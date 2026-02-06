@@ -343,13 +343,20 @@ ARTICLE RULES:
 - Use plain text with paragraph breaks (no markdown headers)
 - Be informative and engaging
 
-FOCUS KEYWORD RULES (CRITICAL - MUST FOLLOW):
-- The focusKeyword MUST be extracted directly from your generated title
-- Use 2-4 consecutive words from the title as the focus keyword
-- Include the main subject/entity (company name, person name, or key topic)
-- Example: Title "Tesla's Bold Move Could Reshape European Manufacturing" → focusKeyword: "Tesla European Manufacturing" or "Tesla Bold Move"
-- Example: Title "Why Warren Buffett Just Made His Biggest Bet Yet" → focusKeyword: "Warren Buffett Biggest Bet"
-- NEVER use generic keywords that don't appear in the title
+FOCUS KEYWORD RULES (CRITICAL - EXACT MATCH REQUIRED):
+- The focusKeyword MUST contain ONLY words that appear EXACTLY in your generated title
+- Copy 2-4 CONSECUTIVE words directly from the title - do not paraphrase or substitute
+- Every word in focusKeyword must exist verbatim in the title
+- Include the main subject (company name, person, or key entity)
+
+CORRECT EXAMPLES:
+- Title: "Tesla's Bold Move Could Reshape European Manufacturing" → focusKeyword: "Tesla Bold Move" (all words appear in title)
+- Title: "Why Warren Buffett Just Made His Biggest Bet Yet" → focusKeyword: "Warren Buffett Biggest Bet" (all words appear in title)
+- Title: "Apple's Secret Weapon in the AI Race Revealed" → focusKeyword: "Apple Secret Weapon" (all words appear in title)
+
+WRONG EXAMPLES (NEVER DO THIS):
+- Title: "Arm Holdings Shares Stumble..." → focusKeyword: "Arm Holdings revenue growth" ❌ ("revenue growth" not in title!)
+- Title: "Meta Platforms Faces Market Retreat" → focusKeyword: "Meta stock analysis" ❌ ("stock analysis" not in title!)
 
 TAG RULES (CRITICAL - MUST PROVIDE):
 - Always provide exactly ONE relevant category tag
@@ -360,7 +367,7 @@ Return JSON with these exact fields:
 {
   "title": "Your unique, professional headline here",
   "content": "Article content with paragraphs separated by double newlines",
-  "focusKeyword": "2-4 words extracted directly from your title",
+  "focusKeyword": "2-4 EXACT consecutive words copied from your title",
   "metaDescription": "Compelling 150-160 character meta description",
   "tag": "Single category tag from the allowed list"
 }`;
