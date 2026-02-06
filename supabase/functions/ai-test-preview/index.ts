@@ -52,7 +52,12 @@ Deno.serve(async (req) => {
     
     const extractTag = (xml: string, tag: string): string => {
       const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
-      return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '';
+      if (!match) return '';
+      // Clean CDATA wrappers in various formats
+      return match[1]
+        .replace(/<!\[CDATA\[/g, '')
+        .replace(/\]\]>/g, '')
+        .trim();
     };
 
     for (const match of itemMatches) {

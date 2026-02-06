@@ -268,11 +268,23 @@ async function fetchRss(url: string): Promise<RssItem[]> {
 function parseRssText(text: string): RssItem[] {
   const items: RssItem[] = [];
   
+  // Helper to clean CDATA wrappers
+  const cleanCData = (str: string): string => {
+    return str
+      .replace(/<!\[CDATA\[/g, '')
+      .replace(/\]\]>/g, '')
+      .trim();
+  };
+  
   // Handle <item> (RSS 2.0) format
   for (const match of text.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
     const xml = match[1];
-    let title = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() || '';
-    const link = xml.match(/<link[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/)?.[1]?.trim() || '';
+    let title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1] || '';
+    let link = xml.match(/<link[^>]*>([\s\S]*?)<\/link>/)?.[1] || '';
+    
+    // Clean CDATA wrappers
+    title = cleanCData(title);
+    link = cleanCData(link);
     
     // Clean up Google News titles that include source name
     title = title.replace(/\s*-\s*[^-]+$/, '').trim();
@@ -285,8 +297,11 @@ function parseRssText(text: string): RssItem[] {
   // Handle <entry> (Atom) format
   for (const match of text.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
     const xml = match[1];
-    let title = xml.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() || '';
+    let title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1] || '';
     const link = xml.match(/<link[^>]*href=["']([^"']+)["']/)?.[1] || '';
+    
+    // Clean CDATA wrappers
+    title = cleanCData(title);
     
     title = title.replace(/\s*-\s*[^-]+$/, '').trim();
     
