@@ -207,8 +207,7 @@ export function MyAgencyView() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Building2 className="h-8 w-8" />
+          <h1 className="text-3xl font-bold text-foreground">
             My Agency
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -235,8 +234,7 @@ export function MyAgencyView() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Building2 className="h-8 w-8" />
+          <h1 className="text-3xl font-bold text-foreground">
             My Agency
           </h1>
           <p className="mt-2 text-muted-foreground">
