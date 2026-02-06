@@ -454,7 +454,8 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
     const baseUrl = site.url.replace(/\/+$/, '');
     const headers = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
 
-    // Validate that the target category exists on the WordPress site with retry logic
+    // Validate that the target category exists on the WordPress site
+    // Use the categories list endpoint with include filter (more permissive than direct ID access)
     if (setting.target_category_id) {
       console.log(`[auto-publish] Validating category ID ${setting.target_category_id} exists on WordPress...`);
       
@@ -466,7 +467,9 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
         try {
           console.log(`[auto-publish] Category validation attempt ${attempt}/${maxRetries}...`);
           
-          const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories/${setting.target_category_id}`, {
+          // Use list endpoint with include filter - more permissive than direct ID access
+          // Some WordPress security plugins block direct /categories/{id} but allow /categories?include={id}
+          const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories?include=${setting.target_category_id}&per_page=1`, {
             headers: { 
               'Authorization': `Basic ${creds}`,
               'Cache-Control': 'no-cache',
@@ -474,13 +477,19 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
           });
           
           if (categoryRes.ok) {
-            const categoryData = await categoryRes.json();
-            console.log(`[auto-publish] Category validated: "${categoryData.name}" (ID: ${categoryData.id})`);
-            categoryFound = true;
-            break;
+            const categories = await categoryRes.json();
+            if (Array.isArray(categories) && categories.length > 0) {
+              const categoryData = categories[0];
+              console.log(`[auto-publish] Category validated: "${categoryData.name}" (ID: ${categoryData.id})`);
+              categoryFound = true;
+              break;
+            } else {
+              lastError = 'Category not in response';
+              console.log(`[auto-publish] Attempt ${attempt}: Category ID ${setting.target_category_id} not found in list`);
+            }
           } else {
             lastError = `Status ${categoryRes.status}`;
-            console.log(`[auto-publish] Attempt ${attempt}: Category not found (${lastError})`);
+            console.log(`[auto-publish] Attempt ${attempt}: Category list fetch failed (${lastError})`);
           }
         } catch (catError) {
           lastError = String(catError);
