@@ -358,10 +358,10 @@ WRONG EXAMPLES (NEVER DO THIS):
 - Title: "Arm Holdings Shares Stumble..." → focusKeyword: "Arm Holdings revenue growth" ❌ ("revenue growth" not in title!)
 - Title: "Meta Platforms Faces Market Retreat" → focusKeyword: "Meta stock analysis" ❌ ("stock analysis" not in title!)
 
-TAG RULES (CRITICAL - MUST PROVIDE):
-- Always provide exactly ONE relevant category tag
-- Choose from: Technology, Finance, Business, Automotive, Energy, Healthcare, Politics, Economy, Markets, Crypto
-- The tag must be relevant to the article topic
+TAG RULES (CRITICAL):
+- The tag MUST be IDENTICAL to the focusKeyword
+- Copy the exact same value you used for focusKeyword into the tag field
+- This ensures consistency between SEO focus and article categorization
 
 Return JSON with these exact fields:
 {
@@ -369,7 +369,7 @@ Return JSON with these exact fields:
   "content": "Article content with paragraphs separated by double newlines",
   "focusKeyword": "2-4 EXACT consecutive words copied from your title",
   "metaDescription": "Compelling 150-160 character meta description",
-  "tag": "Single category tag from the allowed list"
+  "tag": "MUST BE IDENTICAL to focusKeyword"
 }`;
 
   try {
