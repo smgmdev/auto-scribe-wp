@@ -614,6 +614,17 @@ export function AdminAgenciesView() {
         if (agencyError) throw agencyError;
       }
       
+      // Send onboarding complete email
+      if (selectedVerification.email) {
+        supabase.functions.invoke('send-agency-onboarded-email', {
+          body: {
+            email: selectedVerification.email,
+            agency_name: selectedVerification.company_name,
+            full_name: selectedVerification.full_name
+          }
+        }).catch(err => console.error('Failed to send onboarding email:', err));
+      }
+      
       toast({
         title: 'Agency Onboarded',
         description: 'Custom verification approved and agency is now active.',
