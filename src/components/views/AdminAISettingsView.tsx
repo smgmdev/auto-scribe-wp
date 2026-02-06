@@ -126,6 +126,7 @@ export function AdminAISettingsView() {
   // Categories for existing settings (per setting id)
   const [settingCategories, setSettingCategories] = useState<Record<string, WPCategory[]>>({});
   const [loadingCategories, setLoadingCategories] = useState<Record<string, boolean>>({});
+  const [togglingEnabledId, setTogglingEnabledId] = useState<string | null>(null);
   const [updatingSettingId, setUpdatingSettingId] = useState<string | null>(null);
 
   // Fetch settings
@@ -324,8 +325,17 @@ export function AdminAISettingsView() {
     },
   });
 
-  const handleToggle = (id: string, field: keyof AIPublishingSetting, value: boolean) => {
-    updateMutation.mutate({ id, updates: { [field]: value } });
+  const handleToggle = async (id: string, field: keyof AIPublishingSetting, value: boolean) => {
+    if (field === 'enabled') {
+      setTogglingEnabledId(id);
+      try {
+        await updateMutation.mutateAsync({ id, updates: { [field]: value } });
+      } finally {
+        setTogglingEnabledId(null);
+      }
+    } else {
+      updateMutation.mutate({ id, updates: { [field]: value } });
+    }
   };
 
   const handleSelectChange = (id: string, field: keyof AIPublishingSetting, value: string | number) => {
@@ -803,11 +813,15 @@ export function AdminAISettingsView() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
                       <Label className="text-sm">Enabled</Label>
-                      <Switch
-                        checked={setting.enabled}
-                        onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
-                        disabled={updatingSettingId === setting.id}
-                      />
+                      {togglingEnabledId === setting.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : (
+                        <Switch
+                          checked={setting.enabled}
+                          onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
+                          disabled={updatingSettingId === setting.id}
+                        />
+                      )}
                     </div>
                     <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
                       <Label className="text-sm text-muted-foreground">Auto Publish</Label>
