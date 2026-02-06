@@ -39,7 +39,6 @@ async function uploadWithRetry(
       const delay = Math.pow(2, attempt) * BASE_DELAY_MS; // Exponential backoff: 6s, 12s, 24s, 48s
       await new Promise(resolve => setTimeout(resolve, delay));
       return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
-      return uploadWithRetry(url, authHeader, wpFormData, attempt + 1);
     }
 
     return response;
@@ -232,9 +231,14 @@ Deno.serve(async (req) => {
   } catch (error: unknown) {
     console.error('[wordpress-upload-media] Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    // Return 200 OK with error payload to prevent UI "Failed to fetch" crashes
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: false, 
+        error: errorMessage,
+        retryable: true 
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
