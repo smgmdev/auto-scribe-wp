@@ -121,7 +121,7 @@ export function AdminAIArticlesView() {
   });
 
   // Fetch total count for pagination
-  const { data: totalCount } = useQuery({
+  const { data: totalCount, refetch: refetchCount } = useQuery({
     queryKey: ['ai-published-sources-count', selectedSource, selectedSite],
     queryFn: async () => {
       // Use left join so articles persist even if setting is deleted
@@ -141,7 +141,32 @@ export function AdminAIArticlesView() {
       if (error) throw error;
       return count || 0;
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
+
+  // Real-time subscription for article count updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('ai-articles-count-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ai_published_sources',
+        },
+        () => {
+          refetchCount();
+          queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchCount, queryClient]);
 
   // Fetch published sources with pagination
   const { data: articles, isLoading: articlesLoading, isSuccess: articlesSuccess } = useQuery({
