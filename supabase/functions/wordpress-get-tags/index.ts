@@ -1,8 +1,6 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -17,29 +15,30 @@ Deno.serve(async (req) => {
 
     if (!siteId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required field: siteId' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ tags: [], error: 'Missing required field: siteId' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create Supabase client with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Fetch WordPress site credentials directly via REST API
+    const siteRes = await fetch(`${supabaseUrl}/rest/v1/wordpress_sites?id=eq.${siteId}&connected=eq.true&select=id,url,username,app_password,name`, {
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'apikey': supabaseServiceKey,
+      },
+    });
+    
+    const sites = await siteRes.json();
+    const site = sites?.[0];
 
-    // Fetch the WordPress site credentials
-    const { data: site, error: siteError } = await supabase
-      .from('wordpress_sites')
-      .select('id, url, username, app_password, name')
-      .eq('id', siteId)
-      .eq('connected', true)
-      .single();
-
-    if (siteError || !site) {
-      console.error('[wordpress-get-tags] Site not found:', siteError);
+    if (!site) {
+      console.error('[wordpress-get-tags] Site not found');
       return new Response(
-        JSON.stringify({ error: 'WordPress site not found or not connected' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ tags: [], error: 'WordPress site not found or not connected' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -76,7 +75,11 @@ Deno.serve(async (req) => {
         );
       }
       
-      throw fetchError;
+      console.warn('[wordpress-get-tags] Fetch error:', errorMessage);
+      return new Response(
+        JSON.stringify({ tags: [], warning: 'Connection error with WordPress site' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     clearTimeout(timeoutId);
@@ -87,8 +90,17 @@ Deno.serve(async (req) => {
       const errorText = await wpResponse.text();
       console.error('[wordpress-get-tags] WP API error:', wpResponse.status, errorText);
       return new Response(
-        JSON.stringify({ error: `Failed to fetch tags: ${wpResponse.statusText}` }),
-        { status: wpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ tags: [], error: `Failed to fetch tags: ${wpResponse.statusText}` }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const contentType = wpResponse.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      console.error('[wordpress-get-tags] Unexpected content type:', contentType);
+      return new Response(
+        JSON.stringify({ tags: [], warning: 'Unexpected response from WordPress' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -109,10 +121,9 @@ Deno.serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error('[wordpress-get-tags] Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ tags: [], error: 'Internal server error' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

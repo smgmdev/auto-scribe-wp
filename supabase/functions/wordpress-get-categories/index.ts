@@ -15,8 +15,8 @@ Deno.serve(async (req) => {
 
     if (!siteId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required field: siteId' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ categories: [], error: 'Missing required field: siteId' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
