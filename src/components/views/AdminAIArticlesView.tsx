@@ -559,7 +559,7 @@ export function AdminAIArticlesView() {
         <CardHeader>
           <CardTitle>Published Articles</CardTitle>
           <CardDescription>
-            {articles?.length || 0} article{articles?.length !== 1 ? 's' : ''} published
+            {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
           </CardDescription>
         </CardHeader>
         <CardContent>
