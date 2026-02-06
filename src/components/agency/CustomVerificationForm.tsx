@@ -887,7 +887,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               variant="outline"
               disabled={submitting || cancelling}
               onClick={() => setCancelDialogOpen(true)}
-              className="w-full bg-red-500 text-white border border-red-500 hover:bg-transparent hover:text-red-500 transition-all duration-200"
+              className="w-full bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Cancel Application
