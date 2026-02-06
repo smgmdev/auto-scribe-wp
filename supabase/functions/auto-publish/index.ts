@@ -48,12 +48,10 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Check globally across ALL settings to prevent any duplicate sources
+        // Check globally across ALL settings to prevent any duplicate sources or topics
         const { data: published } = await supabase
           .from('ai_published_sources')
-          .select('source_url, source_title, ai_title')
-          .order('published_at', { ascending: false })
-          .limit(100); // Check last 100 articles for topic similarity
+          .select('source_url, source_title, ai_title');
 
         const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
         
