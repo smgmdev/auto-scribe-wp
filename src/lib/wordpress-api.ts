@@ -21,18 +21,39 @@ export async function fetchCategories(site: WordPressSite): Promise<WPCategory[]
 async function fetchCategoriesViaEdgeFunction(siteId: string): Promise<WPCategory[]> {
   console.log('[fetchCategoriesViaEdgeFunction] Fetching categories via edge function for site:', siteId);
   
+  // Check session validity before making the request
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.error('[fetchCategoriesViaEdgeFunction] No active session');
+    throw new Error('Session expired. Please refresh the page or sign in again.');
+  }
+  
   const { data, error } = await supabase.functions.invoke('wordpress-get-categories', {
     body: { siteId },
   });
 
   if (error) {
     console.error('[fetchCategoriesViaEdgeFunction] Invoke error:', error);
+    // Check for auth errors specifically
+    const errorMsg = error.message?.toLowerCase() || '';
+    if (errorMsg.includes('401') || errorMsg.includes('unauthorized') || errorMsg.includes('jwt')) {
+      throw new Error('Session expired. Please refresh the page or sign in again.');
+    }
     throw new Error(error.message || 'Failed to fetch categories');
   }
 
   if (data?.error) {
     console.error('[fetchCategoriesViaEdgeFunction] Edge function error:', data.error);
+    // Check if the error message indicates SSL issues
+    if (data.error.includes('SSL') || data.error.includes('certificate')) {
+      throw new Error('SSL certificate issue with WordPress site.');
+    }
     throw new Error(data.error);
+  }
+
+  // Handle warning responses (e.g., SSL fallback returning empty array with warning)
+  if (data?.warning) {
+    console.warn('[fetchCategoriesViaEdgeFunction] Warning:', data.warning);
   }
 
   // Decode HTML entities in category names
@@ -57,18 +78,39 @@ export async function fetchTags(site: WordPressSite): Promise<WPTag[]> {
 async function fetchTagsViaEdgeFunction(siteId: string): Promise<WPTag[]> {
   console.log('[fetchTagsViaEdgeFunction] Fetching tags via edge function for site:', siteId);
   
+  // Check session validity before making the request
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.error('[fetchTagsViaEdgeFunction] No active session');
+    throw new Error('Session expired. Please refresh the page or sign in again.');
+  }
+  
   const { data, error } = await supabase.functions.invoke('wordpress-get-tags', {
     body: { siteId },
   });
 
   if (error) {
     console.error('[fetchTagsViaEdgeFunction] Invoke error:', error);
+    // Check for auth errors specifically
+    const errorMsg = error.message?.toLowerCase() || '';
+    if (errorMsg.includes('401') || errorMsg.includes('unauthorized') || errorMsg.includes('jwt')) {
+      throw new Error('Session expired. Please refresh the page or sign in again.');
+    }
     throw new Error(error.message || 'Failed to fetch tags');
   }
 
   if (data?.error) {
     console.error('[fetchTagsViaEdgeFunction] Edge function error:', data.error);
+    // Check if the error message indicates SSL issues
+    if (data.error.includes('SSL') || data.error.includes('certificate')) {
+      throw new Error('SSL certificate issue with WordPress site.');
+    }
     throw new Error(data.error);
+  }
+
+  // Handle warning responses (e.g., SSL fallback returning empty array with warning)
+  if (data?.warning) {
+    console.warn('[fetchTagsViaEdgeFunction] Warning:', data.warning);
   }
 
   return (data.tags || []).map((tag: any) => ({
