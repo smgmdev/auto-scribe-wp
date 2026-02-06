@@ -343,13 +343,26 @@ ARTICLE RULES:
 - Use plain text with paragraph breaks (no markdown headers)
 - Be informative and engaging
 
+FOCUS KEYWORD RULES (CRITICAL - MUST FOLLOW):
+- The focusKeyword MUST be extracted directly from your generated title
+- Use 2-4 consecutive words from the title as the focus keyword
+- Include the main subject/entity (company name, person name, or key topic)
+- Example: Title "Tesla's Bold Move Could Reshape European Manufacturing" → focusKeyword: "Tesla European Manufacturing" or "Tesla Bold Move"
+- Example: Title "Why Warren Buffett Just Made His Biggest Bet Yet" → focusKeyword: "Warren Buffett Biggest Bet"
+- NEVER use generic keywords that don't appear in the title
+
+TAG RULES (CRITICAL - MUST PROVIDE):
+- Always provide exactly ONE relevant category tag
+- Choose from: Technology, Finance, Business, Automotive, Energy, Healthcare, Politics, Economy, Markets, Crypto
+- The tag must be relevant to the article topic
+
 Return JSON with these exact fields:
 {
   "title": "Your unique, professional headline here",
   "content": "Article content with paragraphs separated by double newlines",
-  "focusKeyword": "Primary SEO keyword phrase",
+  "focusKeyword": "2-4 words extracted directly from your title",
   "metaDescription": "Compelling 150-160 character meta description",
-  "tag": "Single relevant category tag"
+  "tag": "Single category tag from the allowed list"
 }`;
 
   try {
