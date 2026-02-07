@@ -577,6 +577,11 @@ export function AdminAgencyWithdrawalsView() {
                           )}
                         </div>
                         
+                        {/* Mobile Price */}
+                        <p className="md:hidden mt-3 font-semibold text-foreground">
+                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        
                         {/* Action Buttons */}
                         {withdrawal.status === 'pending' && (
                           <div className="flex flex-col md:flex-row gap-2 mt-3">
@@ -607,7 +612,7 @@ export function AdminAgencyWithdrawalsView() {
                         )}
                         
                         {/* Credit History Button for non-pending */}
-                        {withdrawal.status !== 'pending' && (
+                        {withdrawal.status !== 'pending' && withdrawal.status !== 'approved' && (
                           <div className="mt-3">
                             <Button
                               size="sm"
@@ -637,11 +642,6 @@ export function AdminAgencyWithdrawalsView() {
                             </Button>
                           </div>
                         )}
-                        
-                        {/* Mobile Price */}
-                        <p className="md:hidden mt-3 font-semibold text-foreground">
-                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
                       </div>
                     </div>
                   </div>
