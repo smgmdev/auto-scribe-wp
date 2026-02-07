@@ -519,7 +519,7 @@ export function CreditHistoryView() {
                   )}
                   {withdrawalsByCrypto > 0 && (
                     <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-muted-foreground text-xs">Crypto:</span>
+                      <span className="text-muted-foreground text-xs">USDT:</span>
                       <span className="font-medium text-amber-400 text-xs">-${Math.round(withdrawalsByCrypto).toLocaleString()}</span>
                     </div>
                   )}
