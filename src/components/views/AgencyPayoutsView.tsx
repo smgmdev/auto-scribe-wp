@@ -75,19 +75,19 @@ export function AgencyPayoutsView() {
     .filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
-  // Calculate completed withdrawals (only 'completed' status - these are deducted from wallet)
+  // Calculate completed withdrawals (both 'completed' and 'approved' status - these are deducted from wallet)
   const completedWithdrawalsTotal = withdrawals
-    .filter(w => w.status === 'completed')
+    .filter(w => w.status === 'completed' || w.status === 'approved')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
   // Calculate completed bank withdrawals
   const completedBankWithdrawals = withdrawals
-    .filter(w => w.status === 'completed' && w.withdrawal_method === 'bank')
+    .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
   // Calculate completed crypto withdrawals
   const completedCryptoWithdrawals = withdrawals
-    .filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto')
+    .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
   // Wallet balance = total earnings minus completed withdrawals (rejected ones stay in wallet)
@@ -523,8 +523,7 @@ export function AgencyPayoutsView() {
                 };
 
                 const getCardTitle = () => {
-                  if (withdrawal.status === 'approved') return 'Withdrawal Approved';
-                  if (withdrawal.status === 'completed') return 'Withdrawal Successful';
+                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') return 'Withdrawal Successful';
                   if (withdrawal.status === 'rejected') return 'Withdrawal Rejected';
                   return 'Withdrawal Request';
                 };
@@ -546,8 +545,7 @@ export function AgencyPayoutsView() {
                     <div className="absolute top-3 right-3">
                       <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
                         {withdrawal.status === 'pending' ? 'Pending' : 
-                         withdrawal.status === 'approved' ? 'Approved' :
-                         withdrawal.status === 'completed' ? 'Completed' :
+                         (withdrawal.status === 'approved' || withdrawal.status === 'completed') ? 'Completed' :
                          'Rejected'}
                       </Badge>
                     </div>
