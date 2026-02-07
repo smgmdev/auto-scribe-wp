@@ -171,22 +171,18 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     </TableCell>
                     <TableCell>{getTypeBadge(tx.type)}</TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {tx.type === 'admin_deduct' ? (
-                        tx.description?.includes(': ') ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help underline decoration-dotted">
-                                {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs">
-                              <p className="font-medium">Reason:</p>
-                              <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
-                        )
+                      {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help underline decoration-dotted">
+                              {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="font-medium">Reason:</p>
+                            <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                          </TooltipContent>
+                        </Tooltip>
                       ) : (
                         tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
                       )}
