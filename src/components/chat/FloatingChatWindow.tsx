@@ -6375,7 +6375,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <TooltipTrigger asChild>
                       <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="z-[300]">
+                    <TooltipContent side="top" avoidCollisions={false}>
                       <p>Set the delivery time for this order. At least one value must be greater than 0.</p>
                     </TooltipContent>
                   </Tooltip>
