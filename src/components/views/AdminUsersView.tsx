@@ -70,7 +70,18 @@ interface ServiceRequest {
 }
 
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
-type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements';
+type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements' | 'deliveries';
+
+interface AgencyDelivery {
+  id: string;
+  amount_cents: number;
+  agency_payout_cents: number;
+  status: string;
+  delivery_status: string;
+  created_at: string;
+  delivered_at: string | null;
+  media_sites?: { name: string } | null;
+}
 
 // Helper function to render engagement status badge
 // Helper function to render order status badge
@@ -199,6 +210,7 @@ export function AdminUsersView() {
   const [userCreditTransactions, setUserCreditTransactions] = useState<Record<string, CreditTransaction[]>>({});
   const [userOrders, setUserOrders] = useState<Record<string, Order[]>>({});
   const [userEngagements, setUserEngagements] = useState<Record<string, ServiceRequest[]>>({});
+  const [userDeliveries, setUserDeliveries] = useState<Record<string, AgencyDelivery[]>>({});
   const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
   
   const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
@@ -337,9 +349,49 @@ export function AdminUsersView() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
+      // Fetch agency deliveries (completed orders handled by this agency)
+      // First check if user has an agency payout record
+      const { data: agencyPayout } = await supabase
+        .from('agency_payouts')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      let deliveries: AgencyDelivery[] = [];
+      if (agencyPayout) {
+        // Fetch completed orders for this agency via service_requests
+        const { data: agencyOrders } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            amount_cents,
+            agency_payout_cents,
+            status,
+            delivery_status,
+            created_at,
+            delivered_at,
+            media_sites(name)
+          `)
+          .eq('delivery_status', 'accepted')
+          .order('delivered_at', { ascending: false });
+        
+        // Filter orders that belong to this agency via service_requests
+        if (agencyOrders) {
+          const { data: agencyRequests } = await supabase
+            .from('service_requests')
+            .select('order_id')
+            .eq('agency_payout_id', agencyPayout.id)
+            .not('order_id', 'is', null);
+          
+          const agencyOrderIds = new Set((agencyRequests || []).map(r => r.order_id));
+          deliveries = agencyOrders.filter(o => agencyOrderIds.has(o.id)) as AgencyDelivery[];
+        }
+      }
+      
       setUserCreditTransactions(prev => ({ ...prev, [userId]: transactions || [] }));
       setUserOrders(prev => ({ ...prev, [userId]: orders || [] }));
       setUserEngagements(prev => ({ ...prev, [userId]: engagements || [] }));
+      setUserDeliveries(prev => ({ ...prev, [userId]: deliveries }));
     } catch (error) {
       console.error('Error fetching user details:', error);
     } finally {
@@ -1003,7 +1055,7 @@ export function AdminUsersView() {
                         value={userCardTabs[user.id] || 'logs'} 
                         onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
                       >
-                        <TabsList className="w-full flex md:grid md:grid-cols-4 mb-4 overflow-x-auto scrollbar-hide justify-start">
+                        <TabsList className="w-full flex md:grid md:grid-cols-5 mb-4 overflow-x-auto scrollbar-hide justify-start">
                           <TabsTrigger value="logs" className="text-xs whitespace-nowrap flex-shrink-0">Account Logs</TabsTrigger>
                           <TabsTrigger value="credits" className="text-xs whitespace-nowrap flex-shrink-0">
                             Credit History ({(userCreditTransactions[user.id] || []).length})
@@ -1013,6 +1065,9 @@ export function AdminUsersView() {
                           </TabsTrigger>
                           <TabsTrigger value="engagements" className="text-xs whitespace-nowrap flex-shrink-0">
                             Engagements ({(userEngagements[user.id] || []).length})
+                          </TabsTrigger>
+                          <TabsTrigger value="deliveries" className="text-xs whitespace-nowrap flex-shrink-0">
+                            Deliveries ({user.isAgency ? (userDeliveries[user.id] || []).length : 0})
                           </TabsTrigger>
                         </TabsList>
                         
@@ -1151,6 +1206,40 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <span className="text-muted-foreground">{engagement.media_sites?.name}</span>
                                         <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                            
+                            <TabsContent value="deliveries" className="mt-0">
+                              {!user.isAgency ? (
+                                <p className="text-xs text-muted-foreground py-2">No orders completed</p>
+                              ) : (userDeliveries[user.id] || []).length === 0 ? (
+                                <p className="text-xs text-muted-foreground py-2">No orders completed</p>
+                              ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {(userDeliveries[user.id] || []).map((delivery) => (
+                                    <div 
+                                      key={delivery.id} 
+                                      className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <Truck className="h-3 w-3 text-muted-foreground" />
+                                        <span>{delivery.media_sites?.name || 'Unknown'}</span>
+                                        <Badge className="bg-green-600 text-[10px] py-0">
+                                          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+                                          Completed
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-green-600">
+                                          +${(delivery.agency_payout_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                        <span className="text-muted-foreground">
+                                          {delivery.delivered_at ? formatDateTime(delivery.delivered_at) : formatDateTime(delivery.created_at)}
+                                        </span>
                                       </div>
                                     </div>
                                   ))}
