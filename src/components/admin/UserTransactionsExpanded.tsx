@@ -88,7 +88,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Locked' },
       unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Unlocked' },
       order_accepted: { className: 'bg-purple-100 text-purple-700 hover:bg-purple-100', label: 'Order Accepted' },
-      offer_accepted: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Credits Locked' },
+      offer_accepted: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Credits Locked' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
@@ -194,7 +194,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                     </TableCell>
                   </TableRow>
