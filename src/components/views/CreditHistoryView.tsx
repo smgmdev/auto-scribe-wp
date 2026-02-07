@@ -591,25 +591,25 @@ export function CreditHistoryView() {
               {creditsWithdrawn > 0 && (
                 <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Withdrawn credits:</span>
-                  <span className="font-medium">-${Math.round(creditsWithdrawn).toLocaleString()}</span>
+                  <span className="font-medium">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
                 </div>
               )}
               {creditsInWithdrawals > 0 && (
                 <>
                   <div className="flex justify-between gap-4">
                     <span className="text-muted-foreground">Locked in withdrawals:</span>
-                    <span className="font-medium text-amber-400">-${Math.round(creditsInWithdrawals).toLocaleString()}</span>
+                    <span className="font-medium text-amber-400">-{Math.round(creditsInWithdrawals).toLocaleString()}</span>
                   </div>
                   {withdrawalsByBank > 0 && (
                     <div className="flex justify-between gap-4 pl-2">
                       <span className="text-muted-foreground text-xs">Bank:</span>
-                      <span className="font-medium text-amber-400 text-xs">-${Math.round(withdrawalsByBank).toLocaleString()}</span>
+                      <span className="font-medium text-amber-400 text-xs">-{Math.round(withdrawalsByBank).toLocaleString()}</span>
                     </div>
                   )}
                   {withdrawalsByCrypto > 0 && (
                     <div className="flex justify-between gap-4 pl-2">
                       <span className="text-muted-foreground text-xs">USDT:</span>
-                      <span className="font-medium text-amber-400 text-xs">-${Math.round(withdrawalsByCrypto).toLocaleString()}</span>
+                      <span className="font-medium text-amber-400 text-xs">-{Math.round(withdrawalsByCrypto).toLocaleString()}</span>
                     </div>
                   )}
                 </>
@@ -688,18 +688,18 @@ export function CreditHistoryView() {
                     <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Withdrawals</p>
                     <div className="flex justify-between gap-4 text-xs">
                       <span className="text-muted-foreground">Total withdrawal requests</span>
-                      <span className="font-medium text-amber-400">${Math.round(creditsInWithdrawals).toLocaleString()}</span>
+                      <span className="font-medium text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
                     </div>
                     {withdrawalsByBank > 0 && (
                       <div className="flex justify-between gap-4 text-xs pl-2">
                         <span className="text-muted-foreground">Bank:</span>
-                        <span className="font-medium text-amber-400">${Math.round(withdrawalsByBank).toLocaleString()}</span>
+                        <span className="font-medium text-amber-400">{Math.round(withdrawalsByBank).toLocaleString()}</span>
                       </div>
                     )}
                     {withdrawalsByCrypto > 0 && (
                       <div className="flex justify-between gap-4 text-xs pl-2">
                         <span className="text-muted-foreground">USDT:</span>
-                        <span className="font-medium text-amber-400">${Math.round(withdrawalsByCrypto).toLocaleString()}</span>
+                        <span className="font-medium text-amber-400">{Math.round(withdrawalsByCrypto).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -890,7 +890,7 @@ export function CreditHistoryView() {
                           </div>
                         </div>
                         <div className="text-lg text-foreground">
-                          -${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                          -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </div>
                       </div>
                       
@@ -906,7 +906,7 @@ export function CreditHistoryView() {
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <p className="font-medium">${(details.amount_cents / 100).toLocaleString()}</p>
+                                    <p className="font-medium">{(details.amount_cents / 100).toLocaleString()}</p>
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Requested:</span>
@@ -1017,7 +1017,7 @@ export function CreditHistoryView() {
                           </div>
                         </div>
                         <div className="text-lg text-muted-foreground">
-                          ${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
+                          {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                         </div>
                       </div>
                       
@@ -1033,7 +1033,7 @@ export function CreditHistoryView() {
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <p className="font-medium">${(details.amount_cents / 100).toLocaleString()}</p>
+                                    <p className="font-medium">{(details.amount_cents / 100).toLocaleString()}</p>
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Requested:</span>
