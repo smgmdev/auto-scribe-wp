@@ -202,8 +202,7 @@ export function AdminAgencyWithdrawalsView() {
             user_id: selectedWithdrawal.user_id,
             amount: amount, // Positive to restore (in cents)
             type: 'withdrawal_unlocked',
-            description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`,
-            order_id: selectedWithdrawal.id
+            description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`
           });
       } else if (actionType === 'complete') {
         // Mark withdrawal as completed
@@ -213,8 +212,7 @@ export function AdminAgencyWithdrawalsView() {
             user_id: selectedWithdrawal.user_id,
             amount: -amount, // Negative to confirm deduction (in cents)
             type: 'withdrawal_completed',
-            description: `Withdrawal completed - ${withdrawalMethod}`,
-            order_id: selectedWithdrawal.id
+            description: `Withdrawal completed - ${withdrawalMethod}`
           });
       }
 
