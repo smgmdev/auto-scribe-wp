@@ -80,6 +80,16 @@ export function AgencyPayoutsView() {
     .filter(w => w.status === 'completed')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
+  // Calculate completed bank withdrawals
+  const completedBankWithdrawals = withdrawals
+    .filter(w => w.status === 'completed' && w.withdrawal_method === 'bank')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
+  // Calculate completed crypto withdrawals
+  const completedCryptoWithdrawals = withdrawals
+    .filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
   // Wallet balance = total earnings minus completed withdrawals (rejected ones stay in wallet)
   const walletBalance = summary.totalEarnings - completedWithdrawalsTotal;
 
@@ -393,19 +403,37 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Pending Payouts
+                  Pending Withdrawals
                 </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${summary.pendingPayouts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Payouts awaiting processing or transfer</p>
+            <div className="space-y-1">
+              <p className="font-medium">Pending withdrawal requests</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total pending:</span>
+                <span className="font-semibold">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              {pendingBankWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold">${pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {pendingCryptoWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">USDT:</span>
+                  <span className="font-semibold">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
 
@@ -414,19 +442,37 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Completed Payouts
+                  Completed Withdrawals
                 </CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">
-                  ${summary.completedPayouts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Successfully transferred payouts to your account</p>
+            <div className="space-y-1">
+              <p className="font-medium">Successfully transferred payouts to your account</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total completed:</span>
+                <span className="font-semibold">${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              {completedBankWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold">${completedBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {completedCryptoWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">USDT:</span>
+                  <span className="font-semibold">${completedCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
       </div>
