@@ -796,7 +796,7 @@ export const AdminCreditManagementView = () => {
                         </TableCell>
                         <TableCell>{getTypeBadge(tx.type)}</TableCell>
                         <TableCell className="text-muted-foreground max-w-xs truncate">
-                          {tx.description || '-'}
+                          {tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'}
                         </TableCell>
                         <TableCell className={`text-right ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
                           {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
