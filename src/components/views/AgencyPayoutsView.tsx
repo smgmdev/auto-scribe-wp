@@ -337,7 +337,7 @@ export function AgencyPayoutsView() {
               )}
               {pendingCryptoWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">Crypto:</span>
+                  <span className="text-white/70">USDT:</span>
                   <span className="font-semibold text-amber-400">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
