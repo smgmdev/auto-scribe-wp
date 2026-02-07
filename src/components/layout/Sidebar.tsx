@@ -559,7 +559,7 @@ export function Sidebar({
                 }
               }
               
-              // Count unread disputes for agency
+              // Count unread disputes for agency - only OPEN disputes
               const { count: unreadDisputesCnt } = await supabase
                 .from('disputes')
                 .select(`
@@ -567,6 +567,7 @@ export function Sidebar({
                   read,
                   service_requests!inner(agency_payout_id)
                 `, { count: 'exact', head: true })
+                .eq('status', 'open')
                 .eq('read', false)
                 .eq('service_requests.agency_payout_id', agencyPayoutData.id);
               disputesCount = unreadDisputesCnt || 0;
