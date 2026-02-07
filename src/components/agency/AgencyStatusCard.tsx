@@ -156,6 +156,14 @@ export function AgencyStatusCard({
             <p className="text-xs text-sidebar-foreground/60 mt-0.5">Your account has been downgraded. Contact support for details.</p>
           </div>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full mt-3 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+          onClick={onNavigateToApplication}
+        >
+          View Details
+        </Button>
       </div>
     );
   }
