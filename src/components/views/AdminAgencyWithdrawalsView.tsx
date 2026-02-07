@@ -200,9 +200,9 @@ export function AdminAgencyWithdrawalsView() {
           .from('credit_transactions')
           .insert({
             user_id: selectedWithdrawal.user_id,
-            amount: amount, // Positive to restore
+            amount: amount, // Positive to restore (in cents)
             type: 'withdrawal_unlocked',
-            description: `Withdrawal rejected - ${withdrawalMethod} - $${(amount / 100).toFixed(2)}${adminNotes ? ` - ${adminNotes}` : ''}`,
+            description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`,
             order_id: selectedWithdrawal.id
           });
       } else if (actionType === 'complete') {
@@ -211,9 +211,9 @@ export function AdminAgencyWithdrawalsView() {
           .from('credit_transactions')
           .insert({
             user_id: selectedWithdrawal.user_id,
-            amount: -amount, // Negative to confirm deduction
+            amount: -amount, // Negative to confirm deduction (in cents)
             type: 'withdrawal_completed',
-            description: `Withdrawal completed - ${withdrawalMethod} - $${(amount / 100).toFixed(2)}${adminNotes ? ` - ${adminNotes}` : ''}`,
+            description: `Withdrawal completed - ${withdrawalMethod}`,
             order_id: selectedWithdrawal.id
           });
       }

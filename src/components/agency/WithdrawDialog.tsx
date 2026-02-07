@@ -152,13 +152,14 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
       }
 
       // Create a credit transaction to track the locked withdrawal
+      // Amount stored as cents (matching withdrawal amount_cents)
       const { error: transactionError } = await supabase
         .from('credit_transactions')
         .insert({
           user_id: user.id,
-          amount: -Math.round(numAmount * 100), // Store as cents, negative to indicate deduction
+          amount: -Math.round(numAmount * 100), // Negative cents to indicate locked funds
           type: 'withdrawal_locked',
-          description: `Withdrawal request - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'} - $${numAmount.toFixed(2)}`,
+          description: `Credits locked for withdrawal - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'}`,
           order_id: withdrawalData.id // Store withdrawal ID for reference
         });
 
