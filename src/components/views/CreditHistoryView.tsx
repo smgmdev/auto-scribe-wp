@@ -38,8 +38,8 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Total balance = all credits received (purchases + admin bonuses)
-  // This is calculated from transactions, not user_credits table
+  // Total balance = all credits received (purchases + admin bonuses) minus deductions
+  // This matches the admin-side calculation
   const totalFromPurchases = transactions
     .filter(t => t.type === 'purchase')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -48,10 +48,16 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'gifted' || t.type === 'admin_credit')
     .reduce((sum, t) => sum + t.amount, 0);
   
-  const actualTotalBalance = totalFromPurchases + totalFromAdmin;
+  const totalDeductions = transactions
+    .filter(t => t.type === 'admin_deduct')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   
-  // Available = Total - Locked credits
-  const availableCredits = actualTotalBalance - creditsInUse;
+  // Total credits = Purchased + Gifted - Deductions + Locked
+  // This matches admin calculation: totalCredits + locked
+  const actualTotalBalance = totalFromPurchases + totalFromAdmin - totalDeductions + creditsInUse;
+  
+  // Available = user_credits table value (already has locked subtracted)
+  const availableCredits = totalCredits;
 
   // Extract fetch logic into a reusable function
   const fetchData = useCallback(async (showLoader = true) => {
@@ -340,32 +346,24 @@ export function CreditHistoryView() {
   };
 
   const getTransactionBadge = (type: string) => {
-    switch (type) {
-      case 'purchase':
-        return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Purchase</Badge>;
-      case 'locked':
-      case 'order': // Legacy type - treat as locked
-        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Locked</Badge>;
-      case 'unlocked':
-        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/30">Unlocked</Badge>;
-      case 'order_accepted':
-        return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Accepted</Badge>;
-      case 'offer_accepted':
-        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Credits Locked</Badge>;
-      case 'order_delivered':
-        return <Badge variant="secondary" className="bg-purple-500/10 text-purple-500 border-purple-500/30">Delivered</Badge>;
-      case 'spent':
-        return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
-      case 'gifted':
-      case 'admin_credit':
-        return <Badge variant="secondary" className="bg-foreground text-background border-foreground">Gift</Badge>;
-      case 'order_payout':
-        return <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30">Earnings</Badge>;
-      case 'admin_deduct':
-        return <Badge variant="secondary" className="bg-foreground text-background border-foreground">Deduction</Badge>;
-      default:
-        return <Badge variant="secondary">{type}</Badge>;
-    }
+    // Match admin-side badge styling with bg-*-100 text-*-700 format
+    const config: Record<string, { className: string; label: string }> = {
+      purchase: { className: 'bg-green-100 text-green-700', label: 'Purchase' },
+      locked: { className: 'bg-amber-100 text-amber-700', label: 'Locked' },
+      order: { className: 'bg-amber-100 text-amber-700', label: 'Locked' }, // Legacy type
+      unlocked: { className: 'bg-blue-100 text-blue-700', label: 'Unlocked' },
+      order_accepted: { className: 'bg-purple-100 text-purple-700', label: 'Order Accepted' },
+      offer_accepted: { className: 'bg-amber-100 text-amber-700', label: 'Credits Locked' },
+      order_delivered: { className: 'bg-green-100 text-green-700', label: 'Order Delivered' },
+      spent: { className: 'bg-red-100 text-red-700', label: 'Spent' },
+      gifted: { className: 'bg-emerald-100 text-emerald-700', label: 'Gifted' },
+      admin_credit: { className: 'bg-emerald-100 text-emerald-700', label: 'Gifted' },
+      order_payout: { className: 'bg-emerald-100 text-emerald-700', label: 'Earnings' },
+      refund: { className: 'bg-orange-100 text-orange-700', label: 'Refund' },
+      admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' }
+    };
+    const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+    return <Badge className={badge.className}>{badge.label}</Badge>;
   };
 
   // Filter transactions to show all order-related events
