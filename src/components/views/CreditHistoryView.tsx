@@ -633,8 +633,7 @@ export function CreditHistoryView() {
                   <div className="flex items-center gap-4">
                     {getTransactionIcon(transaction.type, transaction.amount)}
                     <div>
-                      {getTransactionBadge(transaction.type)}
-                      <p className="font-medium mt-1">
+                      <p className="font-medium">
                         {(transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -655,6 +654,9 @@ export function CreditHistoryView() {
                         <Calendar className="h-3 w-3" />
                         {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                       </span>
+                      <div className="mt-1">
+                        {getTransactionBadge(transaction.type)}
+                      </div>
                     </div>
                   </div>
                   <div className={`text-lg ${
