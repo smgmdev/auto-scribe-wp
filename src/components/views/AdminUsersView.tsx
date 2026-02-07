@@ -189,6 +189,7 @@ export function AdminUsersView() {
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [creditAmount, setCreditAmount] = useState('');
+  const [creditReason, setCreditReason] = useState('');
   const [creditAction, setCreditAction] = useState<'add' | 'remove'>('add');
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -456,13 +457,21 @@ export function AdminUsersView() {
       return;
     }
 
+    // Build description with optional reason for removals
+    let description = '';
+    if (creditAction === 'add') {
+      description = `Gifted ${amount} credits by Arcana Mace Staff`;
+    } else {
+      description = creditReason.trim()
+        ? `Removed ${amount} credits by Arcana Mace Staff: ${creditReason.trim()}`
+        : `Removed ${amount} credits by Arcana Mace Staff`;
+    }
+
     const { error: txError } = await supabase.from('credit_transactions').insert({
       user_id: selectedUser.id,
       amount: creditAction === 'add' ? amount : -amount,
       type: creditAction === 'add' ? 'gifted' : 'admin_deduct',
-      description: creditAction === 'add' 
-        ? `Gifted ${amount} credits by Arcana Mace Staff`
-        : `Removed ${amount} credits by Arcana Mace Staff`,
+      description,
     });
 
     if (txError) {
@@ -476,6 +485,8 @@ export function AdminUsersView() {
 
     setSaving(false);
     setCreditDialogOpen(false);
+    setCreditAmount('');
+    setCreditReason('');
     fetchUsers();
   };
 
@@ -1069,6 +1080,15 @@ export function AdminUsersView() {
               onChange={(e) => setCreditAmount(e.target.value)}
               min="1"
             />
+
+            {creditAction === 'remove' && (
+              <Input
+                type="text"
+                placeholder="Reason (optional)"
+                value={creditReason}
+                onChange={(e) => setCreditReason(e.target.value)}
+              />
+            )}
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="hover:bg-black hover:text-white">
