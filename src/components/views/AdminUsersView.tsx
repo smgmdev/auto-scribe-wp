@@ -966,7 +966,7 @@ export function AdminUsersView() {
                                         {getOrderStatusBadge(order)}
                                       </div>
                                       <div className="flex items-center gap-2">
-                                        <span className="font-medium">${(order.amount_cents / 100).toFixed(2)}</span>
+                                        <span className="font-medium">${(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <span className="text-muted-foreground">{formatDateTime(order.created_at)}</span>
                                       </div>
                                     </div>
