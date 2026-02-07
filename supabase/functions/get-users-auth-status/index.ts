@@ -51,17 +51,35 @@ serve(async (req) => {
       });
     }
 
-    // Fetch all users with their details
-    const { data: { users }, error: usersError } = await supabaseClient.auth.admin.listUsers();
+    // Fetch all users with their details - use pagination to avoid connection issues
+    const allUsers: any[] = [];
+    let page = 1;
+    const perPage = 100;
+    
+    while (true) {
+      const { data: { users }, error: usersError } = await supabaseClient.auth.admin.listUsers({
+        page,
+        perPage,
+      });
 
-    if (usersError) {
-      throw usersError;
+      if (usersError) {
+        throw usersError;
+      }
+
+      allUsers.push(...users);
+      
+      // If we got fewer users than perPage, we've reached the end
+      if (users.length < perPage) {
+        break;
+      }
+      
+      page++;
     }
 
     // Return user details including login info
     // Only use custom metadata fields for login tracking (not Supabase's built-in last_sign_in_at)
     // because the built-in field gets set on auto-login after signup
-    const usersAuthStatus = users.map((user) => ({
+    const usersAuthStatus = allUsers.map((user) => ({
       id: user.id,
       email_confirmed_at: user.email_confirmed_at,
       created_at: user.created_at,
