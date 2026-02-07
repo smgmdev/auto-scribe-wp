@@ -147,7 +147,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className="pointer-events-auto w-full max-w-md border bg-background pt-4 px-6 pb-6 shadow-lg rounded-lg relative"
+        className="pointer-events-auto w-full max-w-md border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg relative"
         style={{
           transform: `translate(${position.x}px, ${position.y}px)`,
         }}
