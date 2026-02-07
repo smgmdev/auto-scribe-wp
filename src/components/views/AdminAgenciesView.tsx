@@ -851,6 +851,7 @@ export function AdminAgenciesView() {
                               alt=""
                               className="hidden"
                               onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                              onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                             />
                           </>
                         ) : app.logo_url ? (
@@ -945,6 +946,7 @@ export function AdminAgenciesView() {
                                   alt=""
                                   className="hidden"
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                  onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
                             ) : app.logo_url ? (
@@ -1026,6 +1028,7 @@ export function AdminAgenciesView() {
                                   alt=""
                                   className="hidden"
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                  onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
                             ) : app.logo_url ? (
@@ -1153,6 +1156,7 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
                               ) : application && loadingLogoIds.has(application.id) ? (
@@ -1235,6 +1239,7 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
                               ) : application && loadingLogoIds.has(application.id) ? (
@@ -1350,6 +1355,7 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
                               ) : application && loadingLogoIds.has(application.id) ? (
@@ -1481,6 +1487,7 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
                               ) : application && loadingLogoIds.has(application.id) ? (
