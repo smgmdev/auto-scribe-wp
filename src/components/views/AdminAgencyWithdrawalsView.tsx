@@ -425,7 +425,7 @@ export function AdminAgencyWithdrawalsView() {
                             <Info className="h-3.5 w-3.5" />
                           )}
                         </button>
-                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                        <div className="flex flex-col text-xs text-muted-foreground">
                           <p>
                             Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                           </p>
