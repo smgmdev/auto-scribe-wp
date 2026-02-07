@@ -212,8 +212,7 @@ export function AgencyPayoutsView() {
     <div className="space-y-2 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <Wallet className="h-8 w-8" />
+        <h1 className="text-3xl font-bold text-foreground">
           My Earnings
         </h1>
         <p className="mt-2 text-muted-foreground">
