@@ -31,6 +31,7 @@ interface Order {
   delivery_notes: string | null;
   delivery_url: string | null;
   delivery_deadline: string | null;
+  special_terms: string | null;
   created_at: string;
   paid_at: string | null;
   delivered_at: string | null;
@@ -1041,6 +1042,14 @@ export function OrdersView() {
                   </>
                 )}
               </div>
+
+              {/* Special Terms */}
+              {selectedOrder.special_terms && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Special Terms</p>
+                  <p className="text-sm">{selectedOrder.special_terms}</p>
+                </div>
+              )}
 
               {selectedOrder.delivery_url && (
                 <div className="border-t pt-4">
