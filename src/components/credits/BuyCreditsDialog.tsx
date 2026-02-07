@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Coins, GripHorizontal } from 'lucide-react';
+import { Loader2, Coins, GripHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -88,9 +87,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setCreditAmount(value);
   };
 
-  // Drag handlers
-  const handleDragStart = (e: React.MouseEvent) => {
-    e.preventDefault();
+  // Drag handlers - same pattern as FloatingChatWindow
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
+    
     setIsDragging(true);
     dragStartRef.current = {
       x: e.clientX,
@@ -98,7 +98,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       posX: position.x,
       posY: position.y
     };
-  };
+    e.preventDefault();
+  }, [position]);
 
   useEffect(() => {
     if (!isDragging) return;
@@ -116,41 +117,67 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       setIsDragging(false);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging]);
 
+  // Handle escape key
+  useEffect(() => {
+    if (!open) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onOpenChange]);
+
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent 
-        className="sm:max-w-md z-[10000]" 
-        overlayClassName="bg-transparent pointer-events-none"
+    <div 
+      className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
+    >
+      <div
+        className="pointer-events-auto w-full max-w-md border bg-background p-6 shadow-lg rounded-lg"
         style={{
-          transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
+          transform: `translate(${position.x}px, ${position.y}px)`,
         }}
       >
         {/* Drag Handle */}
         <div
-          className="absolute top-0 left-0 right-0 h-12 cursor-grab active:cursor-grabbing flex items-center justify-center z-10"
+          className={`absolute top-0 left-0 right-0 h-12 flex items-center justify-center ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
           <GripHorizontal className="h-4 w-4 text-muted-foreground/50" />
         </div>
 
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+        {/* Close Button */}
+        <button
+          onClick={() => onOpenChange(false)}
+          className="absolute right-3 top-3 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
+
+        <div className="flex flex-col space-y-1.5 text-left">
+          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
             <Coins className="h-5 w-5 text-accent" />
             Buy Credits
-          </DialogTitle>
-          <DialogDescription>
+          </h2>
+          <p className="text-sm text-muted-foreground">
             Purchase credits to publish articles to media sites.
-          </DialogDescription>
-        </DialogHeader>
+          </p>
+        </div>
 
         <div className="space-y-6 py-4">
           {/* Quick Select Buttons */}
@@ -236,7 +263,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </p>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
