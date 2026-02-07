@@ -1942,10 +1942,10 @@ export function AdminMediaManagementView() {
               <TabsTrigger value="added">
                 Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
+              <TabsTrigger value="pending" className="relative overflow-visible">
                 Pending Review ({pendingMediaSubmissions.length})
                 {unreadMediaCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {unreadMediaCount}
                   </span>
                 )}
