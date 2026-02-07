@@ -318,12 +318,22 @@ export const AdminCreditManagementView = () => {
       const deductionsMap = new Map<string, number>();
       // Track offer_accepted (credits locked for pending orders)
       const offerLockedMap = new Map<string, number>();
+      // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
+      const withdrawnMap = new Map<string, number>();
       
-      // Define withdrawal types (stored in cents, not credits) - must be excluded from credit calculations
+      // Define withdrawal types (stored in cents, not credits) - must be excluded from regular credit calculations
       const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
       
       transactionsData?.forEach(tx => {
-        // Skip withdrawal transactions - they are in cents, not credits
+        // Handle withdrawal_completed separately - these reduce available balance
+        if (tx.type === 'withdrawal_completed') {
+          // Amount is stored in cents (negative), convert to dollars
+          const amountInDollars = Math.abs(tx.amount) / 100;
+          withdrawnMap.set(tx.user_id, (withdrawnMap.get(tx.user_id) || 0) + amountInDollars);
+          return;
+        }
+        
+        // Skip other withdrawal transactions - they don't affect credit balance
         if (withdrawalTypes.includes(tx.type)) return;
         
         // Calculate incoming (all positive amounts)
@@ -379,14 +389,15 @@ export const AdminCreditManagementView = () => {
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
+        const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
         // Total locked = credits locked in active orders + credits locked via offer_accepted
         const totalLocked = lockedFromOrders + lockedFromOffers;
         
         // Total Balance = Incoming - Outgoing (excluding locked types)
         const calculatedTotalBalance = incoming - outgoing;
-        // Available = Total Balance - Total Locked Credits
-        const calculatedAvailable = calculatedTotalBalance - totalLocked;
+        // Available = Total Balance - Total Locked Credits - Completed Withdrawals
+        const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
         
         return {
           user_id: credit.user_id,
