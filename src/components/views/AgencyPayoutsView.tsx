@@ -240,19 +240,18 @@ export function AgencyPayoutsView() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            onClick={() => fetchCompletedOrders(true)}
-            disabled={refreshing}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button
             onClick={handleWithdraw}
             className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
           >
             Withdraw
+          </Button>
+          <Button
+            onClick={() => fetchCompletedOrders(true)}
+            disabled={refreshing}
+            className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
         </div>
       </div>
