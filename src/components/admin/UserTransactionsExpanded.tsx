@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowUpCircle, ArrowDownCircle, Lock } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -33,7 +33,7 @@ const transactionTypes = [
   { key: 'refund', label: 'Refund' },
   { key: 'admin_deduct', label: 'Deduction' },
   { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
-  { key: 'withdrawal_unlocked', label: 'Withdrawal Returned' },
+  { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
   { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
 ];
 
@@ -100,7 +100,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
       admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Withdrawal Pending' },
-      withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Withdrawal Returned' },
+      withdrawal_unlocked: { className: 'bg-muted text-muted-foreground hover:bg-muted', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
@@ -185,6 +185,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     <TableCell>
                       {tx.type === 'offer_accepted' ? (
                         <Lock className="h-4 w-4 text-amber-500" />
+                      ) : tx.type === 'withdrawal_unlocked' ? (
+                        <Unlock className="h-4 w-4 text-muted-foreground" />
                       ) : tx.type === 'withdrawal_completed' ? (
                         <ArrowDownCircle className="h-4 w-4 text-foreground" />
                       ) : tx.type === 'order_completed' ? (
@@ -227,9 +229,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.type === 'withdrawal_completed' ? 'text-foreground' : tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <TableCell className={`text-right font-medium ${tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : tx.type === 'withdrawal_completed' ? 'text-foreground' : tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
-                      {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                      {tx.type === 'withdrawal_unlocked' ? (
+                        // Rejected withdrawals: plain number in grey, no $ or +/- signs
+                        <>{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
+                      ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
                         <>
                           {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </>
