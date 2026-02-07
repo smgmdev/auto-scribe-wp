@@ -156,9 +156,9 @@ export function AdminAgencyWithdrawalsView() {
   });
 
   const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
-  const approvedCount = withdrawals.filter(w => w.status === 'approved').length;
   const completedCount = withdrawals.filter(w => w.status === 'completed').length;
   const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const totalCompleted = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-500 text-white border-amber-500',
@@ -197,55 +197,85 @@ export function AdminAgencyWithdrawalsView() {
 
       {/* Stats */}
       <div className="grid gap-2 md:grid-cols-4">
-        <Card className="py-3">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Pending
-            </CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">{pendingCount}</div>
-          </CardContent>
-        </Card>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="py-3 cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Pending
+                </CardTitle>
+                <Clock className="h-4 w-4 text-amber-500" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{pendingCount}</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
+            Withdrawals that are currently pending
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="py-3">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Pending Amount
-            </CardTitle>
-            <Wallet className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-amber-600">
-              ${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-          </CardContent>
-        </Card>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="py-3 cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Pending Amount
+                </CardTitle>
+                <Wallet className="h-4 w-4 text-amber-500" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-amber-600">
+                  ${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
+            Total pending withdrawal amount
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="py-3">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Approved
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">{approvedCount}</div>
-          </CardContent>
-        </Card>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="py-3 cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Completed Withdrawals
+                </CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-foreground">{completedCount}</div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
+            Total number of completed withdrawals
+          </TooltipContent>
+        </Tooltip>
 
-        <Card className="py-3">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Completed
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent className="pt-0 pb-0 px-4">
-            <div className="text-2xl font-semibold text-foreground">{completedCount}</div>
-          </CardContent>
-        </Card>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <Card className="py-3 cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Total Withdrawals
+                </CardTitle>
+                <Wallet className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent className="pt-0 pb-0 px-4">
+                <div className="text-2xl font-semibold text-green-600">
+                  ${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
+            Total withdrawal amount
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Search */}
