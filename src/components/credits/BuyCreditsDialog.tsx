@@ -169,7 +169,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           <span className="sr-only">Close</span>
         </button>
 
-        <div className="flex flex-col space-y-1.5 text-left">
+        <div className="flex flex-col space-y-1.5 text-left mt-6">
           <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
             <Coins className="h-5 w-5 text-accent" />
             Buy Credits
