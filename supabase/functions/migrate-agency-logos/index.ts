@@ -18,12 +18,11 @@ serve(async (req) => {
     // Use service role to perform migration (this is a safe, idempotent operation)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get all agency applications with logos
+    // Get all agency applications with logos (any status)
     const { data: applications, error: appsError } = await supabase
       .from('agency_applications')
-      .select('id, agency_name, logo_url')
-      .not('logo_url', 'is', null)
-      .eq('status', 'approved');
+      .select('id, agency_name, logo_url, status')
+      .not('logo_url', 'is', null);
     
     if (appsError) throw appsError;
     
