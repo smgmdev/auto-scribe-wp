@@ -107,13 +107,26 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;
   };
 
+  // Filter out withdrawal_locked entries if a final status exists (completed or returned)
+  const processedTransactions = transactions.filter(tx => {
+    if (tx.type !== 'withdrawal_locked') return true;
+    
+    // Check if there's a completed or returned transaction with matching amount
+    const hasCompletedOrReturned = transactions.some(other => 
+      (other.type === 'withdrawal_completed' || other.type === 'withdrawal_unlocked') &&
+      Math.abs(other.amount) === Math.abs(tx.amount)
+    );
+    
+    return !hasCompletedOrReturned;
+  });
+
   const filteredTransactions = activeType === 'all' 
-    ? transactions 
-    : transactions.filter(tx => tx.type === activeType);
+    ? processedTransactions 
+    : processedTransactions.filter(tx => tx.type === activeType);
 
   const getTransactionCounts = () => {
-    const counts: Record<string, number> = { all: transactions.length };
-    transactions.forEach(tx => {
+    const counts: Record<string, number> = { all: processedTransactions.length };
+    processedTransactions.forEach(tx => {
       counts[tx.type] = (counts[tx.type] || 0) + 1;
     });
     return counts;
