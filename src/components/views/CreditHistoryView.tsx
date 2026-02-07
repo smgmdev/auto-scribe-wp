@@ -598,9 +598,21 @@ export function CreditHistoryView() {
                   <div>
                     <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Withdrawals</p>
                     <div className="flex justify-between gap-4 text-xs">
-                      <span className="text-muted-foreground">Withdrawal requests</span>
-                      <span className="font-medium text-amber-400">${creditsInWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="text-muted-foreground">Total withdrawal requests</span>
+                      <span className="font-medium text-amber-400">${Math.round(creditsInWithdrawals).toLocaleString()}</span>
                     </div>
+                    {withdrawalsByBank > 0 && (
+                      <div className="flex justify-between gap-4 text-xs pl-2">
+                        <span className="text-muted-foreground">Bank:</span>
+                        <span className="font-medium text-amber-400">${Math.round(withdrawalsByBank).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {withdrawalsByCrypto > 0 && (
+                      <div className="flex justify-between gap-4 text-xs pl-2">
+                        <span className="text-muted-foreground">USDT:</span>
+                        <span className="font-medium text-amber-400">${Math.round(withdrawalsByCrypto).toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
