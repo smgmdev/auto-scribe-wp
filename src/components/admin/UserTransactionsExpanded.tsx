@@ -174,9 +174,9 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       )}
                     </TableCell>
                     <TableCell>{getTypeBadge(tx.type)}</TableCell>
-                    <TableCell className="max-w-xs">
+                    <TableCell className="max-w-md">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-muted-foreground truncate">
+                        <span className="text-muted-foreground break-words">
                           {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
