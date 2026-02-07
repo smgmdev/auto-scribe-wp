@@ -454,10 +454,10 @@ export const AdminCreditManagementView = () => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Credit Management</h1>
-        <p className="text-muted-foreground mt-1">Manage credits and view transactions</p>
+        <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
+        <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
       </div>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
