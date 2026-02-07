@@ -67,7 +67,7 @@ export function AdminAgencyWithdrawalsView() {
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'complete' | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
-  const [loadingUserDetails, setLoadingUserDetails] = useState(false);
+  const [loadingUserDetailsId, setLoadingUserDetailsId] = useState<string | null>(null);
   const [loadingLogos, setLoadingLogos] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export function AdminAgencyWithdrawalsView() {
   };
 
   const handleViewUserDetails = async (withdrawal: WithdrawalRequest) => {
-    setLoadingUserDetails(true);
+    setLoadingUserDetailsId(withdrawal.id);
     
     try {
       // Fetch user profile for full name and whatsapp
@@ -149,7 +149,7 @@ export function AdminAgencyWithdrawalsView() {
       console.error('Error fetching user details:', err);
       toast.error('Failed to fetch user details');
     } finally {
-      setLoadingUserDetails(false);
+      setLoadingUserDetailsId(null);
     }
   };
 
@@ -489,7 +489,7 @@ export function AdminAgencyWithdrawalsView() {
                           <span className="font-medium">
                             {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
                           </span>
-                          {loadingUserDetails ? (
+                          {loadingUserDetailsId === withdrawal.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
                             <Info className="h-3.5 w-3.5" />
