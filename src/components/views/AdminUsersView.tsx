@@ -44,6 +44,7 @@ interface CreditTransaction {
   type: string;
   description: string | null;
   created_at: string;
+  order_id: string | null;
 }
 
 interface Order {
@@ -82,6 +83,25 @@ interface AgencyDelivery {
   delivered_at: string | null;
   media_sites?: { name: string } | null;
   service_request_id?: string;
+}
+
+interface WithdrawalDetails {
+  id: string;
+  amount_cents: number;
+  withdrawal_method: string;
+  status: string;
+  bank_details: {
+    bank_name?: string;
+    account_holder?: string;
+    iban?: string;
+  } | null;
+  crypto_details: {
+    network?: string;
+    wallet_address?: string;
+  } | null;
+  created_at: string;
+  processed_at: string | null;
+  admin_notes: string | null;
 }
 
 // Helper function to render engagement status badge
@@ -212,7 +232,9 @@ export function AdminUsersView() {
   const [userOrders, setUserOrders] = useState<Record<string, Order[]>>({});
   const [userEngagements, setUserEngagements] = useState<Record<string, ServiceRequest[]>>({});
   const [userDeliveries, setUserDeliveries] = useState<Record<string, AgencyDelivery[]>>({});
+  const [userWithdrawals, setUserWithdrawals] = useState<Record<string, WithdrawalDetails[]>>({});
   const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
+  const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   
   const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
   
@@ -397,10 +419,18 @@ export function AdminUsersView() {
         }
       }
       
+      // Fetch withdrawals for this user
+      const { data: withdrawals } = await supabase
+        .from('agency_withdrawals')
+        .select('id, amount_cents, withdrawal_method, status, bank_details, crypto_details, created_at, processed_at, admin_notes')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
       setUserCreditTransactions(prev => ({ ...prev, [userId]: transactions || [] }));
       setUserOrders(prev => ({ ...prev, [userId]: orders || [] }));
       setUserEngagements(prev => ({ ...prev, [userId]: engagements || [] }));
       setUserDeliveries(prev => ({ ...prev, [userId]: deliveries }));
+      setUserWithdrawals(prev => ({ ...prev, [userId]: (withdrawals || []) as unknown as WithdrawalDetails[] }));
     } catch (error) {
       console.error('Error fetching user details:', error);
     } finally {
@@ -1147,6 +1177,8 @@ export function AdminUsersView() {
                             <TabsContent value="credits" className="mt-0">
                               {(() => {
                                 const allTx = userCreditTransactions[user.id] || [];
+                                const withdrawals = userWithdrawals[user.id] || [];
+                                
                                 // Filter out withdrawal_locked if a final status exists (completed or rejected)
                                 const filteredTx = allTx.filter(tx => {
                                   if (tx.type !== 'withdrawal_locked') return true;
@@ -1157,66 +1189,155 @@ export function AdminUsersView() {
                                   return !hasCompletedOrRejected;
                                 });
                                 
+                                // Helper to check if transaction has expandable details
+                                const hasDetails = (tx: CreditTransaction) => {
+                                  if (['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type)) return true;
+                                  if ((tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ')) return true;
+                                  if (tx.order_id) return true;
+                                  return false;
+                                };
+                                
+                                // Find matching withdrawal for a transaction
+                                const findWithdrawal = (tx: CreditTransaction) => {
+                                  const txAmount = Math.abs(tx.amount);
+                                  return withdrawals.find(w => Math.abs(w.amount_cents) === txAmount);
+                                };
+                                
+                                // Toggle expanded transaction
+                                const toggleTransaction = (txId: string) => {
+                                  setExpandedTransactions(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(txId)) next.delete(txId);
+                                    else next.add(txId);
+                                    return next;
+                                  });
+                                };
+                                
                                 return filteredTx.length === 0 ? (
                                   <p className="text-xs text-muted-foreground py-2">No credit transactions</p>
                                 ) : (
-                                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {filteredTx.map((tx) => (
-                                      <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
-                                        <div className="flex items-center gap-2">
-                                          <CreditCard className="h-3 w-3 text-muted-foreground" />
-                                          {/* Withdrawal transactions are stored in cents, convert to dollars */}
-                                          {tx.type === 'withdrawal_unlocked' ? (
-                                            // Rejected withdrawals: grey plain number, no $ or +/-
-                                            <span className="text-muted-foreground">
-                                              {Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
-                                            </span>
-                                          ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
-                                            <span className={tx.type === 'withdrawal_completed' ? 'text-foreground' : 'text-amber-600'}>
-                                              {tx.type === 'withdrawal_locked' ? '-' : '-'}
-                                              ${Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
-                                            </span>
-                                          ) : (
-                                            <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
-                                              {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                                            </span>
-                                          )}
-                                          {/* Withdrawal description */}
-                                          {tx.type === 'withdrawal_unlocked' ? (
-                                            <span className="text-muted-foreground">
-                                              Withdrawal Rejected - {tx.description?.includes('Bank Transfer') 
-                                                ? 'Bank Transfer'
-                                                : tx.description?.includes('USDT')
-                                                  ? 'USDT'
-                                                  : 'Credits returned'}
-                                            </span>
-                                          ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
-                                            <span className="text-muted-foreground">
-                                              {tx.type === 'withdrawal_locked' ? 'Withdrawal Pending' : 'Withdrawal Completed'} - {tx.description?.includes('Bank Transfer') 
-                                                ? 'Bank Transfer'
-                                                : tx.description?.includes('USDT')
-                                                  ? 'USDT'
-                                                  : ''}
-                                            </span>
-                                          ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <span className="text-muted-foreground cursor-help underline decoration-dotted">
-                                                  {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                  <div className="space-y-1 max-h-64 overflow-y-auto">
+                                    {filteredTx.map((tx) => {
+                                      const isExpanded = expandedTransactions.has(tx.id);
+                                      const canExpand = hasDetails(tx);
+                                      const withdrawal = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? findWithdrawal(tx) : null;
+                                      
+                                      return (
+                                        <div key={tx.id} className="bg-muted/30 rounded overflow-hidden">
+                                          <div 
+                                            className={`flex items-center justify-between text-xs p-2 ${canExpand ? 'cursor-pointer hover:bg-muted/50' : ''}`}
+                                            onClick={() => canExpand && toggleTransaction(tx.id)}
+                                          >
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                              <CreditCard className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                              {/* Withdrawal transactions are stored in cents, convert to dollars */}
+                                              {tx.type === 'withdrawal_unlocked' ? (
+                                                <span className="text-muted-foreground">
+                                                  {Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
                                                 </span>
-                                              </TooltipTrigger>
-                                              <TooltipContent side="top" className="max-w-xs">
-                                                <p className="font-medium">Reason:</p>
-                                                <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          ) : (
-                                            <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
+                                              ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                                                <span className={tx.type === 'withdrawal_completed' ? 'text-foreground' : 'text-amber-600'}>
+                                                  -${Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
+                                                </span>
+                                              ) : (
+                                                <span className={tx.amount > 0 ? 'text-green-600' : 'text-destructive'}>
+                                                  {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                                                </span>
+                                              )}
+                                              {/* Transaction description */}
+                                              <span className="text-muted-foreground truncate">
+                                                {tx.type === 'withdrawal_unlocked' ? (
+                                                  `Withdrawal Rejected - ${tx.description?.includes('Bank Transfer') ? 'Bank Transfer' : tx.description?.includes('USDT') ? 'USDT' : 'Credits returned'}`
+                                                ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                                                  `${tx.type === 'withdrawal_locked' ? 'Withdrawal Pending' : 'Withdrawal Completed'} - ${tx.description?.includes('Bank Transfer') ? 'Bank Transfer' : tx.description?.includes('USDT') ? 'USDT' : ''}`
+                                                ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                                  tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
+                                                ) : (
+                                                  (tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')
+                                                )}
+                                              </span>
+                                              {canExpand && (
+                                                <button className="text-[10px] text-muted-foreground hover:text-foreground underline flex-shrink-0 ml-1">
+                                                  {isExpanded ? 'Hide' : 'Details'}
+                                                </button>
+                                              )}
+                                            </div>
+                                            <span className="text-muted-foreground text-[10px] flex-shrink-0 ml-2">{formatDateTime(tx.created_at)}</span>
+                                          </div>
+                                          
+                                          {/* Expanded details */}
+                                          {isExpanded && (
+                                            <div className="px-2 pb-2 pt-1 border-t border-border/50 bg-muted/20">
+                                              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                                {/* Withdrawal details */}
+                                                {withdrawal && (
+                                                  <>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Method</span>
+                                                      <p className="font-medium">{withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}</p>
+                                                    </div>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Status</span>
+                                                      <p className="font-medium capitalize">{withdrawal.status}</p>
+                                                    </div>
+                                                    {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
+                                                      <>
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Bank</span>
+                                                          <p className="font-medium">{withdrawal.bank_details.bank_name || '-'}</p>
+                                                        </div>
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Account</span>
+                                                          <p className="font-medium">{withdrawal.bank_details.account_holder || '-'}</p>
+                                                        </div>
+                                                        {withdrawal.bank_details.iban && (
+                                                          <div className="col-span-2">
+                                                            <span className="text-muted-foreground uppercase tracking-wide">IBAN</span>
+                                                            <p className="font-medium font-mono">{withdrawal.bank_details.iban}</p>
+                                                          </div>
+                                                        )}
+                                                      </>
+                                                    )}
+                                                    {withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details && (
+                                                      <>
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Network</span>
+                                                          <p className="font-medium">{withdrawal.crypto_details.network || 'TRC20'}</p>
+                                                        </div>
+                                                        <div className="col-span-2">
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Wallet</span>
+                                                          <p className="font-medium font-mono text-[9px] break-all">{withdrawal.crypto_details.wallet_address || '-'}</p>
+                                                        </div>
+                                                      </>
+                                                    )}
+                                                    {withdrawal.processed_at && (
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Processed</span>
+                                                        <p className="font-medium">{formatDateTime(withdrawal.processed_at)}</p>
+                                                      </div>
+                                                    )}
+                                                    {withdrawal.admin_notes && (
+                                                      <div className="col-span-2">
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Notes</span>
+                                                        <p>{withdrawal.admin_notes}</p>
+                                                      </div>
+                                                    )}
+                                                  </>
+                                                )}
+                                                
+                                                {/* Gift/Deduction reason */}
+                                                {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') && (
+                                                  <div className="col-span-2">
+                                                    <span className="text-muted-foreground uppercase tracking-wide">Reason</span>
+                                                    <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
                                           )}
                                         </div>
-                                        <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
-                                      </div>
-                                    ))}
+                                      );
+                                    })}
                                   </div>
                                 );
                               })()}
