@@ -359,6 +359,43 @@ export function AdminUsersView() {
       .from('agency_payouts')
       .select('user_id, onboarding_complete');
 
+    // Fetch all transactions to calculate credits from transaction history
+    const { data: allTransactions } = await supabase
+      .from('credit_transactions')
+      .select('user_id, amount, type');
+
+    // Fetch active orders to calculate locked credits per user
+    const { data: activeOrdersData } = await supabase
+      .from('orders')
+      .select('user_id, media_sites(price)')
+      .neq('status', 'cancelled')
+      .neq('status', 'completed')
+      .neq('delivery_status', 'accepted');
+
+    // Calculate credits from transactions for each user
+    const calculatedCreditsMap = new Map<string, number>();
+    const lockedCreditsMap = new Map<string, number>();
+
+    // Calculate incoming and outgoing from transactions
+    allTransactions?.forEach(tx => {
+      const userId = tx.user_id;
+      const currentTotal = calculatedCreditsMap.get(userId) || 0;
+      
+      if (tx.amount > 0) {
+        // Incoming credits
+        calculatedCreditsMap.set(userId, currentTotal + tx.amount);
+      } else if (tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
+        // Outgoing credits (excluding locked types)
+        calculatedCreditsMap.set(userId, currentTotal + tx.amount);
+      }
+    });
+
+    // Calculate locked credits from active orders
+    activeOrdersData?.forEach(order => {
+      const price = (order.media_sites as any)?.price || 0;
+      lockedCreditsMap.set(order.user_id, (lockedCreditsMap.get(order.user_id) || 0) + price);
+    });
+
     // Fetch auth user details for last login info
     let authUsersMap: Record<string, { 
       lastSignInAt: string | null; 
@@ -390,15 +427,19 @@ export function AdminUsersView() {
 
     const usersData = (profiles || []).map((profile) => {
       const userRole = roles?.find((r) => r.user_id === profile.id);
-      const userCredits = credits?.find((c) => c.user_id === profile.id);
       const userAgency = agencies?.find((a) => a.user_id === profile.id);
       const authInfo = authUsersMap[profile.id];
+      
+      // Calculate available credits: Total Balance - Locked
+      const totalBalance = calculatedCreditsMap.get(profile.id) || 0;
+      const locked = lockedCreditsMap.get(profile.id) || 0;
+      const availableCredits = totalBalance - locked;
 
       return {
         id: profile.id,
         email: profile.email || 'Unknown',
         role: (userRole?.role as 'admin' | 'user') || 'user',
-        credits: userCredits?.credits || 0,
+        credits: availableCredits,
         isAgency: userAgency?.onboarding_complete === true,
         emailConfirmed: profile.email_verified ?? false,
         suspended: profile.suspended ?? false,
