@@ -319,7 +319,7 @@ export function CreditHistoryView() {
       return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
     if (type === 'offer_accepted') {
-      return <HandCoins className="h-5 w-5 text-amber-500" />;
+      return <Lock className="h-5 w-5 text-amber-500" />;
     }
     if (type === 'order_delivered') {
       return <Package className="h-5 w-5 text-purple-500" />;
