@@ -549,11 +549,6 @@ export const AdminCreditManagementView = () => {
                 <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Available</TableHead>
-                    <TableHead className="text-right">Locked</TableHead>
-                    <TableHead className="text-right">Purchased</TableHead>
-                    <TableHead className="text-right">Gifted</TableHead>
-                    <TableHead className="text-right">Orders</TableHead>
-                    <TableHead className="text-right">Total Spent</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -562,16 +557,11 @@ export const AdminCreditManagementView = () => {
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -589,16 +579,36 @@ export const AdminCreditManagementView = () => {
                               {user.email || <span className="text-muted-foreground italic">No email</span>}
                             </TableCell>
                             <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
-                            <TableCell className="text-right text-amber-600">{user.locked.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{user.purchased.toLocaleString()}</TableCell>
-                            <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
-                              <TableCell colSpan={7} className="p-0">
-                                <UserTransactionsExpanded userId={user.user_id} />
+                              <TableCell colSpan={2} className="p-0">
+                                <div className="bg-muted/30 p-4">
+                                  {/* Stats row above tabs */}
+                                  <div className="grid grid-cols-5 gap-4 mb-4">
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Locked</p>
+                                      <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Purchased</p>
+                                      <p className="font-semibold">{user.purchased.toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Gifted</p>
+                                      <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Orders</p>
+                                      <p className="font-semibold">{user.orders.toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Total Spent</p>
+                                      <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                  <UserTransactionsExpanded userId={user.user_id} />
+                                </div>
                               </TableCell>
                             </TableRow>
                           )}
