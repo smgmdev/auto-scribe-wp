@@ -518,9 +518,13 @@ export function Sidebar({
                     } else {
                       // Check if this request has a completed order (delivery_status === 'accepted')
                       // If so, count it as completed, not as active service request
+                      // Also check for cancelled orders - these should not count
                       const order = request.order_id ? ordersMap[request.order_id] : null;
                       if (order && order.delivery_status === 'accepted') {
                         unreadCompletedCount++;
+                      } else if (order && (order.status === 'cancelled' || order.delivery_status === 'cancelled')) {
+                        // Cancelled order - count as cancelled
+                        cancelledRequestsCount++;
                       } else {
                         serviceRequestsCount++;
                       }
