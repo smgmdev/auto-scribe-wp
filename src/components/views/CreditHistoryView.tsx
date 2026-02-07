@@ -851,7 +851,7 @@ export function CreditHistoryView() {
               <p className="text-sm mt-1">Your credit history will appear here</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {displayedTransactions.map((transaction) => {
                 const isClickable = transaction.type === 'order_completed' && transaction.order_id;
                 const isWithdrawalCompleted = transaction.type === 'withdrawal_completed';
@@ -866,8 +866,8 @@ export function CreditHistoryView() {
                       key={transaction.id}
                       className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
                     >
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between p-3">
+                        <div className="flex items-center gap-3">
                           {getTransactionIcon(transaction.type, transaction.amount)}
                           <div>
                             <p className="font-medium">
@@ -887,7 +887,7 @@ export function CreditHistoryView() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="mt-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
@@ -913,8 +913,8 @@ export function CreditHistoryView() {
                       </div>
                       
                       {isExpanded && (
-                        <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-3 space-y-2 text-sm">
+                        <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-2 space-y-2 text-sm">
                             {details ? (
                               <>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -993,8 +993,8 @@ export function CreditHistoryView() {
                       key={transaction.id}
                       className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
                     >
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between p-3">
+                        <div className="flex items-center gap-3">
                           {getTransactionIcon(transaction.type, transaction.amount)}
                           <div>
                             <p className="font-medium">
@@ -1014,7 +1014,7 @@ export function CreditHistoryView() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="mt-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
@@ -1040,8 +1040,8 @@ export function CreditHistoryView() {
                       </div>
                       
                       {isExpanded && (
-                        <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-3 space-y-2 text-sm">
+                        <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-2 space-y-2 text-sm">
                             {details ? (
                               <>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -1117,9 +1117,9 @@ export function CreditHistoryView() {
                   <div
                     key={transaction.id}
                     onClick={isClickable ? () => handleOrderCompletedClick(transaction.order_id!) : undefined}
-                    className={`flex items-center justify-between p-4 rounded-lg border border-border hover:border-[#4771d9] transition-colors ${isClickable ? 'cursor-pointer' : ''}`}
+                    className={`flex items-center justify-between p-3 rounded-lg border border-border hover:border-[#4771d9] transition-colors ${isClickable ? 'cursor-pointer' : ''}`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {getTransactionIcon(transaction.type, transaction.amount)}
                       <div>
                         <p className="font-medium">
