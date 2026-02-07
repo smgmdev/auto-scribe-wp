@@ -40,7 +40,7 @@ export function CreditHistoryView() {
 
   // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
   // Incoming: purchase, gifted, admin_credit, refund, unlocked (positive amounts)
-  // Outgoing: spent, order_delivered, admin_deduct (negative amounts, but NOT locked/offer_accepted)
+  // Outgoing: spent, order_completed, order_delivered, admin_deduct (negative amounts, but NOT locked/offer_accepted)
   const incomingCredits = transactions
     .filter(t => t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
@@ -325,8 +325,8 @@ export function CreditHistoryView() {
     if (type === 'order_delivered') {
       return <Package className="h-5 w-5 text-purple-500" />;
     }
-    if (type === 'spent') {
-      return <ShoppingBag className="h-5 w-5 text-red-500" />;
+    if (type === 'spent' || type === 'order_completed') {
+      return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
     if (type === 'purchase' || type === 'gifted' || type === 'admin_credit') {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
@@ -351,6 +351,7 @@ export function CreditHistoryView() {
       offer_accepted: { className: 'bg-amber-100 text-amber-700', label: 'Credits Locked' },
       order_delivered: { className: 'bg-green-100 text-green-700', label: 'Order Delivered' },
       spent: { className: 'bg-red-100 text-red-700', label: 'Spent' },
+      order_completed: { className: 'bg-green-100 text-green-700', label: 'Order Completed' },
       gifted: { className: 'bg-emerald-100 text-emerald-700', label: 'Gifted' },
       admin_credit: { className: 'bg-emerald-100 text-emerald-700', label: 'Gifted' },
       order_payout: { className: 'bg-emerald-100 text-emerald-700', label: 'Earnings' },
@@ -363,7 +364,7 @@ export function CreditHistoryView() {
 
   // Filter transactions to show all order-related events
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct'].includes(t.type)
   );
 
   return (

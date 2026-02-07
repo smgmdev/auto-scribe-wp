@@ -304,34 +304,34 @@ serve(async (req) => {
       newBalance: newClientCredits 
     });
 
-    // 2. Delete the "locked" transaction (will be replaced by "spent")
+    // 2. Delete the "offer_accepted" transaction (will be replaced by "order_completed")
     const mediaSiteName = mediaSiteData?.name || "Unknown";
     const { error: deleteLockError } = await supabaseAdmin
       .from("credit_transactions")
       .delete()
       .eq("user_id", order.user_id)
-      .eq("type", "locked")
-      .like("description", `%${mediaSiteName}%`);
+      .eq("type", "offer_accepted")
+      .eq("order_id", order_id);
 
     if (deleteLockError) {
-      logStep("Error deleting lock transaction", { error: deleteLockError.message });
-      // Don't fail - continue with spent transaction
+      logStep("Error deleting offer_accepted transaction", { error: deleteLockError.message });
+      // Don't fail - continue with order_completed transaction
     } else {
-      logStep("Lock transaction deleted");
+      logStep("Offer_accepted transaction deleted");
     }
 
-    // 3. Record credit transaction for client (spent)
+    // 3. Record credit transaction for client (order_completed - permanent deduction)
     await supabaseAdmin
       .from("credit_transactions")
       .insert({
         user_id: order.user_id,
         amount: -creditCost,
-        type: "spent",
+        type: "order_completed",
         description: `Order completed: ${mediaSiteName}`,
         order_id: order_id
       });
 
-    logStep("Client spent transaction recorded");
+    logStep("Client order_completed transaction recorded");
 
     // 3. Update order status to completed with DYNAMIC fees locked in
     const { error: updateOrderError } = await supabaseAdmin
