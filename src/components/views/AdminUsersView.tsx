@@ -865,8 +865,8 @@ export function AdminUsersView() {
                                     <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
                                       <div className="flex items-center gap-2">
                                         <CreditCard className="h-3 w-3 text-muted-foreground" />
-                                        <span className={tx.type === 'purchase' || tx.type === 'add' ? 'text-green-600' : 'text-red-600'}>
-                                          {tx.type === 'purchase' || tx.type === 'add' ? '+' : '-'}{Math.abs(tx.amount)}
+                                        <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
+                                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </span>
                                         <span className="text-muted-foreground">{tx.description || tx.type}</span>
                                       </div>
