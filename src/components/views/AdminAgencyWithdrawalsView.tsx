@@ -470,15 +470,15 @@ export function AdminAgencyWithdrawalsView() {
                                     <p><span className="text-white/70">Network:</span> {withdrawal.crypto_details.usdt_network}</p>
                                   )}
                                   {withdrawal.crypto_details.usdt_wallet_address && (
-                                    <div className="flex items-start gap-2">
-                                      <p className="break-all flex-1"><span className="text-white/70">Wallet:</span> {withdrawal.crypto_details.usdt_wallet_address}</p>
+                                    <p className="break-all">
+                                      <span className="text-white/70">Wallet:</span> {withdrawal.crypto_details.usdt_wallet_address}
                                       <button
                                         onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
-                                        className="text-white/70 hover:text-white transition-colors shrink-0 mt-0.5"
+                                        className="text-white/70 hover:text-white transition-colors inline-flex ml-1.5 align-middle"
                                       >
                                         <Copy className="h-3.5 w-3.5" />
                                       </button>
-                                    </div>
+                                    </p>
                                   )}
                                 </div>
                               </TooltipContent>
