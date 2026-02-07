@@ -161,15 +161,15 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
                       htmlFor="bank"
                       className="flex cursor-pointer"
                     >
-                      <Card className={`w-full transition-colors ${withdrawalMethod === 'bank' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground/50'}`}>
+                      <Card className={`w-full transition-colors ${withdrawalMethod === 'bank' ? 'border-[#4771d9] bg-[#4771d9] text-white' : 'hover:border-muted-foreground/50'}`}>
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                              <Building2 className="h-5 w-5 text-muted-foreground" />
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${withdrawalMethod === 'bank' ? 'bg-white/20' : 'bg-muted'}`}>
+                              <Building2 className={`h-5 w-5 ${withdrawalMethod === 'bank' ? 'text-white' : 'text-muted-foreground'}`} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium">Bank Transfer</p>
-                              <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                              <div className={`text-sm mt-1 space-y-0.5 ${withdrawalMethod === 'bank' ? 'text-white/80' : 'text-muted-foreground'}`}>
                                 {verificationData.bank_name && (
                                   <p>{verificationData.bank_name}</p>
                                 )}
@@ -198,15 +198,15 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
                       htmlFor="crypto"
                       className="flex cursor-pointer"
                     >
-                      <Card className={`w-full transition-colors ${withdrawalMethod === 'crypto' ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground/50'}`}>
+                      <Card className={`w-full transition-colors ${withdrawalMethod === 'crypto' ? 'border-[#4771d9] bg-[#4771d9] text-white' : 'hover:border-muted-foreground/50'}`}>
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                              <Wallet className="h-5 w-5 text-muted-foreground" />
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${withdrawalMethod === 'crypto' ? 'bg-white/20' : 'bg-muted'}`}>
+                              <Wallet className={`h-5 w-5 ${withdrawalMethod === 'crypto' ? 'text-white' : 'text-muted-foreground'}`} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium">USDT (Crypto)</p>
-                              <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                              <div className={`text-sm mt-1 space-y-0.5 ${withdrawalMethod === 'crypto' ? 'text-white/80' : 'text-muted-foreground'}`}>
                                 {verificationData.usdt_network && (
                                   <p>Network: {verificationData.usdt_network}</p>
                                 )}
