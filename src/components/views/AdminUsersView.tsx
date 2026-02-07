@@ -370,7 +370,7 @@ export function AdminUsersView() {
       return;
     }
 
-    await supabase.from('credit_transactions').insert({
+    const { error: txError } = await supabase.from('credit_transactions').insert({
       user_id: selectedUser.id,
       amount: creditAction === 'add' ? amount : -amount,
       type: creditAction === 'add' ? 'gifted' : 'admin_deduct',
@@ -378,6 +378,10 @@ export function AdminUsersView() {
         ? `Gifted ${amount} credits by admin`
         : `Admin removed ${amount} credits`,
     });
+
+    if (txError) {
+      console.error('Failed to create transaction record:', txError);
+    }
 
     toast({
       title: 'Credits updated',
