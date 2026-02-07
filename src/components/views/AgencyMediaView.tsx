@@ -576,7 +576,6 @@ export function AgencyMediaView() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all">
-              <Plus className="h-4 w-4 mr-2" />
               Add Media
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
@@ -657,7 +656,6 @@ export function AgencyMediaView() {
                       No approved WordPress sites yet.
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
-                      <Plus className="h-4 w-4 mr-2" />
                       Add New WordPress Site
                     </Button>
                   </CardContent>
@@ -806,7 +804,6 @@ export function AgencyMediaView() {
                       No pending submissions.
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('wordpress')}>
-                      <Plus className="h-4 w-4 mr-2" />
                       Add New WordPress Site
                     </Button>
                   </CardContent>
@@ -1000,7 +997,6 @@ export function AgencyMediaView() {
                       No approved media sites yet.
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('media')}>
-                      <Plus className="h-4 w-4 mr-2" />
                       Add New Media Site
                     </Button>
                   </CardContent>
@@ -1220,7 +1216,6 @@ export function AgencyMediaView() {
                       No pending submissions.
                     </p>
                     <Button variant="outline" onClick={() => handleAddMedia('media')}>
-                      <Plus className="h-4 w-4 mr-2" />
                       Add New Media Site
                     </Button>
                   </CardContent>
