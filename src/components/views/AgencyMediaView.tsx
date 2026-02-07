@@ -177,13 +177,13 @@ export function AgencyMediaView() {
       .maybeSingle();
 
     if (appData?.logo_url) {
-      // Generate signed URL for the logo
-      const { data: signedUrlData } = await supabase.storage
-        .from('agency-documents')
-        .createSignedUrl(appData.logo_url.replace('agency-documents/', ''), 3600);
+      // Get public URL from agency-logos bucket
+      const { data: publicUrlData } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(appData.logo_url);
       
-      if (signedUrlData?.signedUrl) {
-        setAgencyLogo(signedUrlData.signedUrl);
+      if (publicUrlData?.publicUrl) {
+        setAgencyLogo(publicUrlData.publicUrl);
       }
     }
 

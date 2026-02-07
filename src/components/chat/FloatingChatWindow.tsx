@@ -677,18 +677,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             .eq('status', 'approved')
             .maybeSingle();
           
-          // Construct full storage URL if logo_url is a path
           let fullLogoUrl: string | null = null;
           if (appData?.logo_url) {
             // Check if it's already a full URL
             if (appData.logo_url.startsWith('http')) {
               fullLogoUrl = appData.logo_url;
             } else {
-              // Create a signed URL since the bucket is private
-              const { data: urlData } = await supabase.storage
-                .from('agency-documents')
-                .createSignedUrl(appData.logo_url, 3600); // 1 hour expiry
-              fullLogoUrl = urlData?.signedUrl || null;
+              // Get public URL from agency-logos bucket
+              const { data: urlData } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(appData.logo_url);
+              fullLogoUrl = urlData?.publicUrl || null;
             }
           }
           
@@ -749,11 +748,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             if (appData.logo_url.startsWith('http')) {
               fullLogoUrl = appData.logo_url;
             } else {
-              // Create a signed URL since the bucket is private
-              const { data: urlData } = await supabase.storage
-                .from('agency-documents')
-                .createSignedUrl(appData.logo_url, 3600); // 1 hour expiry
-              fullLogoUrl = urlData?.signedUrl || null;
+              // Get public URL from agency-logos bucket
+              const { data: urlData } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(appData.logo_url);
+              fullLogoUrl = urlData?.publicUrl || null;
             }
           }
           
@@ -3347,11 +3346,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       let logoSignedUrl: string | null = null;
       if (appData?.logo_url) {
         const logoPath = appData.logo_url.replace('agency-documents/', '');
-        const { data: signedData } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(logoPath, 3600);
-        if (signedData?.signedUrl) {
-          logoSignedUrl = signedData.signedUrl;
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(logoPath);
+        if (publicUrl?.publicUrl) {
+          logoSignedUrl = publicUrl.publicUrl;
         }
       }
       
@@ -5963,12 +5962,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                         .maybeSingle();
                                       
                                       whatsappPhone = application?.whatsapp_phone || null;
-                                      // Get signed URL for private bucket
+                                      // Get public URL from agency-logos bucket
                                       if (application?.logo_url) {
-                                        const { data: signedData } = await supabase.storage
-                                          .from('agency-documents')
-                                          .createSignedUrl(application.logo_url, 3600);
-                                        logoUrl = signedData?.signedUrl || null;
+                                        const { data: publicUrl } = supabase.storage
+                                          .from('agency-logos')
+                                          .getPublicUrl(application.logo_url);
+                                        logoUrl = publicUrl?.publicUrl || null;
                                       }
                                     }
                                     

@@ -101,15 +101,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   .from('agency-logos')
                   .getPublicUrl(app.logo_url);
                 logoUrl = publicUrl?.publicUrl || null;
-                
-                if (user) {
-                  const { data: signed } = await supabase.storage
-                    .from('agency-documents')
-                    .createSignedUrl(app.logo_url, 3600);
-                  if (signed?.signedUrl) {
-                    logoUrl = signed.signedUrl;
-                  }
-                }
               }
               const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
               agencies.push({
@@ -147,16 +138,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             }
 
             const logos: Record<string, string> = {};
-            await Promise.all(
-              Object.entries(earliestLogoByAgency).map(async ([agencyName, path]) => {
-                const { data: signed, error: signError } = await supabase.storage
-                  .from('agency-documents')
-                  .createSignedUrl(path, 3600);
-                if (!signError && signed?.signedUrl) {
-                  logos[agencyName] = signed.signedUrl;
-                }
-              })
-            );
+            Object.entries(earliestLogoByAgency).forEach(([agencyName, path]) => {
+              const { data: publicUrl } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(path);
+              if (publicUrl?.publicUrl) {
+                logos[agencyName] = publicUrl.publicUrl;
+              }
+            });
             setAgencyLogos(logos);
           }
         }
@@ -194,11 +183,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         .maybeSingle();
       
       if (appData?.logo_url) {
-        const { data: signed } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(appData.logo_url, 3600);
-        if (signed?.signedUrl) {
-          logoUrl = signed.signedUrl;
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(appData.logo_url);
+        if (publicUrl?.publicUrl) {
+          logoUrl = publicUrl.publicUrl;
         }
       }
       
