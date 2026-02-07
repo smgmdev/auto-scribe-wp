@@ -316,6 +316,8 @@ export const AdminCreditManagementView = () => {
       const giftedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
       const deductionsMap = new Map<string, number>();
+      // Track offer_accepted (credits locked for pending orders)
+      const offerLockedMap = new Map<string, number>();
       
       // Define withdrawal types (stored in cents, not credits) - must be excluded from credit calculations
       const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
@@ -334,6 +336,11 @@ export const AdminCreditManagementView = () => {
           outgoingMap.set(tx.user_id, (outgoingMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
         
+        // Track offer_accepted for locked credits calculation
+        if (tx.type === 'offer_accepted' && tx.amount < 0) {
+          offerLockedMap.set(tx.user_id, (offerLockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+        
         // Track specific types for display columns
         if (tx.type === 'refund' && tx.amount > 0) {
           refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + tx.amount);
@@ -347,10 +354,10 @@ export const AdminCreditManagementView = () => {
       });
 
       // Calculate locked credits per user from active orders
-      const lockedMap = new Map<string, number>();
+      const lockedFromOrdersMap = new Map<string, number>();
       activeOrdersData?.forEach(order => {
         const price = (order.media_sites as any)?.price || 0;
-        lockedMap.set(order.user_id, (lockedMap.get(order.user_id) || 0) + price);
+        lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
       });
 
       // Fetch completed orders to calculate total spent per user
@@ -370,12 +377,16 @@ export const AdminCreditManagementView = () => {
       const combined: UserCredit[] = (creditsData || []).map(credit => {
         const incoming = incomingMap.get(credit.user_id) || 0;
         const outgoing = outgoingMap.get(credit.user_id) || 0;
-        const locked = lockedMap.get(credit.user_id) || 0;
+        const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
+        const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
         
-        // Total Balance = Incoming - Outgoing (excluding locked)
+        // Total locked = credits locked in active orders + credits locked via offer_accepted
+        const totalLocked = lockedFromOrders + lockedFromOffers;
+        
+        // Total Balance = Incoming - Outgoing (excluding locked types)
         const calculatedTotalBalance = incoming - outgoing;
-        // Available = Total Balance - Locked
-        const calculatedAvailable = calculatedTotalBalance - locked;
+        // Available = Total Balance - Total Locked Credits
+        const calculatedAvailable = calculatedTotalBalance - totalLocked;
         
         return {
           user_id: credit.user_id,
@@ -383,7 +394,7 @@ export const AdminCreditManagementView = () => {
           gifted: giftedMap.get(credit.user_id) || 0,
           deductions: deductionsMap.get(credit.user_id) || 0,
           totalCredits: calculatedTotalBalance,
-          locked: locked,
+          locked: totalLocked,
           available: calculatedAvailable,
           orders: ordersMap.get(credit.user_id) || 0,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
