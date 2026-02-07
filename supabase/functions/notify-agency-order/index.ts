@@ -59,7 +59,7 @@ serve(async (req) => {
       );
     }
 
-    const agencyPayout = Math.round(amount_dollars * (1 - (agencyData.commission_percentage || 10) / 100));
+    const agencyPayout = Math.round(amount_dollars * (1 - (agencyData.commission_percentage ?? 10) / 100));
 
     const emailHtml = `
       <!DOCTYPE html>
