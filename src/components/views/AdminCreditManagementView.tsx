@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart, Gift, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart, Gift } from 'lucide-react';
 import { SendCreditsDialog } from '@/components/admin/SendCreditsDialog';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 
@@ -560,7 +560,6 @@ export const AdminCreditManagementView = () => {
               <Table>
                 <TableHeader>
                 <TableRow>
-                    <TableHead className="w-10"></TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                     <TableHead className="text-right">Locked</TableHead>
@@ -575,7 +574,6 @@ export const AdminCreditManagementView = () => {
                   {balancesLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
-                        <TableCell><Skeleton className="h-4 w-4" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
@@ -588,7 +586,7 @@ export const AdminCreditManagementView = () => {
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -602,13 +600,6 @@ export const AdminCreditManagementView = () => {
                             className="cursor-pointer hover:bg-muted/50"
                             onClick={() => toggleUserExpanded(user.user_id)}
                           >
-                            <TableCell>
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </TableCell>
                             <TableCell className="font-medium">
                               {user.email || <span className="text-muted-foreground italic">No email</span>}
                             </TableCell>
@@ -639,7 +630,7 @@ export const AdminCreditManagementView = () => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
-                              <TableCell colSpan={9} className="p-0">
+                              <TableCell colSpan={8} className="p-0">
                                 <UserTransactionsExpanded userId={user.user_id} />
                               </TableCell>
                             </TableRow>
