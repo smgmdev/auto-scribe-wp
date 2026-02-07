@@ -248,7 +248,7 @@ export function AdminMediaManagementView() {
   };
 
   // Fetch agency logos based on agency names (matching by agency_name to agency_applications)
-  // First try public bucket, then fall back to signed URLs from private bucket
+  // Use signed URLs from private bucket for admin access
   const fetchAgencyLogos = async (submissions: { user_id: string; agency_name: string }[]) => {
     if (submissions.length === 0) return;
 
@@ -272,38 +272,29 @@ export function AdminMediaManagementView() {
       }
     }
 
-    // Try public bucket first, then fall back to signed URLs from private bucket
+    // Create signed URLs from private bucket
     const logos: Record<string, string> = {};
     await Promise.all(
       Object.entries(logoPathByAgency).map(async ([agencyName, path]) => {
-        // Extract filename from path for public bucket
-        const filename = path.split('/').pop();
-        if (filename) {
-          // Try public bucket first
-          const { data: publicData } = supabase.storage
-            .from('agency-logos')
-            .getPublicUrl(filename);
-          
-          if (publicData?.publicUrl) {
-            // Check if the public URL is valid by doing a HEAD request
-            try {
-              const response = await fetch(publicData.publicUrl, { method: 'HEAD' });
-              if (response.ok) {
-                logos[agencyName] = publicData.publicUrl;
-                return;
-              }
-            } catch {
-              // Fall through to signed URL
-            }
-          }
-        }
-        
-        // Fall back to signed URL from private bucket
+        // Try signed URL from private bucket first
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
           .createSignedUrl(path, 3600);
         if (!signError && signed?.signedUrl) {
           logos[agencyName] = signed.signedUrl;
+          return;
+        }
+        
+        // Fall back to public bucket if signed URL fails
+        const filename = path.split('/').pop();
+        if (filename) {
+          const { data: publicData } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(filename);
+          
+          if (publicData?.publicUrl) {
+            logos[agencyName] = publicData.publicUrl;
+          }
         }
       })
     );
