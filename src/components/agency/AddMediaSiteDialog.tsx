@@ -201,7 +201,11 @@ export function AddMediaSiteDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="border border-transparent hover:!bg-transparent hover:!text-foreground hover:!border-foreground"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
