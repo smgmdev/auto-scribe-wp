@@ -25,6 +25,7 @@ interface UserCredit {
   totalSpent: number;
   refunded: number;
   email: string | null;
+  isAgency: boolean;
 }
 
 interface CreditTransaction {
@@ -276,6 +277,15 @@ export const AdminCreditManagementView = () => {
 
       if (profilesError) throw profilesError;
 
+      // Fetch active agency payouts to determine user type
+      const { data: agencyPayoutsData } = await supabase
+        .from('agency_payouts')
+        .select('user_id')
+        .eq('onboarding_complete', true)
+        .eq('downgraded', false);
+
+      const agencyUserIds = new Set(agencyPayoutsData?.map(a => a.user_id).filter(Boolean) || []);
+
       // Fetch transactions to calculate credits per user
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
@@ -372,7 +382,8 @@ export const AdminCreditManagementView = () => {
           orders: ordersMap.get(credit.user_id) || 0,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
-          email: emailMap.get(credit.user_id) || null
+          email: emailMap.get(credit.user_id) || null,
+          isAgency: agencyUserIds.has(credit.user_id)
         };
       });
 
@@ -576,6 +587,7 @@ export const AdminCreditManagementView = () => {
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
+                    <TableHead>User Type</TableHead>
                     <TableHead className="text-right">Available</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -584,12 +596,13 @@ export const AdminCreditManagementView = () => {
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -606,11 +619,16 @@ export const AdminCreditManagementView = () => {
                             <TableCell className="font-medium">
                               {user.email || <span className="text-muted-foreground italic">No email</span>}
                             </TableCell>
+                            <TableCell>
+                              <Badge className={user.isAgency ? 'bg-purple-100 text-purple-700 hover:bg-purple-100' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
+                                {user.isAgency ? 'Agency' : 'Regular'}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
-                              <TableCell colSpan={2} className="p-0">
+                              <TableCell colSpan={3} className="p-0">
                                 <div className="bg-muted/30 p-4">
                                   {/* Stats row above tabs */}
                                   <div className="grid grid-cols-6 gap-4 mb-4">
