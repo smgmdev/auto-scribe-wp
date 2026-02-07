@@ -475,10 +475,12 @@ export function AdminUsersView() {
       return;
     }
 
-    // Build description with optional reason for removals
+    // Build description with optional reason
     let description = '';
     if (creditAction === 'add') {
-      description = `Gifted ${amount} credits by Arcana Mace Staff`;
+      description = creditReason.trim()
+        ? `Gifted ${amount} credits by Arcana Mace Staff: ${creditReason.trim()}`
+        : `Gifted ${amount} credits by Arcana Mace Staff`;
     } else {
       description = creditReason.trim()
         ? `Removed ${amount} credits by Arcana Mace Staff: ${creditReason.trim()}`
@@ -1099,14 +1101,12 @@ export function AdminUsersView() {
               min="1"
             />
 
-            {creditAction === 'remove' && (
-              <Input
-                type="text"
-                placeholder="Reason (optional)"
-                value={creditReason}
-                onChange={(e) => setCreditReason(e.target.value)}
-              />
-            )}
+            <Input
+              type="text"
+              placeholder="Reason (optional)"
+              value={creditReason}
+              onChange={(e) => setCreditReason(e.target.value)}
+            />
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="hover:bg-black hover:text-white">
