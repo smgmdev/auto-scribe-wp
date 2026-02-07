@@ -373,8 +373,10 @@ export function AdminUsersView() {
     await supabase.from('credit_transactions').insert({
       user_id: selectedUser.id,
       amount: creditAction === 'add' ? amount : -amount,
-      type: 'admin_grant',
-      description: `Admin ${creditAction === 'add' ? 'added' : 'removed'} ${amount} credits`,
+      type: creditAction === 'add' ? 'gifted' : 'admin_deduct',
+      description: creditAction === 'add' 
+        ? `Gifted ${amount} credits by admin`
+        : `Admin removed ${amount} credits`,
     });
 
     toast({
