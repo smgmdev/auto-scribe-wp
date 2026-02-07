@@ -147,14 +147,14 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className="pointer-events-auto w-full max-w-md border bg-background p-6 shadow-lg rounded-lg"
+        className="pointer-events-auto w-full max-w-md border bg-background pt-4 px-6 pb-6 shadow-lg rounded-lg relative"
         style={{
           transform: `translate(${position.x}px, ${position.y}px)`,
         }}
       >
         {/* Drag Handle */}
         <div
-          className={`absolute top-0 left-0 right-0 h-12 flex items-center justify-start pl-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          className={`flex items-center justify-start h-8 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
           <GripHorizontal className="h-4 w-4 text-muted-foreground/50" />
@@ -163,13 +163,13 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         {/* Close Button */}
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-3 top-3 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+          className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </button>
 
-        <div className="flex flex-col space-y-1.5 text-left mt-6">
+        <div className="flex flex-col space-y-1.5 text-left">
           <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
             <Coins className="h-5 w-5 text-accent" />
             Buy Credits
