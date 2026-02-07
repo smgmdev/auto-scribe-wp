@@ -6704,7 +6704,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       </AlertDialog>
 
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
-        <DialogContent className="max-w-md z-[9999]" hideCloseButton>
+        <DialogContent className="max-w-md z-[9999] max-h-[90vh] flex flex-col" hideCloseButton>
           <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
             <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
               <X className="h-4 w-4" />
@@ -6719,6 +6719,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : orderDetails ? (
+            <ScrollArea className="flex-1 -mr-4 pr-4">
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                 {globalChatRequest?.media_site?.favicon ? (
@@ -6979,6 +6980,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
               </div>
             </div>
+            </ScrollArea>
           ) : (
             <p className="text-center text-muted-foreground py-8">Order not found</p>
           )}
