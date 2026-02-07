@@ -492,7 +492,7 @@ export function AdminAgencyWithdrawalsView() {
                       <div className="flex-1 min-w-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                          className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                          className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                         >
                           <span className="font-medium">
                             {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
