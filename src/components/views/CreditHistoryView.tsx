@@ -38,23 +38,9 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Total balance = all credits received (purchases + admin bonuses) minus deductions
-  // This matches the admin-side calculation
-  const totalFromPurchases = transactions
-    .filter(t => t.type === 'purchase')
-    .reduce((sum, t) => sum + t.amount, 0);
-  
-  const totalFromAdmin = transactions
-    .filter(t => t.type === 'gifted' || t.type === 'admin_credit')
-    .reduce((sum, t) => sum + t.amount, 0);
-  
-  const totalDeductions = transactions
-    .filter(t => t.type === 'admin_deduct')
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  
-  // Total credits = Purchased + Gifted - Deductions + Locked
-  // This matches admin calculation: totalCredits + locked
-  const actualTotalBalance = totalFromPurchases + totalFromAdmin - totalDeductions + creditsInUse;
+  // Total balance = Available (from user_credits) + Locked
+  // This matches admin-side calculation: user_credits.credits + locked orders
+  const actualTotalBalance = totalCredits + creditsInUse;
   
   // Available = user_credits table value (already has locked subtracted)
   const availableCredits = totalCredits;
