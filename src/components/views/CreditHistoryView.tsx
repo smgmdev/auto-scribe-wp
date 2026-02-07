@@ -60,7 +60,7 @@ export function CreditHistoryView() {
   };
 
   // Toggle withdrawal details expansion and fetch details if needed
-  const toggleWithdrawalDetails = async (transactionId: string, amount: number, description: string | null) => {
+  const toggleWithdrawalDetails = async (transactionId: string, amount: number, description: string | null, type: string) => {
     const newExpanded = new Set(expandedWithdrawals);
     
     if (newExpanded.has(transactionId)) {
@@ -74,16 +74,16 @@ export function CreditHistoryView() {
     
     // Fetch withdrawal details if not already loaded
     if (!withdrawalDetails[transactionId] && user) {
-      const isBank = description?.includes('Bank Transfer');
-      const isCrypto = description?.includes('USDT');
+      // Determine the status to search for based on transaction type
+      const status = type === 'withdrawal_completed' ? 'completed' : type === 'withdrawal_unlocked' ? 'rejected' : 'pending';
       
-      // Find the matching withdrawal by amount and method
+      // Find the matching withdrawal by amount and status
       const { data: withdrawal } = await supabase
         .from('agency_withdrawals')
         .select('*')
         .eq('user_id', user.id)
         .eq('amount_cents', Math.abs(amount))
-        .eq('status', 'completed')
+        .eq('status', status)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
@@ -473,7 +473,7 @@ export function CreditHistoryView() {
       refund: { className: 'bg-orange-100 text-orange-700', label: 'Refund' },
       admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700', label: 'Withdrawal Pending' },
-      withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700', label: 'Withdrawal Returned' },
+      withdrawal_unlocked: { className: 'bg-red-100 text-red-700', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
@@ -486,24 +486,32 @@ export function CreditHistoryView() {
     ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct', 'withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(t.type)
   );
 
-  // Find completed withdrawals to identify which pending ones to hide
+  // Find completed and rejected withdrawals to identify which pending ones to hide
   const completedWithdrawals = filteredTransactions.filter(t => t.type === 'withdrawal_completed');
+  const rejectedWithdrawals = filteredTransactions.filter(t => t.type === 'withdrawal_unlocked');
   
-  // Build a set of withdrawal identifiers (amount + method) that have been completed
+  // Build a set of withdrawal identifiers (amount + method) that have been completed or rejected
   const completedWithdrawalKeys = new Set(
     completedWithdrawals.map(t => {
       const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
       return `${Math.abs(t.amount)}-${method}`;
     })
   );
+  
+  const rejectedWithdrawalKeys = new Set(
+    rejectedWithdrawals.map(t => {
+      const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
+      return `${Math.abs(t.amount)}-${method}`;
+    })
+  );
 
-  // Filter out withdrawal_locked transactions that have a matching completed withdrawal
+  // Filter out withdrawal_locked transactions that have a matching completed or rejected withdrawal
   const displayedTransactions = filteredTransactions.filter(t => {
     if (t.type === 'withdrawal_locked') {
       const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
       const key = `${Math.abs(t.amount)}-${method}`;
-      // Hide this pending withdrawal if there's a completed one with the same amount and method
-      if (completedWithdrawalKeys.has(key)) {
+      // Hide this pending withdrawal if there's a completed or rejected one with the same amount and method
+      if (completedWithdrawalKeys.has(key) || rejectedWithdrawalKeys.has(key)) {
         return false;
       }
     }
@@ -814,9 +822,11 @@ export function CreditHistoryView() {
               {displayedTransactions.map((transaction) => {
                 const isClickable = transaction.type === 'order_completed' && transaction.order_id;
                 const isWithdrawalCompleted = transaction.type === 'withdrawal_completed';
+                const isWithdrawalRejected = transaction.type === 'withdrawal_unlocked';
                 const isExpanded = expandedWithdrawals.has(transaction.id);
                 const details = withdrawalDetails[transaction.id];
                 
+                // Expandable card for completed withdrawals
                 if (isWithdrawalCompleted) {
                   return (
                     <div
@@ -847,7 +857,7 @@ export function CreditHistoryView() {
                               className="mt-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description);
+                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
                               }}
                             >
                               {isExpanded ? (
@@ -943,6 +953,133 @@ export function CreditHistoryView() {
                   );
                 }
                 
+                // Expandable card for rejected withdrawals
+                if (isWithdrawalRejected) {
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-4">
+                          {getTransactionIcon(transaction.type, transaction.amount)}
+                          <div>
+                            <p className="font-medium">
+                              {transaction.description?.includes('Bank Transfer') 
+                                ? `Withdrawal via Bank Transfer` 
+                                : transaction.description?.includes('USDT')
+                                  ? `Withdrawal via USDT`
+                                  : 'Withdrawal Rejected'}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getTransactionBadge(transaction.type)}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
+                              }}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3 mr-1" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  See Details
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-lg text-green-500">
+                          +${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                        </div>
+                      </div>
+                      
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-3 space-y-2 text-sm">
+                            {details ? (
+                              <>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                  <div>
+                                    <span className="text-muted-foreground">Withdrawal Method:</span>
+                                    <p className="font-medium">{details.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Amount:</span>
+                                    <p className="font-medium">${(details.amount_cents / 100).toLocaleString()}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Requested:</span>
+                                    <p className="font-medium">{format(new Date(details.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Rejected:</span>
+                                    <p className="font-medium">{details.processed_at ? format(new Date(details.processed_at), 'MMM d, yyyy h:mm a') : 'N/A'}</p>
+                                  </div>
+                                  
+                                  {details.withdrawal_method === 'bank' && details.bank_details && (
+                                    <>
+                                      <div>
+                                        <span className="text-muted-foreground">Bank:</span>
+                                        <p className="font-medium">{(details.bank_details as any).bank_name || 'N/A'}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Account Holder:</span>
+                                        <p className="font-medium">{(details.bank_details as any).account_holder || 'N/A'}</p>
+                                      </div>
+                                      <div className="col-span-2">
+                                        <span className="text-muted-foreground">Account Number:</span>
+                                        <p className="font-medium">{(details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
+                                      </div>
+                                    </>
+                                  )}
+                                  
+                                  {details.withdrawal_method === 'crypto' && details.crypto_details && (
+                                    <>
+                                      <div>
+                                        <span className="text-muted-foreground">Network:</span>
+                                        <p className="font-medium">{(details.crypto_details as any).usdt_network || (details.crypto_details as any).network || 'TRC-20'}</p>
+                                      </div>
+                                      <div className="col-span-2">
+                                        <span className="text-muted-foreground">Wallet Address:</span>
+                                        <p className="font-medium font-mono text-xs break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                                
+                                {details.admin_notes && (
+                                  <div className="mt-2 pt-2 border-t border-border/50">
+                                    <span className="text-muted-foreground">Rejection Reason:</span>
+                                    <p className="font-medium">{details.admin_notes}</p>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="flex items-center justify-center py-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                <span className="ml-2 text-muted-foreground">Loading details...</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
                 return (
                   <div
                     key={transaction.id}
@@ -953,13 +1090,13 @@ export function CreditHistoryView() {
                       {getTransactionIcon(transaction.type, transaction.amount)}
                       <div>
                         <p className="font-medium">
-                          {['withdrawal_locked', 'withdrawal_unlocked'].includes(transaction.type) ? (
-                            // For withdrawal transactions, show cleaner description
+                          {transaction.type === 'withdrawal_locked' ? (
+                            // For pending withdrawal transactions, show cleaner description
                             transaction.description?.includes('Bank Transfer') 
                               ? `Withdrawal via Bank Transfer` 
                               : transaction.description?.includes('USDT')
                                 ? `Withdrawal via USDT`
-                                : transaction.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
+                                : 'Withdrawal Pending'
                           ) : (transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -988,15 +1125,12 @@ export function CreditHistoryView() {
                     <div className={`text-lg ${
                       transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
                         ? 'text-amber-500' 
-                        : transaction.type === 'withdrawal_unlocked' 
-                          ? 'text-blue-500'
-                          : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                        : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
-                      {['withdrawal_locked', 'withdrawal_unlocked'].includes(transaction.type) ? (
+                      {transaction.type === 'withdrawal_locked' ? (
                         <>
-                          {transaction.type === 'withdrawal_locked' ? '-' : '+'}
-                          ${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                          -${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </>
                       ) : (
                         <>
