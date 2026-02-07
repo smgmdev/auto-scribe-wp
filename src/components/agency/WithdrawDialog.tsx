@@ -82,7 +82,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
     if (isNaN(numValue) || numValue <= 0) {
       setError('Please enter a valid amount');
     } else if (numValue > availableBalance) {
-      setError(`Amount exceeds available balance of $${availableBalance.toFixed(2)}`);
+      setError(`Amount exceeds available balance of $${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
     }
   };
 
@@ -129,7 +129,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
         <DialogHeader>
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
-            Available balance: <span className="font-semibold text-green-500">${availableBalance.toFixed(2)}</span>
+            Available balance: <span className="font-semibold text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -249,7 +249,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
                 onClick={() => handleAmountChange(availableBalance.toFixed(2))}
                 className="text-xs text-primary hover:underline"
               >
-                Withdraw max ({`$${availableBalance.toFixed(2)}`})
+                Withdraw max ({`$${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`})
               </button>
             </div>
 

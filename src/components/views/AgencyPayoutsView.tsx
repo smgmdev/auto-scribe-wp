@@ -392,7 +392,7 @@ export function AgencyPayoutsView() {
                       </Badge>
                     </div>
                     <p className="absolute bottom-3 right-3 font-semibold text-green-500">
-                      +${earningsAmount.toFixed(2)}
+                      +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <div className="flex items-center gap-3 pr-24">
                       <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
