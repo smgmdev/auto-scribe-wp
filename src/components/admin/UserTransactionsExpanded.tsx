@@ -26,9 +26,10 @@ const transactionTypes = [
   { key: 'locked', label: 'Locked' },
   { key: 'unlocked', label: 'Unlocked' },
   { key: 'order_accepted', label: 'Order Accepted' },
-  { key: 'offer_accepted', label: 'Offer Accepted' },
+  { key: 'offer_accepted', label: 'Credits Locked' },
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
+  { key: 'admin_deduct', label: 'Deduction' },
 ];
 
 export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedProps) => {
@@ -86,10 +87,11 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Locked' },
       unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Unlocked' },
       order_accepted: { className: 'bg-purple-100 text-purple-700 hover:bg-purple-100', label: 'Order Accepted' },
-      offer_accepted: { className: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-100', label: 'Offer Accepted' },
+      offer_accepted: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Credits Locked' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
-      adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' }
+      adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
+      admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={badge.className}>{badge.label}</Badge>;
