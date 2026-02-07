@@ -476,15 +476,16 @@ export function AdminUsersView() {
     }
 
     // Build description with optional reason
+    const formattedAmount = amount.toLocaleString();
     let description = '';
     if (creditAction === 'add') {
       description = creditReason.trim()
-        ? `Gifted ${amount} credits by Arcana Mace Staff: ${creditReason.trim()}`
-        : `Gifted ${amount} credits by Arcana Mace Staff`;
+        ? `Gifted ${formattedAmount} credits by Arcana Mace Staff: ${creditReason.trim()}`
+        : `Gifted ${formattedAmount} credits by Arcana Mace Staff`;
     } else {
       description = creditReason.trim()
-        ? `Removed ${amount} credits by Arcana Mace Staff: ${creditReason.trim()}`
-        : `Removed ${amount} credits by Arcana Mace Staff`;
+        ? `Removed ${formattedAmount} credits by Arcana Mace Staff: ${creditReason.trim()}`
+        : `Removed ${formattedAmount} credits by Arcana Mace Staff`;
     }
 
     const { error: txError } = await supabase.from('credit_transactions').insert({
