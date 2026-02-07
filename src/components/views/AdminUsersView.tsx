@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,6 +64,44 @@ interface ServiceRequest {
 
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
 type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements';
+
+// Helper function to render engagement status badge
+const getEngagementStatusBadge = (status: string) => {
+  switch (status) {
+    case 'cancelled':
+      return (
+        <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] py-0">
+          Cancelled
+        </Badge>
+      );
+    case 'completed':
+      return (
+        <Badge className="bg-green-600 text-[10px] py-0">
+          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+          Completed
+        </Badge>
+      );
+    case 'pending_review':
+      return (
+        <Badge variant="secondary" className="text-[10px] py-0">
+          <Clock className="h-2.5 w-2.5 mr-0.5" />
+          Open
+        </Badge>
+      );
+    case 'in_progress':
+      return (
+        <Badge className="bg-blue-600 text-[10px] py-0">
+          Active
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="text-[10px] py-0">
+          {status}
+        </Badge>
+      );
+  }
+};
 
 export function AdminUsersView() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -869,7 +907,7 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <MessageSquare className="h-3 w-3 text-muted-foreground" />
                                         <span className="truncate max-w-[200px]">{engagement.title}</span>
-                                        <Badge variant="outline" className="text-[10px] py-0">{engagement.status}</Badge>
+                                        {getEngagementStatusBadge(engagement.status)}
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <span className="text-muted-foreground">{engagement.media_sites?.name}</span>
