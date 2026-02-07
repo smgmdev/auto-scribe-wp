@@ -927,7 +927,7 @@ export function CreditHistoryView() {
                                       </div>
                                       <div className="col-span-2">
                                         <span className="text-muted-foreground">Wallet Address:</span>
-                                        <p className="font-medium font-mono text-xs break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
+                                        <p className="font-medium break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
                                       </div>
                                     </>
                                   )}
@@ -1054,7 +1054,7 @@ export function CreditHistoryView() {
                                       </div>
                                       <div className="col-span-2">
                                         <span className="text-muted-foreground">Wallet Address:</span>
-                                        <p className="font-medium font-mono text-xs break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
+                                        <p className="font-medium break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
                                       </div>
                                     </>
                                   )}
