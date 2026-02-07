@@ -52,17 +52,21 @@ export function CreditHistoryView() {
   // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
   // Incoming: purchase, gifted, admin_credit, refund, unlocked (positive amounts)
   // Outgoing: spent, order_completed, order_delivered, admin_deduct (negative amounts, but NOT locked/offer_accepted)
+  // Note: withdrawal transactions are in cents and handled separately
+  const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+  
   const incomingCredits = transactions
-    .filter(t => t.amount > 0)
+    .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type))
     .reduce((sum, t) => sum + t.amount, 0);
   
   const outgoingCredits = transactions
-    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && t.type !== 'withdrawal_locked')
+    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   
   const actualTotalBalance = incomingCredits - outgoingCredits;
   
   // Available = Total Balance - Locked Credits (calculated from transactions)
+  // creditsInWithdrawals is already in dollars (converted from cents)
   const availableCredits = actualTotalBalance - creditsInUse;
 
   // Extract fetch logic into a reusable function
@@ -158,20 +162,21 @@ export function CreditHistoryView() {
       .eq('user_id', user.id)
       .in('type', ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed']);
 
-    let withdrawalLocked = 0;
+    let withdrawalLockedCents = 0;
     if (withdrawalTransactions) {
       for (const tx of withdrawalTransactions) {
         if (tx.type === 'withdrawal_locked') {
-          withdrawalLocked += Math.abs(tx.amount); // These are negative, so take absolute
+          withdrawalLockedCents += Math.abs(tx.amount); // These are negative cents, so take absolute
         } else if (tx.type === 'withdrawal_unlocked' || tx.type === 'withdrawal_completed') {
-          withdrawalLocked -= Math.abs(tx.amount); // These release the lock
+          withdrawalLockedCents -= Math.abs(tx.amount); // These release the lock (in cents)
         }
       }
     }
-    // Ensure we don't go negative
-    withdrawalLocked = Math.max(0, withdrawalLocked);
-    setCreditsInWithdrawals(withdrawalLocked);
-    totalInUse += withdrawalLocked;
+    // Ensure we don't go negative and convert cents to dollars
+    withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
+    const withdrawalLockedDollars = withdrawalLockedCents / 100;
+    setCreditsInWithdrawals(withdrawalLockedDollars);
+    totalInUse += withdrawalLockedDollars;
 
     setCreditsInUse(totalInUse);
     setCreditsInOrders(ordersTotal);
@@ -479,7 +484,7 @@ export function CreditHistoryView() {
               {creditsInWithdrawals > 0 && (
                 <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Locked in withdrawals:</span>
-                  <span className="font-medium text-amber-400">-{creditsInWithdrawals.toLocaleString()}</span>
+                  <span className="font-medium text-amber-400">-${creditsInWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
@@ -516,7 +521,7 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[320px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            {lockedOrders.length === 0 ? (
+            {lockedOrders.length === 0 && creditsInWithdrawals === 0 ? (
               <p>No credits currently locked</p>
             ) : (
               <div className="space-y-2">
@@ -556,7 +561,7 @@ export function CreditHistoryView() {
                     <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Withdrawals</p>
                     <div className="flex justify-between gap-4 text-xs">
                       <span className="text-muted-foreground">Withdrawal requests</span>
-                      <span className="font-medium text-amber-400">{creditsInWithdrawals.toLocaleString()}</span>
+                      <span className="font-medium text-amber-400">${creditsInWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 )}
@@ -720,9 +725,23 @@ export function CreditHistoryView() {
                     <div className={`text-lg ${
                       transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
                         ? 'text-amber-500' 
-                        : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                        : transaction.type === 'withdrawal_unlocked' 
+                          ? 'text-blue-500'
+                          : transaction.type === 'withdrawal_completed'
+                            ? 'text-green-500'
+                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
-                      {transaction.type === 'withdrawal_locked' ? '-' : transaction.amount > 0 ? '+' : ''}{Math.abs(transaction.amount).toLocaleString()}
+                      {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
+                      {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(transaction.type) ? (
+                        <>
+                          {transaction.type === 'withdrawal_locked' ? '-' : transaction.type === 'withdrawal_unlocked' ? '+' : '-'}
+                          ${(Math.abs(transaction.amount) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </>
+                      ) : (
+                        <>
+                          {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
+                        </>
+                      )}
                     </div>
                   </div>
                 );
