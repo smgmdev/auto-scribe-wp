@@ -1129,8 +1129,7 @@ export function MyRequestsView() {
     <div className="animate-fade-in">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <ClipboardList className="h-8 w-8" />
+          <h1 className="text-3xl font-bold text-foreground">
             My Engagements
           </h1>
           <p className="mt-2 text-muted-foreground">

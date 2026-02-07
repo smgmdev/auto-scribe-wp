@@ -566,8 +566,7 @@ export function AgencyMediaView() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Library className="h-8 w-8" />
+          <h1 className="text-3xl font-bold text-foreground">
             My Media
           </h1>
           <p className="mt-2 text-muted-foreground">

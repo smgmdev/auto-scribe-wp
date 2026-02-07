@@ -1243,8 +1243,7 @@ export function AgencyRequestsView() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <ClipboardList className="h-8 w-8" />
+        <h1 className="text-3xl font-bold text-foreground">
           Client Requests
         </h1>
         <p className="mt-2 text-muted-foreground">
