@@ -23,13 +23,15 @@ interface WithdrawalDetails {
   status: string;
   bank_details: {
     bank_name?: string;
-    account_holder?: string;
-    iban?: string;
-    swift_code?: string;
+    bank_account_holder?: string;
+    bank_account_number?: string;
+    bank_iban?: string;
+    bank_swift_code?: string;
+    bank_country?: string;
   } | null;
   crypto_details: {
-    network?: string;
-    wallet_address?: string;
+    usdt_network?: string;
+    usdt_wallet_address?: string;
   } | null;
   created_at: string;
   processed_at: string | null;
@@ -203,10 +205,23 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     return false;
   };
 
-  // Find matching withdrawal for a transaction
+  // Find matching withdrawal for a transaction - match by amount AND method from description
   const findMatchingWithdrawal = (tx: Transaction): WithdrawalDetails | undefined => {
     const txAmount = Math.abs(tx.amount);
-    return withdrawals.find(w => Math.abs(w.amount_cents) === txAmount);
+    const isUSDT = tx.description?.includes('USDT');
+    const isBank = tx.description?.includes('Bank Transfer');
+    
+    // Find withdrawal matching both amount and method
+    return withdrawals.find(w => {
+      const amountMatches = Math.abs(w.amount_cents) === txAmount;
+      if (!amountMatches) return false;
+      
+      // If we can determine the method from description, filter by it
+      if (isUSDT && w.withdrawal_method !== 'crypto') return false;
+      if (isBank && w.withdrawal_method !== 'bank') return false;
+      
+      return true;
+    });
   };
 
   // Render expanded details for a transaction
@@ -234,12 +249,24 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               </div>
               <div>
                 <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Account Holder</p>
-                <p className="font-medium">{withdrawal.bank_details.account_holder || '-'}</p>
+                <p className="font-medium">{withdrawal.bank_details.bank_account_holder || '-'}</p>
               </div>
-              {withdrawal.bank_details.iban && (
+              {withdrawal.bank_details.bank_account_number && (
+                <div className="col-span-2">
+                  <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Account Number</p>
+                  <p className="font-medium font-mono text-xs">{withdrawal.bank_details.bank_account_number}</p>
+                </div>
+              )}
+              {withdrawal.bank_details.bank_iban && (
                 <div className="col-span-2">
                   <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">IBAN</p>
-                  <p className="font-medium font-mono text-xs">{withdrawal.bank_details.iban}</p>
+                  <p className="font-medium font-mono text-xs">{withdrawal.bank_details.bank_iban}</p>
+                </div>
+              )}
+              {withdrawal.bank_details.bank_swift_code && (
+                <div>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">SWIFT/BIC</p>
+                  <p className="font-medium font-mono text-xs">{withdrawal.bank_details.bank_swift_code}</p>
                 </div>
               )}
             </>
@@ -248,11 +275,11 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <>
               <div>
                 <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Network</p>
-                <p className="font-medium">{withdrawal.crypto_details.network || 'TRC20'}</p>
+                <p className="font-medium">{withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
               </div>
               <div className="col-span-2">
                 <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Wallet Address</p>
-                <p className="font-medium font-mono text-xs break-all">{withdrawal.crypto_details.wallet_address || '-'}</p>
+                <p className="font-medium font-mono text-xs break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
               </div>
             </>
           )}
