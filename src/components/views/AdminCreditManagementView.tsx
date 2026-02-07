@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart, Gift } from 'lucide-react';
-import { SendCreditsDialog } from '@/components/admin/SendCreditsDialog';
+import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw, Building2, Percent, DollarSign, Wallet, ShoppingCart } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 
 interface UserCredit {
@@ -89,9 +88,6 @@ export const AdminCreditManagementView = () => {
   const [agencyTransactionsLoading, setAgencyTransactionsLoading] = useState(true);
   const [agencyTransactionsSearchTerm, setAgencyTransactionsSearchTerm] = useState('');
 
-  // Send credits dialog state
-  const [sendCreditsOpen, setSendCreditsOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ userId: string; email: string | null; credits: number } | null>(null);
   
   // Expanded user rows state
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
@@ -108,15 +104,6 @@ export const AdminCreditManagementView = () => {
     });
   };
 
-  const handleSendCredits = (userId: string, email: string | null, credits: number) => {
-    setSelectedUser({ userId, email, credits });
-    setSendCreditsOpen(true);
-  };
-
-  const handleSendCreditsSuccess = () => {
-    fetchUserCredits();
-    fetchTransactions();
-  };
 
   useEffect(() => {
     fetchUserCredits();
@@ -567,7 +554,6 @@ export const AdminCreditManagementView = () => {
                     <TableHead className="text-right">Gifted</TableHead>
                     <TableHead className="text-right">Orders</TableHead>
                     <TableHead className="text-right">Total Spent</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -581,12 +567,11 @@ export const AdminCreditManagementView = () => {
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : filteredCredits.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                         {balancesSearchTerm ? 'No users found matching your search' : 'No user credits found'}
                       </TableCell>
                     </TableRow>
@@ -609,28 +594,10 @@ export const AdminCreditManagementView = () => {
                             <TableCell className="text-right text-green-600">{user.gifted.toLocaleString()}</TableCell>
                             <TableCell className="text-right">{user.orders.toLocaleString()}</TableCell>
                             <TableCell className="text-right">{user.totalSpent.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 hover:bg-black hover:text-white"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleSendCredits(user.user_id, user.email, user.available);
-                                    }}
-                                  >
-                                    <Gift className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Send credits</TooltipContent>
-                              </Tooltip>
-                            </TableCell>
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
-                              <TableCell colSpan={8} className="p-0">
+                              <TableCell colSpan={7} className="p-0">
                                 <UserTransactionsExpanded userId={user.user_id} />
                               </TableCell>
                             </TableRow>
@@ -1126,17 +1093,6 @@ export const AdminCreditManagementView = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Send Credits Dialog */}
-      {selectedUser && (
-        <SendCreditsDialog
-          open={sendCreditsOpen}
-          onOpenChange={setSendCreditsOpen}
-          userId={selectedUser.userId}
-          userEmail={selectedUser.email}
-          currentCredits={selectedUser.credits}
-          onSuccess={handleSendCreditsSuccess}
-        />
-      )}
     </div>
   );
 };
