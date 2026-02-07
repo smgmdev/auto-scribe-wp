@@ -51,8 +51,8 @@ export function CreditHistoryView() {
   
   const actualTotalBalance = incomingCredits - outgoingCredits;
   
-  // Available = user_credits table value (already has locked subtracted)
-  const availableCredits = totalCredits;
+  // Available = Total Balance - Locked Credits (calculated from transactions)
+  const availableCredits = actualTotalBalance - creditsInUse;
 
   // Extract fetch logic into a reusable function
   const fetchData = useCallback(async (showLoader = true) => {
