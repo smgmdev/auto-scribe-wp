@@ -7225,7 +7225,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
                   <p className="text-sm text-amber-600 dark:text-amber-400">
-                    "{pendingOrderRequest.special_terms}"
+                    {pendingOrderRequest.special_terms}
                   </p>
                 </div>
               )}
