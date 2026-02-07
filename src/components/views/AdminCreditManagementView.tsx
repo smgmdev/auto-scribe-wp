@@ -596,30 +596,60 @@ export const AdminCreditManagementView = () => {
                                 <div className="bg-muted/30 p-4">
                                   {/* Stats row above tabs */}
                                   <div className="grid grid-cols-6 gap-4 mb-4">
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Locked</p>
-                                      <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Purchased</p>
-                                      <p className="font-semibold">{user.purchased.toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Gifted</p>
-                                      <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Deductions</p>
-                                      <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Orders</p>
-                                      <p className="font-semibold">{user.orders.toLocaleString()}</p>
-                                    </div>
-                                    <div className="text-center">
-                                      <p className="text-xs text-muted-foreground">Total Spent</p>
-                                      <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
-                                    </div>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Locked</p>
+                                          <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Credits locked in active orders</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Purchased</p>
+                                          <p className="font-semibold">{user.purchased.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Total purchased credits by the user</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Gifted</p>
+                                          <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Credits received from administration</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Deductions</p>
+                                          <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Administration fees</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Orders</p>
+                                          <p className="font-semibold">{user.orders.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Completed Orders</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Total Spent</p>
+                                          <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>Total value spent on completed orders</TooltipContent>
+                                    </Tooltip>
                                   </div>
                                   <UserTransactionsExpanded userId={user.user_id} />
                                 </div>
