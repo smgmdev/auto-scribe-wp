@@ -513,21 +513,27 @@ export function Sidebar({
                   
                   if (hasUnreadMessages) {
                     countedRequests.add(request.id);
+                    
+                    // Get order data for this request
+                    const order = request.order_id ? ordersMap[request.order_id] : null;
+                    
+                    // Determine which category this request belongs to
+                    // This MUST match the filtering logic in AgencyRequestsView:
+                    // - Cancelled: request.status === 'cancelled'
+                    // - Completed: order.delivery_status === 'accepted'
+                    // - Active: everything else (including requests with cancelled orders, 
+                    //   since those still show in Active tab until request itself is cancelled)
+                    
                     if (request.status === 'cancelled') {
                       cancelledRequestsCount++;
+                    } else if (order && order.delivery_status === 'accepted') {
+                      // Completed order - count for Closed > Completed tab
+                      unreadCompletedCount++;
                     } else {
-                      // Check if this request has a completed order (delivery_status === 'accepted')
-                      // If so, count it as completed, not as active service request
-                      // Also check for cancelled orders - these should not count
-                      const order = request.order_id ? ordersMap[request.order_id] : null;
-                      if (order && order.delivery_status === 'accepted') {
-                        unreadCompletedCount++;
-                      } else if (order && (order.status === 'cancelled' || order.delivery_status === 'cancelled')) {
-                        // Cancelled order - count as cancelled
-                        cancelledRequestsCount++;
-                      } else {
-                        serviceRequestsCount++;
-                      }
+                      // Active request (includes requests without orders, 
+                      // requests with pending/paid orders, and requests with cancelled orders
+                      // that haven't had their request status set to cancelled)
+                      serviceRequestsCount++;
                     }
                   }
                 }
