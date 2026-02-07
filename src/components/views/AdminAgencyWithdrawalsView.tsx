@@ -722,7 +722,10 @@ export function AdminAgencyWithdrawalsView() {
           )}
           
           <DialogFooter>
-            <Button onClick={() => setUserDetailsDialog(null)}>
+            <Button 
+              onClick={() => setUserDetailsDialog(null)}
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+            >
               Close
             </Button>
           </DialogFooter>
