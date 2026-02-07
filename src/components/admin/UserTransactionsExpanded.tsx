@@ -191,8 +191,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-muted-foreground whitespace-nowrap text-sm">
-                      {new Date(tx.created_at).toLocaleDateString()}{' '}
-                      {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </TableCell>
                   </TableRow>
                 ))
