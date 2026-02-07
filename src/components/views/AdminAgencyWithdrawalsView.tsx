@@ -47,6 +47,7 @@ interface WithdrawalRequest {
     agency_name: string;
     email: string | null;
   } | null;
+  logo_url?: string | null;
 }
 
 interface AgencyUserDetails {
@@ -67,6 +68,7 @@ export function AdminAgencyWithdrawalsView() {
   const [adminNotes, setAdminNotes] = useState('');
   const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
   const [loadingUserDetails, setLoadingUserDetails] = useState(false);
+  const [loadingLogos, setLoadingLogos] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchWithdrawals();
@@ -87,7 +89,28 @@ export function AdminAgencyWithdrawalsView() {
       console.error('Error fetching withdrawals:', error);
       toast.error('Failed to fetch withdrawal requests');
     } else {
-      setWithdrawals((data || []) as unknown as WithdrawalRequest[]);
+      // Fetch logos for each withdrawal
+      const withdrawalsWithLogos = await Promise.all((data || []).map(async (w) => {
+        const withdrawal = w as unknown as WithdrawalRequest;
+        if (withdrawal.agency_payout?.agency_name) {
+          const { data: appData } = await supabase
+            .from('agency_applications')
+            .select('logo_url')
+            .eq('agency_name', withdrawal.agency_payout.agency_name)
+            .eq('status', 'approved')
+            .maybeSingle();
+          
+          if (appData?.logo_url) {
+            const { data: publicUrl } = supabase.storage
+              .from('agency-logos')
+              .getPublicUrl(appData.logo_url);
+            return { ...withdrawal, logo_url: publicUrl?.publicUrl || null };
+          }
+        }
+        return { ...withdrawal, logo_url: null };
+      }));
+      
+      setWithdrawals(withdrawalsWithLogos as WithdrawalRequest[]);
     }
 
     setLoading(false);
@@ -369,30 +392,40 @@ export function AdminAgencyWithdrawalsView() {
                     </p>
                     
                     <div className="flex items-start gap-3 pr-32">
-                      <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-muted">
-                        {withdrawal.withdrawal_method === 'bank' ? (
-                          <Building2 className="h-5 w-5 text-muted-foreground" />
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-muted overflow-hidden">
+                        {loadingLogos[withdrawal.id] ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        ) : withdrawal.logo_url ? (
+                          <img 
+                            src={withdrawal.logo_url} 
+                            alt={withdrawal.agency_payout?.agency_name || 'Agency'}
+                            className="h-10 w-10 object-cover"
+                            onLoadStart={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: true }))}
+                            onLoad={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }))}
+                            onError={(e) => {
+                              setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }));
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
                         ) : (
-                          <Wallet className="h-5 w-5 text-muted-foreground" />
+                          <Building2 className="h-5 w-5 text-muted-foreground" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                          className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                        >
+                          <span className="font-medium">
                             {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                          </p>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            {loadingUserDetails ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Info className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                        <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
+                          </span>
+                          {loadingUserDetails ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Info className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                           <p>
                             Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                           </p>
@@ -473,7 +506,7 @@ export function AdminAgencyWithdrawalsView() {
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
                               disabled={processingId === withdrawal.id}
-                              className="bg-foreground text-background hover:bg-green-500 hover:text-white transition-colors"
+                              className="bg-blue-600 text-white hover:bg-transparent hover:text-blue-600 border border-blue-600 transition-colors"
                             >
                               Approve
                             </Button>
