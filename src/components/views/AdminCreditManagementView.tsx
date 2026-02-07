@@ -603,7 +603,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Credits locked in active orders</TooltipContent>
+                                      <TooltipContent>Credits locked in active orders.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -612,7 +612,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.purchased.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Total purchased credits by the user</TooltipContent>
+                                      <TooltipContent>Total purchased credits by the user.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -621,7 +621,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Credits received from administration</TooltipContent>
+                                      <TooltipContent>Credits received from administration.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -630,7 +630,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Administration fees</TooltipContent>
+                                      <TooltipContent>Administration fees.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -639,7 +639,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.orders.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Completed Orders</TooltipContent>
+                                      <TooltipContent>Completed orders.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -648,7 +648,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Total value spent on completed orders</TooltipContent>
+                                      <TooltipContent>Total value spent on completed orders.</TooltipContent>
                                     </Tooltip>
                                   </div>
                                   <UserTransactionsExpanded userId={user.user_id} />
