@@ -2393,7 +2393,7 @@ export function AdminMediaManagementView() {
                                         setIsReplyDialogOpen(true);
                                       }}
                                     >
-                                      Reply
+                                      Approve & Import
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       className="text-destructive focus:bg-foreground focus:text-background cursor-pointer"
