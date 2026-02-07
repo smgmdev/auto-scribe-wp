@@ -28,6 +28,7 @@ const transactionTypes = [
   { key: 'unlocked', label: 'Unlocked' },
   { key: 'order_accepted', label: 'Order Accepted' },
   { key: 'offer_accepted', label: 'Credits Locked' },
+  { key: 'order_completed', label: 'Order Completed' },
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
   { key: 'admin_deduct', label: 'Deduction' },
@@ -89,6 +90,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Unlocked' },
       order_accepted: { className: 'bg-purple-100 text-purple-700 hover:bg-purple-100', label: 'Order Accepted' },
       offer_accepted: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Credits Locked' },
+      order_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Completed' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
@@ -163,6 +165,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     <TableCell>
                       {tx.type === 'offer_accepted' ? (
                         <Lock className="h-4 w-4 text-amber-500" />
+                      ) : tx.type === 'order_completed' ? (
+                        <ArrowDownCircle className="h-4 w-4 text-green-500" />
                       ) : tx.amount > 0 ? (
                         <ArrowUpCircle className="h-4 w-4 text-green-500" />
                       ) : (
@@ -194,8 +198,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-green-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {tx.type === 'order_completed' ? '' : tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                     </TableCell>
                   </TableRow>
                 ))
