@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { useAuth } from '@/hooks/useAuth';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 
 interface MediaSite {
   id: string;
@@ -53,18 +54,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   
   // Agency details popup state
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
-  const [agencyDetails, setAgencyDetails] = useState<{
-    agency_name: string;
-    email: string | null;
-    onboarding_complete: boolean;
-    created_at: string;
-    logo_url: string | null;
-    agency_website: string | null;
-    country: string | null;
-    agency_description: string | null;
-  } | null>(null);
-  const [loadingAgency, setLoadingAgency] = useState(false);
-  const [logoLoading, setLogoLoading] = useState(true);
+  const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -163,62 +153,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     fetchSites();
   }, [open, user]);
 
-  // Fetch agency details
-  const fetchAgencyDetails = async (agencyName: string) => {
-    setLoadingAgency(true);
-    setLogoLoading(true);
-    
-    try {
-      const { data, error } = await supabase
-        .from('agency_payouts')
-        .select('agency_name, email, onboarding_complete, created_at')
-        .eq('agency_name', agencyName)
-        .single();
-      
-      if (error) throw error;
-      
-      // Get logo, website, country, and description from agency_applications
-      let logoUrl: string | null = null;
-      let agencyWebsite: string | null = null;
-      let country: string | null = null;
-      let agencyDescription: string | null = null;
-      
-      const { data: appData } = await supabase
-        .from('agency_applications')
-        .select('logo_url, agency_website, country, agency_description')
-        .eq('agency_name', agencyName)
-        .eq('status', 'approved')
-        .maybeSingle();
-      
-      if (appData) {
-        agencyWebsite = appData.agency_website || null;
-        country = appData.country || null;
-        agencyDescription = appData.agency_description || null;
-        
-        if (appData.logo_url) {
-          const { data: publicUrl } = supabase.storage
-            .from('agency-logos')
-            .getPublicUrl(appData.logo_url);
-          if (publicUrl?.publicUrl) {
-            logoUrl = publicUrl.publicUrl;
-          }
-        }
-      }
-      
-      setAgencyDetails({
-        ...data,
-        logo_url: logoUrl,
-        agency_website: agencyWebsite,
-        country: country,
-        agency_description: agencyDescription
-      });
-      setAgencyDetailsOpen(true);
-    } catch (error) {
-      console.error('Error fetching agency details:', error);
-      setAgencyDetails(null);
-    } finally {
-      setLoadingAgency(false);
-    }
+  // Handle agency click - open the universal dialog
+  const handleAgencyClick = (agencyName: string) => {
+    setSelectedAgencyName(agencyName);
+    setAgencyDetailsOpen(true);
   };
 
   // Close on Escape key
@@ -507,86 +445,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       />
 
       {/* Agency Details Dialog */}
-      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
-        <DialogContent className="sm:max-w-md z-[200]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              {agencyDetails?.logo_url ? (
-                <>
-                  {logoLoading && (
-                    <div className="h-12 w-12 rounded-xl bg-muted animate-pulse" />
-                  )}
-                  <img
-                    src={agencyDetails.logo_url}
-                    alt={agencyDetails.agency_name}
-                    className={`h-12 w-12 rounded-xl object-cover ${logoLoading ? 'hidden' : ''}`}
-                    onLoad={() => setLogoLoading(false)}
-                    onError={() => setLogoLoading(false)}
-                  />
-                </>
-              ) : (
-                <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                  <Info className="h-6 w-6 text-muted-foreground" />
-                </div>
-              )}
-              <span>{agencyDetails?.agency_name}</span>
-            </DialogTitle>
-          </DialogHeader>
-          {loadingAgency ? (
-            <div className="py-8 text-center">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-            </div>
-          ) : agencyDetails && (
-            <div className="space-y-4 mt-4">
-              {agencyDetails.agency_website && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Website</span>
-                  <p className="font-medium text-foreground">
-                    <a 
-                      href={agencyDetails.agency_website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:underline break-all"
-                    >
-                      {agencyDetails.agency_website}
-                    </a>
-                  </p>
-                </div>
-              )}
-              
-              {agencyDetails.country && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Country</span>
-                  <p className="font-medium text-foreground">{agencyDetails.country}</p>
-                </div>
-              )}
-              
-              {agencyDetails.agency_description && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Description</span>
-                  <p className="font-medium text-foreground">{agencyDetails.agency_description}</p>
-                </div>
-              )}
-              
-              <div>
-                <span className="text-sm text-muted-foreground">Status</span>
-                <p className="font-medium text-foreground">
-                  {agencyDetails.onboarding_complete ? 'Active Agency' : 'Pending Onboarding'}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-muted-foreground">Member Since</span>
-                <p className="font-medium text-foreground">
-                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={selectedAgencyName}
+        zIndex={200}
+      />
     </>
   );
 }
