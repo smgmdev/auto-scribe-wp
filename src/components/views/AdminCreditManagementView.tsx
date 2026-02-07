@@ -351,9 +351,9 @@ export const AdminCreditManagementView = () => {
           user_id: credit.user_id,
           purchased: purchasedMap.get(credit.user_id) || 0,
           gifted: giftedMap.get(credit.user_id) || 0,
-          totalCredits: totalCredits,
+          totalCredits: totalCredits + locked, // Total = available + locked
           locked: locked,
-          available: totalCredits - locked,
+          available: totalCredits, // user_credits.credits IS the available balance (locked already subtracted)
           orders: ordersMap.get(credit.user_id) || 0,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
