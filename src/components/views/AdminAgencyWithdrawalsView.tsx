@@ -180,7 +180,7 @@ export function AdminAgencyWithdrawalsView() {
       };
 
       if (actionType === 'approve') {
-        updateData.status = 'approved';
+        updateData.status = 'completed'; // Approve = completed in one step
       } else if (actionType === 'reject') {
         updateData.status = 'rejected';
       } else if (actionType === 'complete') {
@@ -212,7 +212,7 @@ export function AdminAgencyWithdrawalsView() {
             type: 'withdrawal_unlocked',
             description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`
           });
-      } else if (actionType === 'complete') {
+      } else if (actionType === 'approve' || actionType === 'complete') {
         // Mark withdrawal as completed
         await supabase
           .from('credit_transactions')
@@ -224,7 +224,7 @@ export function AdminAgencyWithdrawalsView() {
           });
       }
 
-      toast.success(`Withdrawal ${actionType === 'approve' ? 'approved' : actionType === 'reject' ? 'rejected' : 'completed'} successfully`);
+      toast.success(`Withdrawal ${actionType === 'approve' ? 'completed' : actionType === 'reject' ? 'rejected' : 'completed'} successfully`);
       fetchWithdrawals();
     } catch (err) {
       console.error('Error:', err);
@@ -571,7 +571,7 @@ export function AdminAgencyWithdrawalsView() {
                             </p>
                           )}
                           {withdrawal.admin_notes && (
-                            <p className="text-muted-foreground/80 italic">
+                            <p className="text-muted-foreground/80">
                               Note: {withdrawal.admin_notes}
                             </p>
                           )}
@@ -657,12 +657,12 @@ export function AdminAgencyWithdrawalsView() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === 'approve' ? 'Approve Withdrawal' : 
+              {actionType === 'approve' ? 'Complete Withdrawal' : 
                actionType === 'reject' ? 'Reject Withdrawal' : 
                'Complete Withdrawal'}
             </DialogTitle>
             <DialogDescription>
-              {actionType === 'approve' && 'This will approve the withdrawal request. The agency will be notified.'}
+              {actionType === 'approve' && 'This will approve and mark the withdrawal as completed. The funds should already be transferred.'}
               {actionType === 'reject' && 'This will reject the withdrawal request. You can optionally provide a reason.'}
               {actionType === 'complete' && 'This will mark the withdrawal as completed (paid out).'}
             </DialogDescription>
