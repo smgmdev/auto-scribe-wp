@@ -317,7 +317,13 @@ export const AdminCreditManagementView = () => {
       const refundedMap = new Map<string, number>();
       const deductionsMap = new Map<string, number>();
       
+      // Define withdrawal types (stored in cents, not credits) - must be excluded from credit calculations
+      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+      
       transactionsData?.forEach(tx => {
+        // Skip withdrawal transactions - they are in cents, not credits
+        if (withdrawalTypes.includes(tx.type)) return;
+        
         // Calculate incoming (all positive amounts)
         if (tx.amount > 0) {
           incomingMap.set(tx.user_id, (incomingMap.get(tx.user_id) || 0) + tx.amount);
