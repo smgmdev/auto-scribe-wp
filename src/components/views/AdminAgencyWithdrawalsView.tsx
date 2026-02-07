@@ -64,6 +64,7 @@ export function AdminAgencyWithdrawalsView() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed' | 'rejected'>('all');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<WithdrawalRequest | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'complete' | null>(null);
@@ -250,13 +251,26 @@ export function AdminAgencyWithdrawalsView() {
   };
 
   const filteredWithdrawals = withdrawals.filter(w => {
+    // First apply status filter
+    if (statusFilter !== 'all') {
+      // For 'completed' filter, also include 'approved' status (legacy)
+      if (statusFilter === 'completed') {
+        if (w.status !== 'completed' && w.status !== 'approved') return false;
+      } else if (w.status !== statusFilter) {
+        return false;
+      }
+    }
+    
+    // Then apply search filter
     const search = searchTerm.toLowerCase();
+    if (!search) return true;
     return (
       w.agency_payout?.agency_name?.toLowerCase().includes(search) ||
-      w.agency_payout?.email?.toLowerCase().includes(search) ||
-      w.status.toLowerCase().includes(search)
+      w.agency_payout?.email?.toLowerCase().includes(search)
     );
   });
+
+  const rejectedCount = withdrawals.filter(w => w.status === 'rejected').length;
 
   const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
   const completedCount = withdrawals.filter(w => w.status === 'completed').length;
@@ -448,6 +462,46 @@ export function AdminAgencyWithdrawalsView() {
             </div>
           </TooltipContent>
         </Tooltip>
+      </div>
+
+      {/* Status Filter Tabs */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          onClick={() => setStatusFilter('all')}
+          className={statusFilter === 'all' 
+            ? 'bg-foreground text-background hover:bg-foreground/90' 
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+        >
+          All ({withdrawals.length})
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => setStatusFilter('pending')}
+          className={statusFilter === 'pending' 
+            ? 'bg-amber-500 text-white hover:bg-amber-600 border border-amber-500' 
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+        >
+          Pending ({pendingCount})
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => setStatusFilter('completed')}
+          className={statusFilter === 'completed' 
+            ? 'bg-green-500 text-white hover:bg-green-600 border border-green-500' 
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+        >
+          Completed ({completedCount + withdrawals.filter(w => w.status === 'approved').length})
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => setStatusFilter('rejected')}
+          className={statusFilter === 'rejected' 
+            ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive' 
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+        >
+          Rejected ({rejectedCount})
+        </Button>
       </div>
 
       {/* Search */}
