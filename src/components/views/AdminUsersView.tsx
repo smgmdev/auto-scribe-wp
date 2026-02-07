@@ -52,6 +52,7 @@ interface Order {
   delivery_status: string;
   created_at: string;
   media_sites?: { name: string } | null;
+  service_requests?: { id: string }[] | null;
 }
 
 interface ServiceRequest {
@@ -288,10 +289,10 @@ export function AdminUsersView() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
-      // Fetch orders with media site info
+      // Fetch orders with media site info and service request
       const { data: orders } = await supabase
         .from('orders')
-        .select('id, amount_cents, status, delivery_status, created_at, media_sites(name)')
+        .select('id, amount_cents, status, delivery_status, created_at, media_sites(name), service_requests(id)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
@@ -316,6 +317,15 @@ export function AdminUsersView() {
     // Store engagement ID and navigate to engagements view
     localStorage.setItem('selectedEngagementId', engagementId);
     setCurrentView('admin-engagements');
+  };
+
+  const handleOrderClick = (order: Order) => {
+    // Find the service request associated with this order and open the engagement
+    const serviceRequestId = order.service_requests?.[0]?.id;
+    if (serviceRequestId) {
+      localStorage.setItem('selectedEngagementId', serviceRequestId);
+      setCurrentView('admin-orders');
+    }
   };
 
   const fetchUsers = async () => {
@@ -959,7 +969,11 @@ export function AdminUsersView() {
                               ) : (
                                 <div className="space-y-2 max-h-48 overflow-y-auto">
                                   {(userOrders[user.id] || []).map((order) => (
-                                    <div key={order.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                    <div 
+                                      key={order.id} 
+                                      className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-colors"
+                                      onClick={() => handleOrderClick(order)}
+                                    >
                                       <div className="flex items-center gap-2">
                                         <ShoppingCart className="h-3 w-3 text-muted-foreground" />
                                         <span>{order.media_sites?.name || 'Unknown'}</span>
