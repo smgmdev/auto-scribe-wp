@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, CheckCircle, XCircle, Clock, Search, RefreshCw } from 'lucide-react';
+import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,13 @@ interface WithdrawalRequest {
   } | null;
 }
 
+interface AgencyUserDetails {
+  agency_name: string;
+  email: string | null;
+  full_name?: string;
+  whatsapp_phone?: string;
+}
+
 export function AdminAgencyWithdrawalsView() {
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +65,8 @@ export function AdminAgencyWithdrawalsView() {
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<WithdrawalRequest | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'complete' | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
+  const [loadingUserDetails, setLoadingUserDetails] = useState(false);
 
   useEffect(() => {
     fetchWithdrawals();
@@ -86,6 +95,38 @@ export function AdminAgencyWithdrawalsView() {
     
     if (isRefresh) {
       toast.success('Withdrawals refreshed');
+    }
+  };
+
+  const handleViewUserDetails = async (withdrawal: WithdrawalRequest) => {
+    setLoadingUserDetails(true);
+    
+    try {
+      // Fetch user profile for full name and whatsapp
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('email, whatsapp_phone')
+        .eq('id', withdrawal.user_id)
+        .maybeSingle();
+
+      // Fetch agency application for full name
+      const { data: applicationData } = await supabase
+        .from('agency_applications')
+        .select('full_name, whatsapp_phone')
+        .eq('user_id', withdrawal.user_id)
+        .maybeSingle();
+
+      setUserDetailsDialog({
+        agency_name: withdrawal.agency_payout?.agency_name || 'Unknown Agency',
+        email: withdrawal.agency_payout?.email || profileData?.email || null,
+        full_name: applicationData?.full_name,
+        whatsapp_phone: applicationData?.whatsapp_phone || profileData?.whatsapp_phone
+      });
+    } catch (err) {
+      console.error('Error fetching user details:', err);
+      toast.error('Failed to fetch user details');
+    } finally {
+      setLoadingUserDetails(false);
     }
   };
 
@@ -144,6 +185,11 @@ export function AdminAgencyWithdrawalsView() {
       .from('agency_withdrawals')
       .update({ read: true })
       .eq('id', id);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
   };
 
   const filteredWithdrawals = withdrawals.filter(w => {
@@ -282,7 +328,7 @@ export function AdminAgencyWithdrawalsView() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by agency name or email..."
+          placeholder="Search by agency name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-9 text-sm"
@@ -323,7 +369,7 @@ export function AdminAgencyWithdrawalsView() {
                     </p>
                     
                     <div className="flex items-start gap-3 pr-32">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${withdrawal.withdrawal_method === 'bank' ? 'bg-muted' : 'bg-muted'}`}>
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-muted">
                         {withdrawal.withdrawal_method === 'bank' ? (
                           <Building2 className="h-5 w-5 text-muted-foreground" />
                         ) : (
@@ -331,12 +377,21 @@ export function AdminAgencyWithdrawalsView() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium">
-                          {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {withdrawal.agency_payout?.email}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">
+                            {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
+                          </p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {loadingUserDetails ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Info className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
                         <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
                           <p>
                             Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
@@ -377,12 +432,20 @@ export function AdminAgencyWithdrawalsView() {
                                 </p>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                                <div className="space-y-1 text-sm">
+                                <div className="space-y-2 text-sm">
                                   {withdrawal.crypto_details.usdt_network && (
                                     <p><span className="text-white/70">Network:</span> {withdrawal.crypto_details.usdt_network}</p>
                                   )}
                                   {withdrawal.crypto_details.usdt_wallet_address && (
-                                    <p className="break-all"><span className="text-white/70">Wallet:</span> {withdrawal.crypto_details.usdt_wallet_address}</p>
+                                    <div className="flex items-start gap-2">
+                                      <p className="break-all flex-1"><span className="text-white/70">Wallet:</span> {withdrawal.crypto_details.usdt_wallet_address}</p>
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
+                                        className="text-white/70 hover:text-white transition-colors shrink-0 mt-0.5"
+                                      >
+                                        <Copy className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
                                   )}
                                 </div>
                               </TooltipContent>
@@ -410,7 +473,7 @@ export function AdminAgencyWithdrawalsView() {
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
                               disabled={processingId === withdrawal.id}
-                              className="bg-blue-500 text-white hover:bg-blue-600"
+                              className="bg-foreground text-background hover:bg-green-500 hover:text-white transition-colors"
                             >
                               Approve
                             </Button>
@@ -448,7 +511,7 @@ export function AdminAgencyWithdrawalsView() {
       </Card>
 
       {/* Action Confirmation Dialog */}
-      <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); }}>
+      <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -457,8 +520,8 @@ export function AdminAgencyWithdrawalsView() {
                'Complete Withdrawal'}
             </DialogTitle>
             <DialogDescription>
-              {actionType === 'approve' && 'This will approve the withdrawal request.'}
-              {actionType === 'reject' && 'This will reject the withdrawal request.'}
+              {actionType === 'approve' && 'This will approve the withdrawal request. The agency will be notified.'}
+              {actionType === 'reject' && 'This will reject the withdrawal request. You can optionally provide a reason.'}
               {actionType === 'complete' && 'This will mark the withdrawal as completed (paid out).'}
             </DialogDescription>
           </DialogHeader>
@@ -475,10 +538,18 @@ export function AdminAgencyWithdrawalsView() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="admin-notes">Admin Notes (optional)</Label>
+                <Label htmlFor="admin-notes">
+                  {actionType === 'reject' ? 'Rejection Reason (optional)' : 
+                   actionType === 'approve' ? 'Details (optional)' :
+                   'Admin Notes (optional)'}
+                </Label>
                 <Textarea
                   id="admin-notes"
-                  placeholder="Add any notes about this action..."
+                  placeholder={
+                    actionType === 'reject' ? 'Enter a reason for rejection...' :
+                    actionType === 'approve' ? 'Add any details or notes...' :
+                    'Add any notes about this action...'
+                  }
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                 />
@@ -487,14 +558,14 @@ export function AdminAgencyWithdrawalsView() {
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setSelectedWithdrawal(null); setActionType(null); }}>
+            <Button variant="outline" onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
               Cancel
             </Button>
             <Button 
               onClick={confirmAction}
               disabled={processingId !== null}
               className={
-                actionType === 'approve' ? 'bg-blue-500 hover:bg-blue-600' :
+                actionType === 'approve' ? 'bg-green-500 hover:bg-green-600 text-white' :
                 actionType === 'reject' ? 'bg-destructive hover:bg-destructive/90' :
                 'bg-green-500 hover:bg-green-600'
               }
@@ -506,6 +577,50 @@ export function AdminAgencyWithdrawalsView() {
                 actionType === 'reject' ? 'Reject' :
                 'Complete'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={!!userDetailsDialog} onOpenChange={() => setUserDetailsDialog(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          
+          {userDetailsDialog && (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Agency Name</p>
+                  <p className="font-medium">{userDetailsDialog.agency_name}</p>
+                </div>
+                {userDetailsDialog.full_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{userDetailsDialog.full_name}</p>
+                  </div>
+                )}
+                {userDetailsDialog.email && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">{userDetailsDialog.email}</p>
+                  </div>
+                )}
+                {userDetailsDialog.whatsapp_phone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                    <p className="font-medium">{userDetailsDialog.whatsapp_phone}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setUserDetailsDialog(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -41,6 +41,7 @@ interface WithdrawalRequest {
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   created_at: string;
   processed_at: string | null;
+  admin_notes: string | null;
 }
 
 export function AgencyPayoutsView() {
@@ -226,7 +227,7 @@ export function AgencyPayoutsView() {
     // Fetch withdrawal requests
     const { data: withdrawalData } = await supabase
       .from('agency_withdrawals')
-      .select('id, amount_cents, withdrawal_method, status, created_at, processed_at')
+      .select('id, amount_cents, withdrawal_method, status, created_at, processed_at, admin_notes')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -430,34 +431,70 @@ export function AgencyPayoutsView() {
                 const withdrawalAmount = withdrawal.amount_cents / 100;
                 const statusColors: Record<string, string> = {
                   pending: 'bg-amber-500 text-white border-amber-500',
-                  approved: 'bg-blue-500 text-white border-blue-500',
+                  approved: 'bg-green-500 text-white border-green-500',
                   completed: 'bg-green-500 text-white border-green-500',
                   rejected: 'bg-destructive text-destructive-foreground border-destructive'
                 };
 
-                return (
+                const getCardIcon = () => {
+                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                    return <CheckCircle className="h-5 w-5 text-green-600" />;
+                  }
+                  if (withdrawal.status === 'rejected') {
+                    return <XCircle className="h-5 w-5 text-destructive" />;
+                  }
+                  return <ArrowUpRight className="h-5 w-5 text-amber-600" />;
+                };
+
+                const getCardBackground = () => {
+                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                    return 'bg-green-500/20';
+                  }
+                  if (withdrawal.status === 'rejected') {
+                    return 'bg-destructive/20';
+                  }
+                  return 'bg-amber-500/20';
+                };
+
+                const getCardTitle = () => {
+                  if (withdrawal.status === 'approved') return 'Withdrawal Approved';
+                  if (withdrawal.status === 'completed') return 'Withdrawal Successful';
+                  if (withdrawal.status === 'rejected') return 'Withdrawal Rejected';
+                  return 'Withdrawal Request';
+                };
+
+                const getAmountColor = () => {
+                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                    return 'text-green-600';
+                  }
+                  if (withdrawal.status === 'rejected') {
+                    return 'text-destructive';
+                  }
+                  return 'text-amber-600';
+                };
+
+                const cardContent = (
                   <div 
-                    key={withdrawal.id}
                     className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
                   >
                     <div className="absolute top-3 right-3">
                       <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
-                        {withdrawal.status === 'pending' ? 'Withdrawal Pending' : 
-                         withdrawal.status === 'approved' ? 'Withdrawal Approved' :
-                         withdrawal.status === 'completed' ? 'Withdrawal Completed' :
-                         'Withdrawal Rejected'}
+                        {withdrawal.status === 'pending' ? 'Pending' : 
+                         withdrawal.status === 'approved' ? 'Approved' :
+                         withdrawal.status === 'completed' ? 'Completed' :
+                         'Rejected'}
                       </Badge>
                     </div>
-                    <p className="absolute bottom-3 right-3 font-semibold text-amber-600">
+                    <p className={`absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
                       -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <div className="flex items-center gap-3 pr-24">
-                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-amber-500/20">
-                        <ArrowUpRight className="h-5 w-5 text-amber-600" />
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
+                        {getCardIcon()}
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">
-                          Withdrawal Request
+                          {getCardTitle()}
                         </p>
                         <div className="flex flex-col gap-1 mt-1">
                           <p className="text-xs text-muted-foreground">
@@ -476,6 +513,27 @@ export function AgencyPayoutsView() {
                     </div>
                   </div>
                 );
+
+                // Show tooltip for approved/rejected/completed with details
+                if ((withdrawal.status === 'approved' || withdrawal.status === 'completed' || withdrawal.status === 'rejected') && withdrawal.admin_notes) {
+                  return (
+                    <Tooltip key={withdrawal.id} delayDuration={100}>
+                      <TooltipTrigger asChild>
+                        {cardContent}
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
+                        <p className="text-sm">
+                          <span className="text-white/70">
+                            {withdrawal.status === 'rejected' ? 'Reason: ' : 'Details: '}
+                          </span>
+                          {withdrawal.admin_notes}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+
+                return <div key={withdrawal.id}>{cardContent}</div>;
               })}
 
               {/* Completed Orders */}
