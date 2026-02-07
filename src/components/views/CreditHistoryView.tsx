@@ -1113,6 +1113,88 @@ export function CreditHistoryView() {
                   );
                 }
                 
+                // Parse platform fee from order_payout description
+                const isEarnings = transaction.type === 'order_payout';
+                const platformFeeMatch = isEarnings && transaction.description?.match(/\(Platform fee: (\d+) credits\)/);
+                const platformFee = platformFeeMatch ? parseInt(platformFeeMatch[1]) : null;
+                const cleanDescription = isEarnings && transaction.description 
+                  ? transaction.description.replace(/\s*\(Platform fee: \d+ credits\)/, '')
+                  : transaction.description;
+                const isEarningsExpanded = isEarnings && expandedWithdrawals.has(transaction.id);
+                
+                // Expandable card for earnings with platform fee
+                if (isEarnings && platformFee !== null) {
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between p-3">
+                        <div className="flex items-center gap-3">
+                          {getTransactionIcon(transaction.type, transaction.amount)}
+                          <div>
+                            <p className="font-medium">{cleanDescription}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getTransactionBadge(transaction.type)}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newExpanded = new Set(expandedWithdrawals);
+                                if (newExpanded.has(transaction.id)) {
+                                  newExpanded.delete(transaction.id);
+                                } else {
+                                  newExpanded.add(transaction.id);
+                                }
+                                setExpandedWithdrawals(newExpanded);
+                              }}
+                            >
+                              {isEarningsExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3 mr-1" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  See Details
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-lg text-green-500">
+                          +{transaction.amount.toLocaleString()}
+                        </div>
+                      </div>
+                      
+                      {isEarningsExpanded && (
+                        <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-2 space-y-2 text-sm">
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                              <div>
+                                <span className="text-muted-foreground">Platform Fee:</span>
+                                <p className="font-medium">{platformFee.toLocaleString()} credits</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Net Earnings:</span>
+                                <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
                 return (
                   <div
                     key={transaction.id}
@@ -1163,7 +1245,7 @@ export function CreditHistoryView() {
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
                       {transaction.type === 'withdrawal_locked' ? (
                         <>
-                          -${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                          -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </>
                       ) : (
                         <>
