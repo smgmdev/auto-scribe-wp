@@ -620,7 +620,7 @@ export const AdminCreditManagementView = () => {
                               {user.email || <span className="text-muted-foreground italic">No email</span>}
                             </TableCell>
                             <TableCell>
-                              <Badge className={user.isAgency ? 'bg-purple-100 text-purple-700 hover:bg-purple-100' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
+                              <Badge className={user.isAgency ? 'bg-foreground text-background hover:bg-foreground' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
                                 {user.isAgency ? 'Agency' : 'Regular'}
                               </Badge>
                             </TableCell>
