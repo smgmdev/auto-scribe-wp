@@ -354,6 +354,47 @@ export function AdminOrdersView() {
     setIsRefreshing(false);
   };
 
+  // Handle deep-linking from Users section - auto-open chat for selected engagement
+  useEffect(() => {
+    if (loading || orders.length === 0) return;
+    
+    const selectedEngagementId = localStorage.getItem('selectedEngagementId');
+    if (selectedEngagementId) {
+      // Find the order that has this service request
+      const findAndOpenChat = async () => {
+        const { data: serviceRequest } = await supabase
+          .from('service_requests')
+          .select('order_id')
+          .eq('id', selectedEngagementId)
+          .maybeSingle();
+        
+        if (serviceRequest?.order_id) {
+          const targetOrder = orders.find(o => o.id === serviceRequest.order_id);
+          if (targetOrder) {
+            // Determine which tab this order belongs to and switch to it
+            if (targetOrder.status === 'cancelled') {
+              setActiveTab('history');
+              setHistorySubTab('cancelled');
+            } else if (targetOrder.delivery_status === 'accepted') {
+              setActiveTab('history');
+              setHistorySubTab('all');
+            } else {
+              setActiveTab('pending');
+            }
+            
+            // Open the chat after a short delay to allow tab switch
+            setTimeout(() => {
+              handleInvestigate(targetOrder);
+            }, 100);
+          }
+        }
+        localStorage.removeItem('selectedEngagementId');
+      };
+      
+      findAndOpenChat();
+    }
+  }, [loading, orders]);
+
   const handleRefresh = () => {
     fetchOrders(true);
     fetchDisputedOrders();
