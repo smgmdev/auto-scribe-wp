@@ -7418,18 +7418,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 
                 setSubmittingDelivery(true);
                 try {
-                  // Get the accepted order data
+                  // Get the accepted order data - fallback to localOrder and globalChatRequest data if not found in messages
                   const acceptedOrderData = getLastAcceptedOrderRequestData();
-                  if (!acceptedOrderData) {
+                  
+                  // If no accepted order data from messages, use localOrder and media_site from request
+                  if (!acceptedOrderData && !localOrder?.id) {
                     throw new Error('No accepted order found');
                   }
+                  
+                  // Use media site info from acceptedOrderData, or fallback to globalChatRequest.media_site
+                  const mediaSiteId = acceptedOrderData?.media_site_id || globalChatRequest.media_site?.id;
+                  const mediaSiteName = acceptedOrderData?.media_site_name || globalChatRequest.media_site?.name || 'Unknown';
+                  const mediaSiteFavicon = acceptedOrderData?.media_site_favicon || globalChatRequest.media_site?.favicon;
                   
                   // Send ORDER_DELIVERED message
                   const deliveryData = {
                     type: 'order_delivered',
-                    media_site_id: acceptedOrderData.media_site_id,
-                    media_site_name: acceptedOrderData.media_site_name,
-                    media_site_favicon: acceptedOrderData.media_site_favicon,
+                    media_site_id: mediaSiteId,
+                    media_site_name: mediaSiteName,
+                    media_site_favicon: mediaSiteFavicon,
                     delivery_url: `https://${deliveryLink.trim()}`,
                     delivery_notes: deliveryNotes.trim() || null,
                     delivered_by: 'agency'
@@ -7462,6 +7469,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     
                     if (updateError) {
                       console.error('Error updating order delivery status:', updateError);
+                      throw new Error(`Failed to update order: ${updateError.message}`);
                     } else {
                       // Update local order state
                       setLocalOrder(prev => prev ? {
@@ -7477,7 +7485,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         .single();
                       
                       if (requestData?.user_id) {
-                        const mediaSiteName = acceptedOrderData.media_site_name || globalChatRequest.media_site?.name || 'Unknown';
                         await supabase
                           .channel(`notify-${requestData.user_id}-admin-action`)
                           .send({
