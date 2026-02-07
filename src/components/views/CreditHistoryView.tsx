@@ -420,9 +420,15 @@ export function CreditHistoryView() {
 
   const totalSpent = completedOrdersSpent + otherSpending;
 
-  const totalCompletedOrders = transactions
+  const completedPurchaseOrders = transactions
     .filter(t => t.type === 'order_completed')
     .length;
+
+  const completedAgencyDeliveryOrders = transactions
+    .filter(t => t.type === 'order_payout')
+    .length;
+
+  const totalCompletedOrders = completedPurchaseOrders + completedAgencyDeliveryOrders;
 
   const getTransactionIcon = (type: string, amount: number) => {
     if (type === 'order' || type === 'locked') {
@@ -780,7 +786,19 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Number of completed orders</p>
+            <div className="space-y-2">
+              <p className="font-medium">Number of completed orders:</p>
+              <div className="space-y-1 pt-1 border-t border-muted-foreground/20">
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Completed Purchase Orders:</span>
+                  <span className="font-medium">{completedPurchaseOrders}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Completed Agency Delivery Orders:</span>
+                  <span className="font-medium">{completedAgencyDeliveryOrders}</span>
+                </div>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
 
