@@ -745,7 +745,7 @@ export function CreditHistoryView() {
                       {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(transaction.type) ? (
                         <>
                           {transaction.type === 'withdrawal_locked' ? '-' : transaction.type === 'withdrawal_unlocked' ? '+' : '-'}
-                          ${(Math.abs(transaction.amount) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </>
                       ) : (
                         <>
