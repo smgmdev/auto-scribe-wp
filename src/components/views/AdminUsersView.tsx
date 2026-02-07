@@ -201,7 +201,7 @@ export function AdminUsersView() {
   const [userEngagements, setUserEngagements] = useState<Record<string, ServiceRequest[]>>({});
   const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
   
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
   
   // Delete options
   const [deleteCredits, setDeleteCredits] = useState(true);
@@ -258,6 +258,38 @@ export function AdminUsersView() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Handle navigation from other views (e.g., Agency Withdrawals -> User Credit History)
+  useEffect(() => {
+    if (adminUsersTargetUserId && users.length > 0) {
+      // Expand the target user
+      setExpandedUsers(prev => {
+        const next = new Set(prev);
+        next.add(adminUsersTargetUserId);
+        return next;
+      });
+      
+      // Set the target tab
+      if (adminUsersTargetTab) {
+        setUserCardTabs(prev => ({ ...prev, [adminUsersTargetUserId]: adminUsersTargetTab }));
+      }
+      
+      // Fetch user details
+      fetchUserDetails(adminUsersTargetUserId);
+      
+      // Clear the target after handling
+      setAdminUsersTargetUserId(null);
+      setAdminUsersTargetTab(null);
+      
+      // Scroll to the user card after a short delay
+      setTimeout(() => {
+        const userCard = document.getElementById(`user-card-${adminUsersTargetUserId}`);
+        if (userCard) {
+          userCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  }, [adminUsersTargetUserId, adminUsersTargetTab, users.length]);
 
   const toggleUserExpand = async (userId: string) => {
     setExpandedUsers(prev => {
@@ -783,7 +815,7 @@ export function AdminUsersView() {
             const isExpanded = expandedUsers.has(user.id);
             
             return (
-              <Card key={user.id} className="group">
+              <Card key={user.id} id={`user-card-${user.id}`} className="group">
                 <CardContent className="p-4">
                   <div 
                     className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"

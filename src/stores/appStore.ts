@@ -85,6 +85,12 @@ interface AppState {
   ordersTargetOrderId: string | null;
   setOrdersTargetOrderId: (orderId: string | null) => void;
   
+  // Admin users view targeting (for navigating from withdrawals to specific user)
+  adminUsersTargetUserId: string | null;
+  setAdminUsersTargetUserId: (userId: string | null) => void;
+  adminUsersTargetTab: 'logs' | 'credits' | 'orders' | 'engagements' | null;
+  setAdminUsersTargetTab: (tab: 'logs' | 'credits' | 'orders' | 'engagements' | null) => void;
+  
   // Admin notifications
   unreadAgencyApplicationsCount: number;
   setUnreadAgencyApplicationsCount: (count: number) => void;
@@ -272,6 +278,12 @@ export const useAppStore = create<AppState>()((set) => ({
   ordersTargetOrderId: null,
   setOrdersTargetOrderId: (orderId) => set({ ordersTargetOrderId: orderId }),
   
+  // Admin users view targeting
+  adminUsersTargetUserId: null,
+  setAdminUsersTargetUserId: (userId) => set({ adminUsersTargetUserId: userId }),
+  adminUsersTargetTab: null,
+  setAdminUsersTargetTab: (tab) => set({ adminUsersTargetTab: tab }),
+
   // Admin notifications
   unreadAgencyApplicationsCount: 0,
   setUnreadAgencyApplicationsCount: (count) => set({ unreadAgencyApplicationsCount: count }),
