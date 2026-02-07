@@ -154,10 +154,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       >
         {/* Drag Handle */}
         <div
-          className={`flex items-center justify-start h-8 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
-          <GripHorizontal className="h-4 w-4 text-muted-foreground/50" />
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
         </div>
 
         {/* Close Button */}
