@@ -377,9 +377,15 @@ export function AdminUsersView() {
     const lockedCreditsMap = new Map<string, number>();
 
     // Calculate incoming and outgoing from transactions
+    // Withdrawal transactions are stored in cents, not credits - exclude them
+    const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+    
     allTransactions?.forEach(tx => {
       const userId = tx.user_id;
       const currentTotal = calculatedCreditsMap.get(userId) || 0;
+      
+      // Skip withdrawal transactions - they are in cents, not credits
+      if (withdrawalTypes.includes(tx.type)) return;
       
       if (tx.amount > 0) {
         // Incoming credits
@@ -1025,10 +1031,27 @@ export function AdminUsersView() {
                                     <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
                                       <div className="flex items-center gap-2">
                                         <CreditCard className="h-3 w-3 text-muted-foreground" />
-                                        <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
-                                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                                        </span>
-                                        {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                        {/* Withdrawal transactions are stored in cents, convert to dollars */}
+                                        {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                                          <span className={tx.type === 'withdrawal_unlocked' ? 'text-blue-600' : tx.type === 'withdrawal_completed' ? 'text-green-600' : 'text-amber-600'}>
+                                            {tx.type === 'withdrawal_locked' ? '-' : tx.type === 'withdrawal_unlocked' ? '+' : '-'}
+                                            ${Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
+                                          </span>
+                                        ) : (
+                                          <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
+                                            {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                                          </span>
+                                        )}
+                                        {/* Withdrawal description */}
+                                        {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                                          <span className="text-muted-foreground">
+                                            {tx.description?.includes('Bank Transfer') 
+                                              ? 'Withdrawal via Bank Transfer'
+                                              : tx.description?.includes('USDT')
+                                                ? 'Withdrawal via USDT'
+                                                : 'Withdrawal'}
+                                          </span>
+                                        ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                                           <Tooltip>
                                             <TooltipTrigger asChild>
                                               <span className="text-muted-foreground cursor-help underline decoration-dotted">
