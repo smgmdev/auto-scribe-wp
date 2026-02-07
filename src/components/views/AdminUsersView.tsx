@@ -359,30 +359,36 @@ export function AdminUsersView() {
       
       let deliveries: AgencyDelivery[] = [];
       if (agencyPayout) {
-        // Fetch service requests with completed orders for this agency
-        const { data: agencyRequests } = await supabase
-          .from('service_requests')
+        // Fetch orders directly that are linked to this agency's service requests
+        const { data: agencyOrders, error: deliveriesError } = await supabase
+          .from('orders')
           .select(`
-            order_id,
-            orders!inner(
-              id,
-              amount_cents,
-              agency_payout_cents,
-              status,
-              delivery_status,
-              created_at,
-              delivered_at,
-              media_sites(name)
-            )
+            id,
+            amount_cents,
+            agency_payout_cents,
+            status,
+            delivery_status,
+            created_at,
+            delivered_at,
+            media_sites(name)
           `)
-          .eq('agency_payout_id', agencyPayout.id)
-          .not('order_id', 'is', null);
+          .eq('delivery_status', 'accepted');
         
-        // Extract and filter for accepted deliveries
-        if (agencyRequests) {
-          deliveries = agencyRequests
-            .map(r => r.orders as any)
-            .filter(o => o && o.delivery_status === 'accepted')
+        if (deliveriesError) {
+          console.error('Error fetching agency deliveries:', deliveriesError);
+        }
+        
+        if (agencyOrders && agencyOrders.length > 0) {
+          // Get service requests for this agency to filter orders
+          const { data: agencyRequests } = await supabase
+            .from('service_requests')
+            .select('order_id')
+            .eq('agency_payout_id', agencyPayout.id)
+            .not('order_id', 'is', null);
+          
+          const agencyOrderIds = new Set((agencyRequests || []).map(r => r.order_id));
+          deliveries = (agencyOrders as AgencyDelivery[])
+            .filter(o => agencyOrderIds.has(o.id))
             .sort((a, b) => new Date(b.delivered_at || b.created_at).getTime() - new Date(a.delivered_at || a.created_at).getTime());
         }
       }
