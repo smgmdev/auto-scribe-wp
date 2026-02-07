@@ -438,9 +438,27 @@ export function AdminUsersView() {
 
     setSaving(true);
 
+    // Fetch fresh credits from database to avoid race conditions
+    const { data: freshCredits, error: fetchError } = await supabase
+      .from('user_credits')
+      .select('credits')
+      .eq('user_id', selectedUser.id)
+      .single();
+
+    if (fetchError || !freshCredits) {
+      toast({
+        variant: 'destructive',
+        title: 'Error fetching current credits',
+        description: fetchError?.message || 'User credits not found',
+      });
+      setSaving(false);
+      return;
+    }
+
+    const currentCredits = freshCredits.credits;
     const newCredits = creditAction === 'add'
-      ? selectedUser.credits + amount
-      : Math.max(0, selectedUser.credits - amount);
+      ? currentCredits + amount
+      : Math.max(0, currentCredits - amount);
 
     const { error: updateError } = await supabase
       .from('user_credits')
