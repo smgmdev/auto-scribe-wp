@@ -38,9 +38,18 @@ export function CreditHistoryView() {
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
-  // Total balance = Available (from user_credits) + Locked
-  // This matches admin-side calculation: user_credits.credits + locked orders
-  const actualTotalBalance = totalCredits + creditsInUse;
+  // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
+  // Incoming: purchase, gifted, admin_credit, refund, unlocked (positive amounts)
+  // Outgoing: spent, order_delivered, admin_deduct (negative amounts, but NOT locked/offer_accepted)
+  const incomingCredits = transactions
+    .filter(t => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const outgoingCredits = transactions
+    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  
+  const actualTotalBalance = incomingCredits - outgoingCredits;
   
   // Available = user_credits table value (already has locked subtracted)
   const availableCredits = totalCredits;
