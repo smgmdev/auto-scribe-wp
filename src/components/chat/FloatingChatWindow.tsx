@@ -7187,7 +7187,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </DialogHeader>
 
           {pendingOrderRequest && (
-            <div className="space-y-3 pb-4">
+            <div className="space-y-2 pb-4">
               {/* Order Summary */}
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-start gap-3">
@@ -7263,7 +7263,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3">
                 <Button
                   variant="outline"
                   className="flex-1 hover:bg-foreground hover:text-background transition-colors"
