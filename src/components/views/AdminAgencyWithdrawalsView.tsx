@@ -465,7 +465,7 @@ export function AdminAgencyWithdrawalsView() {
                                 </p>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                                <div className="space-y-2 text-sm">
+                                <div className="space-y-1.5 text-xs">
                                   {withdrawal.crypto_details.usdt_network && (
                                     <p><span className="text-white/70">Network:</span> {withdrawal.crypto_details.usdt_network}</p>
                                   )}
