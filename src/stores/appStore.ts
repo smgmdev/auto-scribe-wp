@@ -79,6 +79,12 @@ interface AppState {
   agencyMediaTargetSubTab: string | null;
   setAgencyMediaTargetSubTab: (subTab: string | null) => void;
   
+  // Orders view targeting (for navigating from credit history)
+  ordersTargetTab: string | null;
+  setOrdersTargetTab: (tab: string | null) => void;
+  ordersTargetOrderId: string | null;
+  setOrdersTargetOrderId: (orderId: string | null) => void;
+  
   // Admin notifications
   unreadAgencyApplicationsCount: number;
   setUnreadAgencyApplicationsCount: (count: number) => void;
@@ -259,6 +265,12 @@ export const useAppStore = create<AppState>()((set) => ({
   setAgencyMediaTargetTab: (tab) => set({ agencyMediaTargetTab: tab }),
   agencyMediaTargetSubTab: null,
   setAgencyMediaTargetSubTab: (subTab) => set({ agencyMediaTargetSubTab: subTab }),
+  
+  // Orders view targeting
+  ordersTargetTab: null,
+  setOrdersTargetTab: (tab) => set({ ordersTargetTab: tab }),
+  ordersTargetOrderId: null,
+  setOrdersTargetOrderId: (orderId) => set({ ordersTargetOrderId: orderId }),
   
   // Admin notifications
   unreadAgencyApplicationsCount: 0,

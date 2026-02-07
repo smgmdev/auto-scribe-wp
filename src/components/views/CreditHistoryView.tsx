@@ -8,6 +8,7 @@ import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { format } from 'date-fns';
 
 interface CreditTransaction {
@@ -16,6 +17,7 @@ interface CreditTransaction {
   type: string;
   description: string | null;
   created_at: string;
+  order_id: string | null;
 }
 
 interface LockedOrder {
@@ -27,6 +29,7 @@ interface LockedOrder {
 
 export function CreditHistoryView() {
   const { user } = useAuth();
+  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId } = useAppStore();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -37,6 +40,13 @@ export function CreditHistoryView() {
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+
+  // Navigate to completed orders tab and open the chat for a specific order
+  const handleOrderCompletedClick = (orderId: string) => {
+    setOrdersTargetTab('completed');
+    setOrdersTargetOrderId(orderId);
+    setCurrentView('orders');
+  };
 
   // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
   // Incoming: purchase, gifted, admin_credit, refund, unlocked (positive amounts)
@@ -617,47 +627,51 @@ export function CreditHistoryView() {
             </div>
           ) : (
             <div className="space-y-3">
-              {displayedTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-[#4771d9] transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    {getTransactionIcon(transaction.type, transaction.amount)}
-                    <div>
-                      <p className="font-medium">
-                        {(transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help underline decoration-dotted">
-                                {transaction.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs">
-                              <p className="font-medium">Reason:</p>
-                              <p>{transaction.description.split(': ').slice(1).join(': ')}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
-                        )}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {getTransactionBadge(transaction.type)}
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                        </span>
+              {displayedTransactions.map((transaction) => {
+                const isClickable = transaction.type === 'order_completed' && transaction.order_id;
+                return (
+                  <div
+                    key={transaction.id}
+                    onClick={isClickable ? () => handleOrderCompletedClick(transaction.order_id!) : undefined}
+                    className={`flex items-center justify-between p-4 rounded-lg border border-border hover:border-[#4771d9] transition-colors ${isClickable ? 'cursor-pointer' : ''}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {getTransactionIcon(transaction.type, transaction.amount)}
+                      <div>
+                        <p className="font-medium">
+                          {(transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help underline decoration-dotted">
+                                  {transaction.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p className="font-medium">Reason:</p>
+                                <p>{transaction.description.split(': ').slice(1).join(': ')}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
+                          )}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {getTransactionBadge(transaction.type)}
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <div className={`text-lg ${
+                      transaction.type === 'offer_accepted' ? 'text-amber-500' : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
+                    </div>
                   </div>
-                  <div className={`text-lg ${
-                    transaction.type === 'offer_accepted' ? 'text-amber-500' : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                  }`}>
-                    {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
