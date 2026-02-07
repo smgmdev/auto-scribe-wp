@@ -1727,6 +1727,14 @@ export function SitesView() {
                     {(() => {
                       // For Agencies/People category, always show active agencies from agency_payouts
                       if (category === 'Agencies/People') {
+                        // Show loading state while fetching agencies
+                        if (mediaSitesLoading) {
+                          return (
+                            <div className="flex items-center justify-center py-16">
+                              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            </div>
+                          );
+                        }
                         if (activeAgencies.length === 0) {
                           return (
                             <Card className="border-dashed border-2">
@@ -1752,19 +1760,33 @@ export function SitesView() {
                                 <CardContent className="!p-0">
                                   <div className="flex items-stretch">
                                     <div className="flex items-center min-w-0 flex-1">
-                                      <div className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden">
+                                      <div className="relative group/logo flex w-12 h-12 flex-shrink-0 items-center justify-center overflow-hidden bg-muted">
                                         {agency.favicon ? (
-                                          <img 
-                                            src={agency.favicon} 
-                                            alt={`${agency.name} logo`} 
-                                            className="h-full w-full object-cover" 
-                                            onError={e => {
-                                              e.currentTarget.style.display = 'none';
-                                              (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                                            }} 
-                                          />
-                                        ) : null}
-                                        <Globe className={`h-4 w-4 text-accent ${agency.favicon ? 'hidden' : ''}`} />
+                                          <>
+                                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground absolute" />
+                                            <img 
+                                              src={agency.favicon} 
+                                              alt={`${agency.name} logo`} 
+                                              className="h-full w-full object-cover relative z-10" 
+                                              onLoad={e => {
+                                                // Hide the loader once image loads
+                                                const loader = e.currentTarget.previousElementSibling;
+                                                if (loader) (loader as HTMLElement).style.display = 'none';
+                                              }}
+                                              onError={e => {
+                                                e.currentTarget.style.display = 'none';
+                                                // Show Globe icon on error
+                                                const loader = e.currentTarget.previousElementSibling;
+                                                if (loader) (loader as HTMLElement).style.display = 'none';
+                                                const globe = e.currentTarget.parentElement?.querySelector('.globe-fallback');
+                                                if (globe) (globe as HTMLElement).classList.remove('hidden');
+                                              }} 
+                                            />
+                                            <Globe className="globe-fallback h-4 w-4 text-muted-foreground hidden absolute" />
+                                          </>
+                                        ) : (
+                                          <Globe className="h-4 w-4 text-muted-foreground" />
+                                        )}
                                       </div>
                                       <div className="min-w-0 flex-1 ml-3">
                                         <h3 className="text-sm break-words">{agency.name}</h3>
