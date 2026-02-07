@@ -38,9 +38,16 @@ export function CreditHistoryView() {
   const [creditsInOrders, setCreditsInOrders] = useState<number>(0);
   const [creditsInPendingRequests, setCreditsInPendingRequests] = useState<number>(0);
   const [creditsInWithdrawals, setCreditsInWithdrawals] = useState<number>(0);
+  const [withdrawalsByBank, setWithdrawalsByBank] = useState<number>(0);
+  const [withdrawalsByCrypto, setWithdrawalsByCrypto] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+
+  // Calculate earned credits from order_payout transactions
+  const earnedCredits = transactions
+    .filter(t => t.type === 'order_payout' && t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
 
   // Navigate to completed orders tab and open the chat for a specific order
   const handleOrderCompletedClick = (orderId: string) => {
@@ -158,24 +165,41 @@ export function CreditHistoryView() {
     // withdrawal_locked creates negative amounts, so we need to find the net locked amount
     const { data: withdrawalTransactions } = await supabase
       .from('credit_transactions')
-      .select('amount, type')
+      .select('amount, type, description')
       .eq('user_id', user.id)
       .in('type', ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed']);
 
     let withdrawalLockedCents = 0;
+    let bankLockedCents = 0;
+    let cryptoLockedCents = 0;
+    
     if (withdrawalTransactions) {
       for (const tx of withdrawalTransactions) {
+        const isBank = tx.description?.includes('Bank Transfer');
+        const isCrypto = tx.description?.includes('USDT');
+        
         if (tx.type === 'withdrawal_locked') {
-          withdrawalLockedCents += Math.abs(tx.amount); // These are negative cents, so take absolute
+          const amount = Math.abs(tx.amount);
+          withdrawalLockedCents += amount;
+          if (isBank) bankLockedCents += amount;
+          if (isCrypto) cryptoLockedCents += amount;
         } else if (tx.type === 'withdrawal_unlocked' || tx.type === 'withdrawal_completed') {
-          withdrawalLockedCents -= Math.abs(tx.amount); // These release the lock (in cents)
+          const amount = Math.abs(tx.amount);
+          withdrawalLockedCents -= amount;
+          if (isBank) bankLockedCents -= amount;
+          if (isCrypto) cryptoLockedCents -= amount;
         }
       }
     }
     // Ensure we don't go negative and convert cents to dollars
     withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
+    bankLockedCents = Math.max(0, bankLockedCents);
+    cryptoLockedCents = Math.max(0, cryptoLockedCents);
+    
     const withdrawalLockedDollars = withdrawalLockedCents / 100;
     setCreditsInWithdrawals(withdrawalLockedDollars);
+    setWithdrawalsByBank(bankLockedCents / 100);
+    setWithdrawalsByCrypto(cryptoLockedCents / 100);
     totalInUse += withdrawalLockedDollars;
 
     setCreditsInUse(totalInUse);
@@ -471,27 +495,35 @@ export function CreditHistoryView() {
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
             <div className="space-y-1">
+              {earnedCredits > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Earned credits:</span>
+                  <span className="font-medium">{earnedCredits.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Total credit balance:</span>
-                <span className="font-medium">{actualTotalBalance.toLocaleString()}</span>
+                <span className="text-muted-foreground">Purchased credits:</span>
+                <span className="font-medium">{totalPurchased.toLocaleString()}</span>
               </div>
-              {creditsInOrders > 0 && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Locked in active orders:</span>
-                  <span className="font-medium text-amber-400">-{creditsInOrders.toLocaleString()}</span>
-                </div>
-              )}
-              {creditsInPendingRequests > 0 && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Locked in order requests:</span>
-                  <span className="font-medium text-amber-400">-{creditsInPendingRequests.toLocaleString()}</span>
-                </div>
-              )}
               {creditsInWithdrawals > 0 && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Locked in withdrawals:</span>
-                  <span className="font-medium text-amber-400">-${creditsInWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
+                <>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Locked in withdrawals:</span>
+                    <span className="font-medium text-amber-400">-${Math.round(creditsInWithdrawals).toLocaleString()}</span>
+                  </div>
+                  {withdrawalsByBank > 0 && (
+                    <div className="flex justify-between gap-4 pl-2">
+                      <span className="text-muted-foreground text-xs">Bank:</span>
+                      <span className="font-medium text-amber-400 text-xs">-${Math.round(withdrawalsByBank).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {withdrawalsByCrypto > 0 && (
+                    <div className="flex justify-between gap-4 pl-2">
+                      <span className="text-muted-foreground text-xs">Crypto:</span>
+                      <span className="font-medium text-amber-400 text-xs">-${Math.round(withdrawalsByCrypto).toLocaleString()}</span>
+                    </div>
+                  )}
+                </>
               )}
               <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
                 <span className="text-muted-foreground">Available credits:</span>
