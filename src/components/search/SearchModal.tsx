@@ -59,6 +59,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     onboarding_complete: boolean;
     created_at: string;
     logo_url: string | null;
+    agency_website: string | null;
+    country: string | null;
+    agency_description: string | null;
   } | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
   const [logoLoading, setLogoLoading] = useState(true);
@@ -174,26 +177,40 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       
       if (error) throw error;
       
+      // Get logo, website, country, and description from agency_applications
       let logoUrl: string | null = null;
+      let agencyWebsite: string | null = null;
+      let country: string | null = null;
+      let agencyDescription: string | null = null;
+      
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('logo_url')
+        .select('logo_url, agency_website, country, agency_description')
         .eq('agency_name', agencyName)
         .eq('status', 'approved')
         .maybeSingle();
       
-      if (appData?.logo_url) {
-        const { data: publicUrl } = supabase.storage
-          .from('agency-logos')
-          .getPublicUrl(appData.logo_url);
-        if (publicUrl?.publicUrl) {
-          logoUrl = publicUrl.publicUrl;
+      if (appData) {
+        agencyWebsite = appData.agency_website || null;
+        country = appData.country || null;
+        agencyDescription = appData.agency_description || null;
+        
+        if (appData.logo_url) {
+          const { data: publicUrl } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(appData.logo_url);
+          if (publicUrl?.publicUrl) {
+            logoUrl = publicUrl.publicUrl;
+          }
         }
       }
       
       setAgencyDetails({
         ...data,
-        logo_url: logoUrl
+        logo_url: logoUrl,
+        agency_website: agencyWebsite,
+        country: country,
+        agency_description: agencyDescription
       });
       setAgencyDetailsOpen(true);
     } catch (error) {
@@ -521,6 +538,36 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             </div>
           ) : agencyDetails && (
             <div className="space-y-4 mt-4">
+              {agencyDetails.agency_website && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Website</span>
+                  <p className="font-medium text-foreground">
+                    <a 
+                      href={agencyDetails.agency_website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:underline break-all"
+                    >
+                      {agencyDetails.agency_website}
+                    </a>
+                  </p>
+                </div>
+              )}
+              
+              {agencyDetails.country && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Country</span>
+                  <p className="font-medium text-foreground">{agencyDetails.country}</p>
+                </div>
+              )}
+              
+              {agencyDetails.agency_description && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Description</span>
+                  <p className="font-medium text-foreground">{agencyDetails.agency_description}</p>
+                </div>
+              )}
+              
               <div>
                 <span className="text-sm text-muted-foreground">Status</span>
                 <p className="font-medium text-foreground">

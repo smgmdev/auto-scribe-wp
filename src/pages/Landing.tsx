@@ -90,6 +90,9 @@ const Landing = () => {
     onboarding_complete: boolean;
     created_at: string;
     logo_url: string | null;
+    agency_website: string | null;
+    country: string | null;
+    agency_description: string | null;
   } | null>(null);
   const [loadingAgency, setLoadingAgency] = useState(false);
   const [logoLoading, setLogoLoading] = useState(true);
@@ -264,27 +267,40 @@ const Landing = () => {
       
       if (error) throw error;
       
-      // Try to get logo from agency_applications
+      // Get logo, website, country, and description from agency_applications
       let logoUrl: string | null = null;
+      let agencyWebsite: string | null = null;
+      let country: string | null = null;
+      let agencyDescription: string | null = null;
+      
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('logo_url')
+        .select('logo_url, agency_website, country, agency_description')
         .eq('agency_name', agencyName)
         .eq('status', 'approved')
         .maybeSingle();
       
-      if (appData?.logo_url) {
-        const { data: publicUrl } = supabase.storage
-          .from('agency-logos')
-          .getPublicUrl(appData.logo_url);
-        if (publicUrl?.publicUrl) {
-          logoUrl = publicUrl.publicUrl;
+      if (appData) {
+        agencyWebsite = appData.agency_website || null;
+        country = appData.country || null;
+        agencyDescription = appData.agency_description || null;
+        
+        if (appData.logo_url) {
+          const { data: publicUrl } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(appData.logo_url);
+          if (publicUrl?.publicUrl) {
+            logoUrl = publicUrl.publicUrl;
+          }
         }
       }
       
       setAgencyDetails({
         ...data,
-        logo_url: logoUrl
+        logo_url: logoUrl,
+        agency_website: agencyWebsite,
+        country: country,
+        agency_description: agencyDescription
       });
       setAgencyDetailsOpen(true);
     } catch (error) {
@@ -997,10 +1013,31 @@ const Landing = () => {
             </div>
           ) : agencyDetails ? (
             <div className="space-y-4 mt-4">
-              {agencyDetails.email && (
+              {agencyDetails.agency_website && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="text-foreground">{agencyDetails.email}</p>
+                  <p className="text-sm text-muted-foreground">Website</p>
+                  <a 
+                    href={agencyDetails.agency_website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-foreground hover:underline break-all"
+                  >
+                    {agencyDetails.agency_website}
+                  </a>
+                </div>
+              )}
+              
+              {agencyDetails.country && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Country</p>
+                  <p className="text-foreground">{agencyDetails.country}</p>
+                </div>
+              )}
+              
+              {agencyDetails.agency_description && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Description</p>
+                  <p className="text-foreground">{agencyDetails.agency_description}</p>
                 </div>
               )}
               
