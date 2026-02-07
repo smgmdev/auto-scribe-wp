@@ -71,6 +71,55 @@ type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'use
 type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements';
 
 // Helper function to render engagement status badge
+// Helper function to render order status badge
+const getOrderStatusBadge = (order: Order) => {
+  const deliveryStatus = order.delivery_status;
+  
+  // Completed (delivery accepted)
+  if (deliveryStatus === 'accepted') {
+    return (
+      <Badge className="bg-green-600 text-[10px] py-0">
+        <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+        Completed
+      </Badge>
+    );
+  }
+  
+  // Delivered - Pending Approval
+  if (deliveryStatus === 'delivered') {
+    return (
+      <Badge className="bg-purple-600 text-white text-[10px] py-0">
+        Delivered
+      </Badge>
+    );
+  }
+  
+  // Revision Requested
+  if (deliveryStatus === 'pending_revision') {
+    return (
+      <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-[10px] py-0">
+        Revision
+      </Badge>
+    );
+  }
+  
+  // Active Order (pending delivery)
+  if (deliveryStatus === 'pending') {
+    return (
+      <Badge className="bg-blue-600 text-[10px] py-0">
+        Active
+      </Badge>
+    );
+  }
+  
+  // Fallback to order status
+  return (
+    <Badge variant="outline" className="text-[10px] py-0">
+      {order.status}
+    </Badge>
+  );
+};
+
 const getEngagementStatusBadge = (engagement: ServiceRequest) => {
   const hasOrder = !!engagement.order_id;
   const deliveryStatus = engagement.orders?.delivery_status;
@@ -914,7 +963,7 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <ShoppingCart className="h-3 w-3 text-muted-foreground" />
                                         <span>{order.media_sites?.name || 'Unknown'}</span>
-                                        <Badge variant="outline" className="text-[10px] py-0">{order.status}</Badge>
+                                        {getOrderStatusBadge(order)}
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <span className="font-medium">${(order.amount_cents / 100).toFixed(2)}</span>
