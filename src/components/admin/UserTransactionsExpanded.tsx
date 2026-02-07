@@ -170,7 +170,14 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     </TableCell>
                     <TableCell>{getTypeBadge(tx.type)}</TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'}
+                      {tx.type === 'admin_deduct' && tx.description ? (
+                        // Extract reason after colon for deductions
+                        tx.description.includes(': ') 
+                          ? tx.description.split(': ').slice(1).join(': ')
+                          : '-'
+                      ) : (
+                        tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                      )}
                     </TableCell>
                     <TableCell className={`text-right font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
