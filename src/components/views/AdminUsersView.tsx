@@ -868,7 +868,7 @@ export function AdminUsersView() {
                                         <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
                                           {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                                         </span>
-                                        <span className="text-muted-foreground">{tx.description || tx.type}</span>
+                                        <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
                                       </div>
                                       <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
                                     </div>
