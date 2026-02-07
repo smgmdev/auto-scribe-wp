@@ -1877,10 +1877,9 @@ export function SitesView() {
                               {isAdmin && (
                                 <Button 
                                   variant="accent" 
-                                  className="mt-6" 
+                                  className="mt-6 bg-black text-white border border-transparent hover:bg-transparent hover:text-black hover:border-black" 
                                   onClick={() => category === 'Agencies/People' ? setIsAgencyDialogOpen(true) : setIsMediaDialogOpen(true)}
                                 >
-                                  <Plus className="mr-2 h-4 w-4" />
                                   {category === 'Agencies/People' ? 'Add Agency/People' : 'Add Media Site'}
                                 </Button>
                               )}
