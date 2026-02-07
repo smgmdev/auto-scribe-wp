@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Building2, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AgencyDetailsData {
@@ -102,7 +101,7 @@ export function AgencyDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }}>
+      <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }} overlayClassName="bg-transparent">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             {agencyDetails?.logo_url ? (
@@ -170,16 +169,6 @@ export function AgencyDetailsDialog({
                   day: 'numeric'
                 })}
               </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-muted-foreground">Status</p>
-              <Badge 
-                variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} 
-                className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}
-              >
-                {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
-              </Badge>
             </div>
           </div>
         ) : (
