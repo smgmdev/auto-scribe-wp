@@ -700,7 +700,11 @@ export function AdminAgencyWithdrawalsView() {
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
+            <Button 
+              variant="outline" 
+              onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}
+              className="hover:bg-foreground hover:text-background hover:border-foreground"
+            >
               Cancel
             </Button>
             <Button 
@@ -708,7 +712,7 @@ export function AdminAgencyWithdrawalsView() {
               disabled={processingId !== null}
               className={
                 actionType === 'approve' ? 'bg-green-500 hover:bg-green-600 text-white' :
-                actionType === 'reject' ? 'bg-destructive hover:bg-destructive/90' :
+                actionType === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-transparent hover:text-destructive hover:border-destructive border' :
                 'bg-green-500 hover:bg-green-600'
               }
             >
