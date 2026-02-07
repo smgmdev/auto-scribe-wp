@@ -83,8 +83,12 @@ export function AgencyRequestsView() {
   const [cancelledSortBy, setCancelledSortBy] = useState<'cancelled_at' | 'last_message' | 'submitted'>('cancelled_at');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'active' | 'cancelled' | 'orders'>('active');
+  const [requestsSubTab, setRequestsSubTab] = useState<'active' | 'closed'>('active');
+  const [closedSubTab, setClosedSubTab] = useState<'delivered' | 'cancelled'>('delivered');
+  const [ordersSubTab, setOrdersSubTab] = useState<'active' | 'disputes' | 'completed' | 'cancelled'>('active');
   const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [hasAutoNavigated, setHasAutoNavigated] = useState(false);
 
   // Update current time every second for real-time countdown
   useEffect(() => {
@@ -1282,6 +1286,53 @@ export function AgencyRequestsView() {
     [completedOrders]
   );
 
+  // Auto-navigate to tab with notifications on first load
+  useEffect(() => {
+    if (loading || hasAutoNavigated) return;
+    
+    // Determine which tab has notifications and navigate there
+    const totalRequestsUnread = unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount;
+    const totalOrdersUnread = unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount;
+    
+    // First check if there are any notifications at all
+    if (totalRequestsUnread === 0 && totalOrdersUnread === 0) {
+      setHasAutoNavigated(true);
+      return;
+    }
+    
+    // Navigate to Requests or Orders tab based on where notifications are
+    if (totalRequestsUnread > 0) {
+      setActiveTab('active'); // Stay on requests
+      
+      // Navigate to Active or Closed sub-tab
+      if (unreadActiveCount > 0) {
+        setRequestsSubTab('active');
+      } else if (unreadCompletedRequestsCount > 0 || unreadCancelledCount > 0) {
+        setRequestsSubTab('closed');
+        // Navigate to Completed or Cancelled
+        if (unreadCompletedRequestsCount > 0) {
+          setClosedSubTab('delivered');
+        } else {
+          setClosedSubTab('cancelled');
+        }
+      }
+    } else if (totalOrdersUnread > 0) {
+      setActiveTab('orders');
+      
+      // Navigate to the appropriate orders sub-tab
+      if (unreadActiveOrdersCount > 0) {
+        setOrdersSubTab('active');
+      } else if (unreadDisputesCount > 0) {
+        setOrdersSubTab('disputes');
+      } else if (unreadCompletedOrdersCount > 0) {
+        setOrdersSubTab('completed');
+      }
+    }
+    
+    setHasAutoNavigated(true);
+  }, [loading, hasAutoNavigated, unreadActiveCount, unreadCompletedRequestsCount, unreadCancelledCount, 
+      unreadActiveOrdersCount, unreadDisputesCount, unreadCompletedOrdersCount]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -1332,7 +1383,7 @@ export function AgencyRequestsView() {
         </TabsList>
 
         <TabsContent value="requests" className="mt-2">
-          <Tabs defaultValue="active" className="w-full">
+          <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
             <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start">
               <TabsTrigger value="active" className="gap-2 relative">
                 <MessageSquare className="h-4 w-4" />
@@ -1514,7 +1565,7 @@ export function AgencyRequestsView() {
             </TabsContent>
 
             <TabsContent value="closed" className="mt-2">
-              <Tabs defaultValue="delivered" className="w-full">
+              <Tabs value={closedSubTab} onValueChange={(v) => setClosedSubTab(v as 'delivered' | 'cancelled')} className="w-full">
                 <TabsList className="flex w-full overflow-x-auto md:w-auto md:max-w-xs scrollbar-hide justify-start">
                   <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                     <CheckCircle className="h-4 w-4" />
@@ -1708,7 +1759,7 @@ export function AgencyRequestsView() {
         </TabsContent>
 
         <TabsContent value="orders" className="mt-2">
-          <Tabs defaultValue="active" className="w-full">
+          <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
             <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-2xl md:grid-cols-4 scrollbar-hide justify-start">
               <TabsTrigger value="active" className="gap-2 relative">
                 <ShoppingBag className="h-4 w-4" />
