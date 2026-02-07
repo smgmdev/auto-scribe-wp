@@ -273,12 +273,14 @@ export function AdminAgencyWithdrawalsView() {
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-500 text-white border-amber-500',
+    approved: 'bg-green-500 text-white border-green-500',
     completed: 'bg-green-500 text-white border-green-500',
     rejected: 'bg-destructive text-destructive-foreground border-destructive'
   };
 
   const statusLabels: Record<string, string> = {
     pending: 'Pending',
+    approved: 'Completed',
     completed: 'Completed',
     rejected: 'Rejected'
   };
