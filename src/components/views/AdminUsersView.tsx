@@ -81,6 +81,7 @@ interface AgencyDelivery {
   created_at: string;
   delivered_at: string | null;
   media_sites?: { name: string } | null;
+  service_request_id?: string;
 }
 
 // Helper function to render engagement status badge
@@ -379,17 +380,19 @@ export function AdminUsersView() {
         }
         
         if (agencyOrders && agencyOrders.length > 0) {
-          // Get service requests for this agency to filter orders
+          // Get service requests for this agency to filter orders and get request IDs
           const { data: agencyRequests } = await supabase
             .from('service_requests')
-            .select('order_id')
+            .select('id, order_id')
             .eq('agency_payout_id', agencyPayout.id)
             .not('order_id', 'is', null);
           
-          const agencyOrderIds = new Set((agencyRequests || []).map(r => r.order_id));
+          // Create a map of order_id -> service_request_id
+          const orderToRequestMap = new Map((agencyRequests || []).map(r => [r.order_id, r.id]));
           
           deliveries = (agencyOrders as AgencyDelivery[])
-            .filter(o => agencyOrderIds.has(o.id))
+            .filter(o => orderToRequestMap.has(o.id))
+            .map(o => ({ ...o, service_request_id: orderToRequestMap.get(o.id) }))
             .sort((a, b) => new Date(b.delivered_at || b.created_at).getTime() - new Date(a.delivered_at || a.created_at).getTime());
         }
       }
@@ -416,6 +419,14 @@ export function AdminUsersView() {
     const serviceRequestId = order.service_requests?.[0]?.id;
     if (serviceRequestId) {
       localStorage.setItem('selectedEngagementId', serviceRequestId);
+      setCurrentView('admin-orders');
+    }
+  };
+
+  const handleDeliveryClick = (delivery: AgencyDelivery) => {
+    // Navigate to admin-orders and open the chat for this delivery
+    if (delivery.service_request_id) {
+      localStorage.setItem('selectedEngagementId', delivery.service_request_id);
       setCurrentView('admin-orders');
     }
   };
@@ -1229,7 +1240,8 @@ export function AdminUsersView() {
                                   {(userDeliveries[user.id] || []).map((delivery) => (
                                     <div 
                                       key={delivery.id} 
-                                      className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded"
+                                      className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-colors"
+                                      onClick={() => handleDeliveryClick(delivery)}
                                     >
                                       <div className="flex items-center gap-2">
                                         <Truck className="h-3 w-3 text-muted-foreground" />
@@ -1246,6 +1258,7 @@ export function AdminUsersView() {
                                         <span className="text-muted-foreground">
                                           {delivery.delivered_at ? formatDateTime(delivery.delivered_at) : formatDateTime(delivery.created_at)}
                                         </span>
+                                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
                                       </div>
                                     </div>
                                   ))}
