@@ -39,6 +39,7 @@ export function CreditHistoryView() {
   const [creditsInOrders, setCreditsInOrders] = useState<number>(0);
   const [creditsInPendingRequests, setCreditsInPendingRequests] = useState<number>(0);
   const [creditsInWithdrawals, setCreditsInWithdrawals] = useState<number>(0);
+  const [creditsWithdrawn, setCreditsWithdrawn] = useState<number>(0);
   const [withdrawalsByBank, setWithdrawalsByBank] = useState<number>(0);
   const [withdrawalsByCrypto, setWithdrawalsByCrypto] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
@@ -113,9 +114,9 @@ export function CreditHistoryView() {
   
   const actualTotalBalance = incomingCredits - outgoingCredits;
   
-  // Available = Total Balance - Locked Credits (calculated from transactions)
+  // Available = Total Balance - Locked Credits - Completed Withdrawals
   // creditsInWithdrawals is already in dollars (converted from cents)
-  const availableCredits = actualTotalBalance - creditsInUse;
+  const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
 
   // Extract fetch logic into a reusable function
   const fetchData = useCallback(async (showLoader = true) => {
@@ -211,6 +212,7 @@ export function CreditHistoryView() {
       .in('type', ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed']);
 
     let withdrawalLockedCents = 0;
+    let withdrawalCompletedCents = 0;
     let bankLockedCents = 0;
     let cryptoLockedCents = 0;
     
@@ -224,9 +226,15 @@ export function CreditHistoryView() {
           withdrawalLockedCents += amount;
           if (isBank) bankLockedCents += amount;
           if (isCrypto) cryptoLockedCents += amount;
-        } else if (tx.type === 'withdrawal_unlocked' || tx.type === 'withdrawal_completed') {
+        } else if (tx.type === 'withdrawal_unlocked') {
           const amount = Math.abs(tx.amount);
           withdrawalLockedCents -= amount;
+          if (isBank) bankLockedCents -= amount;
+          if (isCrypto) cryptoLockedCents -= amount;
+        } else if (tx.type === 'withdrawal_completed') {
+          const amount = Math.abs(tx.amount);
+          withdrawalLockedCents -= amount;
+          withdrawalCompletedCents += amount;
           if (isBank) bankLockedCents -= amount;
           if (isCrypto) cryptoLockedCents -= amount;
         }
@@ -239,6 +247,7 @@ export function CreditHistoryView() {
     
     const withdrawalLockedDollars = withdrawalLockedCents / 100;
     setCreditsInWithdrawals(withdrawalLockedDollars);
+    setCreditsWithdrawn(withdrawalCompletedCents / 100);
     setWithdrawalsByBank(bankLockedCents / 100);
     setWithdrawalsByCrypto(cryptoLockedCents / 100);
     totalInUse += withdrawalLockedDollars;
@@ -579,6 +588,12 @@ export function CreditHistoryView() {
                 <span className="text-muted-foreground">Purchased credits:</span>
                 <span className="font-medium">{totalPurchased.toLocaleString()}</span>
               </div>
+              {creditsWithdrawn > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Withdrawn credits:</span>
+                  <span className="font-medium">-${Math.round(creditsWithdrawn).toLocaleString()}</span>
+                </div>
+              )}
               {creditsInWithdrawals > 0 && (
                 <>
                   <div className="flex justify-between gap-4">
