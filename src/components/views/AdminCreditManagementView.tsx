@@ -17,6 +17,7 @@ interface UserCredit {
   user_id: string;
   purchased: number;
   gifted: number;
+  deductions: number;
   totalCredits: number;
   locked: number;
   available: number;
@@ -310,6 +311,14 @@ export const AdminCreditManagementView = () => {
         }
       });
 
+      // Calculate deductions per user
+      const deductionsMap = new Map<string, number>();
+      transactionsData?.forEach(tx => {
+        if (tx.type === 'admin_deduct') {
+          deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+      });
+
       // Calculate locked credits per user from active orders
       const lockedMap = new Map<string, number>();
       activeOrdersData?.forEach(order => {
@@ -338,6 +347,7 @@ export const AdminCreditManagementView = () => {
           user_id: credit.user_id,
           purchased: purchasedMap.get(credit.user_id) || 0,
           gifted: giftedMap.get(credit.user_id) || 0,
+          deductions: deductionsMap.get(credit.user_id) || 0,
           totalCredits: totalCredits + locked, // Total = available + locked
           locked: locked,
           available: totalCredits, // user_credits.credits IS the available balance (locked already subtracted)
@@ -585,7 +595,7 @@ export const AdminCreditManagementView = () => {
                               <TableCell colSpan={2} className="p-0">
                                 <div className="bg-muted/30 p-4">
                                   {/* Stats row above tabs */}
-                                  <div className="grid grid-cols-5 gap-4 mb-4">
+                                  <div className="grid grid-cols-6 gap-4 mb-4">
                                     <div className="text-center">
                                       <p className="text-xs text-muted-foreground">Locked</p>
                                       <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
@@ -597,6 +607,10 @@ export const AdminCreditManagementView = () => {
                                     <div className="text-center">
                                       <p className="text-xs text-muted-foreground">Gifted</p>
                                       <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">Deductions</p>
+                                      <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
                                     </div>
                                     <div className="text-center">
                                       <p className="text-xs text-muted-foreground">Orders</p>
