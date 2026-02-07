@@ -100,7 +100,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
       admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Withdrawal Pending' },
-      withdrawal_unlocked: { className: 'bg-muted text-muted-foreground hover:bg-muted', label: 'Withdrawal Rejected' },
+      withdrawal_unlocked: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
