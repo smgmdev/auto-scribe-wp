@@ -376,7 +376,13 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                       modalMediaSites.map(site => (
                         <button
                           key={site.id}
-                          onClick={() => handleSiteClick(site)}
+                          onClick={() => {
+                            if (site.category === 'Agencies/People') {
+                              handleAgencyClick(site.name);
+                            } else {
+                              handleSiteClick(site);
+                            }
+                          }}
                           className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           {/* Media logo */}
