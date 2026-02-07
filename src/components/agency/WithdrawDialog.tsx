@@ -151,22 +151,8 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
         return;
       }
 
-      // Create a credit transaction to track the locked withdrawal
-      // Amount stored as cents (matching withdrawal amount_cents)
-      const { error: transactionError } = await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: user.id,
-          amount: -Math.round(numAmount * 100), // Negative cents to indicate locked funds
-          type: 'withdrawal_locked',
-          description: `Withdrawal pending - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'} ($${numAmount.toLocaleString()})`
-          // Note: order_id not set as it references orders table, not withdrawals
-        });
-
-      if (transactionError) {
-        console.error('Error creating transaction:', transactionError);
-        // Don't fail the withdrawal, just log the error
-      }
+      // Note: The withdrawal_locked credit transaction is now created automatically
+      // by a database trigger (on_withdrawal_created) when the withdrawal is inserted
 
       toast.success('Withdrawal request submitted successfully. Our team will process it within 24-48 hours.');
       setAmount('');
