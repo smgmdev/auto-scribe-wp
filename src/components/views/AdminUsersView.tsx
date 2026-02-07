@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppStore } from '@/stores/appStore';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -986,7 +987,21 @@ export function AdminUsersView() {
                                         <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
                                           {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                                         </span>
-                                        <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
+                                        {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <span className="text-muted-foreground cursor-help underline decoration-dotted">
+                                                {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                              </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="max-w-xs">
+                                              <p className="font-medium">Reason:</p>
+                                              <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        ) : (
+                                          <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
+                                        )}
                                       </div>
                                       <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
                                     </div>
