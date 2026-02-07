@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Clock, Copy } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Clock, Copy, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,6 +44,7 @@ export function AgencyPayoutsView() {
     completedPayouts: 0
   });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
 
   const handleViewOrderDetails = async (orderId: string) => {
@@ -116,87 +118,103 @@ export function AgencyPayoutsView() {
     }
   };
 
-  useEffect(() => {
-    const fetchCompletedOrders = async () => {
-      if (!user) return;
+  const fetchCompletedOrders = async (isRefresh = false) => {
+    if (!user) return;
 
-      // Get agency payout id for this user
-      const { data: agencyData } = await supabase
-        .from('agency_payouts')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+    if (isRefresh) {
+      setRefreshing(true);
+    }
 
-      if (!agencyData) {
-        setLoading(false);
-        return;
-      }
+    // Get agency payout id for this user
+    const { data: agencyData } = await supabase
+      .from('agency_payouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-      // Get all service requests for this agency to find associated orders
-      const { data: serviceRequests } = await supabase
-        .from('service_requests')
-        .select('order_id')
-        .eq('agency_payout_id', agencyData.id)
-        .not('order_id', 'is', null);
-
-      if (!serviceRequests || serviceRequests.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const orderIds = serviceRequests.map(sr => sr.order_id).filter(Boolean) as string[];
-
-      // Fetch completed orders (only 'accepted' = client confirmed) for this agency
-      const { data: ordersData, error } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          order_number,
-          amount_cents,
-          platform_fee_cents,
-          agency_payout_cents,
-          delivery_status,
-          accepted_at,
-          delivered_at,
-          created_at,
-          media_site:media_sites(name, favicon)
-        `)
-        .in('id', orderIds)
-        .eq('delivery_status', 'accepted')
-        .order('accepted_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching completed orders:', error);
-        setLoading(false);
-        return;
-      }
-
-      const typedOrders = (ordersData || []) as unknown as CompletedOrder[];
-      setCompletedOrders(typedOrders);
-
-      // Calculate summary from completed orders
-      const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
-      const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
-
-      // Fetch payout transactions for pending/completed payouts
-      const { data: payoutData } = await supabase
-        .from('payout_transactions')
-        .select('amount_cents, status')
-        .eq('agency_payout_id', agencyData.id);
-
-      const pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
-      const completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
-
-      setSummary({
-        totalSales,
-        totalEarnings,
-        pendingPayouts,
-        completedPayouts
-      });
-
+    if (!agencyData) {
       setLoading(false);
-    };
+      setRefreshing(false);
+      return;
+    }
 
+    // Get all service requests for this agency to find associated orders
+    const { data: serviceRequests } = await supabase
+      .from('service_requests')
+      .select('order_id')
+      .eq('agency_payout_id', agencyData.id)
+      .not('order_id', 'is', null);
+
+    if (!serviceRequests || serviceRequests.length === 0) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    const orderIds = serviceRequests.map(sr => sr.order_id).filter(Boolean) as string[];
+
+    // Fetch completed orders (only 'accepted' = client confirmed) for this agency
+    const { data: ordersData, error } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        order_number,
+        amount_cents,
+        platform_fee_cents,
+        agency_payout_cents,
+        delivery_status,
+        accepted_at,
+        delivered_at,
+        created_at,
+        media_site:media_sites(name, favicon)
+      `)
+      .in('id', orderIds)
+      .eq('delivery_status', 'accepted')
+      .order('accepted_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching completed orders:', error);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    const typedOrders = (ordersData || []) as unknown as CompletedOrder[];
+    setCompletedOrders(typedOrders);
+
+    // Calculate summary from completed orders
+    const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
+    const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
+
+    // Fetch payout transactions for pending/completed payouts
+    const { data: payoutData } = await supabase
+      .from('payout_transactions')
+      .select('amount_cents, status')
+      .eq('agency_payout_id', agencyData.id);
+
+    const pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+    const completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+
+    setSummary({
+      totalSales,
+      totalEarnings,
+      pendingPayouts,
+      completedPayouts
+    });
+
+    setLoading(false);
+    setRefreshing(false);
+    
+    if (isRefresh) {
+      toast.success('Earnings refreshed');
+    }
+  };
+
+  const handleWithdraw = () => {
+    toast.info('Withdraw feature coming soon');
+  };
+
+  useEffect(() => {
     fetchCompletedOrders();
   }, [user]);
 
@@ -211,13 +229,32 @@ export function AgencyPayoutsView() {
   return (
     <div className="space-y-2 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          My Earnings
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Track your earnings from completed orders
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            My Earnings
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Track your earnings from completed orders
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchCompletedOrders(true)}
+            disabled={refreshing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            onClick={handleWithdraw}
+            className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+          >
+            Withdraw
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
