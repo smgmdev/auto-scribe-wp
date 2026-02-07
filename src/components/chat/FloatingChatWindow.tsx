@@ -7187,7 +7187,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </DialogHeader>
 
           {pendingOrderRequest && (
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 pt-2 pb-4">
               {/* Order Summary */}
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-start gap-3">
