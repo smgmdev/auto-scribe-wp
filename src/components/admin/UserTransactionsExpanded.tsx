@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Transaction {
   id: string;
@@ -13,6 +13,39 @@ interface Transaction {
   type: string;
   description: string | null;
   created_at: string;
+  order_id: string | null;
+}
+
+interface WithdrawalDetails {
+  id: string;
+  amount_cents: number;
+  withdrawal_method: string;
+  status: string;
+  bank_details: {
+    bank_name?: string;
+    account_holder?: string;
+    iban?: string;
+    swift_code?: string;
+  } | null;
+  crypto_details: {
+    network?: string;
+    wallet_address?: string;
+  } | null;
+  created_at: string;
+  processed_at: string | null;
+  admin_notes: string | null;
+}
+
+interface OrderDetails {
+  id: string;
+  order_number: string | null;
+  amount_cents: number;
+  status: string;
+  delivery_status: string;
+  media_sites: {
+    name: string;
+    favicon: string | null;
+  } | null;
 }
 
 interface UserTransactionsExpandedProps {
@@ -39,19 +72,37 @@ const transactionTypes = [
 
 export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalDetails[]>([]);
+  const [orders, setOrders] = useState<Map<string, OrderDetails>>(new Map());
   const [loading, setLoading] = useState(true);
   const [activeType, setActiveType] = useState('all');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const fetchTransactions = async () => {
     try {
       const { data, error } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at')
+        .select('id, amount, type, description, created_at, order_id')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setTransactions(data || []);
+
+      // Fetch related orders for transactions that have order_id
+      const orderIds = (data || []).filter(tx => tx.order_id).map(tx => tx.order_id!);
+      if (orderIds.length > 0) {
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('id, order_number, amount_cents, status, delivery_status, media_sites(name, favicon)')
+          .in('id', orderIds);
+        
+        if (orderData) {
+          const orderMap = new Map<string, OrderDetails>();
+          orderData.forEach(order => orderMap.set(order.id, order as OrderDetails));
+          setOrders(orderMap);
+        }
+      }
     } catch (error) {
       console.error('Error fetching user transactions:', error);
     } finally {
@@ -59,10 +110,26 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     }
   };
 
+  const fetchWithdrawals = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agency_withdrawals')
+        .select('id, amount_cents, withdrawal_method, status, bank_details, crypto_details, created_at, processed_at, admin_notes')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      // Cast the data to our expected type
+      setWithdrawals((data || []) as unknown as WithdrawalDetails[]);
+    } catch (error) {
+      console.error('Error fetching withdrawals:', error);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
+    fetchWithdrawals();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel(`user-transactions-${userId}`)
       .on(
@@ -84,6 +151,18 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     };
   }, [userId]);
 
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   const getTypeBadge = (type: string) => {
     const config: Record<string, { className: string; label: string }> = {
       purchase: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Purchase' },
@@ -103,20 +182,152 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       withdrawal_unlocked: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
-    const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+    const badge = config[type] || { className: 'bg-muted text-muted-foreground hover:bg-muted', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;
   };
 
-  // Filter out withdrawal_locked entries if a final status exists (completed or returned)
+  // Check if a transaction has expandable details
+  const hasExpandableDetails = (tx: Transaction): boolean => {
+    // Withdrawal transactions
+    if (['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type)) {
+      return true;
+    }
+    // Order-related transactions with order_id
+    if (tx.order_id && orders.has(tx.order_id)) {
+      return true;
+    }
+    // Gifted/deduction with reason
+    if ((tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ')) {
+      return true;
+    }
+    return false;
+  };
+
+  // Find matching withdrawal for a transaction
+  const findMatchingWithdrawal = (tx: Transaction): WithdrawalDetails | undefined => {
+    const txAmount = Math.abs(tx.amount);
+    return withdrawals.find(w => Math.abs(w.amount_cents) === txAmount);
+  };
+
+  // Render expanded details for a transaction
+  const renderExpandedDetails = (tx: Transaction) => {
+    // Withdrawal details
+    if (['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type)) {
+      const withdrawal = findMatchingWithdrawal(tx);
+      if (!withdrawal) return null;
+
+      return (
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Method</p>
+            <p className="font-medium">{withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Status</p>
+            <p className="font-medium capitalize">{withdrawal.status}</p>
+          </div>
+          {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
+            <>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Bank Name</p>
+                <p className="font-medium">{withdrawal.bank_details.bank_name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Account Holder</p>
+                <p className="font-medium">{withdrawal.bank_details.account_holder || '-'}</p>
+              </div>
+              {withdrawal.bank_details.iban && (
+                <div className="col-span-2">
+                  <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">IBAN</p>
+                  <p className="font-medium font-mono text-xs">{withdrawal.bank_details.iban}</p>
+                </div>
+              )}
+            </>
+          )}
+          {withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details && (
+            <>
+              <div>
+                <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Network</p>
+                <p className="font-medium">{withdrawal.crypto_details.network || 'TRC20'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Wallet Address</p>
+                <p className="font-medium font-mono text-xs break-all">{withdrawal.crypto_details.wallet_address || '-'}</p>
+              </div>
+            </>
+          )}
+          {withdrawal.processed_at && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Processed</p>
+              <p className="font-medium">
+                {new Date(withdrawal.processed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          )}
+          {withdrawal.admin_notes && (
+            <div className="col-span-2">
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Admin Notes</p>
+              <p className="text-sm">{withdrawal.admin_notes}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Order details
+    if (tx.order_id && orders.has(tx.order_id)) {
+      const order = orders.get(tx.order_id)!;
+      return (
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {order.order_number && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order #</p>
+              <p className="font-medium font-mono">{order.order_number}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
+            <div className="flex items-center gap-2">
+              {order.media_sites?.favicon && (
+                <img src={order.media_sites.favicon} alt="" className="w-4 h-4 rounded" />
+              )}
+              <p className="font-medium">{order.media_sites?.name || '-'}</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Status</p>
+            <p className="font-medium capitalize">{order.status.replace(/_/g, ' ')}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
+            <p className="font-medium">${(order.amount_cents / 100).toFixed(2)}</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Gifted/deduction reason
+    if ((tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ')) {
+      const [, ...reasonParts] = tx.description.split(': ');
+      const reason = reasonParts.join(': ');
+      return (
+        <div className="text-sm">
+          <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Reason</p>
+          <p>{reason}</p>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // Filter out withdrawal_locked entries if a final status exists
   const processedTransactions = transactions.filter(tx => {
     if (tx.type !== 'withdrawal_locked') return true;
-    
-    // Check if there's a completed or returned transaction with matching amount
     const hasCompletedOrReturned = transactions.some(other => 
       (other.type === 'withdrawal_completed' || other.type === 'withdrawal_unlocked') &&
       Math.abs(other.amount) === Math.abs(tx.amount)
     );
-    
     return !hasCompletedOrReturned;
   });
 
@@ -180,72 +391,94 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredTransactions.map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell>
-                      {tx.type === 'offer_accepted' ? (
-                        <Lock className="h-4 w-4 text-amber-500" />
-                      ) : tx.type === 'withdrawal_unlocked' ? (
-                        <Unlock className="h-4 w-4 text-muted-foreground" />
-                      ) : tx.type === 'withdrawal_completed' ? (
-                        <ArrowDownCircle className="h-4 w-4 text-foreground" />
-                      ) : tx.type === 'order_completed' ? (
-                        <ArrowDownCircle className="h-4 w-4 text-red-500" />
-                      ) : tx.amount > 0 ? (
-                        <ArrowUpCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <ArrowDownCircle className="h-4 w-4 text-red-500" />
-                      )}
-                    </TableCell>
-                    <TableCell>{getTypeBadge(tx.type)}</TableCell>
-                    <TableCell className="max-w-md">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-muted-foreground break-words">
-                          {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
-                            // For withdrawal transactions, show cleaner description
-                            tx.description?.includes('Bank Transfer') 
-                              ? `Withdrawal via Bank Transfer` 
-                              : tx.description?.includes('USDT')
-                                ? `Withdrawal via USDT`
-                                : tx.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
-                          ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help underline decoration-dotted">
-                                  {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <p className="font-medium">Reason:</p>
-                                <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                              </TooltipContent>
-                            </Tooltip>
+                filteredTransactions.map((tx) => {
+                  const isExpanded = expandedRows.has(tx.id);
+                  const canExpand = hasExpandableDetails(tx);
+
+                  return (
+                    <>
+                      <TableRow key={tx.id} className={cn(canExpand && "cursor-pointer hover:bg-muted/50")} onClick={() => canExpand && toggleRow(tx.id)}>
+                        <TableCell>
+                          {tx.type === 'offer_accepted' ? (
+                            <Lock className="h-4 w-4 text-amber-500" />
+                          ) : tx.type === 'withdrawal_unlocked' ? (
+                            <Unlock className="h-4 w-4 text-muted-foreground" />
+                          ) : tx.type === 'withdrawal_completed' ? (
+                            <ArrowDownCircle className="h-4 w-4 text-foreground" />
+                          ) : tx.type === 'order_completed' ? (
+                            <ArrowDownCircle className="h-4 w-4 text-destructive" />
+                          ) : tx.amount > 0 ? (
+                            <ArrowUpCircle className="h-4 w-4 text-green-600" />
                           ) : (
-                            tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                            <ArrowDownCircle className="h-4 w-4 text-destructive" />
                           )}
-                        </span>
-                        <span className="text-xs text-muted-foreground/70">
-                          {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : tx.type === 'withdrawal_completed' ? 'text-foreground' : tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
-                      {tx.type === 'withdrawal_unlocked' ? (
-                        // Rejected withdrawals: plain number in grey, no $ or +/- signs
-                        <>{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
-                      ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
-                        <>
-                          {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </>
-                      ) : (
-                        <>
-                          {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
-                        </>
+                        </TableCell>
+                        <TableCell>{getTypeBadge(tx.type)}</TableCell>
+                        <TableCell className="max-w-md">
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground break-words">
+                                {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                                  tx.description?.includes('Bank Transfer') 
+                                    ? `Withdrawal via Bank Transfer` 
+                                    : tx.description?.includes('USDT')
+                                      ? `Withdrawal via USDT`
+                                      : tx.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
+                                ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                  tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
+                                ) : (
+                                  tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                                )}
+                              </span>
+                              {canExpand && (
+                                <button 
+                                  className="text-xs text-muted-foreground hover:text-foreground underline flex items-center gap-0.5"
+                                  onClick={(e) => { e.stopPropagation(); toggleRow(tx.id); }}
+                                >
+                                  {isExpanded ? (
+                                    <>Hide <ChevronUp className="h-3 w-3" /></>
+                                  ) : (
+                                    <>Details <ChevronDown className="h-3 w-3" /></>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground/70">
+                              {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className={cn(
+                          "text-right font-medium",
+                          tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : 
+                          tx.type === 'withdrawal_completed' ? 'text-foreground' : 
+                          tx.type === 'offer_accepted' ? 'text-amber-600' : 
+                          tx.type === 'order_completed' ? 'text-destructive' : 
+                          tx.amount > 0 ? 'text-green-600' : 'text-destructive'
+                        )}>
+                          {tx.type === 'withdrawal_unlocked' ? (
+                            <>{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
+                          ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                            <>
+                              {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </>
+                          ) : (
+                            <>
+                              {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
+                            </>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      {isExpanded && (
+                        <TableRow key={`${tx.id}-details`}>
+                          <TableCell colSpan={4} className="bg-muted/20 p-4">
+                            {renderExpandedDetails(tx)}
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </>
+                  );
+                })
               )}
             </TableBody>
           </Table>
