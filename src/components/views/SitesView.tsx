@@ -321,17 +321,18 @@ export function SitesView() {
         .in('agency_name', agencyNames)
         .eq('status', 'approved');
       
-      // Create signed URLs for logos and build active agencies list
+      // Get public URLs for logos from agency-logos bucket
       const agencies: ActiveAgency[] = [];
       if (appData) {
         for (const app of appData) {
           let logoUrl: string | null = null;
           if (app.logo_url) {
-            const { data: signed } = await supabase.storage
-              .from('agency-documents')
-              .createSignedUrl(app.logo_url, 3600);
-            if (signed?.signedUrl) {
-              logoUrl = signed.signedUrl;
+            // Logos are stored in the public agency-logos bucket
+            const { data: publicUrl } = supabase.storage
+              .from('agency-logos')
+              .getPublicUrl(app.logo_url);
+            if (publicUrl?.publicUrl) {
+              logoUrl = publicUrl.publicUrl;
             }
           }
           const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
@@ -377,18 +378,16 @@ export function SitesView() {
       }
     }
 
-    // Create signed URLs for each logo
+    // Get public URLs for each logo from agency-logos bucket
     const logos: Record<string, string> = {};
-    await Promise.all(
-      Object.entries(earliestLogoByAgency).map(async ([agencyName, path]) => {
-        const { data: signed, error: signError } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(path, 3600);
-        if (!signError && signed?.signedUrl) {
-          logos[agencyName] = signed.signedUrl;
-        }
-      })
-    );
+    Object.entries(earliestLogoByAgency).forEach(([agencyName, path]) => {
+      const { data: publicUrl } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(path);
+      if (publicUrl?.publicUrl) {
+        logos[agencyName] = publicUrl.publicUrl;
+      }
+    });
 
     if (Object.keys(logos).length > 0) {
       setAgencyLogos(prev => ({ ...prev, ...logos }));
