@@ -359,8 +359,6 @@ export function AdminUsersView() {
       
       let deliveries: AgencyDelivery[] = [];
       if (agencyPayout) {
-        console.log('Agency payout found for user:', userId, 'payout id:', agencyPayout.id);
-        
         // Fetch orders directly that are linked to this agency's service requests
         const { data: agencyOrders, error: deliveriesError } = await supabase
           .from('orders')
@@ -376,33 +374,24 @@ export function AdminUsersView() {
           `)
           .eq('status', 'completed');
         
-        console.log('Completed orders fetched:', agencyOrders?.length, agencyOrders);
-        
         if (deliveriesError) {
           console.error('Error fetching agency deliveries:', deliveriesError);
         }
         
         if (agencyOrders && agencyOrders.length > 0) {
           // Get service requests for this agency to filter orders
-          const { data: agencyRequests, error: reqError } = await supabase
+          const { data: agencyRequests } = await supabase
             .from('service_requests')
             .select('order_id')
             .eq('agency_payout_id', agencyPayout.id)
             .not('order_id', 'is', null);
           
-          console.log('Agency requests for payout:', agencyPayout.id, agencyRequests, reqError);
-          
           const agencyOrderIds = new Set((agencyRequests || []).map(r => r.order_id));
-          console.log('Agency order IDs set:', [...agencyOrderIds]);
           
           deliveries = (agencyOrders as AgencyDelivery[])
             .filter(o => agencyOrderIds.has(o.id))
             .sort((a, b) => new Date(b.delivered_at || b.created_at).getTime() - new Date(a.delivered_at || a.created_at).getTime());
-          
-          console.log('Filtered deliveries:', deliveries.length, deliveries);
         }
-      } else {
-        console.log('No agency payout found for user:', userId);
       }
       
       setUserCreditTransactions(prev => ({ ...prev, [userId]: transactions || [] }));
