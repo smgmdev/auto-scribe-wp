@@ -372,7 +372,7 @@ export function AdminUsersView() {
             delivered_at,
             media_sites(name)
           `)
-          .eq('delivery_status', 'accepted');
+          .eq('status', 'completed');
         
         if (deliveriesError) {
           console.error('Error fetching agency deliveries:', deliveriesError);
