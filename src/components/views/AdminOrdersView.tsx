@@ -375,7 +375,8 @@ export function AdminOrdersView() {
             if (targetOrder.status === 'cancelled') {
               setActiveTab('history');
               setHistorySubTab('cancelled');
-            } else if (targetOrder.delivery_status === 'accepted') {
+            } else if (targetOrder.status === 'completed' || targetOrder.delivery_status === 'accepted') {
+              // Completed orders go to history tab
               setActiveTab('history');
               setHistorySubTab('all');
             } else {
