@@ -589,59 +589,44 @@ export function AdminAgencyWithdrawalsView() {
                             Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                           </p>
                           {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
-                            <Tooltip delayDuration={100}>
-                              <TooltipTrigger asChild>
-                                <p className="cursor-help underline decoration-dashed">
-                                  {withdrawal.bank_details.bank_name || 'Bank details available'}
+                            <>
+                              <p className="text-foreground">
+                                {withdrawal.bank_details.bank_name || 'Bank'} - {withdrawal.bank_details.bank_account_holder || 'N/A'}
+                              </p>
+                              {withdrawal.bank_details.bank_account_number && (
+                                <p className="font-mono">
+                                  Account: {withdrawal.bank_details.bank_account_number}
                                 </p>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                                <div className="space-y-1 text-sm">
-                                  {withdrawal.bank_details.bank_account_holder && (
-                                    <p><span className="text-white/70">Holder:</span> {withdrawal.bank_details.bank_account_holder}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_account_number && (
-                                    <p><span className="text-white/70">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_iban && (
-                                    <p><span className="text-white/70">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_swift_code && (
-                                    <p><span className="text-white/70">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_country && (
-                                    <p><span className="text-white/70">Country:</span> {withdrawal.bank_details.bank_country}</p>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
+                              )}
+                              {withdrawal.bank_details.bank_iban && (
+                                <p className="font-mono">
+                                  IBAN: {withdrawal.bank_details.bank_iban}
+                                </p>
+                              )}
+                              {withdrawal.bank_details.bank_swift_code && (
+                                <p className="font-mono">
+                                  SWIFT: {withdrawal.bank_details.bank_swift_code}
+                                </p>
+                              )}
+                            </>
                           )}
                           {withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details && (
-                            <Tooltip delayDuration={100}>
-                              <TooltipTrigger asChild>
-                                <p className="cursor-help underline decoration-dashed">
-                                  {withdrawal.crypto_details.usdt_network || 'Crypto details available'}
-                                </p>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                                <div className="space-y-1.5 text-xs">
-                                  {withdrawal.crypto_details.usdt_network && (
-                                    <p><span className="text-white/70">Network:</span> {withdrawal.crypto_details.usdt_network}</p>
-                                  )}
-                                  {withdrawal.crypto_details.usdt_wallet_address && (
-                                    <p className="break-all">
-                                      <span className="text-white/70">Wallet:</span> {withdrawal.crypto_details.usdt_wallet_address}
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
-                                        className="text-white/70 hover:text-white transition-colors inline-flex ml-1.5 align-middle"
-                                      >
-                                        <Copy className="h-3.5 w-3.5" />
-                                      </button>
-                                    </p>
-                                  )}
+                            <>
+                              <p className="text-foreground">
+                                {withdrawal.crypto_details.usdt_network || 'TRC20'} Network
+                              </p>
+                              {withdrawal.crypto_details.usdt_wallet_address && (
+                                <div className="flex items-center gap-1 font-mono text-[11px]">
+                                  <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </button>
                                 </div>
-                              </TooltipContent>
-                            </Tooltip>
+                              )}
+                            </>
                           )}
                           <p>
                             Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
