@@ -359,32 +359,31 @@ export function AdminUsersView() {
       
       let deliveries: AgencyDelivery[] = [];
       if (agencyPayout) {
-        // Fetch completed orders for this agency via service_requests
-        const { data: agencyOrders } = await supabase
-          .from('orders')
+        // Fetch service requests with completed orders for this agency
+        const { data: agencyRequests } = await supabase
+          .from('service_requests')
           .select(`
-            id,
-            amount_cents,
-            agency_payout_cents,
-            status,
-            delivery_status,
-            created_at,
-            delivered_at,
-            media_sites(name)
+            order_id,
+            orders!inner(
+              id,
+              amount_cents,
+              agency_payout_cents,
+              status,
+              delivery_status,
+              created_at,
+              delivered_at,
+              media_sites(name)
+            )
           `)
-          .eq('delivery_status', 'accepted')
-          .order('delivered_at', { ascending: false });
+          .eq('agency_payout_id', agencyPayout.id)
+          .not('order_id', 'is', null);
         
-        // Filter orders that belong to this agency via service_requests
-        if (agencyOrders) {
-          const { data: agencyRequests } = await supabase
-            .from('service_requests')
-            .select('order_id')
-            .eq('agency_payout_id', agencyPayout.id)
-            .not('order_id', 'is', null);
-          
-          const agencyOrderIds = new Set((agencyRequests || []).map(r => r.order_id));
-          deliveries = agencyOrders.filter(o => agencyOrderIds.has(o.id)) as AgencyDelivery[];
+        // Extract and filter for accepted deliveries
+        if (agencyRequests) {
+          deliveries = agencyRequests
+            .map(r => r.orders as any)
+            .filter(o => o && o.delivery_status === 'accepted')
+            .sort((a, b) => new Date(b.delivered_at || b.created_at).getTime() - new Date(a.delivered_at || a.created_at).getTime());
         }
       }
       
