@@ -7213,13 +7213,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {/* Delivery Time */}
               {pendingOrderRequest.delivery_duration && (pendingOrderRequest.delivery_duration.days > 0 || pendingOrderRequest.delivery_duration.hours > 0 || pendingOrderRequest.delivery_duration.minutes > 0) && (
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                  <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Delivery Time</p>
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
-                      {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
-                    </p>
-                  </div>
+                  <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    Delivery Time: {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
+                  </p>
                 </div>
               )}
 
@@ -7227,7 +7224,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {pendingOrderRequest.special_terms && (
                 <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
-                  <p className="text-sm text-amber-600 dark:text-amber-400 italic">
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
                     "{pendingOrderRequest.special_terms}"
                   </p>
                 </div>
@@ -7269,7 +7266,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 hover:bg-foreground hover:text-background transition-colors"
                   onClick={() => {
                     setAcceptOrderDialogOpen(false);
                     setPendingOrderRequest(null);
@@ -7279,7 +7276,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  className="flex-1 bg-foreground text-background hover:bg-green-600 transition-all duration-200"
                   disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
                   onClick={async () => {
                     if (!pendingOrderRequest || !globalChatRequest) return;
