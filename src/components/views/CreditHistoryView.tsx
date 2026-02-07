@@ -642,7 +642,7 @@ export function CreditHistoryView() {
                   <div className={`text-lg ${
                     transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                   }`}>
-                    {transaction.amount > 0 ? '+' : ''}{transaction.amount}
+                    {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
                   </div>
                 </div>
               ))}
