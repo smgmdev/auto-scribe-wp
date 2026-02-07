@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Lock } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -161,7 +161,9 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 filteredTransactions.map((tx) => (
                   <TableRow key={tx.id}>
                     <TableCell>
-                      {tx.amount > 0 ? (
+                      {tx.type === 'offer_accepted' ? (
+                        <Lock className="h-4 w-4 text-amber-500" />
+                      ) : tx.amount > 0 ? (
                         <ArrowUpCircle className="h-4 w-4 text-green-500" />
                       ) : (
                         <ArrowDownCircle className="h-4 w-4 text-red-500" />
