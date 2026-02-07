@@ -5138,7 +5138,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Tooltip>
                       </TooltipProvider>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-3">
                       {acceptedOrderData?.price && (
                         <TooltipProvider>
                           <Tooltip>
