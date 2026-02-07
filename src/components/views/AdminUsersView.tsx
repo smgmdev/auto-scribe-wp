@@ -92,12 +92,16 @@ interface WithdrawalDetails {
   status: string;
   bank_details: {
     bank_name?: string;
-    account_holder?: string;
-    iban?: string;
+    bank_account_holder?: string;
+    bank_account_number?: string;
+    bank_iban?: string;
+    bank_swift_code?: string;
+    bank_country?: string;
+    bank_address?: string;
   } | null;
   crypto_details: {
-    network?: string;
-    wallet_address?: string;
+    usdt_network?: string;
+    usdt_wallet_address?: string;
   } | null;
   created_at: string;
   processed_at: string | null;
@@ -1287,13 +1291,25 @@ export function AdminUsersView() {
                                                           <p className="font-medium">{withdrawal.bank_details.bank_name || '-'}</p>
                                                         </div>
                                                         <div>
-                                                          <span className="text-muted-foreground uppercase tracking-wide">Account</span>
-                                                          <p className="font-medium">{withdrawal.bank_details.account_holder || '-'}</p>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Account Holder</span>
+                                                          <p className="font-medium">{withdrawal.bank_details.bank_account_holder || '-'}</p>
                                                         </div>
-                                                        {withdrawal.bank_details.iban && (
+                                                        {withdrawal.bank_details.bank_account_number && (
+                                                          <div className="col-span-2">
+                                                            <span className="text-muted-foreground uppercase tracking-wide">Account Number</span>
+                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_account_number}</p>
+                                                          </div>
+                                                        )}
+                                                        {withdrawal.bank_details.bank_iban && (
                                                           <div className="col-span-2">
                                                             <span className="text-muted-foreground uppercase tracking-wide">IBAN</span>
-                                                            <p className="font-medium font-mono">{withdrawal.bank_details.iban}</p>
+                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_iban}</p>
+                                                          </div>
+                                                        )}
+                                                        {withdrawal.bank_details.bank_swift_code && (
+                                                          <div>
+                                                            <span className="text-muted-foreground uppercase tracking-wide">SWIFT/BIC</span>
+                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_swift_code}</p>
                                                           </div>
                                                         )}
                                                       </>
@@ -1302,11 +1318,11 @@ export function AdminUsersView() {
                                                       <>
                                                         <div>
                                                           <span className="text-muted-foreground uppercase tracking-wide">Network</span>
-                                                          <p className="font-medium">{withdrawal.crypto_details.network || 'TRC20'}</p>
+                                                          <p className="font-medium">{withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
                                                         </div>
                                                         <div className="col-span-2">
-                                                          <span className="text-muted-foreground uppercase tracking-wide">Wallet</span>
-                                                          <p className="font-medium font-mono text-[9px] break-all">{withdrawal.crypto_details.wallet_address || '-'}</p>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Wallet Address</span>
+                                                          <p className="font-medium font-mono text-[9px] break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
                                                         </div>
                                                       </>
                                                     )}
