@@ -352,7 +352,7 @@ export function CreditHistoryView() {
         return <Badge variant="secondary" className="bg-red-500/10 text-red-500 border-red-500/30">Spent</Badge>;
       case 'gifted':
       case 'admin_credit':
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">Gift</Badge>;
+        return <Badge variant="secondary" className="bg-foreground text-background border-foreground">Gift</Badge>;
       case 'order_payout':
         return <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30">Earnings</Badge>;
       default:
