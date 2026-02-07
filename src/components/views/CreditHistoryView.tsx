@@ -37,6 +37,7 @@ export function CreditHistoryView() {
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
   const [creditsInOrders, setCreditsInOrders] = useState<number>(0);
   const [creditsInPendingRequests, setCreditsInPendingRequests] = useState<number>(0);
+  const [creditsInWithdrawals, setCreditsInWithdrawals] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
@@ -56,7 +57,7 @@ export function CreditHistoryView() {
     .reduce((sum, t) => sum + t.amount, 0);
   
   const outgoingCredits = transactions
-    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order')
+    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && t.type !== 'withdrawal_locked')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   
   const actualTotalBalance = incomingCredits - outgoingCredits;
@@ -148,6 +149,29 @@ export function CreditHistoryView() {
       pendingTotal += pendingOrder.credits;
       orders.push(pendingOrder);
     }
+
+    // Calculate pending withdrawal amounts from transactions
+    // withdrawal_locked creates negative amounts, so we need to find the net locked amount
+    const { data: withdrawalTransactions } = await supabase
+      .from('credit_transactions')
+      .select('amount, type')
+      .eq('user_id', user.id)
+      .in('type', ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed']);
+
+    let withdrawalLocked = 0;
+    if (withdrawalTransactions) {
+      for (const tx of withdrawalTransactions) {
+        if (tx.type === 'withdrawal_locked') {
+          withdrawalLocked += Math.abs(tx.amount); // These are negative, so take absolute
+        } else if (tx.type === 'withdrawal_unlocked' || tx.type === 'withdrawal_completed') {
+          withdrawalLocked -= Math.abs(tx.amount); // These release the lock
+        }
+      }
+    }
+    // Ensure we don't go negative
+    withdrawalLocked = Math.max(0, withdrawalLocked);
+    setCreditsInWithdrawals(withdrawalLocked);
+    totalInUse += withdrawalLocked;
 
     setCreditsInUse(totalInUse);
     setCreditsInOrders(ordersTotal);
@@ -340,6 +364,15 @@ export function CreditHistoryView() {
     if (type === 'admin_deduct') {
       return <ArrowDownCircle className="h-5 w-5 text-red-500" />;
     }
+    if (type === 'withdrawal_locked') {
+      return <Lock className="h-5 w-5 text-amber-500" />;
+    }
+    if (type === 'withdrawal_unlocked') {
+      return <LockOpen className="h-5 w-5 text-blue-500" />;
+    }
+    if (type === 'withdrawal_completed') {
+      return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+    }
     if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
     }
@@ -443,6 +476,12 @@ export function CreditHistoryView() {
                   <span className="font-medium text-amber-400">-{creditsInPendingRequests.toLocaleString()}</span>
                 </div>
               )}
+              {creditsInWithdrawals > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Locked in withdrawals:</span>
+                  <span className="font-medium text-amber-400">-{creditsInWithdrawals.toLocaleString()}</span>
+                </div>
+              )}
               <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
                 <span className="text-muted-foreground">Available credits:</span>
                 <span className="font-medium">{availableCredits.toLocaleString()}</span>
@@ -507,6 +546,17 @@ export function CreditHistoryView() {
                           <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pending Withdrawals Section */}
+                {creditsInWithdrawals > 0 && (
+                  <div>
+                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Withdrawals</p>
+                    <div className="flex justify-between gap-4 text-xs">
+                      <span className="text-muted-foreground">Withdrawal requests</span>
+                      <span className="font-medium text-amber-400">{creditsInWithdrawals.toLocaleString()}</span>
                     </div>
                   </div>
                 )}
@@ -668,9 +718,11 @@ export function CreditHistoryView() {
                       </div>
                     </div>
                     <div className={`text-lg ${
-                      transaction.type === 'offer_accepted' ? 'text-amber-500' : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                      transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                        ? 'text-amber-500' 
+                        : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
-                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
+                      {transaction.type === 'withdrawal_locked' ? '-' : transaction.amount > 0 ? '+' : ''}{Math.abs(transaction.amount).toLocaleString()}
                     </div>
                   </div>
                 );
