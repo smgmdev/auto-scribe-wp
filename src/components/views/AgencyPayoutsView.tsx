@@ -65,6 +65,16 @@ export function AgencyPayoutsView() {
     .filter(w => w.status === 'pending')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
+  // Calculate pending bank withdrawals
+  const pendingBankWithdrawals = withdrawals
+    .filter(w => w.status === 'pending' && w.withdrawal_method === 'bank')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
+  // Calculate pending crypto withdrawals
+  const pendingCryptoWithdrawals = withdrawals
+    .filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
   // Calculate completed withdrawals (only 'completed' status - these are deducted from wallet)
   const completedWithdrawalsTotal = withdrawals
     .filter(w => w.status === 'completed')
@@ -313,24 +323,34 @@ export function AgencyPayoutsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-            {pendingWithdrawalsTotal > 0 ? (
-              <div className="space-y-1">
-                <div className="flex justify-between gap-4">
-                  <span className="text-white/70">Available Balance:</span>
-                  <span className="font-semibold text-green-400">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <span className="text-white/70">Withdrawals Pending:</span>
-                  <span className="font-semibold text-amber-400">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                  <span className="text-white/70">Wallet Balance:</span>
-                  <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
+            <div className="space-y-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Available Balance:</span>
+                <span className="font-semibold text-green-400">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-            ) : (
-              <p>Available balance: ${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            )}
+              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Withdrawals Pending</div>
+              {pendingBankWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold text-amber-400">${pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {pendingCryptoWithdrawals > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Crypto:</span>
+                  <span className="font-semibold text-amber-400">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {pendingBankWithdrawals === 0 && pendingCryptoWithdrawals === 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/50">None</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                <span className="text-white/70">Wallet Balance:</span>
+                <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
 
