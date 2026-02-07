@@ -381,7 +381,7 @@ export function OrderWithCreditsDialog({
             <Button
               onClick={() => setBuyCreditsOpen(true)}
               variant="default"
-              className="w-full"
+              className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
               size="lg"
             >
               <CreditCard className="h-4 w-4 mr-2" />
