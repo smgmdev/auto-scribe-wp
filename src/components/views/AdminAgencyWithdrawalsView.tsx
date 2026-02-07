@@ -273,9 +273,14 @@ export function AdminAgencyWithdrawalsView() {
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-500 text-white border-amber-500',
-    approved: 'bg-blue-500 text-white border-blue-500',
     completed: 'bg-green-500 text-white border-green-500',
     rejected: 'bg-destructive text-destructive-foreground border-destructive'
+  };
+
+  const statusLabels: Record<string, string> = {
+    pending: 'Pending',
+    completed: 'Completed',
+    rejected: 'Rejected'
   };
 
   if (loading) {
@@ -380,8 +385,26 @@ export function AdminAgencyWithdrawalsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
-            <p>Total number of completed withdrawals.</p>
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm max-w-[280px]">
+            <div className="space-y-1">
+              <p className="font-medium">Total number of completed withdrawals:</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total:</span>
+                <span className="font-semibold text-green-400">{completedCount}</span>
+              </div>
+              {withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').length > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold text-green-400">{withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').length}</span>
+                </div>
+              )}
+              {withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').length > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">USDT:</span>
+                  <span className="font-semibold text-green-400">{withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').length}</span>
+                </div>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
 
@@ -462,7 +485,7 @@ export function AdminAgencyWithdrawalsView() {
                   >
                     <div className="absolute top-3 right-3 flex items-center gap-2">
                       <Badge className={statusColors[withdrawal.status]}>
-                        {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
+                        {statusLabels[withdrawal.status] || withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
                       </Badge>
                     </div>
                     <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-foreground">
@@ -612,27 +635,8 @@ export function AdminAgencyWithdrawalsView() {
                         )}
                         
                         {/* Credit History Button for non-pending */}
-                        {withdrawal.status !== 'pending' && withdrawal.status !== 'approved' && (
+                        {withdrawal.status !== 'pending' && (
                           <div className="mt-3">
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
-                            >
-                              Credit History
-                            </Button>
-                          </div>
-                        )}
-                        {withdrawal.status === 'approved' && (
-                          <div className="flex flex-col md:flex-row gap-2 mt-3">
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'complete'); }}
-                              disabled={processingId === withdrawal.id}
-                              className="w-full md:w-auto bg-green-500 text-white hover:bg-green-600"
-                            >
-                              Mark as Completed
-                            </Button>
                             <Button
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
