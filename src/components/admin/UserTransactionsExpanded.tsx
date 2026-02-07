@@ -176,7 +176,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-help underline decoration-dotted">
-                                {tx.description.replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
                               </span>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="max-w-xs">
