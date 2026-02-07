@@ -751,11 +751,39 @@ export function AdminOrdersView() {
     }
     
     const agency = order.media_sites?.agency;
-    if (!agency || !agencyCommissions[agency]) {
+    if (!agency || agencyCommissions[agency] === undefined) {
       return order.platform_fee_cents; // Fall back to stored value
     }
     const commissionPercentage = agencyCommissions[agency];
     return Math.round(order.amount_cents * (commissionPercentage / 100));
+  };
+
+  // Helper to calculate dynamic agency payout based on current agency commission
+  const calculateAgencyPayout = (order: Order): number => {
+    // Completed and cancelled orders keep their original stored fee
+    if (order.status === 'completed' || order.status === 'cancelled') {
+      return order.agency_payout_cents;
+    }
+    
+    const dynamicPlatformFee = calculatePlatformFee(order);
+    return order.amount_cents - dynamicPlatformFee;
+  };
+
+  // Get the current commission percentage for display
+  const getCommissionPercentage = (order: Order): number => {
+    // For completed/cancelled, calculate from stored values
+    if (order.status === 'completed' || order.status === 'cancelled') {
+      if (order.amount_cents === 0) return 0;
+      return Math.round((order.platform_fee_cents / order.amount_cents) * 100);
+    }
+    
+    const agency = order.media_sites?.agency;
+    if (!agency || agencyCommissions[agency] === undefined) {
+      // Fall back to stored percentage
+      if (order.amount_cents === 0) return 0;
+      return Math.round((order.platform_fee_cents / order.amount_cents) * 100);
+    }
+    return agencyCommissions[agency];
   };
 
   const filteredOrders = orders.filter(order => {
@@ -1267,12 +1295,12 @@ export function AdminOrdersView() {
                   <span className="font-semibold">${(selectedOrder.amount_cents / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
-                  <span className="text-muted-foreground">Platform Fee ({agencyCommissions[selectedOrder.media_sites?.agency || ''] || 10}%)</span>
+                  <span className="text-muted-foreground">Platform Fee ({getCommissionPercentage(selectedOrder)}%)</span>
                   <span className="text-green-600">${(calculatePlatformFee(selectedOrder) / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
                   <span className="text-muted-foreground">Agency Payout</span>
-                  <span>${(selectedOrder.agency_payout_cents / 100).toFixed(2)}</span>
+                  <span>${(calculateAgencyPayout(selectedOrder) / 100).toFixed(2)}</span>
                 </div>
               </div>
 
