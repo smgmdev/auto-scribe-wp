@@ -653,8 +653,14 @@ export function CreditHistoryView() {
           >
             <div className="space-y-1">
               <p className="font-medium">Total credits purchased:</p>
-              <p>Online via platform: {onlinePurchased.toLocaleString()}</p>
-              <p>Offline via invoice: {offlineInvoice.toLocaleString()}</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Online via platform:</span>
+                <span className="font-semibold text-green-400">{onlinePurchased.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Offline via invoice:</span>
+                <span className="font-semibold text-green-400">{offlineInvoice.toLocaleString()}</span>
+              </div>
             </div>
           </TooltipContent>
         </Tooltip>
