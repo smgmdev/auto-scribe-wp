@@ -866,7 +866,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full bg-black text-white hover:bg-transparent hover:text-black border border-black"
               disabled={submitting || uploading || uploadingLogo || !documentUrl || !logoUrl}
             >
               {submitting ? (
