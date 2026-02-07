@@ -319,12 +319,12 @@ export function AgencyPayoutsView() {
                   <span className="font-semibold text-green-400">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-white/70">Wallet Balance:</span>
-                  <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
                   <span className="text-white/70">Withdrawals Pending:</span>
                   <span className="font-semibold text-amber-400">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                  <span className="text-white/70">Wallet Balance:</span>
+                  <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             ) : (
