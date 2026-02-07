@@ -307,6 +307,62 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_withdrawals: {
+        Row: {
+          admin_notes: string | null
+          agency_payout_id: string | null
+          amount_cents: number
+          bank_details: Json | null
+          created_at: string
+          crypto_details: Json | null
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          read: boolean
+          status: string
+          user_id: string
+          withdrawal_method: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          agency_payout_id?: string | null
+          amount_cents: number
+          bank_details?: Json | null
+          created_at?: string
+          crypto_details?: Json | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          read?: boolean
+          status?: string
+          user_id: string
+          withdrawal_method: string
+        }
+        Update: {
+          admin_notes?: string | null
+          agency_payout_id?: string | null
+          amount_cents?: number
+          bank_details?: Json | null
+          created_at?: string
+          crypto_details?: Json | null
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          read?: boolean
+          status?: string
+          user_id?: string
+          withdrawal_method?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_withdrawals_agency_payout_id_fkey"
+            columns: ["agency_payout_id"]
+            isOneToOne: false
+            referencedRelation: "agency_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_published_sources: {
         Row: {
           ai_title: string | null

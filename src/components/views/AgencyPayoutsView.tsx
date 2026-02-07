@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ExternalLink, Clock, Copy, RefreshCw } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,15 @@ interface EarningsSummary {
   completedPayouts: number;
 }
 
+interface WithdrawalRequest {
+  id: string;
+  amount_cents: number;
+  withdrawal_method: 'bank' | 'crypto';
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  created_at: string;
+  processed_at: string | null;
+}
+
 export function AgencyPayoutsView() {
   const { user } = useAuth();
   const { openGlobalChat } = useAppStore();
@@ -48,6 +57,7 @@ export function AgencyPayoutsView() {
   const [refreshing, setRefreshing] = useState(false);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
 
   // Calculate available balance (total earnings minus pending and completed payouts)
   const availableBalance = summary.totalEarnings - summary.pendingPayouts - summary.completedPayouts;
@@ -199,6 +209,15 @@ export function AgencyPayoutsView() {
 
     const pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
     const completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+
+    // Fetch withdrawal requests
+    const { data: withdrawalData } = await supabase
+      .from('agency_withdrawals')
+      .select('id, amount_cents, withdrawal_method, status, created_at, processed_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    setWithdrawals((withdrawalData || []) as WithdrawalRequest[]);
 
     setSummary({
       totalSales,
@@ -361,13 +380,13 @@ export function AgencyPayoutsView() {
         </Tooltip>
       </div>
 
-      {/* Completed Orders (Earnings) */}
+      {/* Earnings History */}
       <Card className="border-border/50">
         <CardHeader>
           <CardTitle>Earnings History</CardTitle>
         </CardHeader>
         <CardContent>
-          {completedOrders.length === 0 ? (
+          {completedOrders.length === 0 && withdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground text-center">
@@ -376,6 +395,60 @@ export function AgencyPayoutsView() {
             </div>
           ) : (
             <div className="space-y-2">
+              {/* Withdrawal Requests */}
+              {withdrawals.map((withdrawal) => {
+                const withdrawalAmount = withdrawal.amount_cents / 100;
+                const statusColors: Record<string, string> = {
+                  pending: 'bg-amber-500 text-white border-amber-500',
+                  approved: 'bg-blue-500 text-white border-blue-500',
+                  completed: 'bg-green-500 text-white border-green-500',
+                  rejected: 'bg-destructive text-destructive-foreground border-destructive'
+                };
+
+                return (
+                  <div 
+                    key={withdrawal.id}
+                    className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
+                  >
+                    <div className="absolute top-3 right-3">
+                      <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
+                        {withdrawal.status === 'pending' ? 'Withdrawal Pending' : 
+                         withdrawal.status === 'approved' ? 'Withdrawal Approved' :
+                         withdrawal.status === 'completed' ? 'Withdrawal Completed' :
+                         'Withdrawal Rejected'}
+                      </Badge>
+                    </div>
+                    <p className="absolute bottom-3 right-3 font-semibold text-amber-600">
+                      -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <div className="flex items-center gap-3 pr-24">
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-amber-500/20">
+                        <ArrowUpRight className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">
+                          Withdrawal Request
+                        </p>
+                        <div className="flex flex-col gap-1 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                          {withdrawal.processed_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Completed Orders */}
               {completedOrders.map((order) => {
                 const earningsAmount = (order.agency_payout_cents || 0) / 100;
                 const saleAmount = (order.amount_cents || 0) / 100;
@@ -466,6 +539,7 @@ export function AgencyPayoutsView() {
         open={withdrawDialogOpen}
         onOpenChange={setWithdrawDialogOpen}
         availableBalance={availableBalance}
+        onSuccess={() => fetchCompletedOrders(true)}
       />
     </div>
   );

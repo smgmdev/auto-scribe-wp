@@ -86,7 +86,11 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     }, {
       id: 'admin-credit-management',
       label: 'Credit Management',
-      icon: CreditCard
+      icon: CreditCard,
+      submenu: [
+        { id: 'admin-credit-management', label: 'User Credits', icon: CreditCard },
+        { id: 'admin-agency-withdrawals', label: 'Agency Withdrawals', icon: Wallet }
+      ]
     }, {
       id: 'admin-users',
       label: 'Users',
