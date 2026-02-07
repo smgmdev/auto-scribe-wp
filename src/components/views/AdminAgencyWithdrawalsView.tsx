@@ -273,17 +273,19 @@ export function AdminAgencyWithdrawalsView() {
   const rejectedCount = withdrawals.filter(w => w.status === 'rejected').length;
 
   const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
-  const completedCount = withdrawals.filter(w => w.status === 'completed').length;
+  const completedCount = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').length;
   const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
-  const totalCompleted = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const totalCompleted = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
 
   // Pending breakdown by method
   const pendingBankAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
   const pendingCryptoAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
 
-  // Completed breakdown by method
-  const completedBankAmount = withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
-  const completedCryptoAmount = withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  // Completed breakdown by method (includes 'approved' status as completed)
+  const completedBankAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const completedCryptoAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const completedBankCount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank').length;
+  const completedCryptoCount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto').length;
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-500 text-white border-amber-500',
@@ -408,16 +410,16 @@ export function AdminAgencyWithdrawalsView() {
                 <span className="text-white/70">Total:</span>
                 <span className="font-semibold text-green-400">{completedCount}</span>
               </div>
-              {withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').length > 0 && (
+              {completedBankCount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold text-green-400">{withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').length}</span>
+                  <span className="font-semibold text-green-400">{completedBankCount}</span>
                 </div>
               )}
-              {withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').length > 0 && (
+              {completedCryptoCount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold text-green-400">{withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').length}</span>
+                  <span className="font-semibold text-green-400">{completedCryptoCount}</span>
                 </div>
               )}
             </div>
@@ -491,7 +493,7 @@ export function AdminAgencyWithdrawalsView() {
             ? 'bg-green-500 text-white hover:bg-green-600 border border-green-500' 
             : 'bg-transparent text-foreground border border-border hover:bg-muted'}
         >
-          Completed ({completedCount + withdrawals.filter(w => w.status === 'approved').length})
+          Completed ({completedCount})
         </Button>
         <Button
           size="sm"
