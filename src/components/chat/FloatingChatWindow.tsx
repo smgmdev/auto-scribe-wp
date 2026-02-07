@@ -5089,6 +5089,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         {localOrder && !loadingMessages && (() => {
           // Get accepted order data for display (media site name, special terms, etc.)
           const acceptedOrderData = getLastAcceptedOrderRequestData();
+          // Also get the last order request data as fallback for special_terms
+          const orderRequestData = getLastOrderRequestData();
+          // Merge special_terms: prefer accepted order data, fallback to order request data
+          const specialTerms = acceptedOrderData?.special_terms || orderRequestData?.special_terms;
           const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
           const isAgencyView = globalChatType === 'agency-request' && !isAdmin;
           const isClientView = globalChatType === 'my-request' || actualSenderType === 'client';
@@ -5312,7 +5316,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         
                         return null;
                       })()}
-                      {acceptedOrderData?.special_terms && (
+                      {specialTerms && (
                         <>
                           <span className="text-white/40">•</span>
                           <TooltipProvider>
@@ -5324,7 +5328,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{acceptedOrderData.special_terms}</p>
+                                <p>{specialTerms}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
