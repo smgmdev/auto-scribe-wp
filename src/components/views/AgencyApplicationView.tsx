@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock } from 'lucide-react';
+import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock, UserMinus } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
@@ -59,6 +59,7 @@ interface AgencyPayout {
   agency_name: string;
   onboarding_complete: boolean;
   payout_method: string;
+  downgraded: boolean;
   created_at: string;
 }
 
@@ -159,7 +160,7 @@ export function AgencyApplicationView() {
       // Fetch agency payout record
       const { data: payoutData } = await supabase
         .from('agency_payouts')
-        .select('id, agency_name, onboarding_complete, payout_method, created_at')
+        .select('id, agency_name, onboarding_complete, payout_method, downgraded, created_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -239,7 +240,10 @@ export function AgencyApplicationView() {
     fetchAgencyData();
   };
 
-  const getStatusBadge = (status: string, isExpired?: boolean) => {
+  const getStatusBadge = (status: string, isExpired?: boolean, isDowngraded?: boolean) => {
+    if (isDowngraded) {
+      return <Badge className="bg-red-600"><UserMinus className="h-3 w-3 mr-1" />Downgraded</Badge>;
+    }
     if (isExpired || status === 'expired') {
       return <Badge className="bg-red-600"><XCircle className="h-3 w-3 mr-1" />Expired Application</Badge>;
     }
@@ -280,6 +284,44 @@ export function AgencyApplicationView() {
   }
   const currentAppStatus = existingApplication?.status;
   const isPending = currentAppStatus === 'pending';
+  const isDowngraded = agencyPayout?.downgraded === true;
+
+  // CASE 1: Downgraded agency
+  if (isDowngraded) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Agency Verification
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Your agency account status
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
+              <UserMinus className="h-6 w-6 text-red-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-red-400">Account Downgraded</h3>
+              <p className="text-sm text-muted-foreground">
+                {agencyPayout?.agency_name}
+              </p>
+            </div>
+            {getStatusBadge('downgraded', false, true)}
+          </div>
+        </div>
+
+        <p className="text-sm text-muted-foreground text-center">
+          Your account has been downgraded. Contact support for details.
+        </p>
+
+        <AgencyFAQ />
+      </div>
+    );
+  }
 
   // CASE 2: Custom Payout verification needed (has agency payout with custom method, not onboarded)
   // Only show if application is approved (not pending, cancelled, or rejected)
