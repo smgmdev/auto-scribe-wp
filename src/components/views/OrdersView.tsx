@@ -85,7 +85,8 @@ export function OrdersView() {
     userUnreadDisputesCount, setUserUnreadDisputesCount, incrementUserUnreadDisputesCount, decrementUserUnreadDisputesCount,
     userUnreadHistoryCount, setUserUnreadHistoryCount, decrementUserUnreadHistoryCount,
     userUnreadCompletedCount, setUserUnreadCompletedCount, incrementUserUnreadCompletedCount, decrementUserUnreadCompletedCount,
-    openGlobalChat, clearUnreadMessageCount
+    openGlobalChat, clearUnreadMessageCount,
+    ordersTargetTab, setOrdersTargetTab, ordersTargetOrderId, setOrdersTargetOrderId
   } = useAppStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
@@ -282,6 +283,54 @@ export function OrdersView() {
       };
     }
   }, [user, isAdmin]);
+
+  // Handle navigation from credit history (ordersTargetTab and ordersTargetOrderId)
+  useEffect(() => {
+    if (ordersTargetTab) {
+      setActiveTab(ordersTargetTab);
+      setOrdersTargetTab(null);
+    }
+  }, [ordersTargetTab, setOrdersTargetTab]);
+
+  // Handle opening the chat for a specific order when navigating from credit history
+  useEffect(() => {
+    if (ordersTargetOrderId && orders.length > 0 && !loading) {
+      const targetOrder = orders.find(o => o.id === ordersTargetOrderId);
+      if (targetOrder) {
+        // Find the service request for this order to open the chat
+        const openChatForOrder = async () => {
+          const { data: serviceRequest } = await supabase
+            .from('service_requests')
+            .select(`
+              id, title, description, status, read, created_at, updated_at, cancellation_reason,
+              media_sites (id, name, favicon, price, publication_format, link, category, subcategory, about, agency),
+              orders (id, status, delivery_status, delivery_deadline)
+            `)
+            .eq('order_id', ordersTargetOrderId)
+            .single();
+
+          if (serviceRequest) {
+            const chatRequest = {
+              id: serviceRequest.id,
+              title: serviceRequest.title,
+              description: serviceRequest.description,
+              status: serviceRequest.status,
+              read: serviceRequest.read,
+              created_at: serviceRequest.created_at,
+              updated_at: serviceRequest.updated_at,
+              cancellation_reason: serviceRequest.cancellation_reason,
+              media_site: serviceRequest.media_sites as any,
+              order: serviceRequest.orders as any
+            };
+            openGlobalChat(chatRequest, 'my-request');
+            clearUnreadMessageCount(serviceRequest.id);
+          }
+        };
+        openChatForOrder();
+      }
+      setOrdersTargetOrderId(null);
+    }
+  }, [ordersTargetOrderId, orders, loading, setOrdersTargetOrderId, openGlobalChat, clearUnreadMessageCount]);
 
   const fetchOrders = async () => {
     if (!user) return;
