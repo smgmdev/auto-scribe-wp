@@ -1145,55 +1145,81 @@ export function AdminUsersView() {
                             </TabsContent>
                             
                             <TabsContent value="credits" className="mt-0">
-                              {(userCreditTransactions[user.id] || []).length === 0 ? (
-                                <p className="text-xs text-muted-foreground py-2">No credit transactions</p>
-                              ) : (
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
-                                  {(userCreditTransactions[user.id] || []).map((tx) => (
-                                    <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
-                                      <div className="flex items-center gap-2">
-                                        <CreditCard className="h-3 w-3 text-muted-foreground" />
-                                        {/* Withdrawal transactions are stored in cents, convert to dollars */}
-                                        {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
-                                          <span className={tx.type === 'withdrawal_unlocked' ? 'text-blue-600' : tx.type === 'withdrawal_completed' ? 'text-green-600' : 'text-amber-600'}>
-                                            {tx.type === 'withdrawal_locked' ? '-' : tx.type === 'withdrawal_unlocked' ? '+' : '-'}
-                                            ${Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
-                                          </span>
-                                        ) : (
-                                          <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
-                                            {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                                          </span>
-                                        )}
-                                        {/* Withdrawal description */}
-                                        {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
-                                          <span className="text-muted-foreground">
-                                            {tx.description?.includes('Bank Transfer') 
-                                              ? 'Withdrawal via Bank Transfer'
-                                              : tx.description?.includes('USDT')
-                                                ? 'Withdrawal via USDT'
-                                                : 'Withdrawal'}
-                                          </span>
-                                        ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <span className="text-muted-foreground cursor-help underline decoration-dotted">
-                                                {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                                              </span>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top" className="max-w-xs">
-                                              <p className="font-medium">Reason:</p>
-                                              <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        ) : (
-                                          <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
-                                        )}
+                              {(() => {
+                                const allTx = userCreditTransactions[user.id] || [];
+                                // Filter out withdrawal_locked if a final status exists (completed or rejected)
+                                const filteredTx = allTx.filter(tx => {
+                                  if (tx.type !== 'withdrawal_locked') return true;
+                                  const hasCompletedOrRejected = allTx.some(other => 
+                                    (other.type === 'withdrawal_completed' || other.type === 'withdrawal_unlocked') &&
+                                    Math.abs(other.amount) === Math.abs(tx.amount)
+                                  );
+                                  return !hasCompletedOrRejected;
+                                });
+                                
+                                return filteredTx.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground py-2">No credit transactions</p>
+                                ) : (
+                                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {filteredTx.map((tx) => (
+                                      <div key={tx.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                        <div className="flex items-center gap-2">
+                                          <CreditCard className="h-3 w-3 text-muted-foreground" />
+                                          {/* Withdrawal transactions are stored in cents, convert to dollars */}
+                                          {tx.type === 'withdrawal_unlocked' ? (
+                                            // Rejected withdrawals: grey plain number, no $ or +/-
+                                            <span className="text-muted-foreground">
+                                              {Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
+                                            </span>
+                                          ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                                            <span className={tx.type === 'withdrawal_completed' ? 'text-foreground' : 'text-amber-600'}>
+                                              {tx.type === 'withdrawal_locked' ? '-' : '-'}
+                                              ${Math.round(Math.abs(tx.amount) / 100).toLocaleString()}
+                                            </span>
+                                          ) : (
+                                            <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
+                                              {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                                            </span>
+                                          )}
+                                          {/* Withdrawal description */}
+                                          {tx.type === 'withdrawal_unlocked' ? (
+                                            <span className="text-muted-foreground">
+                                              Withdrawal Rejected - {tx.description?.includes('Bank Transfer') 
+                                                ? 'Bank Transfer'
+                                                : tx.description?.includes('USDT')
+                                                  ? 'USDT'
+                                                  : 'Credits returned'}
+                                            </span>
+                                          ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                                            <span className="text-muted-foreground">
+                                              {tx.type === 'withdrawal_locked' ? 'Withdrawal Pending' : 'Withdrawal Completed'} - {tx.description?.includes('Bank Transfer') 
+                                                ? 'Bank Transfer'
+                                                : tx.description?.includes('USDT')
+                                                  ? 'USDT'
+                                                  : ''}
+                                            </span>
+                                          ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <span className="text-muted-foreground cursor-help underline decoration-dotted">
+                                                  {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                                </span>
+                                              </TooltipTrigger>
+                                              <TooltipContent side="top" className="max-w-xs">
+                                                <p className="font-medium">Reason:</p>
+                                                <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          ) : (
+                                            <span className="text-muted-foreground">{(tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')}</span>
+                                          )}
+                                        </div>
+                                        <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
                                       </div>
-                                      <span className="text-muted-foreground">{formatDateTime(tx.created_at)}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                                    ))}
+                                  </div>
+                                );
+                              })()}
                             </TabsContent>
                             
                             <TabsContent value="orders" className="mt-0">
