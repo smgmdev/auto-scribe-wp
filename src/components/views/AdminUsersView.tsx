@@ -674,7 +674,7 @@ export function AdminUsersView() {
                           {user.role !== 'admin' && (
                             <Badge variant="secondary" className="min-w-[90px] justify-start">
                               <Coins className="h-3 w-3 mr-1" />
-                              {user.credits} credits
+                              {user.credits.toLocaleString()} credits
                             </Badge>
                           )}
                         </div>
@@ -791,7 +791,7 @@ export function AdminUsersView() {
                         {user.role !== 'admin' && (
                           <Badge variant="secondary" className="min-w-[90px] justify-start">
                             <Coins className="h-3 w-3 mr-1" />
-                            {user.credits} credits
+                            {user.credits.toLocaleString()} credits
                           </Badge>
                         )}
                       </div>
@@ -866,7 +866,7 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <CreditCard className="h-3 w-3 text-muted-foreground" />
                                         <span className={tx.amount > 0 ? 'text-green-600' : 'text-red-600'}>
-                                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                                         </span>
                                         <span className="text-muted-foreground">{tx.description || tx.type}</span>
                                       </div>
