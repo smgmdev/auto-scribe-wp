@@ -710,7 +710,14 @@ const Landing = () => {
                       modalMediaSites.map(site => (
                         <button
                           key={site.id}
-                          onClick={() => handleDropdownSiteClick(site, 'media')}
+                          onClick={() => {
+                            // Check if this is an agency item and open the correct dialog
+                            if (site.category === 'Agencies/People') {
+                              handleAgencyClick(site.name);
+                            } else {
+                              handleDropdownSiteClick(site, 'media');
+                            }
+                          }}
                           className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
                           {/* Media logo */}
