@@ -377,6 +377,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         <button
                           key={site.id}
                           onClick={() => {
+                            // Check if this is an agency item and open the correct dialog
                             if (site.category === 'Agencies/People') {
                               handleAgencyClick(site.name);
                             } else {
