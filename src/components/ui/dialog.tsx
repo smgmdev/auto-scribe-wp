@@ -49,8 +49,8 @@ const DialogContent = React.forwardRef<
         className,
       )}
       style={{ 
-        ...style, 
         transform: 'translate(-50%, -50%)',
+        ...style, 
       }}
       {...props}
     >
