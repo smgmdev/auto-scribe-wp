@@ -101,7 +101,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Withdrawal Pending' },
       withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Withdrawal Returned' },
-      withdrawal_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Withdrawal Completed' }
+      withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;
@@ -172,6 +172,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     <TableCell>
                       {tx.type === 'offer_accepted' ? (
                         <Lock className="h-4 w-4 text-amber-500" />
+                      ) : tx.type === 'withdrawal_completed' ? (
+                        <ArrowDownCircle className="h-4 w-4 text-foreground" />
                       ) : tx.type === 'order_completed' ? (
                         <ArrowDownCircle className="h-4 w-4 text-red-500" />
                       ) : tx.amount > 0 ? (
@@ -212,7 +214,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <TableCell className={`text-right font-medium ${tx.type === 'withdrawal_completed' ? 'text-foreground' : tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
                       {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
                         <>
