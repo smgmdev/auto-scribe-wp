@@ -712,7 +712,7 @@ export function AdminAgencyWithdrawalsView() {
               disabled={processingId !== null}
               className={
                 actionType === 'approve' ? 'bg-green-500 hover:bg-green-600 text-white' :
-                actionType === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-transparent hover:text-destructive hover:border-destructive border' :
+                actionType === 'reject' ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive' :
                 'bg-green-500 hover:bg-green-600'
               }
             >
