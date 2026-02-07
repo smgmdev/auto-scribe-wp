@@ -327,7 +327,13 @@ export function CreditHistoryView() {
     if (type === 'spent') {
       return <ShoppingBag className="h-5 w-5 text-red-500" />;
     }
-    if (type === 'purchase' || amount > 0) {
+    if (type === 'purchase' || type === 'gifted' || type === 'admin_credit') {
+      return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
+    }
+    if (type === 'admin_deduct') {
+      return <ArrowDownCircle className="h-5 w-5 text-red-500" />;
+    }
+    if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
     }
     return <ArrowDownCircle className="h-5 w-5 text-red-500" />;
@@ -355,6 +361,8 @@ export function CreditHistoryView() {
         return <Badge variant="secondary" className="bg-foreground text-background border-foreground">Gift</Badge>;
       case 'order_payout':
         return <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30">Earnings</Badge>;
+      case 'admin_deduct':
+        return <Badge variant="secondary" className="bg-foreground text-background border-foreground">Deduction</Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
@@ -362,7 +370,7 @@ export function CreditHistoryView() {
 
   // Filter transactions to show all order-related events
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct'].includes(t.type)
   );
 
   return (
