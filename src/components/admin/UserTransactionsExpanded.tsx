@@ -416,19 +416,22 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         <TableCell>{getTypeBadge(tx.type)}</TableCell>
                         <TableCell className="max-w-md">
                           <div className="flex flex-col gap-0.5">
+                            <span className="text-muted-foreground break-words">
+                              {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                                tx.description?.includes('Bank Transfer') 
+                                  ? `Withdrawal via Bank Transfer` 
+                                  : tx.description?.includes('USDT')
+                                    ? `Withdrawal via USDT`
+                                    : tx.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
+                              ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                                tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
+                              ) : (
+                                tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                              )}
+                            </span>
                             <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground break-words">
-                                {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
-                                  tx.description?.includes('Bank Transfer') 
-                                    ? `Withdrawal via Bank Transfer` 
-                                    : tx.description?.includes('USDT')
-                                      ? `Withdrawal via USDT`
-                                      : tx.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
-                                ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
-                                  tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
-                                ) : (
-                                  tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
-                                )}
+                              <span className="text-xs text-muted-foreground/70">
+                                {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
                               {canExpand && (
                                 <button 
@@ -443,9 +446,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                                 </button>
                               )}
                             </div>
-                            <span className="text-xs text-muted-foreground/70">
-                              {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
                           </div>
                         </TableCell>
                         <TableCell className={cn(
