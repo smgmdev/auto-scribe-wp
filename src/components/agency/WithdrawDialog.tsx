@@ -14,6 +14,7 @@ interface WithdrawDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   availableBalance: number;
+  onSuccess?: () => void;
 }
 
 interface VerificationData {
@@ -28,11 +29,12 @@ interface VerificationData {
   usdt_network: string | null;
 }
 
-export function WithdrawDialog({ open, onOpenChange, availableBalance }: WithdrawDialogProps) {
+export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess }: WithdrawDialogProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [verificationData, setVerificationData] = useState<VerificationData | null>(null);
+  const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [withdrawalMethod, setWithdrawalMethod] = useState<'bank' | 'crypto'>('bank');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
@@ -51,6 +53,17 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
     setLoading(true);
 
     try {
+      // Fetch agency payout id
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (agencyData) {
+        setAgencyPayoutId(agencyData.id);
+      }
+
       const { data, error } = await supabase
         .from('agency_custom_verifications')
         .select('bank_account_holder, bank_account_number, bank_name, bank_swift_code, bank_iban, bank_country, bank_address, usdt_wallet_address, usdt_network')
@@ -87,25 +100,65 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance }: Withdra
   };
 
   const handleConfirmWithdraw = async () => {
+    if (!user) return;
+    
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       setError('Please enter a valid amount');
       return;
     }
     if (numAmount > availableBalance) {
-      setError(`Amount exceeds available balance of $${availableBalance.toFixed(2)}`);
+      setError(`Amount exceeds available balance of $${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
       return;
     }
 
     setSubmitting(true);
     
-    // For now, just show a success message - actual withdrawal processing would be implemented later
-    setTimeout(() => {
+    try {
+      // Prepare bank/crypto details
+      const bankDetails = withdrawalMethod === 'bank' && verificationData ? {
+        bank_name: verificationData.bank_name,
+        bank_account_holder: verificationData.bank_account_holder,
+        bank_account_number: verificationData.bank_account_number,
+        bank_iban: verificationData.bank_iban,
+        bank_swift_code: verificationData.bank_swift_code,
+        bank_country: verificationData.bank_country,
+        bank_address: verificationData.bank_address
+      } : null;
+
+      const cryptoDetails = withdrawalMethod === 'crypto' && verificationData ? {
+        usdt_wallet_address: verificationData.usdt_wallet_address,
+        usdt_network: verificationData.usdt_network
+      } : null;
+
+      // Insert withdrawal request
+      const { error: insertError } = await supabase
+        .from('agency_withdrawals')
+        .insert({
+          user_id: user.id,
+          agency_payout_id: agencyPayoutId,
+          amount_cents: Math.round(numAmount * 100),
+          withdrawal_method: withdrawalMethod,
+          bank_details: bankDetails,
+          crypto_details: cryptoDetails
+        });
+
+      if (insertError) {
+        console.error('Error creating withdrawal:', insertError);
+        toast.error('Failed to submit withdrawal request. Please try again.');
+        return;
+      }
+
       toast.success('Withdrawal request submitted successfully. Our team will process it within 24-48 hours.');
-      setSubmitting(false);
       setAmount('');
       onOpenChange(false);
-    }, 1000);
+      onSuccess?.();
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('An unexpected error occurred.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isValidAmount = () => {
