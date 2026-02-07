@@ -166,7 +166,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       {tx.type === 'offer_accepted' ? (
                         <Lock className="h-4 w-4 text-amber-500" />
                       ) : tx.type === 'order_completed' ? (
-                        <ArrowDownCircle className="h-4 w-4 text-green-500" />
+                        <ArrowDownCircle className="h-4 w-4 text-red-500" />
                       ) : tx.amount > 0 ? (
                         <ArrowUpCircle className="h-4 w-4 text-green-500" />
                       ) : (
@@ -198,8 +198,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-green-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {tx.type === 'order_completed' ? '' : tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                    <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
                     </TableCell>
                   </TableRow>
                 ))
