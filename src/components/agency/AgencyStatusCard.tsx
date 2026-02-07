@@ -159,7 +159,7 @@ export function AgencyStatusCard({
         <Button
           size="sm"
           variant="outline"
-          className="w-full mt-3 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+          className="w-full mt-3 bg-transparent border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
           onClick={onNavigateToApplication}
         >
           View Details
