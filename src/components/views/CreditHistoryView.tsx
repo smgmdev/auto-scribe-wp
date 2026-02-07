@@ -301,13 +301,9 @@ export function CreditHistoryView() {
 
   const totalSpent = completedOrdersSpent + otherSpending;
 
-  const totalOrders = transactions
-    .filter(t => t.type === 'order')
+  const totalCompletedOrders = transactions
+    .filter(t => t.type === 'order_completed')
     .length;
-
-  const totalOrderCredits = transactions
-    .filter(t => t.type === 'order')
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const getTransactionIcon = (type: string, amount: number) => {
     if (type === 'order' || type === 'locked') {
@@ -586,7 +582,7 @@ export function CreditHistoryView() {
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
-                    totalOrders
+                    totalCompletedOrders
                   )}
                 </div>
               </CardContent>
@@ -597,7 +593,7 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Number of media site orders placed using credits ({totalOrderCredits.toLocaleString()} credits)</p>
+            <p>Number of completed orders</p>
           </TooltipContent>
         </Tooltip>
       </div>
