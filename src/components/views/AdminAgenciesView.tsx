@@ -147,30 +147,19 @@ export function AdminAgenciesView() {
   }, []);
 
   // Generate logo URLs for all applications
-  // Approved apps use public agency-logos bucket
-  // Cancelled/rejected apps need signed URLs from private agency-documents bucket
+  // All logos are stored in the public agency-logos bucket
   useEffect(() => {
-    const generateLogoUrls = async () => {
+    const generateLogoUrls = () => {
       const urls: Record<string, string> = {};
       
       for (const app of applications) {
         if (app.logo_url && !logoUrls[app.id]) {
-          if (app.status === 'approved') {
-            // Approved: use public bucket
-            const { data } = supabase.storage
-              .from('agency-logos')
-              .getPublicUrl(app.logo_url);
-            if (data?.publicUrl) {
-              urls[app.id] = data.publicUrl;
-            }
-          } else {
-            // Cancelled/rejected/pending: use signed URL from private bucket
-            const { data, error } = await supabase.storage
-              .from('agency-documents')
-              .createSignedUrl(app.logo_url, 3600); // 1 hour expiry
-            if (data?.signedUrl && !error) {
-              urls[app.id] = data.signedUrl;
-            }
+          // All logos use the public agency-logos bucket
+          const { data } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(app.logo_url);
+          if (data?.publicUrl) {
+            urls[app.id] = data.publicUrl;
           }
         }
       }
