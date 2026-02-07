@@ -225,11 +225,11 @@ export function MediaSiteDialog({
         .maybeSingle();
       
       if (appData?.logo_url) {
-        const { data: signed } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(appData.logo_url, 3600);
-        if (signed?.signedUrl) {
-          logoUrl = signed.signedUrl;
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(appData.logo_url);
+        if (publicUrl?.publicUrl) {
+          logoUrl = publicUrl.publicUrl;
         }
       }
       

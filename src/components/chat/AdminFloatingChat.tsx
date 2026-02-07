@@ -847,15 +847,15 @@ export function AdminFloatingChat({
         
         let logoUrl: string | null = null;
         
-        // Get signed URL for logo if exists
+        // Get public URL for logo if exists
         if (appData?.logo_url) {
-          console.log('Fetching signed URL for logo:', appData.logo_url);
-          const { data: signed, error: signError } = await supabase.storage
-            .from('agency-documents')
-            .createSignedUrl(appData.logo_url, 3600);
-          console.log('Signed URL result:', { signed, signError });
-          if (!signError && signed?.signedUrl) {
-            logoUrl = signed.signedUrl;
+          console.log('Fetching public URL for logo:', appData.logo_url);
+          const { data: publicUrl } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(appData.logo_url);
+          console.log('Public URL result:', publicUrl);
+          if (publicUrl?.publicUrl) {
+            logoUrl = publicUrl.publicUrl;
           }
         }
         
@@ -931,15 +931,15 @@ export function AdminFloatingChat({
         
         let logoUrl: string | null = null;
         
-        // Get signed URL for logo if exists
+        // Get public URL for logo if exists
         if (appData?.logo_url) {
-          console.log('fetchAgencyDetailsBySenderId - Fetching signed URL for logo:', appData.logo_url);
-          const { data: signed, error: signError } = await supabase.storage
-            .from('agency-documents')
-            .createSignedUrl(appData.logo_url, 3600);
-          console.log('fetchAgencyDetailsBySenderId - Signed URL result:', { signed, signError });
-          if (!signError && signed?.signedUrl) {
-            logoUrl = signed.signedUrl;
+          console.log('fetchAgencyDetailsBySenderId - Fetching public URL for logo:', appData.logo_url);
+          const { data: publicUrl } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(appData.logo_url);
+          console.log('fetchAgencyDetailsBySenderId - Public URL result:', publicUrl);
+          if (publicUrl?.publicUrl) {
+            logoUrl = publicUrl.publicUrl;
           }
         }
         
@@ -965,13 +965,13 @@ export function AdminFloatingChat({
             
             let logoUrl: string | null = null;
             
-            // Get signed URL for logo if exists
+            // Get public URL for logo if exists
             if (appData?.logo_url) {
-              const { data: signed, error: signError } = await supabase.storage
-                .from('agency-documents')
-                .createSignedUrl(appData.logo_url, 3600);
-              if (!signError && signed?.signedUrl) {
-                logoUrl = signed.signedUrl;
+              const { data: publicUrl } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(appData.logo_url);
+              if (publicUrl?.publicUrl) {
+                logoUrl = publicUrl.publicUrl;
               }
             }
             

@@ -113,31 +113,21 @@ export function MyAgencyView() {
         // Fetch logo signed URL if exists
         if (appData?.logo_url) {
           setLogoLoading(true);
-          // The logo_url is stored as the path - try both with and without prefix
+          // The logo_url is stored as the path - normalize it
           let logoPath = appData.logo_url;
           if (logoPath.startsWith('agency-documents/')) {
             logoPath = logoPath.replace('agency-documents/', '');
           }
           
-          // First try agency-documents bucket
-          let { data: signedUrlData, error: signedUrlError } = await supabase.storage
-            .from('agency-documents')
-            .createSignedUrl(logoPath, 3600);
+          // Get public URL from agency-logos bucket
+          const { data: publicUrlData } = supabase.storage
+            .from('agency-logos')
+            .getPublicUrl(logoPath);
           
-          // If failed, try agency-logos bucket (public bucket for migrated logos)
-          if (signedUrlError || !signedUrlData?.signedUrl) {
-            const { data: publicUrlData } = supabase.storage
-              .from('agency-logos')
-              .getPublicUrl(logoPath);
-            
-            if (publicUrlData?.publicUrl) {
-              setLogoUrl(publicUrlData.publicUrl);
-            } else {
-              console.error('Error fetching logo URL:', signedUrlError);
-              setLogoLoading(false);
-            }
+          if (publicUrlData?.publicUrl) {
+            setLogoUrl(publicUrlData.publicUrl);
           } else {
-            setLogoUrl(signedUrlData.signedUrl);
+            setLogoLoading(false);
           }
         } else {
           setLogoLoading(false);

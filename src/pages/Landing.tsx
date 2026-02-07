@@ -185,26 +185,10 @@ const Landing = () => {
             for (const app of appData) {
               let logoUrl: string | null = null;
               if (app.logo_url) {
-                // Check if logo exists in public bucket (new format)
-                // or in private bucket (legacy format - requires migration)
                 const { data: publicUrl } = supabase.storage
                   .from('agency-logos')
                   .getPublicUrl(app.logo_url);
-                
-                // The public bucket URL will work if the file exists there
-                // For legacy logos in agency-documents, authenticated users will see them
-                // but unauthenticated users will see the fallback
                 logoUrl = publicUrl?.publicUrl || null;
-                
-                // For authenticated users, also try signed URL from private bucket as fallback
-                if (user) {
-                  const { data: signed } = await supabase.storage
-                    .from('agency-documents')
-                    .createSignedUrl(app.logo_url, 3600);
-                  if (signed?.signedUrl) {
-                    logoUrl = signed.signedUrl;
-                  }
-                }
               }
               const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
               agencies.push({
@@ -242,18 +226,16 @@ const Landing = () => {
               }
             }
 
-            // Create signed URLs for each logo
+            // Get public URLs for each logo
             const logos: Record<string, string> = {};
-            await Promise.all(
-              Object.entries(earliestLogoByAgency).map(async ([agencyName, path]) => {
-                const { data: signed, error: signError } = await supabase.storage
-                  .from('agency-documents')
-                  .createSignedUrl(path, 3600);
-                if (!signError && signed?.signedUrl) {
-                  logos[agencyName] = signed.signedUrl;
-                }
-              })
-            );
+            Object.entries(earliestLogoByAgency).forEach(([agencyName, path]) => {
+              const { data: publicUrl } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(path);
+              if (publicUrl?.publicUrl) {
+                logos[agencyName] = publicUrl.publicUrl;
+              }
+            });
             setAgencyLogos(logos);
           }
         }
@@ -292,11 +274,11 @@ const Landing = () => {
         .maybeSingle();
       
       if (appData?.logo_url) {
-        const { data: signed } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(appData.logo_url, 3600);
-        if (signed?.signedUrl) {
-          logoUrl = signed.signedUrl;
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(appData.logo_url);
+        if (publicUrl?.publicUrl) {
+          logoUrl = publicUrl.publicUrl;
         }
       }
       

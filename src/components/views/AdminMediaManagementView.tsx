@@ -277,25 +277,7 @@ export function AdminMediaManagementView() {
     const logos: Record<string, string> = {};
     await Promise.all(
       Object.entries(logoPathByAgency).map(async ([agencyName, path]) => {
-        // First try signed URL from private bucket
-        const { data: signed, error: signError } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(path, 3600);
-        
-        if (!signError && signed?.signedUrl) {
-          // Verify the signed URL works by checking if file exists
-          try {
-            const response = await fetch(signed.signedUrl, { method: 'HEAD' });
-            if (response.ok) {
-              logos[agencyName] = signed.signedUrl;
-              return;
-            }
-          } catch {
-            // File doesn't exist in agency-documents, try agency-logos
-          }
-        }
-        
-        // Fallback to public bucket using full path
+        // Get public URL from agency-logos bucket
         const { data: publicData } = supabase.storage
           .from('agency-logos')
           .getPublicUrl(path);
@@ -337,19 +319,17 @@ export function AdminMediaManagementView() {
       setWpAgencyNames((prev) => ({ ...prev, ...names }));
     }
 
-    // Create signed URLs for each logo
+    // Get public URLs for each logo
     const logos: Record<string, string> = {};
-    await Promise.all(
-      data.map(async (row) => {
-        if (!row?.user_id || !row?.logo_url) return;
-        const { data: signed, error: signError } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(row.logo_url, 3600);
-        if (!signError && signed?.signedUrl) {
-          logos[row.user_id] = signed.signedUrl;
-        }
-      })
-    );
+    data.forEach((row) => {
+      if (!row?.user_id || !row?.logo_url) return;
+      const { data: publicUrl } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(row.logo_url);
+      if (publicUrl?.publicUrl) {
+        logos[row.user_id] = publicUrl.publicUrl;
+      }
+    });
 
     if (Object.keys(logos).length > 0) {
       setWpAgencyLogos((prev) => ({ ...prev, ...logos }));
@@ -380,13 +360,13 @@ export function AdminMediaManagementView() {
 
       setSelectedAgencyDetails(data as AgencyDetails);
 
-      // Get signed URL for logo if exists
+      // Get public URL for logo if exists
       if (data.logo_url) {
-        const { data: signed, error: signError } = await supabase.storage
-          .from('agency-documents')
-          .createSignedUrl(data.logo_url, 3600);
-        if (!signError && signed?.signedUrl) {
-          setAgencyLogoSignedUrl(signed.signedUrl);
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(data.logo_url);
+        if (publicUrl?.publicUrl) {
+          setAgencyLogoSignedUrl(publicUrl.publicUrl);
         }
       }
 
