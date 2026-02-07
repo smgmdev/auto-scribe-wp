@@ -255,6 +255,14 @@ export function AdminAgencyWithdrawalsView() {
   const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
   const totalCompleted = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
 
+  // Pending breakdown by method
+  const pendingBankAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const pendingCryptoAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+
+  // Completed breakdown by method
+  const completedBankAmount = withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const completedCryptoAmount = withdrawals.filter(w => w.status === 'completed' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-500 text-white border-amber-500',
     approved: 'bg-blue-500 text-white border-blue-500',
@@ -307,7 +315,7 @@ export function AdminAgencyWithdrawalsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
-            Withdrawals that are currently pending
+            <p>Total number of withdrawals that are currently pending.</p>
           </TooltipContent>
         </Tooltip>
 
@@ -327,8 +335,26 @@ export function AdminAgencyWithdrawalsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
-            Total pending withdrawal amount
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm max-w-[280px]">
+            <div className="space-y-1">
+              <p className="font-medium">Total pending withdrawal amount:</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total:</span>
+                <span className="font-semibold text-amber-400">${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              {pendingBankAmount > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold text-amber-400">${pendingBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {pendingCryptoAmount > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">USDT:</span>
+                  <span className="font-semibold text-amber-400">${pendingCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
 
@@ -347,7 +373,7 @@ export function AdminAgencyWithdrawalsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
-            Total number of completed withdrawals
+            <p>Total number of completed withdrawals.</p>
           </TooltipContent>
         </Tooltip>
 
@@ -367,8 +393,26 @@ export function AdminAgencyWithdrawalsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm">
-            Total withdrawal amount
+          <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-sm max-w-[280px]">
+            <div className="space-y-1">
+              <p className="font-medium">Total withdrawal amount:</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total:</span>
+                <span className="font-semibold text-green-400">${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              {completedBankAmount > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">Bank:</span>
+                  <span className="font-semibold text-green-400">${completedBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {completedCryptoAmount > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">USDT:</span>
+                  <span className="font-semibold text-green-400">${completedCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
       </div>
