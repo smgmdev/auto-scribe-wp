@@ -198,10 +198,10 @@ serve(async (req) => {
       );
     }
 
-    // Get agency payout details to find the user_id
+    // Get agency payout details to find the user_id and CURRENT commission
     const { data: agencyPayout, error: agencyError } = await supabaseAdmin
       .from("agency_payouts")
-      .select("id, user_id, agency_name")
+      .select("id, user_id, agency_name, commission_percentage")
       .eq("id", serviceRequest.agency_payout_id)
       .single();
 
@@ -226,10 +226,25 @@ serve(async (req) => {
     const mediaSiteData = order.media_sites as unknown as { id: string; name: string; agency: string; price: number } | null;
     const creditCost = mediaSiteData?.price || Math.floor(order.amount_cents / 100);
 
-    // Calculate credits to allocate to agency (agency_payout_cents / 100 for dollars, which equals credits)
+    // DYNAMIC FEE CALCULATION: Use current agency commission at completion time
+    // This allows admin to adjust fees and have them apply to ongoing orders
+    const currentCommission = agencyPayout.commission_percentage ?? 10;
+    const dynamicPlatformFeeCents = Math.round(order.amount_cents * (currentCommission / 100));
+    const dynamicAgencyPayoutCents = order.amount_cents - dynamicPlatformFeeCents;
+    
+    logStep("Dynamic fee calculation", {
+      amountCents: order.amount_cents,
+      currentCommission,
+      dynamicPlatformFeeCents,
+      dynamicAgencyPayoutCents,
+      originalPlatformFeeCents: order.platform_fee_cents,
+      originalAgencyPayoutCents: order.agency_payout_cents
+    });
+
+    // Calculate credits to allocate to agency using DYNAMIC fees
     // 1 credit = $1 = 100 cents
-    const creditsToAllocate = Math.floor(order.agency_payout_cents / 100);
-    const platformFeeCredits = Math.floor(order.platform_fee_cents / 100);
+    const creditsToAllocate = Math.floor(dynamicAgencyPayoutCents / 100);
+    const platformFeeCredits = Math.floor(dynamicPlatformFeeCents / 100);
     
     logStep("Credit calculation", { 
       creditCost,
@@ -318,7 +333,7 @@ serve(async (req) => {
 
     logStep("Client spent transaction recorded");
 
-    // 3. Update order status to completed
+    // 3. Update order status to completed with DYNAMIC fees locked in
     const { error: updateOrderError } = await supabaseAdmin
       .from("orders")
       .update({
@@ -327,7 +342,10 @@ serve(async (req) => {
         accepted_at: now,
         released_at: now,
         read: false, // Notify user
-        agency_read: false // Notify agency
+        agency_read: false, // Notify agency
+        // Lock in the dynamic fees at completion time
+        platform_fee_cents: dynamicPlatformFeeCents,
+        agency_payout_cents: dynamicAgencyPayoutCents
       })
       .eq("id", order_id);
 
@@ -412,13 +430,13 @@ serve(async (req) => {
       logStep("Credit transaction recorded for agency");
     }
 
-    // 8. Create payout transaction record
+    // 8. Create payout transaction record with DYNAMIC fee
     await supabaseAdmin
       .from("payout_transactions")
       .insert({
         order_id: order_id,
         agency_payout_id: serviceRequest.agency_payout_id,
-        amount_cents: order.agency_payout_cents,
+        amount_cents: dynamicAgencyPayoutCents,
         status: "completed",
         completed_at: now
       });
