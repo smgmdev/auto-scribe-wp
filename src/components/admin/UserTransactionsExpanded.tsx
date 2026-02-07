@@ -92,12 +92,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       offer_accepted: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Credits Locked' },
       order_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Completed' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
+      order_payout: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Payout' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
       admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-    return <Badge className={badge.className}>{badge.label}</Badge>;
+    return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;
   };
 
   const filteredTransactions = activeType === 'all' 
