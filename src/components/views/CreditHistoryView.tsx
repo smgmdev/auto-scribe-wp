@@ -910,11 +910,11 @@ export function CreditHistoryView() {
                                       </div>
                                       <div>
                                         <span className="text-muted-foreground">Account Holder:</span>
-                                        <p className="font-medium">{(details.bank_details as any).account_holder || 'N/A'}</p>
+                                        <p className="font-medium">{(details.bank_details as any).bank_account_holder || (details.bank_details as any).account_holder || 'N/A'}</p>
                                       </div>
                                       <div className="col-span-2">
                                         <span className="text-muted-foreground">Account Number:</span>
-                                        <p className="font-medium">{(details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
+                                        <p className="font-medium">{(details.bank_details as any).bank_account_number ? `****${(details.bank_details as any).bank_account_number.slice(-4)}` : (details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
                                       </div>
                                     </>
                                   )}
@@ -1037,11 +1037,11 @@ export function CreditHistoryView() {
                                       </div>
                                       <div>
                                         <span className="text-muted-foreground">Account Holder:</span>
-                                        <p className="font-medium">{(details.bank_details as any).account_holder || 'N/A'}</p>
+                                        <p className="font-medium">{(details.bank_details as any).bank_account_holder || (details.bank_details as any).account_holder || 'N/A'}</p>
                                       </div>
                                       <div className="col-span-2">
                                         <span className="text-muted-foreground">Account Number:</span>
-                                        <p className="font-medium">{(details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
+                                        <p className="font-medium">{(details.bank_details as any).bank_account_number ? `****${(details.bank_details as any).bank_account_number.slice(-4)}` : (details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
                                       </div>
                                     </>
                                   )}
