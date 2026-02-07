@@ -633,16 +633,16 @@ export function CreditHistoryView() {
                   <div className="flex items-center gap-4">
                     {getTransactionIcon(transaction.type, transaction.amount)}
                     <div>
-                      <p className="font-medium">
-                        {transaction.description || `${transaction.type} transaction`}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2">
                         {getTransactionBadge(transaction.type)}
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                        </span>
+                        <p className="font-medium">
+                          {transaction.description || `${transaction.type} transaction`}
+                        </p>
                       </div>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                      </span>
                     </div>
                   </div>
                   <div className={`text-lg ${
