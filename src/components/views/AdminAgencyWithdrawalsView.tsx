@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy, CreditCard } from 'lucide-react';
+import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -577,19 +577,6 @@ export function AdminAgencyWithdrawalsView() {
                           )}
                         </div>
                         
-                        {/* Credit History Button */}
-                        <div className="mt-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                            className="gap-1.5"
-                          >
-                            <CreditCard className="h-3.5 w-3.5" />
-                            Credit History
-                          </Button>
-                        </div>
-                        
                         {/* Action Buttons */}
                         {withdrawal.status === 'pending' && (
                           <div className="flex gap-2 mt-3">
@@ -603,12 +590,31 @@ export function AdminAgencyWithdrawalsView() {
                             </Button>
                             <Button
                               size="sm"
-                              variant="outline"
                               onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'reject'); }}
                               disabled={processingId === withdrawal.id}
-                              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
                             >
                               Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                            >
+                              Credit History
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Credit History Button for non-pending */}
+                        {withdrawal.status !== 'pending' && (
+                          <div className="mt-3">
+                            <Button
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                            >
+                              Credit History
                             </Button>
                           </div>
                         )}
