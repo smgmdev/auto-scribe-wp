@@ -263,9 +263,9 @@ export function AgencyPayoutsView() {
             <Card className="transition-colors hover:border-[#4771d9] py-3 cursor-help border-green-500/30 bg-green-500/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Earnings
+                  Wallet
                 </CardTitle>
-                <CreditCard className="h-4 w-4 text-green-500/60" />
+                <Wallet className="h-4 w-4 text-green-500/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-green-500">
@@ -274,21 +274,8 @@ export function AgencyPayoutsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-            <div className="space-y-1">
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Sales:</span>
-                <span className="font-semibold">${summary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Platform Fees:</span>
-                <span className="font-semibold">${(summary.totalSales - summary.totalEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                <span className="text-white/70">Total Earnings:</span>
-                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-            </div>
+          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+            <p>Available balance: ${(summary.totalEarnings - summary.pendingPayouts - summary.completedPayouts).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -308,8 +295,21 @@ export function AgencyPayoutsView() {
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Total sales amount from all completed orders</p>
+          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
+            <div className="space-y-1">
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Sales:</span>
+                <span className="font-semibold">${summary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Platform Fees:</span>
+                <span className="font-semibold">${(summary.totalSales - summary.totalEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                <span className="text-white/70">Total Earnings:</span>
+                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
 
