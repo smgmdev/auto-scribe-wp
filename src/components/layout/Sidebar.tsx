@@ -516,7 +516,14 @@ export function Sidebar({
                     if (request.status === 'cancelled') {
                       cancelledRequestsCount++;
                     } else {
-                      serviceRequestsCount++;
+                      // Check if this request has a completed order (delivery_status === 'accepted')
+                      // If so, count it as completed, not as active service request
+                      const order = request.order_id ? ordersMap[request.order_id] : null;
+                      if (order && order.delivery_status === 'accepted') {
+                        unreadCompletedCount++;
+                      } else {
+                        serviceRequestsCount++;
+                      }
                     }
                   }
                 }
