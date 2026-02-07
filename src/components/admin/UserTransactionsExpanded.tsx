@@ -279,7 +279,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               </div>
               <div className="col-span-2">
                 <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Wallet Address</p>
-                <p className="font-medium font-mono text-xs break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
+                <p className="font-medium break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
               </div>
             </>
           )}
