@@ -242,9 +242,10 @@ export function AdminAgenciesView() {
   const approvedApplications = applications.filter(app => app.status === 'approved');
   
   // Filter agencies under verification - only include those with approved applications
-  // An agency is under verification if: not onboarding complete AND has an approved application for this user
+  // An agency is under verification if: not onboarding complete AND not downgraded AND has an approved application for this user
   const agenciesUnderVerification = agencies.filter(a => {
     if (a.onboarding_complete) return false;
+    if (a.downgraded) return false; // Exclude downgraded agencies from verification
     // Check if this agency has an approved application
     const hasApprovedApp = approvedApplications.some(app => app.user_id === a.user_id);
     return hasApprovedApp;
