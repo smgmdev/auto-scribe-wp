@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy } from 'lucide-react';
+import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useAppStore } from '@/stores/appStore';
 import {
   Dialog,
   DialogContent,
@@ -58,6 +59,7 @@ interface AgencyUserDetails {
 }
 
 export function AdminAgencyWithdrawalsView() {
+  const { setCurrentView, setAdminUsersTargetUserId, setAdminUsersTargetTab } = useAppStore();
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,6 +71,12 @@ export function AdminAgencyWithdrawalsView() {
   const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
   const [loadingUserDetailsId, setLoadingUserDetailsId] = useState<string | null>(null);
   const [loadingLogos, setLoadingLogos] = useState<Record<string, boolean>>({});
+
+  const handleViewCreditHistory = (userId: string) => {
+    setAdminUsersTargetUserId(userId);
+    setAdminUsersTargetTab('credits');
+    setCurrentView('admin-users');
+  };
 
   useEffect(() => {
     fetchWithdrawals();
@@ -567,6 +575,19 @@ export function AdminAgencyWithdrawalsView() {
                               Note: {withdrawal.admin_notes}
                             </p>
                           )}
+                        </div>
+                        
+                        {/* Credit History Button */}
+                        <div className="mt-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                            className="gap-1.5"
+                          >
+                            <CreditCard className="h-3.5 w-3.5" />
+                            Credit History
+                          </Button>
                         </div>
                         
                         {/* Action Buttons */}
