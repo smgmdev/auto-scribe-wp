@@ -1197,6 +1197,7 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <span className="font-medium">${(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <span className="text-muted-foreground">{formatDateTime(order.created_at)}</span>
+                                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
                                       </div>
                                     </div>
                                   ))}
