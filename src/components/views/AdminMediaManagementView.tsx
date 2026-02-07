@@ -272,21 +272,11 @@ export function AdminMediaManagementView() {
       }
     }
 
-    // Create URLs from storage buckets - try public first, then signed URLs
+    // Always use signed URLs from the private agency-documents bucket
+    // This is where the original logos are stored from agency applications
     const logos: Record<string, string> = {};
     await Promise.all(
       Object.entries(logoPathByAgency).map(async ([agencyName, path]) => {
-        // Try public bucket first using the FULL path (logos are copied with same path structure)
-        const { data: publicData } = supabase.storage
-          .from('agency-logos')
-          .getPublicUrl(path);
-        
-        if (publicData?.publicUrl) {
-          logos[agencyName] = publicData.publicUrl;
-          return;
-        }
-        
-        // Fall back to signed URL from private bucket
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
           .createSignedUrl(path, 3600);
