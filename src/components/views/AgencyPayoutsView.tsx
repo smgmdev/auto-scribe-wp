@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, CreditCard, ArrowDownLeft, ExternalLink, Clock, Copy, RefreshCw } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ExternalLink, Clock, Copy, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { WithdrawDialog } from '@/components/agency/WithdrawDialog';
 
 interface CompletedOrder {
   id: string;
@@ -46,6 +47,10 @@ export function AgencyPayoutsView() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+
+  // Calculate available balance (total earnings minus pending and completed payouts)
+  const availableBalance = summary.totalEarnings - summary.pendingPayouts - summary.completedPayouts;
 
   const handleViewOrderDetails = async (orderId: string) => {
     setOpeningChat(orderId);
@@ -211,7 +216,7 @@ export function AgencyPayoutsView() {
   };
 
   const handleWithdraw = () => {
-    toast.info('Withdraw feature coming soon');
+    setWithdrawDialogOpen(true);
   };
 
   useEffect(() => {
@@ -455,6 +460,13 @@ export function AgencyPayoutsView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Withdraw Dialog */}
+      <WithdrawDialog
+        open={withdrawDialogOpen}
+        onOpenChange={setWithdrawDialogOpen}
+        availableBalance={availableBalance}
+      />
     </div>
   );
 }
