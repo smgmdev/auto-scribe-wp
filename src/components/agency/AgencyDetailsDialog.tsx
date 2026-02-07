@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Loader2 } from 'lucide-react';
+import { Building2, Loader2, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -136,12 +136,13 @@ export function AgencyDetailsDialog({
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
                 <a 
-                  href={agencyDetails.agency_website} 
+                  href={agencyDetails.agency_website.startsWith('http') ? agencyDetails.agency_website : `https://${agencyDetails.agency_website}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-foreground hover:underline break-all"
+                  className="text-blue-600 hover:underline inline-flex items-center gap-1"
                 >
-                  {agencyDetails.agency_website}
+                  {agencyDetails.agency_website.replace(/^https?:\/\//, '')}
+                  <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             )}
