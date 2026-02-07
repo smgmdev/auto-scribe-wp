@@ -49,8 +49,8 @@ export function SendCreditsDialog({
 
       // Create transaction record
       const description = reason 
-        ? `Gifted: ${reason}`
-        : 'Gifted credits';
+        ? `Gifted by Arcana Mace Staff: ${reason}`
+        : 'Gifted credits by Arcana Mace Staff';
 
       const { error: txError } = await supabase
         .from('credit_transactions')

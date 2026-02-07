@@ -375,8 +375,8 @@ export function AdminUsersView() {
       amount: creditAction === 'add' ? amount : -amount,
       type: creditAction === 'add' ? 'gifted' : 'admin_deduct',
       description: creditAction === 'add' 
-        ? `Gifted ${amount} credits by admin`
-        : `Admin removed ${amount} credits`,
+        ? `Gifted ${amount} credits by Arcana Mace Staff`
+        : `Removed ${amount} credits by Arcana Mace Staff`,
     });
 
     if (txError) {
