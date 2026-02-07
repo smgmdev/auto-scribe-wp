@@ -7139,7 +7139,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     onClick={() => handleOpenAgencyDetails(globalChatRequest.media_site!.agency!)}
                   >
                     {globalChatRequest.media_site.agency}
-                    <ExternalLink className="h-3 w-3" />
+                    <Info className="h-3 w-3" />
                   </p>
                 </div>
               )}
