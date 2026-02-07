@@ -444,7 +444,7 @@ export function CreditHistoryView() {
       return <Lock className="h-5 w-5 text-amber-500" />;
     }
     if (type === 'withdrawal_unlocked') {
-      return <LockOpen className="h-5 w-5 text-blue-500" />;
+      return <LockOpen className="h-5 w-5 text-muted-foreground" />;
     }
     if (type === 'withdrawal_completed') {
       return <ArrowDownCircle className="h-5 w-5 text-foreground" />;
@@ -1001,8 +1001,8 @@ export function CreditHistoryView() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-lg text-green-500">
-                          +${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                        <div className="text-lg text-muted-foreground">
+                          ${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                         </div>
                       </div>
                       
