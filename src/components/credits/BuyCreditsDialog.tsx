@@ -126,17 +126,17 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   }, [isDragging]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent 
         className="sm:max-w-md z-[10000]" 
-        overlayClassName="bg-transparent"
+        overlayClassName="bg-transparent pointer-events-none"
         style={{
           transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
         }}
       >
         {/* Drag Handle */}
         <div
-          className="absolute top-0 left-0 right-0 h-12 cursor-grab active:cursor-grabbing flex items-center justify-center"
+          className="absolute top-0 left-0 right-0 h-12 cursor-grab active:cursor-grabbing flex items-center justify-center z-10"
           onMouseDown={handleDragStart}
         >
           <GripHorizontal className="h-4 w-4 text-muted-foreground/50" />
