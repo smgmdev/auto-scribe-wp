@@ -328,9 +328,15 @@ export function CreditHistoryView() {
     };
   }, [user, fetchData]);
 
-  const totalPurchased = transactions
+  const onlinePurchased = transactions
     .filter(t => t.type === 'purchase')
     .reduce((sum, t) => sum + t.amount, 0);
+
+  const offlineInvoice = transactions
+    .filter(t => t.type === 'gifted' || t.type === 'admin_credit')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalPurchased = onlinePurchased + offlineInvoice;
 
   // Total spent = only from completed orders + other usage/deductions
   // Don't subtract refunds here - refunds are for cancelled orders, not completed ones
@@ -601,7 +607,11 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            <p>Total credits you have purchased</p>
+            <div className="space-y-1">
+              <p className="font-medium">Total credits purchased:</p>
+              <p>Online via platform: {onlinePurchased.toLocaleString()}</p>
+              <p>Offline via invoice: {offlineInvoice.toLocaleString()}</p>
+            </div>
           </TooltipContent>
         </Tooltip>
 
