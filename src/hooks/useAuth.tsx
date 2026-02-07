@@ -12,6 +12,7 @@ interface AuthContextType {
   role: AppRole | null;
   credits: number;
   isAdmin: boolean;
+  emailVerified: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
   signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<AppRole | null>(null);
   const [credits, setCredits] = useState(0);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [pinRequired, setPinRequired] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
   const hasShownWelcomeRef = useRef(false);
@@ -72,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setRole(null);
     setCredits(0);
+    setEmailVerified(false);
     setPinRequired(false);
     setPinVerified(false);
     hasShownWelcomeRef.current = false;
@@ -108,12 +111,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCredits(creditsData.credits);
       }
 
-      // Check if PIN is required
+      // Check profile for PIN and email verification status
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('pin_enabled, pin_hash')
+        .select('pin_enabled, pin_hash, email_verified')
         .eq('id', userId)
         .maybeSingle();
+      
+      // Set email verification status
+      setEmailVerified(profileData?.email_verified ?? false);
       
       if (profileData?.pin_enabled && profileData?.pin_hash) {
         setPinRequired(true);
@@ -413,6 +419,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         credits,
         isAdmin: role === 'admin',
+        emailVerified,
         pinRequired,
         pinVerified,
         signUp,
