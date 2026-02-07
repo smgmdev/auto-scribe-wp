@@ -419,18 +419,18 @@ export function AgencyPayoutsView() {
               <p className="font-medium">Pending withdrawal requests</p>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total pending:</span>
-                <span className="font-semibold">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-semibold text-amber-400">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               {pendingBankWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold">${pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold text-amber-400">${pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               {pendingCryptoWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold text-amber-400">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
             </div>
@@ -458,18 +458,18 @@ export function AgencyPayoutsView() {
               <p className="font-medium">Successfully transferred payouts to your account</p>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total completed:</span>
-                <span className="font-semibold">${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-semibold text-green-400">${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               {completedBankWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold">${completedBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold text-green-400">${completedBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               {completedCryptoWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold">${completedCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold text-green-400">${completedCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
             </div>
