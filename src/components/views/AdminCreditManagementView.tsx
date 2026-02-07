@@ -276,7 +276,7 @@ export const AdminCreditManagementView = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch transactions to calculate used credits per user
+      // Fetch transactions to calculate credits per user
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
         .select('user_id, amount, type');
@@ -297,24 +297,35 @@ export const AdminCreditManagementView = () => {
         emailMap.set(profile.id, profile.email);
       });
 
-      // Calculate purchased, gifted, and refunded credits per user
+      // Calculate incoming credits per user (positive amounts)
+      const incomingMap = new Map<string, number>();
+      // Calculate outgoing credits per user (negative amounts, excluding locked types)
+      const outgoingMap = new Map<string, number>();
+      // Track purchased, gifted, refunded separately for display
       const purchasedMap = new Map<string, number>();
       const giftedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
+      const deductionsMap = new Map<string, number>();
+      
       transactionsData?.forEach(tx => {
-        if (tx.type === 'refund') {
-          refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        // Calculate incoming (all positive amounts)
+        if (tx.amount > 0) {
+          incomingMap.set(tx.user_id, (incomingMap.get(tx.user_id) || 0) + tx.amount);
+        }
+        
+        // Calculate outgoing (negative amounts, excluding locked/offer_accepted/order types)
+        if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
+          outgoingMap.set(tx.user_id, (outgoingMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+        
+        // Track specific types for display columns
+        if (tx.type === 'refund' && tx.amount > 0) {
+          refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'gifted' || tx.type === 'admin_credit') {
           giftedMap.set(tx.user_id, (giftedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'purchase') {
           purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
-        }
-      });
-
-      // Calculate deductions per user
-      const deductionsMap = new Map<string, number>();
-      transactionsData?.forEach(tx => {
-        if (tx.type === 'admin_deduct') {
+        } else if (tx.type === 'admin_deduct') {
           deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
       });
@@ -341,16 +352,23 @@ export const AdminCreditManagementView = () => {
       });
 
       const combined: UserCredit[] = (creditsData || []).map(credit => {
-        const totalCredits = credit.credits;
+        const incoming = incomingMap.get(credit.user_id) || 0;
+        const outgoing = outgoingMap.get(credit.user_id) || 0;
         const locked = lockedMap.get(credit.user_id) || 0;
+        
+        // Total Balance = Incoming - Outgoing (excluding locked)
+        const calculatedTotalBalance = incoming - outgoing;
+        // Available = Total Balance - Locked
+        const calculatedAvailable = calculatedTotalBalance - locked;
+        
         return {
           user_id: credit.user_id,
           purchased: purchasedMap.get(credit.user_id) || 0,
           gifted: giftedMap.get(credit.user_id) || 0,
           deductions: deductionsMap.get(credit.user_id) || 0,
-          totalCredits: totalCredits + locked, // Total = available + locked
+          totalCredits: calculatedTotalBalance,
           locked: locked,
-          available: totalCredits, // user_credits.credits IS the available balance (locked already subtracted)
+          available: calculatedAvailable,
           orders: ordersMap.get(credit.user_id) || 0,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
