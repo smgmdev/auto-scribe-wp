@@ -159,7 +159,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
           user_id: user.id,
           amount: -Math.round(numAmount * 100), // Negative cents to indicate locked funds
           type: 'withdrawal_locked',
-          description: `Credits locked for withdrawal - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'}`
+          description: `Withdrawal pending - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'} ($${numAmount.toLocaleString()})`
           // Note: order_id not set as it references orders table, not withdrawals
         });
 
