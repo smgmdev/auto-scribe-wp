@@ -1050,7 +1050,7 @@ export function AdminUsersView() {
                 onClick={() => setCreditAction('add')}
                 className={`flex-1 ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
               >
-                Add
+                Gift
               </Button>
               <Button
                 variant={creditAction === 'remove' ? 'default' : 'outline'}
