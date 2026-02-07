@@ -711,7 +711,7 @@ export function AdminAgencyWithdrawalsView() {
               onClick={confirmAction}
               disabled={processingId !== null}
               className={
-                actionType === 'approve' ? 'bg-green-500 hover:bg-green-600 text-white' :
+                actionType === 'approve' ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500' :
                 actionType === 'reject' ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive' :
                 'bg-green-500 hover:bg-green-600'
               }
