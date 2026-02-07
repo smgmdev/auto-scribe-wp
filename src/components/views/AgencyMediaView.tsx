@@ -746,7 +746,7 @@ export function AgencyMediaView() {
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-muted/50 transition-colors">
+                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all">
                                   Action
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
@@ -755,7 +755,7 @@ export function AgencyMediaView() {
                                 {site.connected ? (
                                   <DropdownMenuItem 
                                     onClick={() => handleDisconnectSite(site.id)}
-                                    className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
+                                    className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
                                   >
                                     <Unplug className="h-4 w-4 mr-2" />
                                     Disconnect
@@ -763,7 +763,7 @@ export function AgencyMediaView() {
                                 ) : (
                                   <DropdownMenuItem 
                                     onClick={() => handleConnectSite(site.id)}
-                                    className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
+                                    className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
                                   >
                                     <Plug className="h-4 w-4 mr-2" />
                                     Connect
@@ -771,14 +771,14 @@ export function AgencyMediaView() {
                                 )}
                                 <DropdownMenuItem 
                                   onClick={() => handleOpenPriceDialog(site)}
-                                  className="cursor-pointer hover:bg-muted/50 focus:bg-muted/50 transition-colors"
+                                  className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
                                 >
                                   <DollarSign className="h-4 w-4 mr-2" />
                                   Change Price
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleDeleteSite(site)}
-                                  className="cursor-pointer text-destructive hover:bg-muted/50 focus:bg-muted/50 transition-colors"
+                                  className="cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground transition-colors"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete
