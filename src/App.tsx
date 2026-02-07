@@ -75,15 +75,14 @@ const usePreventBodyStyleChanges = () => {
 
 // Messaging widget wrapper that hides during loading screens and incomplete auth states
 function MessagingWidget() {
-  const { loading, user, pinRequired, pinVerified } = useAuth();
+  const { loading, user, emailVerified, pinRequired, pinVerified } = useAuth();
   
   // Don't render messaging widget during:
   // 1. Loading screen
   // 2. No authenticated user
-  // 3. PIN required but not yet verified
-  // This prevents the widget from flashing during signup (before email verification)
-  // because Supabase creates a session immediately after signup
-  if (loading || !user || (pinRequired && !pinVerified)) return null;
+  // 3. Email not verified (prevents flash during signup when Supabase auto-logs in)
+  // 4. PIN required but not yet verified
+  if (loading || !user || !emailVerified || (pinRequired && !pinVerified)) return null;
   
   return (
     <>
