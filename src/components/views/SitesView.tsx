@@ -18,6 +18,7 @@ import { getFaviconUrl, extractDomain, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import type { SEOPlugin } from '@/types';
 
 interface SiteCredit {
@@ -110,7 +111,8 @@ export function SitesView() {
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
-  const [selectedAgency, setSelectedAgency] = useState<ActiveAgency | null>(null);
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
   
   // Track user's open engagements by media_site_id (stores full request data for opening chat)
   const [openEngagements, setOpenEngagements] = useState<Record<string, any>>({});
@@ -1629,7 +1631,8 @@ export function SitesView() {
                               key={agency.id}
                               className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
                               onClick={() => {
-                                setSelectedAgency(agency);
+                                setSelectedAgencyName(agency.name);
+                                setAgencyDetailsOpen(true);
                                 setSearchQuery('');
                                 setShowSearchDropdown(false);
                               }}
@@ -1828,7 +1831,10 @@ export function SitesView() {
                                         <Button
                                           size="sm"
                                           className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
-                                          onClick={() => setSelectedAgency(agency)}
+                                          onClick={() => {
+                                            setSelectedAgencyName(agency.name);
+                                            setAgencyDetailsOpen(true);
+                                          }}
                                         >
                                           View Details
                                           <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
@@ -2382,83 +2388,11 @@ export function SitesView() {
       </Dialog>
 
       {/* Agency Detail Dialog */}
-      <Dialog open={!!selectedAgency} onOpenChange={(open) => !open && setSelectedAgency(null)}>
-        <DialogContent className="sm:max-w-md">
-          {selectedAgency && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-3">
-                  <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border">
-                    {selectedAgency.favicon ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground absolute" />
-                        <img 
-                          src={selectedAgency.favicon} 
-                          alt={`${selectedAgency.name} logo`} 
-                          className="h-full w-full object-cover relative z-10"
-                          onLoad={(e) => {
-                            const loader = e.currentTarget.previousElementSibling as HTMLElement;
-                            if (loader) loader.style.display = 'none';
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            const loader = e.currentTarget.previousElementSibling as HTMLElement;
-                            if (loader) loader.style.display = 'none';
-                            (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-                          }}
-                        />
-                        <Globe className="h-6 w-6 text-muted-foreground hidden" />
-                      </>
-                    ) : (
-                      <Globe className="h-6 w-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <DialogTitle>{selectedAgency.name}</DialogTitle>
-                    <DialogDescription className="text-xs">
-                      Agency
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                {selectedAgency.country && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Country</p>
-                    <p className="text-foreground">{selectedAgency.country}</p>
-                  </div>
-                )}
-
-                {selectedAgency.link && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Website</p>
-                    <a 
-                      href={ensureHttps(selectedAgency.link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent hover:underline flex items-center gap-1 w-fit"
-                    >
-                      {extractDomain(selectedAgency.link)}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSelectedAgency(null)}
-                  className="hover:bg-black hover:text-white transition-colors"
-                >
-                  Close
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={selectedAgencyName}
+      />
 
       {/* Brief Submission Dialog */}
       <BriefSubmissionDialog
