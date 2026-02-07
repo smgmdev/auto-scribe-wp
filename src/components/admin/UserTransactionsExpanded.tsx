@@ -139,7 +139,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 <TableHead>Type</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -150,12 +149,11 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                     No transactions found
                   </TableCell>
                 </TableRow>
@@ -170,28 +168,32 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       )}
                     </TableCell>
                     <TableCell>{getTypeBadge(tx.type)}</TableCell>
-                    <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help underline decoration-dotted">
-                              {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs">
-                            <p className="font-medium">Reason:</p>
-                            <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
-                      )}
+                    <TableCell className="max-w-xs">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-muted-foreground truncate">
+                          {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help underline decoration-dotted">
+                                  {tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p className="font-medium">Reason:</p>
+                                <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                          )}
+                        </span>
+                        <span className="text-xs text-muted-foreground/70">
+                          {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className={`text-right font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground whitespace-nowrap text-sm">
-                      {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </TableCell>
                   </TableRow>
                 ))
