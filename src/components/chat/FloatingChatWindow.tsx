@@ -6913,7 +6913,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
               {orderDetails.delivery_url && (
                 <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Delivery Link</p>
+                  <p className="text-sm text-muted-foreground mb-1">Delivery Link</p>
                   <a 
                     href={orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
                     target="_blank"
@@ -6928,7 +6928,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
               {orderDetails.delivery_notes && (
                 <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Delivery Notes</p>
+                  <p className="text-sm text-muted-foreground mb-1">Delivery Notes</p>
                   <p className="text-sm">{orderDetails.delivery_notes}</p>
                 </div>
               )}
