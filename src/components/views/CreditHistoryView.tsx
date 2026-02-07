@@ -351,7 +351,7 @@ export function CreditHistoryView() {
       case 'order_accepted':
         return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/30">Accepted</Badge>;
       case 'offer_accepted':
-        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Offer Accepted</Badge>;
+        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Credits Locked</Badge>;
       case 'order_delivered':
         return <Badge variant="secondary" className="bg-purple-500/10 text-purple-500 border-purple-500/30">Delivered</Badge>;
       case 'spent':
@@ -648,7 +648,7 @@ export function CreditHistoryView() {
                     </div>
                   </div>
                   <div className={`text-lg ${
-                    transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                    transaction.type === 'offer_accepted' ? 'text-amber-500' : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                   }`}>
                     {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
                   </div>
