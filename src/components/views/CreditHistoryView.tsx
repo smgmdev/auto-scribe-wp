@@ -440,9 +440,34 @@ export function CreditHistoryView() {
   };
 
   // Filter transactions to show all order-related events
-  const displayedTransactions = transactions.filter(t => 
+  // When a withdrawal_completed exists, replace the corresponding withdrawal_locked (same amount and method)
+  const filteredTransactions = transactions.filter(t => 
     ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct', 'withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(t.type)
   );
+
+  // Find completed withdrawals to identify which pending ones to hide
+  const completedWithdrawals = filteredTransactions.filter(t => t.type === 'withdrawal_completed');
+  
+  // Build a set of withdrawal identifiers (amount + method) that have been completed
+  const completedWithdrawalKeys = new Set(
+    completedWithdrawals.map(t => {
+      const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
+      return `${Math.abs(t.amount)}-${method}`;
+    })
+  );
+
+  // Filter out withdrawal_locked transactions that have a matching completed withdrawal
+  const displayedTransactions = filteredTransactions.filter(t => {
+    if (t.type === 'withdrawal_locked') {
+      const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
+      const key = `${Math.abs(t.amount)}-${method}`;
+      // Hide this pending withdrawal if there's a completed one with the same amount and method
+      if (completedWithdrawalKeys.has(key)) {
+        return false;
+      }
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-2">
