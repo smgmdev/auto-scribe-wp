@@ -200,6 +200,7 @@ export function Sidebar({
   } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
+  const [isDowngraded, setIsDowngraded] = useState(false);
   const [hasUserNavigated, setHasUserNavigated] = useState(false);
   
   const [payoutMethod, setPayoutMethod] = useState<string | null>(null);
@@ -254,6 +255,7 @@ export function Sidebar({
     if (!user?.id) {
       setAgencyDataLoaded(false);
       setIsAgencyOnboarded(false);
+      setIsDowngraded(false);
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
@@ -271,6 +273,7 @@ export function Sidebar({
       
       setPayoutMethod(null);
       setIsAgencyOnboarded(false);
+      setIsDowngraded(false);
       setUserCustomVerificationStatus(null);
       setAgencyDataLoaded(true);
     }
@@ -405,12 +408,13 @@ export function Sidebar({
       // Check if user has agency payout record and onboarding status
       const { data: agencyData } = await supabase
         .from('agency_payouts')
-        .select('onboarding_complete, stripe_account_id, payout_method')
+        .select('onboarding_complete, stripe_account_id, payout_method, downgraded')
         .eq('user_id', user.id)
         .maybeSingle();
       
       if (isMounted && agencyData) {
-        setIsAgencyOnboarded(agencyData.onboarding_complete === true);
+        setIsAgencyOnboarded(agencyData.onboarding_complete === true && agencyData.downgraded !== true);
+        setIsDowngraded(agencyData.downgraded === true);
         
         setPayoutMethod(agencyData.payout_method);
         
@@ -1408,6 +1412,7 @@ export function Sidebar({
                 rejectionSeen={rejectionSeen}
                 payoutMethod={payoutMethod}
                 isAgencyOnboarded={isAgencyOnboarded}
+                isDowngraded={isDowngraded}
                 customVerificationStatus={userCustomVerificationStatus}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}

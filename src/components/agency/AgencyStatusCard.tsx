@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Building2, CheckCircle, Clock, XCircle, UserMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -9,6 +9,7 @@ interface AgencyStatusCardProps {
   rejectionSeen: boolean;
   payoutMethod: string | null;
   isAgencyOnboarded: boolean;
+  isDowngraded: boolean;
   customVerificationStatus: string | null;
   onNavigateToApplication: () => void;
   onStatusUpdate: (onboarded: boolean) => void;
@@ -21,6 +22,7 @@ export function AgencyStatusCard({
   rejectionSeen,
   payoutMethod,
   isAgencyOnboarded,
+  isDowngraded,
   customVerificationStatus,
   onNavigateToApplication,
   onStatusUpdate,
@@ -141,7 +143,24 @@ export function AgencyStatusCard({
     );
   }
 
-  // STATE 4: Fully onboarded agency - Don't show any box, badge shown in dashboard
+  // STATE 4: Downgraded agency - Show downgraded state
+  if (isDowngraded) {
+    return (
+      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
+            <UserMinus className="h-5 w-5 text-red-500" />
+          </div>
+          <div className="flex-1">
+            <span className="font-medium text-red-400">Downgraded</span>
+            <p className="text-xs text-sidebar-foreground/60 mt-0.5">Your account has been downgraded. Contact support for details.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STATE 5: Fully onboarded agency - Don't show any box, badge shown in dashboard
   if (isAgencyOnboarded) {
     return null;
   }
