@@ -362,7 +362,10 @@ export function CreditHistoryView() {
       admin_credit: { className: 'bg-emerald-100 text-emerald-700', label: 'Gifted' },
       order_payout: { className: 'bg-emerald-100 text-emerald-700', label: 'Earnings' },
       refund: { className: 'bg-orange-100 text-orange-700', label: 'Refund' },
-      admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' }
+      admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' },
+      withdrawal_locked: { className: 'bg-amber-100 text-amber-700', label: 'Withdrawal Pending' },
+      withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700', label: 'Withdrawal Returned' },
+      withdrawal_completed: { className: 'bg-green-100 text-green-700', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={badge.className}>{badge.label}</Badge>;
@@ -370,7 +373,7 @@ export function CreditHistoryView() {
 
   // Filter transactions to show all order-related events
   const displayedTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct', 'withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(t.type)
   );
 
   return (
