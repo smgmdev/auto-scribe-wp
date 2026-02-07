@@ -231,15 +231,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         previousUserIdRef.current = newUserId;
         
-        // Show welcome back notification on actual sign in (not on page refresh/session restore)
-        // SIGNED_IN fires on refresh too, so we check if this is NOT the initial load
+        // Mark that we've seen a sign in (for tracking purposes)
         if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current && !isInitialLoadRef.current) {
           hasShownWelcomeRef.current = true;
-          toast({
-            title: "Welcome back! 👋",
-            description: "You have successfully signed in.",
-            duration: 2000,
-          });
         }
         
         // After first auth state change, no longer initial load
