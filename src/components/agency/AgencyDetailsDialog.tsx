@@ -86,6 +86,11 @@ export function AgencyDetailsDialog({
         country: country,
         agency_description: agencyDescription
       });
+      
+      // If no logo URL, stop the logo loading state
+      if (!logoUrl) {
+        setLogoLoading(false);
+      }
     } catch (error) {
       console.error('Error fetching agency details:', error);
       setAgencyDetails(null);
