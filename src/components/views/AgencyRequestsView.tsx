@@ -190,13 +190,31 @@ export function AgencyRequestsView() {
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
 
-      // Count unread using the same message-based logic
-      const unreadCount = mappedRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+      // Count unread ACTIVE requests only - exclude cancelled AND completed (order.delivery_status === 'accepted')
+      // This must match the activeRequests filter logic
+      const unreadCount = mappedRequests.filter(r => 
+        !r.read && 
+        r.status !== 'cancelled' && 
+        !(r.order && r.order.delivery_status === 'accepted')
+      ).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
       
-      // Count unread cancelled requests
-      const unreadCancelledCount = mappedRequests.filter(r => !r.read && r.status === 'cancelled').length;
+      // Count unread cancelled requests (includes requests with cancelled orders)
+      const unreadCancelledCount = mappedRequests.filter(r => 
+        !r.read && (
+          r.status === 'cancelled' || 
+          (r.order && (r.order.status === 'cancelled' || r.order.delivery_status === 'cancelled'))
+        )
+      ).length;
       setAgencyUnreadCancelledCount(unreadCancelledCount);
+      
+      // Count unread completed requests
+      const unreadCompletedRequestsCount = mappedRequests.filter(r => 
+        !r.read && 
+        r.status !== 'cancelled' && 
+        r.order && r.order.delivery_status === 'accepted'
+      ).length;
+      setAgencyUnreadCompletedCount(unreadCompletedRequestsCount);
 
       // Fetch orders for this agency's service requests
       const requestIds = data.map(r => r.id);
@@ -286,8 +304,12 @@ export function AgencyRequestsView() {
             return r;
           });
           
-          // Recalculate unread count
-          const newUnreadCount = updated.filter(r => !r.read && r.status !== 'cancelled').length;
+          // Recalculate unread count - exclude cancelled AND completed
+          const newUnreadCount = updated.filter(r => 
+            !r.read && 
+            r.status !== 'cancelled' && 
+            !(r.order && r.order.delivery_status === 'accepted')
+          ).length;
           setAgencyUnreadServiceRequestsCount(newUnreadCount);
           
           return updated;
@@ -442,12 +464,21 @@ export function AgencyRequestsView() {
             });
             
             // Don't remove cancelled requests - they go to Cancelled tab
-            // Just recalculate unread counts
-            const newUnreadCount = newRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+            // Just recalculate unread counts - exclude completed requests
+            const newUnreadCount = newRequests.filter(r => 
+              !r.read && 
+              r.status !== 'cancelled' && 
+              !(r.order && r.order.delivery_status === 'accepted')
+            ).length;
             setAgencyUnreadServiceRequestsCount(newUnreadCount);
             
-            // Also update cancelled unread count
-            const newCancelledUnreadCount = newRequests.filter(r => !r.read && r.status === 'cancelled').length;
+            // Also update cancelled unread count (includes cancelled orders)
+            const newCancelledUnreadCount = newRequests.filter(r => 
+              !r.read && (
+                r.status === 'cancelled' || 
+                (r.order && (r.order.status === 'cancelled' || r.order.delivery_status === 'cancelled'))
+              )
+            ).length;
             setAgencyUnreadCancelledCount(newCancelledUnreadCount);
             return newRequests;
           });
@@ -920,7 +951,9 @@ export function AgencyRequestsView() {
 
   const markAsRead = async (requestId: string) => {
     const request = requests.find(r => r.id === requestId);
-    const isCancelled = request?.status === 'cancelled';
+    const isCancelled = request?.status === 'cancelled' || 
+      (request?.order && (request.order.status === 'cancelled' || request.order.delivery_status === 'cancelled'));
+    const isCompleted = request?.order && request.order.delivery_status === 'accepted';
     
     await supabase
       .from('service_requests')
@@ -931,12 +964,28 @@ export function AgencyRequestsView() {
       r.id === requestId ? { ...r, read: true } : r
     ));
     
-    // Update the appropriate count based on whether the request is cancelled
+    // Update the appropriate count based on whether the request is cancelled or completed
     if (isCancelled) {
-      const newCancelledCount = requests.filter(r => !r.read && r.id !== requestId && r.status === 'cancelled').length;
+      const newCancelledCount = requests.filter(r => 
+        !r.read && r.id !== requestId && (
+          r.status === 'cancelled' || 
+          (r.order && (r.order.status === 'cancelled' || r.order.delivery_status === 'cancelled'))
+        )
+      ).length;
       setAgencyUnreadCancelledCount(newCancelledCount);
+    } else if (isCompleted) {
+      const newCompletedCount = requests.filter(r => 
+        !r.read && r.id !== requestId && 
+        r.status !== 'cancelled' && 
+        r.order && r.order.delivery_status === 'accepted'
+      ).length;
+      setAgencyUnreadCompletedCount(newCompletedCount);
     } else {
-      const newUnreadCount = requests.filter(r => !r.read && r.id !== requestId && r.status !== 'cancelled').length;
+      const newUnreadCount = requests.filter(r => 
+        !r.read && r.id !== requestId && 
+        r.status !== 'cancelled' && 
+        !(r.order && r.order.delivery_status === 'accepted')
+      ).length;
       setAgencyUnreadServiceRequestsCount(newUnreadCount);
     }
     
