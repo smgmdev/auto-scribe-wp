@@ -465,11 +465,11 @@ export function AdminAgencyWithdrawalsView() {
                         {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
                       </Badge>
                     </div>
-                    <p className="absolute bottom-3 right-3 font-semibold text-foreground">
+                    <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-foreground">
                       ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     
-                    <div className="flex items-start gap-3 pr-32">
+                    <div className="flex items-start gap-3 md:pr-32">
                       <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-muted overflow-hidden">
                         {loadingLogos[withdrawal.id] ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -619,17 +619,29 @@ export function AdminAgencyWithdrawalsView() {
                           </div>
                         )}
                         {withdrawal.status === 'approved' && (
-                          <div className="flex gap-2 mt-3">
+                          <div className="flex flex-col md:flex-row gap-2 mt-3">
                             <Button
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'complete'); }}
                               disabled={processingId === withdrawal.id}
-                              className="bg-green-500 text-white hover:bg-green-600"
+                              className="w-full md:w-auto bg-green-500 text-white hover:bg-green-600"
                             >
                               Mark as Completed
                             </Button>
+                            <Button
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                            >
+                              Credit History
+                            </Button>
                           </div>
                         )}
+                        
+                        {/* Mobile Price */}
+                        <p className="md:hidden mt-3 font-semibold text-foreground">
+                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
                       </div>
                     </div>
                   </div>
