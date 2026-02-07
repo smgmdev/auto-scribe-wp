@@ -616,7 +616,7 @@ export function AdminAgencyWithdrawalsView() {
                                 {withdrawal.crypto_details.usdt_network || 'TRC20'} Network
                               </p>
                               {withdrawal.crypto_details.usdt_wallet_address && (
-                                <div className="flex items-center gap-1 font-mono text-[11px]">
+                                <div className="flex items-center gap-1">
                                   <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
