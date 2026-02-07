@@ -1332,6 +1332,33 @@ export function AdminMediaManagementView() {
     setIsImporting(true);
 
     try {
+      // Helper function to parse CSV line handling quoted fields with commas
+      const parseCSVLine = (line: string): string[] => {
+        const values: string[] = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+
+          if (char === '"') {
+            if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+              current += '"'; // Handle escaped quotes ""
+              i++;
+            } else {
+              inQuotes = !inQuotes; // Toggle quote state
+            }
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim()); // Add the last value
+        return values;
+      };
+
       // Helper function to parse CSV
       const parseSheet = async (sheetUrl: string) => {
         const csvUrl = sheetUrl.includes('/edit') 
@@ -1352,8 +1379,8 @@ export function AdminMediaManagementView() {
           return [];
         }
 
-        // Parse headers
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+        // Parse headers using the CSV parser
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/['"]/g, ''));
         
         // Column mapping
         const columnMap: Record<string, string> = {
@@ -1375,10 +1402,10 @@ export function AdminMediaManagementView() {
           headerIndices[mappedKey] = i;
         });
 
-        // Parse data rows
+        // Parse data rows using proper CSV parsing
         const sites: { name: string; price: number; link: string; favicon: string | null; category: string; subcategory: string | null; about: string | null; publication_format: string }[] = [];
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+          const values = parseCSVLine(lines[i]).map(v => v.replace(/^["']|["']$/g, ''));
           
           const name = values[headerIndices['name']] || '';
           if (!name) continue;
