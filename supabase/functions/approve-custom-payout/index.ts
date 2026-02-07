@@ -64,7 +64,7 @@ serve(async (req) => {
         .update({
           agency_name,
           email,
-          commission_percentage: commission_percentage || 10,
+          commission_percentage: commission_percentage ?? 10,
           payout_method: 'custom',
           onboarding_complete: false,
         })
@@ -85,7 +85,7 @@ serve(async (req) => {
         .insert({
           agency_name,
           email,
-          commission_percentage: commission_percentage || 10,
+          commission_percentage: commission_percentage ?? 10,
           user_id: user_id || null,
           payout_method: 'custom',
           onboarding_complete: false,

@@ -166,7 +166,7 @@ serve(async (req) => {
       .eq("agency_name", mediaSite.agency)
       .maybeSingle();
 
-    const commissionPercentage = agencyPayout?.commission_percentage || 10;
+    const commissionPercentage = agencyPayout?.commission_percentage ?? 10;
     const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
     const agencyPayoutCents = amountCents - platformFeeCents;
 
