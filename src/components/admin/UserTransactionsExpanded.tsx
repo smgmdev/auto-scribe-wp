@@ -32,6 +32,9 @@ const transactionTypes = [
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
   { key: 'admin_deduct', label: 'Deduction' },
+  { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
+  { key: 'withdrawal_unlocked', label: 'Withdrawal Returned' },
+  { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
 ];
 
 export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedProps) => {
@@ -95,7 +98,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       order_payout: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Payout' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
-      admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' }
+      admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' },
+      withdrawal_locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Withdrawal Pending' },
+      withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Withdrawal Returned' },
+      withdrawal_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;

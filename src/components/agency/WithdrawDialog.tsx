@@ -132,7 +132,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
       } : null;
 
       // Insert withdrawal request
-      const { error: insertError } = await supabase
+      const { data: withdrawalData, error: insertError } = await supabase
         .from('agency_withdrawals')
         .insert({
           user_id: user.id,
@@ -141,12 +141,30 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
           withdrawal_method: withdrawalMethod,
           bank_details: bankDetails,
           crypto_details: cryptoDetails
-        });
+        })
+        .select('id')
+        .single();
 
       if (insertError) {
         console.error('Error creating withdrawal:', insertError);
         toast.error('Failed to submit withdrawal request. Please try again.');
         return;
+      }
+
+      // Create a credit transaction to track the locked withdrawal
+      const { error: transactionError } = await supabase
+        .from('credit_transactions')
+        .insert({
+          user_id: user.id,
+          amount: -Math.round(numAmount * 100), // Store as cents, negative to indicate deduction
+          type: 'withdrawal_locked',
+          description: `Withdrawal request - ${withdrawalMethod === 'bank' ? 'Bank Transfer' : 'USDT'} - $${numAmount.toFixed(2)}`,
+          order_id: withdrawalData.id // Store withdrawal ID for reference
+        });
+
+      if (transactionError) {
+        console.error('Error creating transaction:', transactionError);
+        // Don't fail the withdrawal, just log the error
       }
 
       toast.success('Withdrawal request submitted successfully. Our team will process it within 24-48 hours.');

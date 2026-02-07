@@ -190,6 +190,34 @@ export function AdminAgencyWithdrawalsView() {
         return;
       }
 
+      // Create credit transaction based on action
+      const amount = selectedWithdrawal.amount_cents;
+      const withdrawalMethod = selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT';
+      
+      if (actionType === 'reject') {
+        // Return locked credits - positive amount to restore balance
+        await supabase
+          .from('credit_transactions')
+          .insert({
+            user_id: selectedWithdrawal.user_id,
+            amount: amount, // Positive to restore
+            type: 'withdrawal_unlocked',
+            description: `Withdrawal rejected - ${withdrawalMethod} - $${(amount / 100).toFixed(2)}${adminNotes ? ` - ${adminNotes}` : ''}`,
+            order_id: selectedWithdrawal.id
+          });
+      } else if (actionType === 'complete') {
+        // Mark withdrawal as completed
+        await supabase
+          .from('credit_transactions')
+          .insert({
+            user_id: selectedWithdrawal.user_id,
+            amount: -amount, // Negative to confirm deduction
+            type: 'withdrawal_completed',
+            description: `Withdrawal completed - ${withdrawalMethod} - $${(amount / 100).toFixed(2)}${adminNotes ? ` - ${adminNotes}` : ''}`,
+            order_id: selectedWithdrawal.id
+          });
+      }
+
       toast.success(`Withdrawal ${actionType === 'approve' ? 'approved' : actionType === 'reject' ? 'rejected' : 'completed'} successfully`);
       fetchWithdrawals();
     } catch (err) {
