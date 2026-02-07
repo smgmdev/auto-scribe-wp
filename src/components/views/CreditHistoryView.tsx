@@ -650,12 +650,12 @@ export function CreditHistoryView() {
                           transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
                         )}
                       </p>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                      <div className="mt-1">
+                      <div className="flex items-center gap-2 mt-1">
                         {getTransactionBadge(transaction.type)}
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
                       </div>
                     </div>
                   </div>
