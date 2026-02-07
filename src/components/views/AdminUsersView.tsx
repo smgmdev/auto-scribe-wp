@@ -59,48 +59,75 @@ interface ServiceRequest {
   title: string;
   status: string;
   created_at: string;
+  order_id?: string | null;
   media_sites?: { name: string } | null;
+  orders?: {
+    delivery_status: string;
+    delivery_deadline?: string | null;
+  } | null;
 }
 
 type FilterTab = 'all' | 'users_confirmed' | 'agencies' | 'users_pending' | 'users_suspended';
 type UserCardTab = 'logs' | 'credits' | 'orders' | 'engagements';
 
 // Helper function to render engagement status badge
-const getEngagementStatusBadge = (status: string) => {
-  switch (status) {
-    case 'cancelled':
-      return (
-        <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] py-0">
-          Cancelled
-        </Badge>
-      );
-    case 'completed':
-      return (
-        <Badge className="bg-green-600 text-[10px] py-0">
-          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
-          Completed
-        </Badge>
-      );
-    case 'pending_review':
-      return (
-        <Badge variant="secondary" className="text-[10px] py-0">
-          <Clock className="h-2.5 w-2.5 mr-0.5" />
-          Open
-        </Badge>
-      );
-    case 'in_progress':
-      return (
-        <Badge className="bg-blue-600 text-[10px] py-0">
-          Active
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-[10px] py-0">
-          {status}
-        </Badge>
-      );
+const getEngagementStatusBadge = (engagement: ServiceRequest) => {
+  const hasOrder = !!engagement.order_id;
+  const deliveryStatus = engagement.orders?.delivery_status;
+  
+  // Cancelled engagement
+  if (engagement.status === 'cancelled') {
+    return (
+      <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] py-0">
+        Cancelled
+      </Badge>
+    );
   }
+  
+  // Completed (delivery accepted)
+  if (hasOrder && deliveryStatus === 'accepted') {
+    return (
+      <Badge className="bg-green-600 text-[10px] py-0">
+        <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+        Completed
+      </Badge>
+    );
+  }
+  
+  // Delivered - Pending Approval
+  if (hasOrder && deliveryStatus === 'delivered') {
+    return (
+      <Badge className="bg-purple-600 text-white text-[10px] py-0">
+        Delivered
+      </Badge>
+    );
+  }
+  
+  // Revision Requested
+  if (hasOrder && deliveryStatus === 'pending_revision') {
+    return (
+      <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-[10px] py-0">
+        Revision
+      </Badge>
+    );
+  }
+  
+  // Active Order (pending delivery)
+  if (hasOrder && deliveryStatus === 'pending') {
+    return (
+      <Badge className="bg-blue-600 text-[10px] py-0">
+        Active
+      </Badge>
+    );
+  }
+  
+  // Open engagement (no order yet)
+  return (
+    <Badge variant="secondary" className="text-[10px] py-0">
+      <Clock className="h-2.5 w-2.5 mr-0.5" />
+      Open
+    </Badge>
+  );
 };
 
 export function AdminUsersView() {
@@ -219,10 +246,10 @@ export function AdminUsersView() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
-      // Fetch service requests (engagements)
+      // Fetch service requests (engagements) with order info
       const { data: engagements } = await supabase
         .from('service_requests')
-        .select('id, title, status, created_at, media_sites(name)')
+        .select('id, title, status, created_at, order_id, media_sites(name), orders(delivery_status, delivery_deadline)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
@@ -913,7 +940,7 @@ export function AdminUsersView() {
                                       <div className="flex items-center gap-2">
                                         <MessageSquare className="h-3 w-3 text-muted-foreground" />
                                         <span className="truncate max-w-[200px]">{engagement.title}</span>
-                                        {getEngagementStatusBadge(engagement.status)}
+                                        {getEngagementStatusBadge(engagement)}
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <span className="text-muted-foreground">{engagement.media_sites?.name}</span>
