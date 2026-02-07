@@ -757,7 +757,14 @@ export function CreditHistoryView() {
                       {getTransactionIcon(transaction.type, transaction.amount)}
                       <div>
                         <p className="font-medium">
-                          {(transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
+                          {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(transaction.type) ? (
+                            // For withdrawal transactions, show cleaner description
+                            transaction.description?.includes('Bank Transfer') 
+                              ? `Withdrawal via Bank Transfer` 
+                              : transaction.description?.includes('USDT')
+                                ? `Withdrawal via USDT`
+                                : transaction.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
+                          ) : (transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="cursor-help underline decoration-dotted">

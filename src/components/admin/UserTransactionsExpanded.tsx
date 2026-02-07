@@ -184,7 +184,14 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     <TableCell className="max-w-md">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-muted-foreground break-words">
-                          {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
+                          {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                            // For withdrawal transactions, show cleaner description
+                            tx.description?.includes('Bank Transfer') 
+                              ? `Withdrawal via Bank Transfer` 
+                              : tx.description?.includes('USDT')
+                                ? `Withdrawal via USDT`
+                                : tx.description?.replace(/Credits locked for withdrawal/gi, 'Withdrawal pending')?.replace(/by admin/gi, 'by Arcana Mace Staff') || 'Withdrawal'
+                          ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="cursor-help underline decoration-dotted">
