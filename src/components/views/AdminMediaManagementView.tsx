@@ -272,29 +272,26 @@ export function AdminMediaManagementView() {
       }
     }
 
-    // Create signed URLs from private bucket
+    // Create URLs from storage buckets - try public first, then signed URLs
     const logos: Record<string, string> = {};
     await Promise.all(
       Object.entries(logoPathByAgency).map(async ([agencyName, path]) => {
-        // Try signed URL from private bucket first
+        // Try public bucket first using the FULL path (logos are copied with same path structure)
+        const { data: publicData } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(path);
+        
+        if (publicData?.publicUrl) {
+          logos[agencyName] = publicData.publicUrl;
+          return;
+        }
+        
+        // Fall back to signed URL from private bucket
         const { data: signed, error: signError } = await supabase.storage
           .from('agency-documents')
           .createSignedUrl(path, 3600);
         if (!signError && signed?.signedUrl) {
           logos[agencyName] = signed.signedUrl;
-          return;
-        }
-        
-        // Fall back to public bucket if signed URL fails
-        const filename = path.split('/').pop();
-        if (filename) {
-          const { data: publicData } = supabase.storage
-            .from('agency-logos')
-            .getPublicUrl(filename);
-          
-          if (publicData?.publicUrl) {
-            logos[agencyName] = publicData.publicUrl;
-          }
         }
       })
     );
