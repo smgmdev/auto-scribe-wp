@@ -721,9 +721,9 @@ export const AdminCreditManagementView = () => {
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
                 <div className="space-y-1">
-                  <p className="font-medium">Purchased + Gifted Credits</p>
-                  <p>Purchased: ${totalPurchasedOnly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p>Gifted: ${totalGiftedOnly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="font-medium">Total credits purchased:</p>
+                  <p>Online via platform: {totalPurchasedOnly.toLocaleString()}</p>
+                  <p>Offline via invoice: {totalGiftedOnly.toLocaleString()}</p>
                 </div>
               </TooltipContent>
             </Tooltip>
