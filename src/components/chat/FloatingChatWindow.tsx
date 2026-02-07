@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5118,13 +5118,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <AlertTriangle className="h-6 w-6 text-red-500" />
                           ) : hasRevisionAfterDelivery ? (
                             <RefreshCw className="h-6 w-6 text-orange-400" />
+                          ) : localOrder.status === 'completed' ? (
+                            <CheckCircle2 className="h-6 w-6 text-green-500" />
                           ) : (
                             <CheckCircle className="h-6 w-6 text-green-500" />
                           )}
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p>{hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
+                        <p>{hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -5134,7 +5136,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="font-medium text-sm text-white truncate cursor-help">
-                              {acceptedOrderData?.media_site_name || 'Order Placed'}
+                              {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
                             </p>
                           </TooltipTrigger>
                           <TooltipContent side="bottom">
@@ -5317,7 +5319,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         
                         return null;
                       })()}
-                      {specialTerms && (
+                      {/* Hide special terms for completed orders - they can view in Order Details */}
+                      {specialTerms && localOrder.status !== 'completed' && (
                         <>
                           <span className="text-white/40">•</span>
                           <TooltipProvider>
