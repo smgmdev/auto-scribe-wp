@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -43,6 +44,8 @@ export function CreditHistoryView() {
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [expandedWithdrawals, setExpandedWithdrawals] = useState<Set<string>>(new Set());
+  const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
 
   // Calculate earned credits from order_payout transactions
   const earnedCredits = transactions
@@ -54,6 +57,44 @@ export function CreditHistoryView() {
     setOrdersTargetTab('completed');
     setOrdersTargetOrderId(orderId);
     setCurrentView('orders');
+  };
+
+  // Toggle withdrawal details expansion and fetch details if needed
+  const toggleWithdrawalDetails = async (transactionId: string, amount: number, description: string | null) => {
+    const newExpanded = new Set(expandedWithdrawals);
+    
+    if (newExpanded.has(transactionId)) {
+      newExpanded.delete(transactionId);
+      setExpandedWithdrawals(newExpanded);
+      return;
+    }
+    
+    newExpanded.add(transactionId);
+    setExpandedWithdrawals(newExpanded);
+    
+    // Fetch withdrawal details if not already loaded
+    if (!withdrawalDetails[transactionId] && user) {
+      const isBank = description?.includes('Bank Transfer');
+      const isCrypto = description?.includes('USDT');
+      
+      // Find the matching withdrawal by amount and method
+      const { data: withdrawal } = await supabase
+        .from('agency_withdrawals')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('amount_cents', Math.abs(amount))
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (withdrawal) {
+        setWithdrawalDetails(prev => ({
+          ...prev,
+          [transactionId]: withdrawal
+        }));
+      }
+    }
   };
 
   // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
@@ -772,6 +813,136 @@ export function CreditHistoryView() {
             <div className="space-y-3">
               {displayedTransactions.map((transaction) => {
                 const isClickable = transaction.type === 'order_completed' && transaction.order_id;
+                const isWithdrawalCompleted = transaction.type === 'withdrawal_completed';
+                const isExpanded = expandedWithdrawals.has(transaction.id);
+                const details = withdrawalDetails[transaction.id];
+                
+                if (isWithdrawalCompleted) {
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-4">
+                          {getTransactionIcon(transaction.type, transaction.amount)}
+                          <div>
+                            <p className="font-medium">
+                              {transaction.description?.includes('Bank Transfer') 
+                                ? `Withdrawal via Bank Transfer` 
+                                : transaction.description?.includes('USDT')
+                                  ? `Withdrawal via USDT`
+                                  : 'Withdrawal Completed'}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getTransactionBadge(transaction.type)}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-2 h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description);
+                              }}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3 mr-1" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  See Details
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-lg text-foreground">
+                          -${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                        </div>
+                      </div>
+                      
+                      {isExpanded && (
+                        <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-3 space-y-2 text-sm">
+                            {details ? (
+                              <>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                  <div>
+                                    <span className="text-muted-foreground">Withdrawal Method:</span>
+                                    <p className="font-medium">{details.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Amount:</span>
+                                    <p className="font-medium">${(details.amount_cents / 100).toLocaleString()}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Requested:</span>
+                                    <p className="font-medium">{format(new Date(details.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Completed:</span>
+                                    <p className="font-medium">{details.processed_at ? format(new Date(details.processed_at), 'MMM d, yyyy h:mm a') : 'N/A'}</p>
+                                  </div>
+                                  
+                                  {details.withdrawal_method === 'bank' && details.bank_details && (
+                                    <>
+                                      <div>
+                                        <span className="text-muted-foreground">Bank:</span>
+                                        <p className="font-medium">{(details.bank_details as any).bank_name || 'N/A'}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Account Holder:</span>
+                                        <p className="font-medium">{(details.bank_details as any).account_holder || 'N/A'}</p>
+                                      </div>
+                                      <div className="col-span-2">
+                                        <span className="text-muted-foreground">Account Number:</span>
+                                        <p className="font-medium">{(details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
+                                      </div>
+                                    </>
+                                  )}
+                                  
+                                  {details.withdrawal_method === 'crypto' && details.crypto_details && (
+                                    <>
+                                      <div>
+                                        <span className="text-muted-foreground">Network:</span>
+                                        <p className="font-medium">{(details.crypto_details as any).network || 'TRC-20'}</p>
+                                      </div>
+                                      <div className="col-span-2">
+                                        <span className="text-muted-foreground">Wallet Address:</span>
+                                        <p className="font-medium font-mono text-xs break-all">{(details.crypto_details as any).wallet_address || 'N/A'}</p>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                                
+                                {details.admin_notes && (
+                                  <div className="mt-2 pt-2 border-t border-border/50">
+                                    <span className="text-muted-foreground">Notes:</span>
+                                    <p className="font-medium">{details.admin_notes}</p>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="flex items-center justify-center py-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                <span className="ml-2 text-muted-foreground">Loading details...</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
                 return (
                   <div
                     key={transaction.id}
@@ -782,7 +953,7 @@ export function CreditHistoryView() {
                       {getTransactionIcon(transaction.type, transaction.amount)}
                       <div>
                         <p className="font-medium">
-                          {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(transaction.type) ? (
+                          {['withdrawal_locked', 'withdrawal_unlocked'].includes(transaction.type) ? (
                             // For withdrawal transactions, show cleaner description
                             transaction.description?.includes('Bank Transfer') 
                               ? `Withdrawal via Bank Transfer` 
@@ -819,14 +990,12 @@ export function CreditHistoryView() {
                         ? 'text-amber-500' 
                         : transaction.type === 'withdrawal_unlocked' 
                           ? 'text-blue-500'
-                          : transaction.type === 'withdrawal_completed'
-                            ? 'text-foreground'
-                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                          : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
-                      {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(transaction.type) ? (
+                      {['withdrawal_locked', 'withdrawal_unlocked'].includes(transaction.type) ? (
                         <>
-                          {transaction.type === 'withdrawal_locked' ? '-' : transaction.type === 'withdrawal_unlocked' ? '+' : '-'}
+                          {transaction.type === 'withdrawal_locked' ? '-' : '+'}
                           ${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </>
                       ) : (
