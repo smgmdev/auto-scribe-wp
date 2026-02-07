@@ -190,8 +190,9 @@ export function AgencyRequestsView() {
       }) as unknown as ServiceRequest[];
       setRequests(mappedRequests);
 
-      // Count unread ACTIVE requests only - exclude cancelled AND completed (order.delivery_status === 'accepted')
-      // This must match the activeRequests filter logic
+      // Count unread ACTIVE requests only - must match the activeRequests filter:
+      // activeRequests = status !== 'cancelled' && !(order.delivery_status === 'accepted')
+      // Note: Requests with cancelled ORDERS but non-cancelled REQUEST status still show in Active
       const unreadCount = mappedRequests.filter(r => 
         !r.read && 
         r.status !== 'cancelled' && 
@@ -199,16 +200,16 @@ export function AgencyRequestsView() {
       ).length;
       setAgencyUnreadServiceRequestsCount(unreadCount);
       
-      // Count unread cancelled requests (includes requests with cancelled orders)
+      // Count unread cancelled requests - must match cancelledRequests filter:
+      // cancelledRequests = status === 'cancelled' (only request status matters)
       const unreadCancelledCount = mappedRequests.filter(r => 
-        !r.read && (
-          r.status === 'cancelled' || 
-          (r.order && (r.order.status === 'cancelled' || r.order.delivery_status === 'cancelled'))
-        )
+        !r.read && 
+        r.status === 'cancelled'
       ).length;
       setAgencyUnreadCancelledCount(unreadCancelledCount);
       
-      // Count unread completed requests
+      // Count unread completed requests - must match completedRequests filter:
+      // completedRequests = status !== 'cancelled' && order.delivery_status === 'accepted'
       const unreadCompletedRequestsCount = mappedRequests.filter(r => 
         !r.read && 
         r.status !== 'cancelled' && 
