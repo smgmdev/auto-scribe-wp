@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 interface Transaction {
@@ -170,11 +171,18 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     </TableCell>
                     <TableCell>{getTypeBadge(tx.type)}</TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
-                      {tx.type === 'admin_deduct' && tx.description ? (
-                        // Extract reason after colon for deductions
-                        tx.description.includes(': ') 
-                          ? tx.description.split(': ').slice(1).join(': ')
-                          : '-'
+                      {tx.type === 'admin_deduct' && tx.description?.includes(': ') ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help underline decoration-dotted">
+                              {tx.description.replace(/by admin/gi, 'by Arcana Mace Staff')}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="font-medium">Reason:</p>
+                            <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                          </TooltipContent>
+                        </Tooltip>
                       ) : (
                         tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
                       )}
