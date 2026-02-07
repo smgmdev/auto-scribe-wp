@@ -4546,7 +4546,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {orderPlaced.media_site_name}
             </p>
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-              {orderPlaced.credits_used} credits
+              {orderPlaced.credits_used.toLocaleString()} credits
             </p>
             {timeInfo && (
               <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
@@ -6878,7 +6878,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-semibold">${(orderDetails.amount_cents / 100).toFixed(2)}</span>
+                  <span className="font-semibold">${(orderDetails.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
 
