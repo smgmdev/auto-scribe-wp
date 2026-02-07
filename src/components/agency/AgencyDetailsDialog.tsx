@@ -108,8 +108,12 @@ export function AgencyDetailsDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }} overlayClassName="bg-transparent">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            {agencyDetails?.logo_url ? (
+        <DialogTitle className="flex items-center gap-3">
+            {loading ? (
+              <div className="h-12 w-12 flex items-center justify-center bg-muted rounded-xl">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : agencyDetails?.logo_url ? (
               <div className="relative h-12 w-12">
                 {logoLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
