@@ -88,7 +88,8 @@ serve(async (req) => {
       media_site_id, 
       price,
       delivery_duration,
-      client_user_id
+      client_user_id,
+      special_terms
     } = await req.json();
     
     if (!service_request_id) {
@@ -194,7 +195,8 @@ serve(async (req) => {
         agency_payout_cents: agencyPayoutCents,
         status: "pending_payment",
         delivery_status: "pending",
-        delivery_deadline: deliveryDeadline
+        delivery_deadline: deliveryDeadline,
+        special_terms: special_terms || null
       })
       .select()
       .single();

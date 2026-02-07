@@ -304,6 +304,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     paid_at: string | null;
     delivered_at: string | null;
     accepted_at: string | null;
+    special_terms: string | null;
   } | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
@@ -4818,7 +4819,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           setOrderDetailsOpen(true);
                           const { data } = await supabase
                             .from('orders')
-                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at, special_terms')
                             .eq('id', localOrder.id)
                             .maybeSingle();
                           setOrderDetails(data);
@@ -4912,7 +4913,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           setOrderDetailsOpen(true);
                           const { data } = await supabase
                             .from('orders')
-                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at')
+                            .select('id, order_number, amount_cents, status, delivery_status, delivery_url, delivery_notes, delivery_deadline, created_at, paid_at, delivered_at, accepted_at, special_terms')
                             .eq('id', localOrder.id)
                             .maybeSingle();
                           setOrderDetails(data);
@@ -6883,14 +6884,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               </div>
 
-              {/* Special Terms */}
+              {/* Special Terms - prefer order's stored terms, fallback to chat history */}
               {(() => {
+                // First try to get from the order itself (for completed orders)
+                const storedTerms = orderDetails.special_terms;
+                // Fallback to chat history (for in-progress orders)
                 const acceptedData = getLastAcceptedOrderRequestData();
-                if (acceptedData?.special_terms) {
+                const terms = storedTerms || acceptedData?.special_terms;
+                
+                if (terms) {
                   return (
                     <div className="border-t pt-4">
                       <p className="text-sm text-muted-foreground mb-1">Special Terms</p>
-                      <p className="text-sm">{acceptedData.special_terms}</p>
+                      <p className="text-sm">{terms}</p>
                     </div>
                   );
                 }
