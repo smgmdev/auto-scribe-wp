@@ -14,6 +14,7 @@ import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { OrderWithCreditsDialog } from '@/components/chat/OrderWithCreditsDialog';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -28,14 +29,6 @@ interface ServiceMessage {
   sender_id: string;
   message: string;
   created_at: string;
-}
-
-interface AgencyDetails {
-  agency_name: string;
-  email: string | null;
-  onboarding_complete: boolean;
-  created_at: string;
-  logo_url: string | null;
 }
 
 interface FloatingChatWindowProps {
@@ -221,8 +214,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [isCounterpartyTyping, setIsCounterpartyTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
-  const [agencyDetails, setAgencyDetails] = useState<AgencyDetails | null>(null);
-  const [loadingAgency, setLoadingAgency] = useState(false);
+  const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
   // Counterparty agency info (for displaying agency name and logo in client view)
   const [counterpartyAgencyInfo, setCounterpartyAgencyInfo] = useState<{
     name: string;
@@ -3325,49 +3317,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     onFocus();
   };
 
-  const fetchAgencyDetails = async (agencyName: string) => {
-    setLoadingAgency(true);
-    
-    try {
-      // Fetch from agency_payouts for basic info
-      const { data: payoutData } = await supabase
-        .from('agency_payouts')
-        .select('agency_name, email, onboarding_complete, created_at')
-        .eq('agency_name', agencyName)
-        .maybeSingle();
-      
-      // Fetch logo from agency_applications
-      const { data: appData } = await supabase
-        .from('agency_applications')
-        .select('logo_url')
-        .eq('agency_name', agencyName)
-        .maybeSingle();
-      
-      let logoSignedUrl: string | null = null;
-      if (appData?.logo_url) {
-        const logoPath = appData.logo_url.replace('agency-documents/', '');
-        const { data: publicUrl } = supabase.storage
-          .from('agency-logos')
-          .getPublicUrl(logoPath);
-        if (publicUrl?.publicUrl) {
-          logoSignedUrl = publicUrl.publicUrl;
-        }
-      }
-      
-      if (payoutData) {
-        setAgencyDetails({
-          ...payoutData,
-          logo_url: logoSignedUrl
-        });
-        setAgencyDetailsOpen(true);
-      } else {
-        setAgencyDetails(null);
-      }
-    } catch (error) {
-      console.error('Error fetching agency details:', error);
-    } finally {
-      setLoadingAgency(false);
-    }
+  const handleOpenAgencyDetails = (agencyName: string) => {
+    setSelectedAgencyName(agencyName);
+    setAgencyDetailsOpen(true);
   };
 
   // Render message content (simplified version)
@@ -7183,15 +7135,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <div>
                   <p className="text-sm text-muted-foreground">Agency</p>
                   <p 
-                    className={`text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1 ${loadingAgency ? 'pointer-events-none opacity-70' : ''}`}
-                    onClick={() => fetchAgencyDetails(globalChatRequest.media_site!.agency!)}
+                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
+                    onClick={() => handleOpenAgencyDetails(globalChatRequest.media_site!.agency!)}
                   >
                     {globalChatRequest.media_site.agency}
-                    {loadingAgency ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Info className="h-3 w-3" />
-                    )}
+                    <ExternalLink className="h-3 w-3" />
                   </p>
                 </div>
               )}
@@ -7217,79 +7165,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Agency Details Dialog */}
-      <Dialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen}>
-        <DialogContent className="sm:max-w-md z-[350]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              {agencyDetails?.logo_url ? (
-                <div className="relative h-12 w-12">
-                  <div className="logo-spinner absolute inset-0 flex items-center justify-center rounded-xl bg-muted">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  </div>
-                  <img 
-                    src={agencyDetails.logo_url} 
-                    alt={agencyDetails.agency_name}
-                    className="h-12 w-12 rounded-xl bg-muted object-cover opacity-0 transition-opacity"
-                    onLoad={(e) => {
-                      e.currentTarget.classList.remove('opacity-0');
-                      e.currentTarget.parentElement?.querySelector('.logo-spinner')?.classList.add('hidden');
-                    }}
-                  />
-                </div>
-              ) : (
-                <Building2 className="h-12 w-12 text-muted-foreground" />
-              )}
-              <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {loadingAgency ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : agencyDetails ? (
-            <div className="space-y-4 mt-4">
-              {agencyDetails.email && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="text-foreground">{agencyDetails.email}</p>
-                </div>
-              )}
-              
-              <div>
-                <p className="text-sm text-muted-foreground">Member Since</p>
-                <p className="text-foreground">
-                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
-                  {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
-                </Badge>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">Agency not found</p>
-          )}
-
-          <div className="flex justify-end gap-3 mt-6">
-            <Button 
-              variant="outline"
-              onClick={() => setAgencyDetailsOpen(false)}
-              className="hover:bg-black hover:text-white transition-colors"
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Agency Details Dialog - Using Global Component */}
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={selectedAgencyName}
+        zIndex={350}
+      />
 
       {/* Accept Order Confirmation Dialog */}
       <Dialog open={acceptOrderDialogOpen} onOpenChange={(open) => {
