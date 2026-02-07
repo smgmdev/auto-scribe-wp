@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -228,8 +229,8 @@ export function OrderWithCreditsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => !sending && onOpenChange(newOpen)}>
-      <DialogContent className="sm:max-w-md z-[9999]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md z-[9999] max-h-[90vh] flex flex-col">
+        <DialogHeader className="shrink-0">
           <DialogTitle>
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </DialogTitle>
@@ -238,7 +239,8 @@ export function OrderWithCreditsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <ScrollArea className="flex-1 -mx-6 px-6 overflow-y-auto">
+          <div className="space-y-4 pb-2">
           {/* Media Site Info */}
           <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
             {mediaSite.favicon && (
@@ -406,8 +408,8 @@ export function OrderWithCreditsDialog({
               'Insufficient Credits'
             )}
           </Button>
-        </div>
-
+          </div>
+        </ScrollArea>
         <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
       </DialogContent>
     </Dialog>
