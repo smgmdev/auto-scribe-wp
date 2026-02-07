@@ -406,7 +406,7 @@ export function CreditHistoryView() {
       return <LockOpen className="h-5 w-5 text-blue-500" />;
     }
     if (type === 'withdrawal_completed') {
-      return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      return <ArrowDownCircle className="h-5 w-5 text-foreground" />;
     }
     if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
@@ -433,7 +433,7 @@ export function CreditHistoryView() {
       admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700', label: 'Withdrawal Pending' },
       withdrawal_unlocked: { className: 'bg-blue-100 text-blue-700', label: 'Withdrawal Returned' },
-      withdrawal_completed: { className: 'bg-green-100 text-green-700', label: 'Withdrawal Completed' }
+      withdrawal_completed: { className: 'bg-foreground text-background', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={badge.className}>{badge.label}</Badge>;
@@ -795,7 +795,7 @@ export function CreditHistoryView() {
                         : transaction.type === 'withdrawal_unlocked' 
                           ? 'text-blue-500'
                           : transaction.type === 'withdrawal_completed'
-                            ? 'text-green-500'
+                            ? 'text-foreground'
                             : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
                       {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
