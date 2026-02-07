@@ -1082,7 +1082,7 @@ export function AdminUsersView() {
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                {creditAction === 'add' ? 'Add Credits' : 'Remove Credits'}
+                {creditAction === 'add' ? 'Gift Credits' : 'Remove Credits'}
               </Button>
             </div>
           </div>
