@@ -59,8 +59,21 @@ export function AgencyPayoutsView() {
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
 
-  // Calculate available balance (total earnings minus pending and completed payouts)
-  const availableBalance = summary.totalEarnings - summary.pendingPayouts - summary.completedPayouts;
+  // Calculate pending withdrawals (only 'pending' status)
+  const pendingWithdrawalsTotal = withdrawals
+    .filter(w => w.status === 'pending')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
+  // Calculate completed withdrawals (only 'completed' status - these are deducted from wallet)
+  const completedWithdrawalsTotal = withdrawals
+    .filter(w => w.status === 'completed')
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+
+  // Wallet balance = total earnings minus completed withdrawals (rejected ones stay in wallet)
+  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal;
+
+  // Available balance = wallet balance minus pending withdrawals
+  const availableBalance = walletBalance - pendingWithdrawalsTotal;
 
   const handleViewOrderDetails = async (orderId: string) => {
     setOpeningChat(orderId);
@@ -293,13 +306,30 @@ export function AgencyPayoutsView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-green-500">
-                  ${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-            <p>Available balance: ${(summary.totalEarnings - summary.pendingPayouts - summary.completedPayouts).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
+            {pendingWithdrawalsTotal > 0 ? (
+              <div className="space-y-1">
+                <div className="flex justify-between gap-4">
+                  <span className="text-white/70">Available Balance:</span>
+                  <span className="font-semibold text-green-400">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-white/70">Wallet Balance:</span>
+                  <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                  <span className="text-white/70">Withdrawals Pending:</span>
+                  <span className="font-semibold text-amber-400">${pendingWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            ) : (
+              <p>Available balance: ${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            )}
           </TooltipContent>
         </Tooltip>
 
