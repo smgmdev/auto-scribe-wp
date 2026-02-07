@@ -940,7 +940,11 @@ export function AdminUsersView() {
               <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="hover:bg-black hover:text-white">
                 Cancel
               </Button>
-              <Button onClick={handleCreditChange} disabled={saving || !creditAmount}>
+              <Button 
+                onClick={handleCreditChange} 
+                disabled={saving || !creditAmount}
+                className="border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+              >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
