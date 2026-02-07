@@ -206,7 +206,16 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       </div>
                     </TableCell>
                     <TableCell className={`text-right font-medium ${tx.type === 'offer_accepted' ? 'text-amber-600' : tx.type === 'order_completed' ? 'text-red-600' : tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
+                      {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
+                      {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
+                        <>
+                          {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </>
+                      ) : (
+                        <>
+                          {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
