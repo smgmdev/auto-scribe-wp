@@ -133,6 +133,7 @@ export function AdminAgenciesView() {
   const [logoUrls, setLogoUrls] = useState<Record<string, string>>({});
   const [loadingLogoIds, setLoadingLogoIds] = useState<Set<string>>(new Set());
   const [loadedImageIds, setLoadedImageIds] = useState<Set<string>>(new Set());
+  const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
   const [verificationLogoLoaded, setVerificationLogoLoaded] = useState(false);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
@@ -835,13 +836,13 @@ export function AdminAgenciesView() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
+                        {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                           <img 
                             src={logoUrls[app.id]} 
                             alt={app.agency_name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
-                        ) : logoUrls[app.id] ? (
+                        ) : logoUrls[app.id] && !failedImageIds.has(app.id) ? (
                           <>
                             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                               <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -851,10 +852,10 @@ export function AdminAgenciesView() {
                               alt=""
                               className="hidden"
                               onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
-                              onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                              onError={() => setFailedImageIds(prev => new Set([...prev, app.id]))}
                             />
                           </>
-                        ) : app.logo_url ? (
+                        ) : app.logo_url && !failedImageIds.has(app.id) ? (
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                           </div>
@@ -930,13 +931,13 @@ export function AdminAgenciesView() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-4">
-                            {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
+                            {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                               <img 
                                 src={logoUrls[app.id]} 
                                 alt={app.agency_name}
                                 className="w-10 h-10 rounded-full object-cover"
                               />
-                            ) : logoUrls[app.id] ? (
+                            ) : logoUrls[app.id] && !failedImageIds.has(app.id) ? (
                               <>
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -946,10 +947,10 @@ export function AdminAgenciesView() {
                                   alt=""
                                   className="hidden"
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
-                                  onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                  onError={() => setFailedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
-                            ) : app.logo_url ? (
+                            ) : app.logo_url && !failedImageIds.has(app.id) ? (
                               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
@@ -1012,13 +1013,13 @@ export function AdminAgenciesView() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-4">
-                            {logoUrls[app.id] && loadedImageIds.has(app.id) ? (
+                            {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                               <img 
                                 src={logoUrls[app.id]} 
                                 alt={app.agency_name}
                                 className="w-10 h-10 rounded-full object-cover"
                               />
-                            ) : logoUrls[app.id] ? (
+                            ) : logoUrls[app.id] && !failedImageIds.has(app.id) ? (
                               <>
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1028,10 +1029,10 @@ export function AdminAgenciesView() {
                                   alt=""
                                   className="hidden"
                                   onLoad={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
-                                  onError={() => setLoadedImageIds(prev => new Set([...prev, app.id]))}
+                                  onError={() => setFailedImageIds(prev => new Set([...prev, app.id]))}
                                 />
                               </>
-                            ) : app.logo_url ? (
+                            ) : app.logo_url && !failedImageIds.has(app.id) ? (
                               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
@@ -1140,13 +1141,13 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
-                              ) : application && logoUrls[application.id] ? (
+                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
                                 <>
                                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                     <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1156,10 +1157,10 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
+                              ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
@@ -1223,13 +1224,13 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
-                              ) : application && logoUrls[application.id] ? (
+                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
                                 <>
                                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                     <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1239,10 +1240,10 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
+                              ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
@@ -1339,13 +1340,13 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
-                              ) : application && logoUrls[application.id] ? (
+                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
                                 <>
                                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                     <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1355,10 +1356,10 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
+                              ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
@@ -1471,13 +1472,13 @@ export function AdminAgenciesView() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) ? (
+                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
                                   className="w-10 h-10 rounded-full object-cover"
                                 />
-                              ) : application && logoUrls[application.id] ? (
+                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
                                 <>
                                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                     <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -1487,10 +1488,10 @@ export function AdminAgenciesView() {
                                     alt=""
                                     className="hidden"
                                     onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
                                   />
                                 </>
-                              ) : application && loadingLogoIds.has(application.id) ? (
+                              ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
