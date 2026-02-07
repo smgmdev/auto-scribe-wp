@@ -753,7 +753,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="h-5 px-1 text-xs"
+                          className="h-5 px-1 text-xs hover:bg-transparent"
                           onClick={() => {
                             setLogoFile(null);
                             setLogoUrl(null);
@@ -825,7 +825,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="h-5 px-1 text-xs"
+                          className="h-5 px-1 text-xs hover:bg-transparent"
                           onClick={() => {
                             setDocumentFile(null);
                             setDocumentUrl('');
