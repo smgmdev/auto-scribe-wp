@@ -635,7 +635,21 @@ export function CreditHistoryView() {
                     <div>
                       {getTransactionBadge(transaction.type)}
                       <p className="font-medium mt-1">
-                        {transaction.description || `${transaction.type} transaction`}
+                        {(transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help underline decoration-dotted">
+                                {transaction.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="font-medium">Reason:</p>
+                              <p>{transaction.description.split(': ').slice(1).join(': ')}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
+                        )}
                       </p>
                       <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                         <Calendar className="h-3 w-3" />
