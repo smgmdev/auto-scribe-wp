@@ -2026,7 +2026,14 @@ export function AgencyRequestsView() {
                       onClick={() => handleCompletedOrderClick(order, relatedRequest)}
                     >
                       <CardHeader className="pb-2 px-4 pt-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                          {/* Mobile: Badge at top right */}
+                          <div className="flex justify-end md:hidden">
+                            <Badge className="bg-green-600 text-white">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Completed
+                            </Badge>
+                          </div>
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               {order.media_site?.favicon ? (
@@ -2051,7 +2058,8 @@ export function AgencyRequestsView() {
                               )}
                             </div>
                           </div>
-                          <Badge className="bg-green-600 text-white">
+                          {/* Desktop: Badge on the right */}
+                          <Badge className="hidden md:flex bg-green-600 text-white">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Completed
                           </Badge>
