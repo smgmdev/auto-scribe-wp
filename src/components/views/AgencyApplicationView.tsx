@@ -90,23 +90,24 @@ function AgencyFAQ() {
           open={openItems.includes(index)}
           onOpenChange={() => toggleItem(index)}
         >
-          <div className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10">
-            <CollapsibleTrigger className="group flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 transition-all duration-200 group-hover:bg-primary/20 group-hover:scale-110">
-                  <item.icon className="h-4 w-4 text-primary transition-transform duration-200 group-hover:scale-105" />
-                </div>
-                <span className="font-medium text-foreground">{item.question}</span>
-              </div>
+          <div className={`rounded-lg border border-border overflow-hidden transition-all duration-300 ${
+            openItems.includes(index) 
+              ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 border-slate-700 shadow-lg shadow-blue-900/20' 
+              : 'bg-card hover:bg-gradient-to-r hover:from-slate-900 hover:via-slate-800 hover:to-blue-900 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-900/20'
+          }`}>
+            <CollapsibleTrigger className={`group flex w-full items-center justify-between p-4 text-left transition-colors ${
+              openItems.includes(index) ? 'text-white' : 'hover:text-white'
+            }`}>
+              <span className={`font-medium ${openItems.includes(index) ? 'text-white' : 'text-foreground group-hover:text-white'}`}>{item.question}</span>
               <ChevronDown 
-                className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
-                  openItems.includes(index) ? 'rotate-180' : ''
+                className={`h-5 w-5 transition-transform duration-200 ${
+                  openItems.includes(index) ? 'rotate-180 text-white' : 'text-muted-foreground group-hover:text-white'
                 }`} 
               />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="px-4 py-4">
-                <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
+                <p className={`leading-relaxed ${openItems.includes(index) ? 'text-slate-300' : 'text-muted-foreground'}`}>{item.answer}</p>
               </div>
             </CollapsibleContent>
           </div>
