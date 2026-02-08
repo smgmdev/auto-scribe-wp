@@ -109,9 +109,9 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
                 <button 
                   onClick={() => {
                     if (user) {
-                      navigate('/dashboard', { state: { targetView: 'settings' } });
+                      navigate('/dashboard', { state: { targetView: 'account' } });
                     } else {
-                      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'settings' } });
+                      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'account' } });
                     }
                   }}
                   className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}
