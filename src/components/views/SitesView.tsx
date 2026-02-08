@@ -1243,12 +1243,12 @@ export function SitesView() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-end w-full">
                 {!isAdmin && !(userAgencyName && site.agency === userAgencyName) && (
                   openEngagements[site.id] ? (
                     <Badge 
                       variant="secondary" 
-                      className="text-xs flex items-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors"
+                      className="text-xs flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors w-full md:w-auto"
                       onClick={(e) => {
                         e.stopPropagation();
                         const engagement = openEngagements[site.id];
@@ -1262,7 +1262,7 @@ export function SitesView() {
                   ) : (
                     <Button
                       size="sm"
-                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 overflow-hidden border border-transparent hover:border-black"
+                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 overflow-hidden border border-transparent hover:border-black w-full md:w-auto justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenMediaSiteDialog(site);
