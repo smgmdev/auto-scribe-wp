@@ -187,7 +187,7 @@ export function AccountSettings() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Changing your email will require confirmation via the new address
+            Changing your email will require confirmation via new email address.
           </p>
         </div>
 
