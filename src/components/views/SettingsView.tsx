@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import type { ArticleTone } from '@/types';
 
 type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
@@ -51,7 +51,6 @@ const tones: {
 export function SettingsView() {
   const { settings, updateSettings, isLoading, toggleSource } = useUserSettings();
   const { sites } = useSites();
-  const { toast } = useToast();
   
   const [localSettings, setLocalSettings] = useState(settings);
   const [isSaving, setIsSaving] = useState(false);
@@ -88,10 +87,7 @@ export function SettingsView() {
     setIsSaving(true);
     try {
       await updateSettings(localSettings);
-      toast({
-        title: "Settings saved",
-        description: "Your AI publishing settings have been updated"
-      });
+      sonnerToast.success('Settings saved');
     } finally {
       setIsSaving(false);
     }
