@@ -864,7 +864,7 @@ export function AdminUsersView() {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Users</h1>
           <p className="mt-2 text-muted-foreground">
@@ -875,7 +875,7 @@ export function AdminUsersView() {
           size="sm"
           onClick={() => fetchUsers()}
           disabled={loading}
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          className="w-full md:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
