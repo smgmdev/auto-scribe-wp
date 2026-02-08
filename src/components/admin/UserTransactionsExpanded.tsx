@@ -42,6 +42,7 @@ interface OrderDetails {
   id: string;
   order_number: string | null;
   amount_cents: number;
+  platform_fee_cents: number;
   status: string;
   delivery_status: string;
   media_sites: {
@@ -96,7 +97,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       if (orderIds.length > 0) {
         const { data: orderData } = await supabase
           .from('orders')
-          .select('id, order_number, amount_cents, status, delivery_status, media_sites(name, favicon)')
+          .select('id, order_number, amount_cents, platform_fee_cents, status, delivery_status, media_sites(name, favicon)')
           .in('id', orderIds);
         
         if (orderData) {
@@ -327,8 +328,14 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
-            <p className="font-medium">{(order.amount_cents / 100).toFixed(2)}</p>
+            <p className="font-medium">{(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
           </div>
+          {order.platform_fee_cents > 0 && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Platform Fee</p>
+              <p className="font-medium">{(order.platform_fee_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
+            </div>
+          )}
         </div>
       );
     }
@@ -453,7 +460,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                               ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                                 tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
                               ) : (
-                                tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'
+                                tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '') : '-'
                               )}
                             </span>
                             <div className="flex items-center gap-2">
