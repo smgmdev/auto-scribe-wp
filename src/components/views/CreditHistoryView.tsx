@@ -710,48 +710,40 @@ export function CreditHistoryView() {
           <TooltipContent 
             side="bottom" 
             sideOffset={8}
-            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg"
           >
             <div className="space-y-1">
-              {earnedCredits > 0 && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Earned credits:</span>
-                  <span className="font-medium">{earnedCredits.toLocaleString()}</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Available Balance:</span>
+                <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
+              </div>
+              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Credits Locked</div>
+              {creditsInOrders > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">In Orders:</span>
+                  <span className="font-semibold text-amber-400">{creditsInOrders.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Purchased credits:</span>
-                <span className="font-medium">{totalPurchased.toLocaleString()}</span>
-              </div>
-              {creditsWithdrawn > 0 && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Withdrawn credits:</span>
-                  <span className="font-medium">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
+              {creditsInPendingRequests > 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">In Pending Requests:</span>
+                  <span className="font-semibold text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
                 </div>
               )}
               {creditsInWithdrawals > 0 && (
-                <>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Locked in withdrawals:</span>
-                    <span className="font-medium text-amber-400">-{Math.round(creditsInWithdrawals).toLocaleString()}</span>
-                  </div>
-                  {withdrawalsByBank > 0 && (
-                    <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-muted-foreground text-xs">Bank:</span>
-                      <span className="font-medium text-amber-400 text-xs">-{Math.round(withdrawalsByBank).toLocaleString()}</span>
-                    </div>
-                  )}
-                  {withdrawalsByCrypto > 0 && (
-                    <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-muted-foreground text-xs">USDT:</span>
-                      <span className="font-medium text-amber-400 text-xs">-{Math.round(withdrawalsByCrypto).toLocaleString()}</span>
-                    </div>
-                  )}
-                </>
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/70">In Withdrawals:</span>
+                  <span className="font-semibold text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
+                </div>
               )}
-              <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
-                <span className="text-muted-foreground">Available credits:</span>
-                <span className="font-medium">{availableCredits.toLocaleString()}</span>
+              {creditsInOrders === 0 && creditsInPendingRequests === 0 && creditsInWithdrawals === 0 && (
+                <div className="flex justify-between gap-4 pl-2">
+                  <span className="text-white/50">None</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                <span className="text-white/70">Total Balance:</span>
+                <span className="font-semibold">{totalCredits.toLocaleString()}</span>
               </div>
             </div>
           </TooltipContent>
