@@ -1254,7 +1254,7 @@ export function CreditHistoryView() {
                           {getTransactionIcon(transaction.type, transaction.amount)}
                           <div className="flex-1">
                             <p className="font-medium">{cleanDescription}</p>
-                            <div className="text-lg text-foreground md:hidden mt-1">
+                            <div className="text-lg text-green-500 md:hidden mt-1">
                               +{transaction.amount.toLocaleString()}
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
@@ -1262,7 +1262,7 @@ export function CreditHistoryView() {
                             </span>
                           </div>
                         </div>
-                        <div className="text-lg text-foreground hidden md:block">
+                        <div className="text-lg text-green-500 hidden md:block">
                           +{transaction.amount.toLocaleString()}
                         </div>
                       </div>
