@@ -864,7 +864,8 @@ export function CreditHistoryView() {
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      onClick={() => toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type)}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                         <div className="flex items-start gap-3">
@@ -995,7 +996,8 @@ export function CreditHistoryView() {
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      onClick={() => toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type)}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                         <div className="flex items-start gap-3">
@@ -1135,7 +1137,16 @@ export function CreditHistoryView() {
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
+                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        const newExpanded = new Set(expandedWithdrawals);
+                        if (newExpanded.has(transaction.id)) {
+                          newExpanded.delete(transaction.id);
+                        } else {
+                          newExpanded.add(transaction.id);
+                        }
+                        setExpandedWithdrawals(newExpanded);
+                      }}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                         <div className="flex items-start gap-3">
