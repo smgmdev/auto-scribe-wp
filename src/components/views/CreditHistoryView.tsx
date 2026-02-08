@@ -917,7 +917,7 @@ export function CreditHistoryView() {
                       {isExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                           <div className="pt-2 space-y-3 text-sm">
-                            <div className="mb-2">
+                            <div className="flex justify-end mb-2">
                               {getTransactionBadge(transaction.type)}
                             </div>
                             {details ? (
@@ -1049,7 +1049,7 @@ export function CreditHistoryView() {
                       {isExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                           <div className="pt-2 space-y-3 text-sm">
-                            <div className="mb-2">
+                            <div className="flex justify-end mb-2">
                               {getTransactionBadge(transaction.type)}
                             </div>
                             {details ? (
@@ -1198,7 +1198,7 @@ export function CreditHistoryView() {
                       {isEarningsExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                           <div className="pt-2 space-y-3 text-sm">
-                            <div className="mb-2">
+                            <div className="flex justify-end mb-2">
                               {getTransactionBadge(transaction.type)}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
