@@ -1541,14 +1541,14 @@ export function AdminUsersView() {
               className="w-full h-9 text-sm rounded-none"
             />
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="rounded-none hover:bg-black hover:text-white">
+            <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2">
+              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
                 Cancel
               </Button>
               <Button 
                 onClick={handleCreditChange} 
                 disabled={saving || !creditAmount}
-                className="rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+                className="w-full md:w-auto rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
