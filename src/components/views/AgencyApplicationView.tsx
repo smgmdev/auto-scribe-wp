@@ -492,9 +492,9 @@ export function AgencyApplicationView() {
         <div className="h-[60vh]" />
 
         {/* Content Section - scrolls over the video, pointer-events-auto to make it interactive */}
-        <div className="relative bg-white rounded-t-[40px] pointer-events-auto">
+        <div className="relative bg-white rounded-t-[40px] pointer-events-auto min-h-screen">
         
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 lg:pb-12 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
