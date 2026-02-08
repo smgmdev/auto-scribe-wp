@@ -898,7 +898,7 @@ export function AdminUsersView() {
         </div>
         
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
-          <TabsList className="w-full justify-start flex-wrap h-auto gap-1">
+          <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0">
             <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
             <TabsTrigger value="users_confirmed" className="gap-1">
               Users <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" /> ({tabCounts.users_confirmed})
