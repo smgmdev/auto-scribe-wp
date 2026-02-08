@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy } from 'lucide-react';
+import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,6 +72,11 @@ export function AdminAgencyWithdrawalsView() {
   const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
   const [loadingUserDetailsId, setLoadingUserDetailsId] = useState<string | null>(null);
   const [loadingLogos, setLoadingLogos] = useState<Record<string, boolean>>({});
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+
+  const toggleCardExpansion = (id: string) => {
+    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleViewCreditHistory = (userId: string) => {
     setAdminUsersTargetUserId(userId);
@@ -636,10 +641,19 @@ export function AdminAgencyWithdrawalsView() {
                               Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           )}
-                          {withdrawal.admin_notes && (
-                            <p className="text-muted-foreground/80">
-                              Note: {withdrawal.admin_notes}
-                            </p>
+                          {/* See Details for completed/rejected - collapsible */}
+                          {withdrawal.status !== 'pending' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); toggleCardExpansion(withdrawal.id); }}
+                              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline transition-colors mt-1"
+                            >
+                              <span>See details</span>
+                              {expandedCards[withdrawal.id] ? (
+                                <ChevronUp className="h-3 w-3" />
+                              ) : (
+                                <ChevronDown className="h-3 w-3" />
+                              )}
+                            </button>
                           )}
                         </div>
                         
@@ -648,7 +662,7 @@ export function AdminAgencyWithdrawalsView() {
                           ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         
-                        {/* Action Buttons */}
+                        {/* Action Buttons for pending */}
                         {withdrawal.status === 'pending' && (
                           <div className="flex flex-col md:flex-row gap-2 mt-3">
                             <Button
@@ -677,9 +691,14 @@ export function AdminAgencyWithdrawalsView() {
                           </div>
                         )}
                         
-                        {/* Credit History Button for non-pending */}
-                        {withdrawal.status !== 'pending' && (
-                          <div className="mt-3">
+                        {/* Expanded Details for completed/rejected */}
+                        {withdrawal.status !== 'pending' && expandedCards[withdrawal.id] && (
+                          <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
+                            {withdrawal.admin_notes && (
+                              <p className="text-xs text-muted-foreground">
+                                <span className="font-medium">Note:</span> {withdrawal.admin_notes}
+                              </p>
+                            )}
                             <Button
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
