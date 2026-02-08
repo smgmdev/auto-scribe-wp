@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 interface CreditPack {
   id: string;
@@ -25,9 +26,7 @@ export function AdminCreditsView() {
   const [editingPack, setEditingPack] = useState<CreditPack | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
