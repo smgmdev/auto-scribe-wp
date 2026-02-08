@@ -582,9 +582,9 @@ export function MediaSiteDialog({
                 : 'absolute inset-0 opacity-0 translate-x-full pointer-events-none'
             }`}
           >
-            <DialogHeader>
-              <DialogTitle>Send Your Brief</DialogTitle>
-              <DialogDescription>
+            <DialogHeader className="text-left">
+              <DialogTitle className="text-left">Send Your Brief</DialogTitle>
+              <DialogDescription className="text-left">
                 Tell the agency what you're looking for. They'll review your request and respond.
               </DialogDescription>
             </DialogHeader>
