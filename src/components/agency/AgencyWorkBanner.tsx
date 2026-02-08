@@ -19,7 +19,7 @@ export function AgencyWorkBanner({ onApplyClick }: AgencyWorkBannerProps) {
           </h2>
           <Button 
             onClick={onApplyClick}
-            className="bg-[#0066CC] hover:bg-[#0055AA] text-white px-8 py-3 text-base font-medium rounded-full"
+            className="bg-[#0066CC] hover:bg-[#0055AA] text-white px-8 py-3 text-base font-medium"
           >
             Start Today
           </Button>
