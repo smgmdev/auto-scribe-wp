@@ -567,7 +567,7 @@ export function DashboardView() {
           {/* Agency Summary - Modern Mini Dashboard */}
           <Card className="border-border/30 bg-gradient-to-br from-card to-muted/20 overflow-hidden">
             <CardHeader className="pb-2 pt-4 px-4">
-              <CardTitle className="text-base font-semibold tracking-tight">Agency Summary</CardTitle>
+              <CardTitle className="text-xl">Agency Summary</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
               {/* Financial Stats - Modern Cards */}
