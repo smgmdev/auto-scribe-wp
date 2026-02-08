@@ -186,7 +186,7 @@ export function ConnectEarnCarousel() {
   const duplicatedArticles = [...articles, ...articles];
 
   return (
-    <section className="py-8 px-6">
+    <section className="pt-4 pb-8 px-6">
       <h2 className="text-3xl font-bold text-white mb-6 text-center">
         Connect and Earn. <span className="font-normal text-white/60">Generate New Profits.</span>
       </h2>
