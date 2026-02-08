@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Menu } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import amlogo from '@/assets/amlogo.png';
@@ -37,10 +37,21 @@ export function MainLayout({
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <main className="lg:pl-64 pt-14 lg:pt-0 h-screen overflow-y-auto">
-        <div className="min-h-full p-4 lg:p-8">
+      <main className="lg:pl-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+        <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
+        
+        {/* Global Footer */}
+        <footer className="border-t border-border bg-muted/30 py-4 px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>© 2026 Arcana Mace. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <Link to="/help" className="hover:text-foreground transition-colors">Help Center</Link>
+              <Link to="/system-status" className="hover:text-foreground transition-colors">System Status</Link>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>;
 }
