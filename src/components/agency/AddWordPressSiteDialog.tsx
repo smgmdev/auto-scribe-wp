@@ -647,16 +647,20 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 pt-4">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="hover:!bg-foreground hover:!text-background"
+              className="w-full md:w-auto hover:!bg-foreground hover:!text-background"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
+            >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSubmitting ? 'Submitting...' : 'Submit for Approval'}
             </Button>
