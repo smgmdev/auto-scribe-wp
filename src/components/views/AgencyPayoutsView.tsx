@@ -333,7 +333,7 @@ export function AgencyPayoutsView() {
       <div className="grid gap-2 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="transition-colors py-3 cursor-help border-0 bg-gradient-to-br from-[#4771d9] via-[#3a5db8] to-[#1d1d1f]">
+            <Card className="transition-colors py-3 cursor-help border-0 bg-[#4771d9]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Wallet
