@@ -913,7 +913,7 @@ export function AdminUsersView() {
           />
         </div>
 
-      <div className="mt-8">
+      <div className="mt-10">
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -939,9 +939,9 @@ export function AdminUsersView() {
             
             return (
               <Card key={user.id} id={`user-card-${user.id}`} className="group rounded-none">
-                <CardContent className="pt-4 pb-0 px-4">
+                <CardContent className="p-4">
                   <div 
-                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -mx-4 -mt-4 px-4 pt-4"
+                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4"
                     onClick={() => toggleUserExpand(user.id)}
                   >
                     {/* Desktop layout */}
