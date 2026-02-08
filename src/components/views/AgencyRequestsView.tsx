@@ -1959,13 +1959,16 @@ export function AgencyRequestsView() {
                                 <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-card" />
                               )}
                             </div>
-                            <div>
+                            <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                                 {isNew && (
                                   <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
                                 )}
                               </div>
+                              {order.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {order.media_site.agency}</span>
+                              )}
                             </div>
                           </div>
                           {/* Desktop: Badge on the right */}
@@ -2076,8 +2079,11 @@ export function AgencyRequestsView() {
                                 <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-card" />
                               )}
                             </div>
-                            <div>
+                            <div className="flex flex-col">
                               <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
+                              {order.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {order.media_site.agency}</span>
+                              )}
                             </div>
                           </div>
                           {/* Desktop: Badge on the right */}
@@ -2251,7 +2257,12 @@ export function AgencyRequestsView() {
                                 <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                               </div>
                             )}
-                            <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
+                              {order.media_site?.agency && (
+                                <span className="text-xs text-muted-foreground">via {order.media_site.agency}</span>
+                              )}
+                            </div>
                           </div>
                           {/* Desktop: Badge on the right */}
                           <Badge className="hidden md:flex bg-muted text-muted-foreground border-muted-foreground/30">
