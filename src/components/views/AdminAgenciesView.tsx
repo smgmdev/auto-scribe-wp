@@ -1389,7 +1389,7 @@ export function AdminAgenciesView() {
                             <div className="flex items-center gap-2 flex-wrap">
                               {verification && (
                                 <Badge 
-                                  className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
+                                  className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenVerification(verification, e);
@@ -1404,7 +1404,7 @@ export function AdminAgenciesView() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Badge 
-                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
+                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleOpenCommissionDialog(agency);
