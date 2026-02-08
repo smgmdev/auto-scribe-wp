@@ -622,7 +622,7 @@ export function AdminEngagementsView() {
                     )}
                   </div>
                   
-                  <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                  <CardHeader className="pb-2 px-3 md:px-4 pt-10 md:pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {r.media_sites?.favicon && (
@@ -756,7 +756,7 @@ export function AdminEngagementsView() {
                         </Badge>
                       </div>
                       
-                      <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                      <CardHeader className="pb-2 px-3 md:px-4 pt-10 md:pt-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             {r.media_sites?.favicon && (
@@ -861,7 +861,7 @@ export function AdminEngagementsView() {
                           </Badge>
                         </div>
                         
-                        <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                        <CardHeader className="pb-2 px-3 md:px-4 pt-10 md:pt-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               {r.media_sites?.favicon ? (
