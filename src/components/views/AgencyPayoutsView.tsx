@@ -596,24 +596,27 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
-                            <div className="pt-3 space-y-2">
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                                </p>
+                          <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                            <div className="pt-2 space-y-3 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                <div>
+                                  <span className="text-muted-foreground">Submitted:</span>
+                                  <p className="font-medium">{format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
                                 {withdrawal.processed_at && (
-                                  <p className="text-xs text-muted-foreground">
-                                    <span className="text-foreground/70">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
-                                  </p>
+                                  <div>
+                                    <span className="text-muted-foreground">Processed:</span>
+                                    <p className="font-medium">{format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}</p>
+                                  </div>
                                 )}
                                 {withdrawal.admin_notes && (
-                                  <p className="text-xs text-muted-foreground">
-                                    <span className="text-foreground/70">{withdrawal.status === 'rejected' ? 'Reason:' : 'Details:'}</span> {withdrawal.admin_notes}
-                                  </p>
+                                  <div className="md:col-span-2">
+                                    <span className="text-muted-foreground">{withdrawal.status === 'rejected' ? 'Reason:' : 'Details:'}</span>
+                                    <p className="font-medium">{withdrawal.admin_notes}</p>
+                                  </div>
                                 )}
                               </div>
-                              <div className="flex flex-col gap-1 pt-2 border-t border-border/30">
+                              <div className="pt-2 border-t border-border/30">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -680,22 +683,25 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
-                            <div className="pt-3 space-y-2">
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">Order Created:</span> {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-                                </p>
+                          <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                            <div className="pt-2 space-y-3 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                <div>
+                                  <span className="text-muted-foreground">Order Created:</span>
+                                  <p className="font-medium">{format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
                                 {order.delivered_at && (
-                                  <p className="text-xs text-muted-foreground">
-                                    <span className="text-foreground/70">Delivered:</span> {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
-                                  </p>
+                                  <div>
+                                    <span className="text-muted-foreground">Delivered:</span>
+                                    <p className="font-medium">{format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}</p>
+                                  </div>
                                 )}
-                                <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">Completed:</span> {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
-                                </p>
+                                <div>
+                                  <span className="text-muted-foreground">Completed:</span>
+                                  <p className="font-medium">{format(new Date(completedDate), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
                               </div>
-                              <div className="flex flex-col gap-1 pt-2 border-t border-border/30">
+                              <div className="pt-2 border-t border-border/30 space-y-1">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
