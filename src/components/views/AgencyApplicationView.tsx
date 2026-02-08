@@ -495,8 +495,9 @@ export function AgencyApplicationView() {
         </div>
 
         <AgencyWorkBanner />
+        </div>
 
-        <div className="bg-[#1d1d1f] pt-8 pb-8 lg:pb-12">
+        <div className="bg-[#1d1d1f] pt-8 pb-8 lg:pb-12" style={{ zIndex: 1 }}>
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 space-y-8">
             <ConnectEarnCarousel />
 
@@ -582,8 +583,6 @@ export function AgencyApplicationView() {
         </Card>
       )}
           </div>
-        </div>
-        
         </div>
       </div>
 
