@@ -572,16 +572,9 @@ export function AgencyPayoutsView() {
                               Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           )}
-                          <div className="md:hidden mt-2 flex items-center justify-between">
-                            <p className={`font-semibold ${getAmountColor()}`}>
-                              -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </p>
-                            <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
-                              {withdrawal.status === 'pending' ? 'Pending' : 
-                               (withdrawal.status === 'approved' || withdrawal.status === 'completed') ? 'Completed' :
-                               'Rejected'}
-                            </Badge>
-                          </div>
+                          <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
+                            -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -670,14 +663,9 @@ export function AgencyPayoutsView() {
                           <p className="text-xs text-muted-foreground">
                             Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
                           </p>
-                          <div className="md:hidden mt-2 flex items-center justify-between">
-                            <p className="font-semibold text-green-500">
-                              +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </p>
-                            <Badge className="bg-foreground text-background border-foreground">
-                              {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
-                            </Badge>
-                          </div>
+                          <p className="md:hidden mt-2 font-semibold text-green-500">
+                            +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
                         </div>
                       </div>
                     </div>
