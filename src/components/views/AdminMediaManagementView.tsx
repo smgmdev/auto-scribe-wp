@@ -1549,8 +1549,8 @@ export function AdminMediaManagementView() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start overflow-visible">
-          <TabsTrigger value="media" className="relative overflow-visible">
+        <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start overflow-visible rounded-none gap-0">
+          <TabsTrigger value="media" className="relative overflow-visible flex-1 rounded-none">
             Media Sites ({mediaSites.length})
             {unreadMediaCount > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -1558,7 +1558,7 @@ export function AdminMediaManagementView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="relative overflow-visible">
+          <TabsTrigger value="wordpress" className="relative overflow-visible flex-1 rounded-none">
             WordPress Sites ({approvedSites.length})
             {unreadWpCount > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -1572,11 +1572,11 @@ export function AdminMediaManagementView() {
         <TabsContent value="wordpress" className="mt-2">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
-            <TabsList className="flex w-full overflow-x-auto md:w-auto scrollbar-hide justify-start">
-              <TabsTrigger value="approved">
+            <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
+              <TabsTrigger value="approved" className="flex-1 rounded-none">
                 Approved ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative">
+              <TabsTrigger value="pending" className="relative flex-1 rounded-none">
                 Pending Review ({pendingSubmissions.length})
                 {unreadWpCount > 0 && (
                   <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -1584,7 +1584,7 @@ export function AdminMediaManagementView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected">
+              <TabsTrigger value="rejected" className="flex-1 rounded-none">
                 Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
@@ -1970,11 +1970,11 @@ export function AdminMediaManagementView() {
         <TabsContent value="media" className="mt-2">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="flex w-full overflow-x-auto md:w-auto scrollbar-hide justify-start">
-              <TabsTrigger value="added">
+            <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
+              <TabsTrigger value="added" className="flex-1 rounded-none">
                 Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative overflow-visible">
+              <TabsTrigger value="pending" className="relative overflow-visible flex-1 rounded-none">
                 Pending Review ({pendingMediaSubmissions.length})
                 {unreadMediaCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -1982,7 +1982,7 @@ export function AdminMediaManagementView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected">
+              <TabsTrigger value="rejected" className="flex-1 rounded-none">
                 Rejected ({rejectedMediaSubmissions.length + approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0).length})
               </TabsTrigger>
             </TabsList>
