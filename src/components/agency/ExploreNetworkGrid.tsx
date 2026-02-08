@@ -68,7 +68,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
           <button
             key={site.id}
             onClick={() => setSelectedSite(site)}
-            className={`rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md aspect-square ${
+            className={`rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md aspect-square md:aspect-auto ${
               dark 
                 ? 'border-[#333] bg-transparent hover:border-[#999]' 
                 : 'border-border bg-card hover:border-foreground'
@@ -78,7 +78,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
               <img
                 src={site.favicon}
                 alt={site.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full md:h-20 md:w-auto object-cover md:object-contain"
               />
             ) : (
               <span className={`text-xs text-center px-3 py-4 block ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
