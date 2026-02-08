@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users } from 'lucide-react';
+import { Search, CreditCard, Users, RefreshCw } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
+import { toast } from 'sonner';
 
 interface UserCredit {
   user_id: string;
@@ -42,6 +43,15 @@ export const AdminCreditManagementView = () => {
   const [balancesSearchTerm, setBalancesSearchTerm] = useState('');
   // Expanded user rows state
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserCredits();
+    setRefreshing(false);
+    toast.success('Credits refreshed');
+  };
 
   const toggleUserExpanded = (userId: string) => {
     setExpandedUsers(prev => {
@@ -278,9 +288,20 @@ export const AdminCreditManagementView = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
-        <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
+          <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
+        </div>
+        <Button 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          variant="outline"
+          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="space-y-2">
