@@ -19,27 +19,27 @@ import {
 const faqItems = [
   {
     icon: Building2,
-    question: "Is the Agency Account the Right Fit for You?",
+    question: "Is the agency account the right fit for you?",
     answer: "You must be a formally incorporated media marketing agency that provides professional PR services with a focus on securing media coverage for clients. This account type is intended exclusively for established agencies with proven operations and a documented track record in the media industry."
   },
   {
     icon: Gift,
-    question: "What Are the Benefits for Agencies on Arcana Mace?",
+    question: "What are the benefits for agencies on Arcana Mace?",
     answer: "As an agency, you can list your own media channels for sale and promote them to a wide audience. With Arcana Mace, clients gain greater confidence when engaging agencies for media buying, while we ensure that agencies receive the support, protection, and guaranteed payment they deserve for their work."
   },
   {
     icon: Workflow,
-    question: "How Does the Model Work?",
+    question: "How does the model work?",
     answer: "You will list your available media channels along with your service details. Clients can then contact you directly with questions about their orders, allowing you to provide guidance and feedback on their requirements. Once both you and the client agree on a media publishing plan, the client places the order and you proceed with delivery. Arcana Mace securely holds the payment during this process. After delivery, the client reviews and approves your work. Once approved, your payment is released to you. Simple and secure."
   },
   {
     icon: CalendarClock,
-    question: "What Is the Verification and Approval Timeline?",
+    question: "What is the verification and approval timeline?",
     answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1–3 business days. Once approved, you will be required to complete additional KYC details and payout information. You may choose to receive payments via bank transfer or USDT. You will receive email notifications at each stage of the process."
   },
   {
     icon: Building2,
-    question: "Can I Connect My Own WordPress Media Site to Arcana Mace?",
+    question: "Can I connect my own WordPress media site to Arcana Mace?",
     answer: "Yes! If your agency owns a media site such as a WordPress blog or WordPress news channel, you can connect it directly to Arcana Mace. This allows clients to purchase articles and publish them directly to your media site through Arcana Mace, streamlining the entire publishing workflow."
   },
 ];
