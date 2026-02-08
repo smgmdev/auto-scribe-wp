@@ -441,8 +441,8 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="animate-fade-in -m-4 lg:-m-8">
-      {/* Fixed Video Background - stays completely still on scroll */}
+    <>
+      {/* Fixed Video Background - rendered at viewport level, stays completely still on scroll */}
       <div 
         className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0"
         style={{ zIndex: 0 }}
@@ -483,13 +483,15 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Spacer to push content down and reveal the fixed video */}
-      <div className="h-[80vh]" />
+      {/* Main scrollable content container */}
+      <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 1 }}>
+        {/* Transparent spacer to reveal the fixed video */}
+        <div className="h-[80vh]" />
 
-      {/* Content Section - scrolls over the video */}
-      <div className="relative bg-white" style={{ zIndex: 1 }}>
-        {/* Dark gradient transition at top */}
-        <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-white pointer-events-none" />
+        {/* Content Section - scrolls over the video */}
+        <div className="relative bg-white">
+          {/* Dark gradient transition at top */}
+          <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-white pointer-events-none" />
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
@@ -578,6 +580,7 @@ export function AgencyApplicationView() {
         </Card>
       )}
         </div>
+        </div>
       </div>
 
       <AgencyApplicationDialog 
@@ -592,6 +595,6 @@ export function AgencyApplicationView() {
         url={webViewUrl || ''}
         title="Agency Website"
       />
-    </div>
+    </>
   );
 }
