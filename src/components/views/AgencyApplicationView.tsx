@@ -444,7 +444,7 @@ export function AgencyApplicationView() {
     <>
       {/* Fixed Video Background - rendered at viewport level, stays completely still on scroll */}
       <div 
-        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0"
+        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 pointer-events-none"
         style={{ zIndex: 0 }}
       >
         <video 
@@ -455,38 +455,41 @@ export function AgencyApplicationView() {
           playsInline
           className="w-full h-full object-cover"
         />
-        
-        {/* Text Overlay on Video - z-index higher than spacer to allow clicks */}
-        <div className="absolute inset-0 flex items-center pb-20" style={{ zIndex: 2 }}>
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
-            <div className="max-w-xl">
-              <img 
-                src="/favicon.png" 
-                alt="Arcana Mace" 
-                className="h-10 w-10 mb-4 brightness-0 invert"
-              />
-              <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-                Upgrade to Agency
-              </h1>
-              <p className="mt-3 text-white/80 text-base lg:text-lg">
-                Become a media merchant on Arcana Mace to trade and buy media products worldwide.
-              </p>
-              <Button 
-                className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-                onClick={() => setDialogOpen(true)}
-                disabled={existingApplication?.status === 'pending'}
-              >
-                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-              </Button>
-            </div>
+      </div>
+
+      {/* Fixed Text Overlay - separate from video for proper z-index stacking */}
+      <div 
+        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 flex items-center pb-20 pointer-events-none"
+        style={{ zIndex: 2 }}
+      >
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
+          <div className="max-w-xl pointer-events-auto">
+            <img 
+              src="/favicon.png" 
+              alt="Arcana Mace" 
+              className="h-10 w-10 mb-4 brightness-0 invert"
+            />
+            <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
+              Upgrade to Agency
+            </h1>
+            <p className="mt-3 text-white/80 text-base lg:text-lg">
+              Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+            </p>
+            <Button 
+              className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+              onClick={() => setDialogOpen(true)}
+              disabled={existingApplication?.status === 'pending'}
+            >
+              {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Main scrollable content container */}
       <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 1 }}>
-        {/* Transparent spacer to reveal the fixed video - pointer-events-none allows clicks to pass through */}
-        <div className="h-[80vh] pointer-events-none" />
+        {/* Transparent spacer to reveal the fixed video */}
+        <div className="h-[80vh]" />
 
         {/* Content Section - scrolls over the video */}
         <div className="relative bg-white rounded-t-3xl">
