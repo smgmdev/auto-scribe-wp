@@ -590,18 +590,18 @@ export function AdminAgencyWithdrawalsView() {
                               <TooltipTrigger asChild>
                                 <p className="cursor-help underline decoration-dotted">Method: Bank Transfer</p>
                               </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <div className="space-y-1 text-xs">
-                                  <p><span className="text-muted-foreground">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
-                                  <p><span className="text-muted-foreground">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
+                              <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-xs">
+                                <div className="space-y-1">
+                                  <p><span className="opacity-70">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
+                                  <p><span className="opacity-70">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
                                   {withdrawal.bank_details.bank_account_number && (
-                                    <p><span className="text-muted-foreground">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
+                                    <p><span className="opacity-70">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
                                   )}
                                   {withdrawal.bank_details.bank_iban && (
-                                    <p><span className="text-muted-foreground">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
+                                    <p><span className="opacity-70">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
                                   )}
                                   {withdrawal.bank_details.bank_swift_code && (
-                                    <p><span className="text-muted-foreground">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
+                                    <p><span className="opacity-70">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
                                   )}
                                 </div>
                               </TooltipContent>
@@ -611,16 +611,16 @@ export function AdminAgencyWithdrawalsView() {
                               <TooltipTrigger asChild>
                                 <p className="cursor-help underline decoration-dotted">Method: USDT (Crypto)</p>
                               </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-sm">
-                                <div className="space-y-1 text-xs">
-                                  <p><span className="text-muted-foreground">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
+                              <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-sm">
+                                <div className="space-y-1">
+                                  <p><span className="opacity-70">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
                                   {withdrawal.crypto_details.usdt_wallet_address && (
                                     <div className="flex items-center gap-1">
-                                      <span className="text-muted-foreground">Wallet:</span>
+                                      <span className="opacity-70">Wallet:</span>
                                       <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
                                       <button
                                         onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
-                                        className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                                        className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
                                       >
                                         <Copy className="h-3 w-3" />
                                       </button>
