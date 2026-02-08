@@ -939,9 +939,9 @@ export function AdminUsersView() {
             
             return (
               <Card key={user.id} id={`user-card-${user.id}`} className="group rounded-none">
-                <CardContent className="p-4">
+                <CardContent className="pt-4 pb-0 px-4">
                   <div 
-                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4"
+                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -mx-4 -mt-4 px-4 pt-4"
                     onClick={() => toggleUserExpand(user.id)}
                   >
                     {/* Desktop layout */}
