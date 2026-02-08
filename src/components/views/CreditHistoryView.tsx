@@ -1255,7 +1255,7 @@ export function CreditHistoryView() {
                           <div className="flex-1">
                             <p className="font-medium">{cleanDescription}</p>
                             <div className="text-lg text-green-500 md:hidden mt-1">
-                              +{transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              +{transaction.amount % 1 === 0 ? transaction.amount.toLocaleString() : transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
                               {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
@@ -1263,7 +1263,7 @@ export function CreditHistoryView() {
                           </div>
                         </div>
                         <div className="text-lg text-green-500 hidden md:block">
-                          +{transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          +{transaction.amount % 1 === 0 ? transaction.amount.toLocaleString() : transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       
