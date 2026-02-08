@@ -45,12 +45,9 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
     if (!user) {
       // Not logged in - redirect to auth, then to agency application
       navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'agency-application' } });
-    } else if (isAdmin) {
-      // Admin - redirect to agency management in dashboard
-      navigate('/dashboard', { state: { targetView: 'admin-agencies' } });
-    } else if (isAgency) {
-      // Agency user - redirect to agency side of dashboard
-      navigate('/dashboard', { state: { targetView: 'my-agency' } });
+    } else if (isAdmin || isAgency) {
+      // Admin or Agency user - just go to dashboard
+      navigate('/dashboard');
     } else {
       // Regular user - redirect to agency application in dashboard
       navigate('/dashboard', { state: { targetView: 'agency-application' } });
