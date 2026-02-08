@@ -226,7 +226,7 @@ export function MyAgencyView() {
       case 'stripe':
         return 'Stripe Connect';
       case 'custom':
-        return 'Custom Payout (Bank/USDT)';
+        return bankDetails?.usdt_wallet_address ? 'USDT' : 'Bank';
       default:
         return 'Not configured';
     }
