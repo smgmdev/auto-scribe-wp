@@ -1020,6 +1020,12 @@ export function AgencyMediaView() {
                                 <CheckCircle className="h-5 w-5 text-green-500" />
                               </div>
                               <div className="min-w-0 flex-1 space-y-0">
+                                {/* Badge - visible on mobile only, above the title */}
+                                <div className="flex items-center gap-2 mb-1 md:hidden">
+                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                    {submission.imported_sites?.length || 0} sites added
+                                  </Badge>
+                                </div>
                                 <div className="flex items-center gap-1.5">
                                   <p className="font-medium text-sm truncate leading-tight">
                                     {submission.rejected_media && submission.rejected_media.length > 0 
@@ -1041,12 +1047,6 @@ export function AgencyMediaView() {
                                       <p>Approved media sites are now available in Global Library under Media Network.</p>
                                     </TooltipContent>
                                   </Tooltip>
-                                </div>
-                                {/* Badge - visible on mobile only, above the link */}
-                                <div className="flex items-center gap-2 mt-1 md:hidden">
-                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                    {submission.imported_sites?.length || 0} sites added
-                                  </Badge>
                                 </div>
                                 {submission.reply_sheet_url && (
                                   <div className="flex items-center gap-2">
