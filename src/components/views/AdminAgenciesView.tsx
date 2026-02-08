@@ -1909,7 +1909,7 @@ export function AdminAgenciesView() {
               {/* Personal Information */}
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Personal Information</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Full Name</p>
                     <div 
@@ -1967,7 +1967,7 @@ export function AdminAgenciesView() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="hover:bg-black hover:text-white"
+                        className="w-full md:w-auto hover:bg-black hover:text-white"
                         onClick={() => handleViewKycDocument(verificationDocUrls.passport, 'Passport / ID')}
                       >
                         <FileText className="h-4 w-4 mr-2" />
@@ -1981,7 +1981,7 @@ export function AdminAgenciesView() {
               {/* Company Information */}
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Company Information</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Company Name</p>
                     <div 
@@ -2037,7 +2037,7 @@ export function AdminAgenciesView() {
                       )}
                     </div>
                   </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <p className="text-muted-foreground">Company Address</p>
                     <div 
                       className="flex items-center gap-1 cursor-pointer hover:text-primary"
@@ -2055,14 +2055,14 @@ export function AdminAgenciesView() {
                     </div>
                   </div>
                   {(verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) && (
-                    <div className="col-span-2">
+                    <div className="md:col-span-2">
                       <p className="text-muted-foreground mb-1">Company Uploads</p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
                         {verificationDocUrls.company_incorporation && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-black hover:text-white"
+                            className="w-full md:w-auto hover:bg-black hover:text-white"
                             onClick={() => handleViewKycDocument(verificationDocUrls.company_incorporation, 'Company Incorporation')}
                           >
                             <FileText className="h-4 w-4 mr-2" />
@@ -2073,7 +2073,7 @@ export function AdminAgenciesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-black hover:text-white"
+                            className="w-full md:w-auto hover:bg-black hover:text-white"
                             onClick={() => handleViewKycDocument(verificationDocUrls.license, 'Business License')}
                           >
                             <FileText className="h-4 w-4 mr-2" />
@@ -2084,7 +2084,7 @@ export function AdminAgenciesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-black hover:text-white"
+                            className="w-full md:w-auto hover:bg-black hover:text-white"
                             onClick={() => handleViewKycDocument(verificationDocUrls.memorandum, 'Memorandum of Association')}
                           >
                             <FileText className="h-4 w-4 mr-2" />
@@ -2095,7 +2095,7 @@ export function AdminAgenciesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-black hover:text-white"
+                            className="w-full md:w-auto hover:bg-black hover:text-white"
                             onClick={() => handleViewKycDocument(verificationDocUrls.additional, 'Additional Documents')}
                           >
                             <FileText className="h-4 w-4 mr-2" />
@@ -2111,7 +2111,7 @@ export function AdminAgenciesView() {
               {/* Bank Details */}
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Bank Details</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Beneficiary</p>
                     <div 
@@ -2214,7 +2214,7 @@ export function AdminAgenciesView() {
                       )}
                     </div>
                   </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <p className="text-muted-foreground">Bank Address</p>
                     <div 
                       className="flex items-center gap-1 cursor-pointer hover:text-primary"
@@ -2238,12 +2238,12 @@ export function AdminAgenciesView() {
               {(selectedVerification.usdt_wallet_address || selectedVerification.usdt_network) && (
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-3">Crypto Wallet (USDT)</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">Network</p>
                       <p className="font-medium">{selectedVerification.usdt_network || '-'}</p>
                     </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                       <p className="text-muted-foreground">Wallet Address</p>
                       <div 
                         className="flex items-center gap-1 cursor-pointer hover:text-primary"
@@ -2275,12 +2275,12 @@ export function AdminAgenciesView() {
 
               {/* Action Buttons */}
               {selectedVerification.status === 'pending_review' && (
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex flex-col md:flex-row gap-3 pt-4 border-t">
                   <Button
                     onClick={handleApproveVerification}
                     disabled={processingVerification}
                     variant="outline"
-                    className="flex-1 hover:bg-black hover:text-white"
+                    className="w-full md:flex-1 hover:bg-black hover:text-white"
                   >
                     {processingVerification ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -2293,7 +2293,7 @@ export function AdminAgenciesView() {
                     onClick={() => setShowVerificationRejectDialog(true)}
                     disabled={processingVerification}
                     variant="outline"
-                    className="flex-1 hover:bg-black hover:text-white"
+                    className="w-full md:flex-1 hover:bg-black hover:text-white"
                   >
                     Reject
                   </Button>
@@ -2355,9 +2355,9 @@ export function AdminAgenciesView() {
 
       {/* KYC Document Viewer Dialog */}
       <Dialog open={docViewerOpen} onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
-          <DialogHeader className="px-3 pb-0">
-            <div className="flex items-center justify-between">
+        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+          <DialogHeader className="px-2 md:px-3 pb-0">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => {
@@ -2368,18 +2368,26 @@ export function AdminAgenciesView() {
                   variant="ghost"
                   size="sm"
                   disabled={documentLoading}
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
                 >
                   <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
                 </Button>
-                <DialogTitle className="text-sm">{docViewerTitle}</DialogTitle>
+                <DialogTitle className="text-sm truncate">{docViewerTitle}</DialogTitle>
+                <Button
+                  onClick={() => setDocViewerOpen(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white md:hidden ml-auto flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => window.open(docViewerUrl, '_blank')}
                   variant="outline"
                   size="sm"
-                  className="hover:bg-black hover:text-white h-7 text-xs"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Download
@@ -2388,7 +2396,7 @@ export function AdminAgenciesView() {
                   onClick={() => window.open(docViewerUrl, '_blank')}
                   variant="outline"
                   size="sm"
-                  className="hover:bg-black hover:text-white h-7 text-xs"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
                 >
                   <ExternalLink className="h-3 w-3 mr-1" />
                   Open in New Tab
@@ -2397,7 +2405,7 @@ export function AdminAgenciesView() {
                   onClick={() => setDocViewerOpen(false)}
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white hidden md:flex flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -2405,7 +2413,7 @@ export function AdminAgenciesView() {
             </div>
           </DialogHeader>
           {docViewerUrl && (
-            <div className="w-full h-[75vh] relative">
+            <div className="w-full h-[70vh] md:h-[75vh] relative">
               {documentLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
                   <div className="flex flex-col items-center gap-2">
