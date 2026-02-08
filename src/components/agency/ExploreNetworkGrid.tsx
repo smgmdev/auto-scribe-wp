@@ -70,7 +70,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
             onClick={() => setSelectedSite(site)}
             className={`rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md ${
               dark 
-                ? 'border-white/20 bg-white/10 hover:border-white/40' 
+                ? 'border-[#999] bg-transparent hover:border-[#333]' 
                 : 'border-border bg-card hover:border-foreground'
             }`}
           >
