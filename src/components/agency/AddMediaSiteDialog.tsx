@@ -132,17 +132,17 @@ export function AddMediaSiteDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] overflow-hidden">
-        <DialogHeader>
+        <DialogHeader className="space-y-1">
           <DialogTitle className="flex items-center gap-2">
             <Library className="h-5 w-5" />
             Add Media Sites
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-left">
             Submit your media list for review and approval.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="w-full space-y-6 pt-4 overflow-hidden">
+        <form onSubmit={handleSubmit} className="w-full space-y-6 pt-2 overflow-hidden">
           <div className="space-y-4 overflow-hidden">
             <div className="w-full p-3 md:p-4 bg-muted/50 rounded-lg border border-border/50 space-y-3 overflow-hidden">
               <p className="text-xs md:text-sm text-foreground break-words">
