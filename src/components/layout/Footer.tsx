@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
 
@@ -11,7 +13,49 @@ interface FooterProps {
 
 export function Footer({ narrow = false, showTopBorder = false, dark = false }: FooterProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const [isAgency, setIsAgency] = useState(false);
+
+  // Check if user is an approved agency
+  useEffect(() => {
+    const checkAgencyStatus = async () => {
+      if (!user) {
+        setIsAgency(false);
+        return;
+      }
+      
+      try {
+        const { data } = await supabase
+          .from('agency_payouts')
+          .select('onboarding_complete')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        setIsAgency(data?.onboarding_complete === true);
+      } catch (error) {
+        console.error('Error checking agency status:', error);
+        setIsAgency(false);
+      }
+    };
+    
+    checkAgencyStatus();
+  }, [user]);
+
+  const handleAgencyAccountClick = () => {
+    if (!user) {
+      // Not logged in - redirect to agency portal
+      navigate('/agency');
+    } else if (isAdmin) {
+      // Admin - redirect to agency management in dashboard
+      navigate('/dashboard', { state: { targetView: 'admin-agencies' } });
+    } else if (isAgency) {
+      // Agency user - redirect to agency side of dashboard
+      navigate('/dashboard', { state: { targetView: 'my-agency' } });
+    } else {
+      // Regular user - redirect to agency portal
+      navigate('/agency');
+    }
+  };
 
   const containerClass = narrow 
     ? "max-w-[980px] mx-auto px-4 md:px-6 pb-16"
@@ -93,7 +137,14 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
           <div>
             <h4 className={`font-semibold mb-2 text-xs ${dark ? 'text-white' : 'text-foreground'}`}>For Business</h4>
             <ul className={`space-y-2 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
-              <li><a href="#" className={`transition-colors ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Become an Agency</a></li>
+              <li>
+                <button 
+                  onClick={handleAgencyAccountClick}
+                  className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}
+                >
+                  Agency Account
+                </button>
+              </li>
             </ul>
           </div>
           
