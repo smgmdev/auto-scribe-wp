@@ -471,7 +471,7 @@ export function AgencyApplicationView() {
                   Become a media merchant on Arcana Mace to trade and buy media products worldwide.
                 </p>
                 <Button 
-                  className={`mt-6 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
                   onClick={() => setDialogOpen(true)}
                   disabled={existingApplication?.status === 'pending'}
                 >
