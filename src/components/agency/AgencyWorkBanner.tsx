@@ -2,7 +2,7 @@ import agencyWorkBanner from '@/assets/agency-work-banner.jpg';
 
 export function AgencyWorkBanner() {
   return (
-    <section className="relative w-[calc(100%+2rem)] lg:w-[calc(100%+4rem)] -mx-4 lg:-mx-8 h-[300px] md:h-[400px] overflow-hidden">
+    <section className="relative w-[calc(100%+2rem)] lg:w-[calc(100%+4rem)] -mx-4 lg:-mx-8 h-[300px] md:h-[400px] overflow-hidden rounded-b-[40px]">
       <img 
         src={agencyWorkBanner} 
         alt="Agency at Work" 
