@@ -494,7 +494,7 @@ export const AdminCreditManagementView = () => {
                               <TableCell colSpan={3} className="p-0">
                                 <div className="bg-foreground py-1">
                                   {/* Stats row above tabs */}
-                                  <div className="grid grid-cols-6 gap-4 px-3">
+                                  <div className="grid grid-cols-6 gap-4 px-3 pb-3">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
