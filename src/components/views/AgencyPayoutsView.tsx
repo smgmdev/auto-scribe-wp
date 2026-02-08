@@ -569,7 +569,7 @@ export function AgencyPayoutsView() {
                              'Rejected'}
                           </Badge>
                         </div>
-                        <p className={`hidden md:block absolute bottom-3 right-3 font-semibold text-lg ${getAmountColor()}`}>
+                        <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
                           -{Math.round(withdrawalAmount).toLocaleString()}
                         </p>
                         <div className="flex items-center gap-3 md:pr-24">
@@ -601,7 +601,7 @@ export function AgencyPayoutsView() {
                               >
                                 See transaction details
                               </button>
-                              <p className={`md:hidden mt-2 font-semibold text-lg ${getAmountColor()}`}>
+                              <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
                                 -{Math.round(withdrawalAmount).toLocaleString()}
                               </p>
                             </div>
@@ -647,8 +647,8 @@ export function AgencyPayoutsView() {
                             {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
                           </Badge>
                         </div>
-                        <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-green-500">
-                          +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
+                          +{Math.round(earningsAmount).toLocaleString()}
                         </p>
                         <div className="flex items-center gap-3 md:pr-24">
                           <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
@@ -699,8 +699,8 @@ export function AgencyPayoutsView() {
                               >
                                 See transaction details
                               </button>
-                              <p className="md:hidden mt-2 font-semibold text-green-500">
-                                +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              <p className="md:hidden mt-2 text-lg text-green-500">
+                                +{Math.round(earningsAmount).toLocaleString()}
                               </p>
                             </div>
                           </div>
