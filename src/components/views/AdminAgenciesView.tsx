@@ -894,7 +894,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Void Tab - Cancelled and Rejected */}
-        <TabsContent value="void" className="mt-2">
+        <TabsContent value="void" className="mt-0">
           {/* Sub-tabs for void stages */}
           <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start rounded-none">
@@ -1101,7 +1101,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Under Verification Tab */}
-        <TabsContent value="verification" className="mt-2">
+        <TabsContent value="verification" className="mt-0">
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab}>
             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start rounded-none">
@@ -1304,7 +1304,7 @@ export function AdminAgenciesView() {
         </TabsContent>
 
         {/* Onboarded Agencies Tab */}
-        <TabsContent value="onboarded" className="mt-2">
+        <TabsContent value="onboarded" className="mt-0">
           {/* Sub-tabs for Active and Downgraded */}
           <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab}>
             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 md:max-w-md scrollbar-hide justify-start rounded-none">
