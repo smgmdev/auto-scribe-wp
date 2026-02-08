@@ -250,7 +250,7 @@ export function AccountSettings() {
               onClick={handleUpdatePassword} 
               disabled={savingPassword || !newPassword || !confirmPassword}
               variant="outline"
-              className="w-full"
+              className="w-full hover:bg-transparent hover:text-accent hover:border-accent"
             >
               {savingPassword ? (
                 <>
