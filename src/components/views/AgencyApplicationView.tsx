@@ -443,6 +443,11 @@ export function AgencyApplicationView() {
     <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 p-4 lg:p-8 bg-white min-h-full">
       <div className="rounded-lg p-6">
         <div className="text-center">
+          <img 
+            src="/favicon.png" 
+            alt="Arcana Mace" 
+            className="h-12 w-12 mx-auto mb-4"
+          />
           <h1 className="text-[40px] font-bold text-foreground">
             Why Upgrade to Agency?
           </h1>
