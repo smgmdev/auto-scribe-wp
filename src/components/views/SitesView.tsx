@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, ChevronRight, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send, MessageSquare } from 'lucide-react';
+import { Globe, Plus, Trash2, CheckCircle, XCircle, ExternalLink, Coins, Edit2, ChevronDown, ChevronUp, ChevronRight, X, Loader2, Search, ImageIcon, Link2, Upload, Copy, Send, MessageSquare, RefreshCw } from 'lucide-react';
 
 import { useSites } from '@/hooks/useSites';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { getFaviconUrl, extractDomain, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
@@ -137,6 +138,15 @@ export function SitesView() {
   // Brief submission dialog state
   const [briefDialogOpen, setBriefDialogOpen] = useState(false);
   const [briefMediaSite, setBriefMediaSite] = useState<MediaSite | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetchSites(), fetchMediaSites(), fetchOpenEngagements()]);
+    setRefreshing(false);
+    sonnerToast.success('Media network refreshed');
+  };
 
   // WebView state removed - now using direct _blank links
 
@@ -1394,12 +1404,24 @@ export function SitesView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Media Network</h1>
           <p className="mt-2 text-muted-foreground">Available media sites for publishing</p>
         </div>
-        
+        <Button
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className={`w-full md:w-auto gap-2 border border-black transition-all duration-200 ${
+            refreshing 
+              ? 'bg-transparent text-black' 
+              : 'bg-black text-white hover:bg-transparent hover:text-black'
+          }`}
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       {/* Tabs */}
