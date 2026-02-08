@@ -72,11 +72,11 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
         <div className="p-5 pb-3">
           <div className="flex items-center gap-3 mb-3">
             {article.published_to_favicon && (
-              <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+              <div className="h-10 w-10 rounded-xl overflow-hidden flex-shrink-0">
                 <img
                   src={article.published_to_favicon}
                   alt=""
-                  className="h-6 w-6 object-contain"
+                  className="h-full w-full object-cover"
                 />
               </div>
             )}
@@ -101,16 +101,18 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
           </div>
         </div>
         
-        {/* Featured Image - takes up remaining space */}
-        {article.featured_image?.url && (
-          <div className="flex-1 min-h-[180px] relative overflow-hidden">
+        {/* Featured Image - fixed height for consistency */}
+        <div className="h-[180px] overflow-hidden">
+          {article.featured_image?.url ? (
             <img
               src={article.featured_image.url}
               alt={article.featured_image.alt || article.title}
               className="w-full h-full object-cover"
             />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full bg-white/5" />
+          )}
+        </div>
         
         {/* Footer info */}
         <div className="px-5 py-3 bg-[#1d1d1f]">
