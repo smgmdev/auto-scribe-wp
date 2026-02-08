@@ -485,8 +485,8 @@ export function AgencyApplicationView() {
 
       {/* Main scrollable content container */}
       <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 1 }}>
-        {/* Transparent spacer to reveal the fixed video */}
-        <div className="h-[80vh]" />
+        {/* Transparent spacer to reveal the fixed video - pointer-events-none allows clicks to pass through */}
+        <div className="h-[80vh] pointer-events-none" />
 
         {/* Content Section - scrolls over the video */}
         <div className="relative bg-white rounded-t-3xl">
