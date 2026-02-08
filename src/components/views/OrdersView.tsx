@@ -772,9 +772,26 @@ export function OrdersView() {
     >
       {/* Unread indicator dot */}
       {isUnread && !isAdmin && (
-        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse md:block hidden" />
       )}
       <CardHeader className="pb-2 px-4 pt-3">
+        {/* Mobile: Badge on top right */}
+        <div className="flex md:hidden justify-end mb-2">
+          <div className="flex gap-2">
+            {order.status === 'cancelled' ? (
+              <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
+            ) : (
+              <>
+                {order.status !== 'paid' && order.status !== 'pending_payment' && order.delivery_status !== 'accepted' && getStatusBadge(order.status)}
+                {getDeliveryBadge(order.delivery_status, order.delivery_deadline, order.id)}
+              </>
+            )}
+          </div>
+          {/* Unread indicator for mobile */}
+          {isUnread && !isAdmin && (
+            <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+          )}
+        </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -799,7 +816,8 @@ export function OrdersView() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          {/* Desktop: Badge inline */}
+          <div className="hidden md:flex items-center gap-4">
             <div className="flex flex-col items-end gap-1">
               <div className="flex gap-2">
                 {order.status === 'cancelled' ? (
