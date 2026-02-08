@@ -678,6 +678,23 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Credit Balance</p>
+                                          <p className="font-semibold text-green-600">{user.available.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p><span className="opacity-70">Earned:</span> {(user.earned || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased:</span> {(user.purchased || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Withdrawn:</span> {(user.withdrawn || 0).toLocaleString()}</p>
+                                          <hr className="border-background/30 my-1" />
+                                          <p className="font-medium">Available Credit Balance: {user.available.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
                                           <p className="text-xs text-muted-foreground">Locked</p>
                                           <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
                                         </div>
@@ -724,23 +741,6 @@ export const AdminCreditManagementView = () => {
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent>Total value spent on completed orders.</TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip delayDuration={100}>
-                                      <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Credit Balance</p>
-                                          <p className="font-semibold text-green-600">{user.available.toLocaleString()}</p>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
-                                        <div className="space-y-1">
-                                          <p><span className="opacity-70">Earned:</span> {(user.earned || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Purchased:</span> {(user.purchased || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Withdrawn:</span> {(user.withdrawn || 0).toLocaleString()}</p>
-                                          <hr className="border-background/30 my-1" />
-                                          <p className="font-medium">Available Credit Balance: {user.available.toLocaleString()}</p>
-                                        </div>
-                                      </TooltipContent>
                                     </Tooltip>
                                   </div>
                                   <UserTransactionsExpanded userId={user.user_id} />
