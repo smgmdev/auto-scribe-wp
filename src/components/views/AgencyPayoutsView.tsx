@@ -656,7 +656,7 @@ export function AgencyPayoutsView() {
                           </div>
                           <div className="flex-1">
                             <p className="font-medium">
-                              {order.media_site?.name || 'Order Earning'}
+                              Credited: {order.media_site?.name || 'Order Earning'}
                             </p>
                             <div className="flex flex-col mt-1">
                               <div className="flex items-center gap-1">
