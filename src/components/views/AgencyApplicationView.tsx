@@ -596,8 +596,8 @@ export function AgencyApplicationView() {
               </div>
             </div>
           </div>
-          {/* White spacer to cover any remaining video below footer */}
-          <div className="h-[200px] bg-white" />
+          {/* Full viewport white spacer to guarantee video is always covered */}
+          <div className="h-[100vh] bg-white" />
         </div>
         </div>
       </div>
