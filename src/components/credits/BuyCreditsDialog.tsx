@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Coins, GripHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 10;
@@ -20,7 +20,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [creditAmount, setCreditAmount] = useState<string>('10');
   const [purchasing, setPurchasing] = useState(false);
   const { refreshCredits } = useAuth();
-  const { toast } = useToast();
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -40,11 +39,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
   const handlePurchase = async () => {
     if (!isValidAmount) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid amount',
-        description: `Minimum purchase is ${MIN_CREDITS} credits.`,
-      });
+      toast.error(`Minimum purchase is ${MIN_CREDITS} credits.`);
       return;
     }
 
@@ -72,11 +67,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         setTimeout(() => clearInterval(pollInterval), 300000);
       }
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Purchase failed',
-        description: error.message || 'Failed to create checkout session.',
-      });
+      toast.error(error.message || 'Failed to create checkout session.');
     } finally {
       setPurchasing(false);
     }

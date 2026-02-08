@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Loader2, ArrowRight, Search } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
@@ -55,7 +55,6 @@ export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   
   const locationState = location.state as LocationState | null;
 
@@ -148,11 +147,7 @@ export default function Auth() {
 
     if (isSuspended) {
       setIsLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Account Suspended',
-        description: 'Your account has been suspended. Contact support for details.',
-      });
+      toast.error('Your account has been suspended. Contact support for details.');
       return;
     }
 
@@ -163,32 +158,20 @@ export default function Auth() {
     if (statusError) {
       console.error('Error checking user status:', statusError);
       setIsLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Unable to verify account status. Please try again.',
-      });
+      toast.error('Unable to verify account status. Please try again.');
       return;
     }
 
     // Handle different user statuses
     if (userStatus === 'not_found') {
       setIsLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Account not found',
-        description: 'No account exists with this email. Please create a new account.',
-      });
+      toast.error('No account exists with this email. Please create a new account.');
       return;
     }
 
     if (userStatus === 'unverified') {
       setIsLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Email not verified',
-        description: 'This email was already used to sign up but has not yet been verified. Please check your inbox for the verification link.',
-      });
+      toast.error('This email was already used to sign up but has not yet been verified. Please check your inbox for the verification link.');
       return;
     }
 
@@ -201,11 +184,7 @@ export default function Auth() {
       if (error.message === 'Invalid login credentials') {
         errorMessage = 'Invalid email or password. Please try again.';
       }
-      toast({
-        variant: 'destructive',
-        title: 'Sign in failed',
-        description: errorMessage,
-      });
+      toast.error(errorMessage);
       return;
     }
 
@@ -237,11 +216,7 @@ export default function Auth() {
       if (error.message.includes('already registered')) {
         errorMessage = 'This email is already registered. Please sign in instead.';
       }
-      toast({
-        variant: 'destructive',
-        title: 'Sign up failed',
-        description: errorMessage,
-      });
+      toast.error(errorMessage);
       return;
     }
 
@@ -265,10 +240,7 @@ export default function Auth() {
     
     setIsLoading(false);
     setIsSigningUp(false);
-    toast({
-      title: 'Check your email!',
-      description: 'We sent you a verification link. Please verify your email to sign in.',
-    });
+    toast.success('Check your email! We sent you a verification link.');
   };
 
   return (

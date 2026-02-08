@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useToast } from './use-toast';
+import { toast } from 'sonner';
 import type { Article, Headline, FeaturedImage, ArticleTone } from '@/types';
 
 const ARTICLES_PER_PAGE = 15;
@@ -63,7 +63,6 @@ export function useArticles() {
   const [publishedCount, setPublishedCount] = useState(0);
   const [draftsCount, setDraftsCount] = useState(0);
   const { user, isAdmin } = useAuth();
-  const { toast } = useToast();
   const lastUserIdRef = useRef<string | null>(null);
 
   // Fetch counts for both statuses
@@ -118,11 +117,7 @@ export function useArticles() {
 
     if (publishedResult.error) {
       console.error('Error fetching published articles:', publishedResult.error);
-      toast({
-        variant: 'destructive',
-        title: 'Error loading articles',
-        description: publishedResult.error.message,
-      });
+      toast.error(publishedResult.error.message);
     }
 
     if (draftsResult.error) {
@@ -139,7 +134,7 @@ export function useArticles() {
     await fetchCounts();
     
     setLoading(false);
-  }, [user, isAdmin, toast, hasFetched, fetchCounts]);
+  }, [user, isAdmin, hasFetched, fetchCounts]);
 
   // Reset and refetch when user changes
   useEffect(() => {
@@ -222,11 +217,7 @@ export function useArticles() {
 
     if (error) {
       console.error('Error adding article:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error saving article',
-        description: error.message,
-      });
+      toast.error(error.message);
       return null;
     }
 
@@ -263,11 +254,7 @@ export function useArticles() {
 
     if (error) {
       console.error('Error updating article:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error updating article',
-        description: error.message,
-      });
+      toast.error(error.message);
       return false;
     }
 
@@ -295,17 +282,10 @@ export function useArticles() {
 
         if (wpError) {
           console.error('Error deleting from WordPress:', wpError);
-          toast({
-            variant: 'destructive',
-            title: 'WordPress deletion failed',
-            description: 'Could not delete the post from WordPress. The local article will still be removed.',
-          });
+          toast.error('Could not delete the post from WordPress. The local article will still be removed.');
         } else if (data?.deleted) {
           console.log('WordPress post and media deleted successfully');
-          toast({
-            title: 'Deleted from WordPress',
-            description: 'The post was also removed from WordPress.',
-          });
+          toast.success('Deleted from WordPress');
         }
       } catch (err) {
         console.error('Error calling delete-wordpress-post:', err);
@@ -320,11 +300,7 @@ export function useArticles() {
 
     if (error) {
       console.error('Error deleting article:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error deleting article',
-        description: error.message,
-      });
+      toast.error(error.message);
       return false;
     }
 
@@ -353,11 +329,7 @@ export function useArticles() {
 
     if (error) {
       console.error('Error loading more articles:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error loading more articles',
-        description: error.message,
-      });
+      toast.error(error.message);
       setLoadingMore(false);
       return;
     }

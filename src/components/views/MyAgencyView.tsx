@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import usdtIcon from '@/assets/usdt.svg';
 interface AgencyDetails {
   id: string;
@@ -70,10 +70,10 @@ export function MyAgencyView() {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      toast({ title: 'Copied to clipboard' });
+      toast.success('Copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({ title: 'Failed to copy', variant: 'destructive' });
+      toast.error('Failed to copy');
     }
   };
 

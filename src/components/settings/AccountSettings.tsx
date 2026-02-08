@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Mail, Lock, Loader2, Phone } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { PinSettings } from './PinSettings';
 
 export function AccountSettings() {
   const { user } = useAuth();
-  const { toast } = useToast();
   
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -47,11 +46,7 @@ export function AccountSettings() {
 
   const handleUpdateEmail = async () => {
     if (!email.trim()) {
-      toast({
-        title: "Error",
-        description: "Email cannot be empty",
-        variant: "destructive"
-      });
+      toast.error('Email cannot be empty');
       return;
     }
 
@@ -60,18 +55,11 @@ export function AccountSettings() {
     setSavingEmail(false);
     
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast.error(error.message);
       return;
     }
     
-    toast({
-      title: "Email update initiated",
-      description: "Check your new email inbox for a confirmation link"
-    });
+    toast.success('Email update initiated');
   };
 
   const handleUpdateWhatsapp = async () => {
@@ -85,46 +73,27 @@ export function AccountSettings() {
     setSavingWhatsapp(false);
     
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast.error(error.message);
       return;
     }
     
     setOriginalWhatsapp(whatsapp.trim());
-    toast({
-      title: "WhatsApp updated",
-      description: "Your WhatsApp number has been saved"
-    });
+    toast.success('WhatsApp updated');
   };
 
   const handleUpdatePassword = async () => {
     if (!newPassword) {
-      toast({
-        title: "Error",
-        description: "New password cannot be empty",
-        variant: "destructive"
-      });
+      toast.error('New password cannot be empty');
       return;
     }
 
     if (newPassword.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters",
-        variant: "destructive"
-      });
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive"
-      });
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -133,21 +102,14 @@ export function AccountSettings() {
     setSavingPassword(false);
     
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast.error(error.message);
       return;
     }
     
     setNewPassword('');
     setConfirmPassword('');
     
-    toast({
-      title: "Password updated",
-      description: "Your password has been successfully changed"
-    });
+    toast.success('Password updated');
   };
 
   return (
