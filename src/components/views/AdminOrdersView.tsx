@@ -1043,12 +1043,12 @@ export function AdminOrdersView() {
 
         {/* Sub-tabs for Order History */}
         {activeTab === 'history' && (
-          <div className="mt-4 flex gap-2">
+          <div className="flex gap-0">
             <Button
               variant={historySubTab === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setHistorySubTab('all')}
-              className={historySubTab !== 'all' ? 'hover:bg-black hover:text-white hover:border-black' : ''}
+              className={`rounded-none ${historySubTab !== 'all' ? 'hover:bg-black hover:text-white hover:border-black' : ''}`}
             >
               All ({allOrdersCount})
             </Button>
@@ -1056,7 +1056,7 @@ export function AdminOrdersView() {
               variant={historySubTab === 'cancelled' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setHistorySubTab('cancelled')}
-              className={historySubTab !== 'cancelled' ? 'hover:bg-black hover:text-white hover:border-black' : ''}
+              className={`rounded-none ${historySubTab !== 'cancelled' ? 'hover:bg-black hover:text-white hover:border-black' : ''}`}
             >
               Cancelled ({cancelledCount})
             </Button>
