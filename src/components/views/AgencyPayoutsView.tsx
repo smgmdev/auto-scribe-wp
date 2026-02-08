@@ -287,7 +287,7 @@ export function AgencyPayoutsView() {
   return (
     <div className="space-y-2 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             My Earnings
@@ -296,17 +296,17 @@ export function AgencyPayoutsView() {
             Track your earnings from completed orders
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
           <Button
             onClick={handleWithdraw}
-            className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
           >
             Withdraw
           </Button>
           <Button
             onClick={() => fetchCompletedOrders(true)}
             disabled={refreshing}
-            className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
