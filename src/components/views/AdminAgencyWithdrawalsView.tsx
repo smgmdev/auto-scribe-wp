@@ -522,7 +522,7 @@ export function AdminAgencyWithdrawalsView() {
         </div>
 
         {/* Withdrawals List */}
-        <Card className="border-border/50 rounded-none border-t-0">
+        <Card className="border-0 rounded-none shadow-none">
         <CardHeader className="px-0">
           <CardTitle>Withdrawal Requests</CardTitle>
         </CardHeader>
