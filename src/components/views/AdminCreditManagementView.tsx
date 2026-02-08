@@ -502,13 +502,50 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-green-600">{user.available.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
                                         <div className="space-y-1">
-                                          <p><span className="opacity-70">Earned:</span> {(user.earned || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Purchased:</span> {(user.purchased || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Withdrawn:</span> {(user.withdrawn || 0).toLocaleString()}</p>
-                                          <hr className="border-background/30 my-1" />
-                                          <p className="font-medium">Available Credit Balance: {user.available.toLocaleString()}</p>
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Earnings:</span>
+                                            <span className="font-semibold text-green-400">{(user.earned || 0).toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Withdrawals:</span>
+                                            <span className="font-semibold text-red-400">{user.withdrawn > 0 ? `-${Math.round(user.withdrawn).toLocaleString()}` : '0'}</span>
+                                          </div>
+                                          <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
+                                          {user.pendingBankWithdrawals > 0 && (
+                                            <div className="flex justify-between gap-4 pl-2">
+                                              <span className="text-white/70">Bank:</span>
+                                              <span className="font-semibold text-amber-400">${user.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                          )}
+                                          {user.pendingCryptoWithdrawals > 0 && (
+                                            <div className="flex justify-between gap-4 pl-2">
+                                              <span className="text-white/70">USDT:</span>
+                                              <span className="font-semibold text-amber-400">${user.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                          )}
+                                          {user.pendingBankWithdrawals === 0 && user.pendingCryptoWithdrawals === 0 && (
+                                            <div className="flex justify-between gap-4 pl-2">
+                                              <span className="text-white/50">None</span>
+                                            </div>
+                                          )}
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Locked in Orders:</span>
+                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromOrders).toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Total Purchased:</span>
+                                            <span className="font-semibold text-green-400">{user.purchased.toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Total Spent:</span>
+                                            <span className="font-semibold text-red-400">{user.totalSpent > 0 ? `-${user.totalSpent.toLocaleString()}` : '0'}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+                                            <span className="text-white/70">Available Credit Balance:</span>
+                                            <span className="font-semibold text-green-400">{user.available.toLocaleString()}</span>
+                                          </div>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
