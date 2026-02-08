@@ -309,7 +309,7 @@ export function PinSettings() {
         <Button 
           onClick={() => setShowSetupForm(true)}
           variant="outline"
-          className="w-full"
+          className="w-full hover:bg-transparent hover:text-accent hover:border-accent"
         >
           <ShieldCheck className="mr-2 h-4 w-4" />
           Enable PIN
