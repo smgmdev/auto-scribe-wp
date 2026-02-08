@@ -540,7 +540,7 @@ export function AgencyPayoutsView() {
 
                 const cardContent = (
                   <div 
-                    className="relative p-4 pt-10 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
+                    className="relative p-4 pt-10 md:pt-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
                   >
                     <div className="absolute top-3 right-3">
                       <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
@@ -612,7 +612,7 @@ export function AgencyPayoutsView() {
 
                 const rowContent = (
                   <div 
-                    className="relative p-4 pt-10 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="relative p-4 pt-10 md:pt-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                   >
                     <div className="absolute top-3 right-3">
                       <Badge className="bg-foreground text-background border-foreground">
