@@ -1590,10 +1590,10 @@ export function AgencyRequestsView() {
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
                                 <Clock className="h-3 w-3 inline mr-1" />
-                                Last event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+                                Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
                               </span>
                               <span className="text-xs text-muted-foreground block">
-                                Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
                             </div>
                             <div className="flex flex-col items-end gap-0.5">
@@ -1709,7 +1709,7 @@ export function AgencyRequestsView() {
                                     )}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                   {/* Mobile: messages count on new row */}
                                   {requestMessages.length > 0 && (
@@ -1806,7 +1806,7 @@ export function AgencyRequestsView() {
                                     )}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                   {/* Mobile: messages count on new row */}
                                   {requestMessages.length > 0 && (
@@ -2007,12 +2007,12 @@ export function AgencyRequestsView() {
                             </span>
                             {order.delivery_status === 'pending_revision' && order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
-                                Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                               </span>
                             )}
                             {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
-                                Order delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                Order Delivered: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                               </span>
                             )}
                           </div>
@@ -2103,7 +2103,7 @@ export function AgencyRequestsView() {
                             </span>
                             {order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
-                                Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                               </span>
                             )}
                           </div>
@@ -2274,7 +2274,7 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
-                              Cancelled order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                              Cancelled Order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Order Started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
