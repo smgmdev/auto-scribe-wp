@@ -742,7 +742,7 @@ export function CreditHistoryView() {
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Withdrawals:</span>
                 {isAgency ? (
-                  <span className="font-semibold text-red-400">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
+                  <span className="font-semibold text-red-400">{creditsWithdrawn > 0 ? `-${Math.round(creditsWithdrawn).toLocaleString()}` : '0'}</span>
                 ) : (
                   <span className="text-white/50 text-xs">available for agency only</span>
                 )}
