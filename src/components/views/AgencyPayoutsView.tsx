@@ -592,6 +592,11 @@ export function AgencyPayoutsView() {
                               <p className="font-medium">
                                 {getCardTitle()}
                               </p>
+                              {withdrawal.processed_at && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                </p>
+                              )}
                               <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
                                 {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
