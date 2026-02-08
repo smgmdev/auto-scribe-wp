@@ -99,6 +99,7 @@ export function SendCreditsDialog({
               placeholder="Enter amount..."
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              className="w-full h-9 text-sm rounded-none"
             />
           </div>
 
@@ -110,6 +111,7 @@ export function SendCreditsDialog({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
+              className="w-full text-sm rounded-none"
             />
           </div>
         </div>
