@@ -474,7 +474,7 @@ export function AgencyApplicationView() {
                   Upgrade to Agency
                 </h1>
                 <p className="mt-3 text-white/80 text-base lg:text-lg">
-                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+                  Become a media merchant on Arcana Mace to trade media products worldwide.
                 </p>
                 <Button 
                   className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
