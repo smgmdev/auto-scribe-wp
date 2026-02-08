@@ -1016,7 +1016,7 @@ export function AdminOrdersView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto md:inline-flex md:w-auto scrollbar-hide justify-start rounded-none">
+        <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none">
           <TabsTrigger value="pending" className="relative">
             Active Orders ({pendingCount})
             {unreadPendingCount > 0 && (
