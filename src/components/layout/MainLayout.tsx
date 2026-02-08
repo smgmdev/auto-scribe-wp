@@ -50,7 +50,7 @@ export function MainLayout({
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className="lg:pl-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+      <main className={`lg:pl-64 pt-14 lg:pt-0 min-h-screen flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
         <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
