@@ -471,7 +471,7 @@ export function AgencyApplicationView() {
       </div>
 
       {/* Hero Video Section */}
-      <div className="w-full overflow-hidden rounded-2xl">
+      <div className="w-full overflow-hidden rounded-2xl mt-8">
         <video 
           src={agencyHeroVideo} 
           autoPlay 
