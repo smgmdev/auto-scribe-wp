@@ -1098,9 +1098,27 @@ export function AdminOrdersView() {
                 >
                   {/* Unread notification badge */}
                   {hasUnreadNotification && (
-                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+                    <div className="absolute top-3 right-3 md:top-3 md:right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
                   )}
-                  <CardHeader className="pb-2 px-4 pt-3">
+                  
+                  {/* Mobile: Badge at top-right above title */}
+                  <div className="md:hidden absolute top-2 right-3 flex gap-1 flex-wrap justify-end">
+                    {order.status === 'cancelled' ? (
+                      <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] px-1.5 py-0.5">Cancelled</Badge>
+                    ) : isDisputedOrder ? (
+                      <Badge className="bg-red-600 text-white border-red-600 text-[10px] px-1.5 py-0.5">
+                        <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
+                        In Dispute
+                      </Badge>
+                    ) : (
+                      <>
+                        {order.status !== 'paid' && order.status !== 'pending_payment' && getStatusBadge(order.status)}
+                        {activeTab !== 'history' && activeTab !== 'completed' && getDeliveryBadge(order.delivery_status, order.delivery_deadline)}
+                      </>
+                    )}
+                  </div>
+                  
+                  <CardHeader className="pb-2 px-3 md:px-4 pt-6 md:pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="relative">
@@ -1120,7 +1138,7 @@ export function AdminOrdersView() {
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-base">{order.media_sites?.name || 'Unknown Site'}</CardTitle>
                             {hasUnreadNotification && (
-                              <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
+                              <Badge className="hidden md:inline-flex bg-green-500 text-white border-green-500">New Order</Badge>
                             )}
                           </div>
                           {order.media_sites?.agency && (
@@ -1128,7 +1146,8 @@ export function AdminOrdersView() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+                      {/* Desktop: Badge at right side */}
+                      <div className="hidden md:flex flex-col items-end gap-1">
                           <div className="flex gap-2">
                             {order.status === 'cancelled' ? (
                               <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
@@ -1147,8 +1166,9 @@ export function AdminOrdersView() {
                         </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0 pb-3 px-4">
-                    <div className="flex items-end justify-between">
+                  <CardContent className="pt-0 pb-3 px-3 md:px-4">
+                    {/* Desktop layout */}
+                    <div className="hidden md:flex items-end justify-between">
                       <div className="space-y-0.5">
                         <span className="text-xs text-muted-foreground block">
                           Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
@@ -1179,6 +1199,43 @@ export function AdminOrdersView() {
                             +${(calculatePlatformFee(order) / 100).toFixed(2)} fee
                           </span>
                         </p>
+                      </div>
+                    </div>
+                    
+                    {/* Mobile layout */}
+                    <div className="md:hidden space-y-2">
+                      <div className="space-y-0.5">
+                        <span className="text-xs text-muted-foreground block">
+                          Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
+                        {order.status === 'cancelled' && (
+                          <span className="text-xs text-muted-foreground block">
+                            Order Cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        )}
+                        {order.delivery_status === 'pending_revision' && order.delivered_at && (
+                          <span className="text-xs text-muted-foreground block">
+                            Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        )}
+                        {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
+                          <span className="text-xs text-muted-foreground block">
+                            {revisionOrderIds.has(order.id) || disputedOrderIds.has(order.id) && revisionOrderIds.has(order.id) ? 'Last Order Delivery:' : 'Order Delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-end">
+                        <div className="flex flex-col items-end gap-0.5">
+                          {order.media_sites?.publication_format && (
+                            <span className="text-xs text-muted-foreground capitalize">{order.media_sites.publication_format}</span>
+                          )}
+                          <p className="font-semibold text-sm">
+                            ${(order.amount_cents / 100).toFixed(2)}
+                            <span className="text-xs text-green-600 font-normal ml-2">
+                              +${(calculatePlatformFee(order) / 100).toFixed(2)} fee
+                            </span>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
