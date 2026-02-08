@@ -905,6 +905,9 @@ export function OrdersView() {
     setRefreshing(true);
     await Promise.all([fetchOrders(), fetchUserDisputes()]);
     setRefreshing(false);
+    toast({
+      title: 'Orders refreshed',
+    });
   };
 
   return (
