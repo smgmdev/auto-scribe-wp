@@ -1418,24 +1418,6 @@ export function AdminAgenciesView() {
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
-
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:bg-black hover:text-white"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenDowngradeDialog(agency);
-                                }}
-                                disabled={deleting === agency.id}
-                                title="Downgrade agency"
-                              >
-                                {deleting === agency.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <X className="h-4 w-4" />
-                                )}
-                              </Button>
                             </div>
                           </div>
                         </CardContent>
