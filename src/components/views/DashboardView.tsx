@@ -89,6 +89,7 @@ export function DashboardView() {
     pendingCryptoWithdrawals: 0,
     completedBankWithdrawals: 0,
     completedCryptoWithdrawals: 0,
+    lockedInOrders: 0,
     loading: true
   });
   
@@ -323,13 +324,15 @@ export function DashboardView() {
           order:orders!inner(
             amount_cents,
             agency_payout_cents,
-            delivery_status
+            delivery_status,
+            status
           )
         `)
         .eq('agency_payout_id', agencyPayout.id);
 
       let totalEarnings = 0;
       let totalSales = 0;
+      let lockedInOrders = 0;
       
       if (orders) {
         orders.forEach((req: any) => {
@@ -337,6 +340,10 @@ export function DashboardView() {
           if (req.order?.delivery_status === 'accepted') {
             totalEarnings += (req.order.agency_payout_cents || 0) / 100;
             totalSales += (req.order.amount_cents || 0) / 100;
+          }
+          // In-progress orders (not yet accepted by client, not cancelled)
+          if (req.order?.delivery_status !== 'accepted' && req.order?.status !== 'cancelled') {
+            lockedInOrders += (req.order.agency_payout_cents || 0) / 100;
           }
         });
       }
@@ -388,6 +395,7 @@ export function DashboardView() {
         pendingCryptoWithdrawals,
         completedBankWithdrawals,
         completedCryptoWithdrawals,
+        lockedInOrders,
         loading: false
       });
     };
@@ -656,10 +664,14 @@ export function DashboardView() {
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Available Balance:</span>
-                        <span className="font-semibold text-green-400">${(agencySummary.walletBalance - agencySummary.pendingWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="text-white/70">Total Earnings:</span>
+                        <span className="font-semibold text-green-400">${agencySummary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Withdrawals Pending</div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Total Withdrawals:</span>
+                        <span className="font-semibold text-red-400">{agencySummary.completedWithdrawals > 0 ? `-$${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
+                      </div>
+                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
                       {agencySummary.pendingBankWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
                           <span className="text-white/70">Bank:</span>
@@ -677,6 +689,18 @@ export function DashboardView() {
                           <span className="text-white/50">None</span>
                         </div>
                       )}
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Locked in Orders:</span>
+                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Total Purchased:</span>
+                        <span className="text-white/50 text-xs">Not Included</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Total Spent:</span>
+                        <span className="text-white/50 text-xs">Not Included</span>
+                      </div>
                       <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
                         <span className="text-white/70">Wallet Balance:</span>
                         <span className="font-semibold">${agencySummary.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
