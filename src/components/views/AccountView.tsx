@@ -2,7 +2,8 @@ import { AccountSettings } from '@/components/settings/AccountSettings';
 
 export function AccountView() {
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground">
@@ -14,6 +15,7 @@ export function AccountView() {
       </div>
 
       <AccountSettings />
+      </div>
     </div>
   );
 }
