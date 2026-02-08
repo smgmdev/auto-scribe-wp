@@ -442,57 +442,52 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <>
-      {/* Fixed Video Background - rendered at viewport level, stays completely still on scroll */}
-      <div 
-        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 pointer-events-none"
-        style={{ zIndex: 0 }}
-      >
-        <video 
-          src={agencyHeroVideo} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Fixed Text Overlay - below scrollable content so it gets covered */}
-      <div 
-        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 flex items-start pt-16 lg:pt-24 pointer-events-none"
-        style={{ zIndex: 1 }}
-      >
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
-          <div className="max-w-xl pointer-events-auto">
-            <img 
-              src="/favicon.png" 
-              alt="Arcana Mace" 
-              className="h-10 w-10 mb-4 brightness-0 invert"
-            />
-            <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-              Upgrade to Agency
-            </h1>
-            <p className="mt-3 text-white/80 text-base lg:text-lg">
-              Become a media merchant on Arcana Mace to trade and buy media products worldwide.
-            </p>
-            <Button 
-              className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-              onClick={() => setDialogOpen(true)}
-              disabled={existingApplication?.status === 'pending'}
-            >
-              {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-            </Button>
+      {/* Wrapper that contains both video and content - video won't extend beyond this */}
+      <div className="animate-fade-in -m-4 lg:-m-8 relative">
+        {/* Video Section - sticky so it stays visible while scrolling through the spacer */}
+        <div 
+          className="sticky top-14 lg:top-0 h-[60vh] overflow-hidden"
+          style={{ zIndex: 0 }}
+        >
+          <video 
+            src={agencyHeroVideo} 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          {/* Text Overlay on video */}
+          <div 
+            className="absolute inset-0 flex items-start pt-16 lg:pt-24 pointer-events-none"
+          >
+            <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
+              <div className="max-w-xl pointer-events-auto">
+                <img 
+                  src="/favicon.png" 
+                  alt="Arcana Mace" 
+                  className="h-10 w-10 mb-4 brightness-0 invert"
+                />
+                <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
+                  Upgrade to Agency
+                </h1>
+                <p className="mt-3 text-white/80 text-base lg:text-lg">
+                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+                </p>
+                <Button 
+                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                  onClick={() => setDialogOpen(true)}
+                  disabled={existingApplication?.status === 'pending'}
+                >
+                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main scrollable content container - pointer-events-none to allow clicks to pass through spacer */}
-      <div className="animate-fade-in -m-4 lg:-m-8 relative pointer-events-none" style={{ zIndex: 2 }}>
-        {/* Transparent spacer to reveal the fixed video */}
-        <div className="h-[60vh]" />
-
-        {/* Content Section - scrolls over the video, pointer-events-auto to make it interactive */}
-        <div className="relative bg-white rounded-t-[40px] pointer-events-auto min-h-screen">
+        {/* Content Section - overlaps the sticky video, then pushes it out of view */}
+        <div className="relative bg-white rounded-t-[40px] -mt-8" style={{ zIndex: 1 }}>
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 lg:pb-12 space-y-8">
         <ExploreNetworkGrid />
@@ -582,23 +577,6 @@ export function AgencyApplicationView() {
       )}
         </div>
         
-        {/* Footer with white extension to cover fixed video */}
-        <div className="bg-white">
-          <div className="bg-muted/30 border-t border-border py-4 px-4 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground max-w-[980px] mx-auto">
-              <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <a href="/terms" className="hover:text-foreground transition-colors text-left">Terms of Service</a>
-                <a href="/privacy" className="hover:text-foreground transition-colors text-left">Privacy Policy</a>
-                <a href="/help" className="hover:text-foreground transition-colors text-left">Help Center</a>
-                <a href="/system-status" className="hover:text-foreground transition-colors text-left">System Status</a>
-                <a href="/sitemap" className="hover:text-foreground transition-colors text-left">Site Map</a>
-              </div>
-            </div>
-          </div>
-          {/* Full viewport white spacer to guarantee video is always covered */}
-          <div className="h-[100vh] bg-white" />
-        </div>
         </div>
       </div>
 
