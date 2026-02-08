@@ -1563,9 +1563,9 @@ export function AdminUsersView() {
       {/* User Action Dialog */}
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>User Actions</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left">
               {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -1583,7 +1583,7 @@ export function AdminUsersView() {
                 variant={selectedUser?.suspended ? 'default' : 'outline'}
                 onClick={handleSuspendUser}
                 disabled={processing}
-                className={!selectedUser?.suspended ? 'hover:bg-black hover:text-white' : ''}
+                className={`w-full rounded-none ${!selectedUser?.suspended ? 'hover:bg-black hover:text-white' : ''}`}
               >
                 {processing ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -1643,15 +1643,15 @@ export function AdminUsersView() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setActionDialogOpen(false)} className="hover:bg-black hover:text-white">
+              <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setActionDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
                   Cancel
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={handleDeleteUser}
                   disabled={processing || (!deleteAccount && !deleteCredits && !deleteArticles && !deleteOrders)}
-                  className="border border-transparent hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
+                  className="w-full md:w-auto rounded-none border border-transparent hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
                 >
                   {processing ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
