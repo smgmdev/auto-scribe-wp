@@ -883,31 +883,32 @@ export function CreditHistoryView() {
                             <div className="mt-1">
                               {getTransactionBadge(transaction.type)}
                             </div>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
-                              }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Hide Details
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  See Details
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
+                                }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Hide Details
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    See Details
+                                  </>
+                                )}
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-lg text-foreground hidden md:block">
@@ -1013,31 +1014,32 @@ export function CreditHistoryView() {
                             <div className="mt-1">
                               {getTransactionBadge(transaction.type)}
                             </div>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
-                              }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Hide Details
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  See Details
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
+                                }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Hide Details
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    See Details
+                                  </>
+                                )}
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-lg text-muted-foreground hidden md:block">
@@ -1146,37 +1148,38 @@ export function CreditHistoryView() {
                             <div className="mt-1">
                               {getTransactionBadge(transaction.type)}
                             </div>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-1 h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const newExpanded = new Set(expandedWithdrawals);
-                                if (newExpanded.has(transaction.id)) {
-                                  newExpanded.delete(transaction.id);
-                                } else {
-                                  newExpanded.add(transaction.id);
-                                }
-                                setExpandedWithdrawals(newExpanded);
-                              }}
-                            >
-                              {isEarningsExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Hide Details
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  See Details
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newExpanded = new Set(expandedWithdrawals);
+                                  if (newExpanded.has(transaction.id)) {
+                                    newExpanded.delete(transaction.id);
+                                  } else {
+                                    newExpanded.add(transaction.id);
+                                  }
+                                  setExpandedWithdrawals(newExpanded);
+                                }}
+                              >
+                                {isEarningsExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Hide Details
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    See Details
+                                  </>
+                                )}
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-lg text-green-500 hidden md:block">
@@ -1251,8 +1254,7 @@ export function CreditHistoryView() {
                         <div className="mt-1">
                           {getTransactionBadge(transaction.type)}
                         </div>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Calendar className="h-3 w-3" />
+                        <span className="text-xs text-muted-foreground mt-1">
                           {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                       </div>
