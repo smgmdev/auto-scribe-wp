@@ -563,6 +563,9 @@ export function AgencyPayoutsView() {
                     };
 
                     const getAmountColor = () => {
+                      if (withdrawal.status === 'rejected') {
+                        return 'text-muted-foreground';
+                      }
                       return 'text-foreground';
                     };
 
