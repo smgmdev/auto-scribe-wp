@@ -49,11 +49,11 @@ const stats = [{
   tooltip: 'Published Articles refer to self published articles via Instant Publishing using media from Local Library.',
   clickable: true
 }, {
-  label: 'Draft Articles',
-  icon: Newspaper,
-  key: 'drafts',
-  tooltip: null,
-  clickable: false
+  label: 'Available Credits',
+  icon: Wallet,
+  key: 'availableCredits',
+  tooltip: null, // Custom tooltip handled separately
+  clickable: true
 }];
 
 export function DashboardView() {
@@ -85,9 +85,15 @@ export function DashboardView() {
     loading: true
   });
   
-  // User credits
-  const [userCredits, setUserCredits] = useState<number | null>(null);
-  const [creditsLoading, setCreditsLoading] = useState(true);
+  // Available credits calculation state
+  const [availableCreditsData, setAvailableCreditsData] = useState({
+    availableCredits: 0,
+    earnedCredits: 0,
+    purchasedCredits: 0,
+    creditsWithdrawn: 0,
+    creditsInWithdrawals: 0,
+    loading: true
+  });
 
   const agencyStatusLoading = isAgency === null && !isAdmin;
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
@@ -110,25 +116,123 @@ export function DashboardView() {
     fetchAgencyStatus();
   }, [user, isAdmin]);
 
-  // Fetch user credits
+  // Fetch available credits with full calculation
   useEffect(() => {
-    const fetchUserCredits = async () => {
+    const fetchAvailableCredits = async () => {
       if (!user) return;
-      setCreditsLoading(true);
+      setAvailableCreditsData(prev => ({ ...prev, loading: true }));
       
-      const { data, error } = await supabase
-        .from('user_credits')
-        .select('credits')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Fetch all credit transactions for this user
+      const { data: transactions } = await supabase
+        .from('credit_transactions')
+        .select('amount, type')
+        .eq('user_id', user.id);
+
+      // Calculate totals from transactions
+      let earnedCredits = 0;
+      let purchasedCredits = 0;
+      let incomingCredits = 0;
+      let outgoingCredits = 0;
+      let creditsWithdrawn = 0;
       
-      if (!error) {
-        setUserCredits(data?.credits || 0);
+      if (transactions) {
+        transactions.forEach(t => {
+          // Earned credits (order payouts)
+          if (t.type === 'order_payout') {
+            earnedCredits += t.amount;
+          }
+          // Purchased credits
+          if (t.type === 'purchase' || t.type === 'admin_add') {
+            purchasedCredits += t.amount;
+          }
+          // Calculate incoming vs outgoing for total balance
+          if (!['locked', 'withdrawn', 'withdrawal_locked', 'withdrawal_completed'].includes(t.type)) {
+            if (t.amount > 0) {
+              incomingCredits += t.amount;
+            } else {
+              outgoingCredits += Math.abs(t.amount);
+            }
+          }
+        });
       }
-      setCreditsLoading(false);
+
+      const actualTotalBalance = incomingCredits - outgoingCredits;
+
+      // Fetch locked credits from active orders
+      const { data: activeOrders } = await supabase
+        .from('orders')
+        .select('media_sites(price)')
+        .eq('user_id', user.id)
+        .neq('status', 'cancelled')
+        .neq('status', 'completed')
+        .neq('delivery_status', 'accepted');
+
+      let creditsInUse = 0;
+      if (activeOrders) {
+        activeOrders.forEach((order: any) => {
+          if (order.media_sites?.price) {
+            creditsInUse += order.media_sites.price;
+          }
+        });
+      }
+
+      // Fetch pending service requests with locked credits
+      const { data: pendingRequests } = await supabase
+        .from('service_requests')
+        .select('id, media_sites(price)')
+        .eq('user_id', user.id)
+        .is('order_id', null)
+        .neq('status', 'cancelled');
+
+      if (pendingRequests) {
+        for (const request of pendingRequests) {
+          const { data: orderRequestMessages } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', request.id)
+            .like('message', '%CLIENT_ORDER_REQUEST%')
+            .limit(1);
+
+          if (orderRequestMessages && orderRequestMessages.length > 0) {
+            const mediaSite = request.media_sites as { price: number } | null;
+            if (mediaSite?.price) {
+              creditsInUse += mediaSite.price;
+            }
+          }
+        }
+      }
+
+      // Fetch withdrawal data
+      const { data: withdrawals } = await supabase
+        .from('agency_withdrawals')
+        .select('amount_cents, status')
+        .eq('user_id', user.id);
+
+      let creditsInWithdrawals = 0;
+      if (withdrawals) {
+        withdrawals.forEach(w => {
+          if (w.status === 'pending') {
+            creditsInWithdrawals += (w.amount_cents || 0) / 100;
+          }
+          if (w.status === 'completed' || w.status === 'approved') {
+            creditsWithdrawn += (w.amount_cents || 0) / 100;
+          }
+        });
+      }
+
+      const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
+
+      setAvailableCreditsData({
+        availableCredits,
+        earnedCredits,
+        purchasedCredits,
+        creditsWithdrawn,
+        creditsInWithdrawals,
+        loading: false
+      });
     };
 
-    fetchUserCredits();
+    fetchAvailableCredits();
   }, [user]);
 
   // Fetch agency summary data (wallet balance and total sales)
@@ -242,8 +346,8 @@ export function DashboardView() {
         return globalLibraryCount;
       case 'published':
         return publishedCount;
-      case 'drafts':
-        return draftsCount;
+      case 'availableCredits':
+        return availableCreditsData.availableCredits.toLocaleString();
       default:
         return 0;
     }
@@ -262,10 +366,45 @@ export function DashboardView() {
       case 'published':
         setCurrentView('articles');
         break;
+      case 'availableCredits':
+        setCurrentView('credit-history');
+        break;
       default:
         break;
     }
   };
+
+  // Custom tooltip content for Available Credits
+  const renderAvailableCreditsTooltip = () => (
+    <div className="space-y-1">
+      {availableCreditsData.earnedCredits > 0 && (
+        <div className="flex justify-between gap-4">
+          <span className="text-muted-foreground">Earned credits:</span>
+          <span className="font-medium">{availableCreditsData.earnedCredits.toLocaleString()}</span>
+        </div>
+      )}
+      <div className="flex justify-between gap-4">
+        <span className="text-muted-foreground">Purchased credits:</span>
+        <span className="font-medium">{availableCreditsData.purchasedCredits.toLocaleString()}</span>
+      </div>
+      {availableCreditsData.creditsWithdrawn > 0 && (
+        <div className="flex justify-between gap-4">
+          <span className="text-muted-foreground">Withdrawn credits:</span>
+          <span className="font-medium">-{Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}</span>
+        </div>
+      )}
+      {availableCreditsData.creditsInWithdrawals > 0 && (
+        <div className="flex justify-between gap-4">
+          <span className="text-muted-foreground">Locked in withdrawals:</span>
+          <span className="font-medium text-amber-400">-{Math.round(availableCreditsData.creditsInWithdrawals).toLocaleString()}</span>
+        </div>
+      )}
+      <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
+        <span className="text-muted-foreground">Available credits:</span>
+        <span className="font-medium">{availableCreditsData.availableCredits.toLocaleString()}</span>
+      </div>
+    </div>
+  );
   return <div className="space-y-2 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
@@ -315,10 +454,13 @@ export function DashboardView() {
       <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
+          const isAvailableCredits = stat.key === 'availableCredits';
+          const isLoading = isAvailableCredits ? availableCreditsData.loading : isDataLoading;
+          
           const cardContent = (
             <Card 
               key={stat.key} 
-              className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
+              className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 ${stat.clickable ? 'cursor-pointer hover:border-primary' : 'hover:border-border/50'}`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => stat.clickable && handleStatClick(stat.key)}
             >
@@ -330,7 +472,7 @@ export function DashboardView() {
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
                 <div className="text-xl md:text-2xl font-semibold text-foreground">
-                  {isDataLoading ? (
+                  {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
                     getStatValue(stat.key)
@@ -339,6 +481,24 @@ export function DashboardView() {
               </CardContent>
             </Card>
           );
+
+          // Custom tooltip for Available Credits
+          if (isAvailableCredits) {
+            return (
+              <Tooltip key={stat.key} delayDuration={100}>
+                <TooltipTrigger asChild>
+                  {cardContent}
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="bottom" 
+                  sideOffset={8}
+                  className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+                >
+                  {renderAvailableCreditsTooltip()}
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
 
           if (stat.tooltip) {
             return (
@@ -447,10 +607,10 @@ export function DashboardView() {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Available Credits</span>
-                {creditsLoading ? (
+                {availableCreditsData.loading ? (
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 ) : (
-                  <span className="font-semibold">{userCredits || 0}</span>
+                  <span className="font-semibold">{availableCreditsData.availableCredits.toLocaleString()}</span>
                 )}
               </div>
               <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
