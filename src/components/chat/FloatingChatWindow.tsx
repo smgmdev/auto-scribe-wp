@@ -4693,10 +4693,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const cleanQuoteText = getCleanQuoteText();
     
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 min-w-0 w-full overflow-hidden">
         {quote && (
           <div 
-            className={`text-xs p-2 rounded border-l-2 cursor-pointer ${
+            className={`text-xs p-2 rounded border-l-2 cursor-pointer min-w-0 overflow-hidden ${
               isOwnMessage 
                 ? 'bg-primary-foreground/10 border-primary-foreground/30' 
                 : 'bg-muted/50 border-muted-foreground/30'
@@ -4704,13 +4704,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             onClick={() => quote.originalId && scrollToMessage(quote.originalId)}
           >
             {quoteSenderLabel && (
-              <p className="font-medium opacity-80 mb-0.5">{quoteSenderLabel}</p>
+              <p className="font-medium opacity-80 mb-0.5 truncate">{quoteSenderLabel}</p>
             )}
-            <p className="opacity-70 line-clamp-2">{cleanQuoteText}</p>
+            <p className="opacity-70 line-clamp-2 break-words">{cleanQuoteText}</p>
           </div>
         )}
         {displayMessage && (
-          <p className="text-sm whitespace-pre-wrap break-words">{displayMessage}</p>
+          <p className="text-sm whitespace-pre-wrap break-words overflow-hidden">{displayMessage}</p>
         )}
         {attachments.length > 0 && (
           <div className="mt-2 space-y-2">
@@ -5773,7 +5773,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
-            <div className="space-y-2 p-3">
+            <div className="space-y-2 p-3 w-full overflow-hidden">
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
@@ -5839,7 +5839,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div
                     key={msg.id}
                     id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} min-w-0`}
+                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} min-w-0 w-full`}
                   >
                     <div
                       className={`relative group max-w-[85%] md:max-w-[80%] min-w-0 overflow-hidden rounded-lg p-2 md:p-3 transition-all duration-300 ${
