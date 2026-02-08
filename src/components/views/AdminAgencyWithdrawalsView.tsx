@@ -585,15 +585,15 @@ export function AdminAgencyWithdrawalsView() {
                           )}
                         </button>
                         <div className="flex flex-col text-xs text-muted-foreground">
-                          <p>
-                            Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
-                          </p>
-                          {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
+                          {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <p className="text-foreground cursor-help underline decoration-dotted">
-                                  {withdrawal.bank_details.bank_name || 'Bank'} - {withdrawal.bank_details.bank_account_holder || 'N/A'}
-                                </p>
+                                <div className="cursor-help">
+                                  <p>Method: Bank Transfer</p>
+                                  <p className="text-foreground underline decoration-dotted">
+                                    {withdrawal.bank_details.bank_name || 'Bank'} - {withdrawal.bank_details.bank_account_holder || 'N/A'}
+                                  </p>
+                                </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
                                 <div className="space-y-1 text-xs">
@@ -609,13 +609,15 @@ export function AdminAgencyWithdrawalsView() {
                                 </div>
                               </TooltipContent>
                             </Tooltip>
-                          )}
-                          {withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details && (
+                          ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <p className="text-foreground cursor-help underline decoration-dotted">
-                                  {withdrawal.crypto_details.usdt_network || 'TRC20'} Network
-                                </p>
+                                <div className="cursor-help">
+                                  <p>Method: USDT (Crypto)</p>
+                                  <p className="text-foreground underline decoration-dotted">
+                                    {withdrawal.crypto_details.usdt_network || 'TRC20'} Network
+                                  </p>
+                                </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-sm">
                                 <div className="space-y-1 text-xs">
@@ -634,6 +636,8 @@ export function AdminAgencyWithdrawalsView() {
                                 </div>
                               </TooltipContent>
                             </Tooltip>
+                          ) : (
+                            <p>Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
                           )}
                           <p>
                             Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
