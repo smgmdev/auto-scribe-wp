@@ -110,7 +110,7 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
         </div>
         
         {/* Footer info with Read button */}
-        <div className="px-5 py-3 bg-[#1d1d1f] flex items-end justify-between">
+        <div className="px-5 pt-3 pb-5 bg-[#1d1d1f] flex items-end justify-between">
           <div>
             <p className="text-white/40 text-xs font-medium">Published</p>
             <p className="text-white/60 text-xs">{article.published_to_name}</p>
