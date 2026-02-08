@@ -1201,10 +1201,22 @@ export function AdminUsersView() {
                                   return false;
                                 };
                                 
-                                // Find matching withdrawal for a transaction
+                                // Find matching withdrawal for a transaction - match by amount AND method from description
                                 const findWithdrawal = (tx: CreditTransaction) => {
                                   const txAmount = Math.abs(tx.amount);
-                                  return withdrawals.find(w => Math.abs(w.amount_cents) === txAmount);
+                                  const isUSDT = tx.description?.includes('USDT');
+                                  const isBank = tx.description?.includes('Bank Transfer');
+                                  
+                                  return withdrawals.find(w => {
+                                    const amountMatches = Math.abs(w.amount_cents) === txAmount;
+                                    if (!amountMatches) return false;
+                                    
+                                    // If we can determine the method from description, filter by it
+                                    if (isUSDT && w.withdrawal_method !== 'crypto') return false;
+                                    if (isBank && w.withdrawal_method !== 'bank') return false;
+                                    
+                                    return true;
+                                  });
                                 };
                                 
                                 // Toggle expanded transaction
