@@ -3692,31 +3692,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="w-10 h-10 flex items-center justify-center shrink-0">
                 <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
                     {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {clientOrderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5" />
+                <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-xs">
                     Price: {clientOrderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5" />
+                  <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
                     <span className="text-xs">
                       Delivery: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}
                     </span>
                   </div>
                 )}
                 {clientOrderRequest.special_terms && (
-                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {clientOrderRequest.special_terms}
                   </p>
                 )}
@@ -3885,35 +3885,35 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
                 <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                     {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {orderRequestAccepted.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5" />
+                <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-xs">
                     Price: {orderRequestAccepted.price.toLocaleString()} credits
                   </span>
                 </div>
                 {cardCountdown && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${
+                  <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${
                     cardCountdown.isOverdue 
                       ? 'text-red-600 dark:text-red-400' 
                       : isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
                   }`}>
-                    <Clock className="h-3.5 w-3.5" />
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
                     <span className="text-xs">
                       {cardCountdown.isOverdue ? 'Overdue' : `Delivery in: ${cardCountdown.text}`}
                     </span>
                   </div>
                 )}
                 {orderRequestAccepted.special_terms && (
-                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {orderRequestAccepted.special_terms}
                   </p>
                 )}
@@ -4290,31 +4290,31 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               }`}>
                 <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {orderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5" />
+                <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-xs">
                     Price: {orderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5" />
+                  <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
                     <span className="text-xs">
                       Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
                     </span>
                   </div>
                 )}
                 {orderRequest.special_terms && (
-                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {orderRequest.special_terms}
                   </p>
                 )}
@@ -4545,7 +4545,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}
             </p>
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
@@ -4582,7 +4582,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <ShoppingCart className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-red-600 dark:text-red-400'}`} />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-700 dark:text-red-300'}`}>Order Cancelled</span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderCancelled.media_site_name}
             </p>
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
@@ -4594,7 +4594,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Cancelled by Arcana Mace Staff
                 </p>
                 {orderCancelled.reason && (
-                  <p className={`text-xs mt-1 italic ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 italic break-words ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                     Reason: {orderCancelled.reason}
                   </p>
                 )}
