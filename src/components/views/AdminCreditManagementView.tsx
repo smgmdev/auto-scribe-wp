@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, RefreshCw } from 'lucide-react';
+import { Search, CreditCard, Users, RefreshCw, X } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 import { toast } from 'sonner';
 
@@ -431,8 +431,18 @@ export const AdminCreditManagementView = () => {
                     placeholder="Search by email..."
                     value={balancesSearchTerm}
                     onChange={(e) => setBalancesSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="w-full pl-10 h-9 text-sm"
                   />
+                  {balancesSearchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => setBalancesSearchTerm('')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               <Table>
