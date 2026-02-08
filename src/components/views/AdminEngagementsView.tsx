@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
@@ -816,7 +816,10 @@ export function AdminEngagementsView() {
                                 : 'No messages'}
                             </span>
                             {messages[r.id]?.length > 0 && (
-                              <span className="text-xs text-muted-foreground block pl-4">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                              <span className="text-xs text-muted-foreground flex items-center gap-1 pl-4">
+                                <Mail className="h-3 w-3" />
+                                {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}
+                              </span>
                             )}
                           </div>
                           <div className="flex justify-end">
