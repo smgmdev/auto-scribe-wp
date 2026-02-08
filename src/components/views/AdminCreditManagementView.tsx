@@ -426,18 +426,19 @@ export const AdminCreditManagementView = () => {
             <CardContent className="px-0">
               <div className="mb-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
                   <Input
                     placeholder="Search by email..."
                     value={balancesSearchTerm}
                     onChange={(e) => setBalancesSearchTerm(e.target.value)}
-                    className="w-full pl-10 h-9 text-sm rounded-none"
+                    className="w-full pl-10 h-9 text-sm rounded-none border-0 text-white placeholder:text-white/50"
+                    style={{ backgroundColor: '#1d1d1f' }}
                   />
                   {balancesSearchTerm && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
                       onClick={() => setBalancesSearchTerm('')}
                     >
                       <X className="h-4 w-4" />
