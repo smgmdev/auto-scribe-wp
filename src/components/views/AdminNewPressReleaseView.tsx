@@ -477,7 +477,8 @@ export function AdminNewPressReleaseView() {
   };
 
   return (
-    <div className="space-y-4 animate-fade-in relative">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-4 relative">
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Main Editor */}
         <div className="lg:col-span-2 space-y-4">
@@ -928,6 +929,7 @@ export function AdminNewPressReleaseView() {
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

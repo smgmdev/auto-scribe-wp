@@ -536,7 +536,8 @@ export function AdminAllNewsView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-6">
       {/* Header - matching ArticlesView style */}
       <div className="flex items-start justify-between">
         <div>
@@ -1049,6 +1050,7 @@ export function AdminAllNewsView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }
