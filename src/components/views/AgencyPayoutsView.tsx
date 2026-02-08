@@ -557,9 +557,14 @@ export function AgencyPayoutsView() {
                     };
 
                     const getCardTitle = () => {
-                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') return 'Withdrawal Successful';
-                      if (withdrawal.status === 'rejected') return 'Withdrawal Rejected';
-                      return 'Withdrawal Request';
+                      const method = withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT';
+                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                        return `Withdrawal via ${method} Successful`;
+                      }
+                      if (withdrawal.status === 'rejected') {
+                        return `Withdrawal via ${method} Rejected`;
+                      }
+                      return `Withdrawal via ${method}`;
                     };
 
                     const getAmountColor = () => {
@@ -586,9 +591,6 @@ export function AgencyPayoutsView() {
                             <div className="flex-1">
                               <p className="font-medium">
                                 {getCardTitle()}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                               </p>
                               <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
                                 {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
