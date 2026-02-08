@@ -1156,20 +1156,22 @@ export function ComposeView() {
       setIsSavingDraft(false);
     }
   };
-  return <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-4 relative">
-      {/* Publishing Overlay */}
-      {isPublishing && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
-            <Loader2 className="h-10 w-10 animate-spin text-accent" />
-            <div className="text-center">
-              <p className="text-lg font-medium text-foreground">Publishing Article...</p>
-              <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
-            </div>
+  return <>
+    {/* Publishing Overlay - Outside animated container for true fixed positioning */}
+    {isPublishing && (
+      <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <Loader2 className="h-10 w-10 animate-spin text-accent" />
+          <div className="text-center">
+            <p className="text-lg font-medium text-foreground">Publishing Article...</p>
+            <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
           </div>
         </div>
-      )}
+      </div>
+    )}
+    
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-4 relative">
 
       {/* Saving Draft Overlay */}
       {isSavingDraft && (
@@ -1730,5 +1732,6 @@ export function ComposeView() {
         </div>
       </div>
       </div>
-    </div>;
+    </div>
+  </>;
 }
