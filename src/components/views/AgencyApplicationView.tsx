@@ -42,11 +42,6 @@ const faqItems = [
     question: "Can I Connect My Own WordPress Media Site?",
     answer: "Yes! If your agency owns a media site such as a WordPress blog or WordPress news channel, you can connect it directly to Arcana Mace. This allows clients to purchase articles and publish them directly to your media site through our platform, streamlining the entire publishing workflow."
   },
-  {
-    icon: Workflow,
-    question: "How Does Direct Publishing to My Media Site Work?",
-    answer: "Once your WordPress site is connected, clients can browse your media channel, place orders, and submit their content. After you review and approve the article, it can be published directly to your WordPress site with a single click. You maintain full editorial control while benefiting from automated publishing capabilities."
-  }
 ];
 
 interface AgencyApplication {
