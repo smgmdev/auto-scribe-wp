@@ -700,20 +700,20 @@ export function AdminEngagementsView() {
                         <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
                       )}
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {r.media_sites?.favicon && (
-                              <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
-                            )}
-                            <div>
-                              <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                              <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
-                            </div>
-                          </div>
+                        <div className="flex justify-end mb-2">
                           <Badge className="bg-green-600">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Delivery Completed
                           </Badge>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {r.media_sites?.favicon && (
+                            <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                          )}
+                          <div>
+                            <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
+                            <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                          </div>
                         </div>
                         <div className="mt-2 flex items-end justify-between">
                           <div className="space-y-0.5">
@@ -726,7 +726,7 @@ export function AdminEngagementsView() {
                                 ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                                 : 'No messages'}</span>
                               {messages[r.id]?.length > 0 && (
-                                <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">• {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                                <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
                               )}
                             </p>
                           </div>
