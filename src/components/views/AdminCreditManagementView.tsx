@@ -420,7 +420,7 @@ export const AdminCreditManagementView = () => {
           </div>
 
           <Card className="p-0 border-0 shadow-none">
-            <CardHeader className="pb-3 px-3 py-2" style={{ backgroundColor: '#1d1d1f' }}>
+            <CardHeader className="pb-3 px-3 py-2 border-t border-white/20" style={{ backgroundColor: '#1d1d1f' }}>
               <CardTitle className="text-lg font-semibold text-white">User Credit Balances</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
