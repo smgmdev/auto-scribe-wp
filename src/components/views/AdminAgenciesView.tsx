@@ -816,7 +816,7 @@ export function AdminAgenciesView() {
 
         {/* Pending Applications Tab */}
         <TabsContent value="pending" className="mt-2">
-          <p className="text-sm text-muted-foreground mb-4">New agency applications</p>
+          <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">New agency applications</p>
           {pendingApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -911,7 +911,7 @@ export function AdminAgenciesView() {
 
             {/* Cancelled Sub-Tab */}
             <TabsContent value="cancelled" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Cancelled agency applications by user</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Cancelled agency applications by user</p>
               {cancelledApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -993,7 +993,7 @@ export function AdminAgenciesView() {
 
             {/* Rejected Sub-Tab */}
             <TabsContent value="rejected" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Rejected agency applications by Arcana Mace Staff</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Rejected agency applications by Arcana Mace Staff</p>
               {rejectedApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1118,7 +1118,7 @@ export function AdminAgenciesView() {
 
             {/* Pending Verification Sub-Tab */}
             <TabsContent value="pending-verification" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing verification</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Agency applications undergoing verification</p>
               {agenciesPendingVerification.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1199,7 +1199,7 @@ export function AdminAgenciesView() {
 
             {/* Pending Approval Sub-Tab */}
             <TabsContent value="pending-approval" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Agency applications undergoing approval</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Agency applications undergoing approval</p>
               {agenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1315,7 +1315,7 @@ export function AdminAgenciesView() {
 
             {/* Active Sub-Tab */}
             <TabsContent value="active" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Onboarded active agencies</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Onboarded active agencies</p>
               {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1430,7 +1430,7 @@ export function AdminAgenciesView() {
 
             {/* Downgraded Sub-Tab */}
             <TabsContent value="downgraded" className="mt-2">
-              <p className="text-sm text-muted-foreground mb-4">Onboarded downgraded agencies</p>
+              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Onboarded downgraded agencies</p>
               {agencies.filter(a => a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
