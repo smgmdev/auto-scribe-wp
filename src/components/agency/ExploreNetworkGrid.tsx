@@ -78,7 +78,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
               <img
                 src={site.favicon}
                 alt={site.name}
-                className="h-14 md:h-20 w-full md:w-auto object-contain"
+                className="h-14 md:h-20 w-full object-cover"
               />
             ) : (
               <span className={`text-xs text-center px-3 py-4 block ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
