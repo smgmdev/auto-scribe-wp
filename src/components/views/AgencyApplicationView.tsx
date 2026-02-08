@@ -441,6 +441,7 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 p-4 lg:p-8 bg-white min-h-full">
+      <div className="max-w-[980px] mx-auto">
       <div className="rounded-lg p-6">
         <div className="text-center">
           <img 
@@ -562,6 +563,7 @@ export function AgencyApplicationView() {
         url={webViewUrl || ''}
         title="Agency Website"
       />
+      </div>
     </div>
   );
 }
