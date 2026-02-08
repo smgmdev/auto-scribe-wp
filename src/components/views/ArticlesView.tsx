@@ -277,18 +277,26 @@ export function ArticlesView() {
         </div>
       )}
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">
-            Articles
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage your published and draft articles
-          </p>
+      <div className="mb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              My Articles
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Manage your published and draft articles
+            </p>
+          </div>
+          <Button 
+            onClick={() => setCurrentView('compose')} 
+            className="hidden md:inline-flex border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          >
+            New Article
+          </Button>
         </div>
         <Button 
           onClick={() => setCurrentView('compose')} 
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          className="md:hidden w-full mt-4 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           New Article
         </Button>
