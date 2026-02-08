@@ -771,16 +771,16 @@ export function CreditHistoryView() {
                 </>
               )}
               <div className="flex justify-between gap-4">
+                <span className="text-white/70">Locked in Orders:</span>
+                <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total Purchased:</span>
                 <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total Spent:</span>
                 <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked in Orders:</span>
-                <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
               </div>
               <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                 <span className="text-white/70">Total Available Credits:</span>
