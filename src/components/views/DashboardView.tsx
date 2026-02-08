@@ -98,7 +98,8 @@ export function DashboardView() {
     totalBalance: 0,
     earnedCredits: 0,
     purchasedCredits: 0,
-    lockedCredits: 0,
+    creditsInOrders: 0,
+    creditsInPendingRequests: 0,
     creditsWithdrawn: 0,
     creditsInWithdrawals: 0,
     totalOrders: 0,
@@ -183,11 +184,11 @@ export function DashboardView() {
         .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
 
-      let creditsInUse = 0;
+      let creditsInOrders = 0;
       if (activeOrders) {
         activeOrders.forEach((order: any) => {
           if (order.media_sites?.price) {
-            creditsInUse += order.media_sites.price;
+            creditsInOrders += order.media_sites.price;
           }
         });
       }
@@ -200,6 +201,7 @@ export function DashboardView() {
         .is('order_id', null)
         .neq('status', 'cancelled');
 
+      let creditsInPendingRequests = 0;
       if (pendingRequests) {
         for (const request of pendingRequests) {
           const { data: orderRequestMessages } = await supabase
@@ -212,7 +214,7 @@ export function DashboardView() {
           if (orderRequestMessages && orderRequestMessages.length > 0) {
             const mediaSite = request.media_sites as { price: number } | null;
             if (mediaSite?.price) {
-              creditsInUse += mediaSite.price;
+              creditsInPendingRequests += mediaSite.price;
             }
           }
         }
@@ -261,6 +263,7 @@ export function DashboardView() {
         : 0;
       totalOrders += deliveryOrdersCount;
 
+      const creditsInUse = creditsInOrders + creditsInPendingRequests;
       const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
 
       setAvailableCreditsData({
@@ -268,7 +271,8 @@ export function DashboardView() {
         totalBalance: actualTotalBalance,
         earnedCredits,
         purchasedCredits,
-        lockedCredits: creditsInUse,
+        creditsInOrders,
+        creditsInPendingRequests,
         creditsWithdrawn,
         creditsInWithdrawals,
         totalOrders,
@@ -447,36 +451,47 @@ export function DashboardView() {
   };
 
   // Custom tooltip content for Available Credits
-  const renderAvailableCreditsTooltip = () => (
-    <div className="space-y-1">
-      {availableCreditsData.earnedCredits > 0 && (
+  const renderAvailableCreditsTooltip = () => {
+    const { availableCredits, creditsInOrders, creditsInPendingRequests, creditsInWithdrawals, totalBalance } = availableCreditsData;
+    const hasLockedCredits = creditsInOrders > 0 || creditsInPendingRequests > 0 || creditsInWithdrawals > 0;
+    
+    return (
+      <div className="space-y-1">
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Earned credits:</span>
-          <span className="font-medium">{availableCreditsData.earnedCredits.toLocaleString()}</span>
+          <span className="text-white/70">Available Balance:</span>
+          <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
         </div>
-      )}
-      <div className="flex justify-between gap-4">
-        <span className="text-muted-foreground">Purchased credits:</span>
-        <span className="font-medium">{availableCreditsData.purchasedCredits.toLocaleString()}</span>
+        <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Credits Locked</div>
+        {creditsInOrders > 0 && (
+          <div className="flex justify-between gap-4 pl-2">
+            <span className="text-white/70">In Orders:</span>
+            <span className="font-semibold text-amber-400">{creditsInOrders.toLocaleString()}</span>
+          </div>
+        )}
+        {creditsInPendingRequests > 0 && (
+          <div className="flex justify-between gap-4 pl-2">
+            <span className="text-white/70">In Pending Requests:</span>
+            <span className="font-semibold text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
+          </div>
+        )}
+        {creditsInWithdrawals > 0 && (
+          <div className="flex justify-between gap-4 pl-2">
+            <span className="text-white/70">In Withdrawals:</span>
+            <span className="font-semibold text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
+          </div>
+        )}
+        {!hasLockedCredits && (
+          <div className="flex justify-between gap-4 pl-2">
+            <span className="text-white/50">None</span>
+          </div>
+        )}
+        <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+          <span className="text-white/70">Total Balance:</span>
+          <span className="font-semibold">{totalBalance.toLocaleString()}</span>
+        </div>
       </div>
-      {availableCreditsData.creditsWithdrawn > 0 && (
-        <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Withdrawn credits:</span>
-          <span className="font-medium">-{Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}</span>
-        </div>
-      )}
-      {availableCreditsData.creditsInWithdrawals > 0 && (
-        <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Locked in withdrawals:</span>
-          <span className="font-medium text-amber-400">-{Math.round(availableCreditsData.creditsInWithdrawals).toLocaleString()}</span>
-        </div>
-      )}
-      <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
-        <span className="text-muted-foreground">Available credits:</span>
-        <span className="font-medium">{availableCreditsData.availableCredits.toLocaleString()}</span>
-      </div>
-    </div>
-  );
+    );
+  };
   return <div className="space-y-2 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
