@@ -911,7 +911,7 @@ export function AdminOrdersView() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-0 mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-0">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default border-0" style={{ backgroundColor: '#1d1d1f' }}>
@@ -995,7 +995,7 @@ export function AdminOrdersView() {
         </Tooltip>
       </div>
 
-      <div className="relative w-full mb-2">
+      <div className="relative w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by site, order number..."
@@ -1016,7 +1016,7 @@ export function AdminOrdersView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto md:inline-flex md:w-auto scrollbar-hide justify-start">
+        <TabsList className="flex w-full overflow-x-auto md:inline-flex md:w-auto scrollbar-hide justify-start rounded-none">
           <TabsTrigger value="pending" className="relative">
             Active Orders ({pendingCount})
             {unreadPendingCount > 0 && (
