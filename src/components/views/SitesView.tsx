@@ -1591,7 +1591,7 @@ export function SitesView() {
                                 <div className="md:hidden flex items-center gap-1 text-xs text-muted-foreground">
                                   <span>{site.publication_format}</span>
                                   {site.agency && (
-                                    <>
+                                    <span className="hidden md:inline-flex items-center gap-1">
                                       <span>via {site.agency}</span>
                                       {agencyLogos[site.agency] && (
                                         <img 
@@ -1600,7 +1600,7 @@ export function SitesView() {
                                           className="h-4 w-4 object-contain rounded-full flex-shrink-0"
                                         />
                                       )}
-                                    </>
+                                    </span>
                                   )}
                                 </div>
                               </div>
