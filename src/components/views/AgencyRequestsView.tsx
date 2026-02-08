@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, AlertTriangle, Tag } from 'lucide-react';
+import { ClipboardList, Loader2, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ArrowUpDown, Search, ShoppingBag, AlertTriangle, Tag, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { toast as sonnerToast } from 'sonner';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
@@ -89,6 +91,15 @@ export function AgencyRequestsView() {
   const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
   const [currentTime, setCurrentTime] = useState(new Date());
   const [hasAutoNavigated, setHasAutoNavigated] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchRequests();
+    setRefreshing(false);
+    sonnerToast.success('Requests refreshed');
+  };
 
   // Update current time every second for real-time countdown
   useEffect(() => {
@@ -1344,13 +1355,24 @@ export function AgencyRequestsView() {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">
-          Client Requests
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage client requests and orders for your media sites
-        </p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Client Requests
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage client requests and orders for your media sites
+          </p>
+        </div>
+        <Button 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          variant="outline"
+          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="relative mb-2">
