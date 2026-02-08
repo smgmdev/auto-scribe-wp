@@ -182,7 +182,7 @@ export function AccountSettings() {
               {savingEmail ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "Save"
+                "Update"
               )}
             </Button>
           </div>
@@ -214,7 +214,7 @@ export function AccountSettings() {
               {savingWhatsapp ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "Save"
+                "Update"
               )}
             </Button>
           </div>
