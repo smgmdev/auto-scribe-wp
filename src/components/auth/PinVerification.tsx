@@ -46,8 +46,8 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
             <img src={amblackIcon} alt="Arcana Mace" className="h-12 w-12" />
           </div>
           <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-            Enter PIN
             <Lock className="h-5 w-5" />
+            Enter PIN
           </CardTitle>
           <CardDescription>Enter your 4-digit PIN to continue</CardDescription>
         </CardHeader>
