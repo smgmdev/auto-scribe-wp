@@ -490,8 +490,6 @@ export function AgencyApplicationView() {
 
         {/* Content Section - scrolls over the video */}
         <div className="relative bg-white rounded-t-3xl">
-          {/* Dark gradient transition at top */}
-          <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-transparent pointer-events-none rounded-t-3xl" />
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
