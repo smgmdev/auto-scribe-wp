@@ -336,17 +336,17 @@ export function AdminAgencyWithdrawalsView() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help">
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Pending
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">{pendingCount}</div>
+                <div className="text-2xl font-semibold text-white">{pendingCount}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -357,14 +357,14 @@ export function AdminAgencyWithdrawalsView() {
 
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help">
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Pending Amount
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">
+                <div className="text-2xl font-semibold text-white">
                   ${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -395,14 +395,14 @@ export function AdminAgencyWithdrawalsView() {
 
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help">
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Completed Withdrawals
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">{completedCount}</div>
+                <div className="text-2xl font-semibold text-white">{completedCount}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -431,14 +431,14 @@ export function AdminAgencyWithdrawalsView() {
 
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help">
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Total Withdrawals
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">
+                <div className="text-2xl font-semibold text-white">
                   ${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
