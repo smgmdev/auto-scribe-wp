@@ -341,7 +341,7 @@ export function AdminAgencyWithdrawalsView() {
         <div className="grid grid-cols-2 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1e3a5f' }}>
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#464646' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Pending
@@ -359,7 +359,7 @@ export function AdminAgencyWithdrawalsView() {
 
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1e3a5f' }}>
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#464646' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Pending Amount
@@ -397,7 +397,7 @@ export function AdminAgencyWithdrawalsView() {
 
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1e3a5f' }}>
+            <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#464646' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                 <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Completed Withdrawals
