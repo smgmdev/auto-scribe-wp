@@ -71,13 +71,13 @@ export function ExploreNetworkGrid() {
           <button
             key={site.id}
             onClick={() => setSelectedSite(site)}
-            className="aspect-square rounded-xl border border-border bg-card overflow-hidden hover:border-foreground transition-all duration-200 hover:shadow-md flex items-center justify-center p-2"
+            className="w-full h-20 md:h-24 rounded-xl border border-border bg-card overflow-hidden hover:border-foreground transition-all duration-200 hover:shadow-md flex items-center justify-center p-3"
           >
             {site.favicon ? (
               <img
                 src={site.favicon}
                 alt={site.name}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain"
               />
             ) : (
               <span className="text-xs text-muted-foreground text-center truncate px-1">
