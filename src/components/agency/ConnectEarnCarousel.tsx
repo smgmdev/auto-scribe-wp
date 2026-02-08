@@ -65,9 +65,9 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
       href={article.wp_link || '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="block h-full group flex-shrink-0 w-[280px]"
+      className="block group flex-shrink-0 w-[280px] h-[420px]"
     >
-      <div className="rounded-2xl bg-[#1d1d1f] overflow-hidden h-full hover:scale-[1.02] transition-all duration-300 flex flex-col">
+      <div className="rounded-2xl bg-[#1d1d1f] overflow-hidden h-full group-hover:scale-105 transition-all duration-300 flex flex-col shadow-lg group-hover:shadow-2xl">
         {/* Header with site info */}
         <div className="p-5 pb-3">
           <div className="flex items-center gap-3 mb-3">
@@ -184,10 +184,10 @@ export function ConnectEarnCarousel() {
   const duplicatedArticles = [...articles, ...articles];
 
   return (
-    <section className="py-8 px-6 overflow-hidden">
+    <section className="py-8 px-6">
       <h2 className="text-3xl font-bold text-foreground mb-6 text-center">Connect and Earn.</h2>
       
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-visible py-4">
         
         <div 
           className="flex gap-4 animate-marquee"
