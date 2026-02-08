@@ -462,10 +462,10 @@ export function AgencyApplicationView() {
                 <img 
                   src="/favicon.png" 
                   alt="Arcana Mace" 
-                  className="h-10 w-10 mb-4"
+                  className="h-10 w-10 mb-4 brightness-0 invert"
                 />
                 <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-                  Why Upgrade to Agency?
+                  Upgrade to Agency
                 </h1>
                 <p className="mt-3 text-white/80 text-base lg:text-lg">
                   Become a media merchant on Arcana Mace to trade and buy media products worldwide.
