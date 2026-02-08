@@ -438,7 +438,7 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in -m-4 md:-m-6 p-4 md:p-6 bg-white min-h-full">
       <div className="bg-white rounded-lg border border-border p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
