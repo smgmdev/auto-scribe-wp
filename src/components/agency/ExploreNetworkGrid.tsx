@@ -90,7 +90,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
       </div>
 
       <p className={`text-xs mt-6 ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
-        When you join Arcana Mace you can list your own worldwide media options.
+        *When you join Arcana Mace you can list your own worldwide media options.
       </p>
 
       <MediaSiteDialog
