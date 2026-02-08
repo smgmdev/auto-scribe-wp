@@ -693,8 +693,8 @@ export const AdminCreditManagementView = () => {
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
-                                          <p><span className="opacity-70">Purchased via online:</span> {user.purchasedOnline.toLocaleString()}</p>
-                                          <p><span className="opacity-70">Purchased via invoice:</span> {user.purchasedInvoice.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased via online:</span> {(user.purchasedOnline || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased via invoice:</span> {(user.purchasedInvoice || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
@@ -734,9 +734,9 @@ export const AdminCreditManagementView = () => {
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
-                                          <p><span className="opacity-70">Earned:</span> {user.earned.toLocaleString()}</p>
-                                          <p><span className="opacity-70">Purchased:</span> {user.purchased.toLocaleString()}</p>
-                                          <p><span className="opacity-70">Withdrawn:</span> {user.withdrawn.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Earned:</span> {(user.earned || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased:</span> {(user.purchased || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Withdrawn:</span> {(user.withdrawn || 0).toLocaleString()}</p>
                                           <hr className="border-background/30 my-1" />
                                           <p className="font-medium">Available Credit Balance: {user.available.toLocaleString()}</p>
                                         </div>
