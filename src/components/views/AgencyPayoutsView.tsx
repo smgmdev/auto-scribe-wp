@@ -627,7 +627,7 @@ export function AgencyPayoutsView() {
                         <p className="font-medium">
                           {order.media_site?.name || 'Order Earning'}
                         </p>
-                        <div className="flex flex-col gap-1 mt-1">
+                        <div className="flex flex-col mt-1">
                           <div className="flex items-center gap-1">
                             <p className="text-xs text-muted-foreground">
                               Order: {order.order_number || order.id.slice(0, 8) + '...'}
