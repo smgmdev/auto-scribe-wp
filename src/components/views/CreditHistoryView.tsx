@@ -885,7 +885,7 @@ export function CreditHistoryView() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
@@ -1017,7 +1017,7 @@ export function CreditHistoryView() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
@@ -1160,7 +1160,7 @@ export function CreditHistoryView() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   const newExpanded = new Set(expandedWithdrawals);
