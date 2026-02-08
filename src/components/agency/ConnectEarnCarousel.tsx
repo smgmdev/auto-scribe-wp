@@ -68,8 +68,8 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
       className="block group flex-shrink-0 w-[280px] h-[420px]"
     >
       <div className="rounded-2xl bg-[#1d1d1f] overflow-hidden h-full group-hover:scale-105 transition-all duration-300 flex flex-col shadow-lg group-hover:shadow-2xl">
-        {/* Header with site info */}
-        <div className="p-5 pb-3">
+        {/* Header with site info - fixed height */}
+        <div className="p-5 pb-3 h-[160px] flex flex-col">
           <div className="flex items-center gap-3 mb-3">
             {article.published_to_favicon && (
               <div className="h-10 w-10 rounded-xl overflow-hidden flex-shrink-0">
@@ -86,12 +86,12 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
           </div>
           
           {/* Title as description */}
-          <p className="text-white/70 text-sm leading-relaxed line-clamp-3">
+          <p className="text-white/70 text-sm leading-relaxed line-clamp-3 flex-1">
             {article.title}
           </p>
           
           {/* Date */}
-          <p className="text-xs text-white/50 mt-4">
+          <p className="text-xs text-white/50 mt-auto pt-2">
             {formatRelativeTime(article.created_at)}
           </p>
         </div>
