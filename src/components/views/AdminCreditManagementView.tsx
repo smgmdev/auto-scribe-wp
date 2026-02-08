@@ -22,6 +22,8 @@ interface UserCredit {
   deductions: number;
   totalCredits: number;
   locked: number;
+  lockedFromOrders: number;
+  lockedFromWithdrawals: number;
   available: number;
   orders: number;
   purchaseOrders: number;
@@ -432,6 +434,8 @@ export const AdminCreditManagementView = () => {
           deductions: deductionsMap.get(credit.user_id) || 0,
           totalCredits: calculatedTotalBalance,
           locked: totalLocked,
+          lockedFromOrders,
+          lockedFromWithdrawals: lockedFromOffers,
           available: calculatedAvailable,
           orders: purchaseOrders + deliveryOrders,
           purchaseOrders,
@@ -713,7 +717,13 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Credits locked in active orders/withdrawals.</TooltipContent>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p className="font-medium mb-1">Credits locked in active orders/withdrawals</p>
+                                          <p><span className="opacity-70">Credits locked in active orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Credits locked in withdrawals:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
+                                        </div>
+                                      </TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
