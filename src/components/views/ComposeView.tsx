@@ -1256,7 +1256,7 @@ export function ComposeView() {
             </Card>}
 
           {/* Publish To - Single Line */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
             <Label className="whitespace-nowrap text-sm font-medium">Publish To</Label>
             {sitesLoading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -1273,7 +1273,7 @@ export function ComposeView() {
                   }
                 }}
               >
-                <SelectTrigger className="flex-1">
+                <SelectTrigger className="w-full md:flex-1">
                   <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && <div className="flex items-center gap-2">
                         <img src={currentSite.favicon || getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
