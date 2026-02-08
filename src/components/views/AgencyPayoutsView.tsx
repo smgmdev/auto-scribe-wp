@@ -524,7 +524,7 @@ export function AgencyPayoutsView() {
       {/* Earnings History */}
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle>Earnings History</CardTitle>
+          <CardTitle className="text-lg">Earnings History</CardTitle>
         </CardHeader>
         <CardContent>
           {completedOrders.length === 0 && withdrawals.length === 0 ? (
