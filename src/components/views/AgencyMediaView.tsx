@@ -604,7 +604,7 @@ export function AgencyMediaView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible">
+        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible rounded-none">
           <TabsTrigger value="media" className="relative overflow-visible">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
@@ -627,7 +627,7 @@ export function AgencyMediaView() {
         <TabsContent value="wordpress" className="mt-2 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
               <TabsTrigger value="connected" className="relative overflow-visible">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
@@ -968,7 +968,7 @@ export function AgencyMediaView() {
         <TabsContent value="media" className="mt-2 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
               <TabsTrigger value="added" className="relative overflow-visible">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
