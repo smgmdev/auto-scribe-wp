@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, Save, Loader2, Phone } from 'lucide-react';
+import { Mail, Lock, Loader2, Phone } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -177,12 +177,12 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateEmail} 
               disabled={savingEmail || email === user?.email}
-              variant="outline"
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
             >
               {savingEmail ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="h-4 w-4" />
+                "Save"
               )}
             </Button>
           </div>
@@ -209,12 +209,12 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateWhatsapp} 
               disabled={savingWhatsapp || whatsapp === originalWhatsapp}
-              variant="outline"
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
             >
               {savingWhatsapp ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="h-4 w-4" />
+                "Save"
               )}
             </Button>
           </div>
