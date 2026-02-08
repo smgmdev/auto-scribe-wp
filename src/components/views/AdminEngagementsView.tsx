@@ -482,31 +482,31 @@ export function AdminEngagementsView() {
     // Order related events based on status
     if (request.orders) {
       if (request.orders.status === 'pending') {
-        events.push({ name: 'Order pending payment', time: new Date(request.updated_at) });
+        events.push({ name: 'Order Pending Payment', time: new Date(request.updated_at) });
       } else if (request.orders.status === 'paid') {
-        events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+        events.push({ name: 'Order Paid', time: new Date(request.updated_at) });
       } else if (request.orders.status === 'cancelled') {
-        events.push({ name: 'Order cancelled', time: new Date(request.updated_at) });
+        events.push({ name: 'Order Cancelled', time: new Date(request.updated_at) });
       }
       
       // Delivery status events
       if (request.orders.delivery_status === 'pending' && request.orders.delivery_deadline) {
-        events.push({ name: 'Awaiting delivery', time: new Date(request.updated_at) });
+        events.push({ name: 'Awaiting Delivery', time: new Date(request.updated_at) });
       } else if (request.orders.delivery_status === 'delivered') {
-        events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+        events.push({ name: 'Delivery Submitted', time: new Date(request.updated_at) });
       } else if (request.orders.delivery_status === 'accepted') {
-        events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+        events.push({ name: 'Delivery Accepted', time: new Date(request.updated_at) });
       } else if (request.orders.delivery_status === 'rejected') {
-        events.push({ name: 'Delivery rejected', time: new Date(request.updated_at) });
+        events.push({ name: 'Delivery Rejected', time: new Date(request.updated_at) });
       }
     }
     
     // Request status based events
     if (request.status === 'cancelled') {
-      const cancelledBy = request.cancelled_by === 'client' ? 'by client' : 
-                          request.cancelled_by === 'agency' ? 'by agency' : 
-                          request.cancelled_by === 'admin' ? 'by admin' : '';
-      events.push({ name: `Request cancelled ${cancelledBy}`.trim(), time: new Date(request.updated_at) });
+      const cancelledBy = request.cancelled_by === 'client' ? 'by Client' : 
+                          request.cancelled_by === 'agency' ? 'by Agency' : 
+                          request.cancelled_by === 'admin' ? 'by Admin' : '';
+      events.push({ name: `Request Cancelled ${cancelledBy}`.trim(), time: new Date(request.updated_at) });
     }
     
     // Check for offer sent or client order request
