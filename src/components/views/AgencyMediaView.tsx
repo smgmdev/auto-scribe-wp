@@ -1042,6 +1042,12 @@ export function AgencyMediaView() {
                                     </TooltipContent>
                                   </Tooltip>
                                 </div>
+                                {/* Badge - visible on mobile only, above the link */}
+                                <div className="flex items-center gap-2 mt-1 md:hidden">
+                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                    {submission.imported_sites?.length || 0} sites added
+                                  </Badge>
+                                </div>
                                 {submission.reply_sheet_url && (
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -1075,12 +1081,6 @@ export function AgencyMediaView() {
                                     ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
                                     : 'N/A'}
                                 </p>
-                                {/* Badge - visible on mobile only, under the title */}
-                                <div className="flex items-center gap-2 mt-2 md:hidden">
-                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                    {submission.imported_sites?.length || 0} sites added
-                                  </Badge>
-                                </div>
                               </div>
                             </div>
                             {/* Badge and chevron - hidden on mobile, visible on desktop */}
