@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,7 @@ export function CreditHistoryView() {
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Handle transaction query param for deep linking
   useEffect(() => {
@@ -212,7 +213,13 @@ export function CreditHistoryView() {
   // creditsInWithdrawals is already in dollars (converted from cents)
   const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
 
-  // Extract fetch logic into a reusable function
+  // Refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchData(false);
+    setRefreshing(false);
+  };
+
   const fetchData = useCallback(async (showLoader = true) => {
     if (!user) return;
 
@@ -693,12 +700,23 @@ export function CreditHistoryView() {
             Manage your credits and view transaction history
           </p>
         </div>
-        <Button 
-          onClick={() => setBuyCreditsOpen(true)}
-          className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
-        >
-          Buy Credits
-        </Button>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <Button 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="outline"
+            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button 
+            onClick={() => setBuyCreditsOpen(true)}
+            className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
+          >
+            Buy Credits
+          </Button>
+        </div>
       </div>
 
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
