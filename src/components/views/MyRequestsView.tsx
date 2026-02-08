@@ -1296,7 +1296,7 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-2">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <TabsList className="w-full max-w-xs">
+              <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
