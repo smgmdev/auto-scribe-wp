@@ -3349,19 +3349,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (disputeResolved) {
       const isCompleted = disputeResolved.type === 'dispute_resolved_complete';
       return (
-        <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
-            <div className="flex items-center gap-2 mb-2">
-              <Scale className={`h-4 w-4 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
+        <div className="space-y-1 min-w-0 max-w-full">
+          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <Scale className={`h-4 w-4 shrink-0 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
               <span className={`font-semibold text-sm ${isCompleted ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
                 Dispute Resolved
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground break-words">
               {isCompleted ? 'Order marked as completed by Arcana Mace Staff' : 'Order cancelled by Arcana Mace Staff'}
             </p>
             {disputeResolved.reason && (
-              <p className="text-xs mt-2 text-muted-foreground">
+              <p className="text-xs mt-2 text-muted-foreground break-words">
                 Reason: {disputeResolved.reason}
               </p>
             )}
@@ -3973,14 +3973,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const canRespond = isClient && !hasAcceptance && !hasRevision && !isDeliveryAccepted && !isOwnMessage;
 
       return (
-        <div className="space-y-1">
-          <div className={`rounded-lg border p-4 ${
+        <div className="space-y-1 min-w-0 max-w-full">
+          <div className={`rounded-lg border p-3 md:p-4 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Order Delivered
               </span>
@@ -3995,37 +3995,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Badge>
               )}
             </div>
-            <p className={`text-sm font-medium ${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>
+            <p className={`text-sm font-medium break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>
               {orderDelivered.media_site_name}
             </p>
-            <p className={`text-sm mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm mt-2 break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               Here is your delivery. Please review and accept or request a revision.
             </p>
             {orderDelivered.delivery_url && (
-              <div className="mt-2">
+              <div className="mt-2 min-w-0 overflow-hidden">
                 <a 
                   href={orderDelivered.delivery_url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-1.5 text-sm ${isOwnMessage ? 'text-primary-foreground underline' : 'text-blue-600 dark:text-blue-400 hover:underline'}`}
+                  className={`inline-flex items-center gap-1.5 text-sm break-all ${isOwnMessage ? 'text-primary-foreground underline' : 'text-blue-600 dark:text-blue-400 hover:underline'}`}
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                   View Delivery
                 </a>
               </div>
             )}
             {orderDelivered.delivery_notes && (
-              <p className={`text-xs mt-2 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              <p className={`text-xs mt-2 break-words ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                 Notes: {orderDelivered.delivery_notes}
               </p>
             )}
             
             {/* Action buttons for client */}
             {canRespond && (
-              <div className="flex gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+              <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
                   onClick={handleAcceptDeliveryFromChat}
                   disabled={acceptingDelivery || hasOpenDispute}
                 >
@@ -4035,7 +4035,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1 bg-white text-black border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200"
+                  className="flex-1 bg-white text-black border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-xs sm:text-sm"
                   onClick={() => setRevisionDialogOpen(true)}
                   disabled={hasOpenDispute}
                 >
@@ -4054,19 +4054,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle delivery accepted message
     if (deliveryAccepted && !quote) {
       return (
-        <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+        <div className="space-y-1 min-w-0 max-w-full">
+          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Delivery Accepted
               </span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {isOwnMessage ? 'You accepted' : 'Client accepted'} the delivery for {deliveryAccepted.media_site_name}
             </p>
             <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
@@ -4083,22 +4083,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle revision requested message
     if (revisionRequested && !quote) {
       return (
-        <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+        <div className="space-y-1 min-w-0 max-w-full">
+          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-orange-700 dark:text-orange-300'}`}>
                 Revision Requested
               </span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+            <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {isOwnMessage ? 'You requested' : 'Client requested'} a revision for {revisionRequested.media_site_name}
             </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+            <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               Reason: {revisionRequested.reason}
             </p>
           </div>
@@ -5839,10 +5839,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div
                     key={msg.id}
                     id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} min-w-0`}
                   >
                     <div
-                      className={`relative group max-w-[85%] md:max-w-[80%] rounded-lg p-2 md:p-3 transition-all duration-300 ${
+                      className={`relative group max-w-[85%] md:max-w-[80%] min-w-0 overflow-hidden rounded-lg p-2 md:p-3 transition-all duration-300 ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
