@@ -82,6 +82,8 @@ export function DashboardView() {
   const [agencySummary, setAgencySummary] = useState({
     walletBalance: 0,
     totalSales: 0,
+    pendingWithdrawals: 0,
+    completedWithdrawals: 0,
     loading: true
   });
   
@@ -287,26 +289,32 @@ export function DashboardView() {
         });
       }
 
-      // Fetch withdrawals to calculate wallet balance
+      // Fetch withdrawals to calculate wallet balance and withdrawal stats
       const { data: withdrawals } = await supabase
         .from('agency_withdrawals')
         .select('amount_cents, status')
         .eq('user_id', user.id);
 
-      let completedWithdrawals = 0;
+      let completedWithdrawalsAmount = 0;
+      let pendingWithdrawalsAmount = 0;
       if (withdrawals) {
         withdrawals.forEach(w => {
           if (w.status === 'completed' || w.status === 'approved') {
-            completedWithdrawals += (w.amount_cents || 0) / 100;
+            completedWithdrawalsAmount += (w.amount_cents || 0) / 100;
+          }
+          if (w.status === 'pending') {
+            pendingWithdrawalsAmount += (w.amount_cents || 0) / 100;
           }
         });
       }
 
-      const walletBalance = totalEarnings - completedWithdrawals;
+      const walletBalance = totalEarnings - completedWithdrawalsAmount;
 
       setAgencySummary({
         walletBalance,
         totalSales,
+        pendingWithdrawals: pendingWithdrawalsAmount,
+        completedWithdrawals: completedWithdrawalsAmount,
         loading: false
       });
     };
@@ -533,14 +541,9 @@ export function DashboardView() {
           {/* Agency Summary - Modern Mini Dashboard */}
           <Card className="border-border/30 bg-gradient-to-br from-card to-muted/20 overflow-hidden">
             <CardHeader className="pb-2 pt-4 px-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold tracking-tight">Agency Summary</CardTitle>
-                <div className="h-8 w-8 rounded-full bg-foreground/5 flex items-center justify-center">
-                  <Wallet className="h-4 w-4 text-foreground/70" />
-                </div>
-              </div>
+              <CardTitle className="text-base font-semibold tracking-tight">Agency Summary</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4 space-y-4">
+            <CardContent className="px-4 pb-4">
               {/* Financial Stats - Modern Cards */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative bg-foreground rounded-xl p-4 text-background overflow-hidden">
@@ -571,33 +574,34 @@ export function DashboardView() {
                     )}
                   </div>
                 </div>
-              </div>
-              {/* Quick Links - Minimal Style */}
-              <div className="flex gap-1.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
-                  onClick={() => setCurrentView('agency-payouts')}
-                >
-                  Earnings
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
-                  onClick={() => setCurrentView('agency-media')}
-                >
-                  Media
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
-                  onClick={() => setCurrentView('my-agency')}
-                >
-                  Agency
-                </Button>
+                <div className="relative bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <span className="text-[10px] uppercase tracking-wider text-amber-600 font-medium">Pending</span>
+                    {agencySummary.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-amber-600 mt-1" />
+                    ) : (
+                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                        ${agencySummary.pendingWithdrawals.toFixed(0)}
+                        <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.pendingWithdrawals % 1).toFixed(2).slice(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="relative bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-medium">Withdrawn</span>
+                    {agencySummary.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-emerald-600 mt-1" />
+                    ) : (
+                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                        ${agencySummary.completedWithdrawals.toFixed(0)}
+                        <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.completedWithdrawals % 1).toFixed(2).slice(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
