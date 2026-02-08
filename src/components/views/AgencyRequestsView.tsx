@@ -2003,7 +2003,7 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
-                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                             {order.delivery_status === 'pending_revision' && order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
@@ -2099,7 +2099,7 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
-                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                             {order.delivered_at && (
                               <span className="text-xs text-muted-foreground block">
@@ -2195,7 +2195,7 @@ export function AgencyRequestsView() {
                               )}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
                             {/* Mobile: messages count on new row */}
                             {requestMessages.length > 0 && (
@@ -2277,7 +2277,7 @@ export function AgencyRequestsView() {
                               Cancelled order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Order started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                              Order Started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-0.5">
