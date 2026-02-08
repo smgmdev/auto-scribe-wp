@@ -816,7 +816,7 @@ export function AdminEngagementsView() {
                                 : 'No messages'}
                             </span>
                             {messages[r.id]?.length > 0 && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1 pl-4">
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Mail className="h-3 w-3" />
                                 {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}
                               </span>
