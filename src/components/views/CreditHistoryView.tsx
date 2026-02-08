@@ -866,10 +866,10 @@ export function CreditHistoryView() {
                       key={transaction.id}
                       className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
                     >
-                      <div className="flex items-center justify-between p-3">
-                        <div className="flex items-center gap-3">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                        <div className="flex items-start gap-3">
                           {getTransactionIcon(transaction.type, transaction.amount)}
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">
                               {transaction.description?.includes('Bank Transfer') 
                                 ? `Withdrawal via Bank Transfer` 
@@ -877,6 +877,9 @@ export function CreditHistoryView() {
                                   ? `Withdrawal via USDT`
                                   : 'Withdrawal Completed'}
                             </p>
+                            <div className="text-lg text-foreground md:hidden mt-1">
+                              -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                            </div>
                             <div className="flex items-center gap-2 mt-1">
                               {getTransactionBadge(transaction.type)}
                               <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -907,7 +910,7 @@ export function CreditHistoryView() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-lg text-foreground">
+                        <div className="text-lg text-foreground hidden md:block">
                           -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                         </div>
                       </div>
@@ -1129,11 +1132,14 @@ export function CreditHistoryView() {
                       key={transaction.id}
                       className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
                     >
-                      <div className="flex items-center justify-between p-3">
-                        <div className="flex items-center gap-3">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                        <div className="flex items-start gap-3">
                           {getTransactionIcon(transaction.type, transaction.amount)}
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">{cleanDescription}</p>
+                            <div className="text-lg text-green-500 md:hidden mt-1">
+                              +{transaction.amount.toLocaleString()}
+                            </div>
                             <div className="flex items-center gap-2 mt-1">
                               {getTransactionBadge(transaction.type)}
                               <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -1170,7 +1176,7 @@ export function CreditHistoryView() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-lg text-green-500">
+                        <div className="text-lg text-green-500 hidden md:block">
                           +{transaction.amount.toLocaleString()}
                         </div>
                       </div>
@@ -1199,11 +1205,11 @@ export function CreditHistoryView() {
                   <div
                     key={transaction.id}
                     onClick={isClickable ? () => handleOrderCompletedClick(transaction.order_id!) : undefined}
-                    className={`flex items-center justify-between p-3 rounded-lg border border-border hover:border-[#4771d9] transition-colors ${isClickable ? 'cursor-pointer' : ''}`}
+                    className={`flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg border border-border hover:border-[#4771d9] transition-colors gap-2 md:gap-0 ${isClickable ? 'cursor-pointer' : ''}`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       {getTransactionIcon(transaction.type, transaction.amount)}
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">
                           {transaction.type === 'withdrawal_locked' ? (
                             // For pending withdrawal transactions, show cleaner description
@@ -1228,6 +1234,17 @@ export function CreditHistoryView() {
                             transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
                           )}
                         </p>
+                        <div className={`text-lg md:hidden mt-1 ${
+                          transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                            ? 'text-amber-500' 
+                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                        }`}>
+                          {transaction.type === 'withdrawal_locked' ? (
+                            <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                          ) : (
+                            <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 mt-1">
                           {getTransactionBadge(transaction.type)}
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -1237,7 +1254,7 @@ export function CreditHistoryView() {
                         </div>
                       </div>
                     </div>
-                    <div className={`text-lg ${
+                    <div className={`text-lg hidden md:block ${
                       transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
                         ? 'text-amber-500' 
                         : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
