@@ -736,7 +736,7 @@ export function CreditHistoryView() {
                 {isAgency ? (
                   <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
                 ) : (
-                  <span className="text-white/50 text-xs italic">available for agency only</span>
+                  <span className="text-white/50 text-xs">available for agency only</span>
                 )}
               </div>
               <div className="flex justify-between gap-4">
@@ -744,11 +744,11 @@ export function CreditHistoryView() {
                 {isAgency ? (
                   <span className="font-semibold text-red-400">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
                 ) : (
-                  <span className="text-white/50 text-xs italic">available for agency only</span>
+                  <span className="text-white/50 text-xs">available for agency only</span>
                 )}
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-white/70">Purchased:</span>
+                <span className="text-white/70">Total Purchased:</span>
                 <span className="font-semibold text-green-400">{purchasedCredits.toLocaleString()}</span>
               </div>
               <div className="flex justify-between gap-4">
