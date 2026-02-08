@@ -565,11 +565,11 @@ export function DashboardView() {
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
-          <Card className="border-border/30 bg-gradient-to-br from-card to-muted/20 overflow-hidden">
-            <CardHeader className="pb-2 pt-4 px-4">
+          <Card className="border-border/50 bg-card">
+            <CardHeader>
               <CardTitle className="text-xl">Agency Summary</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4">
+            <CardContent>
               {/* Financial Stats - Modern Cards */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Wallet Card with Tooltip */}
