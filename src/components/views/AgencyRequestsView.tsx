@@ -1460,7 +1460,56 @@ export function AgencyRequestsView() {
                         onClick={() => handleCardClick(request)}
                       >
                         <CardHeader className="py-3 px-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                            {/* Mobile: Badge at top right */}
+                            <div className="flex justify-end md:hidden">
+                              {isInDispute ? (
+                                <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  In Dispute
+                                </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'pending_revision' ? (
+                                <Badge className="bg-black text-orange-400">
+                                  Delivered - Revision Requested
+                                </Badge>
+                              ) : hasOrder && request.order?.delivery_status === 'delivered' ? (
+                                <Badge className="bg-purple-600 text-white">
+                                  Delivered - Pending Approval
+                                </Badge>
+                              ) : hasOrder && isOverdue ? (
+                                <Badge variant="destructive" className="bg-red-600 text-white">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  Order Placed - Overdue
+                                </Badge>
+                              ) : hasOrder ? (
+                                <Badge className="bg-black text-white dark:bg-white dark:text-black">
+                                  <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                                  Order Placed
+                                  {(() => {
+                                    const countdown = getTimeRemaining();
+                                    return countdown && !countdown.isOverdue && (
+                                      <span className="ml-2">
+                                        • {countdown.text}
+                                      </span>
+                                    );
+                                  })()}
+                                </Badge>
+                              ) : hasPendingOfferSent(request.id) ? (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Offer Sent
+                                </Badge>
+                              ) : hasClientOrderRequestPending(request.id) ? (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Received an Order Request
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground">
+                                  Open
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex items-center gap-3">
                               <div className="relative">
                                 {request.media_site?.favicon ? (
@@ -1485,8 +1534,8 @@ export function AgencyRequestsView() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-1">
-                              {/* Status badges - Dispute takes priority */}
+                            {/* Desktop: Badge on the right */}
+                            <div className="hidden md:flex flex-col items-end gap-1">
                               {isInDispute ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
@@ -1610,7 +1659,14 @@ export function AgencyRequestsView() {
                             onClick={() => handleCardClick(request)}
                           >
                             <CardHeader className="pb-2 px-4 pt-3">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                {/* Mobile: Badge at top right */}
+                                <div className="flex justify-end md:hidden">
+                                  <Badge className="bg-green-600 text-white">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Completed
+                                  </Badge>
+                                </div>
                                 <div className="flex items-center gap-3">
                                   <div className="relative">
                                     {request.media_site?.favicon ? (
@@ -1635,7 +1691,8 @@ export function AgencyRequestsView() {
                                     )}
                                   </div>
                                 </div>
-                                <Badge className="bg-green-600 text-white">
+                                {/* Desktop: Badge on the right */}
+                                <Badge className="hidden md:flex bg-green-600 text-white">
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Completed
                                 </Badge>
@@ -1646,13 +1703,20 @@ export function AgencyRequestsView() {
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
                                     Completed: {request.order?.released_at ? format(new Date(request.order.released_at), 'MMM d, yyyy h:mm a') : request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
+                                    {/* Desktop: inline messages count */}
                                     {requestMessages.length > 0 && (
-                                      <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                      <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                     )}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
+                                  {/* Mobile: messages count on new row */}
+                                  {requestMessages.length > 0 && (
+                                    <p className="text-xs text-muted-foreground md:hidden">
+                                      {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                   {request.media_site?.publication_format && (
@@ -1694,7 +1758,13 @@ export function AgencyRequestsView() {
                             onClick={() => handleCardClick(request)}
                           >
                             <CardHeader className="pb-2 px-4 pt-3">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                {/* Mobile: Badge at top right */}
+                                <div className="flex justify-end md:hidden">
+                                  <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                    Cancelled
+                                  </Badge>
+                                </div>
                                 <div className="flex items-center gap-3">
                                   <div className="relative">
                                     {request.media_site?.favicon ? (
@@ -1719,7 +1789,8 @@ export function AgencyRequestsView() {
                                     )}
                                   </div>
                                 </div>
-                                <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                {/* Desktop: Badge on the right */}
+                                <Badge className="hidden md:flex bg-muted text-muted-foreground border-muted-foreground/30">
                                   Cancelled
                                 </Badge>
                               </div>
@@ -1729,13 +1800,20 @@ export function AgencyRequestsView() {
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
                                     Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                                    {/* Desktop: inline messages count */}
                                     {requestMessages.length > 0 && (
-                                      <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                      <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                     )}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     Request received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
+                                  {/* Mobile: messages count on new row */}
+                                  {requestMessages.length > 0 && (
+                                    <p className="text-xs text-muted-foreground md:hidden">
+                                      {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                   {request.media_site?.publication_format && (
@@ -1837,7 +1915,33 @@ export function AgencyRequestsView() {
                       onClick={() => handleOrderCardClick(order, relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                          {/* Mobile: Badge at top right */}
+                          <div className="flex justify-end md:hidden">
+                            {order.delivery_status === 'pending_revision' ? (
+                              <Badge className="bg-black text-orange-400">
+                                Delivered - Revision Requested
+                              </Badge>
+                            ) : order.delivery_status === 'in_progress' ? (
+                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                In Progress
+                              </Badge>
+                            ) : order.delivery_status === 'delivered' ? (
+                              <Badge className="bg-purple-600 text-white">
+                                Delivered - Pending Approval
+                              </Badge>
+                            ) : isOverdue ? (
+                              <Badge variant="destructive" className="bg-red-600 text-white">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Order Placed - Overdue
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-black text-white dark:bg-white dark:text-black">
+                                <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                                Order Placed {getTimeRemaining() && `• ${getTimeRemaining()}`}
+                              </Badge>
+                            )}
+                          </div>
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               {order.media_site?.favicon ? (
@@ -1864,7 +1968,8 @@ export function AgencyRequestsView() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
+                          {/* Desktop: Badge on the right */}
+                          <div className="hidden md:flex flex-col items-end gap-1">
                             {order.delivery_status === 'pending_revision' ? (
                               <Badge className="bg-black text-orange-400">
                                 Delivered - Revision Requested
@@ -1946,7 +2051,14 @@ export function AgencyRequestsView() {
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                          {/* Mobile: Badge at top right */}
+                          <div className="flex justify-end md:hidden">
+                            <Badge className="bg-red-600 text-white border-red-600">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Open Dispute
+                            </Badge>
+                          </div>
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               {order.media_site?.favicon ? (
@@ -1968,7 +2080,8 @@ export function AgencyRequestsView() {
                               <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1">
+                          {/* Desktop: Badge on the right */}
+                          <div className="hidden md:flex flex-col items-end gap-1">
                             <Badge className="bg-red-600 text-white border-red-600">
                               <AlertTriangle className="h-3 w-3 mr-1" />
                               Open Dispute
@@ -2119,7 +2232,13 @@ export function AgencyRequestsView() {
                       onClick={() => relatedRequest && handleCardClick(relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                          {/* Mobile: Badge at top right */}
+                          <div className="flex justify-end md:hidden">
+                            <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                              Cancelled
+                            </Badge>
+                          </div>
                           <div className="flex items-center gap-3">
                             {order.media_site?.favicon ? (
                               <img 
@@ -2134,7 +2253,8 @@ export function AgencyRequestsView() {
                             )}
                             <CardTitle className="text-base">{order.media_site?.name || 'Unknown Site'}</CardTitle>
                           </div>
-                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                          {/* Desktop: Badge on the right */}
+                          <Badge className="hidden md:flex bg-muted text-muted-foreground border-muted-foreground/30">
                             Cancelled
                           </Badge>
                         </div>
