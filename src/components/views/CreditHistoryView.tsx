@@ -52,34 +52,83 @@ export function CreditHistoryView() {
   const [expandedWithdrawals, setExpandedWithdrawals] = useState<Set<string>>(new Set());
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
+  const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
 
   // Handle transaction query param for deep linking
   useEffect(() => {
     const transactionOrderId = searchParams.get('transaction');
+    const withdrawalId = searchParams.get('withdrawalId');
+    
     if (transactionOrderId && !hasScrolledToTransaction.current) {
       setHighlightedOrderId(transactionOrderId);
-      // Clear the query param after reading
+    }
+    if (withdrawalId && !hasScrolledToTransaction.current) {
+      setHighlightedWithdrawalId(withdrawalId);
+    }
+    
+    // Clear the query params after reading
+    if (transactionOrderId || withdrawalId) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('transaction');
+      newParams.delete('withdrawalId');
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
   // Scroll to and expand the highlighted transaction once data is loaded
   useEffect(() => {
-    if (highlightedOrderId && !loading && transactions.length > 0 && !hasScrolledToTransaction.current) {
-      // Find the transaction with this order_id and expand it
-      const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
-      if (transaction) {
-        setExpandedWithdrawals(new Set([transaction.id]));
-        hasScrolledToTransaction.current = true;
-        // Scroll after a short delay to allow DOM to update
-        setTimeout(() => {
-          highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+    if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current) {
+      // Handle order_payout highlight
+      if (highlightedOrderId) {
+        const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
+        if (transaction) {
+          setExpandedWithdrawals(new Set([transaction.id]));
+          hasScrolledToTransaction.current = true;
+          setTimeout(() => {
+            highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+      }
+      
+      // Handle withdrawal highlight - find matching withdrawal transaction by fetching withdrawal details
+      if (highlightedWithdrawalId) {
+        // We need to find the credit_transaction that matches this withdrawal
+        // Withdrawals create transactions with types: withdrawal_locked, withdrawal_completed, withdrawal_unlocked
+        const matchWithdrawal = async () => {
+          const { data: withdrawal } = await supabase
+            .from('agency_withdrawals')
+            .select('amount_cents, status')
+            .eq('id', highlightedWithdrawalId)
+            .single();
+          
+          if (withdrawal) {
+            const type = withdrawal.status === 'completed' || withdrawal.status === 'approved' 
+              ? 'withdrawal_completed' 
+              : withdrawal.status === 'rejected' 
+                ? 'withdrawal_unlocked' 
+                : 'withdrawal_locked';
+            
+            // Find matching transaction by amount and type
+            const matchingTransaction = transactions.find(t => 
+              t.type === type && 
+              Math.abs(t.amount) === withdrawal.amount_cents
+            );
+            
+            if (matchingTransaction) {
+              setExpandedWithdrawals(new Set([matchingTransaction.id]));
+              hasScrolledToTransaction.current = true;
+              // Store the transaction id for highlighting
+              setHighlightedOrderId(matchingTransaction.id);
+              setTimeout(() => {
+                highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
+            }
+          }
+        };
+        matchWithdrawal();
       }
     }
-  }, [highlightedOrderId, loading, transactions]);
+  }, [highlightedOrderId, highlightedWithdrawalId, loading, transactions]);
 
   // Calculate earned credits from order_payout transactions
   const earnedCredits = transactions
@@ -894,10 +943,16 @@ export function CreditHistoryView() {
                 
                 // Expandable card for completed withdrawals
                 if (isWithdrawalCompleted) {
+                  const isHighlighted = highlightedOrderId === transaction.id;
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      ref={isHighlighted ? highlightedTransactionRef : undefined}
+                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                        isHighlighted 
+                          ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
+                          : 'border-border hover:border-[#4771d9]'
+                      }`}
                       onClick={() => toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type)}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
@@ -1003,10 +1058,16 @@ export function CreditHistoryView() {
                 
                 // Expandable card for rejected withdrawals
                 if (isWithdrawalRejected) {
+                  const isHighlighted = highlightedOrderId === transaction.id;
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      ref={isHighlighted ? highlightedTransactionRef : undefined}
+                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                        isHighlighted 
+                          ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
+                          : 'border-border hover:border-[#4771d9]'
+                      }`}
                       onClick={() => toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type)}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
