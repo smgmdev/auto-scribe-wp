@@ -62,11 +62,8 @@ export function ExploreNetworkGrid() {
       <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2 text-center">
         Do More.<br /><span className="font-normal text-muted-foreground">Grow with Arcana Mace network.</span>
       </h2>
-      <p className="text-muted-foreground text-sm mb-6 text-center">
-        Click any publication to learn more about placement options.
-      </p>
       
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 justify-center">
         {mediaSites.map((site) => (
           <button
             key={site.id}
@@ -87,6 +84,10 @@ export function ExploreNetworkGrid() {
           </button>
         ))}
       </div>
+
+      <p className="text-muted-foreground text-sm mt-6 text-center">
+        When you join Arcana Mace you can promote your own worldwide media options.
+      </p>
 
       <MediaSiteDialog
         mediaSite={selectedSite}
