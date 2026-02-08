@@ -441,52 +441,54 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
-      {/* Hero Section Container */}
-      <div className="relative">
-        {/* Sticky Video that stays in place while scrolling */}
-        <div className="sticky top-0 h-[80vh] overflow-hidden -z-10">
-          <video 
-            src={agencyHeroVideo} 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Text Overlay on Video */}
-          <div className="absolute inset-0 flex items-center pb-32">
-            <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
-              <div className="max-w-xl">
-                <img 
-                  src="/favicon.png" 
-                  alt="Arcana Mace" 
-                  className="h-10 w-10 mb-4 brightness-0 invert"
-                />
-                <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-                  Upgrade to Agency
-                </h1>
-                <p className="mt-3 text-white/80 text-base lg:text-lg">
-                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
-                </p>
-                <Button 
-                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-                  onClick={() => setDialogOpen(true)}
-                  disabled={existingApplication?.status === 'pending'}
-                >
-                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-                </Button>
-              </div>
+    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full">
+      {/* Video Background - Sticky so it stays in place */}
+      <div className="sticky top-0 h-[80vh] overflow-hidden" style={{ zIndex: -1 }}>
+        <video 
+          src={agencyHeroVideo} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Text Overlay on Video */}
+        <div className="absolute inset-0 flex items-center pb-32">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
+            <div className="max-w-xl">
+              <img 
+                src="/favicon.png" 
+                alt="Arcana Mace" 
+                className="h-10 w-10 mb-4 brightness-0 invert"
+              />
+              <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
+                Upgrade to Agency
+              </h1>
+              <p className="mt-3 text-white/80 text-base lg:text-lg">
+                Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+              </p>
+              <Button 
+                className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                onClick={() => setDialogOpen(true)}
+                disabled={existingApplication?.status === 'pending'}
+              >
+                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content that scrolls over the video */}
-        <div className="relative bg-white -mt-16">
-          {/* Dark gradient transition at top */}
-          <div className="absolute -top-32 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-black/50 pointer-events-none" />
-          
+      {/* Content that scrolls over the video */}
+      <div className="relative bg-white" style={{ marginTop: '-80vh' }}>
+        {/* Spacer to push content down initially */}
+        <div className="h-[70vh]" />
+        
+        {/* Dark gradient transition */}
+        <div className="h-24 bg-gradient-to-b from-black/50 via-black/30 to-white" />
+        
+        <div className="bg-white">
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
