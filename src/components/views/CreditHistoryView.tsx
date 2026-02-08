@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,9 +31,12 @@ interface LockedOrder {
 
 export function CreditHistoryView() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId } = useAppStore();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const highlightedTransactionRef = useRef<HTMLDivElement>(null);
+  const hasScrolledToTransaction = useRef(false);
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [creditsInUse, setCreditsInUse] = useState<number>(0);
@@ -47,6 +51,35 @@ export function CreditHistoryView() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [expandedWithdrawals, setExpandedWithdrawals] = useState<Set<string>>(new Set());
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
+  const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
+
+  // Handle transaction query param for deep linking
+  useEffect(() => {
+    const transactionOrderId = searchParams.get('transaction');
+    if (transactionOrderId && !hasScrolledToTransaction.current) {
+      setHighlightedOrderId(transactionOrderId);
+      // Clear the query param after reading
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('transaction');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Scroll to and expand the highlighted transaction once data is loaded
+  useEffect(() => {
+    if (highlightedOrderId && !loading && transactions.length > 0 && !hasScrolledToTransaction.current) {
+      // Find the transaction with this order_id and expand it
+      const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
+      if (transaction) {
+        setExpandedWithdrawals(new Set([transaction.id]));
+        hasScrolledToTransaction.current = true;
+        // Scroll after a short delay to allow DOM to update
+        setTimeout(() => {
+          highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  }, [highlightedOrderId, loading, transactions]);
 
   // Calculate earned credits from order_payout transactions
   const earnedCredits = transactions
@@ -1088,10 +1121,16 @@ export function CreditHistoryView() {
                 
                 // Expandable card for earnings with platform fee
                 if (isEarnings && platformFee !== null) {
+                  const isHighlighted = transaction.order_id === highlightedOrderId;
                   return (
                     <div
                       key={transaction.id}
-                      className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden cursor-pointer"
+                      ref={isHighlighted ? highlightedTransactionRef : undefined}
+                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                        isHighlighted 
+                          ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
+                          : 'border-border hover:border-[#4771d9]'
+                      }`}
                       onClick={() => {
                         const newExpanded = new Set(expandedWithdrawals);
                         if (newExpanded.has(transaction.id)) {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +47,7 @@ interface WithdrawalRequest {
 
 export function AgencyPayoutsView() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { openGlobalChat } = useAppStore();
   const [completedOrders, setCompletedOrders] = useState<CompletedOrder[]>([]);
   const [summary, setSummary] = useState<EarningsSummary>({
@@ -659,6 +661,15 @@ export function AgencyPayoutsView() {
                             ) : null}
                             View order details
                             <ExternalLink className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1 w-fit"
+                          >
+                            See transaction details
                           </button>
                           <p className="text-xs text-muted-foreground">
                             Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
