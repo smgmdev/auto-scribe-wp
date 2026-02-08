@@ -571,7 +571,7 @@ export function AdminEngagementsView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-2 max-w-md rounded-none">
           <TabsTrigger value="active" className="relative">
             Active ({activeRequests.length})
             {activeRequests.filter(r => !r.read).length > 0 && (
@@ -590,7 +590,7 @@ export function AdminEngagementsView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="mt-2">
+        <TabsContent value="active" className="mt-0">
           {activeRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No active engagements</CardContent></Card>
           ) : (
@@ -664,9 +664,9 @@ export function AdminEngagementsView() {
           )}
         </TabsContent>
 
-        <TabsContent value="closed" className="mt-2">
+        <TabsContent value="closed" className="mt-0">
           <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
-            <TabsList className="grid w-full grid-cols-2 max-w-xs">
+            <TabsList className="grid w-full grid-cols-2 max-w-xs rounded-none">
               <TabsTrigger value="delivered" className="relative">
                 Delivered ({deliveredRequests.length})
                 {deliveredRequests.filter(r => !r.read).length > 0 && (
@@ -685,7 +685,7 @@ export function AdminEngagementsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="delivered" className="mt-2">
+            <TabsContent value="delivered" className="mt-0">
               {deliveredRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No delivered engagements</CardContent></Card>
               ) : (
@@ -746,7 +746,7 @@ export function AdminEngagementsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-2">
+            <TabsContent value="cancelled" className="mt-0">
               {cancelledRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
               ) : (
