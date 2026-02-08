@@ -913,7 +913,7 @@ export function AdminUsersView() {
           </TabsList>
         </Tabs>
 
-      <div className="mt-4">
+      <div className="mt-6">
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -938,10 +938,10 @@ export function AdminUsersView() {
             const isExpanded = expandedUsers.has(user.id);
             
             return (
-              <Card key={user.id} id={`user-card-${user.id}`} className="group">
+              <Card key={user.id} id={`user-card-${user.id}`} className="group rounded-none">
                 <CardContent className="p-4">
                   <div 
-                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
+                    className="cursor-pointer group-hover:bg-muted/50 transition-colors -m-4 p-4"
                     onClick={() => toggleUserExpand(user.id)}
                   >
                     {/* Desktop layout */}
