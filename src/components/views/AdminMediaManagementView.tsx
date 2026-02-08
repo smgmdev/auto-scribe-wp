@@ -2187,9 +2187,9 @@ export function AdminMediaManagementView() {
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
                                             </div>
-                                            {/* Agency info on mobile */}
+                                            {/* Format info on mobile */}
                                             <p className="text-xs text-muted-foreground md:hidden truncate">
-                                              {site.agency ? `via ${site.agency}` : site.publication_format}
+                                              {site.publication_format || (site.agency ? `via ${site.agency}` : '')}
                                             </p>
                                             {/* Arrow in bottom-right corner on mobile */}
                                             <div className="flex md:hidden justify-end -mb-3">
