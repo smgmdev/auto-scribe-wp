@@ -46,7 +46,7 @@ const stats = [{
   label: 'Published Articles',
   icon: FileText,
   key: 'published',
-  tooltip: 'Published Articles refer to self published articles via Instant Publishing Library.',
+  tooltip: 'Published Articles refer to self published articles via Instant Publishing using media from Local Library.',
   clickable: true
 }, {
   label: 'Draft Articles',
