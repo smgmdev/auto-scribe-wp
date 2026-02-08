@@ -699,7 +699,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Credits locked in active orders.</TooltipContent>
+                                      <TooltipContent>Credits locked in active orders/withdrawals.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
