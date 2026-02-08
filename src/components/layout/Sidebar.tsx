@@ -49,10 +49,10 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       label: 'Agency Management',
       icon: Briefcase,
       submenu: [
+        { id: 'my-agency', label: 'My Agency', icon: Building2 },
         { id: 'agency-media', label: 'My Media', icon: Library },
         { id: 'agency-requests', label: 'Client Requests', icon: ClipboardList },
-        { id: 'agency-payouts', label: 'My Earnings', icon: Wallet },
-        { id: 'my-agency', label: 'My Agency', icon: Building2 }
+        { id: 'agency-payouts', label: 'My Earnings', icon: Wallet }
       ]
     });
   }
