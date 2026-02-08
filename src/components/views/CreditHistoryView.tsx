@@ -97,7 +97,7 @@ export function CreditHistoryView() {
         const matchWithdrawal = async () => {
           const { data: withdrawal } = await supabase
             .from('agency_withdrawals')
-            .select('amount_cents, status')
+            .select('*')
             .eq('id', highlightedWithdrawalId)
             .single();
           
@@ -115,6 +115,11 @@ export function CreditHistoryView() {
             );
             
             if (matchingTransaction) {
+              // Store the withdrawal details so it doesn't show "Loading..."
+              setWithdrawalDetails(prev => ({
+                ...prev,
+                [matchingTransaction.id]: withdrawal
+              }));
               setExpandedWithdrawals(new Set([matchingTransaction.id]));
               hasScrolledToTransaction.current = true;
               // Store the transaction id for highlighting
