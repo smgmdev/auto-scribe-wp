@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Info } from 'lucide-react';
 import { useSites } from '@/hooks/useSites';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -235,16 +234,13 @@ export function SettingsView() {
             </Select>
 
             <div className="rounded-lg bg-muted/50 p-4">
-              <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">About Article Tones</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    The tone setting influences the writing style and vocabulary used by the AI.
-                    Political articles focus on policy analysis, while financial content emphasizes
-                    market data and economic indicators.
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm font-medium">About Article Tones</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  The tone setting influences the writing style and vocabulary used by the AI.
+                  Political articles focus on policy analysis, while financial content emphasizes
+                  market data and economic indicators.
+                </p>
               </div>
             </div>
           </CardContent>
