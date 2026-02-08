@@ -382,11 +382,11 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         <div className="bg-background">
           <Table>
             <TableHeader>
-              <TableRow className="h-8">
-                <TableHead className="w-10 py-1"></TableHead>
-                <TableHead className="py-1">Type</TableHead>
-                <TableHead className="py-1">Description</TableHead>
-                <TableHead className="text-right py-1">Amount</TableHead>
+              <TableRow className="h-6">
+                <TableHead className="w-10 py-0"></TableHead>
+                <TableHead className="py-0">Type</TableHead>
+                <TableHead className="py-0">Description</TableHead>
+                <TableHead className="text-right py-0">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
