@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/collapsible';
 import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
 import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
+import agencyHeroImage from '@/assets/agency-hero.jpg';
 
 const faqItems = [
   {
@@ -455,14 +456,27 @@ export function AgencyApplicationView() {
           <p className="mt-4 text-muted-foreground">
             Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
           </p>
-          <Button 
-            className={`mt-4 shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
-            onClick={() => setDialogOpen(true)}
-            disabled={existingApplication?.status === 'pending'}
-          >
-            {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-          </Button>
         </div>
+      </div>
+
+      {/* Hero Image Section */}
+      <div className="w-full overflow-hidden rounded-2xl">
+        <img 
+          src={agencyHeroImage} 
+          alt="Professional team collaborating" 
+          className="w-full h-auto object-cover"
+        />
+      </div>
+
+      {/* Start Application Button */}
+      <div className="text-center">
+        <Button 
+          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+          onClick={() => setDialogOpen(true)}
+          disabled={existingApplication?.status === 'pending'}
+        >
+          {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+        </Button>
       </div>
 
       <ExploreNetworkGrid />
