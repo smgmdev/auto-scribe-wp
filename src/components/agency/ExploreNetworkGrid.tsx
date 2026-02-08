@@ -32,7 +32,7 @@ export function ExploreNetworkGrid() {
         .from('media_sites')
         .select('*')
         .not('favicon', 'is', null)
-        .limit(21);
+        .limit(24);
 
       if (!error && data) {
         setMediaSites(data);
