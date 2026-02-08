@@ -84,7 +84,7 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
             <Button 
               variant="ghost" 
               onClick={onCancel} 
-              className="w-full"
+              className="w-full hover:bg-foreground hover:text-background"
               disabled={isVerifying}
             >
               Sign out
