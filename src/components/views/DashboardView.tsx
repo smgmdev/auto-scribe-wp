@@ -725,7 +725,7 @@ export function DashboardView() {
                     <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Pending</span>
+                        <span className="text-[10px] uppercase tracking-tight text-muted-foreground font-medium font-body">Pending Withdrawals</span>
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
                         ) : (
@@ -766,7 +766,7 @@ export function DashboardView() {
                     <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Completed</span>
+                        <span className="text-[10px] uppercase tracking-tight text-muted-foreground font-medium font-body">Completed Withdrawals</span>
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
                         ) : (
