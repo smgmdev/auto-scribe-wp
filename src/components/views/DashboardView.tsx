@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
+import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { isYesterday, format } from 'date-fns';
 
@@ -75,6 +76,18 @@ export function DashboardView() {
   const [isAgency, setIsAgency] = useState<boolean | null>(null);
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  
+  // Agency summary data
+  const [agencySummary, setAgencySummary] = useState({
+    walletBalance: 0,
+    totalSales: 0,
+    loading: true
+  });
+  
+  // User credits
+  const [userCredits, setUserCredits] = useState<number | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(true);
 
   const agencyStatusLoading = isAgency === null && !isAdmin;
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
@@ -96,6 +109,100 @@ export function DashboardView() {
 
     fetchAgencyStatus();
   }, [user, isAdmin]);
+
+  // Fetch user credits
+  useEffect(() => {
+    const fetchUserCredits = async () => {
+      if (!user) return;
+      setCreditsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('user_credits')
+        .select('credits')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (!error) {
+        setUserCredits(data?.credits || 0);
+      }
+      setCreditsLoading(false);
+    };
+
+    fetchUserCredits();
+  }, [user]);
+
+  // Fetch agency summary data (wallet balance and total sales)
+  useEffect(() => {
+    const fetchAgencySummary = async () => {
+      if (!user || !isAgency) {
+        setAgencySummary(prev => ({ ...prev, loading: false }));
+        return;
+      }
+      
+      // Get the agency_payout_id for this user
+      const { data: agencyPayout } = await supabase
+        .from('agency_payouts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('onboarding_complete', true)
+        .maybeSingle();
+      
+      if (!agencyPayout) {
+        setAgencySummary(prev => ({ ...prev, loading: false }));
+        return;
+      }
+
+      // Fetch completed orders for this agency (total sales and earnings)
+      const { data: orders } = await supabase
+        .from('service_requests')
+        .select(`
+          order:orders!inner(
+            agency_payout_cents,
+            delivery_status
+          )
+        `)
+        .eq('agency_payout_id', agencyPayout.id);
+
+      let totalEarnings = 0;
+      let totalSales = 0;
+      
+      if (orders) {
+        orders.forEach((req: any) => {
+          if (req.order?.delivery_status === 'completed') {
+            totalEarnings += (req.order.agency_payout_cents || 0) / 100;
+            totalSales += (req.order.agency_payout_cents || 0) / 100;
+          }
+        });
+      }
+
+      // Fetch withdrawals to calculate wallet balance
+      const { data: withdrawals } = await supabase
+        .from('agency_withdrawals')
+        .select('amount_cents, status')
+        .eq('user_id', user.id);
+
+      let completedWithdrawals = 0;
+      if (withdrawals) {
+        withdrawals.forEach(w => {
+          if (w.status === 'completed' || w.status === 'approved') {
+            completedWithdrawals += (w.amount_cents || 0) / 100;
+          }
+        });
+      }
+
+      const walletBalance = totalEarnings - completedWithdrawals;
+
+      setAgencySummary({
+        walletBalance,
+        totalSales,
+        loading: false
+      });
+    };
+
+    if (isAgency !== null) {
+      fetchAgencySummary();
+    }
+  }, [user, isAgency]);
 
   useEffect(() => {
     const fetchGlobalLibraryCount = async () => {
@@ -252,6 +359,87 @@ export function DashboardView() {
         })}
       </div>
 
+      {/* Agency & Credit Summary (only for agency users) */}
+      {isAgency && (
+        <div className="grid gap-2 md:grid-cols-2">
+          {/* Agency Summary */}
+          <Card className="border-border/50 bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Wallet className="h-4 w-4" />
+                Agency Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Wallet Balance</span>
+                {agencySummary.loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="font-semibold">${agencySummary.walletBalance.toFixed(2)}</span>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total Sales</span>
+                {agencySummary.loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="font-semibold">${agencySummary.totalSales.toFixed(2)}</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
+                  <ArrowRight className="mr-2 h-3 w-3" />
+                  My Earnings
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
+                  <ArrowRight className="mr-2 h-3 w-3" />
+                  My Media
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
+                  <ArrowRight className="mr-2 h-3 w-3" />
+                  My Agency
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Credit Summary */}
+          <Card className="border-border/50 bg-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Coins className="h-4 w-4" />
+                Credit Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Available Credits</span>
+                {creditsLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="font-semibold">{userCredits || 0}</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => setBuyCreditsOpen(true)}
+                >
+                  <ArrowRight className="mr-2 h-3 w-3" />
+                  Buy Credits
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('credit-history')}>
+                  <ArrowRight className="mr-2 h-3 w-3" />
+                  Credit History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Instant Publishing & B2B Media Buying */}
       <div className="grid gap-2 md:grid-cols-2">
@@ -400,6 +588,12 @@ export function DashboardView() {
           <LatestGlobalArticles />
         </CardContent>
       </Card>
+
+      {/* Buy Credits Dialog */}
+      <BuyCreditsDialog 
+        open={buyCreditsOpen} 
+        onOpenChange={setBuyCreditsOpen} 
+      />
 
     </div>;
 }
