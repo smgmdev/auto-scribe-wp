@@ -306,18 +306,18 @@ export const AdminCreditManagementView = () => {
       </div>
 
       <div className="space-y-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 md:border">
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Total Users
                     </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground/60" />
+                    <Users className="h-4 w-4 text-white/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                    <div className="text-xl md:text-2xl font-semibold text-foreground">{activeUsers.length.toLocaleString()}</div>
+                    <div className="text-xl md:text-2xl font-semibold text-white">{activeUsers.length.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -328,15 +328,15 @@ export const AdminCreditManagementView = () => {
 
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 md:border">
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Users with Credits
                     </CardTitle>
-                    <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                    <CreditCard className="h-4 w-4 text-white/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                    <div className="text-xl md:text-2xl font-semibold text-foreground">{usersWithCredits.toLocaleString()}</div>
+                    <div className="text-xl md:text-2xl font-semibold text-white">{usersWithCredits.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
@@ -347,15 +347,15 @@ export const AdminCreditManagementView = () => {
 
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 md:border">
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Total Available Credits
                     </CardTitle>
-                    <CreditCard className="h-4 w-4 text-muted-foreground/60" />
+                    <CreditCard className="h-4 w-4 text-white/60" />
                   </CardHeader>
                   <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                    <div className="text-xl md:text-2xl font-semibold text-foreground">{totalCredits.toLocaleString()}</div>
+                    <div className="text-xl md:text-2xl font-semibold text-white">{totalCredits.toLocaleString()}</div>
                   </CardContent>
                 </Card>
               </TooltipTrigger>
