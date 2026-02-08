@@ -542,8 +542,11 @@ export function AdminAgencyWithdrawalsView() {
                   return (
                     <div 
                       key={withdrawal.id}
-                      className={`rounded-lg border transition-colors overflow-hidden ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border hover:border-[#4771d9]'}`}
-                      onClick={() => !withdrawal.read && markAsRead(withdrawal.id)}
+                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${expandedCards[withdrawal.id] ? 'border-[#4771d9]' : ''} ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border hover:border-[#4771d9]'}`}
+                      onClick={() => {
+                        if (!withdrawal.read) markAsRead(withdrawal.id);
+                        toggleCardExpansion(withdrawal.id);
+                      }}
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                         <div className="flex items-start gap-3">
@@ -644,20 +647,6 @@ export function AdminAgencyWithdrawalsView() {
                                   Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                               )}
-                              {/* See Details for completed/rejected - collapsible */}
-                              {withdrawal.status !== 'pending' && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); toggleCardExpansion(withdrawal.id); }}
-                                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline transition-colors mt-1 w-fit"
-                                >
-                                  <span>See details</span>
-                                  {expandedCards[withdrawal.id] ? (
-                                    <ChevronUp className="h-3 w-3" />
-                                  ) : (
-                                    <ChevronDown className="h-3 w-3" />
-                                  )}
-                                </button>
-                              )}
                             </div>
                             
                             {/* Action Buttons for pending */}
@@ -695,8 +684,8 @@ export function AdminAgencyWithdrawalsView() {
                         </div>
                       </div>
                       
-                      {/* Expanded Details for completed/rejected */}
-                      {withdrawal.status !== 'pending' && expandedCards[withdrawal.id] && (
+                      {/* Expanded Details */}
+                      {expandedCards[withdrawal.id] && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                           <div className="pt-2 space-y-2">
                             {withdrawal.admin_notes && (
