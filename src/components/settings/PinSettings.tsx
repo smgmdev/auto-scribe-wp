@@ -200,7 +200,7 @@ export function PinSettings() {
             disabled={saving}
             variant="outline"
             size="sm"
-            className="text-destructive hover:text-destructive"
+            className="text-accent hover:bg-transparent hover:text-destructive hover:border-destructive"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
