@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, CheckCircle, Clock, Search, RefreshCw, Info, Copy } from 'lucide-react';
+import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -338,7 +338,6 @@ export function AdminAgencyWithdrawalsView() {
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Pending
                 </CardTitle>
-                <Clock className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">{pendingCount}</div>
@@ -357,10 +356,9 @@ export function AdminAgencyWithdrawalsView() {
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Pending Amount
                 </CardTitle>
-                <Wallet className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-amber-600">
+                <div className="text-2xl font-semibold text-foreground">
                   ${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -371,18 +369,18 @@ export function AdminAgencyWithdrawalsView() {
               <p className="font-medium">Total pending withdrawal amount:</p>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total:</span>
-                <span className="font-semibold text-amber-400">${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-semibold">${totalPending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               {pendingBankAmount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold text-amber-400">${pendingBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold">${pendingBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               {pendingCryptoAmount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold text-amber-400">${pendingCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold">${pendingCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
             </div>
@@ -396,7 +394,6 @@ export function AdminAgencyWithdrawalsView() {
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Completed Withdrawals
                 </CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
                 <div className="text-2xl font-semibold text-foreground">{completedCount}</div>
@@ -408,18 +405,18 @@ export function AdminAgencyWithdrawalsView() {
               <p className="font-medium">Total number of completed withdrawals:</p>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total:</span>
-                <span className="font-semibold text-green-400">{completedCount}</span>
+                <span className="font-semibold">{completedCount}</span>
               </div>
               {completedBankCount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold text-green-400">{completedBankCount}</span>
+                  <span className="font-semibold">{completedBankCount}</span>
                 </div>
               )}
               {completedCryptoCount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold text-green-400">{completedCryptoCount}</span>
+                  <span className="font-semibold">{completedCryptoCount}</span>
                 </div>
               )}
             </div>
@@ -433,10 +430,9 @@ export function AdminAgencyWithdrawalsView() {
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Total Withdrawals
                 </CardTitle>
-                <Wallet className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-green-600">
+                <div className="text-2xl font-semibold text-foreground">
                   ${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -447,18 +443,18 @@ export function AdminAgencyWithdrawalsView() {
               <p className="font-medium">Total withdrawal amount:</p>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total:</span>
-                <span className="font-semibold text-green-400">${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-semibold">${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               {completedBankAmount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold text-green-400">${completedBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold">${completedBankAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               {completedCryptoAmount > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold text-green-400">${completedCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-semibold">${completedCryptoAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
             </div>
