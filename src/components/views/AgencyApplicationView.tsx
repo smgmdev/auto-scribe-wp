@@ -79,7 +79,7 @@ interface CustomVerification {
   admin_notes: string | null;
 }
 
-function AgencyFAQ() {
+function AgencyFAQ({ dark = false }: { dark?: boolean }) {
   const [openItems, setOpenItems] = useState<number[]>([]);
 
   const toggleItem = (index: number) => {
@@ -92,8 +92,8 @@ function AgencyFAQ() {
 
   return (
     <div className="rounded-lg p-6">
-      <h2 className="text-3xl font-bold text-foreground text-center mb-8">Questions? Answers.</h2>
-      <div className="divide-y divide-border">
+      <h2 className={`text-3xl font-bold text-center mb-8 ${dark ? 'text-white' : 'text-foreground'}`}>Questions? Answers.</h2>
+      <div className={`divide-y ${dark ? 'divide-white/20' : 'divide-border'}`}>
         {faqItems.map((item, index) => (
           <Collapsible
             key={index}
@@ -101,16 +101,16 @@ function AgencyFAQ() {
             onOpenChange={() => toggleItem(index)}
           >
             <CollapsibleTrigger className="group flex w-full items-center justify-between py-4 text-left">
-              <span className="font-semibold text-foreground text-base pr-4">{item.question}</span>
+              <span className={`font-semibold text-base pr-4 ${dark ? 'text-white' : 'text-foreground'}`}>{item.question}</span>
               <ChevronDown 
-                className={`h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-200 ${
-                  openItems.includes(index) ? 'rotate-180' : ''
-                }`} 
+                className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${
+                  dark ? 'text-white/50' : 'text-muted-foreground'
+                } ${openItems.includes(index) ? 'rotate-180' : ''}`} 
               />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="pb-4">
-                <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
+                <p className={`leading-relaxed ${dark ? 'text-white/70' : 'text-muted-foreground'}`}>{item.answer}</p>
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -496,10 +496,11 @@ export function AgencyApplicationView() {
 
         <AgencyWorkBanner />
 
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 lg:pb-12 space-y-8">
-        <ConnectEarnCarousel />
+        <div className="bg-[#1d1d1f] pt-8 pb-8 lg:pb-12">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 space-y-8">
+            <ConnectEarnCarousel />
 
-        <AgencyFAQ />
+            <AgencyFAQ dark />
 
       {/* Show existing application status card */}
       {existingApplication && (
@@ -580,6 +581,7 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
+          </div>
         </div>
         
         </div>
