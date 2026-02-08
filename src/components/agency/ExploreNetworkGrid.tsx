@@ -58,7 +58,7 @@ export function ExploreNetworkGrid() {
   }
 
   return (
-    <section className="py-8">
+    <section className="py-8 px-6">
       <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
         Even more. <span className="font-normal text-muted-foreground">Explore our network.</span>
       </h2>
