@@ -1001,7 +1001,7 @@ export function AdminOrdersView() {
           placeholder="Search by site, order number..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 h-9 text-sm rounded-none"
+          className="w-full pl-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/60 border-black"
         />
         {searchQuery && (
           <Button
@@ -1015,9 +1015,9 @@ export function AdminOrdersView() {
         )}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto md:inline-flex md:w-auto scrollbar-hide justify-start rounded-none">
-          <TabsTrigger value="pending" className="relative">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none">
+          <TabsTrigger value="pending" className="relative flex-1">
             Active Orders ({pendingCount})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
@@ -1025,7 +1025,7 @@ export function AdminOrdersView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="disputes" className="relative">
+          <TabsTrigger value="disputes" className="relative flex-1">
             Open Disputes ({disputesCount})
             {unreadDisputesCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
@@ -1033,10 +1033,10 @@ export function AdminOrdersView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="completed">
+          <TabsTrigger value="completed" className="flex-1">
             Completed ({completedCount})
           </TabsTrigger>
-          <TabsTrigger value="history">
+          <TabsTrigger value="history" className="flex-1">
             Order History ({allOrdersCount})
           </TabsTrigger>
         </TabsList>
