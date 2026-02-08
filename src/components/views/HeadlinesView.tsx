@@ -267,12 +267,12 @@ export function HeadlinesView() {
           </Card>
         ) : (
           <>
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>Last 24 hours headlines</span>
               </div>
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex gap-2 flex-wrap">
                 {allSources.map(source => {
                   const count = filteredHeadlines.filter(h => h.source === source).length;
                   if (count === 0) return null;
@@ -291,46 +291,48 @@ export function HeadlinesView() {
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => handleSelectHeadline(headline)}
               >
-                <CardContent className="flex items-start justify-between p-6">
-                  <div className="flex-1 pr-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge 
-                        variant="outline" 
-                        className={sourceColors[headline.source]}
-                      >
-                        {sourceLabels[headline.source]}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatTimeAgo(headline.publishedAt)}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
-                      {headline.title}
-                    </h3>
-                    {headline.summary && (
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                        {headline.summary}
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Badge 
+                          variant="outline" 
+                          className={sourceColors[headline.source]}
+                        >
+                          {sourceLabels[headline.source]}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(headline.publishedAt)}
+                        </span>
+                      </div>
+                      <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
+                        {headline.title}
+                      </h3>
+                      {headline.summary && (
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          {headline.summary}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-muted-foreground/70 truncate">
+                        {headline.url}
                       </p>
-                    )}
-                    <p className="mt-2 text-xs text-muted-foreground/70 truncate max-w-md">
-                      {headline.url}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      className="p-2 rounded-md hover:bg-muted transition-colors"
-                      onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
-                      title={headline.url}
-                    >
-                      <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                    </button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    </div>
+                    <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                      <button 
+                        className="p-2 rounded-md hover:bg-muted transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                        title={headline.url}
+                      >
+                        <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-accent" />
+                      </button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
