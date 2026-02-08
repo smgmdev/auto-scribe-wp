@@ -1,13 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, isYesterday } from 'date-fns';
-import Autoplay from 'embla-carousel-autoplay';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
 
 interface FeaturedImage {
   url?: string;
@@ -65,13 +59,63 @@ function formatRelativeTime(dateString: string): string {
   return format(date, 'MMM d, yyyy');
 }
 
+function ArticleCard({ article }: { article: PublishedArticle }) {
+  return (
+    <a
+      href={article.wp_link || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block h-full group flex-shrink-0 w-[280px]"
+    >
+      <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
+        {/* Featured Image */}
+        {article.featured_image?.url && (
+          <ImageWithLoader
+            src={article.featured_image.url}
+            alt={article.featured_image.alt || article.title}
+          />
+        )}
+        
+        <div className="p-4 flex flex-col flex-1">
+          {/* Site info */}
+          <div className="flex items-center gap-2 mb-2">
+            {article.published_to_favicon && (
+              <img
+                src={article.published_to_favicon}
+                alt=""
+                className="h-4 w-4 rounded-sm object-contain"
+              />
+            )}
+            {article.published_to_name && (
+              <span className="text-xs text-muted-foreground font-medium truncate">
+                {article.published_to_name}
+              </span>
+            )}
+          </div>
+          
+          {/* Title */}
+          <h3 className="font-semibold text-foreground text-sm leading-snug line-clamp-2 flex-1 group-hover:text-primary transition-colors">
+            {article.title}
+          </h3>
+          
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">
+              {formatRelativeTime(article.created_at)}
+            </span>
+            {article.wp_link && (
+              <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+            )}
+          </div>
+        </div>
+      </div>
+    </a>
+  );
+}
+
 export function ConnectEarnCarousel() {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const autoplayPlugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })
-  );
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -127,73 +171,25 @@ export function ConnectEarnCarousel() {
     );
   }
 
+  // Duplicate articles for seamless infinite scroll
+  const duplicatedArticles = [...articles, ...articles];
+
   return (
     <section className="py-8">
       <h2 className="text-3xl font-bold text-foreground mb-6">Connect and earn</h2>
-      <Carousel
-        opts={{
-          align: 'start',
-          loop: true,
-        }}
-        plugins={[autoplayPlugin.current]}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-3">
-          {articles.map((article) => (
-            <CarouselItem key={article.id} className="pl-3 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <a
-                href={article.wp_link || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block h-full group"
-              >
-                <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
-                  {/* Featured Image */}
-                  {article.featured_image?.url && (
-                    <ImageWithLoader
-                      src={article.featured_image.url}
-                      alt={article.featured_image.alt || article.title}
-                    />
-                  )}
-                  
-                  <div className="p-4 flex flex-col flex-1">
-                    {/* Site info */}
-                    <div className="flex items-center gap-2 mb-2">
-                      {article.published_to_favicon && (
-                        <img
-                          src={article.published_to_favicon}
-                          alt=""
-                          className="h-4 w-4 rounded-sm object-contain"
-                        />
-                      )}
-                      {article.published_to_name && (
-                        <span className="text-xs text-muted-foreground font-medium truncate">
-                          {article.published_to_name}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Title */}
-                    <h3 className="font-semibold text-foreground text-sm leading-snug line-clamp-2 flex-1 group-hover:text-primary transition-colors">
-                      {article.title}
-                    </h3>
-                    
-                    {/* Footer */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                      <span className="text-xs text-muted-foreground">
-                        {formatRelativeTime(article.created_at)}
-                      </span>
-                      {article.wp_link && (
-                        <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </CarouselItem>
+      
+      <div className="overflow-hidden">
+        <div 
+          className="flex gap-4 animate-marquee hover:pause"
+          style={{
+            width: 'max-content',
+          }}
+        >
+          {duplicatedArticles.map((article, index) => (
+            <ArticleCard key={`${article.id}-${index}`} article={article} />
           ))}
-        </CarouselContent>
-      </Carousel>
+        </div>
+      </div>
       
       <p className="text-muted-foreground mt-6">
         As an agency you can connect your own WordPress news site and list it on Arcana Mace. Users will pay your fee to publish articles directly on your site. Easy and smooth process.
