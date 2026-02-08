@@ -442,53 +442,52 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
-      {/* Fixed Video Background */}
-      <div className="fixed top-0 left-0 right-0 h-[80vh] overflow-hidden z-0">
-        <video 
-          src={agencyHeroVideo} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="w-full h-full object-cover"
-        />
-        
-        {/* Text Overlay on Video */}
-        <div className="absolute inset-0 flex items-center pb-32">
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full ml-[280px] lg:ml-auto">
-            <div className="max-w-xl">
-              <img 
-                src="/favicon.png" 
-                alt="Arcana Mace" 
-                className="h-10 w-10 mb-4 brightness-0 invert"
-              />
-              <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-                Upgrade to Agency
-              </h1>
-              <p className="mt-3 text-white/80 text-base lg:text-lg">
-                Become a media merchant on Arcana Mace to trade and buy media products worldwide.
-              </p>
-              <Button 
-                className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-                onClick={() => setDialogOpen(true)}
-                disabled={existingApplication?.status === 'pending'}
-              >
-                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-              </Button>
+      {/* Hero Section Container */}
+      <div className="relative">
+        {/* Sticky Video that stays in place while scrolling */}
+        <div className="sticky top-0 h-[80vh] overflow-hidden -z-10">
+          <video 
+            src={agencyHeroVideo} 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          
+          {/* Text Overlay on Video */}
+          <div className="absolute inset-0 flex items-center pb-32">
+            <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
+              <div className="max-w-xl">
+                <img 
+                  src="/favicon.png" 
+                  alt="Arcana Mace" 
+                  className="h-10 w-10 mb-4 brightness-0 invert"
+                />
+                <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
+                  Upgrade to Agency
+                </h1>
+                <p className="mt-3 text-white/80 text-base lg:text-lg">
+                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+                </p>
+                <Button 
+                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                  onClick={() => setDialogOpen(true)}
+                  disabled={existingApplication?.status === 'pending'}
+                >
+                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Spacer for the fixed video */}
-      <div className="h-[70vh]" />
-
-      {/* Content that scrolls over the video */}
-      <div className="relative z-10 bg-white">
-        {/* Dark gradient transition at top */}
-        <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-black/70 pointer-events-none" />
-        
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
+        {/* Content that scrolls over the video */}
+        <div className="relative bg-white -mt-16">
+          {/* Dark gradient transition at top */}
+          <div className="absolute -top-32 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-black/50 pointer-events-none" />
+          
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
@@ -574,6 +573,7 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
+          </div>
         </div>
       </div>
 
