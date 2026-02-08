@@ -69,7 +69,7 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
     >
       <div className="rounded-2xl bg-[#1d1d1f] overflow-hidden h-full group-hover:scale-105 transition-all duration-300 flex flex-col shadow-lg group-hover:shadow-2xl">
         {/* Header with site info */}
-        <div className="p-5 pb-3">
+        <div className="p-5">
           <div className="flex items-center gap-3 mb-3">
             {article.published_to_favicon && (
               <div className="h-10 w-10 rounded-xl overflow-hidden flex-shrink-0">
@@ -110,7 +110,7 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
         </div>
         
         {/* Footer info with Read button */}
-        <div className="px-5 pt-3 pb-5 bg-[#1d1d1f] flex items-end justify-between">
+        <div className="p-5 bg-[#1d1d1f] flex items-end justify-between">
           <div>
             <p className="text-white/40 text-xs font-medium">Published</p>
             <p className="text-white/60 text-xs">{article.published_to_name}</p>
