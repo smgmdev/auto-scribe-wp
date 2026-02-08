@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/collapsible';
 import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
 import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
-import agencyHeroImage from '@/assets/agency-hero.jpg';
+import agencyHeroVideo from '@/assets/agency-hero.mp4';
 
 const faqItems = [
   {
@@ -459,11 +459,14 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Hero Image Section */}
+      {/* Hero Video Section */}
       <div className="w-full overflow-hidden rounded-2xl">
-        <img 
-          src={agencyHeroImage} 
-          alt="Professional team collaborating" 
+        <video 
+          src={agencyHeroVideo} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
           className="w-full h-auto object-cover"
         />
       </div>
