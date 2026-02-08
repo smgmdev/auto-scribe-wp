@@ -382,7 +382,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         <div className="bg-background">
           <Table>
             <TableHeader>
-              <TableRow className="h-6 !border-b !border-foreground/20">
+              <TableRow className="h-6 !border-b border-border">
                 <TableHead className="w-10 py-0"></TableHead>
                 <TableHead className="py-0">Type</TableHead>
                 <TableHead className="py-0">Description</TableHead>
