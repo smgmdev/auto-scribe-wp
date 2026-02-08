@@ -446,7 +446,7 @@ export function AgencyApplicationView() {
           <img 
             src="/favicon.png" 
             alt="Arcana Mace" 
-            className="h-12 w-12 mx-auto mb-4"
+            className="h-12 w-12 mx-auto mb-8"
           />
           <h1 className="text-[40px] font-bold text-foreground">
             Why Upgrade to Agency?
