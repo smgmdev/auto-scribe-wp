@@ -688,7 +688,7 @@ export const AdminCreditManagementView = () => {
                               <TableCell colSpan={3} className="p-0">
                                 <div className="bg-muted/30 p-4">
                                   {/* Stats row above tabs */}
-                                  <div className="grid grid-cols-6 gap-4 mb-4">
+                                  <div className="grid grid-cols-5 gap-4 mb-4">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
@@ -728,15 +728,6 @@ export const AdminCreditManagementView = () => {
                                           <p><span className="opacity-70">Purchased via invoice:</span> {(user.purchasedInvoice || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip delayDuration={100}>
-                                      <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Deductions</p>
-                                          <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Administration fees.</TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
