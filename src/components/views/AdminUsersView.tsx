@@ -933,7 +933,7 @@ export function AdminUsersView() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-0">
           {filteredUsers.map((user) => {
             const isExpanded = expandedUsers.has(user.id);
             
