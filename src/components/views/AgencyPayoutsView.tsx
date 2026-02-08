@@ -607,9 +607,9 @@ export function AgencyPayoutsView() {
                       <div 
                         key={`withdrawal-${withdrawal.id}`}
                         onClick={() => toggleCardExpand(`withdrawal-${withdrawal.id}`)}
-                        className={`rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-muted-foreground/50' : ''}`}
+                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
                       >
-                        <div className="relative p-4">
+                        <div className="relative p-3">
                           <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
                             {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
@@ -635,7 +635,7 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="px-3 pb-3 pt-0 border-t border-border bg-muted/30">
                             <div className="pt-2 space-y-3 text-sm">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                 <div>
@@ -684,9 +684,9 @@ export function AgencyPayoutsView() {
                       <div 
                         key={`order-${order.id}`}
                         onClick={() => toggleCardExpand(`order-${order.id}`)}
-                        className={`rounded-lg border border-border/50 hover:border-primary transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-primary' : ''}`}
+                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
                       >
-                        <div className="relative p-4">
+                        <div className="relative p-3">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
                             +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
@@ -722,7 +722,7 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="px-3 pb-3 pt-0 border-t border-border bg-muted/30">
                             <div className="pt-2 space-y-3 text-sm">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                 <div>
