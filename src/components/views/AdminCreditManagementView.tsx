@@ -331,7 +331,7 @@ export const AdminCreditManagementView = () => {
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Withdrawals:</span>
-                        <span className="font-semibold text-red-400">-{Math.round(totalWithdrawn).toLocaleString()}</span>
+                        <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${Math.round(totalWithdrawn).toLocaleString()}` : '0'}</span>
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Total Purchased:</span>
