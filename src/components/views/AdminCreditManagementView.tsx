@@ -734,7 +734,6 @@ export const AdminCreditManagementView = () => {
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
-                                          <p className="font-medium mb-1">Total purchased credits</p>
                                           <p><span className="opacity-70">Purchased via online:</span> {(user.purchasedOnline || 0).toLocaleString()}</p>
                                           <p><span className="opacity-70">Purchased via invoice:</span> {(user.purchasedInvoice || 0).toLocaleString()}</p>
                                           <hr className="border-background/30 my-1" />
