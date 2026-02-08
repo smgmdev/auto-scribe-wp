@@ -7,7 +7,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from '@/components/ui/carousel';
 
 interface FeaturedImage {
@@ -69,24 +68,10 @@ function formatRelativeTime(dateString: string): string {
 export function ConnectEarnCarousel() {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
   
   const autoplayPlugin = useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: false })
   );
-
-  useEffect(() => {
-    if (!api) return;
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -146,7 +131,6 @@ export function ConnectEarnCarousel() {
     <section className="py-8">
       <h2 className="text-3xl font-bold text-foreground mb-6">Connect and earn</h2>
       <Carousel
-        setApi={setApi}
         opts={{
           align: 'start',
           loop: true,
@@ -210,24 +194,6 @@ export function ConnectEarnCarousel() {
           ))}
         </CarouselContent>
       </Carousel>
-      
-      {/* Progress Dots */}
-      {count > 0 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: count }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => api?.scrollTo(index)}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                index === current 
-                  ? 'w-6 bg-foreground' 
-                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
       
       <p className="text-muted-foreground mt-6">
         As an agency you can connect your own WordPress news site and list it on Arcana Mace. Users will pay your fee to publish articles directly on your site. Easy and smooth process.
