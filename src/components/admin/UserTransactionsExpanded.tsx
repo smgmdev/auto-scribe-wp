@@ -361,7 +361,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="py-2 bg-muted/30 border-t">
+    <div className="bg-muted/30 border-t">
       <Tabs value={activeType} onValueChange={setActiveType}>
         <TabsList className="flex flex-wrap justify-start h-auto gap-1 bg-transparent p-0 mb-4">
           {transactionTypes.map(type => {
