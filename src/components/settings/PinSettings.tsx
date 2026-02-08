@@ -270,7 +270,7 @@ export function PinSettings() {
                 setConfirmPin('');
               }}
               variant="outline"
-              className="flex-1"
+              className="flex-1 hover:bg-transparent hover:text-accent hover:border-accent"
             >
               Cancel
             </Button>
