@@ -557,25 +557,25 @@ export function AdminAllNewsView() {
           No press releases yet. Create your first one!
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-8">
           {Object.entries(groupedReleases).map(([monthYear, releases]) => (
             <div key={monthYear}>
-              <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-8">{monthYear}</h2>
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-4">{monthYear}</h2>
               
               <div className="space-y-0">
                 {releases.map((pr) => (
                   <article 
                     key={pr.id}
-                    className="group relative border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="group relative border-t border-border py-4 cursor-pointer hover:bg-muted/20 transition-colors"
                   >
                     {/* Actions Dropdown - Top Right */}
-                    <div className="absolute top-4 right-0">
+                    <div className="absolute top-2 right-0">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="hover:bg-foreground hover:text-background"
+                            className="h-8 w-8 hover:bg-foreground hover:text-background"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <MoreVertical className="h-4 w-4" />
@@ -623,11 +623,11 @@ export function AdminAllNewsView() {
                       </DropdownMenu>
                     </div>
                     
-                    <div className="flex gap-8 items-center pr-12">
+                    <div className="flex gap-4 items-center pr-10">
                       {/* Image or Logo placeholder - clickable */}
                       <div 
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
-                        className="hidden sm:block w-[200px] h-[134px] flex-shrink-0 rounded-xl overflow-hidden bg-muted"
+                        className="hidden sm:block w-[120px] h-[80px] flex-shrink-0 rounded-lg overflow-hidden bg-muted"
                       >
                         {pr.image_url ? (
                           <img 
@@ -637,7 +637,7 @@ export function AdminAllNewsView() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted">
-                            <img src={amlogo} alt="Arcana Mace" className="h-12 w-auto opacity-50" />
+                            <img src={amlogo} alt="Arcana Mace" className="h-8 w-auto opacity-50" />
                           </div>
                         )}
                       </div>
@@ -647,13 +647,13 @@ export function AdminAllNewsView() {
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
                         className="flex-1 min-w-0 cursor-pointer"
                       >
-                        <span className="text-[13px] font-bold text-muted-foreground uppercase">
+                        <span className="text-[11px] font-bold text-muted-foreground uppercase">
                           {pr.category}
                         </span>
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground mt-0.5 leading-tight">
+                        <h3 className="text-base md:text-lg font-bold text-foreground mt-0.5 leading-tight line-clamp-1">
                           {pr.title}
                         </h3>
-                        <p className="text-sm font-bold text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {format(new Date(pr.published_at || pr.created_at), 'MMMM d, yyyy')}
                         </p>
                       </div>
