@@ -24,6 +24,8 @@ interface UserCredit {
   locked: number;
   available: number;
   orders: number;
+  purchaseOrders: number;
+  deliveryOrders: number;
   totalSpent: number;
   refunded: number;
   withdrawn: number;
@@ -379,18 +381,26 @@ export const AdminCreditManagementView = () => {
         lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
       });
 
-      // Fetch completed orders to calculate total spent per user
+      // Fetch completed orders to calculate total spent per user (purchase orders)
       const { data: completedOrdersData } = await supabase
         .from('orders')
         .select('user_id, media_sites(price)')
         .eq('delivery_status', 'accepted');
 
       const totalSpentMap = new Map<string, number>();
-      const ordersMap = new Map<string, number>();
+      const purchaseOrdersMap = new Map<string, number>();
       completedOrdersData?.forEach(order => {
         const price = (order.media_sites as any)?.price || 0;
         totalSpentMap.set(order.user_id, (totalSpentMap.get(order.user_id) || 0) + price);
-        ordersMap.set(order.user_id, (ordersMap.get(order.user_id) || 0) + 1);
+        purchaseOrdersMap.set(order.user_id, (purchaseOrdersMap.get(order.user_id) || 0) + 1);
+      });
+
+      // Calculate delivery orders per agency user from order_payout transactions
+      const deliveryOrdersMap = new Map<string, number>();
+      transactionsData?.forEach(tx => {
+        if (tx.type === 'order_payout') {
+          deliveryOrdersMap.set(tx.user_id, (deliveryOrdersMap.get(tx.user_id) || 0) + 1);
+        }
       });
 
       const combined: UserCredit[] = (creditsData || []).map(credit => {
@@ -410,6 +420,8 @@ export const AdminCreditManagementView = () => {
         
         const purchasedOnline = purchasedOnlineMap.get(credit.user_id) || 0;
         const purchasedInvoice = purchasedInvoiceMap.get(credit.user_id) || 0;
+        const purchaseOrders = purchaseOrdersMap.get(credit.user_id) || 0;
+        const deliveryOrders = deliveryOrdersMap.get(credit.user_id) || 0;
         
         return {
           user_id: credit.user_id,
@@ -421,7 +433,9 @@ export const AdminCreditManagementView = () => {
           totalCredits: calculatedTotalBalance,
           locked: totalLocked,
           available: calculatedAvailable,
-          orders: ordersMap.get(credit.user_id) || 0,
+          orders: purchaseOrders + deliveryOrders,
+          purchaseOrders,
+          deliveryOrders,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
           withdrawn,
@@ -731,7 +745,13 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.orders.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Completed orders.</TooltipContent>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p className="font-medium mb-1">Completed orders</p>
+                                          <p><span className="opacity-70">Completed Purchase Orders:</span> {(user.purchaseOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Completed Agency Delivery Orders:</span> {(user.deliveryOrders || 0).toLocaleString()}</p>
+                                        </div>
+                                      </TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
