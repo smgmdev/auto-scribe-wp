@@ -442,7 +442,19 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
-      <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-4 lg:pt-8">
+      {/* Hero Video Section - Full Width */}
+      <div className="w-full">
+        <video 
+          src={agencyHeroVideo} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-auto object-cover"
+        />
+      </div>
+
+      <div className="max-w-[980px] mx-auto px-4 lg:px-8">
         <div className="rounded-lg p-6">
           <div className="text-center">
             <img 
@@ -469,18 +481,6 @@ export function AgencyApplicationView() {
             {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
           </Button>
         </div>
-      </div>
-
-      {/* Hero Video Section - Full Width */}
-      <div className="w-full">
-        <video 
-          src={agencyHeroVideo} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="w-full h-auto object-cover"
-        />
       </div>
 
       <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
