@@ -364,40 +364,45 @@ export function DashboardView() {
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary */}
           <Card className="border-border/50 bg-card">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Wallet className="h-4 w-4" />
                 Agency Summary
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Wallet Balance</span>
-                {agencySummary.loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                ) : (
-                  <span className="font-semibold">${agencySummary.walletBalance.toFixed(2)}</span>
-                )}
+            <CardContent className="space-y-4">
+              {/* Financial Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Wallet Balance</span>
+                  {agencySummary.loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <div className="text-xl md:text-2xl font-bold text-foreground">
+                      ${agencySummary.walletBalance.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Total Sales</span>
+                  {agencySummary.loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <div className="text-xl md:text-2xl font-bold text-foreground">
+                      ${agencySummary.totalSales.toFixed(2)}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Sales</span>
-                {agencySummary.loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                ) : (
-                  <span className="font-semibold">${agencySummary.totalSales.toFixed(2)}</span>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
-                  <ArrowRight className="mr-2 h-3 w-3" />
+              {/* Quick Links */}
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('agency-payouts')}>
                   My Earnings
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
-                  <ArrowRight className="mr-2 h-3 w-3" />
+                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('agency-media')}>
                   My Media
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
-                  <ArrowRight className="mr-2 h-3 w-3" />
+                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('my-agency')}>
                   My Agency
                 </Button>
               </div>
