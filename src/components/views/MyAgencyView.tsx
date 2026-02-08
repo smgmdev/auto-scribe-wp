@@ -345,13 +345,13 @@ export function MyAgencyView() {
                   <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                     <Globe className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Website</p>
                     <a 
                       href={agency.agency_website.startsWith('http') ? agency.agency_website : `https://${agency.agency_website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+                      className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
                     >
                       <span className="truncate">{agency.agency_website.replace(/^https?:\/\//, '')}</span>
                       <ExternalLink className="h-3 w-3 flex-shrink-0" />
