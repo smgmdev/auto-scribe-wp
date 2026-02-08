@@ -187,11 +187,7 @@ export function ConnectEarnCarousel() {
     <section className="py-8 px-6 overflow-hidden">
       <h2 className="text-3xl font-bold text-foreground mb-6 text-center">Connect and Earn.</h2>
       
-      <div className="relative overflow-hidden rounded-2xl">
-        {/* Left fade with inner radius */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none rounded-l-2xl" />
-        {/* Right fade with inner radius */}
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none rounded-r-2xl" />
+      <div className="relative overflow-hidden">
         
         <div 
           className="flex gap-4 animate-marquee"
