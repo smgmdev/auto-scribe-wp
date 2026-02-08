@@ -678,12 +678,12 @@ export function MediaSiteDialog({
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex justify-end gap-3 mt-6">
               <Button 
                 variant="outline" 
                 onClick={handleBack}
                 disabled={isSubmitting}
-                className="hover:bg-black hover:text-white transition-all duration-200 group flex-1 md:flex-none md:w-auto px-3"
+                className="hover:bg-black hover:text-white transition-all duration-200 group px-3"
               >
                 <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
                   <ArrowLeft className="h-4 w-4 shrink-0" />
@@ -691,7 +691,7 @@ export function MediaSiteDialog({
                 <span>Back</span>
               </Button>
               <Button 
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group flex-1 md:flex-none md:w-auto px-3 border border-transparent hover:border-black"
+                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group px-3 border border-transparent hover:border-black"
                 onClick={handleSubmit} 
                 disabled={isSubmitting || !description.trim()}
               >
