@@ -469,40 +469,40 @@ export function AdminAgencyWithdrawalsView() {
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap">
         <Button
           size="sm"
           onClick={() => setStatusFilter('all')}
-          className={statusFilter === 'all' 
+          className={`rounded-none ${statusFilter === 'all' 
             ? 'bg-foreground text-background hover:bg-foreground/90' 
-            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
         >
           All ({withdrawals.length})
         </Button>
         <Button
           size="sm"
           onClick={() => setStatusFilter('pending')}
-          className={statusFilter === 'pending' 
+          className={`rounded-none ${statusFilter === 'pending' 
             ? 'bg-amber-500 text-white hover:bg-amber-600 border border-amber-500' 
-            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
         >
           Pending ({pendingCount})
         </Button>
         <Button
           size="sm"
           onClick={() => setStatusFilter('completed')}
-          className={statusFilter === 'completed' 
+          className={`rounded-none ${statusFilter === 'completed' 
             ? 'bg-green-500 text-white hover:bg-green-600 border border-green-500' 
-            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
         >
           Completed ({completedCount})
         </Button>
         <Button
           size="sm"
           onClick={() => setStatusFilter('rejected')}
-          className={statusFilter === 'rejected' 
+          className={`rounded-none ${statusFilter === 'rejected' 
             ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive' 
-            : 'bg-transparent text-foreground border border-border hover:bg-muted'}
+            : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
         >
           Rejected ({rejectedCount})
         </Button>
@@ -515,7 +515,7 @@ export function AdminAgencyWithdrawalsView() {
           placeholder="Search by agency name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9 text-sm"
+          className="pl-9 text-sm rounded-none"
         />
       </div>
 
