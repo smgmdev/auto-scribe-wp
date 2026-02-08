@@ -1384,7 +1384,7 @@ export function AgencyRequestsView() {
 
         <TabsContent value="requests" className="mt-2">
           <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
-            <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start">
+            <TabsList className="grid w-full grid-cols-2 md:max-w-md">
               <TabsTrigger value="active" className="gap-2 relative">
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
