@@ -196,7 +196,7 @@ export function ConnectEarnCarousel() {
         </div>
       </div>
       
-      <p className="text-muted-foreground mt-6 text-sm">
+      <p className="text-muted-foreground mt-4 text-xs">
         As an agency you can connect your own WordPress news site and list it on Arcana Mace. Users will pay your fee to publish articles directly on your site. Easy and smooth process.
       </p>
     </section>
