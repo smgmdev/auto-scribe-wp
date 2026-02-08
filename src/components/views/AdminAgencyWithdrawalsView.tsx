@@ -433,12 +433,12 @@ export function AdminAgencyWithdrawalsView() {
           <TooltipTrigger asChild>
             <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#f2a547' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-black/70 uppercase tracking-wide">
                   Total Withdrawals
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-white">
+                <div className="text-2xl font-semibold text-black">
                   ${totalCompleted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
