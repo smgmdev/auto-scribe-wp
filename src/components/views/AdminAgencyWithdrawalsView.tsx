@@ -570,25 +570,23 @@ export function AdminAgencyWithdrawalsView() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1">
-                              <p className="font-medium">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                              className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                            >
+                              <span className="font-medium">
                                 {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                              </p>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                                className="text-muted-foreground hover:text-foreground transition-colors"
-                              >
-                                {loadingUserDetailsId === withdrawal.id ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Info className="h-3.5 w-3.5" />
-                                )}
-                              </button>
-                            </div>
+                              </span>
+                              {loadingUserDetailsId === withdrawal.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Info className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                             {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <p className="text-xs text-muted-foreground cursor-help underline decoration-dotted w-fit">Withdrawal via Bank Transfer</p>
+                                  <p className="text-sm text-blue-600 cursor-help underline w-fit">Withdrawal via Bank Transfer</p>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-xs">
                                   <div className="space-y-1">
@@ -609,7 +607,7 @@ export function AdminAgencyWithdrawalsView() {
                             ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <p className="text-xs text-muted-foreground cursor-help underline decoration-dotted w-fit">Withdrawal via USDT</p>
+                                  <p className="text-sm text-blue-600 cursor-help underline w-fit">Withdrawal via USDT</p>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-sm">
                                   <div className="space-y-1">
@@ -630,7 +628,7 @@ export function AdminAgencyWithdrawalsView() {
                                 </TooltipContent>
                               </Tooltip>
                             ) : (
-                              <p className="text-xs text-muted-foreground">Withdrawal via {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}</p>
+                              <p className="text-sm text-blue-600 underline">Withdrawal via {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}</p>
                             )}
                             <div className="text-lg text-foreground md:hidden mt-1">
                               ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
