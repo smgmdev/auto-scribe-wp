@@ -1,10 +1,11 @@
 import { ReactNode, useState } from 'react';
 import { Menu, Search } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
+import { useAppStore } from '@/stores/appStore';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -16,6 +17,10 @@ export function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const navigate = useNavigate();
+  const currentView = useAppStore((state) => state.currentView);
+  
+  // Check if we're on the agency application page (dark theme)
+  const isDarkFooter = currentView === 'agency-application';
 
   return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}
@@ -51,15 +56,15 @@ export function MainLayout({
         </div>
         
         {/* Global Footer */}
-        <footer className="border-t border-border/50 py-4 px-4 lg:px-8 mb-[50px]">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground">
+        <footer className={`border-t py-4 px-4 lg:px-8 mb-[50px] ${isDarkFooter ? 'bg-[#1d1d1f] border-white/20' : 'border-border/50'}`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
             <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <Link to="/terms" className="hover:text-foreground transition-colors text-left">Terms of Service</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors text-left">Privacy Policy</Link>
-              <Link to="/help" className="hover:text-foreground transition-colors text-left">Help Center</Link>
-              <Link to="/system-status" className="hover:text-foreground transition-colors text-left">System Status</Link>
-              <Link to="/sitemap" className="hover:text-foreground transition-colors text-left">Site Map</Link>
+              <Link to="/terms" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
+              <Link to="/privacy" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
+              <Link to="/help" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
+              <Link to="/system-status" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
+              <Link to="/sitemap" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
             </div>
           </div>
         </footer>
