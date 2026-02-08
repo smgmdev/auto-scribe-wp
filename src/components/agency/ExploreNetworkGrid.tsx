@@ -59,8 +59,8 @@ export function ExploreNetworkGrid() {
 
   return (
     <section className="py-8 px-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2 text-center">
-        Do More.<br /><span className="font-normal text-muted-foreground">Grow with Arcana Mace network.</span>
+      <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-center">
+        Do More. <span className="font-normal text-muted-foreground">Grow with Arcana Mace.</span>
       </h2>
       
       <div className="flex flex-wrap gap-3 justify-center">
