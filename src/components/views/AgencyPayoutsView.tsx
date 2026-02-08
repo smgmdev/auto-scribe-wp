@@ -567,11 +567,12 @@ export function AgencyPayoutsView() {
                     };
 
                     return (
-                      <div key={`withdrawal-${withdrawal.id}`}>
-                        <div 
-                          onClick={() => toggleCardExpand(`withdrawal-${withdrawal.id}`)}
-                          className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors cursor-pointer"
-                        >
+                      <div 
+                        key={`withdrawal-${withdrawal.id}`}
+                        onClick={() => toggleCardExpand(`withdrawal-${withdrawal.id}`)}
+                        className={`rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-muted-foreground/50' : ''}`}
+                      >
+                        <div className="relative p-4">
                           <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
                             -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
@@ -595,32 +596,34 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="mt-1 ml-4 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-2 animate-fade-in">
-                            <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground">
-                                <span className="text-foreground/70">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                              {withdrawal.processed_at && (
+                          <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
+                            <div className="pt-3 space-y-2">
+                              <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                  <span className="text-foreground/70">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
-                              )}
-                              {withdrawal.admin_notes && (
-                                <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">{withdrawal.status === 'rejected' ? 'Reason:' : 'Details:'}</span> {withdrawal.admin_notes}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex flex-col gap-1 pt-1 border-t border-border/30">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
-                                }}
-                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
-                              >
-                                See transaction details
-                              </button>
+                                {withdrawal.processed_at && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <span className="text-foreground/70">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                )}
+                                {withdrawal.admin_notes && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <span className="text-foreground/70">{withdrawal.status === 'rejected' ? 'Reason:' : 'Details:'}</span> {withdrawal.admin_notes}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex flex-col gap-1 pt-2 border-t border-border/30">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
+                                  }}
+                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                >
+                                  See transaction details
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -636,11 +639,12 @@ export function AgencyPayoutsView() {
                     const isExpanded = expandedCards.has(`order-${order.id}`);
 
                     return (
-                      <div key={`order-${order.id}`}>
-                        <div 
-                          onClick={() => toggleCardExpand(`order-${order.id}`)}
-                          className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
-                        >
+                      <div 
+                        key={`order-${order.id}`}
+                        onClick={() => toggleCardExpand(`order-${order.id}`)}
+                        className={`rounded-lg border border-border/50 hover:border-primary transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-primary' : ''}`}
+                      >
+                        <div className="relative p-4">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
                             +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
@@ -676,43 +680,45 @@ export function AgencyPayoutsView() {
                         
                         {/* Expanded details */}
                         {isExpanded && (
-                          <div className="mt-1 ml-4 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-2 animate-fade-in">
-                            <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground">
-                                <span className="text-foreground/70">Order Created:</span> {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                              {order.delivered_at && (
+                          <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
+                            <div className="pt-3 space-y-2">
+                              <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground">
-                                  <span className="text-foreground/70">Delivered:</span> {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                  <span className="text-foreground/70">Order Created:</span> {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
-                              )}
-                              <p className="text-xs text-muted-foreground">
-                                <span className="text-foreground/70">Completed:</span> {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-1 pt-1 border-t border-border/30">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleViewOrderDetails(order.id);
-                                }}
-                                disabled={openingChat === order.id}
-                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
-                              >
-                                {openingChat === order.id ? (
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : null}
-                                View order details
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
-                                }}
-                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
-                              >
-                                See transaction details
-                              </button>
+                                {order.delivered_at && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <span className="text-foreground/70">Delivered:</span> {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="text-foreground/70">Completed:</span> {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-1 pt-2 border-t border-border/30">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewOrderDetails(order.id);
+                                  }}
+                                  disabled={openingChat === order.id}
+                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
+                                >
+                                  {openingChat === order.id ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : null}
+                                  View order details
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
+                                  }}
+                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                >
+                                  See transaction details
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
