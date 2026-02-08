@@ -2070,13 +2070,20 @@ export function AgencyRequestsView() {
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
                               Order Completed: {format(new Date(order.accepted_at || order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
+                              {/* Desktop: inline messages count */}
                               {requestMessages.length > 0 && (
-                                <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                                <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                               )}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
+                            {/* Mobile: messages count on new row */}
+                            {requestMessages.length > 0 && (
+                              <p className="text-xs text-muted-foreground md:hidden">
+                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
+                              </p>
+                            )}
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                             {order.media_site?.publication_format && (
