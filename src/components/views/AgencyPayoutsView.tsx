@@ -534,12 +534,7 @@ export function AgencyPayoutsView() {
                   if (item.type === 'withdrawal') {
                     const withdrawal = item.data;
                     const withdrawalAmount = withdrawal.amount_cents / 100;
-                    const statusColors: Record<string, string> = {
-                      pending: 'bg-amber-500 text-white border-amber-500',
-                      approved: 'bg-green-500 text-white border-green-500',
-                      completed: 'bg-green-500 text-white border-green-500',
-                      rejected: 'bg-destructive text-destructive-foreground border-destructive'
-                    };
+                    const isExpanded = expandedCards.has(`withdrawal-${withdrawal.id}`);
 
                     const getCardIcon = () => {
                       if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
@@ -571,33 +566,52 @@ export function AgencyPayoutsView() {
                       return 'text-foreground';
                     };
 
-                    const cardContent = (
-                      <div 
-                        className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
-                      >
-                        <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
-                          -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <div className="flex items-start gap-3 md:pr-24">
-                          <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
-                            {getCardIcon()}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {getCardTitle()}
-                            </p>
-                            <div className="flex flex-col mt-1">
-                              <p className="text-xs text-muted-foreground">
+                    return (
+                      <div key={`withdrawal-${withdrawal.id}`}>
+                        <div 
+                          onClick={() => toggleCardExpand(`withdrawal-${withdrawal.id}`)}
+                          className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors cursor-pointer"
+                        >
+                          <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
+                            -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <div className="flex items-start gap-3 md:pr-24">
+                            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
+                              {getCardIcon()}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                {getCardTitle()}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
                                 Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                               </p>
+                              <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
+                                -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div className="mt-1 ml-4 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-2 animate-fade-in">
+                            <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">
-                                Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
+                                <span className="text-foreground/70">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
                               </p>
                               {withdrawal.processed_at && (
                                 <p className="text-xs text-muted-foreground">
-                                  Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                  <span className="text-foreground/70">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                               )}
+                              {withdrawal.admin_notes && (
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="text-foreground/70">{withdrawal.status === 'rejected' ? 'Reason:' : 'Details:'}</span> {withdrawal.admin_notes}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-1 pt-1 border-t border-border/30">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -607,35 +621,11 @@ export function AgencyPayoutsView() {
                               >
                                 See transaction details
                               </button>
-                              <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
-                                -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </p>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
-
-                    // Show tooltip for approved/rejected/completed with details
-                    if ((withdrawal.status === 'approved' || withdrawal.status === 'completed' || withdrawal.status === 'rejected') && withdrawal.admin_notes) {
-                      return (
-                        <Tooltip key={`withdrawal-${withdrawal.id}`} delayDuration={100}>
-                          <TooltipTrigger asChild>
-                            {cardContent}
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                            <p className="text-sm">
-                              <span className="text-white/70">
-                                {withdrawal.status === 'rejected' ? 'Reason: ' : 'Details: '}
-                              </span>
-                              {withdrawal.admin_notes}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    }
-
-                    return <div key={`withdrawal-${withdrawal.id}`}>{cardContent}</div>;
                   } else {
                     // Order card
                     const order = item.data;
