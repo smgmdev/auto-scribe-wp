@@ -1104,7 +1104,7 @@ export function SitesView() {
                 </a>
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden w-full md:w-auto"
+                  className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 overflow-hidden border border-transparent hover:border-black w-full md:w-auto justify-center"
                   onClick={() => {
                     useAppStore.getState().setPreselectedSiteId(site.id);
                     useAppStore.getState().setCurrentView('compose');
