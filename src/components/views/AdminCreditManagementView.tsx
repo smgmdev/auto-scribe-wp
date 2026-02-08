@@ -431,7 +431,7 @@ export const AdminCreditManagementView = () => {
                     placeholder="Search by email..."
                     value={balancesSearchTerm}
                     onChange={(e) => setBalancesSearchTerm(e.target.value)}
-                    className="w-full pl-10 h-9 text-sm"
+                    className="w-full pl-10 h-9 text-sm rounded-none"
                   />
                   {balancesSearchTerm && (
                     <Button
