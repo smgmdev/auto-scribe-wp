@@ -468,7 +468,7 @@ export function AdminAgencyWithdrawalsView() {
         </Tooltip>
       </div>
 
-      {/* Status Filter Tabs + Search */}
+      {/* Status Filter Tabs + Search + List */}
       <div>
         <div className="flex flex-wrap">
           <Button
