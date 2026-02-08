@@ -542,13 +542,13 @@ export function AdminAgencyWithdrawalsView() {
                   return (
                     <div 
                       key={withdrawal.id}
-                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${expandedCards[withdrawal.id] ? 'border-[#4771d9]' : ''} ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border hover:border-[#4771d9]'}`}
+                      className={`border transition-colors overflow-hidden cursor-pointer ${expandedCards[withdrawal.id] ? 'border-[#4771d9]' : ''} ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border hover:border-[#4771d9]'}`}
                       onClick={() => {
                         if (!withdrawal.read) markAsRead(withdrawal.id);
                         toggleCardExpansion(withdrawal.id);
                       }}
                     >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                      <div className="flex items-start justify-between p-3 gap-3">
                         <div className="flex items-start gap-3">
                           <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
                             {loadingLogos[withdrawal.id] ? (
@@ -570,24 +570,19 @@ export function AdminAgencyWithdrawalsView() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                                className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                              >
-                                <span className="font-medium">
-                                  {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                                </span>
-                                {loadingUserDetailsId === withdrawal.id ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Info className="h-3.5 w-3.5" />
-                                )}
-                              </button>
-                              <Badge className={statusColors[withdrawal.status]}>
-                                {statusLabels[withdrawal.status] || withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
-                              </Badge>
-                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                              className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                            >
+                              <span className="font-medium">
+                                {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
+                              </span>
+                              {loadingUserDetailsId === withdrawal.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Info className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                             <div className="text-lg text-foreground md:hidden mt-1">
                               ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
@@ -679,8 +674,13 @@ export function AdminAgencyWithdrawalsView() {
                             )}
                           </div>
                         </div>
-                        <div className="text-lg text-foreground hidden md:block">
-                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge className={`rounded-none ${statusColors[withdrawal.status]}`}>
+                            {statusLabels[withdrawal.status] || withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
+                          </Badge>
+                          <div className="text-lg text-foreground hidden md:block">
+                            ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
                         </div>
                       </div>
                       
