@@ -492,14 +492,14 @@ export const AdminCreditManagementView = () => {
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
                               <TableCell colSpan={3} className="p-0">
-                                <div className="bg-muted/30 py-1">
+                                <div className="bg-foreground py-1">
                                   {/* Stats row above tabs */}
                                   <div className="grid grid-cols-6 gap-4">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Credit Balance</p>
-                                          <p className="font-semibold text-green-600">{user.available.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Credit Balance</p>
+                                          <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
@@ -552,8 +552,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Locked</p>
-                                          <p className="font-semibold text-amber-600">{user.locked.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Locked</p>
+                                          <p className="font-semibold text-amber-400">{user.locked.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
@@ -567,8 +567,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Purchased</p>
-                                          <p className="font-semibold">{user.purchased.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Purchased</p>
+                                          <p className="font-semibold text-white">{user.purchased.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
@@ -583,8 +583,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Deductions</p>
-                                          <p className="font-semibold text-red-600">{user.deductions.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Deductions</p>
+                                          <p className="font-semibold text-red-400">{user.deductions.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent>Administration fees.</TooltipContent>
@@ -592,8 +592,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Orders</p>
-                                          <p className="font-semibold">{user.orders.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Orders</p>
+                                          <p className="font-semibold text-white">{user.orders.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
@@ -607,8 +607,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Total Spent</p>
-                                          <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Total Spent</p>
+                                          <p className="font-semibold text-white">{user.totalSpent.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent>Total amount spent on completed purchase orders.</TooltipContent>
