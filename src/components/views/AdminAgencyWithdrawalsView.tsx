@@ -597,6 +597,8 @@ export function AdminAgencyWithdrawalsView() {
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
                                 <div className="space-y-1 text-xs">
+                                  <p><span className="text-muted-foreground">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
+                                  <p><span className="text-muted-foreground">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
                                   {withdrawal.bank_details.bank_account_number && (
                                     <p><span className="text-muted-foreground">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
                                   )}
@@ -621,6 +623,7 @@ export function AdminAgencyWithdrawalsView() {
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-sm">
                                 <div className="space-y-1 text-xs">
+                                  <p><span className="text-muted-foreground">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
                                   {withdrawal.crypto_details.usdt_wallet_address && (
                                     <div className="flex items-center gap-1">
                                       <span className="text-muted-foreground">Wallet:</span>
