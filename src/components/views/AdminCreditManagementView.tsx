@@ -317,7 +317,41 @@ export const AdminCreditManagementView = () => {
                 </Card>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total credits across all user accounts</p>
+                {(() => {
+                  const totalEarned = activeUsers.reduce((sum, user) => sum + user.earned, 0);
+                  const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
+                  const totalPurchased = activeUsers.reduce((sum, user) => sum + user.purchased, 0);
+                  const totalSpent = activeUsers.reduce((sum, user) => sum + user.totalSpent, 0);
+                  const totalLocked = activeUsers.reduce((sum, user) => sum + user.locked, 0);
+                  return (
+                    <div className="space-y-1">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Earnings:</span>
+                        <span className="font-semibold text-green-400">{totalEarned.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Withdrawals:</span>
+                        <span className="font-semibold text-red-400">-{Math.round(totalWithdrawn).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Total Purchased:</span>
+                        <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Total Spent:</span>
+                        <span className="font-semibold text-red-400">-{totalSpent.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Locked Credits:</span>
+                        <span className="font-semibold text-amber-400">{Math.round(totalLocked).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+                        <span className="text-white/70">Total Available Credits:</span>
+                        <span className="font-semibold text-green-400">{totalCredits.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </TooltipContent>
             </Tooltip>
           </div>
