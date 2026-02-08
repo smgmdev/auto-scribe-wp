@@ -165,7 +165,7 @@ export function AccountSettings() {
             <Mail className="h-4 w-4" />
             Email Address
           </Label>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <Input
               id="email"
               type="email"
@@ -177,7 +177,7 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateEmail} 
               disabled={savingEmail || email === user?.email}
-              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
             >
               {savingEmail ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -197,7 +197,7 @@ export function AccountSettings() {
             <Phone className="h-4 w-4" />
             WhatsApp Number
           </Label>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <Input
               id="whatsapp"
               type="tel"
@@ -209,7 +209,7 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateWhatsapp} 
               disabled={savingWhatsapp || whatsapp === originalWhatsapp}
-              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
             >
               {savingWhatsapp ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
