@@ -609,35 +609,6 @@ export function DashboardView() {
       </div>
 
       {/* Agency Summary (only for agency users) */}
-      {agencyStatusLoading && (
-        <div className="grid gap-2 md:grid-cols-2">
-          <Card className="border-border/50 bg-card">
-            <CardHeader>
-              <CardTitle className="text-xl">Agency Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-muted/60 p-4 animate-pulse">
-                    <div className="h-3 w-16 bg-muted rounded mb-2" />
-                    <div className="h-8 w-24 bg-muted rounded" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 bg-card">
-            <CardHeader>
-              <CardTitle className="text-xl">Agency Management</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-10 w-full bg-muted/60 rounded animate-pulse" />
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      )}
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
