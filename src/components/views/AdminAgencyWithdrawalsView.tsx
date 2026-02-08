@@ -583,53 +583,9 @@ export function AdminAgencyWithdrawalsView() {
                                 <Info className="h-3.5 w-3.5" />
                               )}
                             </button>
-                            {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-sm text-blue-600 cursor-help underline w-fit">Withdrawal via Bank Transfer</p>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-xs">
-                                  <div className="space-y-1">
-                                    <p><span className="opacity-70">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
-                                    <p><span className="opacity-70">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
-                                    {withdrawal.bank_details.bank_account_number && (
-                                      <p><span className="opacity-70">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
-                                    )}
-                                    {withdrawal.bank_details.bank_iban && (
-                                      <p><span className="opacity-70">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
-                                    )}
-                                    {withdrawal.bank_details.bank_swift_code && (
-                                      <p><span className="opacity-70">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
-                                    )}
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-sm text-blue-600 cursor-help underline w-fit">Withdrawal via USDT</p>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-sm">
-                                  <div className="space-y-1">
-                                    <p><span className="opacity-70">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
-                                    {withdrawal.crypto_details.usdt_wallet_address && (
-                                      <div className="flex items-center gap-1">
-                                        <span className="opacity-70">Wallet:</span>
-                                        <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
-                                          className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
-                                        >
-                                          <Copy className="h-3 w-3" />
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              <p className="text-sm text-blue-600 underline">Withdrawal via {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}</p>
-                            )}
+                            <p className="text-sm text-muted-foreground">
+                              Withdrawal via {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}
+                            </p>
                             <div className="text-lg text-foreground md:hidden mt-1">
                               ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
