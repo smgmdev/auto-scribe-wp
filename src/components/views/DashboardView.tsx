@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -101,6 +101,8 @@ export function DashboardView() {
     lockedCredits: 0,
     creditsWithdrawn: 0,
     creditsInWithdrawals: 0,
+    totalOrders: 0,
+    totalSpent: 0,
     loading: true
   });
 
@@ -235,6 +237,30 @@ export function DashboardView() {
         });
       }
 
+      // Fetch completed orders for total orders count and total spent
+      const { data: completedOrders } = await supabase
+        .from('orders')
+        .select('media_sites(price)')
+        .eq('user_id', user.id)
+        .eq('delivery_status', 'accepted');
+
+      let totalOrders = 0;
+      let totalSpent = 0;
+      if (completedOrders) {
+        totalOrders = completedOrders.length;
+        completedOrders.forEach((order: any) => {
+          if (order.media_sites?.price) {
+            totalSpent += order.media_sites.price;
+          }
+        });
+      }
+
+      // Also count agency delivery orders (order_payout transactions)
+      const deliveryOrdersCount = transactions
+        ? transactions.filter(t => t.type === 'order_payout').length
+        : 0;
+      totalOrders += deliveryOrdersCount;
+
       const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
 
       setAvailableCreditsData({
@@ -245,6 +271,8 @@ export function DashboardView() {
         lockedCredits: creditsInUse,
         creditsWithdrawn,
         creditsInWithdrawals,
+        totalOrders,
+        totalSpent,
         loading: false
       });
     };
@@ -804,176 +832,226 @@ export function DashboardView() {
       )}
 
       {/* Credit Management (available for all users) */}
-      <Card className="border-border/50 bg-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl">Credit Management</CardTitle>
+      <div className="space-y-2">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <h2 className="text-xl font-semibold">Credit Management</h2>
           <Button 
-            variant="outline" 
-            size="sm"
             onClick={() => setBuyCreditsOpen(true)}
-            className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border border-transparent transition-all"
           >
-            <Coins className="mr-2 h-4 w-4" />
             Buy Credits
           </Button>
-        </CardHeader>
-        <CardContent>
-          {/* Credit Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            {/* Total Balance Card */}
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="relative bg-foreground p-4 text-background overflow-hidden cursor-help">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-background/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative">
-                    <span className="text-[10px] uppercase tracking-wider text-background/60 font-medium">Total Balance</span>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
+          {/* Available Credits */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide leading-3">
+                    Available Credits
+                  </CardTitle>
+                  <Wallet className="h-4 w-4 text-muted-foreground/60" />
+                </CardHeader>
+                <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                  <div className="text-xl md:text-2xl font-semibold text-foreground">
                     {availableCreditsData.loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-background/60 mt-1" />
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     ) : (
-                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight">
-                        {Math.round(availableCreditsData.totalBalance).toLocaleString()}
-                      </div>
+                      Math.round(availableCreditsData.availableCredits).toLocaleString()
                     )}
                   </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-                <div className="space-y-1">
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              sideOffset={8}
+              className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            >
+              <div className="space-y-1">
+                {availableCreditsData.earnedCredits > 0 && (
                   <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Purchased credits:</span>
-                    <span className="font-semibold">{availableCreditsData.purchasedCredits.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Earned credits:</span>
+                    <span className="font-medium">{availableCreditsData.earnedCredits.toLocaleString()}</span>
                   </div>
-                  {availableCreditsData.earnedCredits > 0 && (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-background/70">Earned credits:</span>
-                      <span className="font-semibold text-green-400">{availableCreditsData.earnedCredits.toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between gap-4 pt-1 border-t border-background/20">
-                    <span className="text-background/70">Total Balance:</span>
-                    <span className="font-semibold">{Math.round(availableCreditsData.totalBalance).toLocaleString()}</span>
-                  </div>
+                )}
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Purchased credits:</span>
+                  <span className="font-medium">{availableCreditsData.purchasedCredits.toLocaleString()}</span>
                 </div>
-              </TooltipContent>
-            </Tooltip>
+                {availableCreditsData.creditsWithdrawn > 0 && (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Withdrawn credits:</span>
+                    <span className="font-medium">-{Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4">
+                  <span className="text-muted-foreground">Available credits:</span>
+                  <span className="font-medium">{Math.round(availableCreditsData.availableCredits).toLocaleString()}</span>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-            {/* Available Credits Card */}
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Available</span>
+          {/* Locked Credits */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide leading-3">
+                    Locked Credits
+                  </CardTitle>
+                  <Lock className="h-4 w-4 text-muted-foreground/60" />
+                </CardHeader>
+                <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                  <div className="text-xl md:text-2xl font-semibold text-foreground">
                     {availableCreditsData.loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     ) : (
-                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
-                        {Math.round(availableCreditsData.availableCredits).toLocaleString()}
-                      </div>
+                      availableCreditsData.lockedCredits.toLocaleString()
                     )}
                   </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-                <div className="space-y-1">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Total balance:</span>
-                    <span className="font-semibold">{Math.round(availableCreditsData.totalBalance).toLocaleString()}</span>
-                  </div>
-                  {availableCreditsData.lockedCredits > 0 && (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-background/70">Locked in orders:</span>
-                      <span className="font-semibold text-amber-400">-{availableCreditsData.lockedCredits.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {availableCreditsData.creditsWithdrawn > 0 && (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-background/70">Withdrawn:</span>
-                      <span className="font-semibold">-{Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between gap-4 pt-1 border-t border-background/20">
-                    <span className="text-background/70">Available credits:</span>
-                    <span className="font-semibold text-green-400">{Math.round(availableCreditsData.availableCredits).toLocaleString()}</span>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Locked Credits Card */}
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Locked</span>
-                    {availableCreditsData.loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
-                    ) : (
-                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
-                        {availableCreditsData.lockedCredits.toLocaleString()}
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              sideOffset={8}
+              className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            >
+              <div className="space-y-1">
+                {availableCreditsData.lockedCredits === 0 && availableCreditsData.creditsInWithdrawals === 0 ? (
+                  <p>No credits currently locked</p>
+                ) : (
+                  <>
+                    {availableCreditsData.lockedCredits > 0 && (
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">In active orders:</span>
+                        <span className="font-medium text-amber-400">{availableCreditsData.lockedCredits.toLocaleString()}</span>
                       </div>
                     )}
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">Credits locked in active orders</p>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">In active orders:</span>
-                    <span className="font-semibold text-amber-400">{availableCreditsData.lockedCredits.toLocaleString()}</span>
-                  </div>
-                  {availableCreditsData.creditsInWithdrawals > 0 && (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-background/70">Pending withdrawals:</span>
-                      <span className="font-semibold text-amber-400">{Math.round(availableCreditsData.creditsInWithdrawals).toLocaleString()}</span>
-                    </div>
-                  )}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Withdrawn Credits Card */}
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Withdrawn</span>
-                    {availableCreditsData.loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
-                    ) : (
-                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
-                        {Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}
+                    {availableCreditsData.creditsInWithdrawals > 0 && (
+                      <div className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">Pending withdrawals:</span>
+                        <span className="font-medium text-amber-400">{Math.round(availableCreditsData.creditsInWithdrawals).toLocaleString()}</span>
                       </div>
                     )}
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">Completed withdrawals</p>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Total withdrawn:</span>
-                    <span className="font-semibold">{Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}</span>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+                  </>
+                )}
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          {/* Transaction History Link */}
-          <Button 
-            variant="outline" 
-            className="w-full justify-start"
-            onClick={() => setCurrentView('credit-history')}
-          >
-            <ArrowRight className="mr-2 h-4 w-4" />
-            View Transaction History
-          </Button>
-        </CardContent>
-      </Card>
+          {/* Total Purchased */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide leading-3">
+                    Total Purchased
+                  </CardTitle>
+                  <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
+                </CardHeader>
+                <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                  <div className="text-xl md:text-2xl font-semibold text-foreground">
+                    {availableCreditsData.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      availableCreditsData.purchasedCredits.toLocaleString()
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              sideOffset={8}
+              className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            >
+              <div className="space-y-1">
+                <p className="font-medium">Total credits purchased</p>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">All purchases:</span>
+                  <span className="font-semibold text-green-400">{availableCreditsData.purchasedCredits.toLocaleString()}</span>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Total Orders */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide leading-3">
+                    Total Orders
+                  </CardTitle>
+                  <ShoppingBag className="h-4 w-4 text-muted-foreground/60" />
+                </CardHeader>
+                <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                  <div className="text-xl md:text-2xl font-semibold text-foreground">
+                    {availableCreditsData.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      availableCreditsData.totalOrders
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              sideOffset={8}
+              className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            >
+              <p>Number of completed orders</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Total Spent */}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide leading-3">
+                    Total Spent
+                  </CardTitle>
+                  <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+                </CardHeader>
+                <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                  <div className="text-xl md:text-2xl font-semibold text-foreground">
+                    {availableCreditsData.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : (
+                      availableCreditsData.totalSpent.toLocaleString()
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              sideOffset={8}
+              className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            >
+              <p>Total credits spent on orders</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Transaction History Link */}
+        <Button 
+          variant="outline" 
+          className="w-full justify-start"
+          onClick={() => setCurrentView('credit-history')}
+        >
+          <ArrowRight className="mr-2 h-4 w-4" />
+          View Transaction History
+        </Button>
+      </div>
 
       {/* Instant Publishing & B2B Media Buying */}
       <div className="grid gap-2 md:grid-cols-2">
