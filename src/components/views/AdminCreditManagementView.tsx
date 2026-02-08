@@ -29,6 +29,8 @@ interface UserCredit {
   totalSpent: number;
   refunded: number;
   withdrawn: number;
+  pendingBankWithdrawals: number;
+  pendingCryptoWithdrawals: number;
   email: string | null;
   isAgency: boolean;
 }
@@ -173,6 +175,23 @@ export const AdminCreditManagementView = () => {
         lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
       });
 
+      // Fetch pending withdrawals for Bank/USDT split
+      const { data: pendingWithdrawalsData } = await supabase
+        .from('agency_withdrawals')
+        .select('user_id, amount_cents, withdrawal_method')
+        .eq('status', 'pending');
+
+      const pendingBankWithdrawalsMap = new Map<string, number>();
+      const pendingCryptoWithdrawalsMap = new Map<string, number>();
+      pendingWithdrawalsData?.forEach(w => {
+        const amountInDollars = (w.amount_cents || 0) / 100;
+        if (w.withdrawal_method === 'bank') {
+          pendingBankWithdrawalsMap.set(w.user_id, (pendingBankWithdrawalsMap.get(w.user_id) || 0) + amountInDollars);
+        } else if (w.withdrawal_method === 'usdt') {
+          pendingCryptoWithdrawalsMap.set(w.user_id, (pendingCryptoWithdrawalsMap.get(w.user_id) || 0) + amountInDollars);
+        }
+      });
+
       // Fetch completed orders to calculate total spent per user (purchase orders)
       const { data: completedOrdersData } = await supabase
         .from('orders')
@@ -233,6 +252,8 @@ export const AdminCreditManagementView = () => {
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
           withdrawn,
+          pendingBankWithdrawals: pendingBankWithdrawalsMap.get(credit.user_id) || 0,
+          pendingCryptoWithdrawals: pendingCryptoWithdrawalsMap.get(credit.user_id) || 0,
           email: emailMap.get(credit.user_id) || null,
           isAgency: agencyUserIds.has(credit.user_id)
         };
@@ -322,7 +343,9 @@ export const AdminCreditManagementView = () => {
                   const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
                   const totalPurchased = activeUsers.reduce((sum, user) => sum + user.purchased, 0);
                   const totalSpent = activeUsers.reduce((sum, user) => sum + user.totalSpent, 0);
-                  const totalLocked = activeUsers.reduce((sum, user) => sum + user.locked, 0);
+                  const totalLockedFromOrders = activeUsers.reduce((sum, user) => sum + user.lockedFromOrders, 0);
+                  const totalPendingBankWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingBankWithdrawals, 0);
+                  const totalPendingCryptoWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingCryptoWithdrawals, 0);
                   return (
                     <div className="space-y-1">
                       <div className="flex justify-between gap-4">
@@ -333,6 +356,24 @@ export const AdminCreditManagementView = () => {
                         <span className="text-white/70">Withdrawals:</span>
                         <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${Math.round(totalWithdrawn).toLocaleString()}` : '0'}</span>
                       </div>
+                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
+                      {totalPendingBankWithdrawals > 0 && (
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/70">Bank:</span>
+                          <span className="font-semibold text-amber-400">${totalPendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      )}
+                      {totalPendingCryptoWithdrawals > 0 && (
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/70">USDT:</span>
+                          <span className="font-semibold text-amber-400">${totalPendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      )}
+                      {totalPendingBankWithdrawals === 0 && totalPendingCryptoWithdrawals === 0 && (
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/50">None</span>
+                        </div>
+                      )}
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Total Purchased:</span>
                         <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
@@ -342,8 +383,8 @@ export const AdminCreditManagementView = () => {
                         <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
                       </div>
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked Credits:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(totalLocked).toLocaleString()}</span>
+                        <span className="text-white/70">Locked in Orders:</span>
+                        <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                         <span className="text-white/70">Total Available Credits:</span>
