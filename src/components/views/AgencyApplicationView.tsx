@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/collapsible';
 import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
 import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
+import { AgencyWorkBanner } from '@/components/agency/AgencyWorkBanner';
 import agencyHeroVideo from '@/assets/agency-hero.mp4';
 
 const faqItems = [
@@ -491,6 +492,8 @@ export function AgencyApplicationView() {
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 lg:pb-12 space-y-8">
         <ExploreNetworkGrid />
+
+        <AgencyWorkBanner />
 
         <ConnectEarnCarousel />
 
