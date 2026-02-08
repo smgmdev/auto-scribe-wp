@@ -1282,74 +1282,124 @@ export function CreditHistoryView() {
                   );
                 }
                 
+                // Standard transaction card - now expandable
+                const isStandardExpanded = expandedWithdrawals.has(transaction.id);
+                const hasReason = (transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ');
+                const reasonText = hasReason ? transaction.description?.split(': ').slice(1).join(': ') : null;
+                const displayDescription = hasReason 
+                  ? transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
+                  : transaction.type === 'withdrawal_locked' 
+                    ? (transaction.description?.includes('Bank Transfer') 
+                        ? 'Withdrawal via Bank Transfer' 
+                        : transaction.description?.includes('USDT')
+                          ? 'Withdrawal via USDT'
+                          : 'Withdrawal Pending')
+                    : transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
+                
                 return (
                   <div
                     key={transaction.id}
-                    onClick={isClickable ? () => handleOrderCompletedClick(transaction.order_id!) : undefined}
-                    className={`flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg border border-border hover:border-[#4771d9] transition-colors gap-2 md:gap-0 ${isClickable ? 'cursor-pointer' : ''}`}
+                    className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                      isClickable ? 'cursor-pointer' : ''
+                    } border-border hover:border-[#4771d9]`}
+                    onClick={() => {
+                      if (isClickable) {
+                        handleOrderCompletedClick(transaction.order_id!);
+                      } else {
+                        const newExpanded = new Set(expandedWithdrawals);
+                        if (newExpanded.has(transaction.id)) {
+                          newExpanded.delete(transaction.id);
+                        } else {
+                          newExpanded.add(transaction.id);
+                        }
+                        setExpandedWithdrawals(newExpanded);
+                      }
+                    }}
                   >
-                    <div className="flex items-start gap-3">
-                      {getTransactionIcon(transaction.type, transaction.amount)}
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {transaction.type === 'withdrawal_locked' ? (
-                            // For pending withdrawal transactions, show cleaner description
-                            transaction.description?.includes('Bank Transfer') 
-                              ? `Withdrawal via Bank Transfer` 
-                              : transaction.description?.includes('USDT')
-                                ? `Withdrawal via USDT`
-                                : 'Withdrawal Pending'
-                          ) : (transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ') ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help underline decoration-dotted">
-                                  {transaction.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <p className="font-medium">Reason:</p>
-                                <p>{transaction.description.split(': ').slice(1).join(': ')}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`
-                          )}
-                        </p>
-                        <div className={`text-lg md:hidden mt-1 ${
-                          transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                            ? 'text-amber-500' 
-                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                        }`}>
-                          {transaction.type === 'withdrawal_locked' ? (
-                            <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
-                          ) : (
-                            <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
-                          )}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                      <div className="flex items-start gap-3">
+                        {getTransactionIcon(transaction.type, transaction.amount)}
+                        <div className="flex-1">
+                          <p className="font-medium">{displayDescription}</p>
+                          <div className={`text-lg md:hidden mt-1 ${
+                            transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                              ? 'text-amber-500' 
+                              : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                          }`}>
+                            {transaction.type === 'withdrawal_locked' ? (
+                              <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                            ) : (
+                              <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground mt-1">
+                            {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
                         </div>
-                        <div className="mt-1">
-                          {getTransactionBadge(transaction.type)}
-                        </div>
-                        <span className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                        </span>
+                      </div>
+                      <div className={`text-lg hidden md:block ${
+                        transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                          ? 'text-amber-500' 
+                          : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                      }`}>
+                        {transaction.type === 'withdrawal_locked' ? (
+                          <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                        ) : (
+                          <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
+                        )}
                       </div>
                     </div>
-                    <div className={`text-lg hidden md:block ${
-                      transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                        ? 'text-amber-500' 
-                        : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                    }`}>
-                      {/* Withdrawal transactions are stored in cents, convert to dollars for display */}
-                      {transaction.type === 'withdrawal_locked' ? (
-                        <>
-                          -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
-                        </>
-                      ) : (
-                        <>
-                          {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}
-                        </>
-                      )}
-                    </div>
+                    
+                    {isStandardExpanded && (
+                      <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                        <div className="pt-2 space-y-3 text-sm">
+                          <div className="flex justify-end mb-2">
+                            {getTransactionBadge(transaction.type)}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                            <div>
+                              <span className="text-muted-foreground">Transaction Type:</span>
+                              <p className="font-medium capitalize">{transaction.type.replace(/_/g, ' ')}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Amount:</span>
+                              <p className={`font-medium ${
+                                transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                                  ? 'text-amber-500' 
+                                  : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                              }`}>
+                                {transaction.type === 'withdrawal_locked' 
+                                  ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
+                                  : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
+                                }
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Date & Time:</span>
+                              <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Transaction ID:</span>
+                              <p className="font-medium text-xs font-mono">{transaction.id.slice(0, 8)}...</p>
+                            </div>
+                          </div>
+                          
+                          {reasonText && (
+                            <div className="mt-2 pt-2 border-t border-border/50">
+                              <span className="text-muted-foreground">Reason:</span>
+                              <p className="font-medium">{reasonText}</p>
+                            </div>
+                          )}
+                          
+                          {transaction.order_id && (
+                            <div className="mt-2 pt-2 border-t border-border/50">
+                              <span className="text-muted-foreground">Order ID:</span>
+                              <p className="font-medium text-xs font-mono">{transaction.order_id.slice(0, 8)}...</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
