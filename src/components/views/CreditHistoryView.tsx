@@ -54,6 +54,7 @@ export function CreditHistoryView() {
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
+  const [isAgency, setIsAgency] = useState<boolean>(false);
 
   // Handle transaction query param for deep linking
   useEffect(() => {
@@ -141,6 +142,11 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'order_payout' && t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Calculate purchased credits from purchase transactions
+  const purchasedCredits = transactions
+    .filter(t => t.type === 'purchase' && t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
   // Navigate to completed orders tab and open the chat for a specific order
   const handleOrderCompletedClick = (orderId: string) => {
     setOrdersTargetTab('completed');
@@ -211,6 +217,17 @@ export function CreditHistoryView() {
     if (!user) return;
 
     if (showLoader) setLoading(true);
+    
+    // Check if user is an agency
+    const { data: agencyPayout } = await supabase
+      .from('agency_payouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('onboarding_complete', true)
+      .eq('downgraded', false)
+      .maybeSingle();
+    
+    setIsAgency(!!agencyPayout);
     
     // Fetch available credits from user_credits
     const { data: creditsData } = await supabase
@@ -715,36 +732,32 @@ export function CreditHistoryView() {
           >
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
-                <span className="text-white/70">Available Balance:</span>
-                <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
+                <span className="text-white/70">Earnings:</span>
+                {isAgency ? (
+                  <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
+                ) : (
+                  <span className="text-white/50 text-xs italic">available for agency only</span>
+                )}
               </div>
-              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Credits Locked</div>
-              {creditsInOrders > 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">In Orders:</span>
-                  <span className="font-semibold text-amber-400">{creditsInOrders.toLocaleString()}</span>
-                </div>
-              )}
-              {creditsInPendingRequests > 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">In Pending Requests:</span>
-                  <span className="font-semibold text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
-                </div>
-              )}
-              {creditsInWithdrawals > 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">In Withdrawals:</span>
-                  <span className="font-semibold text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
-                </div>
-              )}
-              {creditsInOrders === 0 && creditsInPendingRequests === 0 && creditsInWithdrawals === 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/50">None</span>
-                </div>
-              )}
-              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                <span className="text-white/70">Total Balance:</span>
-                <span className="font-semibold">{totalCredits.toLocaleString()}</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Withdrawals:</span>
+                {isAgency ? (
+                  <span className="font-semibold text-red-400">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
+                ) : (
+                  <span className="text-white/50 text-xs italic">available for agency only</span>
+                )}
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Purchased:</span>
+                <span className="font-semibold text-green-400">{purchasedCredits.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Spent:</span>
+                <span className="font-semibold text-red-400">-{totalSpent.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+                <span className="text-white/70">Total Available Credits:</span>
+                <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
               </div>
             </div>
           </TooltipContent>
