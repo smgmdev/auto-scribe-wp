@@ -246,7 +246,8 @@ export function ArticlesView() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in relative">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-6 relative">
       {/* Deleting Overlay */}
       {isDeleting && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
@@ -395,6 +396,7 @@ export function ArticlesView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }
