@@ -453,6 +453,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   value={formData.full_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
                   disabled={submitting}
+                  className="h-9 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -469,7 +470,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: false }));
                   }}
                   disabled={submitting}
-                  className={fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                  className={`h-9 text-sm ${fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
                 {fieldErrors.email && formData.email && !isValidEmail(formData.email) && (
                   <p className="text-xs text-red-500">Please enter a valid email address</p>
@@ -488,7 +489,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     if (fieldErrors.whatsapp_phone) setFieldErrors(prev => ({ ...prev, whatsapp_phone: false }));
                   }}
                   disabled={submitting}
-                  className={fieldErrors.whatsapp_phone ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                  className={`h-9 text-sm ${fieldErrors.whatsapp_phone ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 />
                 {fieldErrors.whatsapp_phone && formData.whatsapp_phone && !isValidPhone(formData.whatsapp_phone) && (
                   <p className="text-xs text-red-500">Please enter a valid phone number</p>
@@ -521,6 +522,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   value={formData.agency_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, agency_name: e.target.value }))}
                   disabled={submitting}
+                  className="h-9 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -532,7 +534,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
                   disabled={submitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select your country" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
@@ -549,7 +551,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   <Label htmlFor="agency_website" className={fieldErrors.agency_website ? 'text-red-500' : ''}>Agency Website *</Label>
                 </div>
                 <div className="flex">
-                  <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.agency_website ? 'border-red-500' : 'border-input'}`}>
+                  <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md h-9 ${fieldErrors.agency_website ? 'border-red-500' : 'border-input'}`}>
                     https://
                   </span>
                   <Input
@@ -562,7 +564,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                       if (fieldErrors.agency_website) setFieldErrors(prev => ({ ...prev, agency_website: false }));
                     }}
                     disabled={submitting}
-                    className={`rounded-l-none ${fieldErrors.agency_website ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`rounded-l-none h-9 text-sm ${fieldErrors.agency_website ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   />
                 </div>
                 {fieldErrors.agency_website && formData.agency_website && !isValidUrl(formData.agency_website) && (
@@ -602,11 +604,11 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                     </div>
                   );
                 })}
-              </div>
+            </div>
               {selectedNiches.includes('WP Media Blog Owner') && (
                 <div className="mt-2">
                   <div className="flex w-full">
-                    <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md border-input">
+                    <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md border-input h-9">
                       https://
                     </span>
                     <Input
@@ -614,7 +616,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                       value={wpBlogUrl}
                       onChange={(e) => setWpBlogUrl(e.target.value)}
                       disabled={submitting}
-                      className="rounded-l-none flex-1"
+                      className="rounded-l-none flex-1 h-9 text-sm"
                     />
                   </div>
                 </div>
@@ -625,7 +627,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   value={otherNiche}
                   onChange={(e) => setOtherNiche(e.target.value)}
                   disabled={submitting}
-                  className="mt-2"
+                  className="mt-2 h-9 text-sm"
                 />
               )}
             </div>
@@ -635,7 +637,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
               <div className="flex flex-col gap-3">
                 <div>
                   <div className="flex w-full">
-                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_1 ? 'border-red-500' : 'border-input'}`}>
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md h-9 ${fieldErrors.media_channel_1 ? 'border-red-500' : 'border-input'}`}>
                       https://
                     </span>
                     <Input
@@ -646,7 +648,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         if (fieldErrors.media_channel_1) setFieldErrors(prev => ({ ...prev, media_channel_1: false }));
                       }}
                       disabled={submitting}
-                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_1 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`rounded-l-none flex-1 h-9 text-sm ${fieldErrors.media_channel_1 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     />
                   </div>
                   {fieldErrors.media_channel_1 && formData.media_channel_1 && !isValidUrl(formData.media_channel_1) && (
@@ -655,7 +657,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 </div>
                 <div>
                   <div className="flex w-full">
-                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_2 ? 'border-red-500' : 'border-input'}`}>
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md h-9 ${fieldErrors.media_channel_2 ? 'border-red-500' : 'border-input'}`}>
                       https://
                     </span>
                     <Input
@@ -666,7 +668,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         if (fieldErrors.media_channel_2) setFieldErrors(prev => ({ ...prev, media_channel_2: false }));
                       }}
                       disabled={submitting}
-                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_2 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`rounded-l-none flex-1 h-9 text-sm ${fieldErrors.media_channel_2 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     />
                   </div>
                   {fieldErrors.media_channel_2 && formData.media_channel_2 && !isValidUrl(formData.media_channel_2) && (
@@ -675,7 +677,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 </div>
                 <div>
                   <div className="flex w-full">
-                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md ${fieldErrors.media_channel_3 ? 'border-red-500' : 'border-input'}`}>
+                    <span className={`inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md h-9 ${fieldErrors.media_channel_3 ? 'border-red-500' : 'border-input'}`}>
                       https://
                     </span>
                     <Input
@@ -686,7 +688,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                         if (fieldErrors.media_channel_3) setFieldErrors(prev => ({ ...prev, media_channel_3: false }));
                       }}
                       disabled={submitting}
-                      className={`rounded-l-none flex-1 ${fieldErrors.media_channel_3 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`rounded-l-none flex-1 h-9 text-sm ${fieldErrors.media_channel_3 ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     />
                   </div>
                   {fieldErrors.media_channel_3 && formData.media_channel_3 && !isValidUrl(formData.media_channel_3) && (
@@ -708,7 +710,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                   }
                 }}
                 disabled={submitting}
-                className="resize-none h-20"
+                className="resize-none h-20 text-sm"
                 maxLength={150}
               />
               <p className="text-xs text-muted-foreground text-right">{agencyDescription.length}/150</p>
