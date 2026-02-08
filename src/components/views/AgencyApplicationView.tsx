@@ -440,7 +440,7 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Why Upgrade to Agency?
@@ -448,9 +448,31 @@ export function AgencyApplicationView() {
           <p className="mt-2 text-muted-foreground">
             Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
           </p>
+          <Button 
+            className={`mt-4 w-full md:hidden shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+            onClick={() => setDialogOpen(true)}
+            disabled={existingApplication?.status === 'pending'}
+          >
+            {existingApplication?.status === 'pending' ? (
+              <>
+                <Clock className="h-4 w-4 mr-2" />
+                In Review
+              </>
+            ) : existingApplication?.status === 'cancelled' || existingApplication?.status === 'rejected' || !existingApplication ? (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Submit New Application
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Submit New Application
+              </>
+            )}
+          </Button>
         </div>
         <Button 
-          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+          className={`hidden md:flex shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
           onClick={() => setDialogOpen(true)}
           disabled={existingApplication?.status === 'pending'}
         >
