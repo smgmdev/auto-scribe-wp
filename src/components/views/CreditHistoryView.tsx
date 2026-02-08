@@ -536,7 +536,7 @@ export function CreditHistoryView() {
   return (
     <div className="space-y-2">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Credit Management
@@ -547,7 +547,7 @@ export function CreditHistoryView() {
         </div>
         <Button 
           onClick={() => setBuyCreditsOpen(true)}
-          className="bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
+          className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
         >
           Buy Credits
         </Button>
