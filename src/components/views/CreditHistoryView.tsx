@@ -880,13 +880,13 @@ export function CreditHistoryView() {
                             <div className="text-lg text-foreground md:hidden mt-1">
                               -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="mt-1">
                               {getTransactionBadge(transaction.type)}
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
                             </div>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1140,13 +1140,13 @@ export function CreditHistoryView() {
                             <div className="text-lg text-green-500 md:hidden mt-1">
                               +{transaction.amount.toLocaleString()}
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="mt-1">
                               {getTransactionBadge(transaction.type)}
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
                             </div>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1245,13 +1245,13 @@ export function CreditHistoryView() {
                             <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="mt-1">
                           {getTransactionBadge(transaction.type)}
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                          </span>
                         </div>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
                       </div>
                     </div>
                     <div className={`text-lg hidden md:block ${
