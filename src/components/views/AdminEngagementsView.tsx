@@ -752,7 +752,7 @@ export function AdminEngagementsView() {
                       <div className="md:hidden absolute top-2 right-3">
                         <Badge className="bg-green-600 text-[10px] px-1.5 py-0.5">
                           <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
-                          Delivery Completed
+                          Completed
                         </Badge>
                       </div>
                       
@@ -771,7 +771,7 @@ export function AdminEngagementsView() {
                           <div className="hidden md:flex">
                             <Badge className="bg-green-600">
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Delivery Completed
+                              Completed
                             </Badge>
                           </div>
                         </div>
