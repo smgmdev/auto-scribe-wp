@@ -133,7 +133,8 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateEmail} 
               disabled={savingEmail || email === user?.email}
-              className="w-full md:w-auto bg-accent text-accent-foreground hover:bg-transparent hover:text-accent border border-accent"
+              variant="outline"
+              className="w-full md:w-auto hover:bg-transparent hover:text-accent hover:border-accent"
             >
               {savingEmail ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -165,7 +166,8 @@ export function AccountSettings() {
             <Button 
               onClick={handleUpdateWhatsapp} 
               disabled={savingWhatsapp || whatsapp === originalWhatsapp}
-              className="w-full md:w-auto bg-accent text-accent-foreground hover:bg-transparent hover:text-accent border border-accent"
+              variant="outline"
+              className="w-full md:w-auto hover:bg-transparent hover:text-accent hover:border-accent"
             >
               {savingWhatsapp ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
