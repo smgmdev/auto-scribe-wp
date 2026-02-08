@@ -627,7 +627,7 @@ export function AdminAllNewsView() {
                       {/* Image or Logo placeholder - clickable */}
                       <div 
                         onClick={() => window.open(`/press/${pr.id}`, '_blank')}
-                        className="hidden sm:block w-[120px] h-[80px] flex-shrink-0 rounded-lg overflow-hidden bg-muted"
+                        className="w-[80px] h-[60px] sm:w-[120px] sm:h-[80px] flex-shrink-0 rounded-lg overflow-hidden bg-muted"
                       >
                         {pr.image_url ? (
                           <img 
