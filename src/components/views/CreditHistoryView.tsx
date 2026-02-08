@@ -796,7 +796,7 @@ export function CreditHistoryView() {
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Locked Credits
+                  Locked in Orders
                 </CardTitle>
                 <Lock className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
@@ -805,7 +805,7 @@ export function CreditHistoryView() {
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
-                    creditsInUse.toLocaleString()
+                    creditsInOrders.toLocaleString()
                   )}
                 </div>
               </CardContent>
@@ -816,66 +816,26 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[320px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            {lockedOrders.length === 0 && creditsInWithdrawals === 0 ? (
-              <p>No credits currently locked</p>
+            {lockedOrders.filter(o => o.type === 'order').length === 0 ? (
+              <p>No credits currently locked in orders</p>
             ) : (
               <div className="space-y-2">
                 {/* Active Orders Section */}
-                {lockedOrders.filter(o => o.type === 'order').length > 0 && (
-                  <div>
-                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Active Orders</p>
-                    <div className="space-y-1 max-h-[100px] overflow-y-auto">
-                      {lockedOrders.filter(o => o.type === 'order').map((order) => (
-                        <div key={order.id} className="flex justify-between gap-4 text-xs">
-                          <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
-                          <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Pending Order Requests Section */}
-                {lockedOrders.filter(o => o.type === 'pending_request').length > 0 && (
-                  <div>
-                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Order Requests</p>
-                    <div className="space-y-1 max-h-[100px] overflow-y-auto">
-                      {lockedOrders.filter(o => o.type === 'pending_request').map((order) => (
-                        <div key={order.id} className="flex justify-between gap-4 text-xs">
-                          <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
-                          <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Pending Withdrawals Section */}
-                {creditsInWithdrawals > 0 && (
-                  <div>
-                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Pending Withdrawals</p>
-                    <div className="flex justify-between gap-4 text-xs">
-                      <span className="text-muted-foreground">Total withdrawal requests</span>
-                      <span className="font-medium text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
-                    </div>
-                    {withdrawalsByBank > 0 && (
-                      <div className="flex justify-between gap-4 text-xs pl-2">
-                        <span className="text-muted-foreground">Bank:</span>
-                        <span className="font-medium text-amber-400">{Math.round(withdrawalsByBank).toLocaleString()}</span>
+                <div>
+                  <p className="font-medium text-xs uppercase tracking-wide mb-1">Active Orders</p>
+                  <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                    {lockedOrders.filter(o => o.type === 'order').map((order) => (
+                      <div key={order.id} className="flex justify-between gap-4 text-xs">
+                        <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
+                        <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
                       </div>
-                    )}
-                    {withdrawalsByCrypto > 0 && (
-                      <div className="flex justify-between gap-4 text-xs pl-2">
-                        <span className="text-muted-foreground">USDT:</span>
-                        <span className="font-medium text-amber-400">{Math.round(withdrawalsByCrypto).toLocaleString()}</span>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                )}
+                </div>
 
                 <div className="border-t border-muted-foreground/20 pt-1 mt-2 flex justify-between gap-4">
-                  <span className="text-muted-foreground">Total locked:</span>
-                  <span className="font-medium">{creditsInUse.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Total locked in orders:</span>
+                  <span className="font-medium">{creditsInOrders.toLocaleString()}</span>
                 </div>
               </div>
             )}
