@@ -669,7 +669,6 @@ export function AgencyPayoutsView() {
                               <Loader2 className="h-3 w-3 animate-spin" />
                             ) : null}
                             View order details
-                            <ExternalLink className="h-3 w-3" />
                           </button>
                           <button
                             onClick={(e) => {
