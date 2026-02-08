@@ -233,7 +233,7 @@ export function MyAgencyView() {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
