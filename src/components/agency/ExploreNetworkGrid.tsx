@@ -63,7 +63,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
         Do More. <span className={`font-normal ${dark ? 'text-white/60' : 'text-muted-foreground'}`}>Grow with Arcana Mace.</span>
       </h2>
       
-      <div className="flex flex-wrap gap-3 justify-center">
+      <div className="grid grid-cols-4 md:flex md:flex-wrap gap-3 justify-center">
         {mediaSites.map((site) => (
           <button
             key={site.id}
@@ -78,7 +78,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
               <img
                 src={site.favicon}
                 alt={site.name}
-                className="h-16 md:h-20 w-auto object-contain"
+                className="h-14 md:h-20 w-full md:w-auto object-contain"
               />
             ) : (
               <span className={`text-xs text-center px-3 py-4 block ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
