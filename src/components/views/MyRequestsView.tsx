@@ -1232,8 +1232,8 @@ export function MyRequestsView() {
                     return (
                       <Card 
                         key={request.id} 
-                        className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                          hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                        className={`relative border border-border hover:border-foreground/30 transition-colors cursor-pointer ${
+                          hasUnread ? 'bg-blue-500/10 !border-l-4 !border-l-blue-500' : ''
                         }`}
                         onClick={() => handleCardClick(request)}
                       >
@@ -1374,8 +1374,8 @@ export function MyRequestsView() {
                       return (
                         <Card 
                           key={request.id} 
-                          className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                            hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
+                          className={`relative border border-border hover:border-foreground/30 transition-colors cursor-pointer ${
+                            hasUnread ? '!border-l-4 !border-l-blue-500 bg-blue-500/10' : ''
                           }`}
                           onClick={() => handleCardClick(request)}
                         >
@@ -1473,8 +1473,8 @@ export function MyRequestsView() {
                       return (
                         <Card 
                           key={request.id} 
-                          className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                            hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
+                          className={`relative border border-border hover:border-foreground/30 transition-colors cursor-pointer ${
+                            hasUnread ? '!border-l-4 !border-l-blue-500 bg-blue-500/10' : ''
                           }`}
                           onClick={() => handleCardClick(request)}
                         >
