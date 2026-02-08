@@ -7089,7 +7089,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Media Listing Dialog */}
       <Dialog open={mediaListingOpen} onOpenChange={setMediaListingOpen}>
-        <DialogContent className="sm:max-w-lg z-[300]">
+        <DialogContent className="sm:max-w-lg z-[300] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <img
