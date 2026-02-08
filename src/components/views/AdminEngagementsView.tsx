@@ -717,6 +717,9 @@ export function AdminEngagementsView() {
                         </div>
                         <div className="mt-2 flex items-end justify-between">
                           <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground">
+                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               Last Message: {messages[r.id]?.length > 0 
@@ -726,9 +729,6 @@ export function AdminEngagementsView() {
                                 <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
                               )}
                             </p>
-                            <span className="text-xs text-muted-foreground">
-                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                             {r.media_sites?.publication_format && (
