@@ -782,7 +782,7 @@ function RequestCard({ request, hasUnreadAdmin, onSelect, getStatusBadge }: {
                 Client: {request.profiles?.email}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                <span className="font-medium">Last event:</span> {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+                <span className="font-medium">Last Event:</span> {eventName} · {format(eventTime, 'MMM d, h:mm a')}
               </p>
             </div>
           </div>

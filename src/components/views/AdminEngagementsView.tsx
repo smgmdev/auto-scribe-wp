@@ -640,12 +640,12 @@ export function AdminEngagementsView() {
                           return (
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              Last event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
+                              Last Event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
                             </p>
                           );
                         })()}
                         <span className="text-xs text-muted-foreground">
-                          Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                          Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                       </div>
                       <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
@@ -719,7 +719,7 @@ export function AdminEngagementsView() {
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              Last message: {messages[r.id]?.length > 0 
+                              Last Message: {messages[r.id]?.length > 0 
                                 ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                                 : 'No messages'}
                               {messages[r.id]?.length > 0 && (
@@ -727,7 +727,7 @@ export function AdminEngagementsView() {
                               )}
                             </p>
                             <span className="text-xs text-muted-foreground">
-                              Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
@@ -786,13 +786,13 @@ export function AdminEngagementsView() {
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
                               <p className="text-xs text-muted-foreground">
-                                Cancelled engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                                Cancelled Engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
                                 {requestMessages.length > 0 && (
                                   <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                 )}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Opened engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                                Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                               </p>
                               {r.cancelled_by === 'admin' ? (
                                 <p className="text-xs text-destructive">
