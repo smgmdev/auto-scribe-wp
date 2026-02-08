@@ -1613,7 +1613,7 @@ export function AdminAgenciesView() {
           {selectedApp && (
             <div className="space-y-4">
               {/* Contact & Basic Info */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Full Name</p>
                   <p className="font-medium">{selectedApp.full_name}</p>
