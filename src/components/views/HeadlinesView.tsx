@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { Headline } from '@/types';
 
@@ -98,10 +99,7 @@ export function HeadlinesView() {
         }));
         setDisplayedHeadlines(parsedHeadlines);
         setHeadlines(parsedHeadlines);
-        toast({
-          title: "Headlines scanned",
-          description: `Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`,
-        });
+        sonnerToast.success(`Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`);
       } else {
         throw new Error(data?.error || 'Failed to scan headlines');
       }
