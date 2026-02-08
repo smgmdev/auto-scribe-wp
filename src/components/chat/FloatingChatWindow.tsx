@@ -5766,14 +5766,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             e.stopPropagation();
           }}
         >
-        <ScrollArea className="h-full w-full" style={{ overscrollBehavior: 'contain' }}>
+        <ScrollArea className="h-full w-full [&>div>div]:!w-full" style={{ overscrollBehavior: 'contain' }}>
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
               <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
-            <div className="space-y-2 p-2 sm:p-3 md:p-4 w-full min-w-0 box-border">
+            <div className="space-y-2 p-2 sm:p-3 md:p-4 w-full min-w-0 max-w-full overflow-x-hidden box-border">
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
