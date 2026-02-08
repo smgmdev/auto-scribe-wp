@@ -677,20 +677,77 @@ export function AdminAgencyWithdrawalsView() {
                       {/* Expanded Details */}
                       {expandedCards[withdrawal.id] && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-2 space-y-2 text-xs text-muted-foreground">
-                            <p>
-                              <span className="font-medium">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                            </p>
-                            {withdrawal.processed_at && (
-                              <p>
-                                <span className="font-medium">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            )}
+                          <div className="pt-2 space-y-3 text-sm">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                              <div>
+                                <span className="text-muted-foreground">Withdrawal Method:</span>
+                                <p className="font-medium">{withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Amount:</span>
+                                <p className="font-medium">${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Requested:</span>
+                                <p className="font-medium">{format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">{withdrawal.status === 'completed' ? 'Completed:' : withdrawal.status === 'rejected' ? 'Rejected:' : 'Processed:'}</span>
+                                <p className="font-medium">{withdrawal.processed_at ? format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a') : 'Pending'}</p>
+                              </div>
+                              
+                              {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
+                                <>
+                                  <div>
+                                    <span className="text-muted-foreground">Bank:</span>
+                                    <p className="font-medium">{withdrawal.bank_details.bank_name || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Account Holder:</span>
+                                    <p className="font-medium">{withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
+                                  </div>
+                                  {withdrawal.bank_details.bank_account_number && (
+                                    <div>
+                                      <span className="text-muted-foreground">Account Number:</span>
+                                      <p className="font-medium">{withdrawal.bank_details.bank_account_number}</p>
+                                    </div>
+                                  )}
+                                  {withdrawal.bank_details.bank_iban && (
+                                    <div>
+                                      <span className="text-muted-foreground">IBAN:</span>
+                                      <p className="font-medium">{withdrawal.bank_details.bank_iban}</p>
+                                    </div>
+                                  )}
+                                  {withdrawal.bank_details.bank_swift_code && (
+                                    <div>
+                                      <span className="text-muted-foreground">SWIFT:</span>
+                                      <p className="font-medium">{withdrawal.bank_details.bank_swift_code}</p>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                              
+                              {withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details && (
+                                <>
+                                  <div>
+                                    <span className="text-muted-foreground">Network:</span>
+                                    <p className="font-medium">{withdrawal.crypto_details.usdt_network || 'TRC-20'}</p>
+                                  </div>
+                                  <div className="md:col-span-2">
+                                    <span className="text-muted-foreground">Wallet Address:</span>
+                                    <p className="font-medium break-all">{withdrawal.crypto_details.usdt_wallet_address || 'N/A'}</p>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            
                             {withdrawal.admin_notes && (
-                              <p>
-                                <span className="font-medium">Note:</span> {withdrawal.admin_notes}
-                              </p>
+                              <div className="pt-2 border-t border-border/50">
+                                <span className="text-muted-foreground">Notes:</span>
+                                <p className="font-medium">{withdrawal.admin_notes}</p>
+                              </div>
                             )}
+                            
                             <Button
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
