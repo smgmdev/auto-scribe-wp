@@ -570,19 +570,21 @@ export function AdminAgencyWithdrawalsView() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                              className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                            >
-                              <span className="font-medium">
+                            <div className="flex items-center gap-1">
+                              <p className="font-medium">
                                 {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                              </span>
-                              {loadingUserDetailsId === withdrawal.id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Info className="h-3.5 w-3.5" />
-                              )}
-                            </button>
+                              </p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                {loadingUserDetailsId === withdrawal.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Info className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                            </div>
                             {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
