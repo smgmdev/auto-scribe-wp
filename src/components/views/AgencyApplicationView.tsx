@@ -441,49 +441,53 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
-      {/* Hero Video Section - Full Width */}
-      <div className="w-full">
-        <video 
-          src={agencyHeroVideo} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="w-full h-auto object-cover"
-        />
-      </div>
+    <div className="animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
+      {/* Hero Section with Sticky Video */}
+      <div className="relative">
+        {/* Sticky Video Container */}
+        <div className="sticky top-0 h-[70vh] overflow-hidden">
+          <video 
+            src={agencyHeroVideo} 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        </div>
 
-      <div className="max-w-[980px] mx-auto px-4 lg:px-8">
-        <div className="rounded-lg p-6">
-          <div className="text-center">
-            <img 
-              src="/favicon.png" 
-              alt="Arcana Mace" 
-              className="h-12 w-12 mx-auto mb-8"
-            />
-            <h1 className="text-[40px] font-bold text-foreground">
-              Why Upgrade to Agency?
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
-            </p>
+        {/* Content that scrolls over the video */}
+        <div className="relative z-10 -mt-32 bg-white rounded-t-[2rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.3)]">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-16 pb-8">
+            <div className="rounded-lg p-6">
+              <div className="text-center">
+                <img 
+                  src="/favicon.png" 
+                  alt="Arcana Mace" 
+                  className="h-12 w-12 mx-auto mb-8"
+                />
+                <h1 className="text-[40px] font-bold text-foreground">
+                  Why Upgrade to Agency?
+                </h1>
+                <p className="mt-4 text-muted-foreground">
+                  Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
+                </p>
+              </div>
+            </div>
+
+            {/* Start Application Button */}
+            <div className="text-center">
+              <Button 
+                className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+                onClick={() => setDialogOpen(true)}
+                disabled={existingApplication?.status === 'pending'}
+              >
+                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Start Application Button */}
-        <div className="text-center">
-          <Button 
-            className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
-            onClick={() => setDialogOpen(true)}
-            disabled={existingApplication?.status === 'pending'}
-          >
-            {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
@@ -569,6 +573,8 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
+          </div>
+        </div>
       </div>
 
       <AgencyApplicationDialog 
