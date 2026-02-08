@@ -889,7 +889,8 @@ export function AdminOrdersView() {
   }
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Order Management</h1>
@@ -1436,6 +1437,7 @@ export function AdminOrdersView() {
         url={webViewUrl || ''}
         title="Delivery"
       />
+      </div>
     </div>
   );
 }
