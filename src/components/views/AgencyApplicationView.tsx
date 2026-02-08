@@ -497,8 +497,9 @@ export function AgencyApplicationView() {
 
         <AgencyWorkBanner onApplyClick={() => setDialogOpen(true)} />
 
+        <ConnectEarnCarousel />
+
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 space-y-8">
-            <ConnectEarnCarousel />
 
             <AgencyFAQ dark />
 
