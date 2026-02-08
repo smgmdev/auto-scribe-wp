@@ -65,48 +65,57 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
       href={article.wp_link || '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="block h-full group flex-shrink-0 w-[220px]"
+      className="block h-full group flex-shrink-0 w-[280px]"
     >
-      <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
-        {/* Featured Image */}
+      <div className="rounded-2xl bg-[#1d1d1f] overflow-hidden h-full hover:scale-[1.02] transition-all duration-300 flex flex-col">
+        {/* Header with site info */}
+        <div className="p-5 pb-3">
+          <div className="flex items-center gap-3 mb-3">
+            {article.published_to_favicon && (
+              <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+                <img
+                  src={article.published_to_favicon}
+                  alt=""
+                  className="h-6 w-6 object-contain"
+                />
+              </div>
+            )}
+            <span className="text-white font-semibold text-base truncate">
+              {article.published_to_name || 'Published Article'}
+            </span>
+          </div>
+          
+          {/* Title as description */}
+          <p className="text-white/70 text-sm leading-relaxed line-clamp-3">
+            {article.title}
+          </p>
+          
+          {/* Action links */}
+          <div className="flex items-center gap-3 mt-4">
+            <span className="text-xs text-white/50 border border-white/20 rounded-full px-3 py-1">
+              Read
+            </span>
+            <span className="text-xs text-white/50 flex items-center gap-1">
+              {formatRelativeTime(article.created_at)} <ExternalLink className="h-3 w-3" />
+            </span>
+          </div>
+        </div>
+        
+        {/* Featured Image - takes up remaining space */}
         {article.featured_image?.url && (
-          <ImageWithLoader
-            src={article.featured_image.url}
-            alt={article.featured_image.alt || article.title}
-          />
+          <div className="flex-1 min-h-[180px] relative overflow-hidden">
+            <img
+              src={article.featured_image.url}
+              alt={article.featured_image.alt || article.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
         
-        <div className="p-4 flex flex-col flex-1">
-          {/* Site info */}
-          <div className="flex items-center gap-2 mb-2">
-            {article.published_to_favicon && (
-              <img
-                src={article.published_to_favicon}
-                alt=""
-                className="h-4 w-4 rounded-sm object-contain"
-              />
-            )}
-            {article.published_to_name && (
-              <span className="text-xs text-muted-foreground font-medium truncate">
-                {article.published_to_name}
-              </span>
-            )}
-          </div>
-          
-          {/* Title */}
-          <h3 className="font-semibold text-foreground text-sm leading-snug line-clamp-2 flex-1 group-hover:text-primary transition-colors">
-            {article.title}
-          </h3>
-          
-          {/* Footer */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTime(article.created_at)}
-            </span>
-            {article.wp_link && (
-              <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
-            )}
-          </div>
+        {/* Footer info */}
+        <div className="px-5 py-3 bg-[#1d1d1f]">
+          <p className="text-white/40 text-xs font-medium">Published</p>
+          <p className="text-white/60 text-xs">{article.published_to_name}</p>
         </div>
       </div>
     </a>
