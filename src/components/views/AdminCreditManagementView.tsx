@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, ArrowUpCircle, ArrowDownCircle, RotateCcw } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Search, CreditCard, Users } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 
 interface UserCredit {
@@ -35,30 +33,11 @@ interface UserCredit {
   isAgency: boolean;
 }
 
-interface CreditTransaction {
-  id: string;
-  user_id: string;
-  amount: number;
-  type: string;
-  description: string | null;
-  created_at: string;
-  email: string | null;
-}
-
 export const AdminCreditManagementView = () => {
-  const [mainTab, setMainTab] = useState('users');
-  const [activeTab, setActiveTab] = useState('balances');
-  
   // Balances state
   const [userCredits, setUserCredits] = useState<UserCredit[]>([]);
   const [balancesLoading, setBalancesLoading] = useState(true);
   const [balancesSearchTerm, setBalancesSearchTerm] = useState('');
-  
-  // Transactions state
-  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
-  const [transactionsLoading, setTransactionsLoading] = useState(true);
-  const [transactionsSearchTerm, setTransactionsSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
   // Expanded user rows state
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
 
@@ -77,7 +56,6 @@ export const AdminCreditManagementView = () => {
 
   useEffect(() => {
     fetchUserCredits();
-    fetchTransactions();
   }, []);
 
   const fetchUserCredits = async () => {
@@ -268,40 +246,6 @@ export const AdminCreditManagementView = () => {
     }
   };
 
-  const fetchTransactions = async () => {
-    setTransactionsLoading(true);
-    try {
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('credit_transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (transactionsError) throw transactionsError;
-
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email');
-
-      if (profilesError) throw profilesError;
-
-      const emailMap = new Map<string, string | null>();
-      profilesData?.forEach(profile => {
-        emailMap.set(profile.id, profile.email);
-      });
-
-      const combined: CreditTransaction[] = (transactionsData || []).map(tx => ({
-        ...tx,
-        email: emailMap.get(tx.user_id) || null
-      }));
-
-      setTransactions(combined);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    } finally {
-      setTransactionsLoading(false);
-    }
-  };
-
   // Balances computed values
   // Only include users with purchased, earned, or available credits
   const activeUsers = userCredits.filter(user => user.purchased > 0 || user.earned > 0 || user.available > 0);
@@ -311,47 +255,6 @@ export const AdminCreditManagementView = () => {
   const totalCredits = activeUsers.reduce((sum, user) => sum + user.available, 0);
   const usersWithCredits = activeUsers.filter(user => user.available > 0).length;
 
-  // Transactions computed values
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = 
-      tx.email?.toLowerCase().includes(transactionsSearchTerm.toLowerCase()) ||
-      tx.description?.toLowerCase().includes(transactionsSearchTerm.toLowerCase());
-    const matchesType = typeFilter === 'all' || tx.type === typeFilter;
-    return matchesSearch && matchesType;
-  });
-
-  const uniqueTypes = [...new Set(transactions.map(tx => tx.type))];
-  const totalPurchasedOnly = transactions.filter(tx => tx.type === 'purchase').reduce((sum, tx) => sum + tx.amount, 0);
-  const totalGiftedOnly = transactions.filter(tx => tx.type === 'gifted' || tx.type === 'admin_credit').reduce((sum, tx) => sum + tx.amount, 0);
-  const totalPurchased = totalPurchasedOnly + totalGiftedOnly;
-  const totalRefunds = transactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-  const totalRefundRequests = transactions.filter(tx => tx.type === 'refund').length;
-
-  const getTransactionIcon = (amount: number) => {
-    return amount > 0 ? (
-      <ArrowUpCircle className="h-4 w-4 text-green-500" />
-    ) : (
-      <ArrowDownCircle className="h-4 w-4 text-red-500" />
-    );
-  };
-
-  const getTypeBadge = (type: string) => {
-    const config: Record<string, { className: string; label: string }> = {
-      purchase: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Purchase' },
-      gifted: { className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100', label: 'Gifted' },
-      spent: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Spent' },
-      locked: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Locked' },
-      unlocked: { className: 'bg-blue-100 text-blue-700 hover:bg-blue-100', label: 'Unlocked' },
-      order_accepted: { className: 'bg-purple-100 text-purple-700 hover:bg-purple-100', label: 'Order Accepted' },
-      offer_accepted: { className: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-100', label: 'Offer Accepted' },
-      order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
-      refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
-      adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' }
-    };
-    const badge = config[type] || { className: 'bg-gray-100 text-gray-700 hover:bg-gray-100', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-    return <Badge className={badge.className}>{badge.label}</Badge>;
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -359,24 +262,7 @@ export const AdminCreditManagementView = () => {
         <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
       </div>
 
-      <Tabs value={mainTab} onValueChange={setMainTab}>
-        <TabsList>
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Users
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Users Tab */}
-        <TabsContent value="users" className="space-y-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="balances">Balances</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            </TabsList>
-
-        {/* Balances Tab */}
-        <TabsContent value="balances" className="space-y-2">
+      <div className="space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
@@ -596,170 +482,7 @@ export const AdminCreditManagementView = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Transactions Tab */}
-        <TabsContent value="transactions" className="space-y-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-3">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Total Credits Acquired
-                    </CardTitle>
-                    <ArrowUpCircle className="h-4 w-4 text-muted-foreground/60" />
-                  </CardHeader>
-                  <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">${totalPurchased.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <div className="space-y-1">
-                  <p className="font-medium">Total credits purchased:</p>
-                  <p>Online via platform: {totalPurchasedOnly.toLocaleString()}</p>
-                  <p>Offline via invoice: {totalGiftedOnly.toLocaleString()}</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-3">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Total Refunds
-                    </CardTitle>
-                    <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
-                  </CardHeader>
-                  <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">${totalRefunds.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total refunds in USD value to users</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-3">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Refund Requests
-                    </CardTitle>
-                    <RotateCcw className="h-4 w-4 text-muted-foreground/60" />
-                  </CardHeader>
-                  <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">{totalRefundRequests.toLocaleString()}</div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total number of refund requests</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-3">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                    <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Transactions
-                    </CardTitle>
-                    <CreditCard className="h-4 w-4 text-muted-foreground/60" />
-                  </CardHeader>
-                  <CardContent className="pt-0 pb-0 px-4">
-                    <div className="text-2xl font-semibold text-foreground">{transactions.length.toLocaleString()}</div>
-                  </CardContent>
-                </Card>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
-                <p>Total number of media site transactions from Local and Global Libraries</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold">Credit Transactions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by email..."
-                    value={transactionsSearchTerm}
-                    onChange={(e) => setTransactionsSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10"></TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactionsLoading ? (
-                    Array.from({ length: 8 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      </TableRow>
-                    ))
-                  ) : filteredTransactions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                        {transactionsSearchTerm || typeFilter !== 'all' 
-                          ? 'No transactions found matching your filters' 
-                          : 'No transactions found'}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredTransactions.map((tx) => (
-                      <TableRow key={tx.id}>
-                        <TableCell>{getTransactionIcon(tx.amount)}</TableCell>
-                        <TableCell>
-                          <p className="font-medium">
-                            {tx.email || <span className="text-muted-foreground italic">No email</span>}
-                          </p>
-                        </TableCell>
-                        <TableCell>{getTypeBadge(tx.type)}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-xs truncate">
-                          {tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff') : '-'}
-                        </TableCell>
-                        <TableCell className={`text-right ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {new Date(tx.created_at).toLocaleDateString()} {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-          </Tabs>
-        </TabsContent>
-      </Tabs>
-
+        </div>
     </div>
   );
 };
