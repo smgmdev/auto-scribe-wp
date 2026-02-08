@@ -90,15 +90,10 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
             {article.title}
           </p>
           
-          {/* Action links */}
-          <div className="flex items-center gap-3 mt-4">
-            <span className="text-xs text-white/50 border border-white/20 rounded-full px-3 py-1 flex items-center gap-1">
-              Read <ExternalLink className="h-3 w-3" />
-            </span>
-            <span className="text-xs text-white/50">
-              {formatRelativeTime(article.created_at)}
-            </span>
-          </div>
+          {/* Date */}
+          <p className="text-xs text-white/50 mt-4">
+            {formatRelativeTime(article.created_at)}
+          </p>
         </div>
         
         {/* Featured Image - fixed height for consistency */}
@@ -114,10 +109,15 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
           )}
         </div>
         
-        {/* Footer info */}
-        <div className="px-5 py-3 bg-[#1d1d1f]">
-          <p className="text-white/40 text-xs font-medium">Published</p>
-          <p className="text-white/60 text-xs">{article.published_to_name}</p>
+        {/* Footer info with Read button */}
+        <div className="px-5 py-3 bg-[#1d1d1f] flex items-end justify-between">
+          <div>
+            <p className="text-white/40 text-xs font-medium">Published</p>
+            <p className="text-white/60 text-xs">{article.published_to_name}</p>
+          </div>
+          <span className="text-xs text-white/50 border border-white/20 rounded-full px-3 py-1">
+            Read
+          </span>
         </div>
       </div>
     </a>
