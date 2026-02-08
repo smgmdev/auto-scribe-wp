@@ -657,6 +657,9 @@ export function AgencyPayoutsView() {
                               <Copy className="h-3 w-3" />
                             </button>
                           </div>
+                          <p className="text-xs text-muted-foreground">
+                            Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                          </p>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -679,9 +682,6 @@ export function AgencyPayoutsView() {
                           >
                             See transaction details
                           </button>
-                          <p className="text-xs text-muted-foreground">
-                            Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
-                          </p>
                           <p className="md:hidden mt-2 font-semibold text-green-500">
                             +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
