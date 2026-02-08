@@ -634,14 +634,6 @@ export function AdminAgencyWithdrawalsView() {
                               ) : (
                                 <p>Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
                               )}
-                              <p>
-                                Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                              {withdrawal.processed_at && (
-                                <p>
-                                  Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
-                                </p>
-                              )}
                             </div>
                             
                             {/* Action Buttons for pending */}
@@ -687,9 +679,17 @@ export function AdminAgencyWithdrawalsView() {
                       {/* Expanded Details */}
                       {expandedCards[withdrawal.id] && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-2 space-y-2">
+                          <div className="pt-2 space-y-2 text-xs text-muted-foreground">
+                            <p>
+                              <span className="font-medium">Submitted:</span> {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            {withdrawal.processed_at && (
+                              <p>
+                                <span className="font-medium">Processed:</span> {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            )}
                             {withdrawal.admin_notes && (
-                              <p className="text-xs text-muted-foreground">
+                              <p>
                                 <span className="font-medium">Note:</span> {withdrawal.admin_notes}
                               </p>
                             )}
