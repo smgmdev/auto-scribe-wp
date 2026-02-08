@@ -142,15 +142,15 @@ export function AddMediaSiteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="w-full max-w-full space-y-6 pt-4">
-          <div className="space-y-4">
-            <div className="w-full max-w-full p-4 bg-muted/50 rounded-lg border border-border/50 space-y-3 overflow-hidden">
-              <p className="text-sm text-foreground">
+        <form onSubmit={handleSubmit} className="w-full space-y-6 pt-4 overflow-hidden">
+          <div className="space-y-4 overflow-hidden">
+            <div className="w-full p-3 md:p-4 bg-muted/50 rounded-lg border border-border/50 space-y-3 overflow-hidden">
+              <p className="text-xs md:text-sm text-foreground break-words">
                 Submit your media list via Google Sheet. Please use the sample template below as a reference for setting up your own sheet.
               </p>
               
-              <div className="flex w-full max-w-full items-center gap-2 overflow-hidden">
-                <div className="flex-1 min-w-0 text-xs text-muted-foreground bg-background rounded px-3 py-2 border border-border overflow-hidden">
+              <div className="flex w-full items-center gap-2 overflow-hidden">
+                <div className="flex-1 min-w-0 text-xs text-muted-foreground bg-background rounded px-2 md:px-3 py-2 border border-border overflow-hidden">
                   <span className="block truncate">docs.google.com/spreadsheets/d/1NrwNb...</span>
                 </div>
                 <Button
@@ -158,12 +158,12 @@ export function AddMediaSiteDialog({
                   variant="outline"
                   size="icon"
                   onClick={handleCopyLink}
-                  className="shrink-0 hover:!bg-foreground hover:!text-background"
+                  className="shrink-0 h-8 w-8 md:h-9 md:w-9 hover:!bg-foreground hover:!text-background"
                 >
                   {copied ? (
-                    <Check className="h-4 w-4" />
+                    <Check className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   ) : (
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   )}
                 </Button>
                 <Button
@@ -171,9 +171,9 @@ export function AddMediaSiteDialog({
                   variant="outline"
                   size="icon"
                   onClick={handleOpenSampleSheet}
-                  className="shrink-0 hover:!bg-foreground hover:!text-background"
+                  className="shrink-0 h-8 w-8 md:h-9 md:w-9 hover:!bg-foreground hover:!text-background"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </Button>
               </div>
             </div>
