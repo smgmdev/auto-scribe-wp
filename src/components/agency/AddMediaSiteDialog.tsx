@@ -192,19 +192,19 @@ export function AddMediaSiteDialog({
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-3 pt-4">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 pt-4">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="hover:!bg-foreground hover:!text-background"
+              className="w-full md:w-auto hover:!bg-foreground hover:!text-background"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="border border-transparent hover:!bg-transparent hover:!text-foreground hover:!border-foreground"
+              className="w-full md:w-auto bg-black text-white border border-transparent hover:!bg-transparent hover:!text-black hover:!border-black transition-all"
             >
               {isSubmitting ? (
                 <>
