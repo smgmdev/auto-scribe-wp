@@ -1160,8 +1160,8 @@ export function ComposeView() {
       <div className="max-w-[980px] mx-auto space-y-4 relative">
       {/* Publishing Overlay */}
       {isPublishing && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
             <Loader2 className="h-10 w-10 animate-spin text-accent" />
             <div className="text-center">
               <p className="text-lg font-medium text-foreground">Publishing Article...</p>
