@@ -44,14 +44,14 @@ export function MainLayout({
         
         {/* Global Footer */}
         <footer className="border-t border-border bg-muted/30 py-4 px-4 lg:px-8 mb-[50px]">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>© 2026 Arcana Mace. All rights reserved.</span>
-            <div className="flex items-center gap-4">
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link to="/help" className="hover:text-foreground transition-colors">Help Center</Link>
-              <Link to="/system-status" className="hover:text-foreground transition-colors">System Status</Link>
-              <Link to="/sitemap" className="hover:text-foreground transition-colors">Site Map</Link>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground">
+            <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <Link to="/terms" className="hover:text-foreground transition-colors text-left">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors text-left">Privacy Policy</Link>
+              <Link to="/help" className="hover:text-foreground transition-colors text-left">Help Center</Link>
+              <Link to="/system-status" className="hover:text-foreground transition-colors text-left">System Status</Link>
+              <Link to="/sitemap" className="hover:text-foreground transition-colors text-left">Site Map</Link>
             </div>
           </div>
         </footer>
