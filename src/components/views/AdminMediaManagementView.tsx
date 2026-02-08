@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { getFaviconUrl, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -548,6 +549,9 @@ export function AdminMediaManagementView() {
     setUnreadMediaSubmissionsCount(totalUnread);
 
     setLoading(false);
+    if (isRefresh) {
+      sonnerToast.success('Media refreshed');
+    }
     setIsRefreshing(false);
   };
 

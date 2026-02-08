@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -396,9 +397,11 @@ export function AdminOrdersView() {
     }
   }, [loading, orders]);
 
-  const handleRefresh = () => {
-    fetchOrders(true);
-    fetchDisputedOrders();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([fetchOrders(true), fetchDisputedOrders()]);
+    setIsRefreshing(false);
+    sonnerToast.success('Orders refreshed');
   };
 
   // Mark order as read when viewing details

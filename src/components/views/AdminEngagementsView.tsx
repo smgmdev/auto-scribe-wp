@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { format, isPast, differenceInSeconds } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
@@ -275,6 +276,9 @@ export function AdminEngagementsView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setLoading(false);
+      if (isRefresh) {
+        sonnerToast.success('Engagements refreshed');
+      }
       setIsRefreshing(false);
     }
   };

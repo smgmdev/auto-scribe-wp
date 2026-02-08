@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
+import { toast as sonnerToast } from 'sonner';
 import amblack from '@/assets/amblack.png';
 
 interface ServiceStatus {
@@ -148,6 +149,9 @@ export default function SystemStatus() {
       ]);
     } finally {
       setIsLoading(false);
+      if (showRefresh) {
+        sonnerToast.success('Status refreshed');
+      }
       setIsRefreshing(false);
     }
   }, []);
