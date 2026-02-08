@@ -124,7 +124,7 @@ export function SettingsView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Settings
@@ -134,7 +134,7 @@ export function SettingsView() {
           </p>
         </div>
         <Button 
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
+          className="w-full lg:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
           onClick={handleSave} 
           disabled={isSaving}
         >
