@@ -760,7 +760,13 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.totalSpent.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Total amount spent on completed purchase orders.</TooltipContent>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p className="font-medium mb-1">Total credits spent on orders and other usage</p>
+                                          <p><span className="opacity-70">Total spent on completed purchase orders:</span> {user.totalSpent.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Total spent on deductions:</span> {user.deductions.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipContent>
                                     </Tooltip>
                                   </div>
                                   <UserTransactionsExpanded userId={user.user_id} />
