@@ -305,7 +305,7 @@ export function DashboardView() {
       <Card className="border-border/50 bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl">My Recent Articles</CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="text-muted-foreground hover:bg-black hover:text-white">
+          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="hidden md:flex text-muted-foreground hover:bg-black hover:text-white">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
@@ -323,9 +323,15 @@ export function DashboardView() {
               ))}
             </div>
           ) : articles.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No articles yet. Start by scanning headlines or writing a new article.
-            </p>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                No articles yet. Start by scanning headlines or writing a new article.
+              </p>
+              <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="md:hidden text-muted-foreground hover:bg-black hover:text-white w-full justify-center">
+                View All
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
           ) : (
             <ul className="space-y-2">
               {articles.slice(0, 3).map(article => {
