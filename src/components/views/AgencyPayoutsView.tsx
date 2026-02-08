@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -614,9 +614,7 @@ export function AgencyPayoutsView() {
                             {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
-                            <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
-                              {getCardIcon()}
-                            </div>
+                            {getCardIcon()}
                             <div className="flex-1">
                               <p className="font-medium">
                                 {getCardTitle()}
@@ -691,9 +689,7 @@ export function AgencyPayoutsView() {
                             +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
-                            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
-                              <ArrowDownLeft className="h-5 w-5 text-green-500" />
-                            </div>
+                            <ArrowUpCircle className="h-5 w-5 text-green-500" />
                             <div className="flex-1">
                               <p className="font-medium">
                                 Credited: {order.media_site?.name || 'Order Earning'}
