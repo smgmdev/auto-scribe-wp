@@ -1,8 +1,9 @@
 import { ReactNode, useState } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
+import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
 
 interface MainLayoutProps {
@@ -13,6 +14,7 @@ export function MainLayout({
   children
 }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const navigate = useNavigate();
 
   return <div className="min-h-screen bg-background">
@@ -28,6 +30,9 @@ export function MainLayout({
           <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
           <span className="ml-2 text-lg font-semibold text-white">Arcana Mace</span>
         </button>
+        <Button variant="ghost" size="icon" onClick={() => setShowSearchModal(true)} className="absolute right-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
+          <Search className="h-5 w-5" />
+        </Button>
       </header>
 
       {/* Mobile Overlay */}
@@ -35,6 +40,9 @@ export function MainLayout({
 
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {/* Search Modal */}
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
       <main className="lg:pl-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
