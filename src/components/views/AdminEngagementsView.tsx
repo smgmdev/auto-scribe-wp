@@ -713,22 +713,20 @@ export function AdminEngagementsView() {
                             <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
                           </div>
                         </div>
-                        <div className="mt-2 flex items-end justify-between">
-                          <div className="space-y-0.5">
-                            <span className="text-xs text-muted-foreground">
-                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                            <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>Last Message: {messages[r.id]?.length > 0 
-                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                                : 'No messages'}</span>
-                              {messages[r.id]?.length > 0 && (
-                                <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                        <div className="mt-2 space-y-0.5">
+                          <span className="text-xs text-muted-foreground">
+                            Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                          </span>
+                          <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>Last Message: {messages[r.id]?.length > 0 
+                              ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
+                              : 'No messages'}</span>
+                            {messages[r.id]?.length > 0 && (
+                              <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                            )}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                             {r.media_sites?.publication_format && (
                               <span className="capitalize">{r.media_sites.publication_format}</span>
                             )}
