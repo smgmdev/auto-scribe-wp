@@ -1615,7 +1615,7 @@ export function AgencyRequestsView() {
 
             <TabsContent value="closed" className="mt-2">
               <Tabs value={closedSubTab} onValueChange={(v) => setClosedSubTab(v as 'delivered' | 'cancelled')} className="w-full">
-                <TabsList className="flex w-full overflow-x-auto md:w-auto md:max-w-xs scrollbar-hide justify-start">
+                <TabsList className="grid w-full grid-cols-2 md:max-w-md">
                   <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                     <CheckCircle className="h-4 w-4" />
                     Completed ({completedRequests.length})
