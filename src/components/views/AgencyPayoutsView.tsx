@@ -579,7 +579,7 @@ export function AgencyPayoutsView() {
                               e.stopPropagation();
                               navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
                             }}
-                            className="text-xs text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1 w-fit mt-1"
+                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit mt-1"
                           >
                             See transaction details
                           </button>
@@ -676,7 +676,7 @@ export function AgencyPayoutsView() {
                               e.stopPropagation();
                               navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
                             }}
-                            className="text-xs text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1 w-fit"
+                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                           >
                             See transaction details
                           </button>
