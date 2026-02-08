@@ -1217,6 +1217,13 @@ export function AgencyMediaView() {
                                               <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0 md:hidden">
                                                 <span>via</span>
                                                 <span className="text-foreground">{agencyName}</span>
+                                                {agencyLogo && (
+                                                  <img 
+                                                    src={agencyLogo} 
+                                                    alt={agencyName} 
+                                                    className="h-4 w-4 object-contain rounded-full"
+                                                  />
+                                                )}
                                               </div>
                                             )}
                                           </div>
