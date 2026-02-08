@@ -1164,7 +1164,7 @@ export function ComposeView() {
           <Loader2 className="h-10 w-10 animate-spin text-accent" />
           <div className="text-center">
             <p className="text-lg font-medium text-foreground">Publishing Article...</p>
-            <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published</p>
+            <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being published. Don't close the window.</p>
           </div>
         </div>
       </div>
