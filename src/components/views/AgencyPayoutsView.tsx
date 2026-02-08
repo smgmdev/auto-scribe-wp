@@ -541,7 +541,7 @@ export function AgencyPayoutsView() {
                         return <CheckCircle className="h-5 w-5 text-green-600" />;
                       }
                       if (withdrawal.status === 'rejected') {
-                        return <XCircle className="h-5 w-5 text-destructive" />;
+                        return <XCircle className="h-5 w-5 text-muted-foreground" />;
                       }
                       return <ArrowUpRight className="h-5 w-5 text-amber-600" />;
                     };
@@ -551,7 +551,7 @@ export function AgencyPayoutsView() {
                         return 'bg-green-500/20';
                       }
                       if (withdrawal.status === 'rejected') {
-                        return 'bg-destructive/20';
+                        return 'bg-muted';
                       }
                       return 'bg-amber-500/20';
                     };
