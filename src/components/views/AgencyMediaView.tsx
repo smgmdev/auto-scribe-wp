@@ -1145,8 +1145,8 @@ export function AgencyMediaView() {
                                           <div className="min-w-0 flex-1">
                                             <h3 className="text-sm break-words">{site.name}</h3>
                                             {/* Mobile: Price and format under name */}
-                                            <div className="flex flex-col gap-1 mt-1 md:hidden">
-                                              <Badge variant="secondary" className="text-xs whitespace-nowrap w-fit">
+                                            <div className="flex items-center gap-2 mt-1 md:hidden">
+                                              <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
                                               <span className="text-xs text-muted-foreground">{site.publication_format}</span>
