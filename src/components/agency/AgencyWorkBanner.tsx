@@ -10,7 +10,7 @@ export function AgencyWorkBanner() {
       />
       <div className="absolute inset-0 flex items-center justify-center">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
-          Agency at Work.
+          Agency on Arcana Mace.
         </h2>
       </div>
     </section>
