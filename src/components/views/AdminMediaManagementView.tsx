@@ -2252,10 +2252,6 @@ export function AdminMediaManagementView() {
                                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                                             </p>
                                           )}
-                                          {/* Publication format on mobile */}
-                                          <p className="text-xs text-muted-foreground md:hidden">
-                                            {site.publication_format}
-                                          </p>
                                           {/* Link at the bottom */}
                                           <a 
                                             href={ensureHttps(site.link)}
