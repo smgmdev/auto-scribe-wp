@@ -459,6 +459,17 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
+      {/* Start Application Button */}
+      <div className="text-center">
+        <Button 
+          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+          onClick={() => setDialogOpen(true)}
+          disabled={existingApplication?.status === 'pending'}
+        >
+          {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+        </Button>
+      </div>
+
       {/* Hero Video Section */}
       <div className="w-full overflow-hidden rounded-2xl">
         <video 
@@ -469,17 +480,6 @@ export function AgencyApplicationView() {
           playsInline
           className="w-full h-auto object-cover"
         />
-      </div>
-
-      {/* Start Application Button */}
-      <div className="text-center">
-        <Button 
-          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
-          onClick={() => setDialogOpen(true)}
-          disabled={existingApplication?.status === 'pending'}
-        >
-          {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-        </Button>
       </div>
 
       <ExploreNetworkGrid />
