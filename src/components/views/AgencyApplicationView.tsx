@@ -16,6 +16,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
+import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
 
 const faqItems = [
   {
@@ -457,6 +458,8 @@ export function AgencyApplicationView() {
           </Button>
         </div>
       </div>
+
+      <ExploreNetworkGrid />
 
       <ConnectEarnCarousel />
 
