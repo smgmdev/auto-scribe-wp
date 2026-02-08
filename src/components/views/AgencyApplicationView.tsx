@@ -495,7 +495,7 @@ export function AgencyApplicationView() {
         <ExploreNetworkGrid dark />
         </div>
 
-        <AgencyWorkBanner />
+        <AgencyWorkBanner onApplyClick={() => setDialogOpen(true)} />
 
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 space-y-8">
             <ConnectEarnCarousel />
