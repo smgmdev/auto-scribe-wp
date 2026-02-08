@@ -1144,27 +1144,12 @@ export function AgencyMediaView() {
                                           </div>
                                           <div className="min-w-0 flex-1">
                                             <h3 className="text-sm break-words">{site.name}</h3>
-                                            {/* Mobile: Price, format, and agency under name */}
+                                            {/* Mobile: Price and format under name */}
                                             <div className="flex flex-col gap-1 mt-1 md:hidden">
                                               <Badge variant="secondary" className="text-xs whitespace-nowrap w-fit">
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
-                                              <div className="flex items-center flex-wrap text-xs text-muted-foreground">
-                                                <span>{site.publication_format}</span>
-                                                {agencyName && (
-                                                  <>
-                                                    <span className="mx-1">via</span>
-                                                    <span className="text-foreground">{agencyName}</span>
-                                                    {agencyLogo && (
-                                                      <img 
-                                                        src={agencyLogo} 
-                                                        alt={agencyName} 
-                                                        className="hidden md:block h-4 w-4 object-contain rounded-full ml-1"
-                                                      />
-                                                    )}
-                                                  </>
-                                                )}
-                                              </div>
+                                              <span className="text-xs text-muted-foreground">{site.publication_format}</span>
                                             </div>
                                           </div>
                                           {/* Mobile chevron */}
@@ -1217,16 +1202,24 @@ export function AgencyMediaView() {
                                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                                             </p>
                                           )}
-                                          {/* Link at the bottom */}
-                                          <a 
-                                            href={ensureHttps(site.link)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-                                          >
-                                            <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                          </a>
+                                          {/* Link and agency on mobile */}
+                                          <div className="flex items-center justify-between gap-2">
+                                            <a 
+                                              href={ensureHttps(site.link)}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 min-w-0"
+                                            >
+                                              <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                            </a>
+                                            {agencyName && (
+                                              <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0 md:hidden">
+                                                <span>via</span>
+                                                <span className="text-foreground">{agencyName}</span>
+                                              </div>
+                                            )}
+                                          </div>
                                         </div>
                                       )}
                                     </CardContent>
