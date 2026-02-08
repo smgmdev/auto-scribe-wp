@@ -588,12 +588,7 @@ export function AdminAgencyWithdrawalsView() {
                           {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="cursor-help">
-                                  <p>Method: Bank Transfer</p>
-                                  <p className="text-foreground underline decoration-dotted">
-                                    {withdrawal.bank_details.bank_name || 'Bank'} - {withdrawal.bank_details.bank_account_holder || 'N/A'}
-                                  </p>
-                                </div>
+                                <p className="cursor-help underline decoration-dotted">Method: Bank Transfer</p>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-xs">
                                 <div className="space-y-1 text-xs">
@@ -614,12 +609,7 @@ export function AdminAgencyWithdrawalsView() {
                           ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="cursor-help">
-                                  <p>Method: USDT (Crypto)</p>
-                                  <p className="text-foreground underline decoration-dotted">
-                                    {withdrawal.crypto_details.usdt_network || 'TRC20'} Network
-                                  </p>
-                                </div>
+                                <p className="cursor-help underline decoration-dotted">Method: USDT (Crypto)</p>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="max-w-sm">
                                 <div className="space-y-1 text-xs">
