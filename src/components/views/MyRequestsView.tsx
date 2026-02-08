@@ -1423,15 +1423,15 @@ export function MyRequestsView() {
                             <div className="flex items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
+                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
                                   Completed: {request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
                                   <span className="hidden md:inline">
                                     {requestMessages.length > 0 && (
                                       <span> • {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}</span>
                                     )}
                                   </span>
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                                 {requestMessages.length > 0 && (
                                   <p className="text-xs text-muted-foreground block md:hidden">
