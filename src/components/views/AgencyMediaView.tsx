@@ -1014,18 +1014,18 @@ export function AgencyMediaView() {
                         onClick={() => toggleExpandedApprovedSubmission(submission.id)}
                       >
                         <CardContent className="p-3">
+                          {/* Badge - visible on mobile only, above the icon */}
+                          <div className="flex items-center gap-2 mb-2 md:hidden">
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              {submission.imported_sites?.length || 0} sites added
+                            </Badge>
+                          </div>
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3 min-w-0 flex-1">
                               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
                                 <CheckCircle className="h-5 w-5 text-green-500" />
                               </div>
                               <div className="min-w-0 flex-1 space-y-0">
-                                {/* Badge - visible on mobile only, above the title */}
-                                <div className="flex items-center gap-2 mb-1 md:hidden">
-                                  <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                    {submission.imported_sites?.length || 0} sites added
-                                  </Badge>
-                                </div>
                                 <div className="flex items-center gap-1.5">
                                   <p className="font-medium text-sm truncate leading-tight">
                                     {submission.rejected_media && submission.rejected_media.length > 0 
