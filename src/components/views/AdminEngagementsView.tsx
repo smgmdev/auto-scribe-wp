@@ -549,7 +549,8 @@ export function AdminEngagementsView() {
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Global Engagements</h2>
@@ -820,6 +821,7 @@ export function AdminEngagementsView() {
           </Tabs>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
