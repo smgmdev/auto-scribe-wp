@@ -192,7 +192,7 @@ export function AddMediaSiteDialog({
             </div>
           </div>
 
-          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 pt-4">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 pt-2">
             <Button 
               type="button" 
               variant="outline" 
