@@ -1092,7 +1092,7 @@ export function SitesView() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Link and Publish Now button row */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <a 
                   href={site.url}
                   target="_blank"
@@ -1104,7 +1104,7 @@ export function SitesView() {
                 </a>
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden"
+                  className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-gray-800 transition-all duration-200 overflow-hidden w-full md:w-auto"
                   onClick={() => {
                     useAppStore.getState().setPreselectedSiteId(site.id);
                     useAppStore.getState().setCurrentView('compose');
