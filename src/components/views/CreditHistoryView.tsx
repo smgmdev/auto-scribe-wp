@@ -373,16 +373,15 @@ export function CreditHistoryView() {
     if (error) {
       console.error('Error fetching transactions:', error);
     } else {
-      setTransactions(data || []);
+      let transactionsWithDates = data || [];
+      const withdrawalDetailsMap: Record<string, any> = {};
       
       // Pre-fetch withdrawal details for completed/rejected withdrawals
-      const withdrawalTransactionsToFetch = (data || []).filter(
+      const withdrawalTransactionsToFetch = transactionsWithDates.filter(
         t => t.type === 'withdrawal_completed' || t.type === 'withdrawal_unlocked'
       );
       
       if (withdrawalTransactionsToFetch.length > 0) {
-        const withdrawalDetailsMap: Record<string, any> = {};
-        
         for (const tx of withdrawalTransactionsToFetch) {
           const amountCents = Math.abs(tx.amount);
           const isBank = tx.description?.includes('Bank Transfer');
@@ -408,6 +407,15 @@ export function CreditHistoryView() {
         
         setWithdrawalDetails(prev => ({ ...prev, ...withdrawalDetailsMap }));
       }
+      
+      // Sort transactions by the actual event date (processed_at for withdrawals, created_at for others)
+      transactionsWithDates.sort((a, b) => {
+        const dateA = withdrawalDetailsMap[a.id]?.processed_at || a.created_at;
+        const dateB = withdrawalDetailsMap[b.id]?.processed_at || b.created_at;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
+      
+      setTransactions(transactionsWithDates);
     }
     setLoading(false);
   }, [user]);
