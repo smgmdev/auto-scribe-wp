@@ -1137,21 +1137,21 @@ export function AdminOrdersView() {
                     <div className="flex items-end justify-between">
                       <div className="space-y-0.5">
                         <span className="text-xs text-muted-foreground block">
-                          Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                          Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                         {order.status === 'cancelled' && (
                           <span className="text-xs text-muted-foreground block">
-                            Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                            Order Cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         )}
                         {order.delivery_status === 'pending_revision' && order.delivered_at && (
                           <span className="text-xs text-muted-foreground block">
-                            Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                            Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         )}
                         {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && (
                           <span className="text-xs text-muted-foreground block">
-                            {revisionOrderIds.has(order.id) || disputedOrderIds.has(order.id) && revisionOrderIds.has(order.id) ? 'Last order delivery:' : 'Order delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                            {revisionOrderIds.has(order.id) || disputedOrderIds.has(order.id) && revisionOrderIds.has(order.id) ? 'Last Order Delivery:' : 'Order Delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         )}
                       </div>
