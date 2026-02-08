@@ -609,14 +609,14 @@ export function AdminEngagementsView() {
                   <div className="md:hidden absolute top-2 right-3 flex gap-1 flex-wrap justify-end">
                     {getEngagementBadge(r)}
                     {!r.order_id && hasPendingOfferSent(r.id) && (
-                      <Badge className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5">
-                        <Tag className="h-2.5 w-2.5 mr-0.5" />
+                      <Badge className="bg-blue-600 text-white">
+                        <Tag className="h-3 w-3 mr-1" />
                         Offer Sent
                       </Badge>
                     )}
                     {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
-                      <Badge className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5">
-                        <Tag className="h-2.5 w-2.5 mr-0.5" />
+                      <Badge className="bg-blue-600 text-white">
+                        <Tag className="h-3 w-3 mr-1" />
                         Client Order Request
                       </Badge>
                     )}
@@ -750,8 +750,8 @@ export function AdminEngagementsView() {
                       
                       {/* Mobile: Badge at top-right above title */}
                       <div className="md:hidden absolute top-2 right-3">
-                        <Badge className="bg-green-600 text-[10px] px-1.5 py-0.5">
-                          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+                        <Badge className="bg-green-600">
+                          <CheckCircle className="h-3 w-3 mr-1" />
                           Completed
                         </Badge>
                       </div>
@@ -856,7 +856,7 @@ export function AdminEngagementsView() {
                         
                         {/* Mobile: Badge at top-right above title */}
                         <div className="md:hidden absolute top-2 right-3">
-                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] px-1.5 py-0.5">
+                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
                             Cancelled
                           </Badge>
                         </div>
