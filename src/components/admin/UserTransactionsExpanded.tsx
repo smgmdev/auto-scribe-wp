@@ -379,7 +379,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           })}
         </TabsList>
 
-        <div className="rounded-md border bg-background">
+        <div className="bg-background">
           <Table>
             <TableHeader>
               <TableRow>
