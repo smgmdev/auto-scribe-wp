@@ -18,6 +18,7 @@ import {
 import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
 import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
 import { AgencyWorkBanner } from '@/components/agency/AgencyWorkBanner';
+import { Footer } from '@/components/layout/Footer';
 import agencyHeroVideo from '@/assets/agency-hero.mp4';
 
 const faqItems = [
@@ -581,6 +582,8 @@ export function AgencyApplicationView() {
         </Card>
       )}
           </div>
+          
+          <Footer dark narrow />
         </div>
       </div>
 

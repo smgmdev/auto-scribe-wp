@@ -2,7 +2,7 @@ import agencyWorkBanner from '@/assets/agency-work-banner.jpg';
 
 export function AgencyWorkBanner() {
   return (
-    <section className="relative h-[300px] md:h-[400px] overflow-hidden rounded-b-[40px] my-8">
+    <section className="relative h-[300px] md:h-[400px] overflow-hidden rounded-b-[40px] mb-0">
         <img 
           src={agencyWorkBanner} 
           alt="Go PRO with Arcana Mace" 
