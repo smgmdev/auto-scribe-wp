@@ -159,27 +159,47 @@ export function DashboardView() {
   };
   return <div className="space-y-2 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+        <div className="order-2 md:order-1">
           <h1 className="text-4xl font-bold text-foreground">
             Dashboard
           </h1>
+          {/* Badge on mobile - shown above description */}
+          <div className="md:hidden mt-2">
+            {agencyStatusLoading ? (
+              <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
+                <Loader2 className="h-3 w-3 animate-spin" />
+              </Badge>
+            ) : isAgency ? (
+              <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black w-fit">
+                <CheckCircle className="h-3 w-3" />
+                Active Agency
+              </Badge>
+            ) : (
+              <Badge className="bg-black text-white border-black hover:bg-black">
+                {isAdmin ? 'Corporate' : 'Regular user'}
+              </Badge>
+            )}
+          </div>
           <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
-        {agencyStatusLoading ? (
-          <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
-            <Loader2 className="h-3 w-3 animate-spin" />
-          </Badge>
-        ) : isAgency ? (
-          <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black">
-            <CheckCircle className="h-3 w-3" />
-            Active Agency
-          </Badge>
-        ) : (
-          <Badge className="bg-black text-white border-black hover:bg-black">
-            {isAdmin ? 'Corporate' : 'Regular user'}
-          </Badge>
-        )}
+        {/* Badge on desktop - shown to the right */}
+        <div className="hidden md:block order-1 md:order-2">
+          {agencyStatusLoading ? (
+            <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
+              <Loader2 className="h-3 w-3 animate-spin" />
+            </Badge>
+          ) : isAgency ? (
+            <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black">
+              <CheckCircle className="h-3 w-3" />
+              Active Agency
+            </Badge>
+          ) : (
+            <Badge className="bg-black text-white border-black hover:bg-black">
+              {isAdmin ? 'Corporate' : 'Regular user'}
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -189,18 +209,18 @@ export function DashboardView() {
           const cardContent = (
             <Card 
               key={stat.key} 
-              className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
+              className={`border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 ${stat.clickable ? 'cursor-pointer hover:border-[#4771d9]' : 'hover:border-border/50'}`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => stat.clickable && handleStatClick(stat.key)}
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {stat.label}
                 </CardTitle>
                 <Icon className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
-              <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-foreground">
+              <CardContent className="pt-0 pb-0 px-3 md:px-4">
+                <div className="text-xl md:text-2xl font-semibold text-foreground">
                   {isDataLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
