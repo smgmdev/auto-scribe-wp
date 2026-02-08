@@ -1214,81 +1214,108 @@ export function MyRequestsView() {
                   const hasUnread = !request.read;
                   const { eventName, eventTime } = getLastEventInfo(request);
                   
-                  return (
-                    <Card 
-                      key={request.id} 
-                      className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
-                        hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
-                      }`}
-                      onClick={() => handleCardClick(request)}
-                    >
-                      <CardHeader className="pb-2 px-4 pt-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="relative">
-                              {request.media_site?.favicon ? (
-                                <img 
-                                  src={request.media_site.favicon} 
-                                  alt="" 
-                                  className="h-8 w-8 rounded object-cover"
-                                />
-                              ) : (
-                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                                </div>
+                    const requestMessages = messages[request.id] || [];
+                    
+                    return (
+                      <Card 
+                        key={request.id} 
+                        className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                          hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
+                        }`}
+                        onClick={() => handleCardClick(request)}
+                      >
+                        <CardHeader className="pb-2 px-4 pt-3">
+                          {/* Mobile: Badge on top right */}
+                          <div className="flex md:hidden justify-end mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {!request.order && hasPendingOffer(request.id) && (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Received an Offer
+                                </Badge>
                               )}
-                              {hasUnread && (
-                                <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                              {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Order Request Sent
+                                </Badge>
                               )}
-                            </div>
-                            <div className="flex flex-col">
-                              <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                              {request.media_site?.agency && (
-                                <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
-                              )}
+                              {getOrderPlacedBadge(request)}
+                              {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestPending(request.id) && getStatusBadge(request.status)}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {!request.order && hasPendingOffer(request.id) && (
-                              <Badge className="bg-blue-600 text-white">
-                                <Tag className="h-3 w-3 mr-1" />
-                                Received an Offer
-                              </Badge>
-                            )}
-                            {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
-                              <Badge className="bg-blue-600 text-white">
-                                <Tag className="h-3 w-3 mr-1" />
-                                Order Request Sent
-                              </Badge>
-                            )}
-                            {getOrderPlacedBadge(request)}
-                            {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestPending(request.id) && getStatusBadge(request.status)}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0 pb-3 px-4">
-                        <div className="flex items-end justify-between">
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              <span>Last event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                {request.media_site?.favicon ? (
+                                  <img 
+                                    src={request.media_site.favicon} 
+                                    alt="" 
+                                    className="h-8 w-8 rounded object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                                {hasUnread && (
+                                  <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-blue-500 rounded-full border-2 border-card" />
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
+                                {request.media_site?.agency && (
+                                  <span className="text-xs text-muted-foreground">via {request.media_site.agency}</span>
+                                )}
+                              </div>
                             </div>
-                            <span className="text-xs text-muted-foreground">
-                              Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
+                            {/* Desktop: Badge inline */}
+                            <div className="hidden md:flex items-center gap-2 flex-wrap">
+                              {!request.order && hasPendingOffer(request.id) && (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Received an Offer
+                                </Badge>
+                              )}
+                              {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
+                                <Badge className="bg-blue-600 text-white">
+                                  <Tag className="h-3 w-3 mr-1" />
+                                  Order Request Sent
+                                </Badge>
+                              )}
+                              {getOrderPlacedBadge(request)}
+                              {!request.order && !hasPendingOffer(request.id) && !hasClientOrderRequestPending(request.id) && getStatusBadge(request.status)}
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
-                            {request.media_site?.publication_format && (
-                              <span className="capitalize">{request.media_site.publication_format}</span>
-                            )}
-                            {request.media_site?.price !== undefined && (
-                              <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
-                            )}
+                        </CardHeader>
+                        <CardContent className="pt-0 pb-3 px-4">
+                          <div className="flex items-end justify-between">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                <span>Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground block">
+                                Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                              {requestMessages.length > 0 && (
+                                <span className="text-xs text-muted-foreground block md:hidden">
+                                  {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                              {request.media_site?.publication_format && (
+                                <span className="capitalize">{request.media_site.publication_format}</span>
+                              )}
+                              {request.media_site?.price !== undefined && (
+                                <span className="font-medium text-foreground text-sm">${request.media_site.price}</span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
+                        </CardContent>
+                      </Card>
+                    );
                 })}
               </div>
             )}
@@ -1340,6 +1367,13 @@ export function MyRequestsView() {
                           onClick={() => handleCardClick(request)}
                         >
                           <CardHeader className="pb-2 px-4 pt-3">
+                            {/* Mobile: Badge on top right */}
+                            <div className="flex md:hidden justify-end mb-2">
+                              <Badge className="bg-green-600 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Completed
+                              </Badge>
+                            </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="relative">
@@ -1365,7 +1399,8 @@ export function MyRequestsView() {
                                   )}
                                 </div>
                               </div>
-                              <Badge className="bg-green-600 text-white">
+                              {/* Desktop: Badge inline */}
+                              <Badge className="hidden md:flex bg-green-600 text-white">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Completed
                               </Badge>
@@ -1376,13 +1411,20 @@ export function MyRequestsView() {
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
                                   Completed: {request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
-                                  {requestMessages.length > 0 && (
-                                    <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                  )}
+                                  <span className="hidden md:inline">
+                                    {requestMessages.length > 0 && (
+                                      <span> • {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}</span>
+                                    )}
+                                  </span>
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
+                                {requestMessages.length > 0 && (
+                                  <p className="text-xs text-muted-foreground block md:hidden">
+                                    {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
+                                  </p>
+                                )}
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                 {request.media_site?.publication_format && (
@@ -1424,6 +1466,12 @@ export function MyRequestsView() {
                           onClick={() => handleCardClick(request)}
                         >
                           <CardHeader className="pb-2 px-4 pt-3">
+                            {/* Mobile: Badge on top right */}
+                            <div className="flex md:hidden justify-end mb-2">
+                              <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                                Cancelled
+                              </Badge>
+                            </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="relative">
@@ -1449,7 +1497,8 @@ export function MyRequestsView() {
                                   )}
                                 </div>
                               </div>
-                              <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
+                              {/* Desktop: Badge inline */}
+                              <Badge className="hidden md:flex bg-muted text-muted-foreground border-muted-foreground/30">
                                 Cancelled
                               </Badge>
                             </div>
@@ -1459,13 +1508,20 @@ export function MyRequestsView() {
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
                                   Cancelled Engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                                  {requestMessages.length > 0 && (
-                                    <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                  )}
+                                  <span className="hidden md:inline">
+                                    {requestMessages.length > 0 && (
+                                      <span> • {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}</span>
+                                    )}
+                                  </span>
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
+                                {requestMessages.length > 0 && (
+                                  <p className="text-xs text-muted-foreground block md:hidden">
+                                    {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
+                                  </p>
+                                )}
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                 {request.media_site?.publication_format && (
