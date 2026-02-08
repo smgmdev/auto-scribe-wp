@@ -481,15 +481,14 @@ export function AgencyApplicationView() {
       </div>
 
       {/* Spacer for the fixed video */}
-      <div className="h-[60vh]" />
+      <div className="h-[70vh]" />
 
       {/* Content that scrolls over the video */}
-      <div className="relative z-10">
-        {/* Dark gradient transition */}
-        <div className="h-32 bg-gradient-to-b from-black/60 via-black/30 to-white" />
+      <div className="relative z-10 bg-white">
+        {/* Dark gradient transition at top */}
+        <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-black/70 pointer-events-none" />
         
-        <div className="bg-white">
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
@@ -575,7 +574,6 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
-          </div>
         </div>
       </div>
 
