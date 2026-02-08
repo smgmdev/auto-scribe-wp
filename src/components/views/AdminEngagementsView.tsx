@@ -628,7 +628,7 @@ export function AdminEngagementsView() {
                         )}
                         <div className="flex flex-col">
                           <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
-                          <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
+                          <span className="text-xs text-muted-foreground">via {r.agency_payouts?.agency_name || 'N/A'}</span>
                         </div>
                       </div>
                       {/* Desktop: Badge at right side */}
@@ -762,7 +762,7 @@ export function AdminEngagementsView() {
                             )}
                             <div className="flex flex-col">
                               <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
-                              <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
+                              <span className="text-xs text-muted-foreground">via {r.agency_payouts?.agency_name || 'N/A'}</span>
                             </div>
                           </div>
                           {/* Desktop: Badge at right side */}
@@ -871,7 +871,7 @@ export function AdminEngagementsView() {
                               )}
                               <div className="flex flex-col">
                                 <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
-                                <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
+                                <span className="text-xs text-muted-foreground">via {r.agency_payouts?.agency_name || 'N/A'}</span>
                               </div>
                             </div>
                             {/* Desktop: Badge at right side */}
