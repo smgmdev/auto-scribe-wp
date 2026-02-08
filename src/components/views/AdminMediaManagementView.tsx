@@ -2252,30 +2252,32 @@ export function AdminMediaManagementView() {
                                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                                             </p>
                                           )}
-                                          {/* Link at the bottom */}
-                                          <a 
-                                            href={ensureHttps(site.link)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 w-fit"
-                                          >
-                                            <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                          </a>
-                                          {/* Agency info on mobile - shown below link */}
-                                          {site.agency && (
-                                            <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground">
-                                              <span>via</span>
-                                              <span className="text-foreground">{site.agency}</span>
-                                              {agencyLogos[site.agency] && (
-                                                <img 
-                                                  src={agencyLogos[site.agency]} 
-                                                  alt={site.agency} 
-                                                  className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                />
-                                              )}
-                                            </div>
-                                          )}
+                                          {/* Link and Agency row */}
+                                          <div className="flex items-center justify-between gap-2">
+                                            <a 
+                                              href={ensureHttps(site.link)}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 min-w-0"
+                                            >
+                                              <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                            </a>
+                                            {/* Agency info on mobile - shown on same row as link */}
+                                            {site.agency && (
+                                              <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
+                                                <span>via</span>
+                                                <span className="text-foreground">{site.agency}</span>
+                                                {agencyLogos[site.agency] && (
+                                                  <img 
+                                                    src={agencyLogos[site.agency]} 
+                                                    alt={site.agency} 
+                                                    className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
                                         </div>
                                       )}
                                     </CardContent>
