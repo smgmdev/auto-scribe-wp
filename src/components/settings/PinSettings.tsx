@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -129,10 +130,7 @@ export function PinSettings() {
     setShowSetupForm(false);
     setPinEnabled(true);
 
-    toast({
-      title: 'PIN enabled',
-      description: 'Your PIN has been set successfully',
-    });
+    sonnerToast.success('PIN enabled');
   };
 
   const handleDisablePin = async () => {
@@ -162,10 +160,7 @@ export function PinSettings() {
 
     setPinEnabled(false);
 
-    toast({
-      title: 'PIN disabled',
-      description: 'Your PIN has been removed',
-    });
+    sonnerToast.success('PIN disabled');
   };
 
   if (loading) {
