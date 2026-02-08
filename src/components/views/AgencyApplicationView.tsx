@@ -441,37 +441,38 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 p-4 lg:p-8 bg-white min-h-full">
-      <div className="max-w-[980px] mx-auto">
-      <div className="rounded-lg p-6">
+    <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
+      <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-4 lg:pt-8">
+        <div className="rounded-lg p-6">
+          <div className="text-center">
+            <img 
+              src="/favicon.png" 
+              alt="Arcana Mace" 
+              className="h-12 w-12 mx-auto mb-8"
+            />
+            <h1 className="text-[40px] font-bold text-foreground">
+              Why Upgrade to Agency?
+            </h1>
+            <p className="mt-4 text-muted-foreground">
+              Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
+            </p>
+          </div>
+        </div>
+
+        {/* Start Application Button */}
         <div className="text-center">
-          <img 
-            src="/favicon.png" 
-            alt="Arcana Mace" 
-            className="h-12 w-12 mx-auto mb-8"
-          />
-          <h1 className="text-[40px] font-bold text-foreground">
-            Why Upgrade to Agency?
-          </h1>
-          <p className="mt-4 text-muted-foreground">
-            Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
-          </p>
+          <Button 
+            className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+            onClick={() => setDialogOpen(true)}
+            disabled={existingApplication?.status === 'pending'}
+          >
+            {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+          </Button>
         </div>
       </div>
 
-      {/* Start Application Button */}
-      <div className="text-center">
-        <Button 
-          className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
-          onClick={() => setDialogOpen(true)}
-          disabled={existingApplication?.status === 'pending'}
-        >
-          {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-        </Button>
-      </div>
-
-      {/* Hero Video Section */}
-      <div className="w-full overflow-hidden mt-8">
+      {/* Hero Video Section - Full Width */}
+      <div className="w-full">
         <video 
           src={agencyHeroVideo} 
           autoPlay 
@@ -482,11 +483,12 @@ export function AgencyApplicationView() {
         />
       </div>
 
-      <ExploreNetworkGrid />
+      <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
+        <ExploreNetworkGrid />
 
-      <ConnectEarnCarousel />
+        <ConnectEarnCarousel />
 
-      <AgencyFAQ />
+        <AgencyFAQ />
 
       {/* Show existing application status card */}
       {existingApplication && (
@@ -567,6 +569,7 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
+      </div>
 
       <AgencyApplicationDialog 
         open={dialogOpen} 
@@ -580,7 +583,6 @@ export function AgencyApplicationView() {
         url={webViewUrl || ''}
         title="Agency Website"
       />
-      </div>
     </div>
   );
 }
