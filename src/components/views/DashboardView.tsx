@@ -575,7 +575,7 @@ export function DashboardView() {
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-foreground rounded-xl p-4 text-background overflow-hidden cursor-help">
+                    <div className="relative bg-foreground p-4 text-background overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-background/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
                         <span className="text-[10px] uppercase tracking-wider text-background/60 font-medium">Wallet</span>
@@ -625,7 +625,7 @@ export function DashboardView() {
                 {/* Total Sales Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 rounded-xl p-4 overflow-hidden cursor-help">
+                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Total Sales</span>
@@ -661,7 +661,7 @@ export function DashboardView() {
                 {/* Pending Withdrawals Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 rounded-xl p-4 overflow-hidden cursor-help">
+                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Pending</span>
@@ -702,7 +702,7 @@ export function DashboardView() {
                 {/* Withdrawn Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 rounded-xl p-4 overflow-hidden cursor-help">
+                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
                       <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
                       <div className="relative">
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Withdrawn</span>
