@@ -891,17 +891,7 @@ export function CreditHistoryView() {
                                   toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
                                 }}
                               >
-                                {isExpanded ? (
-                                  <>
-                                    <ChevronUp className="h-3 w-3" />
-                                    Hide Details
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="h-3 w-3" />
-                                    See Details
-                                  </>
-                                )}
+                              {isExpanded ? 'Hide Details' : 'See Details'}
                               </Button>
                               <span className="text-xs text-muted-foreground">
                                 {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
@@ -1023,17 +1013,7 @@ export function CreditHistoryView() {
                                   toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
                                 }}
                               >
-                                {isExpanded ? (
-                                  <>
-                                    <ChevronUp className="h-3 w-3" />
-                                    Hide Details
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="h-3 w-3" />
-                                    See Details
-                                  </>
-                                )}
+                              {isExpanded ? 'Hide Details' : 'See Details'}
                               </Button>
                               <span className="text-xs text-muted-foreground">
                                 {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
@@ -1172,17 +1152,7 @@ export function CreditHistoryView() {
                                   setExpandedWithdrawals(newExpanded);
                                 }}
                               >
-                                {isEarningsExpanded ? (
-                                  <>
-                                    <ChevronUp className="h-3 w-3" />
-                                    Hide Details
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="h-3 w-3" />
-                                    See Details
-                                  </>
-                                )}
+                              {isEarningsExpanded ? 'Hide Details' : 'See Details'}
                               </Button>
                               <span className="text-xs text-muted-foreground">
                                 {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
