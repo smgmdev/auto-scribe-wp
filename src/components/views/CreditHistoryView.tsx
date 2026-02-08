@@ -880,9 +880,6 @@ export function CreditHistoryView() {
                             <div className="text-lg text-foreground md:hidden mt-1">
                               -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                             </div>
-                            <div className="mt-1">
-                              {getTransactionBadge(transaction.type)}
-                            </div>
                             <div className="flex items-center gap-3 mt-1">
                               <Button
                                 variant="ghost"
@@ -918,7 +915,10 @@ export function CreditHistoryView() {
                       
                       {isExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-2 space-y-2 text-sm">
+                          <div className="pt-2 space-y-3 text-sm">
+                            <div className="mb-2">
+                              {getTransactionBadge(transaction.type)}
+                            </div>
                             {details ? (
                               <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
@@ -1011,9 +1011,6 @@ export function CreditHistoryView() {
                             <div className="text-lg text-muted-foreground md:hidden mt-1">
                               {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                             </div>
-                            <div className="mt-1">
-                              {getTransactionBadge(transaction.type)}
-                            </div>
                             <div className="flex items-center gap-3 mt-1">
                               <Button
                                 variant="ghost"
@@ -1049,7 +1046,10 @@ export function CreditHistoryView() {
                       
                       {isExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-2 space-y-2 text-sm">
+                          <div className="pt-2 space-y-3 text-sm">
+                            <div className="mb-2">
+                              {getTransactionBadge(transaction.type)}
+                            </div>
                             {details ? (
                               <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
@@ -1145,9 +1145,6 @@ export function CreditHistoryView() {
                             <div className="text-lg text-green-500 md:hidden mt-1">
                               +{transaction.amount.toLocaleString()}
                             </div>
-                            <div className="mt-1">
-                              {getTransactionBadge(transaction.type)}
-                            </div>
                             <div className="flex items-center gap-3 mt-1">
                               <Button
                                 variant="ghost"
@@ -1189,7 +1186,10 @@ export function CreditHistoryView() {
                       
                       {isEarningsExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
-                          <div className="pt-2 space-y-2 text-sm">
+                          <div className="pt-2 space-y-3 text-sm">
+                            <div className="mb-2">
+                              {getTransactionBadge(transaction.type)}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                               <div>
                                 <span className="text-muted-foreground">Platform Fee:</span>
