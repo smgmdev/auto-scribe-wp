@@ -58,7 +58,7 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
   }
 
   return (
-    <section className="py-8 px-6">
+    <section className="pt-4 pb-8 px-6">
       <h2 className={`text-3xl font-bold mb-6 text-center ${dark ? 'text-white' : 'text-foreground'}`}>
         Do More. <span className={`font-normal ${dark ? 'text-white/60' : 'text-muted-foreground'}`}>Grow with Arcana Mace.</span>
       </h2>
