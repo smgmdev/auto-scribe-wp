@@ -97,7 +97,9 @@ export function DashboardView() {
     availableCredits: 0,
     totalBalance: 0,
     earnedCredits: 0,
-    purchasedCredits: 0,
+    purchasedOnline: 0,
+    purchasedOffline: 0,
+    totalPurchased: 0,
     creditsInOrders: 0,
     creditsInPendingRequests: 0,
     creditsWithdrawn: 0,
@@ -142,7 +144,8 @@ export function DashboardView() {
 
       // Calculate totals from transactions
       let earnedCredits = 0;
-      let purchasedCredits = 0;
+      let purchasedOnline = 0;
+      let purchasedOffline = 0;
       
       // Withdrawal types should be excluded from balance calculation (handled separately via agency_withdrawals)
       const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
@@ -153,12 +156,18 @@ export function DashboardView() {
           if (t.type === 'order_payout') {
             earnedCredits += t.amount;
           }
-          // Purchased credits
-          if (t.type === 'purchase' || t.type === 'admin_add') {
-            purchasedCredits += t.amount;
+          // Purchased online (via platform)
+          if (t.type === 'purchase') {
+            purchasedOnline += t.amount;
+          }
+          // Purchased offline (gifted/admin_credit)
+          if (t.type === 'gifted' || t.type === 'admin_credit') {
+            purchasedOffline += t.amount;
           }
         });
       }
+      
+      const totalPurchased = purchasedOnline + purchasedOffline;
 
       // Calculate incoming/outgoing matching CreditHistoryView logic
       const incomingCredits = transactions
@@ -270,7 +279,9 @@ export function DashboardView() {
         availableCredits,
         totalBalance: actualTotalBalance,
         earnedCredits,
-        purchasedCredits,
+        purchasedOnline,
+        purchasedOffline,
+        totalPurchased,
         creditsInOrders,
         creditsInPendingRequests,
         creditsWithdrawn,
@@ -452,15 +463,39 @@ export function DashboardView() {
 
   // Custom tooltip content for Available Credits
   const renderAvailableCreditsTooltip = () => {
-    const { availableCredits, earnedCredits, purchasedCredits, creditsWithdrawn } = availableCreditsData;
+    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent } = availableCreditsData;
+    const userIsAgency = isAgency === true;
     
     return (
       <div className="space-y-1">
-        <p><span className="opacity-70">Earned:</span> {earnedCredits.toLocaleString()}</p>
-        <p><span className="opacity-70">Purchased:</span> {purchasedCredits.toLocaleString()}</p>
-        <p><span className="opacity-70">Withdrawn:</span> {creditsWithdrawn.toLocaleString()}</p>
-        <hr className="border-background/30 my-1" />
-        <p className="font-medium">Available Credit Balance: {availableCredits.toLocaleString()}</p>
+        <div className="flex justify-between gap-4">
+          <span className="text-white/70">Earnings:</span>
+          {userIsAgency ? (
+            <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
+          ) : (
+            <span className="text-white/50 text-xs">available for agency only</span>
+          )}
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-white/70">Withdrawals:</span>
+          {userIsAgency ? (
+            <span className="font-semibold text-red-400">-{Math.round(creditsWithdrawn).toLocaleString()}</span>
+          ) : (
+            <span className="text-white/50 text-xs">available for agency only</span>
+          )}
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-white/70">Total Purchased:</span>
+          <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-white/70">Total Spent:</span>
+          <span className="font-semibold text-red-400">-{totalSpent.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+          <span className="text-white/70">Total Available Credits:</span>
+          <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
+        </div>
       </div>
     );
   };
