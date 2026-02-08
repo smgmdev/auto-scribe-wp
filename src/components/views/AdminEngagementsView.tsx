@@ -551,15 +551,13 @@ export function AdminEngagementsView() {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Global Engagements</h2>
-          <p className="text-muted-foreground">Monitor all client-agency communications</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold">Global Engagements</h2>
+        <p className="text-muted-foreground">Monitor all client-agency communications</p>
         <Button
           onClick={() => fetchRequests(true)}
           disabled={isRefreshing}
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
+          className="mt-2 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
         >
           {isRefreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
