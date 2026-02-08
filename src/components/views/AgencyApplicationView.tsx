@@ -457,10 +457,10 @@ export function AgencyApplicationView() {
         />
       </div>
 
-      {/* Fixed Text Overlay - separate from video for proper z-index stacking */}
+      {/* Fixed Text Overlay - below scrollable content so it gets covered */}
       <div 
         className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 flex items-center pb-20 pointer-events-none"
-        style={{ zIndex: 2 }}
+        style={{ zIndex: 1 }}
       >
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
           <div className="max-w-xl pointer-events-auto">
@@ -487,9 +487,9 @@ export function AgencyApplicationView() {
       </div>
 
       {/* Main scrollable content container */}
-      <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 1 }}>
-        {/* Transparent spacer to reveal the fixed video */}
-        <div className="h-[80vh]" />
+      <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 2 }}>
+        {/* Transparent spacer to reveal the fixed video - pointer-events-none allows clicks through to button */}
+        <div className="h-[80vh] pointer-events-none" />
 
         {/* Content Section - scrolls over the video */}
         <div className="relative bg-white rounded-t-3xl">
