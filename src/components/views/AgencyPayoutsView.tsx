@@ -370,6 +370,14 @@ export function AgencyPayoutsView() {
                 <span className="text-white/70">Total Withdrawals:</span>
                 <span className="font-semibold text-red-400">{completedWithdrawalsTotal > 0 ? `-$${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
               </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Purchased:</span>
+                <span className="text-white/50 text-xs">Not Included</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Spent:</span>
+                <span className="text-white/50 text-xs">Not Included</span>
+              </div>
               <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
               {pendingBankWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
