@@ -819,38 +819,38 @@ export function OrdersView() {
         <div className="flex justify-between items-end">
           <div className="space-y-0.5">
             <span className="text-xs text-muted-foreground block">
-              Order started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
             </span>
             {order.status === 'cancelled' && (
               <span className="text-xs text-muted-foreground block">
-                Order cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
+                Order Cancelled: {format(new Date(order.updated_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
             {order.delivery_status === 'pending_revision' && order.delivered_at && !disputeOrderIds.has(order.id) && (
               <span className="text-xs text-muted-foreground block">
-                Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
             {(order.delivery_status === 'delivered' || order.delivery_status === 'accepted') && order.delivered_at && !disputeOrderIds.has(order.id) && (
               <span className="text-xs text-muted-foreground block">
-                {revisionOrderIds.has(order.id) ? 'Last order delivery:' : 'Order delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                {revisionOrderIds.has(order.id) ? 'Last Order Delivery:' : 'Order Delivered:'} {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
             {order.delivery_status === 'accepted' && order.accepted_at && !disputeOrderIds.has(order.id) && (
               <span className="text-xs text-muted-foreground block">
-                Order completed: {format(new Date(order.accepted_at), 'MMM d, yyyy h:mm a')}
+                Order Completed: {format(new Date(order.accepted_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
             {/* Show delivery info for disputed orders */}
             {disputeOrderIds.has(order.id) && order.delivered_at && (
               <span className="text-xs text-muted-foreground block">
-                Last order delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                Last Order Delivery: {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
               </span>
             )}
             {/* Show dispute opened date */}
             {disputeOrderIds.has(order.id) && disputeCreatedDates[order.id] && (
               <span className="text-xs text-muted-foreground block">
-                Dispute opened: {format(new Date(disputeCreatedDates[order.id]), 'MMM d, yyyy h:mm a')}
+                Dispute Opened: {format(new Date(disputeCreatedDates[order.id]), 'MMM d, yyyy h:mm a')}
               </span>
             )}
           </div>
