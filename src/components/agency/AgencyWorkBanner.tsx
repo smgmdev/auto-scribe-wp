@@ -16,7 +16,7 @@ export function AgencyWorkBanner() {
         </div>
       </section>
       {/* White overlay with rounded top corners */}
-      <div className="absolute bottom-0 left-0 right-0 h-10 bg-white rounded-t-[40px]" />
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-background rounded-t-[40px]" />
     </div>
   );
 }
