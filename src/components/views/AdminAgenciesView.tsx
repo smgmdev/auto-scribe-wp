@@ -839,7 +839,7 @@ export function AdminAgenciesView() {
                   onClick={() => handleOpenApplication(app)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                       <div className="flex items-center gap-4">
                         {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                           <img 
@@ -875,11 +875,11 @@ export function AdminAgenciesView() {
                           <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="flex flex-col items-start md:items-end md:text-right gap-1">
                         <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
@@ -934,7 +934,7 @@ export function AdminAgenciesView() {
                       onClick={() => handleOpenApplication(app)}
                     >
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                           <div className="flex items-center gap-4">
                             {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                               <img 
@@ -970,11 +970,11 @@ export function AdminAgenciesView() {
                               <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="flex flex-col items-start md:items-end md:text-right gap-1">
                             <Badge variant="destructive">
                               <XCircle className="h-3 w-3 mr-1" />Cancelled
                             </Badge>
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs text-muted-foreground mt-1">
                               Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
                             {app.updated_at && (
@@ -1016,7 +1016,7 @@ export function AdminAgenciesView() {
                       }}
                     >
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                           <div className="flex items-center gap-4">
                             {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                               <img 
@@ -1054,7 +1054,7 @@ export function AdminAgenciesView() {
                               )}
                             </div>
                           </div>
-                          <div className="text-right flex flex-col items-end gap-1">
+                          <div className="flex flex-col items-start md:items-end md:text-right gap-1">
                             <p className="text-xs text-muted-foreground">
                               Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
@@ -1144,7 +1144,7 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
@@ -1185,9 +1185,8 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center">
                               {getOnboardingStatus(agency)}
-
                             </div>
                           </div>
                         </CardContent>
@@ -1227,7 +1226,7 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
@@ -1273,7 +1272,7 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center">
                               <Badge 
                                 className={`cursor-pointer transition-colors ${
                                   verification?.read 
@@ -1343,7 +1342,7 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
@@ -1387,7 +1386,7 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               {verification && (
                                 <Badge 
                                   className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
@@ -1475,7 +1474,7 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
@@ -1516,44 +1515,42 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                              <div className="flex gap-2">
-                                <Badge className="bg-orange-500/20 text-orange-500">
-                                  <UserMinus className="h-3 w-3 mr-1" />
-                                  Downgraded
-                                </Badge>
-                                {(() => {
-                                  const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
-                                  if (verification) {
-                                    return (
-                                      <Badge 
-                                        className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenVerification(verification, e);
-                                        }}
-                                      >
-                                        <FileText className="h-3 w-3 mr-1" />
-                                        Details
-                                      </Badge>
-                                    );
-                                  } else if (application) {
-                                    return (
-                                      <Badge 
-                                        className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenApplication(application);
-                                        }}
-                                      >
-                                        <FileText className="h-3 w-3 mr-1" />
-                                        Details
-                                      </Badge>
-                                    );
-                                  }
-                                  return null;
-                                })()}
-                              </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge className="bg-orange-500/20 text-orange-500">
+                                <UserMinus className="h-3 w-3 mr-1" />
+                                Downgraded
+                              </Badge>
+                              {(() => {
+                                const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
+                                if (verification) {
+                                  return (
+                                    <Badge 
+                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenVerification(verification, e);
+                                      }}
+                                    >
+                                      <FileText className="h-3 w-3 mr-1" />
+                                      Details
+                                    </Badge>
+                                  );
+                                } else if (application) {
+                                  return (
+                                    <Badge 
+                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenApplication(application);
+                                      }}
+                                    >
+                                      <FileText className="h-3 w-3 mr-1" />
+                                      Details
+                                    </Badge>
+                                  );
+                                }
+                                return null;
+                              })()}
 
                               <Button
                                 variant="outline"
