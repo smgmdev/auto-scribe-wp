@@ -1530,6 +1530,7 @@ export function AdminUsersView() {
               value={creditAmount}
               onChange={(e) => setCreditAmount(e.target.value)}
               min="1"
+              className="w-full h-9 text-sm rounded-none"
             />
 
             <Input
@@ -1537,6 +1538,7 @@ export function AdminUsersView() {
               placeholder="Reason (optional)"
               value={creditReason}
               onChange={(e) => setCreditReason(e.target.value)}
+              className="w-full h-9 text-sm rounded-none"
             />
 
             <div className="flex justify-end gap-2">
