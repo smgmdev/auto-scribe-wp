@@ -1048,6 +1048,7 @@ export function AdminOrdersView() {
               variant={historySubTab === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setHistorySubTab('all')}
+              className={historySubTab !== 'all' ? 'hover:bg-black hover:text-white hover:border-black' : ''}
             >
               All ({allOrdersCount})
             </Button>
@@ -1055,6 +1056,7 @@ export function AdminOrdersView() {
               variant={historySubTab === 'cancelled' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setHistorySubTab('cancelled')}
+              className={historySubTab !== 'cancelled' ? 'hover:bg-black hover:text-white hover:border-black' : ''}
             >
               Cancelled ({cancelledCount})
             </Button>
