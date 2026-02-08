@@ -457,7 +457,7 @@ export function AgencyApplicationView() {
         </div>
 
         {/* Content that scrolls over the video */}
-        <div className="relative z-10 -mt-32 bg-white rounded-t-[2rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.3)]">
+        <div className="relative z-10 -mt-32 bg-white rounded-t-[2rem]">
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-16 pb-8">
             <div className="rounded-lg p-6">
               <div className="text-center">
