@@ -16,7 +16,9 @@ import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExp
 interface UserCredit {
   user_id: string;
   purchased: number;
-  gifted: number;
+  purchasedOnline: number;
+  purchasedInvoice: number;
+  earned: number;
   deductions: number;
   totalCredits: number;
   locked: number;
@@ -24,6 +26,7 @@ interface UserCredit {
   orders: number;
   totalSpent: number;
   refunded: number;
+  withdrawn: number;
   email: string | null;
   isAgency: boolean;
 }
@@ -311,9 +314,10 @@ export const AdminCreditManagementView = () => {
       const incomingMap = new Map<string, number>();
       // Calculate outgoing credits per user (negative amounts, excluding locked types)
       const outgoingMap = new Map<string, number>();
-      // Track purchased, gifted, refunded separately for display
-      const purchasedMap = new Map<string, number>();
-      const giftedMap = new Map<string, number>();
+      // Track purchased (online), purchased (invoice/gifted), earned, refunded separately for display
+      const purchasedOnlineMap = new Map<string, number>();
+      const purchasedInvoiceMap = new Map<string, number>();
+      const earnedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
       const deductionsMap = new Map<string, number>();
       // Track offer_accepted (credits locked for pending orders)
@@ -355,9 +359,14 @@ export const AdminCreditManagementView = () => {
         if (tx.type === 'refund' && tx.amount > 0) {
           refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'gifted' || tx.type === 'admin_credit') {
-          giftedMap.set(tx.user_id, (giftedMap.get(tx.user_id) || 0) + tx.amount);
+          // Gifted/admin_credit = "Purchased via invoice" (gift from admin)
+          purchasedInvoiceMap.set(tx.user_id, (purchasedInvoiceMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'purchase') {
-          purchasedMap.set(tx.user_id, (purchasedMap.get(tx.user_id) || 0) + tx.amount);
+          // Purchase = "Purchased via online" (paid online via buy credits popup)
+          purchasedOnlineMap.set(tx.user_id, (purchasedOnlineMap.get(tx.user_id) || 0) + tx.amount);
+        } else if (tx.type === 'order_payout') {
+          // Order payout = "Earned" (agency earnings from orders)
+          earnedMap.set(tx.user_id, (earnedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'admin_deduct') {
           deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
@@ -399,10 +408,15 @@ export const AdminCreditManagementView = () => {
         // Available = Total Balance - Total Locked Credits - Completed Withdrawals
         const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
         
+        const purchasedOnline = purchasedOnlineMap.get(credit.user_id) || 0;
+        const purchasedInvoice = purchasedInvoiceMap.get(credit.user_id) || 0;
+        
         return {
           user_id: credit.user_id,
-          purchased: purchasedMap.get(credit.user_id) || 0,
-          gifted: giftedMap.get(credit.user_id) || 0,
+          purchased: purchasedOnline + purchasedInvoice,
+          purchasedOnline,
+          purchasedInvoice,
+          earned: earnedMap.get(credit.user_id) || 0,
           deductions: deductionsMap.get(credit.user_id) || 0,
           totalCredits: calculatedTotalBalance,
           locked: totalLocked,
@@ -410,6 +424,7 @@ export const AdminCreditManagementView = () => {
           orders: ordersMap.get(credit.user_id) || 0,
           totalSpent: totalSpentMap.get(credit.user_id) || 0,
           refunded: refundedMap.get(credit.user_id) || 0,
+          withdrawn,
           email: emailMap.get(credit.user_id) || null,
           isAgency: agencyUserIds.has(credit.user_id)
         };
@@ -458,9 +473,9 @@ export const AdminCreditManagementView = () => {
   };
 
   // Balances computed values
-  // Only include users with purchased, gifted, or available credits
-  const activeUsers = userCredits.filter(user => user.purchased > 0 || user.gifted > 0 || user.available > 0);
-  const filteredCredits = activeUsers.filter(user => 
+  // Only include users with purchased, earned, or available credits
+  const activeUsers = userCredits.filter(user => user.purchased > 0 || user.earned > 0 || user.available > 0);
+  const filteredCredits = activeUsers.filter(user =>
     user.email?.toLowerCase().includes(balancesSearchTerm.toLowerCase())
   );
   const totalCredits = activeUsers.reduce((sum, user) => sum + user.available, 0);
@@ -676,16 +691,12 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-semibold">{user.purchased.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent>Total purchased credits by the user.</TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip delayDuration={100}>
-                                      <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
-                                          <p className="text-xs text-muted-foreground">Gifted</p>
-                                          <p className="font-semibold text-green-600">{user.gifted.toLocaleString()}</p>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p><span className="opacity-70">Purchased via online:</span> {user.purchasedOnline.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased via invoice:</span> {user.purchasedInvoice.toLocaleString()}</p>
                                         </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Credits received from administration.</TooltipContent>
+                                      </TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
@@ -713,6 +724,23 @@ export const AdminCreditManagementView = () => {
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent>Total value spent on completed orders.</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <div className="text-center cursor-help">
+                                          <p className="text-xs text-muted-foreground">Credit Balance</p>
+                                          <p className="font-semibold text-green-600">{user.available.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                        <div className="space-y-1">
+                                          <p><span className="opacity-70">Earned:</span> {user.earned.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Purchased:</span> {user.purchased.toLocaleString()}</p>
+                                          <p><span className="opacity-70">Withdrawn:</span> {user.withdrawn.toLocaleString()}</p>
+                                          <hr className="border-background/30 my-1" />
+                                          <p className="font-medium">Available Credit Balance: {user.available.toLocaleString()}</p>
+                                        </div>
+                                      </TooltipContent>
                                     </Tooltip>
                                   </div>
                                   <UserTransactionsExpanded userId={user.user_id} />
