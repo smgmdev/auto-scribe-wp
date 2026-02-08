@@ -56,6 +56,7 @@ export function AgencyPayoutsView() {
     pendingPayouts: 0,
     completedPayouts: 0
   });
+  const [lockedInOrders, setLockedInOrders] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
@@ -250,6 +251,17 @@ export function AgencyPayoutsView() {
     const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
     const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
 
+    // Fetch in-progress orders (locked in orders - not yet accepted by client)
+    const { data: inProgressOrders } = await supabase
+      .from('orders')
+      .select('agency_payout_cents')
+      .in('id', orderIds)
+      .neq('delivery_status', 'accepted')
+      .neq('status', 'cancelled');
+
+    const lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.agency_payout_cents || 0) / 100), 0);
+    setLockedInOrders(lockedAmount);
+
     // Fetch payout transactions for pending/completed payouts
     const { data: payoutData } = await supabase
       .from('payout_transactions')
@@ -351,10 +363,14 @@ export function AgencyPayoutsView() {
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
-                <span className="text-white/70">Available Balance:</span>
-                <span className="font-semibold text-green-400">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-white/70">Total Earnings:</span>
+                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Withdrawals Pending</div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Total Withdrawals:</span>
+                <span className="font-semibold text-red-400">{completedWithdrawalsTotal > 0 ? `-$${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
+              </div>
+              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
               {pendingBankWithdrawals > 0 && (
                 <div className="flex justify-between gap-4 pl-2">
                   <span className="text-white/70">Bank:</span>
@@ -372,6 +388,10 @@ export function AgencyPayoutsView() {
                   <span className="text-white/50">None</span>
                 </div>
               )}
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Locked in Orders:</span>
+                <span className="font-semibold text-amber-400">${lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
               <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
                 <span className="text-white/70">Wallet Balance:</span>
                 <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
