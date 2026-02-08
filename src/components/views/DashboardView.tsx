@@ -631,51 +631,54 @@ export function DashboardView() {
             </CardHeader>
             <CardContent>
               {/* Financial Stats - Modern Cards */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-foreground p-4 text-background overflow-hidden cursor-help">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-background/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="relative">
-                        <span className="text-[10px] uppercase tracking-wider text-background/60 font-medium">Wallet</span>
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1e3a5f]">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                        <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                          Wallet
+                        </CardTitle>
+                        <Wallet className="h-4 w-4 text-white/70" />
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-0 px-4">
                         {agencySummary.loading ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-background/60 mt-1" />
+                          <Loader2 className="h-5 w-5 animate-spin text-white/60" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight font-body">
-                            ${agencySummary.walletBalance.toFixed(0)}
-                            <span className="text-sm font-normal text-background/60">.{(agencySummary.walletBalance % 1).toFixed(2).slice(2)}</span>
+                          <div className="text-2xl font-semibold text-white">
+                            ${agencySummary.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <div className="flex justify-between gap-4">
-                        <span className="text-background/70">Available Balance:</span>
+                        <span className="text-white/70">Available Balance:</span>
                         <span className="font-semibold text-green-400">${(agencySummary.walletBalance - agencySummary.pendingWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="text-background/70 text-xs uppercase tracking-wide pt-1">Withdrawals Pending</div>
+                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Withdrawals Pending</div>
                       {agencySummary.pendingBankWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">Bank:</span>
+                          <span className="text-white/70">Bank:</span>
                           <span className="font-semibold text-amber-400">${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
                       {agencySummary.pendingCryptoWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">USDT:</span>
+                          <span className="text-white/70">USDT:</span>
                           <span className="font-semibold text-amber-400">${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
                       {agencySummary.pendingBankWithdrawals === 0 && agencySummary.pendingCryptoWithdrawals === 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/50">None</span>
+                          <span className="text-white/50">None</span>
                         </div>
                       )}
-                      <div className="flex justify-between gap-4 pt-1 border-t border-background/20">
-                        <span className="text-background/70">Wallet Balance:</span>
+                      <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                        <span className="text-white/70">Wallet Balance:</span>
                         <span className="font-semibold">${agencySummary.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
@@ -685,33 +688,36 @@ export function DashboardView() {
                 {/* Total Sales Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="relative">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Total Sales</span>
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1d1d1f]">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                        <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                          Total Sales
+                        </CardTitle>
+                        <TrendingUp className="h-4 w-4 text-white/70" />
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-0 px-4">
                         {agencySummary.loading ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                          <Loader2 className="h-5 w-5 animate-spin text-white/60" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
-                            ${agencySummary.totalSales.toFixed(0)}
-                            <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.totalSales % 1).toFixed(2).slice(2)}</span>
+                          <div className="text-2xl font-semibold text-white">
+                            ${agencySummary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <div className="flex justify-between gap-4">
-                        <span className="text-background/70">Total Sales:</span>
+                        <span className="text-white/70">Total Sales:</span>
                         <span className="font-semibold">${agencySummary.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4">
-                        <span className="text-background/70">Platform Fees:</span>
+                        <span className="text-white/70">Platform Fees:</span>
                         <span className="font-semibold">${(agencySummary.totalSales - agencySummary.totalEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="flex justify-between gap-4 pt-1 border-t border-background/20">
-                        <span className="text-background/70">Total Earnings:</span>
+                      <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                        <span className="text-white/70">Total Earnings:</span>
                         <span className="font-semibold text-green-400">${agencySummary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
@@ -721,37 +727,40 @@ export function DashboardView() {
                 {/* Pending Withdrawals Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="relative">
-                        <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-medium" style={{ lineHeight: '12px' }}>Pending Withdrawals</span>
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1d1d1f]">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                        <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                          Pending Withdrawals
+                        </CardTitle>
+                        <Clock className="h-4 w-4 text-white/70" />
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-0 px-4">
                         {agencySummary.loading ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                          <Loader2 className="h-5 w-5 animate-spin text-white/60" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
-                            ${agencySummary.pendingWithdrawals.toFixed(0)}
-                            <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.pendingWithdrawals % 1).toFixed(2).slice(2)}</span>
+                          <div className="text-2xl font-semibold text-white">
+                            ${agencySummary.pendingWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <p className="font-medium">Pending withdrawal requests</p>
                       <div className="flex justify-between gap-4">
-                        <span className="text-background/70">Total pending:</span>
+                        <span className="text-white/70">Total pending:</span>
                         <span className="font-semibold text-amber-400">${agencySummary.pendingWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       {agencySummary.pendingBankWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">Bank:</span>
+                          <span className="text-white/70">Bank:</span>
                           <span className="font-semibold text-amber-400">${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
                       {agencySummary.pendingCryptoWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">USDT:</span>
+                          <span className="text-white/70">USDT:</span>
                           <span className="font-semibold text-amber-400">${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
@@ -759,40 +768,43 @@ export function DashboardView() {
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Withdrawn Card with Tooltip */}
+                {/* Completed Withdrawals Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <div className="relative bg-muted/60 p-4 overflow-hidden cursor-help">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <div className="relative">
-                        <span className="block text-[10px] uppercase tracking-wider text-muted-foreground font-medium" style={{ lineHeight: '12px' }}>Completed Withdrawals</span>
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1d1d1f]">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
+                        <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                          Completed Withdrawals
+                        </CardTitle>
+                        <CheckCircle className="h-4 w-4 text-white/70" />
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-0 px-4">
                         {agencySummary.loading ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                          <Loader2 className="h-5 w-5 animate-spin text-white/60" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
-                            ${agencySummary.completedWithdrawals.toFixed(0)}
-                            <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.completedWithdrawals % 1).toFixed(2).slice(2)}</span>
+                          <div className="text-2xl font-semibold text-white">
+                            ${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                         )}
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <p className="font-medium">Completed withdrawals</p>
                       <div className="flex justify-between gap-4">
-                        <span className="text-background/70">Total withdrawn:</span>
+                        <span className="text-white/70">Total withdrawn:</span>
                         <span className="font-semibold text-green-400">${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       {agencySummary.completedBankWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">Bank:</span>
+                          <span className="text-white/70">Bank:</span>
                           <span className="font-semibold text-green-400">${agencySummary.completedBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
                       {agencySummary.completedCryptoWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-background/70">USDT:</span>
+                          <span className="text-white/70">USDT:</span>
                           <span className="font-semibold text-green-400">${agencySummary.completedCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
