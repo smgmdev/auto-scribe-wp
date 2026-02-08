@@ -305,7 +305,7 @@ export const AdminCreditManagementView = () => {
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
