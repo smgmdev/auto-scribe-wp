@@ -186,7 +186,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
     const badge = config[type] || { className: 'bg-muted text-muted-foreground hover:bg-muted', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-    return <Badge className={`${badge.className} whitespace-nowrap`}>{badge.label}</Badge>;
+    return <Badge className={`${badge.className} whitespace-nowrap rounded-none`}>{badge.label}</Badge>;
   };
 
   // Check if a transaction has expandable details
@@ -363,7 +363,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   return (
     <div className="bg-muted/30 border-t">
       <Tabs value={activeType} onValueChange={setActiveType}>
-        <TabsList className="flex flex-wrap justify-start h-auto gap-1 bg-transparent p-0">
+        <TabsList className="flex flex-wrap justify-start h-auto gap-1 bg-transparent p-0 border-y border-border py-2">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             if (type.key !== 'all' && count === 0) return null;
