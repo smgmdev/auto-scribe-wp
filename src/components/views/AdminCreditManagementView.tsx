@@ -287,7 +287,8 @@ export const AdminCreditManagementView = () => {
   const usersWithCredits = activeUsers.filter(user => user.available > 0).length;
 
   return (
-    <div className="space-y-8">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-8">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
@@ -579,6 +580,7 @@ export const AdminCreditManagementView = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
     </div>
   );
 };
