@@ -459,7 +459,7 @@ export function AgencyApplicationView() {
 
       {/* Fixed Text Overlay - below scrollable content so it gets covered */}
       <div 
-        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 flex items-center pb-20 pointer-events-none"
+        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0 flex items-start pt-16 lg:pt-24 pointer-events-none"
         style={{ zIndex: 1 }}
       >
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
