@@ -188,7 +188,7 @@ export function ConnectEarnCarousel() {
   return (
     <section className="py-8 px-6">
       <h2 className="text-3xl font-bold text-foreground mb-6 text-center">
-        Connect and Earn. <span className="font-normal text-muted-foreground">New Passive Income.</span>
+        Connect and Earn. <span className="font-normal text-muted-foreground">Generate New Profits.</span>
       </h2>
       
       <div className="relative overflow-visible py-4">
