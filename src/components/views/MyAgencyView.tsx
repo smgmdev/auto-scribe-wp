@@ -510,7 +510,7 @@ export function MyAgencyView() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="media-sites" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-2 mb-4 rounded-none">
                 <TabsTrigger value="media-sites">
                   Media Sites ({mediaSites.length})
                 </TabsTrigger>
