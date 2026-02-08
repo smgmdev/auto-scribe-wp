@@ -1493,9 +1493,9 @@ export function AdminUsersView() {
       {/* Credits Dialog */}
       <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>Manage Credits</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left">
               {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -1510,7 +1510,7 @@ export function AdminUsersView() {
                 variant={creditAction === 'add' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCreditAction('add')}
-                className={`flex-1 ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
+                className={`flex-1 rounded-none ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
               >
                 Gift
               </Button>
@@ -1518,7 +1518,7 @@ export function AdminUsersView() {
                 variant={creditAction === 'remove' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCreditAction('remove')}
-                className={`flex-1 ${creditAction !== 'remove' ? 'hover:bg-black hover:text-white' : ''}`}
+                className={`flex-1 rounded-none ${creditAction !== 'remove' ? 'hover:bg-black hover:text-white' : ''}`}
               >
                 Remove
               </Button>
@@ -1542,13 +1542,13 @@ export function AdminUsersView() {
             />
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="hover:bg-black hover:text-white">
+              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="rounded-none hover:bg-black hover:text-white">
                 Cancel
               </Button>
               <Button 
                 onClick={handleCreditChange} 
                 disabled={saving || !creditAmount}
-                className="border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+                className="rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
