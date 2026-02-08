@@ -1146,25 +1146,26 @@ export function AgencyMediaView() {
                                             <h3 className="text-sm break-words">{site.name}</h3>
                                             {/* Mobile: Price, format, and agency under name */}
                                             <div className="flex flex-col gap-1 mt-1 md:hidden">
-                                              <div className="flex items-center gap-2">
-                                                <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                                                  {site.price > 0 ? `${site.price} USD` : 'Free'}
-                                                </Badge>
-                                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                              <Badge variant="secondary" className="text-xs whitespace-nowrap w-fit">
+                                                {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                              </Badge>
+                                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <span>{site.publication_format}</span>
+                                                {agencyName && (
+                                                  <>
+                                                    <span>·</span>
+                                                    <span>via</span>
+                                                    <span className="text-foreground">{agencyName}</span>
+                                                    {agencyLogo && (
+                                                      <img 
+                                                        src={agencyLogo} 
+                                                        alt={agencyName} 
+                                                        className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                      />
+                                                    )}
+                                                  </>
+                                                )}
                                               </div>
-                                              {agencyName && (
-                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                  <span>via</span>
-                                                  <span className="text-foreground">{agencyName}</span>
-                                                  {agencyLogo && (
-                                                    <img 
-                                                      src={agencyLogo} 
-                                                      alt={agencyName} 
-                                                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                    />
-                                                  )}
-                                                </div>
-                                              )}
                                             </div>
                                           </div>
                                           {/* Mobile chevron */}
