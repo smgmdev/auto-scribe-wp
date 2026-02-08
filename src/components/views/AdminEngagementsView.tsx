@@ -557,7 +557,7 @@ export function AdminEngagementsView() {
         <Button
           onClick={() => fetchRequests(true)}
           disabled={isRefreshing}
-          className="mt-2 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
+          className="mt-2 w-full md:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
         >
           {isRefreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
