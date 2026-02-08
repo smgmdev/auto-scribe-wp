@@ -486,13 +486,13 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Main scrollable content container */}
-      <div className="animate-fade-in -m-4 lg:-m-8 relative" style={{ zIndex: 2 }}>
-        {/* Transparent spacer to reveal the fixed video - pointer-events-none allows clicks through to button */}
-        <div className="h-[80vh] pointer-events-none" />
+      {/* Main scrollable content container - pointer-events-none to allow clicks to pass through spacer */}
+      <div className="animate-fade-in -m-4 lg:-m-8 relative pointer-events-none" style={{ zIndex: 2 }}>
+        {/* Transparent spacer to reveal the fixed video */}
+        <div className="h-[80vh]" />
 
-        {/* Content Section - scrolls over the video */}
-        <div className="relative bg-white rounded-t-3xl">
+        {/* Content Section - scrolls over the video, pointer-events-auto to make it interactive */}
+        <div className="relative bg-white rounded-t-3xl pointer-events-auto">
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
