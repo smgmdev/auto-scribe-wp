@@ -892,12 +892,12 @@ export function CreditHistoryView() {
                               >
                                 {isExpanded ? (
                                   <>
-                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    <ChevronUp className="h-3 w-3" />
                                     Hide Details
                                   </>
                                 ) : (
                                   <>
-                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    <ChevronDown className="h-3 w-3" />
                                     See Details
                                   </>
                                 )}
@@ -1023,12 +1023,12 @@ export function CreditHistoryView() {
                               >
                                 {isExpanded ? (
                                   <>
-                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    <ChevronUp className="h-3 w-3" />
                                     Hide Details
                                   </>
                                 ) : (
                                   <>
-                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    <ChevronDown className="h-3 w-3" />
                                     See Details
                                   </>
                                 )}
@@ -1163,12 +1163,12 @@ export function CreditHistoryView() {
                               >
                                 {isEarningsExpanded ? (
                                   <>
-                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    <ChevronUp className="h-3 w-3" />
                                     Hide Details
                                   </>
                                 ) : (
                                   <>
-                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    <ChevronDown className="h-3 w-3" />
                                     See Details
                                   </>
                                 )}
