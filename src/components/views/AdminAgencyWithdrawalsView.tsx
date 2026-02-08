@@ -583,7 +583,7 @@ export function AdminAgencyWithdrawalsView() {
                                 <Info className="h-3.5 w-3.5" />
                               )}
                             </button>
-                            <p className="text-base text-foreground font-medium">
+                            <p className="text-sm md:text-base text-foreground font-medium">
                               Withdrawal via {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}
                             </p>
                             <div className="text-lg text-foreground md:hidden mt-1">
