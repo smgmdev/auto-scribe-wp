@@ -441,20 +441,20 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full">
-      {/* Video Background - Sticky so it stays in place */}
-      <div className="sticky top-0 h-[80vh] overflow-hidden" style={{ zIndex: -1 }}>
+    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full bg-black">
+      {/* Hero Section with Video */}
+      <div className="relative h-[80vh]">
         <video 
           src={agencyHeroVideo} 
           autoPlay 
           loop 
           muted 
           playsInline
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         
         {/* Text Overlay on Video */}
-        <div className="absolute inset-0 flex items-center pb-32">
+        <div className="absolute inset-0 flex items-center pb-20">
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
             <div className="max-w-xl">
               <img 
@@ -480,16 +480,12 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Content that scrolls over the video */}
-      <div className="relative bg-white" style={{ marginTop: '-80vh' }}>
-        {/* Spacer to push content down initially */}
-        <div className="h-[70vh]" />
+      {/* Content Section */}
+      <div className="relative bg-white">
+        {/* Dark gradient transition at top */}
+        <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-black/60 pointer-events-none" />
         
-        {/* Dark gradient transition */}
-        <div className="h-24 bg-gradient-to-b from-black/50 via-black/30 to-white" />
-        
-        <div className="bg-white">
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
@@ -575,7 +571,6 @@ export function AgencyApplicationView() {
           </CardContent>
         </Card>
       )}
-          </div>
         </div>
       </div>
 
