@@ -1363,7 +1363,7 @@ export function AgencyRequestsView() {
       </div>
 
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-md md:grid-cols-2 scrollbar-hide justify-start">
+        <TabsList className="grid w-full grid-cols-2 md:max-w-md">
           <TabsTrigger value="requests" className="relative">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
