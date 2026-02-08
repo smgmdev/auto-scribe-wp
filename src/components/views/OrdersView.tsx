@@ -891,20 +891,35 @@ export function OrdersView() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">
-            {isAdmin ? 'All Orders' : 'My Orders'}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {isAdmin ? 'Manage all orders and payouts' : 'Track your media placement orders'}
-          </p>
+      <div className="mb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              {isAdmin ? 'All Orders' : 'My Orders'}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {isAdmin ? 'Manage all orders and payouts' : 'Track your media placement orders'}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className={`hidden md:inline-flex gap-2 border border-black transition-all duration-200 ${
+              refreshing 
+                ? 'bg-transparent text-black' 
+                : 'bg-black text-white hover:bg-transparent hover:text-black'
+            }`}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
         <Button
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className={`gap-2 border border-black transition-all duration-200 ${
+          className={`md:hidden w-full mt-4 gap-2 border border-black transition-all duration-200 ${
             refreshing 
               ? 'bg-transparent text-black' 
               : 'bg-black text-white hover:bg-transparent hover:text-black'
