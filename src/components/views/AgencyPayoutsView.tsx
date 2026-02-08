@@ -574,7 +574,7 @@ export function AgencyPayoutsView() {
                       >
                         <div className="relative p-4">
                           <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
-                            -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
                             <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
@@ -588,7 +588,7 @@ export function AgencyPayoutsView() {
                                 Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                               </p>
                               <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
-                                -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
