@@ -624,7 +624,7 @@ export function AgencyMediaView() {
         <TabsContent value="wordpress" className="mt-2 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <TabsTrigger value="connected" className="relative overflow-visible">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
@@ -965,7 +965,7 @@ export function AgencyMediaView() {
         <TabsContent value="media" className="mt-2 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <TabsTrigger value="added" className="relative overflow-visible">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
