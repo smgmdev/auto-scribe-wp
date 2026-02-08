@@ -87,7 +87,7 @@ function AgencyFAQ() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-border p-6 shadow-sm">
+    <div className="rounded-lg p-6">
       <h2 className="text-3xl font-bold text-foreground text-center mb-8">Questions? Answers.</h2>
       <div className="divide-y divide-border">
         {faqItems.map((item, index) => (
@@ -439,7 +439,7 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="space-y-8 animate-fade-in -m-4 lg:-m-8 p-4 lg:p-8 bg-white min-h-full">
-      <div className="bg-white rounded-lg border border-border p-6 shadow-sm">
+      <div className="rounded-lg p-6">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <h1 className="text-4xl font-bold text-foreground">
