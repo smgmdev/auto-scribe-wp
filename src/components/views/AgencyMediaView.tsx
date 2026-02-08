@@ -1149,18 +1149,17 @@ export function AgencyMediaView() {
                                               <Badge variant="secondary" className="text-xs whitespace-nowrap w-fit">
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
-                                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                              <div className="flex items-center flex-wrap text-xs text-muted-foreground">
                                                 <span>{site.publication_format}</span>
                                                 {agencyName && (
                                                   <>
-                                                    <span>·</span>
-                                                    <span>via</span>
+                                                    <span className="mx-1">via</span>
                                                     <span className="text-foreground">{agencyName}</span>
                                                     {agencyLogo && (
                                                       <img 
                                                         src={agencyLogo} 
                                                         alt={agencyName} 
-                                                        className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                        className="h-4 w-4 object-contain rounded-full ml-1"
                                                       />
                                                     )}
                                                   </>
