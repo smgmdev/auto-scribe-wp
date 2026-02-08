@@ -570,7 +570,7 @@ export function AgencyPayoutsView() {
                           </Badge>
                         </div>
                         <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
-                          -{withdrawalAmount % 1 === 0 ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <div className="flex items-center gap-3 md:pr-24">
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
@@ -602,7 +602,7 @@ export function AgencyPayoutsView() {
                                 See transaction details
                               </button>
                               <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
-                                -{withdrawalAmount % 1 === 0 ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
@@ -648,7 +648,7 @@ export function AgencyPayoutsView() {
                           </Badge>
                         </div>
                         <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
-                          +{earningsAmount % 1 === 0 ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <div className="flex items-center gap-3 md:pr-24">
                           <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
@@ -700,7 +700,7 @@ export function AgencyPayoutsView() {
                                 See transaction details
                               </button>
                               <p className="md:hidden mt-2 text-lg text-green-500">
-                                +{earningsAmount % 1 === 0 ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
