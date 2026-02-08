@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -103,20 +103,20 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         { 
           id: 'admin-press-releases', 
           label: 'Press Releases', 
-          icon: null,
+          icon: Megaphone,
           submenu: [
-            { id: 'admin-new-press-release', label: 'New', icon: null },
-            { id: 'admin-all-news', label: 'All', icon: null }
+            { id: 'admin-new-press-release', label: 'New', icon: FilePlus },
+            { id: 'admin-all-news', label: 'All', icon: List }
           ]
         },
         { 
           id: 'admin-ai-publishing', 
           label: 'AI Publishing', 
-          icon: null,
+          icon: Bot,
           submenu: [
-            { id: 'admin-ai-sources', label: 'AI Sources', icon: null },
-            { id: 'admin-ai-settings', label: 'AI Config', icon: null },
-            { id: 'admin-ai-articles', label: 'AI Articles', icon: null }
+            { id: 'admin-ai-sources', label: 'AI Sources', icon: Database },
+            { id: 'admin-ai-settings', label: 'AI Config', icon: Cog },
+            { id: 'admin-ai-articles', label: 'AI Articles', icon: ScrollText }
           ]
         }
       ]
