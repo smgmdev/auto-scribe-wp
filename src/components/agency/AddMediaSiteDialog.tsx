@@ -178,7 +178,7 @@ export function AddMediaSiteDialog({
               </div>
             </div>
 
-            <div className="space-y-2 w-full max-w-full">
+            <div className="space-y-2 w-full">
               <Label htmlFor="googleSheetUrl">Your Google Sheet URL</Label>
               <Input
                 id="googleSheetUrl"
@@ -186,7 +186,7 @@ export function AddMediaSiteDialog({
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 value={googleSheetUrl}
                 onChange={(e) => setGoogleSheetUrl(e.target.value)}
-                className="w-full max-w-full"
+                className="w-full text-sm placeholder:text-xs"
                 required
               />
             </div>
