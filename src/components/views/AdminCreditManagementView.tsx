@@ -497,7 +497,7 @@ export const AdminCreditManagementView = () => {
                                   <div className="grid grid-cols-6 gap-4">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Credit Balance</p>
                                           <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
@@ -551,7 +551,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Locked</p>
                                           <p className="font-semibold text-amber-400">{user.locked.toLocaleString()}</p>
                                         </div>
@@ -566,7 +566,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Purchased</p>
                                           <p className="font-semibold text-white">{user.purchased.toLocaleString()}</p>
                                         </div>
@@ -582,7 +582,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Deductions</p>
                                           <p className="font-semibold text-red-400">{user.deductions.toLocaleString()}</p>
                                         </div>
@@ -591,7 +591,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Orders</p>
                                           <p className="font-semibold text-white">{user.orders.toLocaleString()}</p>
                                         </div>
@@ -606,7 +606,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-center cursor-help">
+                                        <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Total Spent</p>
                                           <p className="font-semibold text-white">{user.totalSpent.toLocaleString()}</p>
                                         </div>
