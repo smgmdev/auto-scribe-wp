@@ -15,6 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { ConnectEarnCarousel } from '@/components/agency/ConnectEarnCarousel';
 
 const faqItems = [
   {
@@ -465,6 +466,8 @@ export function AgencyApplicationView() {
           </Button>
         </div>
       </div>
+
+      <ConnectEarnCarousel />
 
       <AgencyFAQ />
 
