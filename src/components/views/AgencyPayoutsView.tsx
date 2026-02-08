@@ -560,7 +560,7 @@ export function AgencyPayoutsView() {
                         <p className="font-medium">
                           {getCardTitle()}
                         </p>
-                        <div className="flex flex-col gap-1 mt-1">
+                        <div className="flex flex-col mt-1">
                           <p className="text-xs text-muted-foreground">
                             Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
                           </p>
