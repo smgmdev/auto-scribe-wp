@@ -1524,7 +1524,7 @@ export function AdminMediaManagementView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Media Management
@@ -1534,7 +1534,7 @@ export function AdminMediaManagementView() {
           </p>
         </div>
         <Button
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
+          className="w-full md:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
           onClick={() => fetchData(true)}
           disabled={isRefreshing}
         >
