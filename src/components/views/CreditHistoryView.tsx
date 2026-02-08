@@ -748,6 +748,28 @@ export function CreditHistoryView() {
                   <span className="text-white/50 text-xs">available for agency only</span>
                 )}
               </div>
+              {isAgency && (
+                <>
+                  <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
+                  {withdrawalsByBank > 0 && (
+                    <div className="flex justify-between gap-4 pl-2">
+                      <span className="text-white/70">Bank:</span>
+                      <span className="font-semibold text-amber-400">${withdrawalsByBank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  {withdrawalsByCrypto > 0 && (
+                    <div className="flex justify-between gap-4 pl-2">
+                      <span className="text-white/70">USDT:</span>
+                      <span className="font-semibold text-amber-400">${withdrawalsByCrypto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  {withdrawalsByBank === 0 && withdrawalsByCrypto === 0 && (
+                    <div className="flex justify-between gap-4 pl-2">
+                      <span className="text-white/50">None</span>
+                    </div>
+                  )}
+                </>
+              )}
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total Purchased:</span>
                 <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
@@ -757,8 +779,8 @@ export function CreditHistoryView() {
                 <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked Credits:</span>
-                <span className="font-semibold text-amber-400">{Math.round(creditsInUse).toLocaleString()}</span>
+                <span className="text-white/70">Locked in Orders:</span>
+                <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
               </div>
               <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                 <span className="text-white/70">Total Available Credits:</span>
