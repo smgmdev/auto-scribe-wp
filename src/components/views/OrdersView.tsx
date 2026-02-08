@@ -765,8 +765,8 @@ export function OrdersView() {
     <Card 
       key={order.id} 
       className={cn(
-        "border border-transparent hover:border-border transition-colors cursor-pointer relative [box-shadow:none]",
-        isUnread && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500 hover:border-t-border hover:border-r-border hover:border-b-border",
+        "border border-border hover:border-foreground/30 transition-colors cursor-pointer relative [box-shadow:none]",
+        isUnread && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500",
         isUnread && !isAdmin && order.status === 'cancelled' && "bg-blue-500/10"
       )}
       onClick={() => handleOrderClick(order)}
