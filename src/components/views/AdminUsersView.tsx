@@ -1322,7 +1322,7 @@ export function AdminUsersView() {
                                                         </div>
                                                         <div className="col-span-2">
                                                           <span className="text-muted-foreground uppercase tracking-wide">Wallet Address</span>
-                                                          <p className="font-medium font-mono text-[9px] break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
+                                                          <p className="font-medium break-all">{withdrawal.crypto_details.usdt_wallet_address || '-'}</p>
                                                         </div>
                                                       </>
                                                     )}
