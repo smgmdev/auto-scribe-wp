@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -596,63 +596,111 @@ export function AdminEngagementsView() {
               {activeRequests.map((r) => (
                 <Card 
                   key={r.id} 
-                  className={`cursor-pointer hover:bg-muted/50 transition-colors relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`} 
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`} 
                   onClick={() => handleOpenChat(r)}
                 >
                   {!r.read && (
-                    <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                    <div className="absolute top-3 right-3 md:top-3 md:right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
                   )}
-                  <CardContent className="p-4 relative">
+                  
+                  {/* Mobile: Badge at top-right above title */}
+                  <div className="md:hidden absolute top-2 right-3 flex gap-1 flex-wrap justify-end">
+                    {getEngagementBadge(r)}
+                    {!r.order_id && hasPendingOfferSent(r.id) && (
+                      <Badge className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5">
+                        <Tag className="h-2.5 w-2.5 mr-0.5" />
+                        Offer Sent
+                      </Badge>
+                    )}
+                    {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
+                      <Badge className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5">
+                        <Tag className="h-2.5 w-2.5 mr-0.5" />
+                        Client Order Request
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {r.media_sites?.favicon && (
-                          <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                          <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
                         )}
-                        <div>
-                          <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                          <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                        <div className="flex flex-col">
+                          <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
+                          <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-1 flex-wrap justify-end">
-                          {getEngagementBadge(r)}
-                          {!r.order_id && hasPendingOfferSent(r.id) && (
-                            <Badge className="bg-blue-600 text-white">
-                              <Tag className="h-3 w-3 mr-1" />
-                              Offer Sent
-                            </Badge>
-                          )}
-                          {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
-                            <Badge className="bg-blue-600 text-white">
-                              <Tag className="h-3 w-3 mr-1" />
-                              Client Order Request
-                            </Badge>
-                          )}
-                        </div>
+                      {/* Desktop: Badge at right side */}
+                      <div className="hidden md:flex items-center gap-1">
+                        {getEngagementBadge(r)}
+                        {!r.order_id && hasPendingOfferSent(r.id) && (
+                          <Badge className="bg-blue-600 text-white">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Offer Sent
+                          </Badge>
+                        )}
+                        {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
+                          <Badge className="bg-blue-600 text-white">
+                            <Tag className="h-3 w-3 mr-1" />
+                            Client Order Request
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                    <div className="mt-2 flex items-end justify-between">
+                  </CardHeader>
+                  <CardContent className="pt-0 pb-3 px-3 md:px-4">
+                    {/* Desktop layout */}
+                    <div className="hidden md:flex items-end justify-between">
                       <div className="space-y-0.5">
+                        <span className="text-xs text-muted-foreground block">
+                          Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
                         {(() => {
                           const lastEvent = getLastEventInfo(r);
                           return (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               Last Event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
-                            </p>
+                            </span>
                           );
                         })()}
-                        <span className="text-xs text-muted-foreground">
-                          Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                        </span>
                       </div>
-                      <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                      <div className="flex flex-col items-end gap-0.5">
                         {r.media_sites?.publication_format && (
-                          <span className="capitalize">{r.media_sites.publication_format}</span>
+                          <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                         )}
                         {r.media_sites?.price !== undefined && (
-                          <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
+                          <span className="font-semibold text-sm">${r.media_sites.price}</span>
                         )}
+                      </div>
+                    </div>
+                    
+                    {/* Mobile layout */}
+                    <div className="md:hidden space-y-2">
+                      <div className="space-y-0.5">
+                        <span className="text-xs text-muted-foreground block">
+                          Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                        </span>
+                        {(() => {
+                          const lastEvent = getLastEventInfo(r);
+                          return (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last Event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <div className="flex justify-end">
+                        <div className="flex flex-col items-end gap-0.5">
+                          {r.media_sites?.publication_format && (
+                            <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
+                          )}
+                          {r.media_sites?.price !== undefined && (
+                            <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -691,48 +739,93 @@ export function AdminEngagementsView() {
                   {deliveredRequests.map((r) => (
                     <Card 
                       key={r.id} 
-                      className={`cursor-pointer hover:bg-muted/50 transition-colors relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
+                      className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                       onClick={() => handleOpenChat(r)}
                     >
                       {!r.read && (
-                        <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                        <div className="absolute top-3 right-3 md:top-3 md:right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
                       )}
-                      <CardContent className="p-4">
-                        <div className="flex justify-end mb-2">
-                          <Badge className="bg-green-600">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Delivery Completed
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {r.media_sites?.favicon && (
-                            <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
-                          )}
-                          <div>
-                            <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                            <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                      
+                      {/* Mobile: Badge at top-right above title */}
+                      <div className="md:hidden absolute top-2 right-3">
+                        <Badge className="bg-green-600 text-[10px] px-1.5 py-0.5">
+                          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+                          Delivery Completed
+                        </Badge>
+                      </div>
+                      
+                      <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {r.media_sites?.favicon && (
+                              <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
+                            )}
+                            <div className="flex flex-col">
+                              <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
+                              <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
+                            </div>
+                          </div>
+                          {/* Desktop: Badge at right side */}
+                          <div className="hidden md:flex">
+                            <Badge className="bg-green-600">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Delivery Completed
+                            </Badge>
                           </div>
                         </div>
-                        <div className="mt-2 space-y-0.5">
-                          <span className="text-xs text-muted-foreground">
-                            Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                          </span>
-                          <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>Last Message: {messages[r.id]?.length > 0 
-                              ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                              : 'No messages'}</span>
-                            {messages[r.id]?.length > 0 && (
-                              <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
-                            )}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-3 md:px-4">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground block">
+                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last Message: {messages[r.id]?.length > 0 
+                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
+                                : 'No messages'}
+                              {messages[r.id]?.length > 0 && (
+                                <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5">
                             {r.media_sites?.publication_format && (
-                              <span className="capitalize">{r.media_sites.publication_format}</span>
+                              <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                             )}
                             {r.media_sites?.price !== undefined && (
-                              <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
+                              <span className="font-semibold text-sm">${r.media_sites.price}</span>
                             )}
+                          </div>
+                        </div>
+                        
+                        {/* Mobile layout */}
+                        <div className="md:hidden space-y-2">
+                          <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground block">
+                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Last Message: {messages[r.id]?.length > 0 
+                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
+                                : 'No messages'}
+                            </span>
+                            {messages[r.id]?.length > 0 && (
+                              <span className="text-xs text-muted-foreground block pl-4">{messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                            )}
+                          </div>
+                          <div className="flex justify-end">
+                            <div className="flex flex-col items-end gap-0.5">
+                              {r.media_sites?.publication_format && (
+                                <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
+                              )}
+                              {r.media_sites?.price !== undefined && (
+                                <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -752,59 +845,103 @@ export function AdminEngagementsView() {
                     return (
                       <Card 
                         key={r.id} 
-                        className={`cursor-pointer hover:bg-muted/50 transition-colors border-border/50 relative ${!r.read ? 'bg-blue-500/5 border-blue-500/30' : ''}`}
+                        className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                         onClick={() => handleOpenChat(r)}
                       >
                         {!r.read && (
-                          <div className="absolute top-3 right-3 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                          <div className="absolute top-3 right-3 md:top-3 md:right-3 w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
                         )}
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-2">
+                        
+                        {/* Mobile: Badge at top-right above title */}
+                        <div className="md:hidden absolute top-2 right-3">
+                          <Badge className="bg-muted text-muted-foreground border-muted-foreground/30 text-[10px] px-1.5 py-0.5">
+                            Cancelled
+                          </Badge>
+                        </div>
+                        
+                        <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               {r.media_sites?.favicon ? (
-                                <img src={r.media_sites.favicon} className="h-10 w-10 rounded object-cover" alt="" />
+                                <img src={r.media_sites.favicon} className="h-8 w-8 rounded object-cover" alt="" />
                               ) : (
-                                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
                                 </div>
                               )}
                               <div className="flex flex-col">
-                                <h3 className={`font-medium ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</h3>
-                                <p className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</p>
+                                <CardTitle className={`text-base ${!r.read ? 'text-blue-600' : ''}`}>{r.title}</CardTitle>
+                                <span className="text-xs text-muted-foreground">Agency: {r.agency_payouts?.agency_name || 'N/A'}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1">
+                            {/* Desktop: Badge at right side */}
+                            <div className="hidden md:flex">
                               <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">
                                 Cancelled
                               </Badge>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
+                        </CardHeader>
+                        <CardContent className="pt-0 pb-3 px-3 md:px-4">
+                          {/* Desktop layout */}
+                          <div className="hidden md:flex items-end justify-between">
                             <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                Cancelled Engagement: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                              <span className="text-xs text-muted-foreground block">
+                                Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                              <span className="text-xs text-muted-foreground block">
+                                Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
                                 {requestMessages.length > 0 && (
                                   <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                 )}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
-                              </p>
+                              </span>
                               {r.cancelled_by === 'admin' ? (
-                                <p className="text-xs text-destructive">
+                                <span className="text-xs text-destructive block">
                                   Reason: Cancelled by Arcana Mace Staff{r.cancellation_reason ? ` - ${r.cancellation_reason}` : ''}
-                                </p>
+                                </span>
                               ) : r.cancellation_reason && (
-                                <p className="text-xs text-destructive">Reason: {r.cancellation_reason}</p>
+                                <span className="text-xs text-destructive block">Reason: {r.cancellation_reason}</span>
                               )}
                             </div>
-                            <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                            <div className="flex flex-col items-end gap-0.5">
                               {r.media_sites?.publication_format && (
-                                <span className="capitalize">{r.media_sites.publication_format}</span>
+                                <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                               )}
                               {r.media_sites?.price !== undefined && (
-                                <span className="font-medium text-foreground text-sm">${r.media_sites.price}</span>
+                                <span className="font-semibold text-sm">${r.media_sites.price}</span>
                               )}
+                            </div>
+                          </div>
+                          
+                          {/* Mobile layout */}
+                          <div className="md:hidden space-y-2">
+                            <div className="space-y-0.5">
+                              <span className="text-xs text-muted-foreground block">
+                                Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                              <span className="text-xs text-muted-foreground block">
+                                Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
+                              </span>
+                              {requestMessages.length > 0 && (
+                                <span className="text-xs text-muted-foreground block">{requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
+                              )}
+                              {r.cancelled_by === 'admin' ? (
+                                <span className="text-xs text-destructive block">
+                                  Reason: Cancelled by Arcana Mace Staff{r.cancellation_reason ? ` - ${r.cancellation_reason}` : ''}
+                                </span>
+                              ) : r.cancellation_reason && (
+                                <span className="text-xs text-destructive block">Reason: {r.cancellation_reason}</span>
+                              )}
+                            </div>
+                            <div className="flex justify-end">
+                              <div className="flex flex-col items-end gap-0.5">
+                                {r.media_sites?.publication_format && (
+                                  <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
+                                )}
+                                {r.media_sites?.price !== undefined && (
+                                  <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </CardContent>
