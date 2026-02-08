@@ -492,9 +492,9 @@ export const AdminCreditManagementView = () => {
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
                               <TableCell colSpan={3} className="p-0">
-                                <div className="bg-muted/30 px-4 py-2">
+                                <div className="bg-muted/30 px-4 py-1">
                                   {/* Stats row above tabs */}
-                                  <div className="grid grid-cols-6 gap-4 mb-4">
+                                  <div className="grid grid-cols-6 gap-4 mb-2">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-center cursor-help">
