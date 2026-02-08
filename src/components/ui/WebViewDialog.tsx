@@ -104,9 +104,9 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/50 z-[299]">
-        <DialogHeader className="px-3 pb-0">
-          <div className="flex items-center justify-between">
+      <DialogContent className="w-[95vw] md:w-[90vw] max-w-[95vw] md:max-w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/50 z-[299]">
+        <DialogHeader className="px-2 md:px-3 pb-0">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Button
                 onClick={handleRefresh}
@@ -118,6 +118,14 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
                 <RefreshCw className={`h-4 w-4 ${status === 'loading' ? 'animate-spin' : ''}`} />
               </Button>
               <span className="text-sm font-medium truncate">{title}</span>
+              <Button
+                onClick={() => onOpenChange(false)}
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black md:hidden ml-auto flex-shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               {(downloadUrl || url) && (
@@ -125,7 +133,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
                   onClick={handleDownload}
                   variant="outline"
                   size="sm"
-                  className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Download
@@ -135,14 +143,14 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
                 onClick={() => onOpenChange(false)}
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hidden md:flex flex-shrink-0"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </DialogHeader>
-        <div className="w-full h-[80vh] relative bg-muted">
+        <div className="w-full h-[70vh] md:h-[80vh] relative bg-muted">
           {status === 'loading' && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
               <div className="flex flex-col items-center gap-2">

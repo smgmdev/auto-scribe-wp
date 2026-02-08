@@ -1791,9 +1791,9 @@ export function AdminAgenciesView() {
 
       {/* Document Viewer Dialog */}
       <Dialog open={documentDialogOpen} onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="max-w-[85vw] w-[85vw] max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
-          <DialogHeader className="px-3 pb-0">
-            <div className="flex items-center justify-between">
+        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+          <DialogHeader className="px-2 md:px-3 pb-0">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => {
@@ -1804,18 +1804,26 @@ export function AdminAgenciesView() {
                   variant="ghost"
                   size="sm"
                   disabled={documentLoading}
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
                 >
                   <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
                 </Button>
-                <DialogTitle className="text-sm">Incorporation Document</DialogTitle>
+                <DialogTitle className="text-sm truncate">Incorporation Document</DialogTitle>
+                <Button
+                  onClick={() => setDocumentDialogOpen(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white md:hidden ml-auto flex-shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => window.open(documentUrl!, '_blank')}
                   variant="outline"
                   size="sm"
-                  className="hover:bg-black hover:text-white h-7 text-xs"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
                 >
                   <Download className="h-3 w-3 mr-1" />
                   Download
@@ -1824,7 +1832,7 @@ export function AdminAgenciesView() {
                   onClick={() => window.open(documentUrl!, '_blank')}
                   variant="outline"
                   size="sm"
-                  className="hover:bg-black hover:text-white h-7 text-xs"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
                 >
                   <ExternalLink className="h-3 w-3 mr-1" />
                   Open in New Tab
@@ -1833,7 +1841,7 @@ export function AdminAgenciesView() {
                   onClick={() => setDocumentDialogOpen(false)}
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white"
+                  className="h-7 w-7 p-0 hover:bg-black hover:text-white hidden md:flex flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -1841,7 +1849,7 @@ export function AdminAgenciesView() {
             </div>
           </DialogHeader>
           {documentUrl && (
-            <div className="w-full h-[75vh] relative">
+            <div className="w-full h-[70vh] md:h-[75vh] relative">
               {documentLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
                   <div className="flex flex-col items-center gap-2">
