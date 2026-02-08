@@ -4762,14 +4762,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <div
         data-chat-window
         data-chat-id={globalChatRequest.id}
-        className={`fixed bg-background border shadow-2xl shadow-black/25 flex flex-col overflow-hidden ${
-          isMobile ? 'inset-0 rounded-none' : 'rounded-t-lg'
+        className={`fixed bg-background shadow-2xl shadow-black/25 flex flex-col ${
+          isMobile ? 'inset-0 rounded-none border-0' : 'border rounded-t-lg overflow-hidden'
         }`}
         style={{
-          width: isMobile ? '100%' : '600px',
-          maxWidth: isMobile ? '100%' : 'calc(100vw - 32px)',
-          height: isMobile ? '100%' : '550px',
-          maxHeight: isMobile ? '100%' : 'calc(100vh - 100px)',
+          width: isMobile ? '100vw' : '600px',
+          maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
+          height: isMobile ? '100dvh' : '550px',
+          maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
           left: isMobile ? '0' : `calc(50% + ${localPosition.x}px)`,
           top: isMobile ? '0' : `calc(50% + ${localPosition.y}px)`,
           transform: isMobile ? 'none' : 'translate(-50%, -50%)',
@@ -5773,7 +5773,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
-            <div className="space-y-2 p-3 md:p-4 w-full min-w-0">
+            <div className="space-y-2 p-2 sm:p-3 md:p-4 w-full min-w-0 box-border">
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
@@ -5839,10 +5839,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div
                     key={msg.id}
                     id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full`}
+                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
                   >
                     <div
-                      className={`relative group max-w-[80%] min-w-0 rounded-lg p-2 md:p-3 transition-all duration-300 ${
+                      className={`relative group max-w-[85%] sm:max-w-[80%] min-w-0 rounded-lg p-2.5 sm:p-3 transition-all duration-300 break-words ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
