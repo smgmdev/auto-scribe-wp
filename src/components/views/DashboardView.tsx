@@ -364,48 +364,73 @@ export function DashboardView() {
       {/* Agency & Credit Summary (only for agency users) */}
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
-          {/* Agency Summary */}
-          <Card className="border-border/50 bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Wallet className="h-4 w-4" />
-                Agency Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Financial Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Wallet Balance</span>
-                  {agencySummary.loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  ) : (
-                    <div className="text-xl md:text-2xl font-bold text-foreground">
-                      ${agencySummary.walletBalance.toFixed(2)}
-                    </div>
-                  )}
-                </div>
-                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Total Sales</span>
-                  {agencySummary.loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  ) : (
-                    <div className="text-xl md:text-2xl font-bold text-foreground">
-                      ${agencySummary.totalSales.toFixed(2)}
-                    </div>
-                  )}
+          {/* Agency Summary - Modern Mini Dashboard */}
+          <Card className="border-border/30 bg-gradient-to-br from-card to-muted/20 overflow-hidden">
+            <CardHeader className="pb-2 pt-4 px-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold tracking-tight">Agency Summary</CardTitle>
+                <div className="h-8 w-8 rounded-full bg-foreground/5 flex items-center justify-center">
+                  <Wallet className="h-4 w-4 text-foreground/70" />
                 </div>
               </div>
-              {/* Quick Links */}
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('agency-payouts')}>
-                  My Earnings
+            </CardHeader>
+            <CardContent className="px-4 pb-4 space-y-4">
+              {/* Financial Stats - Modern Cards */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative bg-foreground rounded-xl p-4 text-background overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-background/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <span className="text-[10px] uppercase tracking-wider text-background/60 font-medium">Wallet</span>
+                    {agencySummary.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-background/60 mt-1" />
+                    ) : (
+                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight">
+                        ${agencySummary.walletBalance.toFixed(0)}
+                        <span className="text-sm font-normal text-background/60">.{(agencySummary.walletBalance % 1).toFixed(2).slice(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="relative bg-muted/60 rounded-xl p-4 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="relative">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Total Sales</span>
+                    {agencySummary.loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
+                    ) : (
+                      <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                        ${agencySummary.totalSales.toFixed(0)}
+                        <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.totalSales % 1).toFixed(2).slice(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Quick Links - Minimal Style */}
+              <div className="flex gap-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
+                  onClick={() => setCurrentView('agency-payouts')}
+                >
+                  Earnings
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('agency-media')}>
-                  My Media
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
+                  onClick={() => setCurrentView('agency-media')}
+                >
+                  Media
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 min-w-fit" onClick={() => setCurrentView('my-agency')}>
-                  My Agency
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1 h-8 text-xs font-medium hover:bg-foreground hover:text-background transition-colors"
+                  onClick={() => setCurrentView('my-agency')}
+                >
+                  Agency
                 </Button>
               </div>
             </CardContent>
