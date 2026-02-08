@@ -452,43 +452,15 @@ export function DashboardView() {
 
   // Custom tooltip content for Available Credits
   const renderAvailableCreditsTooltip = () => {
-    const { availableCredits, creditsInOrders, creditsInPendingRequests, creditsInWithdrawals, totalBalance } = availableCreditsData;
-    const hasLockedCredits = creditsInOrders > 0 || creditsInPendingRequests > 0 || creditsInWithdrawals > 0;
+    const { availableCredits, earnedCredits, purchasedCredits, creditsWithdrawn } = availableCreditsData;
     
     return (
       <div className="space-y-1">
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Available Balance:</span>
-          <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
-        </div>
-        <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Credits Locked</div>
-        {creditsInOrders > 0 && (
-          <div className="flex justify-between gap-4 pl-2">
-            <span className="text-white/70">In Orders:</span>
-            <span className="font-semibold text-amber-400">{creditsInOrders.toLocaleString()}</span>
-          </div>
-        )}
-        {creditsInPendingRequests > 0 && (
-          <div className="flex justify-between gap-4 pl-2">
-            <span className="text-white/70">In Pending Requests:</span>
-            <span className="font-semibold text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
-          </div>
-        )}
-        {creditsInWithdrawals > 0 && (
-          <div className="flex justify-between gap-4 pl-2">
-            <span className="text-white/70">In Withdrawals:</span>
-            <span className="font-semibold text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
-          </div>
-        )}
-        {!hasLockedCredits && (
-          <div className="flex justify-between gap-4 pl-2">
-            <span className="text-white/50">None</span>
-          </div>
-        )}
-        <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-          <span className="text-white/70">Total Balance:</span>
-          <span className="font-semibold">{totalBalance.toLocaleString()}</span>
-        </div>
+        <p><span className="opacity-70">Earned:</span> {earnedCredits.toLocaleString()}</p>
+        <p><span className="opacity-70">Purchased:</span> {purchasedCredits.toLocaleString()}</p>
+        <p><span className="opacity-70">Withdrawn:</span> {creditsWithdrawn.toLocaleString()}</p>
+        <hr className="border-background/30 my-1" />
+        <p className="font-medium">Available Credit Balance: {availableCredits.toLocaleString()}</p>
       </div>
     );
   };
