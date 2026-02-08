@@ -371,7 +371,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <TabsTrigger
                 key={type.key}
                 value={type.key}
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background px-3 py-1.5 text-xs"
+                className="data-[state=active]:bg-foreground data-[state=active]:text-background px-3 py-2 text-xs"
               >
                 {type.label} ({count})
               </TabsTrigger>
