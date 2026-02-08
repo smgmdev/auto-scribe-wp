@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { format } from 'date-fns';
 
 interface PublishedSource {
@@ -547,6 +548,7 @@ export function AdminAIArticlesView() {
             setOffset(0);
             setHasMore(true);
             setIsRefreshing(false);
+            sonnerToast.success('Articles refreshed');
           }}
           disabled={isRefreshing || isLoading}
           className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"

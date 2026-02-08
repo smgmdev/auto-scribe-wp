@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AIPublishingSetting {
@@ -406,6 +407,7 @@ export function AdminAISettingsView() {
       queryClient.invalidateQueries({ queryKey: ['wordpress-sites-for-ai'] }),
     ]);
     setIsRefreshing(false);
+    sonnerToast.success('AI Config refreshed');
   };
 
   return (

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -219,6 +220,9 @@ export function AdminAgenciesView() {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setLoading(false);
+      if (isRefresh) {
+        sonnerToast.success('Agencies refreshed');
+      }
       setIsRefreshing(false);
     }
   };

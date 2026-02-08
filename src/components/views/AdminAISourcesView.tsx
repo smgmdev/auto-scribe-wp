@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 
@@ -167,6 +168,7 @@ export function AdminAISourcesView() {
               setIsRefreshing(true);
               await refetch();
               setIsRefreshing(false);
+              sonnerToast.success('Sources refreshed');
             }}
             disabled={isLoading || isRefreshing}
             className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
