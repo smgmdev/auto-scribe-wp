@@ -331,3 +331,16 @@ button:focus-visible,
   0% { transform: rotateX(70deg) rotateY(100deg) rotateZ(0deg); }
   100% { transform: rotateX(70deg) rotateY(100deg) rotateZ(360deg); }
 }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
