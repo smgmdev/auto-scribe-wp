@@ -463,8 +463,9 @@ export function DashboardView() {
 
   // Custom tooltip content for Available Credits
   const renderAvailableCreditsTooltip = () => {
-    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent } = availableCreditsData;
+    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent, creditsInOrders, creditsInPendingRequests, creditsInWithdrawals } = availableCreditsData;
     const userIsAgency = isAgency === true;
+    const totalLocked = creditsInOrders + creditsInPendingRequests + creditsInWithdrawals;
     
     return (
       <div className="space-y-1">
@@ -491,6 +492,10 @@ export function DashboardView() {
         <div className="flex justify-between gap-4">
           <span className="text-white/70">Total Spent:</span>
           <span className="font-semibold text-red-400">-{totalSpent.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-white/70">Locked Credits:</span>
+          <span className="font-semibold text-amber-400">{Math.round(totalLocked).toLocaleString()}</span>
         </div>
         <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
           <span className="text-white/70">Total Available Credits:</span>
