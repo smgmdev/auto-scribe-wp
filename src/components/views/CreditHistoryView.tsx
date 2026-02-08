@@ -753,7 +753,7 @@ export function CreditHistoryView() {
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total Spent:</span>
-                <span className="font-semibold text-red-400">-{totalSpent.toLocaleString()}</span>
+                <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Locked Credits:</span>
