@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
@@ -1123,6 +1124,7 @@ export function MyRequestsView() {
     setRefreshing(true);
     await fetchRequests();
     setRefreshing(false);
+    sonnerToast.success('Engagements refreshed');
   };
 
   return (
