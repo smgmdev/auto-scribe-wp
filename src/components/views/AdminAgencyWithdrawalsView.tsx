@@ -476,7 +476,7 @@ export function AdminAgencyWithdrawalsView() {
             size="sm"
             onClick={() => setStatusFilter('all')}
             className={`rounded-none flex-shrink-0 border-0 ${statusFilter === 'all' 
-              ? 'bg-white text-black hover:bg-white/90' 
+              ? 'bg-white text-black hover:bg-white' 
               : 'bg-black text-white hover:bg-white/10'}`}
           >
             All ({withdrawals.length})
@@ -485,7 +485,7 @@ export function AdminAgencyWithdrawalsView() {
             size="sm"
             onClick={() => setStatusFilter('pending')}
             className={`rounded-none flex-shrink-0 border-0 ${statusFilter === 'pending' 
-              ? 'bg-white text-black hover:bg-white/90' 
+              ? 'bg-white text-black hover:bg-white' 
               : 'bg-black text-white hover:bg-white/10'}`}
           >
             Pending ({pendingCount})
@@ -494,7 +494,7 @@ export function AdminAgencyWithdrawalsView() {
             size="sm"
             onClick={() => setStatusFilter('completed')}
             className={`rounded-none flex-shrink-0 border-0 ${statusFilter === 'completed' 
-              ? 'bg-white text-black hover:bg-white/90' 
+              ? 'bg-white text-black hover:bg-white' 
               : 'bg-black text-white hover:bg-white/10'}`}
           >
             Completed ({completedCount})
@@ -503,7 +503,7 @@ export function AdminAgencyWithdrawalsView() {
             size="sm"
             onClick={() => setStatusFilter('rejected')}
             className={`rounded-none flex-shrink-0 border-0 ${statusFilter === 'rejected' 
-              ? 'bg-white text-black hover:bg-white/90' 
+              ? 'bg-white text-black hover:bg-white' 
               : 'bg-black text-white hover:bg-white/10'}`}
           >
             Rejected ({rejectedCount})
