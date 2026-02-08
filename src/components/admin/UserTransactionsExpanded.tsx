@@ -363,7 +363,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   return (
     <div className="bg-muted/30 border-t">
       <Tabs value={activeType} onValueChange={setActiveType}>
-        <TabsList className="flex flex-wrap justify-start h-auto gap-1 bg-transparent p-0 border-b border-border">
+        <TabsList className="flex flex-wrap justify-start h-auto gap-1 bg-foreground p-0 border-b border-border">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             if (type.key !== 'all' && count === 0) return null;
@@ -371,7 +371,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <TabsTrigger
                 key={type.key}
                 value={type.key}
-                className="data-[state=active]:bg-foreground data-[state=active]:text-background px-3 py-2 text-xs !rounded-none"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground text-white/70 px-3 py-2 text-xs !rounded-none"
               >
                 {type.label} ({count})
               </TabsTrigger>
