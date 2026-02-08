@@ -88,35 +88,27 @@ function AgencyFAQ() {
 
   return (
     <div className="bg-white rounded-lg border border-border p-6 shadow-sm">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-foreground text-center mb-4">FAQs</h2>
+      <h2 className="text-3xl font-bold text-foreground text-center mb-8">Questions? Answers.</h2>
+      <div className="divide-y divide-border">
         {faqItems.map((item, index) => (
           <Collapsible
             key={index}
             open={openItems.includes(index)}
             onOpenChange={() => toggleItem(index)}
           >
-            <div className={`border border-border overflow-hidden transition-all duration-300 ${
-              openItems.includes(index) 
-                ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 border-slate-700 shadow-lg shadow-blue-900/20' 
-                : 'bg-card hover:bg-gradient-to-r hover:from-slate-900 hover:via-slate-800 hover:to-blue-900 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-900/20'
-            }`}>
-              <CollapsibleTrigger className={`group flex w-full items-center justify-between p-4 text-left transition-colors ${
-                openItems.includes(index) ? 'text-white' : 'hover:text-white'
-              }`}>
-                <span className={`font-medium ${openItems.includes(index) ? 'text-white' : 'text-foreground group-hover:text-white'}`}>{item.question}</span>
-                <ChevronDown 
-                  className={`h-5 w-5 transition-transform duration-200 ${
-                    openItems.includes(index) ? 'rotate-180 text-white' : 'text-muted-foreground group-hover:text-white'
-                  }`} 
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 py-4">
-                  <p className={`leading-relaxed ${openItems.includes(index) ? 'text-slate-300' : 'text-muted-foreground'}`}>{item.answer}</p>
-                </div>
-              </CollapsibleContent>
-            </div>
+            <CollapsibleTrigger className="group flex w-full items-center justify-between py-4 text-left">
+              <span className="font-semibold text-foreground text-base pr-4">{item.question}</span>
+              <ChevronDown 
+                className={`h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-200 ${
+                  openItems.includes(index) ? 'rotate-180' : ''
+                }`} 
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="pb-4">
+                <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
+              </div>
+            </CollapsibleContent>
           </Collapsible>
         ))}
       </div>
