@@ -643,7 +643,7 @@ export function DashboardView() {
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-background/60 mt-1" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight">
+                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight font-body">
                             ${agencySummary.walletBalance.toFixed(0)}
                             <span className="text-sm font-normal text-background/60">.{(agencySummary.walletBalance % 1).toFixed(2).slice(2)}</span>
                           </div>
@@ -693,7 +693,7 @@ export function DashboardView() {
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
                             ${agencySummary.totalSales.toFixed(0)}
                             <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.totalSales % 1).toFixed(2).slice(2)}</span>
                           </div>
@@ -729,7 +729,7 @@ export function DashboardView() {
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
                             ${agencySummary.pendingWithdrawals.toFixed(0)}
                             <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.pendingWithdrawals % 1).toFixed(2).slice(2)}</span>
                           </div>
@@ -770,7 +770,7 @@ export function DashboardView() {
                         {agencySummary.loading ? (
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-1" />
                         ) : (
-                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground">
+                          <div className="text-2xl md:text-3xl font-bold mt-0.5 tracking-tight text-foreground font-body">
                             ${agencySummary.completedWithdrawals.toFixed(0)}
                             <span className="text-sm font-normal text-muted-foreground">.{(agencySummary.completedWithdrawals % 1).toFixed(2).slice(2)}</span>
                           </div>
