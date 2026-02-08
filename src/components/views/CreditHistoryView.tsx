@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -219,10 +219,7 @@ export function CreditHistoryView() {
     setRefreshing(true);
     await fetchData(false);
     setRefreshing(false);
-    toast({
-      title: "Refreshed",
-      description: "Credit data has been updated.",
-    });
+    toast.success('Credits refreshed');
   };
 
   const fetchData = useCallback(async (showLoader = true) => {
