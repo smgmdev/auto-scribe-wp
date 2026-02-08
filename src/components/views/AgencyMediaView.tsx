@@ -1014,75 +1014,89 @@ export function AgencyMediaView() {
                         onClick={() => toggleExpandedApprovedSubmission(submission.id)}
                       >
                         <CardContent className="p-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-start gap-3 min-w-0 flex-1">
-                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
-                                <CheckCircle className="h-5 w-5 text-green-500" />
-                              </div>
-                              <div className="min-w-0 flex-1 space-y-0">
-                                <div className="flex items-center gap-1.5">
-                                  <p className="font-medium text-sm truncate leading-tight">
-                                    {submission.rejected_media && submission.rejected_media.length > 0 
-                                      ? 'Partially Approved Media Sheet' 
-                                      : 'Approved Media Sheet'}
-                                  </p>
-                                  <Tooltip delayDuration={100}>
-                                    <TooltipTrigger asChild>
-                                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
-                                    </TooltipTrigger>
-                                    <TooltipContent 
-                                      side="right" 
-                                      align="start"
-                                      sideOffset={8}
-                                      collisionPadding={16}
-                                      avoidCollisions={true}
-                                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
-                                    >
-                                      <p>Approved media sites are now available in Global Library under Media Network.</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </div>
-                                {submission.reply_sheet_url && (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                      {submission.reply_sheet_url.length > 40 
-                                        ? `${submission.reply_sheet_url.substring(0, 40)}...` 
-                                        : submission.reply_sheet_url}
-                                    </span>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigator.clipboard.writeText(submission.reply_sheet_url || '');
-                                        toast.success('Link copied to clipboard');
-                                      }}
-                                      className="text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                      <Copy className="h-3 w-3" />
-                                    </button>
-                                    <a
-                                      href={submission.reply_sheet_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-muted-foreground hover:text-foreground transition-colors"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                  </div>
-                                )}
-                                <p className="text-xs text-muted-foreground leading-tight">
-                                  {submission.reviewed_at 
-                                    ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
-                                    : 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex flex-col gap-2">
+                            {/* Badge row - visible on mobile, hidden on desktop */}
+                            <div className="flex items-center justify-between md:hidden">
                               <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                 {submission.imported_sites?.length || 0} sites added
                               </Badge>
                               <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                              </div>
+                            </div>
+                            
+                            {/* Main content row */}
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 min-w-0 flex-1">
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="font-medium text-sm truncate leading-tight">
+                                      {submission.rejected_media && submission.rejected_media.length > 0 
+                                        ? 'Partially Approved Media Sheet' 
+                                        : 'Approved Media Sheet'}
+                                    </p>
+                                    <Tooltip delayDuration={100}>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
+                                      </TooltipTrigger>
+                                      <TooltipContent 
+                                        side="right" 
+                                        align="start"
+                                        sideOffset={8}
+                                        collisionPadding={16}
+                                        avoidCollisions={true}
+                                        className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                      >
+                                        <p>Approved media sites are now available in Global Library under Media Network.</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </div>
+                                  {submission.reply_sheet_url && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                        {submission.reply_sheet_url.length > 40 
+                                          ? `${submission.reply_sheet_url.substring(0, 40)}...` 
+                                          : submission.reply_sheet_url}
+                                      </span>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          navigator.clipboard.writeText(submission.reply_sheet_url || '');
+                                          toast.success('Link copied to clipboard');
+                                        }}
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </button>
+                                      <a
+                                        href={submission.reply_sheet_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    </div>
+                                  )}
+                                  <p className="text-xs text-muted-foreground leading-tight">
+                                    {submission.reviewed_at 
+                                      ? `${new Date(submission.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(submission.reviewed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` 
+                                      : 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
+                              {/* Badge and chevron - hidden on mobile, visible on desktop */}
+                              <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                                <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                  {submission.imported_sites?.length || 0} sites added
+                                </Badge>
+                                <div className="h-7 w-7 flex items-center justify-center text-muted-foreground">
+                                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                </div>
                               </div>
                             </div>
                           </div>
