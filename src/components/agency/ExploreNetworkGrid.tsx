@@ -86,7 +86,7 @@ export function ExploreNetworkGrid() {
       </div>
 
       <p className="text-muted-foreground text-xs mt-6">
-        When you join Arcana Mace you can promote your own worldwide media options.
+        When you join Arcana Mace you can list your own worldwide media options.
       </p>
 
       <MediaSiteDialog
