@@ -61,6 +61,19 @@ export function AgencyPayoutsView() {
   const [openingChat, setOpeningChat] = useState<string | null>(null);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  const toggleCardExpand = (id: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   // Calculate pending withdrawals (only 'pending' status)
   const pendingWithdrawalsTotal = withdrawals
@@ -630,24 +643,26 @@ export function AgencyPayoutsView() {
                     const saleAmount = (order.amount_cents || 0) / 100;
                     const platformFee = (order.platform_fee_cents || 0) / 100;
                     const completedDate = order.accepted_at || order.delivered_at || order.created_at;
+                    const isExpanded = expandedCards.has(`order-${order.id}`);
 
-                    const rowContent = (
-                      <div 
-                        className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
-                      >
-                        <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
-                          +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <div className="flex items-start gap-3 md:pr-24">
-                          <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
-                            <ArrowDownLeft className="h-5 w-5 text-green-500" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              Credited: {order.media_site?.name || 'Order Earning'}
-                            </p>
-                            <div className="flex flex-col mt-1">
-                              <div className="flex items-center gap-1">
+                    return (
+                      <div key={`order-${order.id}`}>
+                        <div 
+                          onClick={() => toggleCardExpand(`order-${order.id}`)}
+                          className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
+                        >
+                          <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
+                            +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <div className="flex items-start gap-3 md:pr-24">
+                            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
+                              <ArrowDownLeft className="h-5 w-5 text-green-500" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                Credited: {order.media_site?.name || 'Order Earning'}
+                              </p>
+                              <div className="flex items-center gap-1 mt-1">
                                 <p className="text-xs text-muted-foreground">
                                   Order: {order.order_number || order.id.slice(0, 8) + '...'}
                                 </p>
@@ -662,9 +677,30 @@ export function AgencyPayoutsView() {
                                   <Copy className="h-3 w-3" />
                                 </button>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                              <p className="md:hidden mt-2 text-lg text-green-500">
+                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div className="mt-1 ml-4 p-3 rounded-lg bg-muted/30 border border-border/30 space-y-2 animate-fade-in">
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">
+                                <span className="text-foreground/70">Order Created:</span> {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              {order.delivered_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="text-foreground/70">Delivered:</span> {format(new Date(order.delivered_at), 'MMM d, yyyy h:mm a')}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                <span className="text-foreground/70">Completed:</span> {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-1 pt-1 border-t border-border/30">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -687,28 +723,10 @@ export function AgencyPayoutsView() {
                               >
                                 See transaction details
                               </button>
-                              <p className="md:hidden mt-2 text-lg text-green-500">
-                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </p>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    );
-
-                    return (
-                      <Tooltip key={`order-${order.id}`} delayDuration={100}>
-                        <TooltipTrigger asChild>
-                          {rowContent}
-                        </TooltipTrigger>
-                        <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
-                          <div className="space-y-1 text-white">
-                            <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${saleAmount.toFixed(2)}</span></p>
-                            <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
-                            <p><span className="text-white/70">Your Earnings:</span> <span className="font-semibold">${earningsAmount.toFixed(2)}</span></p>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
                     );
                   }
                 });
