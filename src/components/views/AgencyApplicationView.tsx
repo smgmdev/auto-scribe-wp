@@ -441,16 +441,16 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full">
-      {/* Hero Section with Video */}
-      <div className="relative h-[80vh]">
+    <div className="animate-fade-in -m-4 lg:-m-8">
+      {/* Fixed Video Background - stays completely still on scroll */}
+      <div className="fixed inset-0 lg:left-64" style={{ zIndex: 0 }}>
         <video 
           src={agencyHeroVideo} 
           autoPlay 
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="w-full h-full object-cover"
         />
         
         {/* Text Overlay on Video */}
@@ -480,8 +480,11 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="relative bg-white">
+      {/* Spacer to push content down and reveal the fixed video */}
+      <div className="h-[80vh]" />
+
+      {/* Content Section - scrolls over the video */}
+      <div className="relative bg-white" style={{ zIndex: 1 }}>
         {/* Dark gradient transition at top */}
         <div className="absolute -top-24 left-0 right-0 h-24 bg-gradient-to-b from-transparent via-black/40 to-white pointer-events-none" />
         
