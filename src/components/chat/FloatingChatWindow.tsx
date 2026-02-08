@@ -21,6 +21,7 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ServiceMessage {
   id: string;
@@ -38,6 +39,7 @@ interface FloatingChatWindowProps {
 
 export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const { user, isAdmin, credits, refreshCredits } = useAuth();
+  const isMobile = useIsMobile();
   const { 
     closeGlobalChat,
     updateGlobalChatRequest,
@@ -4760,15 +4762,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <div
         data-chat-window
         data-chat-id={globalChatRequest.id}
-        className="fixed bg-background border rounded-t-lg shadow-2xl shadow-black/25 flex flex-col overflow-hidden"
+        className={`fixed bg-background border shadow-2xl shadow-black/25 flex flex-col overflow-hidden ${
+          isMobile ? 'inset-0 rounded-none' : 'rounded-t-lg'
+        }`}
         style={{
-          width: '600px',
-          maxWidth: 'calc(100vw - 32px)',
-          height: '550px',
-          maxHeight: 'calc(100vh - 100px)',
-          left: `calc(50% + ${localPosition.x}px)`,
-          top: `calc(50% + ${localPosition.y}px)`,
-          transform: 'translate(-50%, -50%)',
+          width: isMobile ? '100%' : '600px',
+          maxWidth: isMobile ? '100%' : 'calc(100vw - 32px)',
+          height: isMobile ? '100%' : '550px',
+          maxHeight: isMobile ? '100%' : 'calc(100vh - 100px)',
+          left: isMobile ? '0' : `calc(50% + ${localPosition.x}px)`,
+          top: isMobile ? '0' : `calc(50% + ${localPosition.y}px)`,
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           zIndex: chat.zIndex + 100,
           overscrollBehavior: 'contain'
         }}
@@ -4788,12 +4792,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       >
         {/* Header */}
         <div 
-          className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-          onMouseDown={handleDragStart}
+          className={`px-3 md:px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${!isMobile && isDragging ? 'cursor-grabbing' : !isMobile ? 'cursor-grab' : ''} select-none`}
+          onMouseDown={!isMobile ? handleDragStart : undefined}
         >
           {/* Top row: Grip handle and action buttons */}
           <div className="flex items-center justify-between mb-2">
-            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            {!isMobile && <GripHorizontal className="h-4 w-4 text-muted-foreground" />}
+            {isMobile && <div className="w-4" />}
             <div className="flex items-center gap-1 shrink-0">
               {!isCancelled && localOrder?.status !== 'cancelled' && (
                 <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
@@ -5107,21 +5112,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
           return (
-            <div className="p-3 bg-black text-white border-b border-black">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <div className="p-2 md:p-3 bg-black text-white border-b border-black">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 md:gap-3 min-w-0">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-help shrink-0">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center cursor-help shrink-0">
                           {hasOpenDispute ? (
-                            <AlertTriangle className="h-6 w-6 text-red-500" />
+                            <AlertTriangle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                           ) : hasRevisionAfterDelivery ? (
-                            <RefreshCw className="h-6 w-6 text-orange-400" />
+                            <RefreshCw className="h-5 w-5 md:h-6 md:w-6 text-orange-400" />
                           ) : localOrder.status === 'completed' ? (
-                            <CheckCircle2 className="h-6 w-6 text-green-500" />
+                            <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           ) : (
-                            <CheckCircle className="h-6 w-6 text-green-500" />
+                            <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           )}
                         </div>
                       </TooltipTrigger>
@@ -5837,7 +5842,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`relative group max-w-[80%] rounded-lg p-3 transition-all duration-300 ${
+                      className={`relative group max-w-[85%] md:max-w-[80%] rounded-lg p-2 md:p-3 transition-all duration-300 ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
