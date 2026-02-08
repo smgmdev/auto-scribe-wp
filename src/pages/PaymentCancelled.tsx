@@ -1,17 +1,13 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 const PaymentCancelled = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast({
-      variant: 'destructive',
-      title: 'Payment cancelled',
-      description: 'Your order was not completed.',
-    });
+    toast.error('Payment cancelled');
 
     // Redirect to orders view
     navigate('/dashboard', { 

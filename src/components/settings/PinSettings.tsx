@@ -3,8 +3,7 @@ import { KeyRound, Loader2, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { useToast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -47,7 +46,6 @@ async function hashPinWithSalt(pin: string, salt: string): Promise<string> {
 
 export function PinSettings() {
   const { user } = useAuth();
-  const { toast } = useToast();
   
   const [pinEnabled, setPinEnabled] = useState(false);
   const [newPin, setNewPin] = useState('');
@@ -82,20 +80,12 @@ export function PinSettings() {
     if (!user) return;
 
     if (newPin.length !== 4) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid PIN',
-        description: 'PIN must be exactly 4 digits',
-      });
+      toast.error('PIN must be exactly 4 digits');
       return;
     }
 
     if (newPin !== confirmPin) {
-      toast({
-        variant: 'destructive',
-        title: 'PINs do not match',
-        description: 'Please make sure both PINs match',
-      });
+      toast.error('PINs do not match');
       return;
     }
 
@@ -117,11 +107,7 @@ export function PinSettings() {
     setSaving(false);
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error saving PIN',
-        description: error.message,
-      });
+      toast.error(error.message);
       return;
     }
 
@@ -130,7 +116,7 @@ export function PinSettings() {
     setShowSetupForm(false);
     setPinEnabled(true);
 
-    sonnerToast.success('PIN enabled');
+    toast.success('PIN enabled');
   };
 
   const handleDisablePin = async () => {
@@ -150,17 +136,13 @@ export function PinSettings() {
     setSaving(false);
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error disabling PIN',
-        description: error.message,
-      });
+      toast.error(error.message);
       return;
     }
 
     setPinEnabled(false);
 
-    sonnerToast.success('PIN disabled');
+    toast.success('PIN disabled');
   };
 
   if (loading) {

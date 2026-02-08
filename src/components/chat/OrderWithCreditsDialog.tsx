@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Loader2, Coins, Tag, AlertTriangle, Info, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 interface MediaSiteInfo {
   id: string;
@@ -61,7 +61,6 @@ export function OrderWithCreditsDialog({
   const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const { credits, user } = useAuth();
-  const { toast } = useToast();
 
   // Fetch locked credits when dialog opens (includes active orders AND pending requests)
   React.useEffect(() => {
@@ -200,10 +199,7 @@ export function OrderWithCreditsDialog({
         throw error;
       }
 
-      toast({
-        title: "Order Request Sent",
-        description: `Your order request has been sent. ${creditCost} credits have been locked.`,
-      });
+      toast.success(`Order request sent. ${creditCost} credits locked.`);
       
       // Reset form
       setDeliveryDays(0);
@@ -215,11 +211,7 @@ export function OrderWithCreditsDialog({
       onSuccess(insertedMsg as ServiceMessage);
     } catch (error: any) {
       console.error('Order request error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Request Failed',
-        description: error.message || 'Failed to send order request.',
-      });
+      toast.error(error.message || 'Failed to send order request.');
     } finally {
       setSending(false);
     }

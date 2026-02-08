@@ -3,7 +3,7 @@ import { Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface PinVerificationProps {
   onVerify: (pin: string) => Promise<boolean>;
@@ -13,7 +13,6 @@ interface PinVerificationProps {
 export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
   const [pin, setPin] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const { toast } = useToast();
   const hasVerifiedRef = useRef(false);
 
   const handleVerify = async (pinToVerify: string) => {
@@ -25,11 +24,7 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
     setIsVerifying(false);
 
     if (!isValid) {
-      toast({
-        variant: 'destructive',
-        title: 'Incorrect PIN',
-        description: 'The PIN you entered is incorrect. Please try again.',
-      });
+      toast.error('Incorrect PIN');
       setPin('');
       hasVerifiedRef.current = false;
     }
