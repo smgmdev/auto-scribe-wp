@@ -446,7 +446,7 @@ export function AgencyApplicationView() {
           <h1 className="text-[40px] font-bold text-foreground">
             Why Upgrade to Agency?
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-4 text-muted-foreground">
             Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
           </p>
           <Button 
