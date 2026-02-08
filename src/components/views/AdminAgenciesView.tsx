@@ -815,8 +815,8 @@ export function AdminAgenciesView() {
         </TabsList>
 
         {/* Pending Applications Tab */}
-        <TabsContent value="pending" className="mt-2">
-          <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">New agency applications</p>
+        <TabsContent value="pending">
+          <p className="text-sm bg-black text-white px-3 py-2 inline-block">New agency applications</p>
           {pendingApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -910,8 +910,8 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Cancelled Sub-Tab */}
-            <TabsContent value="cancelled" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Cancelled agency applications by user</p>
+            <TabsContent value="cancelled">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Cancelled agency applications by user</p>
               {cancelledApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -992,8 +992,8 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Rejected Sub-Tab */}
-            <TabsContent value="rejected" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Rejected agency applications by Arcana Mace Staff</p>
+            <TabsContent value="rejected">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Rejected agency applications by Arcana Mace Staff</p>
               {rejectedApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1117,8 +1117,8 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Pending Verification Sub-Tab */}
-            <TabsContent value="pending-verification" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Agency applications undergoing verification</p>
+            <TabsContent value="pending-verification">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Agency applications undergoing verification</p>
               {agenciesPendingVerification.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1198,8 +1198,8 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Pending Approval Sub-Tab */}
-            <TabsContent value="pending-approval" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Agency applications undergoing approval</p>
+            <TabsContent value="pending-approval">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Agency applications undergoing approval</p>
               {agenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1314,8 +1314,8 @@ export function AdminAgenciesView() {
             </TabsList>
 
             {/* Active Sub-Tab */}
-            <TabsContent value="active" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Onboarded active agencies</p>
+            <TabsContent value="active">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Onboarded active agencies</p>
               {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1429,8 +1429,8 @@ export function AdminAgenciesView() {
             </TabsContent>
 
             {/* Downgraded Sub-Tab */}
-            <TabsContent value="downgraded" className="mt-2">
-              <p className="text-sm bg-black text-white px-3 py-2 mb-4 inline-block">Onboarded downgraded agencies</p>
+            <TabsContent value="downgraded">
+              <p className="text-sm bg-black text-white px-3 py-2 inline-block">Onboarded downgraded agencies</p>
               {agencies.filter(a => a.downgraded).length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
