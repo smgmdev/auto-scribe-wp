@@ -333,15 +333,15 @@ export function AgencyPayoutsView() {
       <div className="grid gap-2 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="transition-colors hover:border-primary py-3 cursor-help border-primary bg-primary">
+            <Card className="transition-colors hover:border-primary py-3 cursor-help border-primary/30 bg-primary/10">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
-                <CardTitle className="text-xs font-medium text-primary-foreground/70 uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-primary uppercase tracking-wide">
                   Wallet
                 </CardTitle>
-                <Wallet className="h-4 w-4 text-primary-foreground/60" />
+                <Wallet className="h-4 w-4 text-primary/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-4">
-                <div className="text-2xl font-semibold text-primary-foreground">
+                <div className="text-2xl font-semibold text-primary">
                   ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </CardContent>
