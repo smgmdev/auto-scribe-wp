@@ -996,10 +996,10 @@ export function CreditHistoryView() {
                       key={transaction.id}
                       className="rounded-lg border border-border hover:border-[#4771d9] transition-colors overflow-hidden"
                     >
-                      <div className="flex items-center justify-between p-3">
-                        <div className="flex items-center gap-3">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                        <div className="flex items-start gap-3">
                           {getTransactionIcon(transaction.type, transaction.amount)}
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">
                               {transaction.description?.includes('Bank Transfer') 
                                 ? `Withdrawal via Bank Transfer` 
@@ -1007,13 +1007,16 @@ export function CreditHistoryView() {
                                   ? `Withdrawal via USDT`
                                   : 'Withdrawal Rejected'}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              {getTransactionBadge(transaction.type)}
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
+                            <div className="text-lg text-muted-foreground md:hidden mt-1">
+                              {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                             </div>
+                            <div className="mt-1">
+                              {getTransactionBadge(transaction.type)}
+                            </div>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1037,7 +1040,7 @@ export function CreditHistoryView() {
                             </Button>
                           </div>
                         </div>
-                        <div className="text-lg text-muted-foreground">
+                        <div className="text-lg text-muted-foreground hidden md:block">
                           {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                         </div>
                       </div>
