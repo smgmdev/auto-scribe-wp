@@ -601,6 +601,27 @@ export function DashboardView() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Agency Management */}
+          <Card className="border-border/50 bg-card">
+            <CardHeader>
+              <CardTitle className="text-xl">Agency Management</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
+                My Agency
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
+                My Media
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
+                My Earnings
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-requests')}>
+                Client Requests
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -651,29 +672,6 @@ export function DashboardView() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Agency Management (only for agency users) */}
-      {isAgency && (
-        <Card className="border-border/50 bg-card">
-          <CardHeader>
-            <CardTitle className="text-xl">Agency Management</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
-              My Agency
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
-              My Media
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
-              My Earnings
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-requests')}>
-              Client Requests
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {/* My Recent Articles */}
       <Card className="border-border/50 bg-card">
