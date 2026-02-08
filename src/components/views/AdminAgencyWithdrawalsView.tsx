@@ -471,11 +471,11 @@ export function AdminAgencyWithdrawalsView() {
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap">
+        <div className="flex overflow-x-auto scrollbar-hide">
           <Button
             size="sm"
             onClick={() => setStatusFilter('all')}
-            className={`rounded-none ${statusFilter === 'all' 
+            className={`rounded-none flex-shrink-0 ${statusFilter === 'all' 
               ? 'bg-black text-white hover:bg-black/90 border border-black' 
               : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
           >
@@ -484,7 +484,7 @@ export function AdminAgencyWithdrawalsView() {
           <Button
             size="sm"
             onClick={() => setStatusFilter('pending')}
-            className={`rounded-none ${statusFilter === 'pending' 
+            className={`rounded-none flex-shrink-0 ${statusFilter === 'pending' 
               ? 'bg-black text-white hover:bg-black/90 border border-black' 
               : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
           >
@@ -493,7 +493,7 @@ export function AdminAgencyWithdrawalsView() {
           <Button
             size="sm"
             onClick={() => setStatusFilter('completed')}
-            className={`rounded-none ${statusFilter === 'completed' 
+            className={`rounded-none flex-shrink-0 ${statusFilter === 'completed' 
               ? 'bg-black text-white hover:bg-black/90 border border-black' 
               : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
           >
@@ -502,7 +502,7 @@ export function AdminAgencyWithdrawalsView() {
           <Button
             size="sm"
             onClick={() => setStatusFilter('rejected')}
-            className={`rounded-none ${statusFilter === 'rejected' 
+            className={`rounded-none flex-shrink-0 ${statusFilter === 'rejected' 
               ? 'bg-black text-white hover:bg-black/90 border border-black' 
               : 'bg-transparent text-foreground border border-border hover:bg-muted'}`}
           >
