@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -609,15 +609,19 @@ export function DashboardView() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
+                <Building2 className="mr-2 h-4 w-4" />
                 My Agency
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
+                <Library className="mr-2 h-4 w-4" />
                 My Media
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
+                <Wallet className="mr-2 h-4 w-4" />
                 My Earnings
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-requests')}>
+                <ClipboardList className="mr-2 h-4 w-4" />
                 Client Requests
               </Button>
             </CardContent>
