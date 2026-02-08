@@ -1396,7 +1396,7 @@ export function AdminAgenciesView() {
                                   }}
                                 >
                                   <FileText className="h-3 w-3 mr-1" />
-                                  Details
+                                  Verification Details
                                 </Badge>
                               )}
 
