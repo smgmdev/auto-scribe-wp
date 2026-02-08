@@ -207,21 +207,23 @@ const Index = () => {
   
   useEffect(() => {
     const state = location.state as LocationState | null;
-    if (state?.targetView === 'sites') {
-      setCurrentView('sites');
-      if (state?.targetTab) {
-        setTargetTab(state.targetTab);
+    if (state?.targetView) {
+      setCurrentView(state.targetView as any);
+      
+      // Handle additional state for specific views
+      if (state.targetView === 'sites') {
+        if (state?.targetTab) {
+          setTargetTab(state.targetTab);
+        }
+        if (state?.targetSubcategory) {
+          setTargetSubcategory(state.targetSubcategory);
+        }
+      } else if (state.targetView === 'compose') {
+        if (state?.preselectedSiteId) {
+          setPreselectedSiteId(state.preselectedSiteId);
+        }
       }
-      if (state?.targetSubcategory) {
-        setTargetSubcategory(state.targetSubcategory);
-      }
-      // Clear the state to prevent re-triggering on subsequent renders
-      window.history.replaceState({}, document.title);
-    } else if (state?.targetView === 'compose') {
-      setCurrentView('compose');
-      if (state?.preselectedSiteId) {
-        setPreselectedSiteId(state.preselectedSiteId);
-      }
+      
       // Clear the state to prevent re-triggering on subsequent renders
       window.history.replaceState({}, document.title);
     }
