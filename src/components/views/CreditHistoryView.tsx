@@ -51,7 +51,7 @@ export function CreditHistoryView() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [expandedWithdrawals, setExpandedWithdrawals] = useState<Set<string>>(new Set());
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
-  const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
+  
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
 
@@ -1283,13 +1283,11 @@ export function CreditHistoryView() {
                   );
                 }
                 
-                // Standard transaction card - now expandable
+                // Standard transaction card - expandable (except order_completed which navigates)
                 const isStandardExpanded = expandedWithdrawals.has(transaction.id);
                 const hasReason = (transaction.type === 'admin_deduct' || transaction.type === 'gifted' || transaction.type === 'admin_credit') && transaction.description?.includes(': ');
                 const reasonText = hasReason ? transaction.description?.split(': ').slice(1).join(': ') : null;
                 const isGiftedOrRemoved = transaction.type === 'gifted' || transaction.type === 'admin_credit' || transaction.type === 'admin_deduct';
-                const isOrderCompleted = transaction.type === 'order_completed';
-                const orderInfo = orderDetails[transaction.id];
                 
                 const displayDescription = hasReason 
                   ? transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
@@ -1301,8 +1299,8 @@ export function CreditHistoryView() {
                           : 'Withdrawal Pending')
                     : transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
                 
-                // Fetch order details when expanding order_completed cards
-                const handleExpand = async () => {
+                // Handle click: order_completed navigates, others expand
+                const handleCardClick = () => {
                   if (isClickable) {
                     handleOrderCompletedClick(transaction.order_id!);
                     return;
@@ -1313,22 +1311,6 @@ export function CreditHistoryView() {
                     newExpanded.delete(transaction.id);
                   } else {
                     newExpanded.add(transaction.id);
-                    
-                    // Fetch order details for order_completed transactions
-                    if (isOrderCompleted && transaction.order_id && !orderDetails[transaction.id]) {
-                      const { data: order } = await supabase
-                        .from('orders')
-                        .select('*, media_sites(name, favicon, price, link)')
-                        .eq('id', transaction.order_id)
-                        .single();
-                      
-                      if (order) {
-                        setOrderDetails(prev => ({
-                          ...prev,
-                          [transaction.id]: order
-                        }));
-                      }
-                    }
                   }
                   setExpandedWithdrawals(newExpanded);
                 };
@@ -1337,7 +1319,7 @@ export function CreditHistoryView() {
                   <div
                     key={transaction.id}
                     className={`rounded-lg border transition-colors overflow-hidden cursor-pointer border-border hover:border-[#4771d9]`}
-                    onClick={handleExpand}
+                    onClick={handleCardClick}
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                       <div className="flex items-start gap-3">
@@ -1380,58 +1362,8 @@ export function CreditHistoryView() {
                             {getTransactionBadge(transaction.type)}
                           </div>
                           
-                          {/* Order Completed - Show order details */}
-                          {isOrderCompleted && (
-                            <>
-                              {orderInfo ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
-                                  <div>
-                                    <span className="text-muted-foreground">Media Site:</span>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      {orderInfo.media_sites?.favicon && (
-                                        <img src={orderInfo.media_sites.favicon} alt="" className="h-4 w-4 rounded" />
-                                      )}
-                                      <p className="font-medium">{orderInfo.media_sites?.name || 'Unknown'}</p>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Order Value:</span>
-                                    <p className="font-medium">{orderInfo.media_sites?.price?.toLocaleString() || Math.abs(transaction.amount).toLocaleString()} credits</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Completed:</span>
-                                    <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Status:</span>
-                                    <p className="font-medium text-green-500">Delivered & Accepted</p>
-                                  </div>
-                                  {orderInfo.delivery_url && (
-                                    <div className="md:col-span-2">
-                                      <span className="text-muted-foreground">Published URL:</span>
-                                      <a 
-                                        href={orderInfo.delivery_url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="font-medium text-primary hover:underline block truncate"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        {orderInfo.delivery_url}
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-center py-2">
-                                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                  <span className="ml-2 text-muted-foreground">Loading order details...</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          
                           {/* Gifted/Admin Credit/Admin Deduct - No transaction ID */}
-                          {isGiftedOrRemoved && (
+                          {isGiftedOrRemoved ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                               <div>
                                 <span className="text-muted-foreground">Transaction Type:</span>
@@ -1448,10 +1380,8 @@ export function CreditHistoryView() {
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                             </div>
-                          )}
-                          
-                          {/* Other transaction types - Show standard details */}
-                          {!isOrderCompleted && !isGiftedOrRemoved && (
+                          ) : (
+                          /* Other transaction types - Show standard details */
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                               <div>
                                 <span className="text-muted-foreground">Transaction Type:</span>
