@@ -327,7 +327,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
-            <p className="font-medium">${(order.amount_cents / 100).toFixed(2)}</p>
+            <p className="font-medium">{(order.amount_cents / 100).toFixed(2)}</p>
           </div>
         </div>
       );
@@ -487,7 +487,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                             <>{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
                           ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
                             <>
-                              {tx.amount > 0 ? '+' : '-'}${Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {tx.amount > 0 ? '+' : '-'}{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </>
                           ) : (
                             <>
