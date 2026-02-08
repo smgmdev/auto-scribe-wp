@@ -512,25 +512,25 @@ export function MediaSiteDialog({
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex flex-col-reverse md:flex-row justify-end gap-3 mt-6">
               <Button 
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="hover:bg-black hover:text-white transition-colors"
+                className="hover:bg-black hover:text-white transition-colors w-full md:w-auto"
               >
                 Close
               </Button>
               {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
                 user ? (
                   checkingEngagement ? (
-                    <Button disabled className="bg-black text-white">
+                    <Button disabled className="bg-black text-white w-full md:w-auto">
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Checking...
                     </Button>
                   ) : openEngagementData ? (
                     <Badge 
                       variant="secondary" 
-                      className="text-sm flex items-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3"
+                      className="text-sm flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3 w-full md:w-auto"
                       onClick={() => {
                         const { openGlobalChat, clearUnreadMessageCount } = useAppStore.getState();
                         clearUnreadMessageCount(openEngagementData.id);
@@ -543,7 +543,7 @@ export function MediaSiteDialog({
                     </Badge>
                   ) : (
                     <Button 
-                      className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
+                      className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-auto px-3 border border-transparent hover:border-black"
                       onClick={handleInterested}
                     >
                       <span>I'm Interested - {mediaSite.price.toLocaleString()} USD</span>
@@ -554,7 +554,7 @@ export function MediaSiteDialog({
                   )
                 ) : (
                   <Button 
-                    className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
+                    className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-auto px-3 border border-transparent hover:border-black"
                     onClick={() => {
                       navigate('/auth', { 
                         state: { 
