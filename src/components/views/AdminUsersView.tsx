@@ -1198,6 +1198,7 @@ export function AdminUsersView() {
                                   if (['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type)) return true;
                                   if ((tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ')) return true;
                                   if (tx.order_id) return true;
+                                  if (tx.description?.includes('Platform fee:')) return true;
                                   return false;
                                 };
                                 
@@ -1363,12 +1364,12 @@ export function AdminUsersView() {
                                                 
                                                 {/* Platform fee for order earnings */}
                                                 {tx.description?.includes('Platform fee:') && (() => {
-                                                  const match = tx.description.match(/\(Platform fee:\s*(\d+)%\)/);
+                                                  const match = tx.description.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
                                                   if (match) {
                                                     return (
                                                       <div>
                                                         <span className="text-muted-foreground uppercase tracking-wide">Platform Fee</span>
-                                                        <p className="font-medium">{match[1]}%</p>
+                                                        <p className="font-medium">{parseInt(match[1]).toLocaleString()} credits</p>
                                                       </div>
                                                     );
                                                   }
