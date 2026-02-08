@@ -549,10 +549,10 @@ export function AgencyPayoutsView() {
                          'Rejected'}
                       </Badge>
                     </div>
-                    <p className={`absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
+                    <p className={`hidden md:block absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
                       -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <div className="flex items-center gap-3 pr-24">
+                    <div className="flex items-center gap-3 md:pr-24">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
                         {getCardIcon()}
                       </div>
@@ -572,6 +572,9 @@ export function AgencyPayoutsView() {
                               Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           )}
+                          <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
+                            -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -616,10 +619,10 @@ export function AgencyPayoutsView() {
                         {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
                       </Badge>
                     </div>
-                    <p className="absolute bottom-3 right-3 font-semibold text-green-500">
+                    <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-green-500">
                       +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <div className="flex items-center gap-3 pr-24">
+                    <div className="flex items-center gap-3 md:pr-24">
                       <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
                         <ArrowDownLeft className="h-5 w-5 text-green-500" />
                       </div>
@@ -659,6 +662,9 @@ export function AgencyPayoutsView() {
                           </button>
                           <p className="text-xs text-muted-foreground">
                             Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                          </p>
+                          <p className="md:hidden mt-2 font-semibold text-green-500">
+                            +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                         </div>
                       </div>
