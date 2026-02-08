@@ -126,7 +126,8 @@ export function SettingsView() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -319,6 +320,7 @@ export function SettingsView() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
