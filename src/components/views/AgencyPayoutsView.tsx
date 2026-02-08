@@ -555,13 +555,7 @@ export function AgencyPayoutsView() {
                     };
 
                     const getAmountColor = () => {
-                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
-                        return 'text-green-600';
-                      }
-                      if (withdrawal.status === 'rejected') {
-                        return 'text-destructive';
-                      }
-                      return 'text-amber-600';
+                      return 'text-foreground';
                     };
 
                     const cardContent = (
@@ -575,8 +569,8 @@ export function AgencyPayoutsView() {
                              'Rejected'}
                           </Badge>
                         </div>
-                        <p className={`hidden md:block absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
-                          -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <p className={`hidden md:block absolute bottom-3 right-3 font-semibold text-lg ${getAmountColor()}`}>
+                          -{Math.round(withdrawalAmount).toLocaleString()}
                         </p>
                         <div className="flex items-center gap-3 md:pr-24">
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
@@ -607,8 +601,8 @@ export function AgencyPayoutsView() {
                               >
                                 See transaction details
                               </button>
-                              <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
-                                -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              <p className={`md:hidden mt-2 font-semibold text-lg ${getAmountColor()}`}>
+                                -{Math.round(withdrawalAmount).toLocaleString()}
                               </p>
                             </div>
                           </div>
