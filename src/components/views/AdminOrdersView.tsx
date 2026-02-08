@@ -911,7 +911,7 @@ export function AdminOrdersView() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-1 md:gap-2 mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-0 mb-2">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default border-0" style={{ backgroundColor: '#1d1d1f' }}>
