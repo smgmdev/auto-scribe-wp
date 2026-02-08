@@ -459,7 +459,7 @@ export function AgencyApplicationView() {
             onClick={() => setDialogOpen(true)}
             disabled={existingApplication?.status === 'pending'}
           >
-            {existingApplication?.status === 'pending' ? 'In Review' : 'Submit New Application'}
+            {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
           </Button>
         </div>
       </div>
