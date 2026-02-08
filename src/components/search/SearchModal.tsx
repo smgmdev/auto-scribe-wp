@@ -415,19 +415,19 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <span>{site.publication_format}</span>
                                 {site.agency && (
-                                  <>
+                                  <span className="hidden md:inline-flex items-center gap-1">
                                     <span>via {site.agency}</span>
                                     {agencyLogos[site.agency] && (
                                       <img
                                         src={agencyLogos[site.agency]}
                                         alt={site.agency}
-                                        className="hidden md:block h-4 w-4 rounded-full object-cover flex-shrink-0"
+                                        className="h-4 w-4 rounded-full object-cover flex-shrink-0"
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
                                         }}
                                       />
                                     )}
-                                  </>
+                                  </span>
                                 )}
                               </div>
                             )}
