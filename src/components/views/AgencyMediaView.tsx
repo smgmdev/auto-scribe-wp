@@ -1159,7 +1159,7 @@ export function AgencyMediaView() {
                                                       <img 
                                                         src={agencyLogo} 
                                                         alt={agencyName} 
-                                                        className="h-4 w-4 object-contain rounded-full ml-1"
+                                                        className="hidden md:block h-4 w-4 object-contain rounded-full ml-1"
                                                       />
                                                     )}
                                                   </>
