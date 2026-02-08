@@ -416,7 +416,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                                 <span>{site.publication_format}</span>
                                 {site.agency && (
                                   <>
-                                    <span>· via {site.agency}</span>
+                                    <span>via {site.agency}</span>
                                     {agencyLogos[site.agency] && (
                                       <img
                                         src={agencyLogos[site.agency]}
