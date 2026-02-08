@@ -277,7 +277,7 @@ export function PinSettings() {
             <Button 
               onClick={handleSetPin} 
               disabled={saving || newPin.length !== 4 || confirmPin.length !== 4}
-              className="flex-1"
+              className="flex-1 bg-accent text-accent-foreground hover:bg-transparent hover:text-accent border border-accent"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
