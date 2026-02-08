@@ -469,7 +469,7 @@ export function AdminAgencyWithdrawalsView() {
       </div>
 
       {/* Status Filter Tabs + Search + List */}
-      <div>
+      <div className="-mt-4">
         <div className="flex flex-wrap">
           <Button
             size="sm"
