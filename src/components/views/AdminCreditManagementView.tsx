@@ -419,11 +419,11 @@ export const AdminCreditManagementView = () => {
             </Tooltip>
           </div>
 
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="p-0">
+            <CardHeader className="pb-3 px-0">
               <CardTitle className="text-lg font-semibold">User Credit Balances</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0">
               <div className="mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
