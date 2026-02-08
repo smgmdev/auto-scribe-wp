@@ -60,7 +60,7 @@ export function ExploreNetworkGrid() {
   return (
     <section className="py-8 px-6">
       <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-        Even more. <span className="font-normal text-muted-foreground">Explore our network.</span>
+        You. <span className="font-normal text-muted-foreground">Join Arcana Mace media network.</span>
       </h2>
       <p className="text-muted-foreground text-sm mb-6">
         Click any publication to learn more about placement options.
