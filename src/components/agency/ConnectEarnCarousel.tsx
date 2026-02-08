@@ -65,7 +65,7 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
       href={article.wp_link || '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="block h-full group flex-shrink-0 w-[280px]"
+      className="block h-full group flex-shrink-0 w-[220px]"
     >
       <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
         {/* Featured Image */}
@@ -178,20 +178,27 @@ export function ConnectEarnCarousel() {
     <section className="py-8">
       <h2 className="text-3xl font-bold text-foreground mb-6">Connect and earn</h2>
       
-      <div className="overflow-hidden">
-        <div 
-          className="flex gap-4 animate-marquee hover:pause"
-          style={{
-            width: 'max-content',
-          }}
-        >
-          {duplicatedArticles.map((article, index) => (
-            <ArticleCard key={`${article.id}-${index}`} article={article} />
-          ))}
+      <div className="relative">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+        
+        <div className="overflow-hidden">
+          <div 
+            className="flex gap-4 animate-marquee hover:pause"
+            style={{
+              width: 'max-content',
+            }}
+          >
+            {duplicatedArticles.map((article, index) => (
+              <ArticleCard key={`${article.id}-${index}`} article={article} />
+            ))}
+          </div>
         </div>
       </div>
       
-      <p className="text-muted-foreground mt-6">
+      <p className="text-muted-foreground mt-6 text-sm">
         As an agency you can connect your own WordPress news site and list it on Arcana Mace. Users will pay your fee to publish articles directly on your site. Easy and smooth process.
       </p>
     </section>
