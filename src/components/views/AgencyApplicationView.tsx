@@ -453,45 +453,15 @@ export function AgencyApplicationView() {
             onClick={() => setDialogOpen(true)}
             disabled={existingApplication?.status === 'pending'}
           >
-            {existingApplication?.status === 'pending' ? (
-              <>
-                <Clock className="h-4 w-4 mr-2" />
-                In Review
-              </>
-            ) : existingApplication?.status === 'cancelled' || existingApplication?.status === 'rejected' || !existingApplication ? (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Submit New Application
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Submit New Application
-              </>
-            )}
+          {existingApplication?.status === 'pending' ? 'In Review' : 'Submit New Application'}
           </Button>
         </div>
         <Button 
-          className={`hidden md:flex shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
+          className={`hidden md:inline-flex shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
           onClick={() => setDialogOpen(true)}
           disabled={existingApplication?.status === 'pending'}
         >
-          {existingApplication?.status === 'pending' ? (
-            <>
-              <Clock className="h-4 w-4 mr-2" />
-              In Review
-            </>
-          ) : existingApplication?.status === 'cancelled' || existingApplication?.status === 'rejected' || !existingApplication ? (
-            <>
-              <Send className="h-4 w-4 mr-2" />
-              Submit New Application
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4 mr-2" />
-              Submit New Application
-            </>
-          )}
+          {existingApplication?.status === 'pending' ? 'In Review' : 'Submit New Application'}
         </Button>
       </div>
 
