@@ -920,7 +920,7 @@ export function CreditHistoryView() {
                           <div className="pt-2 space-y-2 text-sm">
                             {details ? (
                               <>
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                   <div>
                                     <span className="text-muted-foreground">Withdrawal Method:</span>
                                     <p className="font-medium">{details.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
@@ -948,7 +948,7 @@ export function CreditHistoryView() {
                                         <span className="text-muted-foreground">Account Holder:</span>
                                         <p className="font-medium">{(details.bank_details as any).bank_account_holder || (details.bank_details as any).account_holder || 'N/A'}</p>
                                       </div>
-                                      <div className="col-span-2">
+                                      <div className="md:col-span-2">
                                         <span className="text-muted-foreground">Account Number:</span>
                                         <p className="font-medium">{(details.bank_details as any).bank_account_number ? `****${(details.bank_details as any).bank_account_number.slice(-4)}` : (details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
                                       </div>
@@ -961,7 +961,7 @@ export function CreditHistoryView() {
                                         <span className="text-muted-foreground">Network:</span>
                                         <p className="font-medium">{(details.crypto_details as any).usdt_network || (details.crypto_details as any).network || 'TRC-20'}</p>
                                       </div>
-                                      <div className="col-span-2">
+                                      <div className="md:col-span-2">
                                         <span className="text-muted-foreground">Wallet Address:</span>
                                         <p className="font-medium break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
                                       </div>
@@ -1050,7 +1050,7 @@ export function CreditHistoryView() {
                           <div className="pt-2 space-y-2 text-sm">
                             {details ? (
                               <>
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                   <div>
                                     <span className="text-muted-foreground">Withdrawal Method:</span>
                                     <p className="font-medium">{details.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
@@ -1078,7 +1078,7 @@ export function CreditHistoryView() {
                                         <span className="text-muted-foreground">Account Holder:</span>
                                         <p className="font-medium">{(details.bank_details as any).bank_account_holder || (details.bank_details as any).account_holder || 'N/A'}</p>
                                       </div>
-                                      <div className="col-span-2">
+                                      <div className="md:col-span-2">
                                         <span className="text-muted-foreground">Account Number:</span>
                                         <p className="font-medium">{(details.bank_details as any).bank_account_number ? `****${(details.bank_details as any).bank_account_number.slice(-4)}` : (details.bank_details as any).account_number ? `****${(details.bank_details as any).account_number.slice(-4)}` : 'N/A'}</p>
                                       </div>
@@ -1091,7 +1091,7 @@ export function CreditHistoryView() {
                                         <span className="text-muted-foreground">Network:</span>
                                         <p className="font-medium">{(details.crypto_details as any).usdt_network || (details.crypto_details as any).network || 'TRC-20'}</p>
                                       </div>
-                                      <div className="col-span-2">
+                                      <div className="md:col-span-2">
                                         <span className="text-muted-foreground">Wallet Address:</span>
                                         <p className="font-medium break-all">{(details.crypto_details as any).usdt_wallet_address || (details.crypto_details as any).wallet_address || 'N/A'}</p>
                                       </div>
@@ -1187,7 +1187,7 @@ export function CreditHistoryView() {
                       {isEarningsExpanded && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                           <div className="pt-2 space-y-2 text-sm">
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                               <div>
                                 <span className="text-muted-foreground">Platform Fee:</span>
                                 <p className="font-medium">{platformFee.toLocaleString()} credits</p>
