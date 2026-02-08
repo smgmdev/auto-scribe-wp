@@ -131,9 +131,9 @@ export function DashboardView() {
       // Calculate totals from transactions
       let earnedCredits = 0;
       let purchasedCredits = 0;
-      let incomingCredits = 0;
-      let outgoingCredits = 0;
-      let creditsWithdrawn = 0;
+      
+      // Withdrawal types should be excluded from balance calculation (handled separately via agency_withdrawals)
+      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
       
       if (transactions) {
         transactions.forEach(t => {
@@ -145,16 +145,21 @@ export function DashboardView() {
           if (t.type === 'purchase' || t.type === 'admin_add') {
             purchasedCredits += t.amount;
           }
-          // Calculate incoming vs outgoing for total balance
-          if (!['locked', 'withdrawn', 'withdrawal_locked', 'withdrawal_completed'].includes(t.type)) {
-            if (t.amount > 0) {
-              incomingCredits += t.amount;
-            } else {
-              outgoingCredits += Math.abs(t.amount);
-            }
-          }
         });
       }
+
+      // Calculate incoming/outgoing matching CreditHistoryView logic
+      const incomingCredits = transactions
+        ? transactions
+            .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type))
+            .reduce((sum, t) => sum + t.amount, 0)
+        : 0;
+      
+      const outgoingCredits = transactions
+        ? transactions
+            .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+        : 0;
 
       const actualTotalBalance = incomingCredits - outgoingCredits;
 
@@ -209,6 +214,7 @@ export function DashboardView() {
         .eq('user_id', user.id);
 
       let creditsInWithdrawals = 0;
+      let creditsWithdrawn = 0;
       if (withdrawals) {
         withdrawals.forEach(w => {
           if (w.status === 'pending') {
