@@ -574,6 +574,15 @@ export function AgencyPayoutsView() {
                               Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1 w-fit mt-1"
+                          >
+                            See transaction details
+                          </button>
                           <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
                             -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
