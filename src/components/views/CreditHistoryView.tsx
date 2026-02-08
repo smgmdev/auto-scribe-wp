@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -218,6 +219,10 @@ export function CreditHistoryView() {
     setRefreshing(true);
     await fetchData(false);
     setRefreshing(false);
+    toast({
+      title: "Refreshed",
+      description: "Credit data has been updated.",
+    });
   };
 
   const fetchData = useCallback(async (showLoader = true) => {
@@ -702,6 +707,12 @@ export function CreditHistoryView() {
         </div>
         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
           <Button 
+            onClick={() => setBuyCreditsOpen(true)}
+            className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
+          >
+            Buy Credits
+          </Button>
+          <Button 
             onClick={handleRefresh}
             disabled={refreshing}
             variant="outline"
@@ -709,12 +720,6 @@ export function CreditHistoryView() {
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
-          </Button>
-          <Button 
-            onClick={() => setBuyCreditsOpen(true)}
-            className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
-          >
-            Buy Credits
           </Button>
         </div>
       </div>
