@@ -489,7 +489,7 @@ export function AgencyApplicationView() {
         </div>
 
         {/* Content Section - overlaps the sticky video, then pushes it out of view */}
-        <div className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-8 pb-8 lg:pb-12" style={{ zIndex: 1 }}>
+        <div className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-8 pb-24 lg:pb-28" style={{ zIndex: 1 }}>
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 space-y-8">
         <ExploreNetworkGrid dark />
@@ -582,8 +582,6 @@ export function AgencyApplicationView() {
         </Card>
       )}
           </div>
-          
-          <Footer dark narrow />
         </div>
       </div>
 
