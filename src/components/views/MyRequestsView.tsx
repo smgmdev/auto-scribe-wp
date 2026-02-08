@@ -891,7 +891,7 @@ export function MyRequestsView() {
     const requestMessages = messages[request.id] || [];
     
     // Request created
-    events.push({ name: 'Engagement opened', time: new Date(request.created_at) });
+    events.push({ name: 'Engagement Opened', time: new Date(request.created_at) });
     
     // Last message time - check for special card types
     if (requestMessages.length > 0) {
@@ -1274,7 +1274,7 @@ export function MyRequestsView() {
                               <span>Last event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
                             </div>
                             <span className="text-xs text-muted-foreground">
-                              Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                              Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
@@ -1381,7 +1381,7 @@ export function MyRequestsView() {
                                   )}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
@@ -1458,13 +1458,13 @@ export function MyRequestsView() {
                             <div className="flex items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
-                                  Cancelled engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
+                                  Cancelled Engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                                   {requestMessages.length > 0 && (
                                     <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                   )}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  Opened engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
