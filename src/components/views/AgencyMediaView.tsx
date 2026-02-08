@@ -1125,8 +1125,9 @@ export function AgencyMediaView() {
                                     }}
                                   >
                                     <CardContent className="p-3">
-                                      <div className="flex items-center gap-4">
-                                        <div className="flex items-center gap-3 min-w-0 w-[280px] flex-shrink-0">
+                                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                                        {/* Name and favicon */}
+                                        <div className="flex items-center gap-3 min-w-0 md:w-[280px] flex-shrink-0">
                                           <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden">
                                             {site.favicon ? (
                                               <img 
@@ -1143,9 +1144,36 @@ export function AgencyMediaView() {
                                           </div>
                                           <div className="min-w-0 flex-1">
                                             <h3 className="text-sm break-words">{site.name}</h3>
+                                            {/* Mobile: Price, format, and agency under name */}
+                                            <div className="flex flex-col gap-1 mt-1 md:hidden">
+                                              <div className="flex items-center gap-2">
+                                                <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                                                  {site.price > 0 ? `${site.price} USD` : 'Free'}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground">{site.publication_format}</span>
+                                              </div>
+                                              {agencyName && (
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                  <span>via</span>
+                                                  <span className="text-foreground">{agencyName}</span>
+                                                  {agencyLogo && (
+                                                    <img 
+                                                      src={agencyLogo} 
+                                                      alt={agencyName} 
+                                                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                    />
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                          {/* Mobile chevron */}
+                                          <div className="h-7 w-7 flex items-center justify-center text-muted-foreground md:hidden">
+                                            {isSiteExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-3 flex-1 justify-end">
+                                        {/* Desktop: Price, format, agency, and chevron on the right */}
+                                        <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
                                           <Badge variant="secondary" className="text-xs whitespace-nowrap">
                                             {site.price > 0 ? `${site.price} USD` : 'Free'}
                                           </Badge>
