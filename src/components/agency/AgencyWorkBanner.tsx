@@ -2,8 +2,8 @@ import agencyWorkBanner from '@/assets/agency-work-banner.jpg';
 
 export function AgencyWorkBanner() {
   return (
-    <div className="w-screen -ml-[calc((100vw-100%)/2)] relative">
-      <section className="relative h-[300px] md:h-[400px] overflow-hidden">
+    <div className="w-screen -ml-[calc((100vw-100%)/2)]">
+      <section className="relative h-[300px] md:h-[400px] overflow-hidden rounded-b-[40px]">
         <img 
           src={agencyWorkBanner} 
           alt="Agency on Arcana Mace" 
@@ -15,8 +15,6 @@ export function AgencyWorkBanner() {
           </h2>
         </div>
       </section>
-      {/* White overlay with rounded top corners */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-background rounded-t-[40px]" />
     </div>
   );
 }
