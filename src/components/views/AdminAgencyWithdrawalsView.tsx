@@ -338,7 +338,7 @@ export function AdminAgencyWithdrawalsView() {
       {/* Stats + Tabs + Search + List */}
       <div>
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#464646' }}>
