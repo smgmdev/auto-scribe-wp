@@ -456,18 +456,18 @@ export function AgencyApplicationView() {
           />
           
           {/* Text Overlay on Video */}
-          <div className="absolute inset-0 flex items-center">
+          <div className="absolute inset-0 flex items-center pb-40">
             <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
               <div className="max-w-xl">
                 <img 
                   src="/favicon.png" 
                   alt="Arcana Mace" 
-                  className="h-12 w-12 mb-6"
+                  className="h-10 w-10 mb-4"
                 />
-                <h1 className="text-[48px] lg:text-[56px] font-bold text-white leading-tight">
+                <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
                   Why Upgrade to Agency?
                 </h1>
-                <p className="mt-4 text-white/80 text-lg">
+                <p className="mt-3 text-white/80 text-base lg:text-lg">
                   Become a media merchant on Arcana Mace to trade and buy media products worldwide.
                 </p>
                 <Button 
