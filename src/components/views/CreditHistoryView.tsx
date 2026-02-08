@@ -708,17 +708,17 @@ export function CreditHistoryView() {
         {/* Available Credits */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+            <Card className="transition-colors py-2 md:py-3 cursor-help border-0 bg-[#1e3a5f]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Available Credits
                 </CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground/60" />
+                <Wallet className="h-4 w-4 text-white/70" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-foreground">
+                <div className="text-xl md:text-2xl font-semibold text-white">
                   {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-5 w-5 animate-spin text-white/70" />
                   ) : (
                     availableCredits.toLocaleString()
                   )}
