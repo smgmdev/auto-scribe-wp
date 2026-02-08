@@ -307,25 +307,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       const order = orders.get(tx.order_id)!;
       return (
         <div className="grid grid-cols-2 gap-4 text-sm">
-          {order.order_number && (
-            <div>
-              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order #</p>
-              <p className="font-medium font-mono">{order.order_number}</p>
-            </div>
-          )}
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
-            <div className="flex items-center gap-2">
-              {order.media_sites?.favicon && (
-                <img src={order.media_sites.favicon} alt="" className="w-4 h-4 rounded" />
-              )}
-              <p className="font-medium">{order.media_sites?.name || '-'}</p>
-            </div>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Status</p>
-            <p className="font-medium capitalize">{order.status.replace(/_/g, ' ')}</p>
-          </div>
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
             <p className="font-medium">{(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
