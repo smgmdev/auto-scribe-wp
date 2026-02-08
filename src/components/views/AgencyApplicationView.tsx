@@ -443,7 +443,10 @@ export function AgencyApplicationView() {
   return (
     <div className="animate-fade-in -m-4 lg:-m-8">
       {/* Fixed Video Background - stays completely still on scroll */}
-      <div className="fixed inset-0 lg:left-64" style={{ zIndex: 0 }}>
+      <div 
+        className="fixed top-14 lg:top-0 left-0 lg:left-64 right-0 bottom-0"
+        style={{ zIndex: 0 }}
+      >
         <video 
           src={agencyHeroVideo} 
           autoPlay 
