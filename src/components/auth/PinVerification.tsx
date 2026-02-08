@@ -42,15 +42,13 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center items-center gap-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-foreground">
-              <img src={amblackIcon} alt="Arcana Mace" className="h-6 w-6 invert" />
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Lock className="h-6 w-6 text-primary-foreground" />
-            </div>
+          <div className="flex justify-center mb-4">
+            <img src={amblackIcon} alt="Arcana Mace" className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl font-bold">Enter PIN</CardTitle>
+          <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
+            Enter PIN
+            <Lock className="h-5 w-5" />
+          </CardTitle>
           <CardDescription>Enter your 4-digit PIN to continue</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
