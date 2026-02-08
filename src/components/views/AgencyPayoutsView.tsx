@@ -562,13 +562,6 @@ export function AgencyPayoutsView() {
                       <div 
                         className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
                       >
-                        <div className="hidden md:block absolute top-3 right-3">
-                          <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
-                            {withdrawal.status === 'pending' ? 'Pending' : 
-                             (withdrawal.status === 'approved' || withdrawal.status === 'completed') ? 'Completed' :
-                             'Rejected'}
-                          </Badge>
-                        </div>
                         <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
                           -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
@@ -642,11 +635,6 @@ export function AgencyPayoutsView() {
                       <div 
                         className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
                       >
-                        <div className="hidden md:block absolute top-3 right-3">
-                          <Badge className="bg-foreground text-background border-foreground">
-                            {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
-                          </Badge>
-                        </div>
                         <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
                           +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
