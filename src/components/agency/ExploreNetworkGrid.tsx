@@ -66,21 +66,21 @@ export function ExploreNetworkGrid() {
         Click any publication to learn more about placement options.
       </p>
       
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-3">
+      <div className="flex flex-wrap gap-3">
         {mediaSites.map((site) => (
           <button
             key={site.id}
             onClick={() => setSelectedSite(site)}
-            className="w-full h-20 md:h-24 rounded-xl border border-border bg-card overflow-hidden hover:border-foreground transition-all duration-200 hover:shadow-md flex items-center justify-center p-3"
+            className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground transition-all duration-200 hover:shadow-md"
           >
             {site.favicon ? (
               <img
                 src={site.favicon}
                 alt={site.name}
-                className="max-w-full max-h-full object-contain"
+                className="h-16 md:h-20 w-auto object-contain"
               />
             ) : (
-              <span className="text-xs text-muted-foreground text-center truncate px-1">
+              <span className="text-xs text-muted-foreground text-center px-3 py-4 block">
                 {site.name}
               </span>
             )}
