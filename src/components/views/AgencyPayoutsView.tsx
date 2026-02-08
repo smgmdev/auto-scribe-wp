@@ -494,218 +494,243 @@ export function AgencyPayoutsView() {
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Withdrawal Requests */}
-              {withdrawals.map((withdrawal) => {
-                const withdrawalAmount = withdrawal.amount_cents / 100;
-                const statusColors: Record<string, string> = {
-                  pending: 'bg-amber-500 text-white border-amber-500',
-                  approved: 'bg-green-500 text-white border-green-500',
-                  completed: 'bg-green-500 text-white border-green-500',
-                  rejected: 'bg-destructive text-destructive-foreground border-destructive'
-                };
+              {/* Combined and sorted earnings history */}
+              {(() => {
+                // Create combined list with type discriminator and event date
+                type EarningsItem = 
+                  | { type: 'withdrawal'; data: WithdrawalRequest; eventDate: Date }
+                  | { type: 'order'; data: CompletedOrder; eventDate: Date };
 
-                const getCardIcon = () => {
-                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
-                    return <CheckCircle className="h-5 w-5 text-green-600" />;
-                  }
-                  if (withdrawal.status === 'rejected') {
-                    return <XCircle className="h-5 w-5 text-destructive" />;
-                  }
-                  return <ArrowUpRight className="h-5 w-5 text-amber-600" />;
-                };
+                const combinedItems: EarningsItem[] = [
+                  ...withdrawals.map(w => ({
+                    type: 'withdrawal' as const,
+                    data: w,
+                    eventDate: new Date(w.processed_at || w.created_at)
+                  })),
+                  ...completedOrders.map(o => ({
+                    type: 'order' as const,
+                    data: o,
+                    eventDate: new Date(o.accepted_at || o.delivered_at || o.created_at)
+                  }))
+                ];
 
-                const getCardBackground = () => {
-                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
-                    return 'bg-green-500/20';
-                  }
-                  if (withdrawal.status === 'rejected') {
-                    return 'bg-destructive/20';
-                  }
-                  return 'bg-amber-500/20';
-                };
+                // Sort by event date descending (most recent first)
+                combinedItems.sort((a, b) => b.eventDate.getTime() - a.eventDate.getTime());
 
-                const getCardTitle = () => {
-                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') return 'Withdrawal Successful';
-                  if (withdrawal.status === 'rejected') return 'Withdrawal Rejected';
-                  return 'Withdrawal Request';
-                };
+                return combinedItems.map((item) => {
+                  if (item.type === 'withdrawal') {
+                    const withdrawal = item.data;
+                    const withdrawalAmount = withdrawal.amount_cents / 100;
+                    const statusColors: Record<string, string> = {
+                      pending: 'bg-amber-500 text-white border-amber-500',
+                      approved: 'bg-green-500 text-white border-green-500',
+                      completed: 'bg-green-500 text-white border-green-500',
+                      rejected: 'bg-destructive text-destructive-foreground border-destructive'
+                    };
 
-                const getAmountColor = () => {
-                  if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
-                    return 'text-green-600';
-                  }
-                  if (withdrawal.status === 'rejected') {
-                    return 'text-destructive';
-                  }
-                  return 'text-amber-600';
-                };
+                    const getCardIcon = () => {
+                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                        return <CheckCircle className="h-5 w-5 text-green-600" />;
+                      }
+                      if (withdrawal.status === 'rejected') {
+                        return <XCircle className="h-5 w-5 text-destructive" />;
+                      }
+                      return <ArrowUpRight className="h-5 w-5 text-amber-600" />;
+                    };
 
-                const cardContent = (
-                  <div 
-                    className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
-                  >
-                    <div className="hidden md:block absolute top-3 right-3">
-                      <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
-                        {withdrawal.status === 'pending' ? 'Pending' : 
-                         (withdrawal.status === 'approved' || withdrawal.status === 'completed') ? 'Completed' :
-                         'Rejected'}
-                      </Badge>
-                    </div>
-                    <p className={`hidden md:block absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
-                      -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex items-center gap-3 md:pr-24">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
-                        {getCardIcon()}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {getCardTitle()}
-                        </p>
-                        <div className="flex flex-col mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                          {withdrawal.processed_at && (
-                            <p className="text-xs text-muted-foreground">
-                              Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
-                            </p>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
-                            }}
-                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
-                          >
-                            See transaction details
-                          </button>
-                          <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
-                            -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </p>
+                    const getCardBackground = () => {
+                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                        return 'bg-green-500/20';
+                      }
+                      if (withdrawal.status === 'rejected') {
+                        return 'bg-destructive/20';
+                      }
+                      return 'bg-amber-500/20';
+                    };
+
+                    const getCardTitle = () => {
+                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') return 'Withdrawal Successful';
+                      if (withdrawal.status === 'rejected') return 'Withdrawal Rejected';
+                      return 'Withdrawal Request';
+                    };
+
+                    const getAmountColor = () => {
+                      if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+                        return 'text-green-600';
+                      }
+                      if (withdrawal.status === 'rejected') {
+                        return 'text-destructive';
+                      }
+                      return 'text-amber-600';
+                    };
+
+                    const cardContent = (
+                      <div 
+                        className="relative p-4 rounded-lg border border-border/50 hover:border-muted-foreground/50 transition-colors"
+                      >
+                        <div className="hidden md:block absolute top-3 right-3">
+                          <Badge className={statusColors[withdrawal.status] || 'bg-muted text-muted-foreground'}>
+                            {withdrawal.status === 'pending' ? 'Pending' : 
+                             (withdrawal.status === 'approved' || withdrawal.status === 'completed') ? 'Completed' :
+                             'Rejected'}
+                          </Badge>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-
-                // Show tooltip for approved/rejected/completed with details
-                if ((withdrawal.status === 'approved' || withdrawal.status === 'completed' || withdrawal.status === 'rejected') && withdrawal.admin_notes) {
-                  return (
-                    <Tooltip key={withdrawal.id} delayDuration={100}>
-                      <TooltipTrigger asChild>
-                        {cardContent}
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
-                        <p className="text-sm">
-                          <span className="text-white/70">
-                            {withdrawal.status === 'rejected' ? 'Reason: ' : 'Details: '}
-                          </span>
-                          {withdrawal.admin_notes}
+                        <p className={`hidden md:block absolute bottom-3 right-3 font-semibold ${getAmountColor()}`}>
+                          -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                }
-
-                return <div key={withdrawal.id}>{cardContent}</div>;
-              })}
-
-              {/* Completed Orders */}
-              {completedOrders.map((order) => {
-                const earningsAmount = (order.agency_payout_cents || 0) / 100;
-                const saleAmount = (order.amount_cents || 0) / 100;
-                const platformFee = (order.platform_fee_cents || 0) / 100;
-                const completedDate = order.accepted_at || order.delivered_at || order.created_at;
-
-                const rowContent = (
-                  <div 
-                    className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
-                  >
-                    <div className="hidden md:block absolute top-3 right-3">
-                      <Badge className="bg-foreground text-background border-foreground">
-                        {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
-                      </Badge>
-                    </div>
-                    <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-green-500">
-                      +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex items-center gap-3 md:pr-24">
-                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
-                        <ArrowDownLeft className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {order.media_site?.name || 'Order Earning'}
-                        </p>
-                        <div className="flex flex-col mt-1">
-                          <div className="flex items-center gap-1">
-                            <p className="text-xs text-muted-foreground">
-                              Order: {order.order_number || order.id.slice(0, 8) + '...'}
-                            </p>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigator.clipboard.writeText(order.order_number || order.id);
-                                toast.success('Order ID copied');
-                              }}
-                              className="text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <Copy className="h-3 w-3" />
-                            </button>
+                        <div className="flex items-center gap-3 md:pr-24">
+                          <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
+                            {getCardIcon()}
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
-                          </p>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewOrderDetails(order.id);
-                            }}
-                            disabled={openingChat === order.id}
-                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
-                          >
-                            {openingChat === order.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : null}
-                            View order details
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
-                            }}
-                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
-                          >
-                            See transaction details
-                          </button>
-                          <p className="md:hidden mt-2 font-semibold text-green-500">
-                            +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </p>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {getCardTitle()}
+                            </p>
+                            <div className="flex flex-col mt-1">
+                              <p className="text-xs text-muted-foreground">
+                                Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              {withdrawal.processed_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                </p>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
+                                }}
+                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                              >
+                                See transaction details
+                              </button>
+                              <p className={`md:hidden mt-2 font-semibold ${getAmountColor()}`}>
+                                -${withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
+                    );
 
-                return (
-                  <Tooltip key={order.id} delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      {rowContent}
-                    </TooltipTrigger>
-                    <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
-                      <div className="space-y-1 text-white">
-                        <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${saleAmount.toFixed(2)}</span></p>
-                        <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
-                        <p><span className="text-white/70">Your Earnings:</span> <span className="font-semibold">${earningsAmount.toFixed(2)}</span></p>
+                    // Show tooltip for approved/rejected/completed with details
+                    if ((withdrawal.status === 'approved' || withdrawal.status === 'completed' || withdrawal.status === 'rejected') && withdrawal.admin_notes) {
+                      return (
+                        <Tooltip key={`withdrawal-${withdrawal.id}`} delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            {cardContent}
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-sm z-[9999] bg-foreground text-background px-4 py-3">
+                            <p className="text-sm">
+                              <span className="text-white/70">
+                                {withdrawal.status === 'rejected' ? 'Reason: ' : 'Details: '}
+                              </span>
+                              {withdrawal.admin_notes}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+
+                    return <div key={`withdrawal-${withdrawal.id}`}>{cardContent}</div>;
+                  } else {
+                    // Order card
+                    const order = item.data;
+                    const earningsAmount = (order.agency_payout_cents || 0) / 100;
+                    const saleAmount = (order.amount_cents || 0) / 100;
+                    const platformFee = (order.platform_fee_cents || 0) / 100;
+                    const completedDate = order.accepted_at || order.delivered_at || order.created_at;
+
+                    const rowContent = (
+                      <div 
+                        className="relative p-4 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/30 transition-colors cursor-pointer"
+                      >
+                        <div className="hidden md:block absolute top-3 right-3">
+                          <Badge className="bg-foreground text-background border-foreground">
+                            {order.delivery_status === 'accepted' ? 'Credited' : 'Delivered'}
+                          </Badge>
+                        </div>
+                        <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-green-500">
+                          +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <div className="flex items-center gap-3 md:pr-24">
+                          <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
+                            <ArrowDownLeft className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {order.media_site?.name || 'Order Earning'}
+                            </p>
+                            <div className="flex flex-col mt-1">
+                              <div className="flex items-center gap-1">
+                                <p className="text-xs text-muted-foreground">
+                                  Order: {order.order_number || order.id.slice(0, 8) + '...'}
+                                </p>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(order.order_number || order.id);
+                                    toast.success('Order ID copied');
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Order Completed: {format(new Date(completedDate), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewOrderDetails(order.id);
+                                }}
+                                disabled={openingChat === order.id}
+                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
+                              >
+                                {openingChat === order.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : null}
+                                View order details
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
+                                }}
+                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                              >
+                                See transaction details
+                              </button>
+                              <p className="md:hidden mt-2 font-semibold text-green-500">
+                                +${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+                    );
+
+                    return (
+                      <Tooltip key={`order-${order.id}`} delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          {rowContent}
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="center" sideOffset={8} className="z-[9999] bg-foreground px-4 py-3 text-sm shadow-lg">
+                          <div className="space-y-1 text-white">
+                            <p><span className="text-white/70">Sale:</span> <span className="font-semibold">${saleAmount.toFixed(2)}</span></p>
+                            <p><span className="text-white/70">Platform Fee:</span> <span className="font-semibold">${platformFee.toFixed(2)}</span></p>
+                            <p><span className="text-white/70">Your Earnings:</span> <span className="font-semibold">${earningsAmount.toFixed(2)}</span></p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  }
+                });
+              })()}
             </div>
           )}
         </CardContent>
