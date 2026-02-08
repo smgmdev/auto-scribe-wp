@@ -1001,7 +1001,7 @@ export function AdminOrdersView() {
           placeholder="Search by site, order number..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 h-9 text-sm"
+          className="w-full pl-10 h-9 text-sm rounded-none"
         />
         {searchQuery && (
           <Button
