@@ -441,9 +441,9 @@ export function AgencyApplicationView() {
 
   // CASE 4: No agency record yet - show application form
   return (
-    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full bg-black">
-      {/* Hero Section with Video */}
-      <div className="relative h-[80vh]">
+    <div className="animate-fade-in -m-4 lg:-m-8 min-h-full">
+      {/* Fixed Video Background - stays completely still */}
+      <div className="sticky top-0 h-[80vh] -z-10">
         <video 
           src={agencyHeroVideo} 
           autoPlay 
@@ -480,12 +480,15 @@ export function AgencyApplicationView() {
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="relative bg-white">
-        {/* Dark gradient transition at top */}
-        <div className="absolute -top-20 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-black/60 pointer-events-none" />
+      {/* Content Section - scrolls over the video */}
+      <div className="relative z-10 bg-white" style={{ marginTop: '-80vh' }}>
+        {/* Spacer to reveal video initially */}
+        <div className="h-[70vh]" />
         
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
+        {/* Dark gradient transition */}
+        <div className="h-24 bg-gradient-to-b from-transparent via-black/40 to-white" />
+        
+        <div className="bg-white max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
         <ConnectEarnCarousel />
