@@ -519,10 +519,9 @@ export function AdminAgencyWithdrawalsView() {
             className="pl-9 text-sm rounded-none"
           />
         </div>
-      </div>
 
-      {/* Withdrawals List */}
-      <Card className="border-border/50">
+        {/* Withdrawals List */}
+        <Card className="border-border/50 rounded-none border-t-0">
         <CardHeader>
           <CardTitle>Withdrawal Requests</CardTitle>
         </CardHeader>
@@ -719,8 +718,8 @@ export function AdminAgencyWithdrawalsView() {
             </div>
           )}
         </CardContent>
-      </Card>
-
+        </Card>
+      </div>
       {/* Action Confirmation Dialog */}
       <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
         <DialogContent>
