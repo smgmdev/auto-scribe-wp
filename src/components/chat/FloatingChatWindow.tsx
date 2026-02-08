@@ -5761,19 +5761,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
         {/* Messages */}
         <div 
-          className="flex-1 overflow-hidden"
+          className="flex-1 overflow-hidden min-w-0 w-full"
           onWheel={(e) => {
             e.stopPropagation();
           }}
         >
-        <ScrollArea className="h-full" style={{ overscrollBehavior: 'contain' }}>
+        <ScrollArea className="h-full w-full" style={{ overscrollBehavior: 'contain' }}>
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
               <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
-            <div className="space-y-2 p-3 w-full overflow-hidden">
+            <div className="space-y-2 p-3 md:p-4 w-full min-w-0">
               {messages.map((msg) => {
                 const quote = parseQuote(msg.message);
                 const isOwnMessage = msg.sender_type === senderType;
@@ -5839,10 +5839,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div
                     key={msg.id}
                     id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} min-w-0 w-full`}
+                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full`}
                   >
                     <div
-                      className={`relative group max-w-[85%] md:max-w-[80%] min-w-0 overflow-hidden rounded-lg p-2 md:p-3 transition-all duration-300 ${
+                      className={`relative group max-w-[80%] min-w-0 rounded-lg p-2 md:p-3 transition-all duration-300 ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
