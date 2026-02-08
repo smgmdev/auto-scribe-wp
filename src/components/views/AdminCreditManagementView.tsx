@@ -424,7 +424,7 @@ export const AdminCreditManagementView = () => {
               <CardTitle className="text-lg font-semibold text-white">User Credit Balances</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
-              <div className="mb-4">
+              <div className="mb-0">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
                   <Input
