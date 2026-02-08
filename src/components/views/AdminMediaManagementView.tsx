@@ -2182,15 +2182,16 @@ export function AdminMediaManagementView() {
                                           <div className="min-w-0 flex-1">
                                             <div className="flex items-center justify-between gap-2">
                                               <h3 className="text-sm truncate">{site.name || 'Unnamed Site'}</h3>
-                                              {/* Price Badge - visible on mobile in same line */}
-                                              <Badge variant="secondary" className="text-xs whitespace-nowrap md:hidden flex-shrink-0">
+                                            </div>
+                                            {/* Price badge + Format info on mobile */}
+                                            <div className="flex items-center gap-2 md:hidden">
+                                              <Badge variant="secondary" className="text-xs whitespace-nowrap flex-shrink-0">
                                                 {site.price > 0 ? `${site.price} USD` : 'Free'}
                                               </Badge>
+                                              <p className="text-xs text-muted-foreground truncate">
+                                                {site.publication_format || (site.agency ? `via ${site.agency}` : '')}
+                                              </p>
                                             </div>
-                                            {/* Format info on mobile */}
-                                            <p className="text-xs text-muted-foreground md:hidden truncate">
-                                              {site.publication_format || (site.agency ? `via ${site.agency}` : '')}
-                                            </p>
                                             {/* Arrow in bottom-right corner on mobile */}
                                             <div className="flex md:hidden justify-end -mb-3">
                                               <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
