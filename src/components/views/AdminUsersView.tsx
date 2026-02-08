@@ -886,7 +886,7 @@ export function AdminUsersView() {
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-0">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
           <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0">
             <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
