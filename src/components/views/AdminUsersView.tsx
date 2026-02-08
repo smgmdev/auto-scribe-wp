@@ -1007,7 +1007,7 @@ export function AdminUsersView() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => openCreditDialog(user, e)}
-                            className="hover:bg-black hover:text-white"
+                            className="rounded-none hover:bg-black hover:text-white"
                           >
                             Manage Credits
                           </Button>
@@ -1016,7 +1016,7 @@ export function AdminUsersView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-black hover:text-white"
+                            className="rounded-none hover:bg-black hover:text-white"
                             onClick={(e) => openActionDialog(user, e)}
                           >
                             <AlertCircle className="h-4 w-4" />
@@ -1043,7 +1043,7 @@ export function AdminUsersView() {
                               variant="outline"
                               size="sm"
                               onClick={(e) => openCreditDialog(user, e)}
-                              className="hover:bg-black hover:text-white text-xs h-7"
+                              className="rounded-none hover:bg-black hover:text-white text-xs h-7"
                             >
                               Manage Credits
                             </Button>
@@ -1052,7 +1052,7 @@ export function AdminUsersView() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="hover:bg-black hover:text-white h-7 w-7 p-0"
+                              className="rounded-none hover:bg-black hover:text-white h-7 w-7 p-0"
                               onClick={(e) => openActionDialog(user, e)}
                             >
                               <AlertCircle className="h-3.5 w-3.5" />
