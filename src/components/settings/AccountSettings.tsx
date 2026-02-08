@@ -152,13 +152,7 @@ export function AccountSettings() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Account Settings</CardTitle>
-        <CardDescription>
-          Manage your account information and security
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Email */}
         <div className="space-y-3">
           <Label htmlFor="email" className="flex items-center gap-2">
