@@ -95,17 +95,17 @@ function AgencyFAQ() {
           open={openItems.includes(index)}
           onOpenChange={() => toggleItem(index)}
         >
-          <div className={`border border-border overflow-hidden transition-all duration-300 ${
+          <div className={`border border-border overflow-hidden transition-all duration-500 ease-in-out ${
             openItems.includes(index) 
               ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 border-slate-700 shadow-lg shadow-blue-900/20' 
               : 'bg-card hover:bg-gradient-to-r hover:from-slate-900 hover:via-slate-800 hover:to-blue-900 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-900/20'
           }`}>
-            <CollapsibleTrigger className={`group flex w-full items-center justify-between p-4 text-left transition-colors ${
+            <CollapsibleTrigger className={`group flex w-full items-center justify-between p-4 text-left transition-colors duration-500 ease-in-out ${
               openItems.includes(index) ? 'text-white' : 'hover:text-white'
             }`}>
-              <span className={`font-medium ${openItems.includes(index) ? 'text-white' : 'text-foreground group-hover:text-white'}`}>{item.question}</span>
+              <span className={`font-medium transition-colors duration-500 ease-in-out ${openItems.includes(index) ? 'text-white' : 'text-foreground group-hover:text-white'}`}>{item.question}</span>
               <ChevronDown 
-                className={`h-5 w-5 transition-transform duration-200 ${
+                className={`h-5 w-5 transition-all duration-500 ease-in-out ${
                   openItems.includes(index) ? 'rotate-180 text-white' : 'text-muted-foreground group-hover:text-white'
                 }`} 
               />
