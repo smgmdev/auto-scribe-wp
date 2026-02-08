@@ -1569,7 +1569,7 @@ export function AdminMediaManagementView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-2">
+        <TabsContent value="wordpress" className="mt-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
@@ -1967,7 +1967,7 @@ export function AdminMediaManagementView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-2">
+        <TabsContent value="media" className="mt-0">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
