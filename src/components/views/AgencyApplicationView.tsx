@@ -454,38 +454,36 @@ export function AgencyApplicationView() {
             playsInline
             className="w-full h-full object-cover"
           />
+          
+          {/* Text Overlay on Video */}
+          <div className="absolute inset-0 flex items-center">
+            <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
+              <div className="max-w-xl">
+                <img 
+                  src="/favicon.png" 
+                  alt="Arcana Mace" 
+                  className="h-12 w-12 mb-6"
+                />
+                <h1 className="text-[48px] lg:text-[56px] font-bold text-white leading-tight">
+                  Why Upgrade to Agency?
+                </h1>
+                <p className="mt-4 text-white/80 text-lg">
+                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+                </p>
+                <Button 
+                  className={`mt-6 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                  onClick={() => setDialogOpen(true)}
+                  disabled={existingApplication?.status === 'pending'}
+                >
+                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Content that scrolls over the video */}
         <div className="relative z-10 -mt-32 bg-white rounded-t-[2rem]">
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-16 pb-8">
-            <div className="rounded-lg p-6">
-              <div className="text-center">
-                <img 
-                  src="/favicon.png" 
-                  alt="Arcana Mace" 
-                  className="h-12 w-12 mx-auto mb-8"
-                />
-                <h1 className="text-[40px] font-bold text-foreground">
-                  Why Upgrade to Agency?
-                </h1>
-                <p className="mt-4 text-muted-foreground">
-                  Become a media merchant on Arcana Mace to trade and buy media products worldwide between clients and other agencies in a secure and reliable way.
-                </p>
-              </div>
-            </div>
-
-            {/* Start Application Button */}
-            <div className="text-center">
-              <Button 
-                className={`shrink-0 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-black text-white' : 'bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black'}`}
-                onClick={() => setDialogOpen(true)}
-                disabled={existingApplication?.status === 'pending'}
-              >
-                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-              </Button>
-            </div>
-          </div>
 
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
