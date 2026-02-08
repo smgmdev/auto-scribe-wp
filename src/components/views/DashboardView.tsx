@@ -527,7 +527,7 @@ export function DashboardView() {
         })}
       </div>
 
-      {/* Agency & Credit Summary (only for agency users) */}
+      {/* Agency Summary (only for agency users) */}
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
@@ -597,41 +597,6 @@ export function DashboardView() {
                   onClick={() => setCurrentView('my-agency')}
                 >
                   Agency
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Credit Summary */}
-          <Card className="border-border/50 bg-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Coins className="h-4 w-4" />
-                Credit Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Available Credits</span>
-                {availableCreditsData.loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                ) : (
-                  <span className="font-semibold">{availableCreditsData.availableCredits.toLocaleString()}</span>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => setBuyCreditsOpen(true)}
-                >
-                  <ArrowRight className="mr-2 h-3 w-3" />
-                  Buy Credits
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setCurrentView('credit-history')}>
-                  <ArrowRight className="mr-2 h-3 w-3" />
-                  Credit History
                 </Button>
               </div>
             </CardContent>
