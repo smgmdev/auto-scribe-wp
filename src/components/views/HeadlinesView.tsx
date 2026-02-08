@@ -166,8 +166,8 @@ export function HeadlinesView() {
   );
 
   return (
-    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-4">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8 overflow-x-hidden">
+      <div className="max-w-[980px] mx-auto space-y-4 overflow-x-hidden">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between">
