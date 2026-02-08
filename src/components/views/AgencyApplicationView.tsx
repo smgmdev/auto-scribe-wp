@@ -492,9 +492,11 @@ export function AgencyApplicationView() {
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 lg:pb-12 space-y-8">
         <ExploreNetworkGrid />
+        </div>
 
         <AgencyWorkBanner />
 
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 lg:pb-12 space-y-8">
         <ConnectEarnCarousel />
 
         <AgencyFAQ />
