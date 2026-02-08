@@ -175,26 +175,24 @@ export function ConnectEarnCarousel() {
   const duplicatedArticles = [...articles, ...articles];
 
   return (
-    <section className="py-8">
+    <section className="py-8 overflow-hidden">
       <h2 className="text-3xl font-bold text-foreground mb-6">Connect and earn</h2>
       
-      <div className="relative">
+      <div className="relative overflow-hidden">
         {/* Left fade */}
         <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
         {/* Right fade */}
         <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
         
-        <div className="overflow-hidden">
-          <div 
-            className="flex gap-4 animate-marquee hover:pause"
-            style={{
-              width: 'max-content',
-            }}
-          >
-            {duplicatedArticles.map((article, index) => (
-              <ArticleCard key={`${article.id}-${index}`} article={article} />
-            ))}
-          </div>
+        <div 
+          className="flex gap-4 animate-marquee"
+          style={{
+            width: 'max-content',
+          }}
+        >
+          {duplicatedArticles.map((article, index) => (
+            <ArticleCard key={`${article.id}-${index}`} article={article} />
+          ))}
         </div>
       </div>
       
