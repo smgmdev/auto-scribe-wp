@@ -886,17 +886,7 @@ export function AdminUsersView() {
         </Button>
       </div>
 
-      <div className="space-y-0">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search users by email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm placeholder:text-sm rounded-none"
-          />
-        </div>
-        
+      <div className="space-y-4">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
           <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0">
             <TabsTrigger value="all">All ({tabCounts.all})</TabsTrigger>
@@ -912,6 +902,16 @@ export function AdminUsersView() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+        
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search users by email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-sm placeholder:text-sm rounded-none"
+          />
+        </div>
 
       <div className="mt-6">
       {loading ? (
