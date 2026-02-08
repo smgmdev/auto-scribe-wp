@@ -881,22 +881,9 @@ export function CreditHistoryView() {
                             <div className="text-lg text-foreground md:hidden mt-1">
                               -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                             </div>
-                            <div className="flex items-center gap-3 mt-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
-                                }}
-                              >
-                              {isExpanded ? 'Hide Details' : 'See Details'}
-                              </Button>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
-                            </div>
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                           </div>
                         </div>
                         <div className="text-lg text-foreground hidden md:block">
@@ -1003,22 +990,9 @@ export function CreditHistoryView() {
                             <div className="text-lg text-muted-foreground md:hidden mt-1">
                               {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                             </div>
-                            <div className="flex items-center gap-3 mt-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleWithdrawalDetails(transaction.id, transaction.amount, transaction.description, transaction.type);
-                                }}
-                              >
-                              {isExpanded ? 'Hide Details' : 'See Details'}
-                              </Button>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
-                            </div>
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                           </div>
                         </div>
                         <div className="text-lg text-muted-foreground hidden md:block">
@@ -1136,28 +1110,9 @@ export function CreditHistoryView() {
                             <div className="text-lg text-green-500 md:hidden mt-1">
                               +{transaction.amount.toLocaleString()}
                             </div>
-                            <div className="flex items-center gap-3 mt-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent gap-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const newExpanded = new Set(expandedWithdrawals);
-                                  if (newExpanded.has(transaction.id)) {
-                                    newExpanded.delete(transaction.id);
-                                  } else {
-                                    newExpanded.add(transaction.id);
-                                  }
-                                  setExpandedWithdrawals(newExpanded);
-                                }}
-                              >
-                              {isEarningsExpanded ? 'Hide Details' : 'See Details'}
-                              </Button>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
-                            </div>
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
                           </div>
                         </div>
                         <div className="text-lg text-green-500 hidden md:block">
