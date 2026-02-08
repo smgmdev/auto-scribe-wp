@@ -1708,7 +1708,7 @@ export function AdminAgenciesView() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="hover:bg-black hover:text-white"
+                  className="w-full md:w-auto hover:bg-black hover:text-white"
                   onClick={() => handleViewDocument(selectedApp.incorporation_document_url)}
                 >
                   <FileText className="h-4 w-4 mr-1" />
