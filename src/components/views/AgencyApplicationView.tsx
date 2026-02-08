@@ -36,6 +36,16 @@ const faqItems = [
     icon: CalendarClock,
     question: "What Is the Verification and Approval Timeline?",
     answer: "After submitting your application, our team will review your details and documentation. This process typically takes 1–3 business days. Once approved, you will be required to complete additional KYC details and payout information. You may choose to receive payments via bank transfer or USDT. You will receive email notifications at each stage of the process."
+  },
+  {
+    icon: Building2,
+    question: "Can I Connect My Own WordPress Media Site?",
+    answer: "Yes! If your agency owns a media site such as a WordPress blog or WordPress news channel, you can connect it directly to Arcana Mace. This allows clients to purchase articles and publish them directly to your media site through our platform, streamlining the entire publishing workflow."
+  },
+  {
+    icon: Workflow,
+    question: "How Does Direct Publishing to My Media Site Work?",
+    answer: "Once your WordPress site is connected, clients can browse your media channel, place orders, and submit their content. After you review and approve the article, it can be published directly to your WordPress site with a single click. You maintain full editorial control while benefiting from automated publishing capabilities."
   }
 ];
 
@@ -90,7 +100,7 @@ function AgencyFAQ() {
           open={openItems.includes(index)}
           onOpenChange={() => toggleItem(index)}
         >
-          <div className={`rounded-lg border border-border overflow-hidden transition-all duration-300 ${
+          <div className={`border border-border overflow-hidden transition-all duration-300 ${
             openItems.includes(index) 
               ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 border-slate-700 shadow-lg shadow-blue-900/20' 
               : 'bg-card hover:bg-gradient-to-r hover:from-slate-900 hover:via-slate-800 hover:to-blue-900 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-900/20'
