@@ -877,29 +877,29 @@ export function AgencyRequestsView() {
       // Check for special card types and use their titles
       let eventName = '';
       if (msgContent.includes('[DISPUTE_OPENED]')) {
-        eventName = 'Dispute opened';
+        eventName = 'Dispute Opened';
       } else if (msgContent.includes('[DISPUTE_RESOLVED]')) {
-        eventName = 'Dispute resolved';
+        eventName = 'Dispute Resolved';
       } else if (msgContent.includes('[ORDER_REQUEST_ACCEPTED]')) {
-        eventName = 'Order request accepted';
+        eventName = 'Order Request Accepted';
       } else if (msgContent.includes('[ORDER_REQUEST_REJECTED]')) {
-        eventName = 'Order request rejected';
+        eventName = 'Order Request Rejected';
       } else if (msgContent.includes('[ORDER_REQUEST]')) {
-        eventName = 'Offer sent to client';
+        eventName = 'Offer Sent to Client';
       } else if (msgContent.includes('[CLIENT_ORDER_REQUEST]')) {
-        eventName = 'Client requested order';
+        eventName = 'Client Requested Order';
       } else if (msgContent.includes('[OFFER_REJECTED]')) {
-        eventName = 'Client rejected offer';
+        eventName = 'Client Rejected Offer';
       } else if (msgContent.includes('[DELIVERY]')) {
-        eventName = 'Delivery submitted';
+        eventName = 'Delivery Submitted';
       } else if (msgContent.includes('[DELIVERY_ACCEPTED]')) {
-        eventName = 'Delivery accepted';
+        eventName = 'Delivery Accepted';
       } else if (msgContent.includes('[REVISION_REQUESTED]')) {
-        eventName = 'Revision requested';
+        eventName = 'Revision Requested';
       } else if (msgContent.includes('[ORDER_CANCELLED]')) {
-        eventName = 'Order cancelled';
+        eventName = 'Order Cancelled';
       } else if (msgContent.includes('[ENGAGEMENT_CANCELLED]')) {
-        eventName = 'Engagement cancelled';
+        eventName = 'Engagement Cancelled';
       } else {
         const senderLabel = lastMsg.sender_type === 'client' ? 'Client' : 
                             lastMsg.sender_type === 'agency' ? 'You' : 'Staff';
@@ -913,35 +913,35 @@ export function AgencyRequestsView() {
     if (request.order) {
       // Order created/started
       if (request.order.created_at) {
-        events.push({ name: 'Order started', time: new Date(request.order.created_at) });
+        events.push({ name: 'Order Started', time: new Date(request.order.created_at) });
       }
       
       // Order accepted by agency
       if (request.order.accepted_at) {
-        events.push({ name: 'Order accepted', time: new Date(request.order.accepted_at) });
+        events.push({ name: 'Order Accepted', time: new Date(request.order.accepted_at) });
       }
       
       // Delivery submitted
       if (request.order.delivered_at) {
-        events.push({ name: 'Order delivered', time: new Date(request.order.delivered_at) });
+        events.push({ name: 'Order Delivered', time: new Date(request.order.delivered_at) });
       }
       
       // Delivery released/completed
       if (request.order.released_at) {
-        events.push({ name: 'Order completed', time: new Date(request.order.released_at) });
+        events.push({ name: 'Order Completed', time: new Date(request.order.released_at) });
       }
     }
     
     // Cancelled event
     if (request.status === 'cancelled' && request.cancelled_at) {
-      events.push({ name: 'Engagement cancelled', time: new Date(request.cancelled_at) });
+      events.push({ name: 'Engagement Cancelled', time: new Date(request.cancelled_at) });
     }
     
     // Dispute opened event (from disputes array if order is in dispute)
     if (request.order?.id) {
       const dispute = disputes.find(d => d.order_id === request.order?.id);
       if (dispute?.created_at) {
-        events.push({ name: 'Dispute opened', time: new Date(dispute.created_at) });
+        events.push({ name: 'Dispute Opened', time: new Date(dispute.created_at) });
       }
     }
     

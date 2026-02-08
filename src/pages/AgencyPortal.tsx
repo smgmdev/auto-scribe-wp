@@ -696,25 +696,25 @@ function getLastEventInfo(request: ServiceRequest): { eventName: string; eventTi
   // Order related events based on status
   if (request.orders) {
     if (request.orders.delivery_status === 'pending' && request.orders.accepted_at) {
-      events.push({ name: 'Awaiting delivery', time: new Date(request.orders.accepted_at) });
+      events.push({ name: 'Awaiting Delivery', time: new Date(request.orders.accepted_at) });
     } else if (request.orders.delivery_status === 'delivered') {
-      events.push({ name: 'Delivery submitted', time: new Date(request.updated_at) });
+      events.push({ name: 'Delivery Submitted', time: new Date(request.updated_at) });
     } else if (request.orders.delivery_status === 'accepted') {
-      events.push({ name: 'Delivery accepted', time: new Date(request.updated_at) });
+      events.push({ name: 'Delivery Accepted', time: new Date(request.updated_at) });
     } else if (request.orders.delivery_status === 'rejected') {
-      events.push({ name: 'Delivery rejected', time: new Date(request.updated_at) });
+      events.push({ name: 'Delivery Rejected', time: new Date(request.updated_at) });
     }
   }
   
   // Request status based events
   if (request.status === 'rejected') {
-    events.push({ name: 'Request rejected', time: new Date(request.updated_at) });
+    events.push({ name: 'Request Rejected', time: new Date(request.updated_at) });
   } else if (request.status === 'accepted') {
-    events.push({ name: 'Request accepted', time: new Date(request.updated_at) });
+    events.push({ name: 'Request Accepted', time: new Date(request.updated_at) });
   } else if (request.status === 'changes_requested') {
-    events.push({ name: 'Changes requested', time: new Date(request.updated_at) });
+    events.push({ name: 'Changes Requested', time: new Date(request.updated_at) });
   } else if (request.status === 'paid') {
-    events.push({ name: 'Order paid', time: new Date(request.updated_at) });
+    events.push({ name: 'Order Paid', time: new Date(request.updated_at) });
   }
   
   // Find the most recent event
