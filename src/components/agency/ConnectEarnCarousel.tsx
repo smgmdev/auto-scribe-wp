@@ -92,11 +92,11 @@ function ArticleCard({ article }: { article: PublishedArticle }) {
           
           {/* Action links */}
           <div className="flex items-center gap-3 mt-4">
-            <span className="text-xs text-white/50 border border-white/20 rounded-full px-3 py-1">
-              Read
+            <span className="text-xs text-white/50 border border-white/20 rounded-full px-3 py-1 flex items-center gap-1">
+              Read <ExternalLink className="h-3 w-3" />
             </span>
-            <span className="text-xs text-white/50 flex items-center gap-1">
-              {formatRelativeTime(article.created_at)} <ExternalLink className="h-3 w-3" />
+            <span className="text-xs text-white/50">
+              {formatRelativeTime(article.created_at)}
             </span>
           </div>
         </div>
