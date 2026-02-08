@@ -170,20 +170,30 @@ export function HeadlinesView() {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">
-            Sources
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Scan news sources for trending stories to write about
-          </p>
+      <div className="mb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">
+              Sources
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Scan news sources for trending stories to write about
+            </p>
+          </div>
+          
+          <Button 
+            onClick={handleScan}
+            disabled={isScanning || settings.selectedSources.length === 0 || settingsLoading}
+            className="hidden md:inline-flex border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
+            {isScanning ? 'Scanning...' : 'Scan Headlines'}
+          </Button>
         </div>
-        
         <Button 
           onClick={handleScan}
           disabled={isScanning || settings.selectedSources.length === 0 || settingsLoading}
-          className="border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          className="md:hidden w-full mt-4 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
           {isScanning ? 'Scanning...' : 'Scan Headlines'}
