@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from 'sonner';
+import amblackIcon from '@/assets/amblack.png';
 
 interface PinVerificationProps {
   onVerify: (pin: string) => Promise<boolean>;
@@ -41,7 +42,8 @@ export function PinVerification({ onVerify, onCancel }: PinVerificationProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <img src={amblackIcon} alt="Arcana Mace" className="h-12 w-12" />
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
               <Lock className="h-6 w-6 text-primary-foreground" />
             </div>
