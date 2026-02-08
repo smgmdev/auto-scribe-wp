@@ -539,164 +539,166 @@ export function AdminAgencyWithdrawalsView() {
               {filteredWithdrawals.map((withdrawal) => {
                 const amount = withdrawal.amount_cents / 100;
                 
-                return (
-                  <div 
-                    key={withdrawal.id}
-                    className={`relative p-4 rounded-lg border transition-colors ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border/50 hover:border-muted-foreground/50'}`}
-                    onClick={() => !withdrawal.read && markAsRead(withdrawal.id)}
-                  >
-                    <div className="absolute top-3 right-3 flex items-center gap-2">
-                      <Badge className={statusColors[withdrawal.status]}>
-                        {statusLabels[withdrawal.status] || withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <p className="hidden md:block absolute bottom-3 right-3 font-semibold text-foreground">
-                      ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    
-                    <div className="flex items-start gap-3 md:pr-32">
-                      <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-muted overflow-hidden">
-                        {loadingLogos[withdrawal.id] ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                        ) : withdrawal.logo_url ? (
-                          <img 
-                            src={withdrawal.logo_url} 
-                            alt={withdrawal.agency_payout?.agency_name || 'Agency'}
-                            className="h-10 w-10 object-cover"
-                            onLoadStart={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: true }))}
-                            onLoad={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }))}
-                            onError={(e) => {
-                              setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }));
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <Building2 className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
-                          className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-                        >
-                          <span className="font-medium">
-                            {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
-                          </span>
-                          {loadingUserDetailsId === withdrawal.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Info className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                        <div className="flex flex-col text-xs text-muted-foreground">
-                          {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <p className="cursor-help underline decoration-dotted">Method: Bank Transfer</p>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-xs">
-                                <div className="space-y-1">
-                                  <p><span className="opacity-70">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
-                                  <p><span className="opacity-70">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
-                                  {withdrawal.bank_details.bank_account_number && (
-                                    <p><span className="opacity-70">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_iban && (
-                                    <p><span className="opacity-70">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
-                                  )}
-                                  {withdrawal.bank_details.bank_swift_code && (
-                                    <p><span className="opacity-70">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <p className="cursor-help underline decoration-dotted">Method: USDT (Crypto)</p>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-sm">
-                                <div className="space-y-1">
-                                  <p><span className="opacity-70">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
-                                  {withdrawal.crypto_details.usdt_wallet_address && (
-                                    <div className="flex items-center gap-1">
-                                      <span className="opacity-70">Wallet:</span>
-                                      <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
-                                        className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            <p>Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
-                          )}
-                          <p>
-                            Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                          {withdrawal.processed_at && (
-                            <p>
-                              Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
-                            </p>
-                          )}
-                          {/* See Details for completed/rejected - collapsible */}
-                          {withdrawal.status !== 'pending' && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); toggleCardExpansion(withdrawal.id); }}
-                              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline transition-colors mt-1"
-                            >
-                              <span>See details</span>
-                              {expandedCards[withdrawal.id] ? (
-                                <ChevronUp className="h-3 w-3" />
-                              ) : (
-                                <ChevronDown className="h-3 w-3" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                        
-                        {/* Mobile Price */}
-                        <p className="md:hidden mt-3 font-semibold text-foreground">
-                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        
-                        {/* Action Buttons for pending */}
-                        {withdrawal.status === 'pending' && (
-                          <div className="flex flex-col md:flex-row gap-2 mt-3">
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
-                              disabled={processingId === withdrawal.id}
-                              className="w-full md:w-auto bg-blue-600 text-white hover:bg-transparent hover:text-blue-600 border border-blue-600 transition-colors"
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'reject'); }}
-                              disabled={processingId === withdrawal.id}
-                              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
-                            >
-                              Reject
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
-                            >
-                              Credit History
-                            </Button>
+                  return (
+                    <div 
+                      key={withdrawal.id}
+                      className={`rounded-lg border transition-colors overflow-hidden ${!withdrawal.read ? 'border-primary bg-primary/5' : 'border-border hover:border-[#4771d9]'}`}
+                      onClick={() => !withdrawal.read && markAsRead(withdrawal.id)}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
+                        <div className="flex items-start gap-3">
+                          <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                            {loadingLogos[withdrawal.id] ? (
+                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            ) : withdrawal.logo_url ? (
+                              <img 
+                                src={withdrawal.logo_url} 
+                                alt={withdrawal.agency_payout?.agency_name || 'Agency'}
+                                className="h-8 w-8 object-cover rounded-full"
+                                onLoadStart={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: true }))}
+                                onLoad={() => setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }))}
+                                onError={(e) => {
+                                  setLoadingLogos(prev => ({ ...prev, [withdrawal.id]: false }));
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <Building2 className="h-5 w-5 text-muted-foreground" />
+                            )}
                           </div>
-                        )}
-                        
-                        {/* Expanded Details for completed/rejected */}
-                        {withdrawal.status !== 'pending' && expandedCards[withdrawal.id] && (
-                          <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleViewUserDetails(withdrawal); }}
+                                className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                              >
+                                <span className="font-medium">
+                                  {withdrawal.agency_payout?.agency_name || 'Unknown Agency'}
+                                </span>
+                                {loadingUserDetailsId === withdrawal.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Info className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              <Badge className={statusColors[withdrawal.status]}>
+                                {statusLabels[withdrawal.status] || withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
+                              </Badge>
+                            </div>
+                            <div className="text-lg text-foreground md:hidden mt-1">
+                              ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="flex flex-col text-xs text-muted-foreground mt-1">
+                              {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="cursor-help underline decoration-dotted w-fit">Method: Bank Transfer</p>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-xs">
+                                    <div className="space-y-1">
+                                      <p><span className="opacity-70">Bank:</span> {withdrawal.bank_details.bank_name || 'N/A'}</p>
+                                      <p><span className="opacity-70">Account Holder:</span> {withdrawal.bank_details.bank_account_holder || 'N/A'}</p>
+                                      {withdrawal.bank_details.bank_account_number && (
+                                        <p><span className="opacity-70">Account:</span> {withdrawal.bank_details.bank_account_number}</p>
+                                      )}
+                                      {withdrawal.bank_details.bank_iban && (
+                                        <p><span className="opacity-70">IBAN:</span> {withdrawal.bank_details.bank_iban}</p>
+                                      )}
+                                      {withdrawal.bank_details.bank_swift_code && (
+                                        <p><span className="opacity-70">SWIFT:</span> {withdrawal.bank_details.bank_swift_code}</p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : withdrawal.withdrawal_method === 'crypto' && withdrawal.crypto_details ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p className="cursor-help underline decoration-dotted w-fit">Method: USDT (Crypto)</p>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-sm">
+                                    <div className="space-y-1">
+                                      <p><span className="opacity-70">Network:</span> {withdrawal.crypto_details.usdt_network || 'TRC20'}</p>
+                                      {withdrawal.crypto_details.usdt_wallet_address && (
+                                        <div className="flex items-center gap-1">
+                                          <span className="opacity-70">Wallet:</span>
+                                          <span className="break-all">{withdrawal.crypto_details.usdt_wallet_address}</span>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); copyToClipboard(withdrawal.crypto_details!.usdt_wallet_address!); }}
+                                            className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
+                                          >
+                                            <Copy className="h-3 w-3" />
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <p>Method: {withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+                              )}
+                              <p>
+                                Submitted: {format(new Date(withdrawal.created_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              {withdrawal.processed_at && (
+                                <p>
+                                  Processed: {format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}
+                                </p>
+                              )}
+                              {/* See Details for completed/rejected - collapsible */}
+                              {withdrawal.status !== 'pending' && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); toggleCardExpansion(withdrawal.id); }}
+                                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline transition-colors mt-1 w-fit"
+                                >
+                                  <span>See details</span>
+                                  {expandedCards[withdrawal.id] ? (
+                                    <ChevronUp className="h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="h-3 w-3" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                            
+                            {/* Action Buttons for pending */}
+                            {withdrawal.status === 'pending' && (
+                              <div className="flex flex-col md:flex-row gap-2 mt-3">
+                                <Button
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
+                                  disabled={processingId === withdrawal.id}
+                                  className="w-full md:w-auto bg-blue-600 text-white hover:bg-transparent hover:text-blue-600 border border-blue-600 transition-colors"
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'reject'); }}
+                                  disabled={processingId === withdrawal.id}
+                                  className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                                >
+                                  Reject
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                                  className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                                >
+                                  Credit History
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-lg text-foreground hidden md:block">
+                          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                      
+                      {/* Expanded Details for completed/rejected */}
+                      {withdrawal.status !== 'pending' && expandedCards[withdrawal.id] && (
+                        <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
+                          <div className="pt-2 space-y-2">
                             {withdrawal.admin_notes && (
                               <p className="text-xs text-muted-foreground">
                                 <span className="font-medium">Note:</span> {withdrawal.admin_notes}
@@ -710,12 +712,11 @@ export function AdminAgencyWithdrawalsView() {
                               Credit History
                             </Button>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
         </CardContent>
