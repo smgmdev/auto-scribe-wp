@@ -1269,7 +1269,7 @@ export function AdminUsersView() {
                                                 ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                                                   tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
                                                 ) : (
-                                                  (tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff')
+                                                  (tx.description || tx.type).replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '')
                                                 )}
                                               </span>
                                               {canExpand && (
@@ -1360,6 +1360,20 @@ export function AdminUsersView() {
                                                     <p>{tx.description.split(': ').slice(1).join(': ')}</p>
                                                   </div>
                                                 )}
+                                                
+                                                {/* Platform fee for order earnings */}
+                                                {tx.description?.includes('Platform fee:') && (() => {
+                                                  const match = tx.description.match(/\(Platform fee:\s*(\d+)%\)/);
+                                                  if (match) {
+                                                    return (
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Platform Fee</span>
+                                                        <p className="font-medium">{match[1]}%</p>
+                                                      </div>
+                                                    );
+                                                  }
+                                                  return null;
+                                                })()}
                                               </div>
                                             </div>
                                           )}
