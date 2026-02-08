@@ -914,15 +914,15 @@ export function AdminOrdersView() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-1 md:gap-2 mb-2">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default">
+            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Active Orders
                 </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground/60" />
+                <Clock className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-foreground">${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -939,15 +939,15 @@ export function AdminOrdersView() {
         
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default">
+            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Open Disputes
                 </CardTitle>
-                <AlertTriangle className="h-4 w-4 text-muted-foreground/60" />
+                <AlertTriangle className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-foreground">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -958,15 +958,15 @@ export function AdminOrdersView() {
         
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default">
+            <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 cursor-default border-0" style={{ backgroundColor: '#1d1d1f' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                   Delivered Orders
                 </CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground/60" />
+                <CheckCircle className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-foreground">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
