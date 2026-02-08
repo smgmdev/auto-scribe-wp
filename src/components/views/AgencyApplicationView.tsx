@@ -456,8 +456,8 @@ export function AgencyApplicationView() {
           className="w-full h-full object-cover"
         />
         
-        {/* Text Overlay on Video */}
-        <div className="absolute inset-0 flex items-center pb-20">
+        {/* Text Overlay on Video - z-index higher than spacer to allow clicks */}
+        <div className="absolute inset-0 flex items-center pb-20" style={{ zIndex: 2 }}>
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
             <div className="max-w-xl">
               <img 
