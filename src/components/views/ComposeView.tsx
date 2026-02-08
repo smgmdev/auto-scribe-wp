@@ -1160,7 +1160,7 @@ export function ComposeView() {
     {/* Publishing Overlay - Outside animated container for true fixed positioning */}
     {isPublishing && (
       <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+        <div className="fixed top-20 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
           <Loader2 className="h-10 w-10 animate-spin text-accent" />
           <div className="text-center">
             <p className="text-lg font-medium text-foreground">Publishing Article...</p>
