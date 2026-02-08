@@ -47,8 +47,11 @@ export function MainLayout({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>© 2026 Arcana Mace. All rights reserved.</span>
             <div className="flex items-center gap-4">
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
               <Link to="/help" className="hover:text-foreground transition-colors">Help Center</Link>
               <Link to="/system-status" className="hover:text-foreground transition-colors">System Status</Link>
+              <Link to="/sitemap" className="hover:text-foreground transition-colors">Site Map</Link>
             </div>
           </div>
         </footer>
