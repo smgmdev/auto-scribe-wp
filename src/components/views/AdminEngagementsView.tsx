@@ -720,13 +720,13 @@ export function AdminEngagementsView() {
                             <span className="text-xs text-muted-foreground">
                               Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              Last Message: {messages[r.id]?.length > 0 
+                              <span>Last Message: {messages[r.id]?.length > 0 
                                 ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                                : 'No messages'}
+                                : 'No messages'}</span>
                               {messages[r.id]?.length > 0 && (
-                                <span> • {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
+                                <span className="block md:inline w-full md:w-auto pl-4 md:pl-0">• {messages[r.id].length} message{messages[r.id].length !== 1 ? 's' : ''}</span>
                               )}
                             </p>
                           </div>
