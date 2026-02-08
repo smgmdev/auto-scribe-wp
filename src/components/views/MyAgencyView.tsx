@@ -428,45 +428,45 @@ export function MyAgencyView() {
                     </div>
                     <div className="space-y-2 pl-6 text-sm">
                       {bankDetails.bank_name && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Bank Name</span>
-                          <span className="font-medium">{bankDetails.bank_name}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.bank_name}</span>
                         </div>
                       )}
                       {bankDetails.bank_account_holder && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Account Holder</span>
-                          <span className="font-medium">{bankDetails.bank_account_holder}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.bank_account_holder}</span>
                         </div>
                       )}
                       {bankDetails.bank_account_number && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Account Number</span>
-                          <span className="font-medium">{bankDetails.bank_account_number}</span>
+                          <span className="font-medium sm:text-right break-all">{bankDetails.bank_account_number}</span>
                         </div>
                       )}
                       {bankDetails.bank_iban && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">IBAN</span>
-                          <span className="font-medium">{bankDetails.bank_iban}</span>
+                          <span className="font-medium sm:text-right break-all">{bankDetails.bank_iban}</span>
                         </div>
                       )}
                       {bankDetails.bank_swift_code && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">SWIFT/BIC</span>
-                          <span className="font-medium">{bankDetails.bank_swift_code}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.bank_swift_code}</span>
                         </div>
                       )}
                       {bankDetails.bank_country && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Bank Country</span>
-                          <span className="font-medium">{bankDetails.bank_country}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.bank_country}</span>
                         </div>
                       )}
                       {bankDetails.bank_address && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Bank Address</span>
-                          <span className="font-medium text-right max-w-[200px]">{bankDetails.bank_address}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.bank_address}</span>
                         </div>
                       )}
                     </div>
@@ -482,14 +482,14 @@ export function MyAgencyView() {
                     </div>
                     <div className="space-y-2 pl-6 text-sm">
                       {bankDetails.usdt_network && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                           <span className="text-muted-foreground">Network</span>
-                          <span className="font-medium">{bankDetails.usdt_network}</span>
+                          <span className="font-medium sm:text-right">{bankDetails.usdt_network}</span>
                         </div>
                       )}
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-4">
                         <span className="text-muted-foreground">Wallet Address</span>
-                        <span className="font-medium text-right max-w-[200px] break-all">
+                        <span className="font-medium sm:text-right break-all">
                           {bankDetails.usdt_wallet_address}
                         </span>
                       </div>
