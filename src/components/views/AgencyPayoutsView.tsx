@@ -572,7 +572,7 @@ export function AgencyPayoutsView() {
                         <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
                           -{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <div className="flex items-center gap-3 md:pr-24">
+                        <div className="flex items-start gap-3 md:pr-24">
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getCardBackground()}`}>
                             {getCardIcon()}
                           </div>
@@ -650,7 +650,7 @@ export function AgencyPayoutsView() {
                         <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
                           +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
-                        <div className="flex items-center gap-3 md:pr-24">
+                        <div className="flex items-start gap-3 md:pr-24">
                           <div className="h-10 w-10 rounded-full flex items-center justify-center bg-green-500/20">
                             <ArrowDownLeft className="h-5 w-5 text-green-500" />
                           </div>
