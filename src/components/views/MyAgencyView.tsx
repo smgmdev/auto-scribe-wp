@@ -233,7 +233,8 @@ export function MyAgencyView() {
   };
 
   return (
-    <div className="space-y-2 bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto space-y-2">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -614,6 +615,7 @@ export function MyAgencyView() {
             </Tabs>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
