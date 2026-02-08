@@ -335,8 +335,10 @@ export function AdminAgencyWithdrawalsView() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4">
+      {/* Stats + Tabs + Search + List */}
+      <div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="py-3 cursor-help rounded-none border-0" style={{ backgroundColor: '#1e3a5f' }}>
@@ -466,10 +468,9 @@ export function AdminAgencyWithdrawalsView() {
             </div>
           </TooltipContent>
         </Tooltip>
-      </div>
+        </div>
 
-      {/* Status Filter Tabs + Search + List */}
-      <div className="-mt-4">
+        {/* Status Filter Tabs */}
         <div className="flex flex-wrap">
           <Button
             size="sm"
@@ -720,6 +721,7 @@ export function AdminAgencyWithdrawalsView() {
         </CardContent>
         </Card>
       </div>
+
       {/* Action Confirmation Dialog */}
       <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
         <DialogContent>
