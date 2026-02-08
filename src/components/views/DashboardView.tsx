@@ -152,11 +152,12 @@ export function DashboardView() {
         return;
       }
 
-      // Fetch completed orders for this agency (total sales and earnings)
+      // Fetch accepted orders for this agency (delivery_status = 'accepted' means client confirmed)
       const { data: orders } = await supabase
         .from('service_requests')
         .select(`
           order:orders!inner(
+            amount_cents,
             agency_payout_cents,
             delivery_status
           )
@@ -168,9 +169,10 @@ export function DashboardView() {
       
       if (orders) {
         orders.forEach((req: any) => {
-          if (req.order?.delivery_status === 'completed') {
+          // 'accepted' means the client has confirmed delivery - this matches AgencyPayoutsView logic
+          if (req.order?.delivery_status === 'accepted') {
             totalEarnings += (req.order.agency_payout_cents || 0) / 100;
-            totalSales += (req.order.agency_payout_cents || 0) / 100;
+            totalSales += (req.order.amount_cents || 0) / 100;
           }
         });
       }
