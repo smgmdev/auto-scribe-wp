@@ -374,6 +374,40 @@ export function CreditHistoryView() {
       console.error('Error fetching transactions:', error);
     } else {
       setTransactions(data || []);
+      
+      // Pre-fetch withdrawal details for completed/rejected withdrawals
+      const withdrawalTransactionsToFetch = (data || []).filter(
+        t => t.type === 'withdrawal_completed' || t.type === 'withdrawal_unlocked'
+      );
+      
+      if (withdrawalTransactionsToFetch.length > 0) {
+        const withdrawalDetailsMap: Record<string, any> = {};
+        
+        for (const tx of withdrawalTransactionsToFetch) {
+          const amountCents = Math.abs(tx.amount);
+          const isBank = tx.description?.includes('Bank Transfer');
+          const isCrypto = tx.description?.includes('USDT');
+          const status = tx.type === 'withdrawal_completed' 
+            ? ['completed', 'approved'] 
+            : ['rejected'];
+          
+          const { data: withdrawal } = await supabase
+            .from('agency_withdrawals')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('amount_cents', amountCents)
+            .in('status', status)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (withdrawal) {
+            withdrawalDetailsMap[tx.id] = withdrawal;
+          }
+        }
+        
+        setWithdrawalDetails(prev => ({ ...prev, ...withdrawalDetailsMap }));
+      }
     }
     setLoading(false);
   }, [user]);
@@ -975,7 +1009,7 @@ export function CreditHistoryView() {
                               -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
-                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              {format(new Date(details?.processed_at || transaction.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                         </div>
@@ -1090,7 +1124,7 @@ export function CreditHistoryView() {
                               {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
-                              {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                              {format(new Date(details?.processed_at || transaction.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                         </div>
