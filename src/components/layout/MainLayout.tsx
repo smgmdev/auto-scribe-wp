@@ -43,7 +43,7 @@ export function MainLayout({
         </div>
         
         {/* Global Footer */}
-        <footer className="border-t border-border bg-muted/30 py-4 px-4 lg:px-8 mb-6">
+        <footer className="border-t border-border bg-muted/30 py-4 px-4 lg:px-8 mb-[50px]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>© 2026 Arcana Mace. All rights reserved.</span>
             <div className="flex items-center gap-4">
