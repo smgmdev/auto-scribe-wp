@@ -523,10 +523,10 @@ export function AdminAgencyWithdrawalsView() {
 
         {/* Withdrawals List */}
         <Card className="border-border/50 rounded-none border-t-0">
-        <CardHeader>
+        <CardHeader className="px-0">
           <CardTitle>Withdrawal Requests</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0">
           {filteredWithdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Wallet className="h-12 w-12 text-muted-foreground/50 mb-4" />
