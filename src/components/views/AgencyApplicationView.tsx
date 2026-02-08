@@ -442,49 +442,53 @@ export function AgencyApplicationView() {
   // CASE 4: No agency record yet - show application form
   return (
     <div className="animate-fade-in -m-4 lg:-m-8 bg-white min-h-full">
-      {/* Hero Section with Sticky Video */}
-      <div className="relative">
-        {/* Sticky Video Container */}
-        <div className="sticky top-0 h-[70vh] overflow-hidden">
-          <video 
-            src={agencyHeroVideo} 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Text Overlay on Video */}
-          <div className="absolute inset-0 flex items-center pb-40">
-            <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
-              <div className="max-w-xl">
-                <img 
-                  src="/favicon.png" 
-                  alt="Arcana Mace" 
-                  className="h-10 w-10 mb-4 brightness-0 invert"
-                />
-                <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
-                  Upgrade to Agency
-                </h1>
-                <p className="mt-3 text-white/80 text-base lg:text-lg">
-                  Become a media merchant on Arcana Mace to trade and buy media products worldwide.
-                </p>
-                <Button 
-                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-                  onClick={() => setDialogOpen(true)}
-                  disabled={existingApplication?.status === 'pending'}
-                >
-                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-                </Button>
-              </div>
+      {/* Fixed Video Background */}
+      <div className="fixed top-0 left-0 right-0 h-[80vh] overflow-hidden z-0">
+        <video 
+          src={agencyHeroVideo} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Text Overlay on Video */}
+        <div className="absolute inset-0 flex items-center pb-32">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full ml-[280px] lg:ml-auto">
+            <div className="max-w-xl">
+              <img 
+                src="/favicon.png" 
+                alt="Arcana Mace" 
+                className="h-10 w-10 mb-4 brightness-0 invert"
+              />
+              <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
+                Upgrade to Agency
+              </h1>
+              <p className="mt-3 text-white/80 text-base lg:text-lg">
+                Become a media merchant on Arcana Mace to trade and buy media products worldwide.
+              </p>
+              <Button 
+                className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
+                onClick={() => setDialogOpen(true)}
+                disabled={existingApplication?.status === 'pending'}
+              >
+                {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content that scrolls over the video */}
-        <div className="relative z-10 -mt-32 bg-white rounded-t-[2rem]">
+      {/* Spacer for the fixed video */}
+      <div className="h-[60vh]" />
 
+      {/* Content that scrolls over the video */}
+      <div className="relative z-10">
+        {/* Dark gradient transition */}
+        <div className="h-32 bg-gradient-to-b from-black/60 via-black/30 to-white" />
+        
+        <div className="bg-white">
           <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-4 lg:pb-8 space-y-8">
         <ExploreNetworkGrid />
 
