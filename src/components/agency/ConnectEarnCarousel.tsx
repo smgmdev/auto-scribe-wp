@@ -186,9 +186,9 @@ export function ConnectEarnCarousel() {
   const duplicatedArticles = [...articles, ...articles];
 
   return (
-    <section className="py-8 px-6">
-      <h2 className="text-3xl font-bold text-foreground mb-6 text-center">
-        Connect and Earn. <span className="font-normal text-muted-foreground">Generate New Profits.</span>
+    <section className="py-8 px-6 bg-[#1d1d1f] rounded-[40px]">
+      <h2 className="text-3xl font-bold text-white mb-6 text-center">
+        Connect and Earn. <span className="font-normal text-white/60">Generate New Profits.</span>
       </h2>
       
       <div className="relative overflow-visible py-4">
@@ -205,7 +205,7 @@ export function ConnectEarnCarousel() {
         </div>
       </div>
       
-      <p className="text-muted-foreground mt-4 text-xs">
+      <p className="text-white/50 mt-4 text-xs">
         As an agency you can connect your own WordPress news site and list it on Arcana Mace. Users will pay your fee to publish articles directly on your site. Easy and smooth process.
       </p>
     </section>
