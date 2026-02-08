@@ -582,18 +582,22 @@ export function AgencyApplicationView() {
       )}
         </div>
         
-        {/* Footer placeholder to ensure proper spacing and coverage of fixed video */}
-        <div className="bg-muted/30 border-t border-border py-4 px-4 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground max-w-[980px] mx-auto">
-            <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <a href="/terms" className="hover:text-foreground transition-colors text-left">Terms of Service</a>
-              <a href="/privacy" className="hover:text-foreground transition-colors text-left">Privacy Policy</a>
-              <a href="/help" className="hover:text-foreground transition-colors text-left">Help Center</a>
-              <a href="/system-status" className="hover:text-foreground transition-colors text-left">System Status</a>
-              <a href="/sitemap" className="hover:text-foreground transition-colors text-left">Site Map</a>
+        {/* Footer with white extension to cover fixed video */}
+        <div className="bg-white">
+          <div className="bg-muted/30 border-t border-border py-4 px-4 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground max-w-[980px] mx-auto">
+              <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <a href="/terms" className="hover:text-foreground transition-colors text-left">Terms of Service</a>
+                <a href="/privacy" className="hover:text-foreground transition-colors text-left">Privacy Policy</a>
+                <a href="/help" className="hover:text-foreground transition-colors text-left">Help Center</a>
+                <a href="/system-status" className="hover:text-foreground transition-colors text-left">System Status</a>
+                <a href="/sitemap" className="hover:text-foreground transition-colors text-left">Site Map</a>
+              </div>
             </div>
           </div>
+          {/* White spacer to cover any remaining video below footer */}
+          <div className="h-[200px] bg-white" />
         </div>
         </div>
       </div>
