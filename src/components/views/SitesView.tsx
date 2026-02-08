@@ -1445,7 +1445,7 @@ export function SitesView() {
                   placeholder="Search local media library..."
                   value={wpSearchQuery}
                   onChange={(e) => setWpSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 h-9 md:h-11 text-sm"
+                  className="pl-10 pr-10 h-9 text-sm"
                 />
                 {wpSearchQuery && (
                   <Button
@@ -1504,7 +1504,7 @@ export function SitesView() {
                     }}
                     onFocus={() => searchQuery.length > 0 && setShowSearchDropdown(true)}
                     onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-                    className="w-full pl-10 h-9 md:h-11 text-sm"
+                    className="w-full pl-10 h-9 text-sm"
                   />
                   {searchQuery && (
                     <Button
