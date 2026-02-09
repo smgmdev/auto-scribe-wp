@@ -569,8 +569,17 @@ export function AgencyApplicationView() {
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="hidden lg:block text-right">
-                              <p className="text-xs text-white/50">Submitted</p>
-                              <p className="text-xs text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
+                              {app.status === 'rejected' && app.reviewed_at ? (
+                                <>
+                                  <p className="text-xs text-white/50">Processed</p>
+                                  <p className="text-xs text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-xs text-white/50">Submitted</p>
+                                  <p className="text-xs text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                </>
+                              )}
                             </div>
                             {app.status === 'rejected' ? (
                               <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
@@ -587,7 +596,11 @@ export function AgencyApplicationView() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between lg:hidden">
-                          <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</span></p>
+                          {app.status === 'rejected' && app.reviewed_at ? (
+                            <p className="text-xs text-white/50">Processed: <span className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</span></p>
+                          ) : (
+                            <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</span></p>
+                          )}
                         </div>
                       </div>
                     </CollapsibleTrigger>
@@ -684,8 +697,21 @@ export function AgencyApplicationView() {
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Action buttons */}
+
+                        {/* Timestamps */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <p className="text-white/50 mb-1">Submitted</p>
+                            <p className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
+                          </div>
+                          {app.status === 'rejected' && app.reviewed_at && (
+                            <div>
+                              <p className="text-white/50 mb-1">Processed</p>
+                              <p className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                            </div>
+                          )}
+                        </div>
+
                         <div className="flex flex-wrap gap-2 pt-2">
                           <Button
                             size="sm"
