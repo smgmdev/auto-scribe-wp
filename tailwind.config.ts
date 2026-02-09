@@ -299,6 +299,28 @@ export default {
 				'50%': { 
 					boxShadow: '0 0 90px rgba(191, 90, 242, 0.7), inset 0 0 40px rgba(191, 90, 242, 0.6)'
 				}
+			},
+			'clock-tick': {
+				'0%': { transform: 'rotate(0deg)' },
+				'10%': { transform: 'rotate(30deg)' },
+				'10.5%': { transform: 'rotate(30deg)' },
+				'20%': { transform: 'rotate(60deg)' },
+				'20.5%': { transform: 'rotate(60deg)' },
+				'30%': { transform: 'rotate(90deg)' },
+				'30.5%': { transform: 'rotate(90deg)' },
+				'40%': { transform: 'rotate(120deg)' },
+				'40.5%': { transform: 'rotate(120deg)' },
+				'50%': { transform: 'rotate(150deg)' },
+				'50.5%': { transform: 'rotate(150deg)' },
+				'60%': { transform: 'rotate(180deg)' },
+				'60.5%': { transform: 'rotate(180deg)' },
+				'70%': { transform: 'rotate(210deg)' },
+				'70.5%': { transform: 'rotate(210deg)' },
+				'80%': { transform: 'rotate(240deg)' },
+				'80.5%': { transform: 'rotate(240deg)' },
+				'90%': { transform: 'rotate(270deg)' },
+				'90.5%': { transform: 'rotate(270deg)' },
+				'100%': { transform: 'rotate(360deg)' }
 			}
 		},
 		animation: {
@@ -323,7 +345,8 @@ export default {
 			'float-3': 'float-3 6s ease-in-out infinite',
 			'border-glow': 'border-glow 3s linear infinite',
 			'purple-glow-pulse': 'purple-glow-pulse 3s ease-in-out infinite',
-			'purple-glow-pulse-intense': 'purple-glow-pulse-intense 3s ease-in-out infinite'
+			'purple-glow-pulse-intense': 'purple-glow-pulse-intense 3s ease-in-out infinite',
+			'clock-tick': 'clock-tick 12s steps(1) infinite'
 		}
   	}
   },
