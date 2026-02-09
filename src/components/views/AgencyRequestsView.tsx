@@ -1861,7 +1861,7 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-2">
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 lg:max-w-2xl overflow-x-auto scrollbar-hide">
+            <TabsList className="flex w-full overflow-x-auto scrollbar-hide lg:grid lg:grid-cols-4 lg:max-w-2xl">
               <TabsTrigger value="active" className="gap-2 relative">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
