@@ -183,7 +183,7 @@ export default function MediaBuying() {
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - dark background */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#3d3d3d]/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-[#3d3d3d]/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -238,7 +238,7 @@ export default function MediaBuying() {
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Spacer */}
-      <div className="h-16" />
+      <div className="h-[92px]" />
 
       {/* Sub-header - Sticky dark */}
       <div className={`sticky z-40 bg-[#3d3d3d]/90 backdrop-blur-sm border-b border-[#4d4d4d] transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>

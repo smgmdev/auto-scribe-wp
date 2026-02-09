@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
+      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
@@ -75,7 +75,7 @@ const PrivacyPolicy = () => {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Content */}
-      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-28">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-[140px]">
         {/* Title Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
