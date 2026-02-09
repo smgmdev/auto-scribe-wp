@@ -13,8 +13,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
-import { ChatListPanel } from '@/components/ui/ChatListPanel';
-import { GlobalChatDialog } from '@/components/chat/GlobalChatDialog';
 import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCarousel';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
@@ -934,13 +932,7 @@ const Landing = () => {
 
     {/* WebView Dialog removed - using direct _blank links */}
 
-    {/* Global Chat Components for logged-in users */}
-    {user && (
-      <>
-        <ChatListPanel />
-        <GlobalChatDialog />
-      </>
-    )}
+    {/* Chat components are rendered globally in App.tsx via MessagingWidget */}
   </>
   );
 };
