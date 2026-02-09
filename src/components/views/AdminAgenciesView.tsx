@@ -1679,6 +1679,19 @@ export function AdminAgenciesView() {
                     </p>
                   </div>
                 )}
+                {(() => {
+                  const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
+                  const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
+                  if (verification?.submitted_at) {
+                    return (
+                      <div>
+                        <p className="text-muted-foreground">Submitted for Final Verification</p>
+                        <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               {/* Contact & Basic Info */}
