@@ -339,6 +339,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const localPositionRef = useRef(localPosition);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -446,16 +447,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
-      const newPos = {
-        x: dragStartRef.current.posX + deltaX,
-        y: dragStartRef.current.posY + deltaY
-      };
-      setLocalPosition(newPos);
-      localPositionRef.current = newPos;
+      const newX = dragStartRef.current.posX + deltaX;
+      const newY = dragStartRef.current.posY + deltaY;
+      localPositionRef.current = { x: newX, y: newY };
+      // Direct DOM update - bypasses React render cycle for smooth dragging
+      if (chatWindowRef.current) {
+        chatWindowRef.current.style.left = `${newX}px`;
+        chatWindowRef.current.style.top = `${newY}px`;
+      }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      // Sync React state with final position
+      setLocalPosition(localPositionRef.current);
       updateChatPosition(globalChatRequest.id, localPositionRef.current);
     };
 
@@ -4798,6 +4803,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     <>
       {/* Floating Chat Window */}
       <div
+        ref={chatWindowRef}
         data-chat-window
         data-chat-id={globalChatRequest.id}
         className={`fixed bg-background shadow-2xl shadow-black/25 flex flex-col ${
