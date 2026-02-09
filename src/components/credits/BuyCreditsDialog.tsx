@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [creditAmount, setCreditAmount] = useState<string>('10');
   const [purchasing, setPurchasing] = useState(false);
   const { refreshCredits } = useAuth();
+  const isMobile = useIsMobile();
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -139,18 +141,22 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className="pointer-events-auto w-full max-w-md border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg relative"
-        style={{
-          transform: `translate(${position.x}px, ${position.y}px)`,
-        }}
+        className={`pointer-events-auto bg-background relative overflow-y-auto ${
+          isMobile
+            ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
+            : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+        }`}
+        style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag Handle */}
-        <div
-          className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-          onMouseDown={handleDragStart}
-        >
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-        </div>
+        {/* Drag Handle - desktop only */}
+        {!isMobile && (
+          <div
+            className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+            onMouseDown={handleDragStart}
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
 
         {/* Close Button */}
         <button
