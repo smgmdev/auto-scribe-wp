@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
-import { Loader2, ExternalLink } from 'lucide-react';
+import { Loader2, ExternalLink, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -205,13 +205,16 @@ export function AgencyDetailsDialog({
           </Button>
           {!isAuthenticated && (
             <Button 
-              className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-foreground/90 transition-colors"
+              className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-auto px-3 border border-transparent hover:border-black"
               onClick={() => {
                 handleClose();
                 navigate('/auth');
               }}
             >
-              Sign In to View Details
+              <span>Sign In to View Details</span>
+              <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                <ArrowRight className="h-4 w-4 shrink-0" />
+              </span>
             </Button>
           )}
         </div>
