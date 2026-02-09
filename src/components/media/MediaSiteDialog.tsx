@@ -76,22 +76,16 @@ export function MediaSiteDialog({
     }
   }, [open]);
 
-  // Lock scroll when popup is open (both mobile and desktop)
+  // On mobile, lock body scroll completely when popup is open
   useEffect(() => {
-    if (!open) return;
+    if (!open || !isMobile) return;
     
-    // Lock body scroll
     const scrollY = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.style.overflow = 'hidden';
-
-    // Also lock any overflow-y-auto main containers (e.g. MainLayout <main>)
-    const mainEl = document.querySelector('main');
-    const prevOverflow = mainEl?.style.overflow;
-    if (mainEl) mainEl.style.overflow = 'hidden';
 
     return () => {
       document.body.style.position = '';
@@ -100,9 +94,25 @@ export function MediaSiteDialog({
       document.body.style.right = '';
       document.body.style.overflow = '';
       window.scrollTo(0, scrollY);
-      if (mainEl) mainEl.style.overflow = prevOverflow || '';
     };
-  }, [open]);
+  }, [open, isMobile]);
+
+  // On desktop, block page scroll only when hovering over popup
+  const [popupHovered, setPopupHovered] = useState(false);
+
+  useEffect(() => {
+    if (!open || isMobile || !popupHovered) return;
+
+    const mainEl = document.querySelector('main');
+    const prevOverflow = mainEl?.style.overflow;
+    if (mainEl) mainEl.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      if (mainEl) mainEl.style.overflow = prevOverflow || '';
+      document.body.style.overflow = '';
+    };
+  }, [open, isMobile, popupHovered]);
 
   // Check for open engagement when dialog opens
   useEffect(() => {
@@ -455,7 +465,8 @@ export function MediaSiteDialog({
           top: `${positionRef.current.y}px`,
           willChange: isDragging ? 'left, top' : 'auto',
         }}
-        onWheel={(e) => e.stopPropagation()}
+        onMouseEnter={() => setPopupHovered(true)}
+        onMouseLeave={() => setPopupHovered(false)}
       >
         <div 
           className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
