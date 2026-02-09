@@ -841,12 +841,7 @@ export function AdminAgenciesView() {
                   onClick={() => handleOpenApplication(app)}
                 >
                     <CardContent className="p-4">
-                    <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                      <div className="absolute top-0 right-0 md:hidden">
-                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
-                          <Clock className="h-3 w-3 mr-1" />Pending
-                        </Badge>
-                      </div>
+                    <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-4">
                         {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                           <img 
@@ -876,22 +871,27 @@ export function AdminAgenciesView() {
                             <Clock className="h-5 w-5 text-yellow-500" />
                           </div>
                         )}
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <h3 className="font-medium">{app.agency_name}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                         </div>
+                        <div className="hidden md:flex flex-col items-end text-right gap-1">
+                          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
+                            <Clock className="h-3 w-3 mr-1" />Pending
+                          </Badge>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
                       </div>
-                      <div className="hidden md:flex flex-col items-end text-right gap-1">
+                      <div className="flex items-center justify-between md:hidden">
+                        <p className="text-xs text-muted-foreground">
+                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                        </p>
                         <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground md:hidden">
-                        Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                      </p>
                     </div>
                   </CardContent>
                 </Card>
