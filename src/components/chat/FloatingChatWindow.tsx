@@ -83,36 +83,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest.order]);
 
-  // Lock scroll when chat is open
+  // Lock scroll when chat is open (mobile & desktop)
   useEffect(() => {
-    // Lock body scroll on mobile
-    if (isMobile) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.overflow = 'hidden';
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
 
-      return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
-      };
-    }
-
-    // On desktop, lock the main scroll container
+    // Also lock any overflow-y-auto main containers (e.g. MainLayout <main>)
     const mainEl = document.querySelector('main');
-    const prevOverflow = mainEl?.style.overflow;
+    const prevMainOverflow = mainEl?.style.overflow;
     if (mainEl) mainEl.style.overflow = 'hidden';
 
     return () => {
-      if (mainEl) mainEl.style.overflow = prevOverflow || '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+      if (mainEl) mainEl.style.overflow = prevMainOverflow || '';
     };
-  }, [isMobile]);
+  }, []);
 
   // Fetch order data on mount - ALWAYS fetch fresh data to ensure delivery_status is current
   useEffect(() => {
