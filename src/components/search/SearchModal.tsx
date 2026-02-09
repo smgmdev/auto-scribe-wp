@@ -292,9 +292,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           
           {/* Search Container */}
           <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-4 px-4 pointer-events-none">
-            <div className="w-full max-w-3xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-3xl pointer-events-auto rounded-none" onClick={(e) => e.stopPropagation()}>
               {/* Search Input Bar */}
-              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border shadow-xl">
+              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border shadow-xl rounded-none">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <input
                   type="text"
@@ -321,7 +321,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               </div>
 
               {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col">
+              <div className="bg-card border border-t-0 border-border shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
                 {/* Category Tabs */}
                 <div className="border-b border-border flex-shrink-0">
                   <div className="flex gap-6 px-4">
