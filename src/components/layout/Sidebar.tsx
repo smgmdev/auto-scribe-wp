@@ -1477,6 +1477,12 @@ export function Sidebar({
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
                 Account Settings
               </Button>
+              {isAdmin && (
+                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent")} onClick={() => navigate('/system-status')}>
+                  <Cog className="h-5 w-5" />
+                  System
+                </Button>
+              )}
               <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={() => {
                 navigate('/');
                 signOut();
