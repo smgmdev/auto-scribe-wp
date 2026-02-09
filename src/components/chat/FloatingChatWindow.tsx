@@ -7319,8 +7319,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   onClick={() => setConfirmBuyCreditsOpen(true)}
                   variant="default"
-                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
-                  size="lg"
+                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 text-sm"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
                   Buy Credits
@@ -7331,7 +7330,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-colors"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-colors text-sm"
                   onClick={() => {
                     setAcceptOrderDialogOpen(false);
                     setPendingOrderRequest(null);
@@ -7341,7 +7340,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200"
+                  className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200 text-sm"
                   disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
                   onClick={async () => {
                     if (!pendingOrderRequest || !globalChatRequest) return;
