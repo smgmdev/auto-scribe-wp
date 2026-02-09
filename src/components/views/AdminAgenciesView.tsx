@@ -1771,15 +1771,33 @@ export function AdminAgenciesView() {
                   return (
                     <>
                       {/* 2. Pre-Approved Date */}
-                      {((selectedApp as any).pre_approved_at || (selectedApp.reviewed_at && (selectedApp.status === 'approved' || selectedApp.status === 'cancelled' || !!verification))) && (
+                      {(selectedApp as any).pre_approved_at && (
                         <div>
                           <p className="text-muted-foreground">Pre-Approved Date</p>
                           <p className="font-medium">
-                            {format(new Date((selectedApp as any).pre_approved_at || selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
+                            {format(new Date((selectedApp as any).pre_approved_at), 'MMM d, yyyy h:mm a')}
                           </p>
                         </div>
                       )}
-                      {/* Direct Rejection Date (no verification involved) */}
+                      {/* 3. Final Submission Date (verification submitted after pre-approval) */}
+                      {verification?.submitted_at && (
+                        <div>
+                          <p className="text-muted-foreground">Final Submission Date</p>
+                          <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
+                        </div>
+                      )}
+                      {/* 4a. Verification Rejection / Approval Date */}
+                      {verification?.reviewed_at && (
+                        <div>
+                          <p className="text-muted-foreground">
+                            {verification.status === 'rejected' ? 'Verification Rejected Date' : 'Verification Approved Date'}
+                          </p>
+                          <p className={`font-medium ${verification.status === 'rejected' ? 'text-red-500' : ''}`}>
+                            {format(new Date(verification.reviewed_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      )}
+                      {/* 4b. Direct Rejection Date (no verification involved) */}
                       {((selectedApp as any).rejected_at && !verification) && (
                         <div>
                           <p className="text-muted-foreground">Rejection Date</p>
