@@ -241,7 +241,8 @@ export default function MediaBuying() {
       <div className="h-[92px]" />
 
       {/* Sub-header - Sticky dark */}
-      <div className={`sticky z-40 bg-[#3d3d3d]/90 backdrop-blur-sm border-b border-[#4d4d4d] transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-[#3d3d3d]/90 backdrop-blur-sm border-b border-[#4d4d4d]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
           <span className="text-xl font-semibold text-white">Media Buying</span>
           <nav className="hidden md:flex items-center gap-6">
@@ -259,6 +260,7 @@ export default function MediaBuying() {
               Browse Global Media Library
             </Button>
           </nav>
+        </div>
         </div>
       </div>
 
