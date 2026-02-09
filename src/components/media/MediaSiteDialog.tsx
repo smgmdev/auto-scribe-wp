@@ -540,6 +540,7 @@ export function MediaSiteDialog({
         onOpenChange={setAgencyDetailsOpen}
         agencyName={selectedAgencyName}
         zIndex={250}
+        isAuthenticated={!!user}
       />
     </>,
     document.body
