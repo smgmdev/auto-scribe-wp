@@ -405,7 +405,7 @@ export function Sidebar({
       // Regular user: fetch application data from DB
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, status, rejection_seen, payout_method')
+        .select('id, status, rejection_seen, payout_method, pre_approved_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -613,14 +613,25 @@ export function Sidebar({
       if (payoutMethodToCheck === 'custom') {
         const { data: verificationData } = await supabase
           .from('agency_custom_verifications')
-          .select('status')
+          .select('status, submitted_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
         
         if (isMounted && verificationData) {
-          setUserCustomVerificationStatus(verificationData.status);
+          // Only use verification if it belongs to the current approval cycle
+          const preApprovedAt = (appData as any)?.pre_approved_at ? new Date((appData as any).pre_approved_at).getTime() : null;
+          if (preApprovedAt && verificationData.submitted_at) {
+            const submittedAt = new Date(verificationData.submitted_at).getTime();
+            if (submittedAt > preApprovedAt) {
+              setUserCustomVerificationStatus(verificationData.status);
+            } else {
+              setUserCustomVerificationStatus(null);
+            }
+          } else {
+            setUserCustomVerificationStatus(verificationData.status);
+          }
         }
       }
       
