@@ -250,6 +250,7 @@ const ScrollColorSection = ({
     >
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div 
+          id="media-libraries-section"
           ref={coralCardRef}
           className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
         >
@@ -878,7 +879,7 @@ const HowItWorks = () => {
           
           <div className="text-center mt-12">
             <Button 
-              onClick={handleGetStarted}
+              onClick={() => document.getElementById('media-libraries-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
             >
               Next
