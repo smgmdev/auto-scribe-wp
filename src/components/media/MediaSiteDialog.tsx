@@ -76,6 +76,16 @@ export function MediaSiteDialog({
     }
   }, [open]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onOpenChange]);
+
   // On mobile, lock body scroll completely when popup is open
   useEffect(() => {
     if (!open || !isMobile) return;
