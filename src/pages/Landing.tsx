@@ -564,8 +564,12 @@ const Landing = () => {
   return (
     <>
     <div className="min-h-screen bg-[#fafafa]">
+      {/* Top Banner */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black text-white text-center text-xs py-1.5 tracking-wide">
+        Global search: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> · Close any popup: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd>
+      </div>
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
+      <header className="fixed top-[30px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
@@ -786,7 +790,7 @@ const Landing = () => {
       )}
 
       {/* Main content */}
-      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-24">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-[7.5rem]">
         {loading ? (
           <div className="space-y-10">
             {[...Array(3)].map((_, i) => (
