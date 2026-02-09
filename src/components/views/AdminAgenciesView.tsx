@@ -1737,9 +1737,9 @@ export function AdminAgenciesView() {
               if (verification?.submitted_at) {
                 return (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className="rounded-none text-xs w-full border-black/20"
+                    className="rounded-none w-full"
                     style={{ backgroundColor: '#f2a547', color: '#000' }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
@@ -1748,7 +1748,6 @@ export function AdminAgenciesView() {
                       handleOpenVerification(verification);
                     }}
                   >
-                    <FileText className="h-3 w-3 mr-1" />
                     View Verification
                   </Button>
                 );
