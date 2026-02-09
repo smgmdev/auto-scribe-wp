@@ -7111,14 +7111,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Website</p>
                 <a 
-                  href={globalChatRequest.media_site.link}
+                  href={globalChatRequest.media_site.link.startsWith('http') ? globalChatRequest.media_site.link : `https://${globalChatRequest.media_site.link}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent hover:underline flex items-center gap-1"
                 >
                   {(() => {
                     try {
-                      return new URL(globalChatRequest.media_site.link).hostname.replace('www.', '');
+                      const url = globalChatRequest.media_site.link.startsWith('http') 
+                        ? globalChatRequest.media_site.link 
+                        : `https://${globalChatRequest.media_site.link}`;
+                      return new URL(url).hostname.replace('www.', '');
                     } catch {
                       return globalChatRequest.media_site.link;
                     }
