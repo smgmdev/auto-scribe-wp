@@ -346,12 +346,7 @@ export function AgencyApplicationView() {
           </p>
         </div>
 
-        <div className="relative w-full overflow-hidden rounded-none -mt-4 -mb-4">
-          <img 
-            src={agencyDowngradedBanner} 
-            alt="Account downgraded" 
-            className="w-full h-[520px] object-cover"
-          />
+        <div className="relative w-full overflow-hidden rounded-none -mt-4 -mb-4 bg-[#1d1d1f] h-[520px]">
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-4">
             <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
               <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center gap-3">
