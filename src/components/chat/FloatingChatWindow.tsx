@@ -7179,7 +7179,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3 mt-2">
             <Button 
               variant="outline"
               onClick={() => setMediaListingOpen(false)}
