@@ -313,18 +313,18 @@ export function BriefSubmissionDialog({
 
             <div className="flex flex-col gap-3 pt-2">
               <Button 
-                className="w-full bg-foreground text-background hover:bg-foreground/80 transition-colors"
+                className="w-full rounded-none bg-foreground text-background hover:bg-foreground/80 transition-colors"
                 onClick={handleSubmit} 
                 disabled={isSubmitting || !description.trim()}
               >
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 Send Brief
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => { onOpenChange(false); onBack?.(); }} 
                 disabled={isSubmitting}
-                className="w-full hover:bg-foreground hover:text-background transition-all duration-200 group"
+                className="w-full rounded-none hover:bg-foreground hover:text-background transition-all duration-200 group"
               >
                 <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
                   <ArrowLeft className="h-4 w-4 shrink-0" />
