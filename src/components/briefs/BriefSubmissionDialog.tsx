@@ -416,7 +416,7 @@ export function BriefSubmissionDialog({
                       ) : (
                         <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                       )}
-                      <span className="text-xs sm:text-sm flex-1 truncate">{file.name}</span>
+                      <span className="text-xs sm:text-sm flex-1 truncate">{isImageFile(file.name) ? `image.${file.name.split('.').pop()?.toLowerCase()}` : `file.${file.name.split('.').pop()?.toLowerCase()}`}</span>
                       <span className="text-xs text-muted-foreground shrink-0">
                         {(file.size / 1024).toFixed(0)}KB
                       </span>
@@ -439,7 +439,7 @@ export function BriefSubmissionDialog({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -447,12 +447,12 @@ export function BriefSubmissionDialog({
                 onBack?.();
               }} 
               disabled={isSubmitting}
-              className="flex-1 sm:flex-none hover:bg-foreground hover:text-background transition-all duration-200"
+              className="w-full sm:w-auto sm:flex-none hover:bg-foreground hover:text-background transition-all duration-200 order-2 sm:order-1"
             >
               Back
             </Button>
             <Button 
-              className="flex-1 sm:flex-none bg-foreground text-background hover:bg-foreground/80 transition-colors"
+              className="w-full sm:w-auto sm:flex-none bg-foreground text-background hover:bg-foreground/80 transition-colors order-1 sm:order-2"
               onClick={handleSubmit} 
               disabled={isSubmitting || !description.trim()}
             >
