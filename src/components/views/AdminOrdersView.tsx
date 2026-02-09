@@ -1016,8 +1016,8 @@ export function AdminOrdersView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none">
-          <TabsTrigger value="pending" className="relative flex-1">
+        <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none bg-black p-0">
+          <TabsTrigger value="pending" className="relative flex-1 rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Active Orders ({pendingCount})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
@@ -1025,7 +1025,7 @@ export function AdminOrdersView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="disputes" className="relative flex-1">
+          <TabsTrigger value="disputes" className="relative flex-1 rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Open Disputes ({disputesCount})
             {unreadDisputesCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
@@ -1033,10 +1033,10 @@ export function AdminOrdersView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="completed" className="flex-1">
+          <TabsTrigger value="completed" className="flex-1 rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Completed ({completedCount})
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex-1">
+          <TabsTrigger value="history" className="flex-1 rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Order History ({allOrdersCount})
           </TabsTrigger>
         </TabsList>
