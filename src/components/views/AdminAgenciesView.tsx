@@ -1327,7 +1327,7 @@ export function AdminAgenciesView() {
                                       {verification.country}
                                     </p>
                                     <Badge 
-                                      className={`md:hidden cursor-pointer transition-colors flex-shrink-0 ${
+                                      className={`md:hidden cursor-pointer transition-colors flex-shrink-0 rounded-none ${
                                         verification?.read 
                                           ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
                                           : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
@@ -1347,7 +1347,7 @@ export function AdminAgenciesView() {
 
                             <div className="hidden md:flex items-center">
                               <Badge 
-                                className={`cursor-pointer transition-colors ${
+                                className={`cursor-pointer transition-colors rounded-none ${
                                   verification?.read 
                                     ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
                                     : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
