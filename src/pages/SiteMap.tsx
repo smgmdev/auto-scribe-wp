@@ -11,10 +11,10 @@ const SITEMAP_SECTIONS = [
   {
     title: 'About Arcana Mace',
     links: [
-      { label: 'About', href: '#' },
-      { label: 'Help Center', href: '#' },
-      { label: 'Press & News', href: '#' },
-      { label: 'Contact Us', href: '#' },
+      { label: 'About', href: '/about' },
+      { label: 'Help Center', href: '/help' },
+      { label: 'Newsroom', href: '/press' },
+      { label: 'System Status', href: '/system-status' },
     ],
   },
   {
@@ -22,15 +22,15 @@ const SITEMAP_SECTIONS = [
     links: [
       { label: 'How Arcana Mace Works', href: '/how-it-works' },
       { label: 'Self Publishing', href: '/self-publishing' },
-      { label: 'Media Buying', href: '#' },
-      { label: 'AI Article Generation', href: '#' },
+      { label: 'Media Buying', href: '/media-buying' },
+      { label: 'AI Article Generation', href: '/ai-article-generation' },
     ],
   },
   {
     title: 'For Business',
     links: [
-      { label: 'Become an Agency', href: '#' },
-      { label: 'Agency Portal', href: '/agency' },
+      { label: 'Become an Agency', href: '/dashboard', state: { targetView: 'agency-application' } },
+      { label: 'Agency Portal', href: '/dashboard', state: { targetView: 'my-agency' } },
     ],
   },
   {
@@ -51,6 +51,20 @@ const SITEMAP_SECTIONS = [
       { label: 'Politics and Economy', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Politics and Economy' } },
       { label: 'MENA', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'MENA' } },
       { label: 'China', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'China' } },
+    ],
+  },
+  {
+    title: 'Help Center',
+    links: [
+      { label: 'Getting Started', href: '/help/getting-started' },
+      { label: 'Your Account', href: '/help/your-account' },
+      { label: 'Credits & Pricing', href: '/help/credits-pricing' },
+      { label: 'Publishing Articles', href: '/help/publishing-articles' },
+      { label: 'Media Buying', href: '/help/media-buying' },
+      { label: 'Orders & Delivery', href: '/help/orders-delivery' },
+      { label: 'For Agencies', href: '/help/for-agencies' },
+      { label: 'AI Generation', href: '/help/ai-generation' },
+      { label: 'Troubleshooting', href: '/help/troubleshooting' },
     ],
   },
   {
