@@ -388,7 +388,7 @@ export function AgencyApplicationView() {
 
     // Show custom verification form
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-8 animate-fade-in bg-white -m-4 lg:-m-8 p-4 lg:p-8 min-h-[calc(100vh-56px)] lg:min-h-screen">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Agency Verification
