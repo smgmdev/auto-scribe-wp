@@ -594,10 +594,12 @@ export function AgencyApplicationView() {
                           {existingApplication.agency_website.replace(/^https?:\/\//, '')}
                         </button>
                       </div>
-                      <div>
-                        <p className="text-white/50 mb-1">Media Channels</p>
-                        <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
-                      </div>
+                      {existingApplication.agency_description && (
+                        <div>
+                          <p className="text-white/50 mb-1">Description</p>
+                          <p className="text-white font-medium">{existingApplication.agency_description}</p>
+                        </div>
+                      )}
                       {existingApplication.wp_blog_url && (
                         <div>
                           <p className="text-white/50 mb-1">WordPress Blog</p>
@@ -624,12 +626,10 @@ export function AgencyApplicationView() {
                           </div>
                         </div>
                       )}
-                      {existingApplication.agency_description && (
-                        <div className="lg:col-span-2">
-                          <p className="text-white/50 mb-1">Description</p>
-                          <p className="text-white font-medium text-xs">{existingApplication.agency_description}</p>
-                        </div>
-                      )}
+                      <div className="lg:col-span-2">
+                        <p className="text-white/50 mb-1">Media Channels</p>
+                        <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
+                      </div>
                     </div>
                     
                     {/* Action buttons */}
