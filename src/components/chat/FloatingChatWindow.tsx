@@ -4365,7 +4365,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-4 ${
+          <div className={`rounded-none border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
