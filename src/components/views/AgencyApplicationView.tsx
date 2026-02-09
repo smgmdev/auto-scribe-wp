@@ -702,7 +702,7 @@ export function AgencyApplicationView() {
             />
           </div>
 
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-10 pb-8 space-y-8">
           <ExploreNetworkGrid dark />
         </div>
 
