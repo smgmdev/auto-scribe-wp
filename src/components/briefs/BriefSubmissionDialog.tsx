@@ -311,7 +311,7 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg z-[200] max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Send Your Brief</DialogTitle>
           <DialogDescription>
@@ -319,6 +319,7 @@ export function BriefSubmissionDialog({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="flex-1 overflow-y-auto pr-1">
         {mediaSite && (
           <div className="flex items-center gap-3 p-3 bg-muted rounded-lg mb-4">
             {mediaSite.favicon && (
@@ -404,7 +405,7 @@ export function BriefSubmissionDialog({
             )}
           </div>
         </div>
-
+        </div>
         <div className="flex justify-between gap-3 mt-4">
           <Button 
             variant="outline" 
