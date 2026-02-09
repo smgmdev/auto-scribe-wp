@@ -5644,7 +5644,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="flex items-center gap-1 cursor-help">
-                        Order Info
+                        Order Information
                         <Info className="h-3 w-3" />
                       </span>
                     </TooltipTrigger>
