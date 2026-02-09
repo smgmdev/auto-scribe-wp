@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import agencyVerificationBanner from '@/assets/agency-verification-banner.jpg';
 import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock, UserMinus } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
@@ -392,6 +393,14 @@ export function AgencyApplicationView() {
           <p className="text-sm text-muted-foreground text-center">
             We'll notify you by email with updates. This process usually takes 1–3 business days.
           </p>
+
+          <div className="w-full overflow-hidden rounded-none">
+            <img 
+              src={agencyVerificationBanner} 
+              alt="Agency verification in progress" 
+              className="w-full h-auto object-cover"
+            />
+          </div>
 
           <AgencyFAQ />
           </div>
