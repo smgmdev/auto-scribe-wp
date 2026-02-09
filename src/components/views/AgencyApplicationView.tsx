@@ -506,7 +506,7 @@ export function AgencyApplicationView() {
 
         {/* Content Section - overlaps the sticky video, then pushes it out of view */}
         <div 
-          className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-8 pb-8 lg:pb-12" 
+          className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-24 pb-8 lg:pb-12" 
           style={{ zIndex: 1 }}
         >
         
