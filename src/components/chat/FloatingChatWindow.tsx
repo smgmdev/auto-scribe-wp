@@ -7269,7 +7269,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative overflow-y-auto ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
+                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
                 : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg'
             }`}
             style={isMobile ? undefined : { transform: `translate(${confirmOrderPos.x}px, ${confirmOrderPos.y}px)` }}
@@ -7284,20 +7284,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
 
-            {/* Close Button */}
-            <button
-              onClick={() => { setAcceptOrderDialogOpen(false); setPendingOrderRequest(null); }}
-              className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-
-            <div className="flex flex-col space-y-1.5 text-left">
+            {/* Header with title and close button aligned */}
+            <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 Confirm Order
               </h2>
+              <button
+                onClick={() => { setAcceptOrderDialogOpen(false); setPendingOrderRequest(null); }}
+                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
             </div>
 
             {pendingOrderRequest && (
