@@ -483,42 +483,6 @@ export function AgencyApplicationView() {
                 >
                   {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
                 </Button>
-                
-                {/* Application Summary - shown under the button when pending */}
-                {existingApplication?.status === 'pending' && (
-                  <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-white">Your Application</h3>
-                      <Badge className="bg-white/20 text-white border-0 text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <p className="text-white/50">Agency</p>
-                        <p className="text-white font-medium">{existingApplication.agency_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50">Country</p>
-                        <p className="text-white font-medium">{existingApplication.country}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50">Submitted</p>
-                        <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50">Website</p>
-                        <button 
-                          onClick={() => setWebViewUrl(existingApplication.agency_website)} 
-                          className="text-white font-medium hover:underline truncate max-w-[120px] text-left"
-                        >
-                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -526,6 +490,44 @@ export function AgencyApplicationView() {
 
         {/* Content Section - overlaps the sticky video, then pushes it out of view */}
         <div className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-8 pb-8 lg:pb-12" style={{ zIndex: 1 }}>
+        
+        {/* Application Summary Bar - shown at the top of the dark section when pending */}
+        {existingApplication?.status === 'pending' && (
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-white">Your Application</h3>
+                <Badge className="bg-white/20 text-white border-0 text-xs">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Pending
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div>
+                  <p className="text-white/50">Agency</p>
+                  <p className="text-white font-medium">{existingApplication.agency_name}</p>
+                </div>
+                <div>
+                  <p className="text-white/50">Country</p>
+                  <p className="text-white font-medium">{existingApplication.country}</p>
+                </div>
+                <div>
+                  <p className="text-white/50">Submitted</p>
+                  <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                </div>
+                <div>
+                  <p className="text-white/50">Website</p>
+                  <button 
+                    onClick={() => setWebViewUrl(existingApplication.agency_website)} 
+                    className="text-white font-medium hover:underline truncate max-w-full text-left"
+                  >
+                    {existingApplication.agency_website.replace(/^https?:\/\//, '')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 space-y-8">
         <ExploreNetworkGrid dark />
