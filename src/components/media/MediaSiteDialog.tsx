@@ -432,10 +432,7 @@ export function MediaSiteDialog({
           className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
-          <div className="flex items-center gap-2">
-            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-sm">{mediaSite.name}</span>
-          </div>
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
           <Button
             variant="ghost"
             size="icon"
