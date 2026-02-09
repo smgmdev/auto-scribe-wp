@@ -365,7 +365,7 @@ export function AgencyApplicationView() {
               Agency Verification
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Your verification is under review
+              Your agency verification is under final review.
             </p>
           </div>
 
