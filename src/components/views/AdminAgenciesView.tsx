@@ -11,8 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -233,11 +232,11 @@ export function AdminAgenciesView() {
         .eq('status', 'rejected');
       setHiddenRejectedCount(hiddenRejected || 0);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setLoading(false);
       if (isRefresh) {
-        sonnerToast.success('Agencies refreshed');
+        toast.success('Agencies refreshed');
       }
       setIsRefreshing(false);
     }
@@ -344,11 +343,7 @@ export function AdminAgenciesView() {
 
       if (status === 'approved') {
         // Show immediate pre-approval notification
-        toast({
-          title: 'Application Pre-Approved',
-          description: 'Processing agency setup...',
-          className: 'bg-blue-600 text-white border-blue-600'
-        });
+        toast('Application Pre-Approved: Processing agency setup...');
 
         // Automatically migrate logo to public bucket if exists
         if (selectedApp.logo_url) {
@@ -371,11 +366,7 @@ export function AdminAgenciesView() {
         if (response.error) throw new Error(response.error.message);
         if (response.data?.error) throw new Error(response.data.error);
 
-        toast({
-          title: 'Application Pre-Approved',
-          description: 'Custom verification email sent to agency.',
-          className: 'bg-green-600 text-white border-green-600'
-        });
+        toast.success('Application Pre-Approved: Custom verification email sent to agency.');
       }
 
       if (status === 'rejected') {
@@ -388,17 +379,14 @@ export function AdminAgenciesView() {
           }
         }).catch(err => console.error('Failed to send rejection email:', err));
 
-        toast({
-          title: 'Application Rejected',
-          description: 'The applicant has been notified.'
-        });
+        toast.success('Application Rejected: The applicant has been notified.');
       }
 
       setSelectedApp(null);
       setAdminNotes('');
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
@@ -431,15 +419,12 @@ export function AdminAgenciesView() {
         });
       }
 
-      toast({
-        title: 'Agency downgraded',
-        description: `${agencyToDowngrade.agency_name} has been downgraded to a regular user account.`
-      });
+      toast.success(`Agency downgraded: ${agencyToDowngrade.agency_name} has been downgraded to a regular user account.`);
       setShowDowngradeDialog(false);
       setAgencyToDowngrade(null);
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setDeleting(null);
     }
@@ -470,13 +455,10 @@ export function AdminAgenciesView() {
         });
       }
 
-      toast({
-        title: 'Agency restored',
-        description: `${agency.agency_name} has been restored as an active agency.`
-      });
+      toast.success(`Agency restored: ${agency.agency_name} has been restored as an active agency.`);
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setDeleting(null);
     }
@@ -498,11 +480,7 @@ export function AdminAgenciesView() {
     
     const percentage = parseFloat(newCommissionPercentage);
     if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid percentage',
-        description: 'Please enter a valid percentage between 0 and 100'
-      });
+      toast.error('Invalid percentage: Please enter a valid percentage between 0 and 100');
       return;
     }
 
@@ -515,16 +493,13 @@ export function AdminAgenciesView() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Commission updated',
-        description: `${agencyToEditCommission.agency_name}'s commission has been updated to ${percentage}%`
-      });
+      toast.success(`Commission updated: ${agencyToEditCommission.agency_name}'s commission is now ${percentage}%`);
       
       setShowCommissionDialog(false);
       setAgencyToEditCommission(null);
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setUpdatingCommission(false);
     }
@@ -655,17 +630,13 @@ export function AdminAgenciesView() {
         }).catch(err => console.error('Failed to send onboarding email:', err));
       }
       
-      toast({
-        title: 'Agency Onboarded',
-        description: 'Custom verification approved and agency is now active.',
-        className: 'bg-green-600 text-white border-green-600'
-      });
+      toast.success('Agency Onboarded: Custom verification approved and agency is now active.');
       
       setSelectedVerification(null);
       setVerificationDocUrls({});
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setProcessingVerification(false);
     }
@@ -720,10 +691,7 @@ export function AdminAgenciesView() {
         }
       }
       
-      toast({
-        title: 'Verification Rejected',
-        description: 'The agency has been notified of the rejection.',
-      });
+      toast.success('Verification Rejected: The agency has been notified of the rejection.');
       
       setSelectedVerification(null);
       setVerificationDocUrls({});
@@ -731,7 +699,7 @@ export function AdminAgenciesView() {
       setVerificationRejectionReason('');
       fetchData();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(`Error: ${error.message}`);
     } finally {
       setProcessingVerification(false);
     }
@@ -748,7 +716,7 @@ export function AdminAgenciesView() {
       // Auto-hide loading after 2 seconds as fallback
       setTimeout(() => setDocumentLoading(false), 2000);
     } else {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not load document' });
+      toast.error('Error: Could not load document');
     }
   };
 
@@ -1023,9 +991,9 @@ export function AdminAgenciesView() {
                                 .eq('hidden', false);
                               
                               if (error) {
-                                toast({ variant: 'destructive', title: 'Error', description: error.message });
+                                toast.error(`Error: ${error.message}`);
                               } else {
-                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                                toast.success('Removed from view');
                               }
                             }}
                           >
@@ -1050,7 +1018,7 @@ export function AdminAgenciesView() {
                       .select();
                     
                     if (error) {
-                      toast({ variant: 'destructive', title: 'Error', description: error.message });
+                      toast.error(`Error: ${error.message}`);
                       return;
                     }
                     
@@ -1060,10 +1028,10 @@ export function AdminAgenciesView() {
                         const newItems = data.filter(d => !existingIds.has(d.id));
                         return [...newItems, ...prev];
                       });
-                      toast({ title: 'Restored', description: `${data.length} cancelled application(s) restored` });
+                      toast.success(`${data.length} cancelled application(s) restored`);
                       setHiddenCancelledCount(0);
                     } else {
-                      toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
+                      toast('No hidden cancelled applications found');
                     }
                   }}
                   className="bg-[#f2a547] text-black hover:bg-black hover:text-[#f2a547] border border-[#f2a547] hover:border-black rounded-none"
@@ -1157,9 +1125,9 @@ export function AdminAgenciesView() {
                                 .eq('hidden', false);
                               
                               if (error) {
-                                toast({ variant: 'destructive', title: 'Error', description: error.message });
+                                toast.error(`Error: ${error.message}`);
                               } else {
-                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                                toast.success('Removed from view');
                               }
                             }}
                           >
@@ -1184,7 +1152,7 @@ export function AdminAgenciesView() {
                       .select();
                     
                     if (error) {
-                      toast({ variant: 'destructive', title: 'Error', description: error.message });
+                      toast.error(`Error: ${error.message}`);
                       return;
                     }
                     
@@ -1194,10 +1162,10 @@ export function AdminAgenciesView() {
                         const newItems = data.filter(d => !existingIds.has(d.id));
                         return [...newItems, ...prev];
                       });
-                      toast({ title: 'Restored', description: `${data.length} rejected application(s) restored` });
+                      toast.success(`${data.length} rejected application(s) restored`);
                       setHiddenRejectedCount(0);
                     } else {
-                      toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
+                      toast('No hidden rejected applications found');
                     }
                   }}
                   className="bg-[#f2a547] text-black hover:bg-black hover:text-[#f2a547] border border-[#f2a547] hover:border-black rounded-none"
@@ -1878,7 +1846,7 @@ export function AdminAgenciesView() {
                 <div>
                   <p className="text-muted-foreground">Email</p>
                   <button
-                    onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast({ title: 'Email copied' }); }}
+                    onClick={() => { navigator.clipboard.writeText(selectedApp.email); toast('Email copied'); }}
                     className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
                   >
                     {selectedApp.email}
@@ -1888,7 +1856,7 @@ export function AdminAgenciesView() {
                 <div>
                   <p className="text-muted-foreground">WhatsApp Phone</p>
                   <button
-                    onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast({ title: 'Phone copied' }); }}
+                    onClick={() => { navigator.clipboard.writeText(selectedApp.whatsapp_phone); toast('Phone copied'); }}
                     className="flex items-center gap-1 font-medium hover:text-primary cursor-pointer"
                   >
                     {selectedApp.whatsapp_phone}
@@ -2001,7 +1969,7 @@ export function AdminAgenciesView() {
                       className="w-full hover:bg-black hover:text-white"
                       onClick={() => {
                         if (!adminNotes.trim()) {
-                          toast({ variant: 'destructive', title: 'Reason required', description: 'Please provide a rejection reason' });
+                          toast.error('Reason required: Please provide a rejection reason');
                           return;
                         }
                         handleDecision('rejected');
@@ -2191,7 +2159,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.full_name) {
                           navigator.clipboard.writeText(selectedVerification.full_name);
-                          toast({ title: 'Copied', description: 'Full name copied to clipboard' });
+                          toast('Full name copied to clipboard');
                         }
                       }}
                     >
@@ -2208,7 +2176,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.email) {
                           navigator.clipboard.writeText(selectedVerification.email);
-                          toast({ title: 'Copied', description: 'Email copied to clipboard' });
+                          toast('Email copied to clipboard');
                         }
                       }}
                     >
@@ -2225,7 +2193,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.phone) {
                           navigator.clipboard.writeText(selectedVerification.phone);
-                          toast({ title: 'Copied', description: 'Phone copied to clipboard' });
+                          toast('Phone copied to clipboard');
                         }
                       }}
                     >
@@ -2263,7 +2231,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.company_name) {
                           navigator.clipboard.writeText(selectedVerification.company_name);
-                          toast({ title: 'Copied', description: 'Company name copied to clipboard' });
+                          toast('Company name copied to clipboard');
                         }
                       }}
                     >
@@ -2284,7 +2252,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.company_id) {
                           navigator.clipboard.writeText(selectedVerification.company_id);
-                          toast({ title: 'Copied', description: 'Company ID copied to clipboard' });
+                          toast('Company ID copied to clipboard');
                         }
                       }}
                     >
@@ -2301,7 +2269,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.tax_number) {
                           navigator.clipboard.writeText(selectedVerification.tax_number);
-                          toast({ title: 'Copied', description: 'Tax number copied to clipboard' });
+                          toast('Tax number copied to clipboard');
                         }
                       }}
                     >
@@ -2318,7 +2286,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.company_address) {
                           navigator.clipboard.writeText(selectedVerification.company_address);
-                          toast({ title: 'Copied', description: 'Company address copied to clipboard' });
+                          toast('Company address copied to clipboard');
                         }
                       }}
                     >
@@ -2393,7 +2361,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_account_holder) {
                           navigator.clipboard.writeText(selectedVerification.bank_account_holder);
-                          toast({ title: 'Copied', description: 'Beneficiary copied to clipboard' });
+                          toast('Beneficiary copied to clipboard');
                         }
                       }}
                     >
@@ -2410,7 +2378,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_account_number) {
                           navigator.clipboard.writeText(selectedVerification.bank_account_number);
-                          toast({ title: 'Copied', description: 'Account number copied to clipboard' });
+                          toast('Account number copied to clipboard');
                         }
                       }}
                     >
@@ -2427,7 +2395,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_iban) {
                           navigator.clipboard.writeText(selectedVerification.bank_iban);
-                          toast({ title: 'Copied', description: 'IBAN copied to clipboard' });
+                          toast('IBAN copied to clipboard');
                         }
                       }}
                     >
@@ -2444,7 +2412,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_swift_code) {
                           navigator.clipboard.writeText(selectedVerification.bank_swift_code);
-                          toast({ title: 'Copied', description: 'SWIFT code copied to clipboard' });
+                          toast('SWIFT code copied to clipboard');
                         }
                       }}
                     >
@@ -2461,7 +2429,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_name) {
                           navigator.clipboard.writeText(selectedVerification.bank_name);
-                          toast({ title: 'Copied', description: 'Bank name copied to clipboard' });
+                          toast('Bank name copied to clipboard');
                         }
                       }}
                     >
@@ -2478,7 +2446,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_country) {
                           navigator.clipboard.writeText(selectedVerification.bank_country);
-                          toast({ title: 'Copied', description: 'Bank country copied to clipboard' });
+                          toast('Bank country copied to clipboard');
                         }
                       }}
                     >
@@ -2495,7 +2463,7 @@ export function AdminAgenciesView() {
                       onClick={() => {
                         if (selectedVerification.bank_address) {
                           navigator.clipboard.writeText(selectedVerification.bank_address);
-                          toast({ title: 'Copied', description: 'Bank address copied to clipboard' });
+                          toast('Bank address copied to clipboard');
                         }
                       }}
                     >
@@ -2524,7 +2492,7 @@ export function AdminAgenciesView() {
                         onClick={() => {
                           if (selectedVerification.usdt_wallet_address) {
                             navigator.clipboard.writeText(selectedVerification.usdt_wallet_address);
-                            toast({ title: 'Copied', description: 'Wallet address copied to clipboard' });
+                            toast('Wallet address copied to clipboard');
                           }
                         }}
                       >

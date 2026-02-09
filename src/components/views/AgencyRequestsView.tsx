@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast as sonnerToast } from 'sonner';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { playMessageSound } from '@/lib/chat-presence';
@@ -434,10 +433,7 @@ export function AgencyRequestsView() {
           filter: `agency_payout_id=eq.${agencyPayoutId}`
         },
         () => {
-          toast({
-            title: 'New Service Request!',
-            description: 'A client has submitted a new brief.',
-          });
+          toast('New Service Request! A client has submitted a new brief.');
           fetchRequests();
         }
       )
@@ -532,10 +528,7 @@ export function AgencyRequestsView() {
           const isOrderPlaced = newMsg.message?.includes('[ORDER_PLACED]');
           if (isOrderPlaced) {
             // Show notification for new order
-            toast({
-              title: 'New Order Received!',
-              description: 'A client has placed an order.',
-            });
+            toast('New Order Received! A client has placed an order.');
             // Play sound
             playMessageSound();
             // Increment unread orders count
@@ -614,25 +607,15 @@ export function AgencyRequestsView() {
         const data = payload.payload as { action: string; message: string; mediaSiteName?: string };
         
         if (data.action === 'order-delivered') {
-          toast({
-            title: "Order Delivered",
-            description: data.message || `Order for ${data.mediaSiteName || 'a media site'} has been marked as delivered.`,
-          });
+          toast(`Order Delivered: ${data.message || `Order for ${data.mediaSiteName || 'a media site'} has been marked as delivered.`}`);
           // Increment the completed count for the notification badge
           incrementAgencyUnreadCompletedCount();
           fetchRequests();
         } else if (data.action === 'dispute-resolved') {
-          toast({
-            title: "Dispute Resolved",
-            description: data.message,
-          });
+          toast(`Dispute Resolved: ${data.message}`);
           fetchRequests();
         } else if (data.action === 'order-cancelled') {
-          toast({
-            title: "Order Cancelled",
-            description: data.message,
-            variant: "destructive",
-          });
+          toast.error(`Order Cancelled: ${data.message}`);
           fetchRequests();
         }
       })
@@ -647,11 +630,7 @@ export function AgencyRequestsView() {
         const data = payload.payload as { action: string; message: string; requestId?: string; reason?: string };
         
         if (data.action === 'engagement-cancelled') {
-          toast({
-            title: "Engagement Cancelled",
-            description: data.message || 'A client has cancelled their engagement.',
-            variant: "destructive",
-          });
+          toast.error(`Engagement Cancelled: ${data.message || 'A client has cancelled their engagement.'}`);
           fetchRequests();
         }
       })
@@ -677,10 +656,7 @@ export function AgencyRequestsView() {
           // Check if delivery_status changed to 'accepted' (client approved = completed)
           if (updatedOrder.delivery_status === 'accepted' && oldOrder.delivery_status !== 'accepted') {
             // Show toast notification only when client accepts
-            toast({
-              title: 'Order Completed! 🎉',
-              description: 'Client has accepted the delivery.',
-            });
+            toast.success('Order Completed! 🎉 Client has accepted the delivery.');
             // Increment the completed count
             incrementAgencyUnreadCompletedCount();
             // Refresh to get updated data
@@ -712,11 +688,7 @@ export function AgencyRequestsView() {
           // Check if this dispute is for one of our orders
           const isOurOrder = orders.some(o => o.id === newDispute.order_id);
           if (isOurOrder) {
-            toast({
-              title: 'Dispute Opened',
-              description: 'A client has opened a dispute on an order.',
-              variant: 'destructive',
-            });
+            toast.error('Dispute Opened: A client has opened a dispute on an order.');
             // Play sound
             playMessageSound();
             // Refresh to get updated data
