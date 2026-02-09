@@ -698,20 +698,6 @@ export function AgencyApplicationView() {
                           </div>
                         </div>
 
-                        {/* Timestamps */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
-                          <div>
-                            <p className="text-white/50 mb-1">Submitted</p>
-                            <p className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
-                          </div>
-                          {app.status === 'rejected' && app.reviewed_at && (
-                            <div>
-                              <p className="text-white/50 mb-1">Processed</p>
-                              <p className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
-                            </div>
-                          )}
-                        </div>
-
                         <div className="flex flex-wrap gap-2 pt-2">
                           <Button
                             size="sm"
@@ -769,6 +755,20 @@ export function AgencyApplicationView() {
                             <p className="text-xs text-white">{app.admin_notes}</p>
                           </div>
                         )}
+
+                        {/* Timestamps */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs pt-2 border-t border-white/10">
+                          <div>
+                            <p className="text-white/50 mb-1">Submitted</p>
+                            <p className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
+                          </div>
+                          {app.status === 'rejected' && app.reviewed_at && (
+                            <div>
+                              <p className="text-white/50 mb-1">Processed</p>
+                              <p className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </CollapsibleContent>
                   </div>
