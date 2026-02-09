@@ -397,7 +397,47 @@ export function AgencyApplicationView() {
           </div>
         </div>
 
-        <AgencyFAQ />
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 py-8">
+          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Why was my account downgraded?</h2>
+          <div className="divide-y divide-border">
+            {[
+              {
+                q: "What does it mean when my agency account is downgraded?",
+                a: "A downgrade reverts your account to a regular user account. You will no longer have access to agency-specific features such as receiving orders, managing media sites, or earning commissions."
+              },
+              {
+                q: "Why was my agency account downgraded?",
+                a: "Accounts may be downgraded for reasons including rule violations, inactivity, failure to complete verification, quality issues with delivered orders, or repeated disputes from clients."
+              },
+              {
+                q: "Can I get my agency account reinstated?",
+                a: "Yes. Contact our support team to discuss the reason for your downgrade. Depending on the circumstances, your account may be eligible for reinstatement after a review."
+              },
+              {
+                q: "What happens to my pending payouts and orders?",
+                a: "Any pending payouts will still be processed. Active orders at the time of downgrade will be handled by our team to ensure clients are not affected."
+              },
+              {
+                q: "Can I still use the platform as a regular user?",
+                a: "Absolutely. You retain full access to all standard user features including publishing articles, browsing the media network, and purchasing media placements."
+              },
+              {
+                q: "How do I avoid being downgraded in the future?",
+                a: "Maintain compliance with our agency guidelines, deliver orders on time and to quality standards, complete your verification promptly, and respond to client requests in a timely manner."
+              }
+            ].map((item, index) => (
+              <Collapsible key={index}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full py-4 text-left">
+                  <span className="text-base font-medium text-foreground">{item.q}</span>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pb-4 text-sm text-muted-foreground">
+                  {item.a}
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
+        </div>
         </div>
       </div>
     );
