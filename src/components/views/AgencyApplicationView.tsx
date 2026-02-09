@@ -543,8 +543,8 @@ export function AgencyApplicationView() {
 
             <AgencyFAQ dark />
 
-      {/* Show existing application status card */}
-      {existingApplication && (
+      {/* Show existing application status card - only for cancelled/rejected, not pending (shown in hero) */}
+      {existingApplication && existingApplication.status !== 'pending' && (
         <Card className={existingApplication.status === 'cancelled' ? 'border-red-500/30' : ''}>
 
           <CardHeader>
