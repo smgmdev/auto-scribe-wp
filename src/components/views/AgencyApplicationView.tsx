@@ -350,9 +350,20 @@ export function AgencyApplicationView() {
           <div className="flex flex-col items-center justify-center p-6 gap-4">
             <div className="w-full max-w-[700px] border border-red-500/30 bg-red-500/10 rounded-lg p-6">
               <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 shrink-0">
-                  <UserMinus className="h-6 w-6 text-red-500" />
-                </div>
+                {existingApplication?.logo_url ? (
+                  <img 
+                    src={existingApplication.logo_url.startsWith('http') 
+                      ? existingApplication.logo_url 
+                      : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
+                    } 
+                    alt={agencyPayout?.agency_name || 'Agency'}
+                    className="h-12 w-12 rounded-full object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 shrink-0">
+                    <UserMinus className="h-6 w-6 text-red-500" />
+                  </div>
+                )}
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-600">Account Downgraded</h3>
                   <p className="text-sm text-muted-foreground">
