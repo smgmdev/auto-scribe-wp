@@ -1725,29 +1725,31 @@ export function AdminAgenciesView() {
           </DialogHeader>
             {(() => {
               if (!selectedApp) return null;
-              const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
-              const verification = agencyPayout 
-                ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
-                : null;
-              if (verification?.submitted_at) {
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-none w-full"
-                    style={{ backgroundColor: '#f2a547', color: '#000' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
-                    onClick={() => {
-                      setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
-                      handleOpenVerification(verification);
-                    }}
-                  >
-                    View Verification
-                  </Button>
-                );
-              }
-              return null;
+              // Only show verification for apps that were pre-approved and have a verification submitted after pre-approval
+              if (!(selectedApp as any).pre_approved_at) return null;
+              const preApprovedAt = new Date((selectedApp as any).pre_approved_at).getTime();
+              const verification = customVerifications.find(v => 
+                v.user_id === selectedApp.user_id && 
+                v.submitted_at && 
+                new Date(v.submitted_at).getTime() > preApprovedAt
+              );
+              if (!verification) return null;
+              return (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-none w-full"
+                  style={{ backgroundColor: '#f2a547', color: '#000' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
+                  onClick={() => {
+                    setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
+                    handleOpenVerification(verification);
+                  }}
+                >
+                  View Verification
+                </Button>
+              );
             })()}
 
           {selectedApp && (
@@ -1761,8 +1763,9 @@ export function AdminAgenciesView() {
                 </div>
                 {(() => {
                   const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
-                  const verification = agencyPayout 
-                    ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
+                  const preApprovedAt = (selectedApp as any).pre_approved_at ? new Date((selectedApp as any).pre_approved_at).getTime() : null;
+                  const verification = preApprovedAt 
+                    ? customVerifications.find(v => v.user_id === selectedApp.user_id && v.submitted_at && new Date(v.submitted_at).getTime() > preApprovedAt) 
                     : null;
                   
                   return (
