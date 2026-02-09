@@ -111,8 +111,7 @@ export function MediaSiteDialog({
   };
 
   const handleInterested = () => {
-    onOpenChange(false); // Close Radix dialog first to release scroll lock
-    setTimeout(() => setBriefDialogOpen(true), 150);
+    setBriefDialogOpen(true);
   };
 
   if (!mediaSite) return null;
@@ -121,7 +120,7 @@ export function MediaSiteDialog({
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open && !briefDialogOpen} onOpenChange={onOpenChange}>
       <DialogContent 
         className="sm:max-w-lg z-[200] max-h-[100dvh] overflow-y-auto sm:max-h-none sm:overflow-y-visible" 
         overlayClassName="bg-transparent"
@@ -277,7 +276,7 @@ export function MediaSiteDialog({
       }}
       onBack={() => {
         setBriefDialogOpen(false);
-        setTimeout(() => onOpenChange(true), 150); // Reopen parent dialog
+        // Parent dialog will reopen automatically since open && !briefDialogOpen
       }}
       onSuccess={(engagement) => {
         setBriefDialogOpen(false);
