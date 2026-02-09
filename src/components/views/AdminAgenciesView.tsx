@@ -1619,7 +1619,7 @@ export function AdminAgenciesView() {
                                 </div>
                               )}
                               <div>
-                                <h3 className="font-semibold">{agency.agency_name}</h3>
+                                <h3 className="font-semibold flex items-center gap-1.5">{agency.agency_name} <UserMinus className="h-3.5 w-3.5 text-destructive" /></h3>
                                 {application && (
                                   <p className="text-xs text-muted-foreground">
                                     {application.country}
