@@ -567,7 +567,7 @@ const Landing = () => {
       {/* Top Banner */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-black text-white text-xs py-1.5 tracking-wide px-4 md:px-6">
         <div className="max-w-[980px] mx-auto flex items-center gap-4">
-          <span>Global search: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌃K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
+          <span>Global search: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
           <span>Close any popup: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
         </div>
       </div>
