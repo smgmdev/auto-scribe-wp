@@ -529,7 +529,7 @@ export function AgencyApplicationView() {
                           className="h-8 w-8 rounded-lg object-cover bg-white/10"
                         />
                       )}
-                      <div>
+                      <div className="text-left">
                         <h3 className="text-sm font-medium text-white">{existingApplication.agency_name}</h3>
                         <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
                       </div>
