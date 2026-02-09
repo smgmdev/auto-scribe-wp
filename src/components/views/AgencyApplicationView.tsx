@@ -688,9 +688,10 @@ export function AgencyApplicationView() {
             </Collapsible>
             </div>
           )}
-          
+        </div>
+
           {/* Full-width Promo Video */}
-          <div className="w-full rounded-2xl overflow-hidden">
+          <div className="w-full overflow-hidden">
             <video
               src={agencyPromoVideo}
               autoPlay
@@ -701,6 +702,7 @@ export function AgencyApplicationView() {
             />
           </div>
 
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 space-y-8">
           <ExploreNetworkGrid dark />
         </div>
 
