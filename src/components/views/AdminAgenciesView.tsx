@@ -735,7 +735,7 @@ export function AdminAgenciesView() {
 
   const getOnboardingStatus = (agency: AgencyPayout) => {
     if (agency.onboarding_complete) {
-      return <Badge className="bg-green-600 md:rounded-md rounded-none"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
+      return <Badge className="bg-green-600 rounded-none"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
     }
     
     // Custom payout agencies - check if verification has been submitted
@@ -744,19 +744,19 @@ export function AdminAgenciesView() {
       
       if (verification && verification.status === 'pending_review') {
         return (
-          <Badge className="bg-green-600/20 text-green-600 md:rounded-md rounded-none">
+          <Badge className="bg-green-600/20 text-green-600 rounded-none">
             <Clock className="h-3 w-3 mr-1" />Pending Review
           </Badge>
         );
       }
       
       return (
-        <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600 md:rounded-md rounded-none">
+        <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600 rounded-none">
           <Clock className="h-3 w-3 mr-1" />Pending Verification
         </Badge>
       );
     
-    return <Badge variant="secondary" className="bg-red-600/20 text-red-600 md:rounded-md rounded-none"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
+    return <Badge variant="secondary" className="bg-red-600/20 text-red-600 rounded-none"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
     }
     return <Badge variant="secondary" className="bg-red-600/20 text-red-600 rounded-none"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
   };
