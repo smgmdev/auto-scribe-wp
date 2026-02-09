@@ -843,7 +843,7 @@ export function AgencyApplicationView() {
 
         <AgencyWorkBanner 
           onApplyClick={() => setDialogOpen(true)} 
-          isPending={existingApplication?.status === 'pending' || existingApplication?.status === 'rejected'}
+          isPending={existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled'}
           onMyApplicationsClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         />
 
@@ -853,49 +853,6 @@ export function AgencyApplicationView() {
 
             <AgencyFAQ dark />
 
-      {/* Show existing application status card - only for cancelled, not pending/rejected (shown in My Applications) */}
-      {existingApplication && existingApplication.status === 'cancelled' && (
-        <Card className={existingApplication.status === 'cancelled' ? 'border-red-500/30' : ''}>
-
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <CardTitle className="text-lg">Your Latest Application</CardTitle>
-              {existingApplication.status === 'cancelled' && existingApplication.admin_notes?.includes('expired') 
-                ? getStatusBadge('expired')
-                : getStatusBadge(existingApplication.status)
-              }
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Agency Name</p>
-                <p className="font-medium">{existingApplication.agency_name}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Country</p>
-                <p className="font-medium">{existingApplication.country}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Submitted</p>
-                <p className="font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy h:mm a')}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Website</p>
-                <button onClick={() => { setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true); }} className="font-medium text-primary hover:underline cursor-pointer">
-                  {existingApplication.agency_website}
-                </button>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Cancelled</p>
-                <p className="font-medium">
-                  {format(new Date(existingApplication.updated_at), 'MMM d, yyyy h:mm a')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
           </div>
         </div>
       </div>
