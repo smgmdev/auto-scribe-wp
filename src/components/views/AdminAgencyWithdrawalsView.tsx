@@ -612,7 +612,7 @@ export function AdminAgencyWithdrawalsView() {
                                 <Button
                                   size="sm"
                                   onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                                  className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                                  className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
                                 >
                                   Credit History
                                 </Button>
@@ -707,7 +707,7 @@ export function AdminAgencyWithdrawalsView() {
                             <Button
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                              className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                              className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
                             >
                               Credit History
                             </Button>
