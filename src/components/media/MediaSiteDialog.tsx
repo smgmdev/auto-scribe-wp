@@ -121,7 +121,12 @@ export function MediaSiteDialog({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200] max-h-[100dvh] overflow-y-auto sm:max-h-none sm:overflow-y-visible" overlayClassName="bg-transparent">
+      <DialogContent 
+        className="sm:max-w-lg z-[200] max-h-[100dvh] overflow-y-auto sm:max-h-none sm:overflow-y-visible" 
+        overlayClassName="bg-transparent"
+        onPointerDownOutside={(e) => { if (briefDialogOpen) e.preventDefault(); }}
+        onInteractOutside={(e) => { if (briefDialogOpen) e.preventDefault(); }}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <img
