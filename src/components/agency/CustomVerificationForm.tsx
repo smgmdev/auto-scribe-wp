@@ -863,12 +863,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
           </CardContent>
         </Card>
 
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-3">
           <Button
             type="submit"
             size="sm"
             disabled={submitting || cancelling || uploadingCompanyDocs || uploadingPassport || uploadingArticles || uploadingLicense}
-            className="w-full lg:w-auto bg-black text-white border border-transparent hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
+            className="w-full lg:w-auto rounded-none bg-black text-white border border-transparent hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
           >
             {submitting ? (
               <>
@@ -887,7 +887,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               size="sm"
               disabled={submitting || cancelling}
               onClick={() => setCancelDialogOpen(true)}
-              className="w-full lg:w-auto bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
+              className="w-full lg:w-auto rounded-none bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
               <XCircle className="h-4 w-4 mr-2" />
               Cancel Application
