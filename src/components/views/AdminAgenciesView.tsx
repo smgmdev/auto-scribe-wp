@@ -1728,7 +1728,7 @@ export function AdminAgenciesView() {
               const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
               const verification = agencyPayout 
                 ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
-                : customVerifications.find(v => v.user_id === selectedApp.user_id);
+                : null;
               if (verification?.submitted_at) {
                 return (
                   <Button
@@ -1763,7 +1763,7 @@ export function AdminAgenciesView() {
                   const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
                   const verification = agencyPayout 
                     ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
-                    : customVerifications.find(v => v.user_id === selectedApp.user_id);
+                    : null;
                   
                   return (
                     <>
