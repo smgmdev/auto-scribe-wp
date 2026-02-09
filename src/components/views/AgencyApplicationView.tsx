@@ -79,6 +79,7 @@ interface AgencyPayout {
   onboarding_complete: boolean;
   payout_method: string;
   downgraded: boolean;
+  downgrade_reason: string | null;
   created_at: string;
 }
 
@@ -189,7 +190,7 @@ export function AgencyApplicationView() {
       // Fetch agency payout record
       const { data: payoutData } = await supabase
         .from('agency_payouts')
-        .select('id, agency_name, onboarding_complete, payout_method, downgraded, created_at')
+        .select('id, agency_name, onboarding_complete, payout_method, downgraded, downgrade_reason, created_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -359,7 +360,9 @@ export function AgencyApplicationView() {
         </div>
 
         <p className="text-sm text-muted-foreground text-center">
-          Your account has been downgraded. Contact support for details.
+          {agencyPayout?.downgrade_reason 
+            ? `Reason: ${agencyPayout.downgrade_reason}`
+            : 'Your account has been downgraded. Contact support for details.'}
         </p>
 
         <AgencyFAQ />

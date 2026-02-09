@@ -123,6 +123,7 @@ export function AdminAgenciesView() {
   const [processingVerification, setProcessingVerification] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [agencyToDowngrade, setAgencyToDowngrade] = useState<AgencyPayout | null>(null);
+  const [downgradeReason, setDowngradeReason] = useState('');
   const [selectedAgencyPayout, setSelectedAgencyPayout] = useState<AgencyPayout | null>(null);
   const [showCommissionDialog, setShowCommissionDialog] = useState(false);
   const [agencyToEditCommission, setAgencyToEditCommission] = useState<AgencyPayout | null>(null);
@@ -403,7 +404,8 @@ export function AdminAgenciesView() {
         .from('agency_payouts')
         .update({ 
           downgraded: true,
-          onboarding_complete: false 
+          onboarding_complete: false,
+          downgrade_reason: downgradeReason.trim() || null
         })
         .eq('id', agencyToDowngrade.id);
 
@@ -423,6 +425,7 @@ export function AdminAgenciesView() {
       toast.success(`Agency downgraded: ${agencyToDowngrade.agency_name} has been downgraded to a regular user account.`);
       setShowDowngradeDialog(false);
       setAgencyToDowngrade(null);
+      setDowngradeReason('');
       fetchData();
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
@@ -2651,6 +2654,17 @@ export function AdminAgenciesView() {
               <p>• The user can re-apply to become an agency later</p>
               <p>• Agency account can still be restored</p>
             </div>
+
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Reason (optional)</label>
+              <Textarea
+                value={downgradeReason}
+                onChange={(e) => setDowngradeReason(e.target.value)}
+                placeholder="Provide a reason for downgrading..."
+                className="rounded-none text-sm resize-none"
+                rows={2}
+              />
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
@@ -2659,6 +2673,7 @@ export function AdminAgenciesView() {
                 onClick={() => {
                   setShowDowngradeDialog(false);
                   setAgencyToDowngrade(null);
+                  setDowngradeReason('');
                 }}
               >
                 Cancel
