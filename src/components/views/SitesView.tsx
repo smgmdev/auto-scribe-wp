@@ -1426,13 +1426,13 @@ export function SitesView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full lg:max-w-md grid-cols-2">
+        <TabsList className="grid w-full lg:max-w-md grid-cols-2 rounded-none">
           <TabsTrigger value="instant">Local Library ({sites.length})</TabsTrigger>
           <TabsTrigger value="custom">Global Library ({mediaSites.length})</TabsTrigger>
         </TabsList>
 
         {/* Instant Publishing Tab - WordPress Sites */}
-        <TabsContent value="instant" className="mt-2">
+        <TabsContent value="instant" className="mt-0">
           {sitesLoading ? (
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-16">
@@ -1468,7 +1468,7 @@ export function SitesView() {
                   placeholder="Search local media library..."
                   value={wpSearchQuery}
                   onChange={(e) => setWpSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 h-9 text-sm"
+                  className="pl-10 pr-10 h-9 text-sm rounded-none"
                 />
                 {wpSearchQuery && (
                   <Button
@@ -1504,7 +1504,7 @@ export function SitesView() {
         </TabsContent>
 
         {/* Custom Tab - Media Sites */}
-        <TabsContent value="custom" className="mt-2">
+        <TabsContent value="custom" className="mt-0">
           {mediaSitesLoading ? (
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-16">
@@ -1527,7 +1527,7 @@ export function SitesView() {
                     }}
                     onFocus={() => searchQuery.length > 0 && setShowSearchDropdown(true)}
                     onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-                    className="w-full pl-10 h-9 text-sm"
+                    className="w-full pl-10 h-9 text-sm rounded-none"
                   />
                   {searchQuery && (
                     <Button
