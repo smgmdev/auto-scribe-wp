@@ -111,7 +111,8 @@ export function MediaSiteDialog({
   };
 
   const handleInterested = () => {
-    setBriefDialogOpen(true);
+    onOpenChange(false); // Close Radix dialog first to release scroll lock
+    setTimeout(() => setBriefDialogOpen(true), 150);
   };
 
   if (!mediaSite) return null;
@@ -276,6 +277,7 @@ export function MediaSiteDialog({
       }}
       onBack={() => {
         setBriefDialogOpen(false);
+        setTimeout(() => onOpenChange(true), 150); // Reopen parent dialog
       }}
       onSuccess={(engagement) => {
         setBriefDialogOpen(false);
