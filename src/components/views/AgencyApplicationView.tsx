@@ -598,12 +598,6 @@ export function AgencyApplicationView() {
                         <p className="text-white/50 mb-1">Media Channels</p>
                         <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
                       </div>
-                      {existingApplication.payout_method && (
-                        <div>
-                          <p className="text-white/50 mb-1">Payout Method</p>
-                          <p className="text-white font-medium capitalize">{existingApplication.payout_method}</p>
-                        </div>
-                      )}
                       {existingApplication.wp_blog_url && (
                         <div>
                           <p className="text-white/50 mb-1">WordPress Blog</p>
