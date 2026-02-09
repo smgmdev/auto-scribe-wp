@@ -261,11 +261,6 @@ export function AdminAgenciesView() {
     return false;
   });
 
-  // Rejected Verifications: Custom payout agencies where verification was rejected
-  const agenciesRejectedVerification = agenciesUnderVerification.filter(a => {
-    const verification = customVerifications.find(v => v.agency_payout_id === a.id);
-    return verification && verification.status === 'rejected';
-  });
 
   // Count unread pending approvals (custom verifications that haven't been read)
   const unreadPendingApprovalCount = agenciesPendingApprovalReview.filter(a => {
@@ -815,7 +810,7 @@ export function AdminAgenciesView() {
           </TabsTrigger>
           <TabsTrigger value="onboarded">Onboarded ({agencies.filter(a => a.onboarding_complete || a.downgraded).length})</TabsTrigger>
           <TabsTrigger value="void" className="relative">
-            Void ({cancelledApplications.length + rejectedApplications.length + agenciesRejectedVerification.length})
+            Void ({cancelledApplications.length + rejectedApplications.length})
             {unreadCancelledCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
                 {unreadCancelledCount}
@@ -912,22 +907,19 @@ export function AdminAgenciesView() {
         <TabsContent value="void" className="mt-0">
           {/* Sub-tabs for void stages */}
           <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-3 scrollbar-hide justify-start rounded-none">
-              <TabsTrigger value="cancelled" className="relative">
-                Cancelled ({cancelledApplications.length})
-                {unreadCancelledCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
-                    {unreadCancelledCount}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="rejected">
-                Rejected ({rejectedApplications.length})
-              </TabsTrigger>
-              <TabsTrigger value="rejected-verifications">
-                Rejected Verifications ({agenciesRejectedVerification.length})
-              </TabsTrigger>
-            </TabsList>
+             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none">
+               <TabsTrigger value="cancelled" className="relative">
+                 Cancelled ({cancelledApplications.length})
+                 {unreadCancelledCount > 0 && (
+                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
+                     {unreadCancelledCount}
+                   </span>
+                 )}
+               </TabsTrigger>
+               <TabsTrigger value="rejected">
+                 Rejected ({rejectedApplications.length})
+               </TabsTrigger>
+             </TabsList>
 
             {/* Cancelled Sub-Tab */}
             <TabsContent value="cancelled">
@@ -1062,8 +1054,12 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-1">
-                  {rejectedApplications.map((app) => (
+                 <div className="grid gap-1">
+                   {[...rejectedApplications].sort((a, b) => {
+                     const dateA = a.reviewed_at || a.updated_at || a.created_at;
+                     const dateB = b.reviewed_at || b.updated_at || b.created_at;
+                     return new Date(dateB).getTime() - new Date(dateA).getTime();
+                   }).map((app) => (
                     <Card 
                       key={app.id} 
                       className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
@@ -1166,80 +1162,6 @@ export function AdminAgenciesView() {
               </div>
             </TabsContent>
 
-            {/* Rejected Verifications Sub-Tab */}
-            <TabsContent value="rejected-verifications">
-              <p className="text-sm bg-black text-white px-3 py-2">Rejected agency verifications</p>
-              {agenciesRejectedVerification.length === 0 ? (
-                <Card className="border-dashed border-2">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <XCircle className="h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-4 text-xl font-semibold">No rejected verifications</h3>
-                    <p className="mt-2 text-sm text-muted-foreground text-center">
-                      Rejected verifications will appear here
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {agenciesRejectedVerification.map(agency => {
-                    const application = getAgencyWithApplication(agency);
-                    const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
-                    return (
-                      <Card 
-                        key={agency.id}
-                        className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
-                        onClick={() => {
-                          if (verification) {
-                            handleOpenVerification(verification);
-                          }
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
-                                <img 
-                                  src={logoUrls[application.id]} 
-                                  alt={agency.agency_name}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
-                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
-                                <>
-                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                  </div>
-                                  <img 
-                                    src={logoUrls[application.id]} 
-                                    alt=""
-                                    className="hidden"
-                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
-                                  />
-                                </>
-                              ) : (
-                                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                                  <XCircle className="h-5 w-5 text-red-500" />
-                                </div>
-                              )}
-                              <div>
-                                <h3 className="font-medium">{agency.agency_name}</h3>
-                                <p className="text-xs text-muted-foreground">{verification?.country}</p>
-                                {verification?.admin_notes && (
-                                  <p className="text-xs text-red-400 mt-1">Reason: {verification.admin_notes}</p>
-                                )}
-                              </div>
-                            </div>
-                            <Badge className="bg-red-500/20 text-red-500 rounded-none">
-                              <XCircle className="h-3 w-3 mr-1" />Rejected
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </TabsContent>
           </Tabs>
         </TabsContent>
 
