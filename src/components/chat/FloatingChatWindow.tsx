@@ -7292,7 +7292,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             style={{ left: mediaListingPos.x, top: mediaListingPos.y }}
           >
             <div 
-              className={`px-4 py-0 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
               onMouseDown={handleMediaDragStart}
             >
               <div className="flex items-center gap-2">
