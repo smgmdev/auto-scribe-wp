@@ -560,7 +560,7 @@ export default function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="h-12 text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
+                className="h-10 md:h-12 text-[15px] md:text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
               />
               {errors.email && (
                 <p className="text-xs text-destructive mt-1.5 ml-1">{errors.email}</p>
@@ -575,7 +575,7 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="h-12 text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
+                className="h-10 md:h-12 text-[15px] md:text-[17px] bg-[#f5f5f7] border-0 rounded-xl px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
               />
               {errors.password && (
                 <p className="text-xs text-destructive mt-1.5 ml-1">{errors.password}</p>
@@ -597,7 +597,7 @@ export default function Auth() {
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="group w-full h-12 text-[17px] font-medium bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-all"
+              className="group w-full h-10 md:h-12 text-[15px] md:text-[17px] font-medium bg-foreground text-background rounded-xl hover:bg-foreground/90 transition-all"
               disabled={isLoading}
             >
               {isLoading ? (
