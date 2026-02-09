@@ -787,24 +787,26 @@ const HowItWorks = () => {
       <div className="h-[92px]" />
 
       {/* Sub-header - Sticky */}
-      <div className={`sticky z-40 bg-white/90 backdrop-blur-sm border-b border-border transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <span className="text-xl font-semibold text-foreground">How It Works</span>
-          <nav className="hidden md:flex items-center gap-6">
-            <button 
-              onClick={() => navigate('/about')}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Learn More
-            </button>
-            <Button
-              size="sm"
-              onClick={handleGetStarted}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
-            >
-              Get Started
-            </Button>
-          </nav>
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-white border-b border-border">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+            <span className="text-xl font-semibold text-foreground">How It Works</span>
+            <nav className="hidden md:flex items-center gap-6">
+              <button 
+                onClick={() => navigate('/about')}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Learn More
+              </button>
+              <Button
+                size="sm"
+                onClick={handleGetStarted}
+                className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
+              >
+                Get Started
+              </Button>
+            </nav>
+          </div>
         </div>
       </div>
 
