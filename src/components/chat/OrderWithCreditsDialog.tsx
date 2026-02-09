@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,13 @@ export function OrderWithCreditsDialog({
   const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const { credits, user } = useAuth();
+
+  // Register on popup stack for layered Esc handling
+  useEffect(() => {
+    if (!open) { removePopup('order-with-credits-dialog'); return; }
+    pushPopup('order-with-credits-dialog', () => onOpenChange(false));
+    return () => removePopup('order-with-credits-dialog');
+  }, [open, onOpenChange]);
 
   // Fetch locked credits when dialog opens (includes active orders AND pending requests)
   React.useEffect(() => {
@@ -221,7 +229,7 @@ export function OrderWithCreditsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => !sending && onOpenChange(newOpen)}>
-      <DialogContent className="sm:max-w-md z-[9999] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-md z-[9999] max-h-[90vh] flex flex-col" onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader className="shrink-0">
           <DialogTitle>
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { Building2, Loader2, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,13 @@ export function AgencyDetailsDialog({
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetailsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoLoading, setLogoLoading] = useState(true);
+
+  // Register on popup stack for layered Esc handling
+  useEffect(() => {
+    if (!open) { removePopup('agency-details-dialog'); return; }
+    pushPopup('agency-details-dialog', () => onOpenChange(false));
+    return () => removePopup('agency-details-dialog');
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     if (open && agencyName) {
@@ -106,7 +114,7 @@ export function AgencyDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }} overlayClassName="bg-transparent">
+      <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }} overlayClassName="bg-transparent" onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
         <DialogTitle className="flex items-center gap-3">
             {loading ? (

@@ -79,11 +79,15 @@ const useGlobalEscapeHandler = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        closeTopPopup();
+        const handled = closeTopPopup();
+        if (handled) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, []);
 };
 

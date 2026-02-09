@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,13 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
   const [withdrawalMethod, setWithdrawalMethod] = useState<'bank' | 'crypto'>('bank');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+
+  // Register on popup stack for layered Esc handling
+  useEffect(() => {
+    if (!open) { removePopup('withdraw-dialog'); return; }
+    pushPopup('withdraw-dialog', () => onOpenChange(false));
+    return () => removePopup('withdraw-dialog');
+  }, [open, onOpenChange]);
 
   const hasBankData = verificationData?.bank_account_holder || verificationData?.bank_account_number || verificationData?.bank_name;
   const hasCryptoData = verificationData?.usdt_wallet_address;
@@ -183,7 +191,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>

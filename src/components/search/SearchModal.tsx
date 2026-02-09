@@ -182,18 +182,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     setAgencyDetailsOpen(true);
   };
 
-  // Close on Escape key
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-    };
-    if (open) {
-      document.addEventListener('keydown', handleEsc);
-      return () => document.removeEventListener('keydown', handleEsc);
-    }
-  }, [open]);
+  // (Esc handled via popup-stack registered above)
 
   const subcategories = useMemo(() => {
     if (activeTab === 'Global') {
