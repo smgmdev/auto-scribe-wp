@@ -561,14 +561,18 @@ export const useAppStore = create<AppState>()((set) => ({
         globalChatType: type
       };
     }
-    // Add new chat with offset position based on existing chats
+    // Add new chat with centered position, offset based on existing chats
     const offset = state.openChats.length * 30;
     const maxZ = Math.max(...state.openChats.map(c => c.zIndex), 99);
+    const chatWidth = 450;
+    const chatHeight = 550;
+    const centerX = (window.innerWidth - chatWidth) / 2 + offset;
+    const centerY = (window.innerHeight - chatHeight) / 2 + offset;
     const newChat: OpenChat = {
       request,
       type,
       zIndex: maxZ + 1,
-      position: { x: offset, y: offset }
+      position: { x: centerX, y: centerY }
     };
     const newChats = [...state.openChats, newChat];
     return { 

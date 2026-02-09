@@ -429,11 +429,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      posX: localPosition.x,
-      posY: localPosition.y
+      posX: localPositionRef.current.x,
+      posY: localPositionRef.current.y
     };
     e.preventDefault();
-  }, [localPosition, onFocus]);
+  }, [onFocus]);
 
   // Keep ref in sync
   useEffect(() => {
@@ -4808,9 +4808,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
           height: isMobile ? '100dvh' : '550px',
           maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
-          left: isMobile ? '0' : `calc(50% + ${localPosition.x}px)`,
-          top: isMobile ? '0' : `calc(50% + ${localPosition.y}px)`,
-          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+          left: isMobile ? '0' : `${localPosition.x}px`,
+          top: isMobile ? '0' : `${localPosition.y}px`,
           zIndex: chat.zIndex + 100,
           overscrollBehavior: 'contain'
         }}
