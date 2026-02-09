@@ -7108,27 +7108,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
           {globalChatRequest?.media_site && (
             <div className="space-y-4 mt-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Website</p>
-                <a 
-                  href={globalChatRequest.media_site.link.startsWith('http') ? globalChatRequest.media_site.link : `https://${globalChatRequest.media_site.link}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent hover:underline flex items-center gap-1"
-                >
-                  {(() => {
-                    try {
-                      const url = globalChatRequest.media_site.link.startsWith('http') 
-                        ? globalChatRequest.media_site.link 
-                        : `https://${globalChatRequest.media_site.link}`;
-                      return new URL(url).hostname.replace('www.', '');
-                    } catch {
-                      return globalChatRequest.media_site.link;
-                    }
-                  })()}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
+              {globalChatRequest.media_site.link && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Website</p>
+                  <a 
+                    href={globalChatRequest.media_site.link.startsWith('http') ? globalChatRequest.media_site.link : `https://${globalChatRequest.media_site.link}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline flex items-center gap-1"
+                  >
+                    {(() => {
+                      try {
+                        const url = globalChatRequest.media_site.link.startsWith('http') 
+                          ? globalChatRequest.media_site.link 
+                          : `https://${globalChatRequest.media_site.link}`;
+                        return new URL(url).hostname.replace('www.', '');
+                      } catch {
+                        return globalChatRequest.media_site.link;
+                      }
+                    })()}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
               
               <div className="flex gap-4">
                 <div>
