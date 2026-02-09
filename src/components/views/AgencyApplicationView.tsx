@@ -690,8 +690,9 @@ export function AgencyApplicationView() {
           )}
         </div>
 
-          {/* Full-width Promo Video */}
-          <div className="w-full overflow-hidden relative">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-10 pb-8 space-y-8">
+          {/* Promo Video */}
+          <div className="w-full overflow-hidden rounded-2xl relative">
             <video
               src={agencyPromoVideo}
               autoPlay
@@ -707,7 +708,6 @@ export function AgencyApplicationView() {
             </div>
           </div>
 
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-10 pb-8 space-y-8">
           <ExploreNetworkGrid dark />
         </div>
 
