@@ -887,7 +887,7 @@ const Landing = () => {
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row md:justify-end gap-3 mt-4">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 mt-4">
             <Button 
               variant="outline"
               onClick={() => setSelectedSite(null)}
