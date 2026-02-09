@@ -592,7 +592,7 @@ export function AgencyApplicationView() {
                                 Pending
                               </Badge>
                             )}
-                            <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                            <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 hidden lg:block ${isExpanded ? 'rotate-180' : ''}`} />
                           </div>
                         </div>
                         <div className="flex items-center justify-between lg:hidden">
@@ -601,6 +601,7 @@ export function AgencyApplicationView() {
                           ) : (
                             <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</span></p>
                           )}
+                          <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 lg:hidden ${isExpanded ? 'rotate-180' : ''}`} />
                         </div>
                       </div>
                     </CollapsibleTrigger>
