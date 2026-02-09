@@ -346,23 +346,23 @@ export function AgencyApplicationView() {
           </p>
         </div>
 
-        <div className="relative w-full overflow-hidden rounded-none -mt-4 -mb-4 bg-[#1d1d1f] h-[520px]">
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-4">
-            <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
+        <div className="relative w-full overflow-hidden rounded-none -mt-4 -mb-4 bg-white">
+          <div className="flex flex-col items-center justify-center p-6 gap-4">
+            <div className="w-full max-w-[700px] border border-red-500/30 bg-red-500/10 rounded-lg p-6">
               <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/30 shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 shrink-0">
                   <UserMinus className="h-6 w-6 text-red-500" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-600">Account Downgraded</h3>
-                  <p className="text-sm text-white/90">
+                  <p className="text-sm text-muted-foreground">
                     Agency: {agencyPayout?.agency_name}
                   </p>
                 </div>
                 <div className="hidden md:block">{getStatusBadge('downgraded', false, true)}</div>
               </div>
               {agencyPayout?.downgrade_reason && (
-                <p className="text-sm text-white/80 text-center mt-4 pt-3 border-t border-white/20">
+                <p className="text-sm text-muted-foreground text-center mt-4 pt-3 border-t border-red-500/20">
                   Reason: {agencyPayout.downgrade_reason}
                 </p>
               )}
