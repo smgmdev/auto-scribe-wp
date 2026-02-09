@@ -121,7 +121,7 @@ export function MediaSiteDialog({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200]" overlayClassName="bg-transparent">
+      <DialogContent className="sm:max-w-lg z-[200] overflow-y-auto max-h-[100dvh] sm:max-h-[85vh]" overlayClassName="bg-transparent">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <img
