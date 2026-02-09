@@ -83,8 +83,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [globalChatRequest.order]);
 
-  // Lock body scroll when chat is open on mobile
+  // Lock scroll when chat is open
   useEffect(() => {
+    // Lock body scroll on mobile
     if (isMobile) {
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
@@ -92,6 +93,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       document.body.style.left = '0';
       document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
+
       return () => {
         document.body.style.position = '';
         document.body.style.top = '';
@@ -101,6 +103,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         window.scrollTo(0, scrollY);
       };
     }
+
+    // On desktop, lock the main scroll container
+    const mainEl = document.querySelector('main');
+    const prevOverflow = mainEl?.style.overflow;
+    if (mainEl) mainEl.style.overflow = 'hidden';
+
+    return () => {
+      if (mainEl) mainEl.style.overflow = prevOverflow || '';
+    };
   }, [isMobile]);
 
   // Fetch order data on mount - ALWAYS fetch fresh data to ensure delivery_status is current
