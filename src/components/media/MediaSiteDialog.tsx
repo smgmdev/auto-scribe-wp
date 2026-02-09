@@ -380,9 +380,8 @@ export function MediaSiteDialog({
               Checking...
             </Button>
           ) : openEngagementData ? (
-            <Badge 
-              variant="secondary" 
-              className="text-sm flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3 rounded-none w-full md:flex-1"
+            <Button 
+              className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
               onClick={() => {
                 const { openGlobalChat, clearUnreadMessageCount } = useAppStore.getState();
                 clearUnreadMessageCount(openEngagementData.id);
@@ -390,9 +389,11 @@ export function MediaSiteDialog({
                 onOpenChange(false);
               }}
             >
-              <MessageSquare className="h-4 w-4" />
-              Engagement Open
-            </Badge>
+              <span>Engagement Open</span>
+              <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                <ArrowRight className="h-4 w-4 shrink-0" />
+              </span>
+            </Button>
           ) : (
             <Button 
               className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
