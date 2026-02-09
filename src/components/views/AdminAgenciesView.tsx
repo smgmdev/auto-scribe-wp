@@ -967,9 +967,9 @@ export function AdminAgenciesView() {
                               {app.admin_notes && (
                                 <p className="text-xs text-red-500">Reason: {app.admin_notes}</p>
                               )}
-                              {app.updated_at && (
+                               {((app as any).cancelled_at || app.updated_at) && (
                                 <p className="text-xs text-muted-foreground">
-                                  Cancelled {format(new Date(app.updated_at), 'MMM d, yyyy, h:mm a')}
+                                  Cancelled {format(new Date((app as any).cancelled_at || app.updated_at), 'MMM d, yyyy, h:mm a')}
                                 </p>
                               )}
                             </div>
