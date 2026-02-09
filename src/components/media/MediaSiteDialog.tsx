@@ -97,7 +97,7 @@ export function MediaSiteDialog({
     };
   }, [open, isMobile]);
 
-  // On desktop, block page scroll when popup is open and user clicks inside it
+  // On desktop, block page scroll when popup is focused (clicked)
   const [popupFocused, setPopupFocused] = useState(false);
   const popupContainerRef = useRef<HTMLDivElement>(null);
 
@@ -115,22 +115,18 @@ export function MediaSiteDialog({
     return () => document.removeEventListener('mousedown', handleClickOutside, true);
   }, [open, isMobile]);
 
+  // Block wheel events on the page when popup is focused
   useEffect(() => {
     if (!open || isMobile || !popupFocused) return;
 
-    const mainEl = document.querySelector('main');
-    const prevMainOverflow = mainEl?.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    if (mainEl) mainEl.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
-    return () => {
-      if (mainEl) mainEl.style.overflow = prevMainOverflow || '';
-      document.body.style.overflow = prevBodyOverflow || '';
-      document.documentElement.style.overflow = prevHtmlOverflow || '';
+    const handleWheel = (e: WheelEvent) => {
+      // Allow scrolling inside the popup, block everything else
+      if (popupContainerRef.current && popupContainerRef.current.contains(e.target as Node)) return;
+      e.preventDefault();
     };
+
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    return () => document.removeEventListener('wheel', handleWheel);
   }, [open, isMobile, popupFocused]);
 
   // Check for open engagement when dialog opens
