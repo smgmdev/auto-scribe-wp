@@ -1009,19 +1009,21 @@ export function AdminAgenciesView() {
                             className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
                             onClick={async (e) => {
                               e.stopPropagation();
+                              // Optimistically remove from UI immediately to prevent double-clicks
+                              setApplications(prev => prev.filter(a => a.id !== app.id));
+                              setHiddenCancelledCount(prev => prev + 1);
+                              
                               const { error } = await supabase
                                 .from('agency_applications')
                                 .update({ hidden: true })
-                                .eq('id', app.id);
+                                .eq('id', app.id)
+                                .eq('hidden', false);
                               
                               if (error) {
                                 toast({ variant: 'destructive', title: 'Error', description: error.message });
-                                return;
+                              } else {
+                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                               }
-                              
-                              setApplications(prev => prev.filter(a => a.id !== app.id));
-                              setHiddenCancelledCount(prev => prev + 1);
-                              toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                             }}
                           >
                             Remove
@@ -1142,19 +1144,20 @@ export function AdminAgenciesView() {
                             className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
                             onClick={async (e) => {
                               e.stopPropagation();
+                              setApplications(prev => prev.filter(a => a.id !== app.id));
+                              setHiddenRejectedCount(prev => prev + 1);
+                              
                               const { error } = await supabase
                                 .from('agency_applications')
                                 .update({ hidden: true })
-                                .eq('id', app.id);
+                                .eq('id', app.id)
+                                .eq('hidden', false);
                               
                               if (error) {
                                 toast({ variant: 'destructive', title: 'Error', description: error.message });
-                                return;
+                              } else {
+                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                               }
-                              
-                              setApplications(prev => prev.filter(a => a.id !== app.id));
-                              setHiddenRejectedCount(prev => prev + 1);
-                              toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                             }}
                           >
                             Remove
