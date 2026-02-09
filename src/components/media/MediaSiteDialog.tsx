@@ -652,7 +652,7 @@ export function MediaSiteDialog({
                         ) : (
                           <FileText className="h-4 w-4 text-muted-foreground" />
                         )}
-                        <span className="text-sm flex-1 truncate">{file.name}</span>
+                        <span className="text-sm flex-1 truncate">{isImageFile(file.name) ? `image.${file.name.split('.').pop()?.toLowerCase()}` : `file.${file.name.split('.').pop()?.toLowerCase()}`}</span>
                         <span className="text-xs text-muted-foreground">
                           {(file.size / 1024).toFixed(0)}KB
                         </span>
@@ -678,12 +678,12 @@ export function MediaSiteDialog({
               </div>
             </div>
 
-            <div className="flex md:justify-end gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mt-6">
               <Button 
                 variant="outline" 
                 onClick={handleBack}
                 disabled={isSubmitting}
-                className="hover:bg-black hover:text-white transition-all duration-200 group flex-1 md:flex-none px-3"
+                className="w-full sm:w-auto sm:flex-none hover:bg-black hover:text-white transition-all duration-200 group px-3 order-2 sm:order-1"
               >
                 <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
                   <ArrowLeft className="h-4 w-4 shrink-0" />
@@ -691,7 +691,7 @@ export function MediaSiteDialog({
                 <span>Back</span>
               </Button>
               <Button 
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group flex-1 md:flex-none px-3 border border-transparent hover:border-black"
+                className="w-full sm:w-auto sm:flex-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group px-3 border border-transparent hover:border-black order-1 sm:order-2"
                 onClick={handleSubmit} 
                 disabled={isSubmitting || !description.trim()}
               >
