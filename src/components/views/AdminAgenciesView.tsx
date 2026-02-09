@@ -842,8 +842,13 @@ export function AdminAgenciesView() {
                   )}
                   onClick={() => handleOpenApplication(app)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                    <CardContent className="p-4">
+                    <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                      <div className="absolute top-0 right-0 md:hidden">
+                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
+                          <Clock className="h-3 w-3 mr-1" />Pending
+                        </Badge>
+                      </div>
                       <div className="flex items-center gap-4">
                         {logoUrls[app.id] && loadedImageIds.has(app.id) && !failedImageIds.has(app.id) ? (
                           <img 
@@ -879,7 +884,7 @@ export function AdminAgenciesView() {
                           <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-start md:items-end md:text-right gap-1">
+                      <div className="hidden md:flex flex-col items-end text-right gap-1">
                         <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
@@ -887,6 +892,9 @@ export function AdminAgenciesView() {
                           Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
+                      <p className="text-xs text-muted-foreground md:hidden">
+                        Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
