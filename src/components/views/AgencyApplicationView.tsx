@@ -555,7 +555,7 @@ export function AgencyApplicationView() {
                         {existingApplication.agency_website.replace(/^https?:\/\//, '')}
                       </p>
                     </div>
-                    <div className="flex items-end justify-end">
+                    <div className="flex items-end justify-end col-start-2 lg:col-start-5">
                       <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
