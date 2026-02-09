@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
@@ -230,6 +231,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   } | null>(null);
   const [loadingAdminAgency, setLoadingAdminAgency] = useState(false);
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
+  const [mediaListingPos, setMediaListingPos] = useState({ x: 0, y: 0 });
+  const [mediaListingDragging, setMediaListingDragging] = useState(false);
+  const mediaListingDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const mediaListingInitialized = useRef(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
@@ -455,6 +460,32 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, localPosition, globalChatRequest.id, updateChatPosition]);
+
+  // Media listing drag handlers
+  useEffect(() => {
+    if (!mediaListingDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - mediaListingDragRef.current.x;
+      const deltaY = e.clientY - mediaListingDragRef.current.y;
+      setMediaListingPos({
+        x: mediaListingDragRef.current.posX + deltaX,
+        y: mediaListingDragRef.current.posY + deltaY
+      });
+    };
+
+    const handleMouseUp = () => {
+      setMediaListingDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [mediaListingDragging]);
 
   // Use actualSenderType which is verified against actual request data (set in fetchSenderId effect)
   // This is the initial value, but actualSenderType will be corrected after data fetch
@@ -7092,104 +7123,175 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         downloadUrl={fileWebView?.url}
       />
 
-      {/* Media Listing Dialog */}
-      <Dialog open={mediaListingOpen} onOpenChange={setMediaListingOpen}>
-        <DialogContent className="sm:max-w-lg z-[300] max-h-[85vh]" overlayClassName="bg-transparent">
-          <DialogHeader className="text-left">
-            <DialogTitle className="flex items-center gap-3 justify-start">
+      {mediaListingOpen && globalChatRequest?.media_site && (() => {
+        // Center on first open
+        if (!mediaListingInitialized.current) {
+          mediaListingInitialized.current = true;
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          setMediaListingPos({ x: (w - 450) / 2, y: (h - 500) / 2 });
+        }
+
+        const handleMediaDragStart = (e: React.MouseEvent) => {
+          if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+          setMediaListingDragging(true);
+          mediaListingDragRef.current = { x: e.clientX, y: e.clientY, posX: mediaListingPos.x, posY: mediaListingPos.y };
+        };
+
+        const content = (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center gap-3">
               <img
-                src={globalChatRequest?.media_site?.favicon || ''}
-                alt={globalChatRequest?.media_site?.name}
+                src={globalChatRequest.media_site.favicon || ''}
+                alt={globalChatRequest.media_site.name}
                 className="h-12 w-12 rounded-xl bg-muted object-contain shrink-0"
               />
-              <span className="text-left">{globalChatRequest?.media_site?.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {globalChatRequest?.media_site && (
-            <div className="space-y-4 mt-4">
-              {globalChatRequest.media_site.link && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Website</p>
-                  <a 
-                    href={globalChatRequest.media_site.link.startsWith('http') ? globalChatRequest.media_site.link : `https://${globalChatRequest.media_site.link}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {(() => {
-                      try {
-                        const url = globalChatRequest.media_site.link.startsWith('http') 
-                          ? globalChatRequest.media_site.link 
-                          : `https://${globalChatRequest.media_site.link}`;
-                        return new URL(url).hostname.replace('www.', '');
-                      } catch {
-                        return globalChatRequest.media_site.link;
-                      }
-                    })()}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              )}
-              
-              <div className="flex gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="text-foreground font-medium">${globalChatRequest.media_site.price.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Format</p>
-                  <Badge variant="secondary">{globalChatRequest.media_site.publication_format}</Badge>
-                </div>
-              </div>
-              
-              {globalChatRequest.media_site.category && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Category</p>
-                  <p className="text-foreground">{globalChatRequest.media_site.category}</p>
-                </div>
-              )}
-              
-              {globalChatRequest.media_site.subcategory && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Subcategory</p>
-                  <p className="text-foreground">{globalChatRequest.media_site.subcategory}</p>
-                </div>
-              )}
-              
-              {globalChatRequest.media_site.agency && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Agency</p>
-                  <p 
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
-                    onClick={() => handleOpenAgencyDetails(globalChatRequest.media_site!.agency!)}
-                  >
-                    {globalChatRequest.media_site.agency}
-                    <Info className="h-3 w-3" />
-                  </p>
-                </div>
-              )}
-              
-              {globalChatRequest.media_site.about && (
-                <div>
-                  <p className="text-sm text-muted-foreground">About</p>
-                  <p className="text-foreground text-sm">{globalChatRequest.media_site.about}</p>
-                </div>
-              )}
+              <span className="text-left font-semibold text-lg">{globalChatRequest.media_site.name}</span>
             </div>
-          )}
 
-          <div className="flex justify-end gap-3 mt-2">
-            <Button 
-              variant="outline"
-              onClick={() => setMediaListingOpen(false)}
-              className="rounded-none w-full hover:bg-black hover:text-white transition-colors"
-            >
-              Close
-            </Button>
+            {globalChatRequest.media_site.link && (
+              <div>
+                <p className="text-sm text-muted-foreground">Website</p>
+                <a 
+                  href={globalChatRequest.media_site.link.startsWith('http') ? globalChatRequest.media_site.link : `https://${globalChatRequest.media_site.link}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline flex items-center gap-1"
+                >
+                  {(() => {
+                    try {
+                      const url = globalChatRequest.media_site.link!.startsWith('http') 
+                        ? globalChatRequest.media_site.link! 
+                        : `https://${globalChatRequest.media_site.link}`;
+                      return new URL(url).hostname.replace('www.', '');
+                    } catch {
+                      return globalChatRequest.media_site.link;
+                    }
+                  })()}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            )}
+            
+            <div className="flex gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="text-foreground font-medium">${globalChatRequest.media_site.price.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Format</p>
+                <Badge variant="secondary">{globalChatRequest.media_site.publication_format}</Badge>
+              </div>
+            </div>
+            
+            {globalChatRequest.media_site.category && (
+              <div>
+                <p className="text-sm text-muted-foreground">Category</p>
+                <p className="text-foreground">{globalChatRequest.media_site.category}</p>
+              </div>
+            )}
+            
+            {globalChatRequest.media_site.subcategory && (
+              <div>
+                <p className="text-sm text-muted-foreground">Subcategory</p>
+                <p className="text-foreground">{globalChatRequest.media_site.subcategory}</p>
+              </div>
+            )}
+            
+            {globalChatRequest.media_site.agency && (
+              <div>
+                <p className="text-sm text-muted-foreground">Agency</p>
+                <p 
+                  className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
+                  onClick={() => handleOpenAgencyDetails(globalChatRequest.media_site!.agency!)}
+                >
+                  {globalChatRequest.media_site.agency}
+                  <Info className="h-3 w-3" />
+                </p>
+              </div>
+            )}
+            
+            {globalChatRequest.media_site.about && (
+              <div>
+                <p className="text-sm text-muted-foreground">About</p>
+                <p className="text-foreground text-sm">{globalChatRequest.media_site.about}</p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-2">
+              <Button 
+                variant="outline"
+                onClick={() => { setMediaListingOpen(false); mediaListingInitialized.current = false; }}
+                className="rounded-none w-full hover:bg-foreground hover:text-background transition-colors"
+              >
+                Close
+              </Button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        );
+
+        if (isMobile) {
+          // Mobile: full-screen like engagement chat
+          return createPortal(
+            <div className="fixed inset-0 z-[300] bg-background flex flex-col">
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={globalChatRequest.media_site.favicon || ''}
+                    alt={globalChatRequest.media_site.name}
+                    className="h-6 w-6 rounded bg-muted object-contain"
+                  />
+                  <span className="font-medium text-sm">{globalChatRequest.media_site.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => { setMediaListingOpen(false); mediaListingInitialized.current = false; }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {content}
+              </div>
+            </div>,
+            document.body
+          );
+        }
+
+        // Desktop: draggable popup
+        return createPortal(
+          <div
+            className="fixed z-[300] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
+            style={{ left: mediaListingPos.x, top: mediaListingPos.y }}
+          >
+            <div 
+              className={`px-4 py-3 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              onMouseDown={handleMediaDragStart}
+            >
+              <div className="flex items-center gap-2">
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{globalChatRequest.media_site.name}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 hover:bg-foreground hover:text-background"
+                onClick={() => { setMediaListingOpen(false); mediaListingInitialized.current = false; }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="overflow-y-auto p-4">
+              {content}
+            </div>
+          </div>,
+          document.body
+        );
+      })()}
 
       {/* Agency Details Dialog - Using Global Component */}
       <AgencyDetailsDialog
