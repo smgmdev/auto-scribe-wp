@@ -315,7 +315,7 @@ export function BriefSubmissionDialog({
         className="sm:max-w-lg z-[200] rounded-none overflow-y-auto max-h-[100dvh] sm:max-h-[85vh]"
         hideCloseButton={false}
         style={{ padding: 0 }}
-        overlayClassName="z-[199]"
+        overlayClassName="z-[199] bg-transparent"
       >
         <div className="p-4 sm:p-6 space-y-4">
           <DialogHeader>
