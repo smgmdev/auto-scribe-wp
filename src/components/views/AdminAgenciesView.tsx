@@ -2460,7 +2460,7 @@ export function AdminAgenciesView() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Please provide a reason for rejecting this verification. This will be recorded in the admin notes.
+              Please provide a reason for rejecting this verification. This will be recorded in the notes.
             </p>
             <Textarea
               placeholder="Enter rejection reason..."
