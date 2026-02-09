@@ -210,14 +210,15 @@ export function BriefSubmissionDialog({
   if (!open) return null;
 
   return createPortal(
-    <div className={`fixed inset-0 z-[200] ${isMobile ? '' : 'flex items-center justify-center pointer-events-none'}`}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div
         className={`bg-background relative overflow-y-auto ${
           isMobile 
             ? 'w-full h-[100dvh]' 
-            : 'pointer-events-auto w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
+            : 'w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Drag Handle - desktop only */}
         {!isMobile && (
