@@ -736,7 +736,7 @@ export function AgencyApplicationView() {
 
                     {/* Rejection reason inside collapsible */}
                     {existingApplication.status === 'rejected' && existingApplication.admin_notes && (
-                      <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                      <div className="p-3 bg-red-500/10 rounded-none border border-red-500/20">
                         <p className="text-xs text-white/50 mb-1">Rejection Reason</p>
                         <p className="text-xs text-white">{existingApplication.admin_notes}</p>
                       </div>
