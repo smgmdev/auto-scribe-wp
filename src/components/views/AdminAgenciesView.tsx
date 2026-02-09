@@ -1098,7 +1098,7 @@ export function AdminAgenciesView() {
                             <div>
                               <h3 className="font-medium">{app.agency_name}</h3>
                               {app.admin_notes && (
-                                <p className="text-xs text-red-400 mt-1">Reason: {app.admin_notes}</p>
+                                <p className="text-xs text-red-400">Reason: {app.admin_notes}</p>
                               )}
                               {app.reviewed_at && (
                                 <p className="text-xs text-muted-foreground">
