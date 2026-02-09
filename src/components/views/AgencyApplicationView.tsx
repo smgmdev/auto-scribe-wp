@@ -369,50 +369,52 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <div className="relative w-full overflow-hidden rounded-none">
-            <img 
-              src={agencyVerificationBanner} 
-              alt="Agency verification in progress" 
-              className="w-full h-[420px] object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center p-6">
-              <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
-                <div className="flex flex-col md:flex-row md:items-center gap-3">
-                  <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
-                    <Clock className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex md:hidden justify-end">
-                    {getStatusBadge(customVerification.status)}
-                  </div>
-                  <div className="flex items-center gap-3 md:flex-1">
-                    <div className="flex md:hidden h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
+          <div>
+            <div className="relative w-full overflow-hidden rounded-none">
+              <img 
+                src={agencyVerificationBanner} 
+                alt="Agency verification in progress" 
+                className="w-full h-[420px] object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3">
+                    <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
                       <Clock className="h-6 w-6 text-white" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
-                      <p className="text-sm text-white/70">
-                        Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
-                      </p>
+                    <div className="flex md:hidden justify-end">
+                      {getStatusBadge(customVerification.status)}
+                    </div>
+                    <div className="flex items-center gap-3 md:flex-1">
+                      <div className="flex md:hidden h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
+                        <Clock className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
+                        <p className="text-sm text-white/70">
+                          Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="hidden md:block">
+                      {getStatusBadge(customVerification.status)}
                     </div>
                   </div>
-                  <div className="hidden md:block">
-                    {getStatusBadge(customVerification.status)}
-                  </div>
+                  {customVerification.status === 'rejected' && customVerification.admin_notes && (
+                    <div className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-400/30">
+                      <p className="text-sm text-white/70 mb-1">Rejection Reason</p>
+                      <p className="text-sm text-white">{customVerification.admin_notes}</p>
+                    </div>
+                  )}
                 </div>
-                {customVerification.status === 'rejected' && customVerification.admin_notes && (
-                  <div className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-400/30">
-                    <p className="text-sm text-white/70 mb-1">Rejection Reason</p>
-                    <p className="text-sm text-white">{customVerification.admin_notes}</p>
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-          <div className="flex items-start gap-2 bg-[#1d1d1f] text-white p-4 rounded-none -mt-4">
-            <Info className="h-4 w-4 mt-0.5 shrink-0" />
-            <p className="text-sm">
-              Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
-            </p>
+            <div className="flex items-start gap-2 bg-[#1d1d1f] text-white p-4 rounded-none">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <p className="text-sm">
+                Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
+              </p>
+            </div>
           </div>
 
           <AgencyFAQ />
