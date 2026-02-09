@@ -540,7 +540,7 @@ export function AgencyApplicationView() {
           {/* Application Summary Cards - shown when there are pending/rejected applications */}
           {allApplications.length > 0 && (existingApplication?.status === 'pending' || existingApplication?.status === 'rejected') && (
             <div ref={myApplicationsRef} className="space-y-2">
-              <h2 className="text-3xl font-bold text-center text-white">
+              <h2 className="text-3xl font-bold text-center text-white mb-4">
                 My Applications
               </h2>
               {allApplications.map((app) => {
