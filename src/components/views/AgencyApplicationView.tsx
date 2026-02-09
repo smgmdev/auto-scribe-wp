@@ -513,7 +513,7 @@ export function AgencyApplicationView() {
           style={{ zIndex: 1 }}
         >
         
-        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' ? 'pt-8 pb-8' : 'pt-5'}`}>
+        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' ? 'pt-8 pb-8' : 'pt-14'}`}>
           
           {/* Application Summary Card - shown when pending */}
           {existingApplication?.status === 'pending' && (
