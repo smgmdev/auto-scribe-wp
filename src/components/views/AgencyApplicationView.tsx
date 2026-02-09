@@ -513,7 +513,7 @@ export function AgencyApplicationView() {
           style={{ zIndex: 1 }}
         >
         
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 space-y-8">
           
           {/* Application Summary Card - shown when pending */}
           {existingApplication?.status === 'pending' && (
