@@ -1604,6 +1604,20 @@ export function AdminAgenciesView() {
 
           {selectedApp && (
             <div className="space-y-4">
+              {/* Dates */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Application Date</p>
+                  <p className="font-medium">{format(new Date(selectedApp.created_at), 'MMM d, yyyy h:mm a')}</p>
+                </div>
+                {selectedApp.reviewed_at && (
+                  <div>
+                    <p className="text-muted-foreground">Rejection Date</p>
+                    <p className="font-medium text-red-500">{format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                  </div>
+                )}
+              </div>
+
               {/* Contact & Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
