@@ -517,7 +517,7 @@ export function AgencyApplicationView() {
               <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {existingApplication.logo_url && (
                         <img 
@@ -534,34 +534,15 @@ export function AgencyApplicationView() {
                         <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
                       </div>
                     </div>
-                    <Badge className="bg-white/20 text-white border-0 text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-left">
-                    <div>
-                      <p className="text-white/50">Agency</p>
-                      <p className="text-white font-medium">{existingApplication.agency_name}</p>
-                    </div>
-                    <div className="hidden lg:block">
-                      <p className="text-white/50">Country</p>
-                      <p className="text-white font-medium">{existingApplication.country}</p>
-                    </div>
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <p className="text-white/50">Submitted</p>
-                        <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs text-white/50">Submitted</p>
+                        <p className="text-xs text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 lg:hidden transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
-                    </div>
-                    <div className="hidden lg:flex items-end justify-between">
-                      <div>
-                        <p className="text-white/50">Website</p>
-                        <p className="text-white font-medium truncate">
-                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
-                        </p>
-                      </div>
+                      <Badge className="bg-white/20 text-white border-0 text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
                       <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
