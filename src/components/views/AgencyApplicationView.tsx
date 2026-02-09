@@ -488,13 +488,17 @@ export function AgencyApplicationView() {
                   <p className="mt-3 text-white/80 text-base lg:text-lg">
                     You have submitted a new application. It takes between 1-3 days to review new applications. You will be notified.
                   </p>
+                ) : existingApplication?.status === 'rejected' ? (
+                  <p className="mt-3 text-white/80 text-base lg:text-lg">
+                    Your previous application was rejected. You can review the reason below and apply again.
+                  </p>
                 ) : (
                   <p className="mt-3 text-white/80 text-base lg:text-lg">
                     Become a media merchant on Arcana Mace and trade media products worldwide.
                   </p>
                 )}
                 
-                {existingApplication?.status === 'pending' ? (
+                {existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? (
                   <Button 
                     className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
                     onClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth' })}
@@ -520,10 +524,10 @@ export function AgencyApplicationView() {
           style={{ zIndex: 1 }}
         >
         
-        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' ? 'pt-8 pb-8' : 'pt-5'}`}>
+        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? 'pt-8 pb-8' : 'pt-5'}`}>
           
-          {/* Application Summary Card - shown when pending */}
-          {existingApplication?.status === 'pending' && (
+          {/* Application Summary Card - shown when pending or rejected */}
+          {(existingApplication?.status === 'pending' || existingApplication?.status === 'rejected') && (
             <div ref={myApplicationsRef} className="space-y-4">
               <h2 className="text-3xl font-bold text-center text-white">
                 My Applications
@@ -554,10 +558,17 @@ export function AgencyApplicationView() {
                           <p className="text-xs text-white/50">Submitted</p>
                           <p className="text-xs text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
                         </div>
-                        <Badge className="bg-white/20 text-white border-0 text-xs">
-                          <Clock className="h-3 w-3 mr-1" />
-                          Pending
-                        </Badge>
+                        {existingApplication.status === 'rejected' ? (
+                          <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Rejected
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-white/20 text-white border-0 text-xs">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending
+                          </Badge>
+                        )}
                         <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                       </div>
                     </div>
@@ -712,6 +723,14 @@ export function AgencyApplicationView() {
                         </Button>
                       )}
                     </div>
+
+                    {/* Rejection reason inside collapsible */}
+                    {existingApplication.status === 'rejected' && existingApplication.admin_notes && (
+                      <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <p className="text-xs text-white/50 mb-1">Rejection Reason</p>
+                        <p className="text-xs text-white">{existingApplication.admin_notes}</p>
+                      </div>
+                    )}
                   </div>
                 </CollapsibleContent>
               </div>
@@ -746,7 +765,7 @@ export function AgencyApplicationView() {
 
         <AgencyWorkBanner 
           onApplyClick={() => setDialogOpen(true)} 
-          isPending={existingApplication?.status === 'pending'}
+          isPending={existingApplication?.status === 'pending' || existingApplication?.status === 'rejected'}
           onMyApplicationsClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         />
 
@@ -756,8 +775,8 @@ export function AgencyApplicationView() {
 
             <AgencyFAQ dark />
 
-      {/* Show existing application status card - only for cancelled/rejected, not pending (shown in hero) */}
-      {existingApplication && existingApplication.status !== 'pending' && (
+      {/* Show existing application status card - only for cancelled, not pending/rejected (shown in My Applications) */}
+      {existingApplication && existingApplication.status === 'cancelled' && (
         <Card className={existingApplication.status === 'cancelled' ? 'border-red-500/30' : ''}>
 
           <CardHeader>
@@ -789,49 +808,13 @@ export function AgencyApplicationView() {
                   {existingApplication.agency_website}
                 </button>
               </div>
-              {(existingApplication.status === 'cancelled' || existingApplication.status === 'rejected') && (
-                <div>
-                  <p className="text-muted-foreground">
-                    {existingApplication.status === 'cancelled' ? 'Cancelled' : 'Rejected'}
-                  </p>
-                  <p className="font-medium">
-                    {format(new Date(existingApplication.status === 'rejected' && existingApplication.reviewed_at 
-                      ? existingApplication.reviewed_at 
-                      : existingApplication.updated_at), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="text-muted-foreground">Cancelled</p>
+                <p className="font-medium">
+                  {format(new Date(existingApplication.updated_at), 'MMM d, yyyy h:mm a')}
+                </p>
+              </div>
             </div>
-            
-            {existingApplication.status === 'rejected' && (
-              <>
-                {!showRejectionReason ? (
-                  <Button 
-                    variant="outline" 
-                    className="w-full hover:bg-black hover:text-white transition-all duration-200"
-                    onClick={() => setShowRejectionReason(true)}
-                  >
-                    <ChevronDown className="h-4 w-4 mr-2" />
-                    See reason
-                  </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <Button 
-                      variant="outline" 
-                      className="w-full hover:bg-black hover:text-white transition-all duration-200"
-                      onClick={() => setShowRejectionReason(false)}
-                    >
-                      <ChevronUp className="h-4 w-4 mr-2" />
-                      Hide reason
-                    </Button>
-                    <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                      <p className="text-sm text-muted-foreground mb-1">Reason</p>
-                      <p className="text-sm">{existingApplication.admin_notes || 'No reason provided'}</p>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
           </CardContent>
         </Card>
       )}
