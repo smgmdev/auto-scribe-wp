@@ -977,7 +977,9 @@ export function AdminAgenciesView() {
                             )}
                             <div>
                               <h3 className="font-medium">{app.agency_name}</h3>
-                              <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
+                              {app.admin_notes && (
+                                <p className="text-xs text-muted-foreground mt-0.5">{app.admin_notes}</p>
+                              )}
                               {app.updated_at && (
                                 <p className="text-xs text-muted-foreground mt-0.5">
                                   Cancelled {format(new Date(app.updated_at), 'MMM d, yyyy, h:mm a')}
