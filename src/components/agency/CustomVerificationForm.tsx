@@ -856,7 +856,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
                 </Select>
               </div>
             </div>
-            <div className="flex items-start gap-2 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+            <div className="flex items-start gap-2 p-3 bg-amber-500/10 rounded-none border border-amber-500/20">
               <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
                 Please double-check your wallet address and network. Sending to the wrong address or network may result in permanent loss of funds.
