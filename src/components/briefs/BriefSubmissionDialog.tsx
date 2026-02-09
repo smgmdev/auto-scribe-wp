@@ -442,12 +442,12 @@ export function BriefSubmissionDialog({
                   variant="outline" 
                   onClick={() => { onOpenChange(false); onBack?.(); }} 
                   disabled={isSubmitting}
-                  className="flex-1 hover:bg-foreground hover:text-background transition-all duration-200"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-all duration-200"
                 >
                   Back
                 </Button>
                 <Button 
-                  className="flex-1 bg-foreground text-background hover:bg-foreground/80 transition-colors"
+                  className="flex-1 rounded-none bg-foreground text-background hover:bg-foreground/80 transition-colors"
                   onClick={handleSubmit} 
                   disabled={isSubmitting || !description.trim()}
                 >
