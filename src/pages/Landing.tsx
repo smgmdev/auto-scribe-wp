@@ -629,7 +629,7 @@ const Landing = () => {
           <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-4 px-4 pointer-events-none">
             <div className="w-full max-w-3xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
               {/* Search Input Bar */}
-              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border rounded-t-xl shadow-xl">
+              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border rounded-none shadow-xl">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <input
                   type="text"
@@ -656,7 +656,7 @@ const Landing = () => {
               </div>
 
               {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border rounded-b-xl shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col">
+              <div className="bg-card border border-t-0 border-border rounded-none shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col">
                 {/* Category Tabs */}
                 <div className="border-b border-border flex-shrink-0">
                   <div className="flex gap-6 px-4">
@@ -682,7 +682,7 @@ const Landing = () => {
                     <div className="flex flex-wrap gap-1 md:gap-2">
                       <button
                         onClick={() => setActiveSubcategory(null)}
-                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                           !activeSubcategory
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -694,7 +694,7 @@ const Landing = () => {
                         <button
                           key={subcat}
                           onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                             activeSubcategory === subcat
                               ? 'bg-foreground text-background'
                               : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -732,7 +732,7 @@ const Landing = () => {
                           <img
                             src={site.favicon || getFaviconUrl(site.link)}
                             alt={site.name}
-                            className="h-10 w-10 rounded-lg bg-muted object-cover flex-shrink-0"
+                            className="h-10 w-10 rounded-none bg-muted object-cover flex-shrink-0"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
