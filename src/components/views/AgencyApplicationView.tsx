@@ -364,7 +364,7 @@ export function AgencyApplicationView() {
                     Agency: {agencyPayout?.agency_name}
                   </p>
                 </div>
-                {getStatusBadge('downgraded', false, true)}
+                <div className="hidden md:block">{getStatusBadge('downgraded', false, true)}</div>
               </div>
               {agencyPayout?.downgrade_reason && (
                 <p className="text-sm text-white/80 text-center mt-4 pt-3 border-t border-white/20">
