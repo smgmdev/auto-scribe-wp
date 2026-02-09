@@ -369,7 +369,7 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <div>
+          <div className="-mx-4 lg:mx-0">
             <div className="relative w-full overflow-hidden rounded-none">
               <img 
                 src={agencyVerificationBanner} 
