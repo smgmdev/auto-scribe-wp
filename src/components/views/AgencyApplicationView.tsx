@@ -702,9 +702,10 @@ export function AgencyApplicationView() {
               className="w-full h-auto object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-              <p className="text-white text-2xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg flex items-center gap-2 flex-wrap justify-center">
-                Have some ☕. Your new application is in <Loader2 className="h-7 w-7 lg:h-10 lg:w-10 animate-spin inline-block" />
-              </p>
+              <div className="text-white text-2xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg">
+                <p>Have some ☕</p>
+                <p className="flex items-center gap-2 justify-center mt-2">Your new application is in <Loader2 className="h-7 w-7 lg:h-10 lg:w-10 animate-spin" /></p>
+              </div>
             </div>
           </div>
 
