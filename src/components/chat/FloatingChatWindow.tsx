@@ -6554,10 +6554,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               This will send an offer to the client. Client will need to accept and pay to proceed.
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse md:flex-row gap-2">
               <Button
                 variant="outline"
-                className="flex-1 hover:bg-black hover:text-white hover:border-black transition-all duration-200 dark:hover:bg-white dark:hover:text-black dark:hover:border-white"
+                className="flex-1 rounded-none hover:bg-black hover:text-white hover:border-black transition-all duration-200 dark:hover:bg-white dark:hover:text-black dark:hover:border-white"
                 onClick={() => {
                   setSendOrderDialogOpen(false);
                   setSpecialTerms('');
@@ -6570,7 +6570,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200"
+                className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200"
                 onClick={async () => {
                   if (!senderId || !globalChatRequest) return;
                   
