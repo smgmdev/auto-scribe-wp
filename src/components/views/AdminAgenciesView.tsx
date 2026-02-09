@@ -788,7 +788,7 @@ export function AdminAgenciesView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-3">
-        <TabsList className="flex w-full overflow-visible md:grid md:grid-cols-4 scrollbar-hide justify-start rounded-none">
+        <TabsList className="flex w-full overflow-x-auto md:overflow-visible md:grid md:grid-cols-4 scrollbar-hide justify-start rounded-none">
           <TabsTrigger value="pending" className="relative">
             New ({pendingApplications.length})
             {unreadPendingCount > 0 && (
