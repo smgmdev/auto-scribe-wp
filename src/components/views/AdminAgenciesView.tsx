@@ -1388,10 +1388,9 @@ export function AdminAgenciesView() {
                                   <h3 className="font-semibold">{agency.agency_name}</h3>
                                   <CheckCircle className="h-4 w-4 text-green-500" />
                                 </div>
-                                <p className="text-sm text-muted-foreground">{agency.email}</p>
                                 {application && (
                                   <p className="text-xs text-muted-foreground">
-                                    {application.full_name} • {application.country}
+                                    {application.country}
                                   </p>
                                 )}
                               </div>
