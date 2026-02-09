@@ -210,12 +210,12 @@ export function BriefSubmissionDialog({
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none">
+    <div className={`fixed inset-0 z-[200] ${isMobile ? '' : 'flex items-center justify-center pointer-events-none'}`}>
       <div
-        className={`pointer-events-auto bg-background relative overflow-y-auto ${
+        className={`bg-background relative overflow-y-auto ${
           isMobile 
-            ? 'w-full h-[100dvh] pt-4 px-4 pb-4' 
-            : 'w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
+            ? 'w-full h-[100dvh]' 
+            : 'pointer-events-auto w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
@@ -238,7 +238,7 @@ export function BriefSubmissionDialog({
           <span className="sr-only">Close</span>
         </button>
 
-        <div className="space-y-4 p-4 sm:p-0">
+        <div className="space-y-4 px-4 sm:px-0">
           <div className="flex flex-col space-y-1.5 text-left">
             <h2 className="text-base sm:text-lg font-semibold leading-none tracking-tight">Send Your Brief</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
