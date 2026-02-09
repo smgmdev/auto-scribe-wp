@@ -453,7 +453,7 @@ export function AgencyApplicationView() {
   return (
     <>
       {/* Wrapper that contains both video and content - video won't extend beyond this */}
-      <div className="animate-fade-in -m-4 lg:-m-8 relative bg-[#1d1d1f]">
+      <div className="animate-fade-in -m-4 lg:-m-8 -mt-4 lg:-mt-8 relative bg-[#1d1d1f] min-h-[calc(100vh-56px)] lg:min-h-screen">
         {/* Video Section - sticky so it stays visible while scrolling through the spacer */}
         <div 
           className="sticky top-14 lg:top-0 h-[60vh] overflow-hidden"
