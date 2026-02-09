@@ -691,7 +691,7 @@ export function AgencyApplicationView() {
         </div>
 
           {/* Full-width Promo Video */}
-          <div className="w-full overflow-hidden">
+          <div className="w-full overflow-hidden relative">
             <video
               src={agencyPromoVideo}
               autoPlay
@@ -700,6 +700,11 @@ export function AgencyApplicationView() {
               playsInline
               className="w-full h-auto object-cover"
             />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <p className="text-white text-2xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg">
+                Have some coffee. Your new application is in review.
+              </p>
+            </div>
           </div>
 
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-10 pb-8 space-y-8">
