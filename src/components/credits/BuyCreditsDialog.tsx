@@ -183,7 +183,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                   variant={parsedAmount === amount ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCreditAmount(amount.toString())}
-                  className="w-full"
+                  className="w-full rounded-none"
                 >
                   {amount}
                 </Button>
@@ -209,14 +209,14 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               value={creditAmount}
               onChange={handleInputChange}
               placeholder="Enter amount"
-              className="text-lg"
+              className="text-sm rounded-none"
             />
             <p className="text-xs text-muted-foreground">
               Minimum purchase: {MIN_CREDITS} credits
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/50 p-4">
+          <div className="rounded-none border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Price per credit</span>
               <span className="font-medium">${PRICE_PER_CREDIT}</span>
@@ -237,7 +237,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           <Button
             onClick={handlePurchase}
             disabled={purchasing || !isValidAmount}
-            className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             size="lg"
           >
             {purchasing ? (
