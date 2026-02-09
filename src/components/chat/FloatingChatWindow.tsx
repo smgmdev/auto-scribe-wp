@@ -4371,15 +4371,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
           }`}>
-            <div className="flex items-start gap-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                isOwnMessage 
-                  ? 'bg-primary-foreground/20' 
-                  : 'bg-blue-100 dark:bg-blue-900/50'
-              }`}>
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-600 dark:text-blue-400'}`} />
-              </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}
@@ -4407,7 +4399,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <span className="font-medium">Special Terms:</span> {orderRequest.special_terms}
                   </p>
                 )}
-              </div>
             </div>
             
             {/* Action buttons for client */}
