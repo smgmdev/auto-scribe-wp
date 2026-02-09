@@ -320,6 +320,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
   const [confirmBuyCreditsOpen, setConfirmBuyCreditsOpen] = useState(false);
   const [acceptingOrder, setAcceptingOrder] = useState(false);
+  const [confirmOrderPos, setConfirmOrderPos] = useState({ x: 0, y: 0 });
+  const [confirmOrderDragging, setConfirmOrderDragging] = useState(false);
+  const confirmOrderDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const [pendingOrderRequest, setPendingOrderRequest] = useState<{
     media_site_id: string;
     media_site_name: string;
@@ -488,8 +491,40 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     document.addEventListener('mouseup', handleUp);
     return () => { document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp); };
   }, [sendOfferDragging]);
-  
-  // Timer tick for live countdown updates (every second)
+
+  // Confirm Order drag handlers
+  const handleConfirmOrderDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
+    setConfirmOrderDragging(true);
+    confirmOrderDragRef.current = { x: e.clientX, y: e.clientY, posX: confirmOrderPos.x, posY: confirmOrderPos.y };
+    e.preventDefault();
+  }, [confirmOrderPos]);
+
+  useEffect(() => {
+    if (!confirmOrderDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setConfirmOrderPos({
+        x: confirmOrderDragRef.current.posX + e.clientX - confirmOrderDragRef.current.x,
+        y: confirmOrderDragRef.current.posY + e.clientY - confirmOrderDragRef.current.y
+      });
+    };
+    const handleUp = () => setConfirmOrderDragging(false);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+    return () => { document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp); };
+  }, [confirmOrderDragging]);
+
+  // Confirm Order popup stack
+  useEffect(() => {
+    if (acceptOrderDialogOpen) {
+      setConfirmOrderPos({ x: 0, y: 0 });
+      pushPopup('confirm-order-dialog', () => { setAcceptOrderDialogOpen(false); setPendingOrderRequest(null); });
+    } else {
+      removePopup('confirm-order-dialog');
+    }
+    return () => removePopup('confirm-order-dialog');
+  }, [acceptOrderDialogOpen]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setTimerTick(tick => tick + 1);
@@ -7228,189 +7263,207 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         zIndex={350}
       />
 
-      {/* Accept Order Confirmation Dialog */}
-      <Dialog open={acceptOrderDialogOpen} onOpenChange={(open) => {
-        setAcceptOrderDialogOpen(open);
-        if (!open) setPendingOrderRequest(null);
-      }}>
-        <DialogContent className="sm:max-w-md z-[9999]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              Confirm Order
-            </DialogTitle>
-          </DialogHeader>
+      {/* Accept Order Confirmation Dialog - draggable portal */}
+      {acceptOrderDialogOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto bg-background relative overflow-y-auto ${
+              isMobile
+                ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
+                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg'
+            }`}
+            style={isMobile ? undefined : { transform: `translate(${confirmOrderPos.x}px, ${confirmOrderPos.y}px)` }}
+          >
+            {/* Drag Handle - desktop only */}
+            {!isMobile && (
+              <div
+                className={`flex items-center justify-start py-2 ${confirmOrderDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                onMouseDown={handleConfirmOrderDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
 
-          {pendingOrderRequest && (
-            <div className="space-y-2 pb-4">
-              {/* Order Summary */}
-              <div className="rounded-none border border-border bg-muted/50 p-4">
-                <div className="flex items-start gap-3">
-                  {pendingOrderRequest.media_site_favicon && (
-                    <img 
-                      src={pendingOrderRequest.media_site_favicon} 
-                      alt="" 
-                      className="w-12 h-12 rounded-lg object-cover shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">{pendingOrderRequest.media_site_name}</h3>
-                    <p className="text-2xl font-bold text-primary mt-1">
-                      ${pendingOrderRequest.price.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {pendingOrderRequest.price.toLocaleString()} credits will be deducted
-                    </p>
+            {/* Close Button */}
+            <button
+              onClick={() => { setAcceptOrderDialogOpen(false); setPendingOrderRequest(null); }}
+              className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+
+            <div className="flex flex-col space-y-1.5 text-left">
+              <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                Confirm Order
+              </h2>
+            </div>
+
+            {pendingOrderRequest && (
+              <div className="space-y-2 py-4">
+                {/* Order Summary */}
+                <div className="rounded-none border border-border bg-muted/50 p-4">
+                  <div className="flex items-start gap-3">
+                    {pendingOrderRequest.media_site_favicon && (
+                      <img 
+                        src={pendingOrderRequest.media_site_favicon} 
+                        alt="" 
+                        className="w-12 h-12 rounded-none object-cover shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold">{pendingOrderRequest.media_site_name}</h3>
+                      <p className="text-2xl font-bold text-primary mt-1">
+                        ${pendingOrderRequest.price.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {pendingOrderRequest.price.toLocaleString()} credits will be deducted
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Delivery Time */}
-              {pendingOrderRequest.delivery_duration && (pendingOrderRequest.delivery_duration.days > 0 || pendingOrderRequest.delivery_duration.hours > 0 || pendingOrderRequest.delivery_duration.minutes > 0) && (
-                <div className="flex items-center gap-2 p-3 rounded-none bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                  <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                    Delivery Time: {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
-                  </p>
+                {/* Delivery Time */}
+                {pendingOrderRequest.delivery_duration && (pendingOrderRequest.delivery_duration.days > 0 || pendingOrderRequest.delivery_duration.hours > 0 || pendingOrderRequest.delivery_duration.minutes > 0) && (
+                  <div className="flex items-center gap-2 p-3 rounded-none bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                    <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      Delivery Time: {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Special Terms */}
+                {pendingOrderRequest.special_terms && (
+                  <div className="p-3 rounded-none bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      {pendingOrderRequest.special_terms}
+                    </p>
+                  </div>
+                )}
+
+                {/* Credit Balance */}
+                <div className="rounded-none border border-border bg-background p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Your Credit Balance</span>
+                    <span className="font-semibold">{(credits || 0).toLocaleString()} credits</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm text-muted-foreground">Order Cost</span>
+                    <span className="font-semibold text-destructive">-{pendingOrderRequest.price.toLocaleString()} credits</span>
+                  </div>
+                  <div className="border-t border-border my-3" />
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">After Order</span>
+                    <span className={`font-bold ${(credits || 0) < pendingOrderRequest.price ? 'text-destructive' : 'text-primary'}`}>
+                      {Math.max(0, (credits || 0) - pendingOrderRequest.price).toLocaleString()} credits
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              {/* Special Terms */}
-              {pendingOrderRequest.special_terms && (
-                <div className="p-3 rounded-none bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
-                  <p className="text-sm text-amber-600 dark:text-amber-400">
-                    {pendingOrderRequest.special_terms}
-                  </p>
-                </div>
-              )}
+                {/* Insufficient Credits Warning */}
+                {(credits || 0) < pendingOrderRequest.price && (
+                  <div className="p-4 rounded-none bg-destructive/10 border border-destructive/20">
+                    <p className="font-medium text-destructive">Insufficient Credits</p>
+                    <p className="text-sm text-muted-foreground">
+                      You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
+                    </p>
+                  </div>
+                )}
 
-              {/* Credit Balance */}
-              <div className="rounded-none border border-border bg-background p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Your Credit Balance</span>
-                  <span className="font-semibold">{(credits || 0).toLocaleString()} credits</span>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm text-muted-foreground">Order Cost</span>
-                  <span className="font-semibold text-destructive">-{pendingOrderRequest.price.toLocaleString()} credits</span>
-                </div>
-                <div className="border-t border-border my-3" />
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">After Order</span>
-                  <span className={`font-bold ${(credits || 0) < pendingOrderRequest.price ? 'text-destructive' : 'text-primary'}`}>
-                    {Math.max(0, (credits || 0) - pendingOrderRequest.price).toLocaleString()} credits
-                  </span>
-                </div>
-              </div>
+                {/* Buy Credits Button when insufficient */}
+                {(credits || 0) < pendingOrderRequest.price && (
+                  <Button
+                    onClick={() => setConfirmBuyCreditsOpen(true)}
+                    variant="default"
+                    className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 text-sm"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Buy Credits
+                  </Button>
+                )}
 
-              {/* Insufficient Credits Warning */}
-              {(credits || 0) < pendingOrderRequest.price && (
-                <div className="p-4 rounded-none bg-destructive/10 border border-destructive/20">
-                  <p className="font-medium text-destructive">Insufficient Credits</p>
-                  <p className="text-sm text-muted-foreground">
-                    You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
-                  </p>
-                </div>
-              )}
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-colors text-sm"
+                    onClick={() => {
+                      setAcceptOrderDialogOpen(false);
+                      setPendingOrderRequest(null);
+                    }}
+                    disabled={acceptingOrder}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200 text-sm"
+                    disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
+                    onClick={async () => {
+                      if (!pendingOrderRequest || !globalChatRequest) return;
+                      
+                      setAcceptingOrder(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke('create-credit-order', {
+                          body: {
+                            media_site_id: pendingOrderRequest.media_site_id,
+                            service_request_id: globalChatRequest.id,
+                            delivery_duration: pendingOrderRequest.delivery_duration || { days: 0, hours: 0, minutes: 0 }
+                          },
+                        });
 
-              {/* Buy Credits Button when insufficient */}
-              {(credits || 0) < pendingOrderRequest.price && (
-                <Button
-                  onClick={() => setConfirmBuyCreditsOpen(true)}
-                  variant="default"
-                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 text-sm"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Buy Credits
-                </Button>
-              )}
+                        if (error) throw error;
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-colors text-sm"
-                  onClick={() => {
-                    setAcceptOrderDialogOpen(false);
-                    setPendingOrderRequest(null);
-                  }}
-                  disabled={acceptingOrder}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200 text-sm"
-                  disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
-                  onClick={async () => {
-                    if (!pendingOrderRequest || !globalChatRequest) return;
-                    
-                    setAcceptingOrder(true);
-                    try {
-                      const { data, error } = await supabase.functions.invoke('create-credit-order', {
-                        body: {
-                          media_site_id: pendingOrderRequest.media_site_id,
-                          service_request_id: globalChatRequest.id,
-                          delivery_duration: pendingOrderRequest.delivery_duration || { days: 0, hours: 0, minutes: 0 }
-                        },
-                      });
-
-                      if (error) throw error;
-
-                      if (data?.success) {
-                        await refreshCredits();
-                        
-                        const newOrder = { 
-                          id: data.order_id, 
-                          status: 'paid',
-                          delivery_status: 'pending',
-                          delivery_deadline: data.delivery_deadline || null
-                        };
-                        
-                        // Update local order state immediately for banner display
-                        setLocalOrder(newOrder);
-                        
-                        // Update the global chat request to reflect that an order exists
-                        updateGlobalChatRequest({ order: newOrder }, globalChatRequest.id);
-                        
-                        // Note: ORDER_PLACED message is inserted by the edge function and will arrive via real-time subscription
-                        // Do NOT add it locally to avoid duplicate messages
-                        
-                        // Increment the unread orders count for notification
-                        incrementUserUnreadOrdersCount();
-                        
-                        toast.success(`Successfully ordered from ${pendingOrderRequest.media_site_name}. ${data.credits_deducted} credits used.`);
-                        
-                        setAcceptOrderDialogOpen(false);
-                        setPendingOrderRequest(null);
-                      } else if (data?.error) {
-                        throw new Error(data.error);
+                        if (data?.success) {
+                          await refreshCredits();
+                          
+                          const newOrder = { 
+                            id: data.order_id, 
+                            status: 'paid',
+                            delivery_status: 'pending',
+                            delivery_deadline: data.delivery_deadline || null
+                          };
+                          
+                          setLocalOrder(newOrder);
+                          updateGlobalChatRequest({ order: newOrder }, globalChatRequest.id);
+                          incrementUserUnreadOrdersCount();
+                          
+                          toast.success(`Successfully ordered from ${pendingOrderRequest.media_site_name}. ${data.credits_deducted} credits used.`);
+                          
+                          setAcceptOrderDialogOpen(false);
+                          setPendingOrderRequest(null);
+                        } else if (data?.error) {
+                          throw new Error(data.error);
+                        }
+                      } catch (error: any) {
+                        console.error('Order error:', error);
+                        toast.error(error.message || 'Failed to place order.');
+                      } finally {
+                        setAcceptingOrder(false);
                       }
-                    } catch (error: any) {
-                      console.error('Order error:', error);
-                      toast.error(error.message || 'Failed to place order.');
-                    } finally {
-                      setAcceptingOrder(false);
-                    }
-                  }}
-                >
-                  {acceptingOrder ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Confirm & Pay
-                    </>
-                  )}
-                </Button>
+                    }}
+                  >
+                    {acceptingOrder ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Confirm & Pay
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Deliver Order Dialog */}
       <Dialog open={deliverOrderDialogOpen} onOpenChange={setDeliverOrderDialogOpen}>
