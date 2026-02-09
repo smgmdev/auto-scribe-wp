@@ -1100,6 +1100,11 @@ export function AdminAgenciesView() {
                               {app.admin_notes && (
                                 <p className="text-xs text-red-400 mt-1">Reason: {app.admin_notes}</p>
                               )}
+                              {app.reviewed_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Rejected {format(new Date(app.reviewed_at), 'MMM d, yyyy, h:mm a')}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <Button
