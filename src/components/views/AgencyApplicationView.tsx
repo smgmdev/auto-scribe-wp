@@ -541,15 +541,18 @@ export function AgencyApplicationView() {
                       <p className="text-white/50">Agency</p>
                       <p className="text-white font-medium">{existingApplication.agency_name}</p>
                     </div>
-                    <div>
+                    <div className="hidden lg:block">
                       <p className="text-white/50">Country</p>
                       <p className="text-white font-medium">{existingApplication.country}</p>
                     </div>
-                    <div>
-                      <p className="text-white/50">Submitted</p>
-                      <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
-                    </div>
                     <div className="flex items-end justify-between">
+                      <div>
+                        <p className="text-white/50">Submitted</p>
+                        <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 lg:hidden transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                    </div>
+                    <div className="hidden lg:flex items-end justify-between">
                       <div>
                         <p className="text-white/50">Website</p>
                         <p className="text-white font-medium truncate">
