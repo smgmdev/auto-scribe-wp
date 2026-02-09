@@ -381,14 +381,14 @@ export function AgencyApplicationView() {
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                className="rounded-sm bg-accent border-none text-white hover:bg-white hover:text-accent"
+                className="rounded-sm bg-accent border-none text-white hover:bg-transparent hover:text-accent hover:border hover:border-accent"
                 onClick={() => window.open('mailto:support@arcanamace.com', '_blank')}
               >
                 Contact Support
               </Button>
               <Button
                 variant="outline"
-                className="rounded-sm bg-accent border-none text-white hover:bg-white hover:text-accent"
+                className="rounded-sm bg-accent border-none text-white hover:bg-transparent hover:text-accent hover:border hover:border-accent"
                 onClick={() => window.open('/help', '_self')}
               >
                 Visit Help Center
