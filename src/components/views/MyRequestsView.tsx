@@ -1191,7 +1191,7 @@ export function MyRequestsView() {
         </div>
 
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
           <TabsTrigger value="active" className="gap-2 relative">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
@@ -1336,7 +1336,7 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-2">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
                 <TabsTrigger value="delivered" className="gap-2 relative flex-1">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
