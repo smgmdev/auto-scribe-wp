@@ -5927,7 +5927,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-black text-white'
                           : 'bg-muted'
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                     >
