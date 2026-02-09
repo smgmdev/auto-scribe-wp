@@ -1729,31 +1729,32 @@ export function AdminAgenciesView() {
                   />
                 </>
               ) : null}
-              <DialogTitle className="flex items-center gap-2">
-                {selectedApp?.agency_name}
-                {(() => {
-                  const agencyPayout = selectedApp ? agencies.find(a => a.user_id === selectedApp.user_id) : null;
-                  const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
-                  if (verification?.submitted_at) {
-                    return (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-none text-xs"
-                        onClick={() => {
-                          setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
-                          handleOpenVerification(verification);
-                        }}
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        View Verification
-                      </Button>
-                    );
-                  }
-                  return null;
-                })()}
-              </DialogTitle>
+              <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
             </div>
+            {(() => {
+              const agencyPayout = selectedApp ? agencies.find(a => a.user_id === selectedApp.user_id) : null;
+              const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
+              if (verification?.submitted_at) {
+                return (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-none text-xs w-full border-black/20"
+                    style={{ backgroundColor: '#f2a547', color: '#000' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
+                    onClick={() => {
+                      setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
+                      handleOpenVerification(verification);
+                    }}
+                  >
+                    <FileText className="h-3 w-3 mr-1" />
+                    View Verification
+                  </Button>
+                );
+              }
+              return null;
+            })()}
           </DialogHeader>
 
           {selectedApp && (
