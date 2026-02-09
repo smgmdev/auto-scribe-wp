@@ -627,7 +627,29 @@ export function AgencyApplicationView() {
                       )}
                       <div className="lg:col-span-2">
                         <p className="text-white/50 mb-1">Media Channels</p>
-                        <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
+                        <div className="flex flex-wrap gap-x-2 gap-y-1">
+                          {existingApplication.media_channels
+                            ? existingApplication.media_channels.split(',').map((channel, idx, arr) => {
+                                const trimmed = channel.trim();
+                                const display = trimmed.replace(/^https?:\/\//, '');
+                                return (
+                                  <span key={idx}>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setWebViewUrl(trimmed); setWebViewIsWebsite(true);
+                                      }}
+                                      className="text-white font-medium underline hover:text-white/80"
+                                    >
+                                      {display}
+                                    </button>
+                                    {idx < arr.length - 1 && <span className="text-white/50">,</span>}
+                                  </span>
+                                );
+                              })
+                            : <p className="text-white font-medium">Not specified</p>
+                          }
+                        </div>
                       </div>
                     </div>
                     
