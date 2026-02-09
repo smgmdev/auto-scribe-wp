@@ -10,6 +10,7 @@ import { ChatListPanel } from "@/components/ui/ChatListPanel";
 import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -120,6 +121,7 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           <AuthProvider>
+            <QuickNavBanner />
             <Toaster />
             <Sonner />
             <Routes>
