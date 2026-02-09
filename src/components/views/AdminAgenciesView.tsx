@@ -1289,33 +1289,17 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="md:hidden flex justify-end mb-2">
-                            <Badge 
-                              className={`cursor-pointer transition-colors ${
-                                verification?.read 
-                                  ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                                  : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
-                              }`}
-                              onClick={(e) => {
-                                if (verification) {
-                                  handleOpenVerification(verification, e);
-                                }
-                              }}
-                            >
-                              <Clock className="h-3 w-3 mr-1" />Pending Review
-                            </Badge>
-                          </div>
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
                                   src={logoUrls[application.id]} 
                                   alt={agency.agency_name}
-                                  className="w-10 h-10 rounded-full object-cover"
+                                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                                 />
                               ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
                                 <>
-                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                                     <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                   </div>
                                   <img 
@@ -1327,20 +1311,36 @@ export function AdminAgenciesView() {
                                   />
                                 </>
                               ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
-                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
                               ) : (
-                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                                   <FileText className="h-5 w-5 text-green-500" />
                                 </div>
                               )}
-                              <div>
+                              <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
                                 {verification && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {verification.country}
-                                  </p>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <p className="text-xs text-muted-foreground">
+                                      {verification.country}
+                                    </p>
+                                    <Badge 
+                                      className={`md:hidden cursor-pointer transition-colors flex-shrink-0 ${
+                                        verification?.read 
+                                          ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
+                                          : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                      }`}
+                                      onClick={(e) => {
+                                        if (verification) {
+                                          handleOpenVerification(verification, e);
+                                        }
+                                      }}
+                                    >
+                                      <Clock className="h-3 w-3 mr-1" />Pending Review
+                                    </Badge>
+                                  </div>
                                 )}
                               </div>
                             </div>
