@@ -137,8 +137,9 @@ export function AgencyApplicationView() {
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
+  const [allApplications, setAllApplications] = useState<AgencyApplication[]>([]);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
-  const [applicationExpanded, setApplicationExpanded] = useState(false);
+  const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const myApplicationsRef = useRef<HTMLDivElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
@@ -189,9 +190,7 @@ export function AgencyApplicationView() {
         .from('agency_applications')
         .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url, logo_url, payout_method, wp_blog_url')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
 
       if (validatedPayout) {
@@ -214,7 +213,9 @@ export function AgencyApplicationView() {
         setCustomVerification(null);
       }
       // Set existing application from the already fetched data
-      setExistingApplication(appData);
+      const apps = (appData || []) as AgencyApplication[];
+      setAllApplications(apps);
+      setExistingApplication(apps.length > 0 ? apps[0] : null);
     } catch (error) {
       console.error('Error fetching agency data:', error);
     } finally {
@@ -536,215 +537,218 @@ export function AgencyApplicationView() {
         
         <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? 'pt-8 pb-8' : 'pt-5'}`}>
           
-          {/* Application Summary Card - shown when pending or rejected */}
-          {(existingApplication?.status === 'pending' || existingApplication?.status === 'rejected') && (
+          {/* Application Summary Cards - shown when there are pending/rejected applications */}
+          {allApplications.length > 0 && (existingApplication?.status === 'pending' || existingApplication?.status === 'rejected') && (
             <div ref={myApplicationsRef} className="space-y-4">
               <h2 className="text-3xl font-bold text-center text-white">
                 My Applications
               </h2>
-              <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
-              <div className="bg-white/5 backdrop-blur-sm rounded-none border border-white/10 overflow-hidden">
-                <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
-                  <div className="space-y-2 lg:space-y-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {existingApplication.logo_url && (
-                          <img 
-                            src={existingApplication.logo_url.startsWith('http') 
-                              ? existingApplication.logo_url 
-                              : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
-                            } 
-                            alt={existingApplication.agency_name}
-                            className="h-8 w-8 rounded-lg object-cover bg-white/10"
-                          />
-                        )}
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium text-white">{existingApplication.agency_name}</h3>
-                          <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="hidden lg:block text-right">
-                          <p className="text-xs text-white/50">Submitted</p>
-                          <p className="text-xs text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
-                        </div>
-                        {existingApplication.status === 'rejected' ? (
-                          <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Rejected
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-white/20 text-white border-0 text-xs">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pending
-                          </Badge>
-                        )}
-                        <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between lg:hidden">
-                      <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy h:mm a')}</span></p>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-                  <div className="px-4 pb-4 pt-2 border-t border-white/10 space-y-4">
-                    
-                    {/* Full details */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <p className="text-white/50 mb-1">Full Name</p>
-                        <p className="text-white font-medium">{existingApplication.full_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50 mb-1">Email</p>
-                        <p className="text-white font-medium">{existingApplication.email}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50 mb-1">WhatsApp</p>
-                        <p className="text-white font-medium">{existingApplication.whatsapp_phone}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50 mb-1">Country</p>
-                        <p className="text-white font-medium">{existingApplication.country}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/50 mb-1">Agency Website</p>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true);
-                          }}
-                          className="text-white font-medium hover:underline truncate max-w-full text-left"
-                        >
-                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
-                        </button>
-                      </div>
-                      {existingApplication.agency_description && (
-                        <div>
-                          <p className="text-white/50 mb-1">Description</p>
-                          <p className="text-white font-medium">{existingApplication.agency_description}</p>
-                        </div>
-                      )}
-                      {existingApplication.wp_blog_url && (
-                        <div>
-                          <p className="text-white/50 mb-1">WordPress Blog</p>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setWebViewUrl(existingApplication.wp_blog_url!); setWebViewIsWebsite(true);
-                            }}
-                            className="text-white font-medium hover:underline truncate max-w-full text-left"
-                          >
-                            {existingApplication.wp_blog_url.replace(/^https?:\/\//, '')}
-                          </button>
-                        </div>
-                      )}
-                      {existingApplication.media_niches && existingApplication.media_niches.length > 0 && (
-                        <div className="lg:col-span-2">
-                          <p className="text-white/50 mb-1">Media Niches</p>
-                          <div className="flex flex-wrap gap-1">
-                            {existingApplication.media_niches.map((niche, index) => (
-                              <Badge key={index} className="bg-white/10 text-white border-0 text-xs">
-                                {niche}
+              {allApplications.map((app) => {
+                const isExpanded = expandedAppId === app.id;
+                return (
+                  <Collapsible key={app.id} open={isExpanded} onOpenChange={(open) => setExpandedAppId(open ? app.id : null)}>
+                  <div className="bg-white/5 backdrop-blur-sm rounded-none border border-white/10 overflow-hidden">
+                    <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
+                      <div className="space-y-2 lg:space-y-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {app.logo_url && (
+                              <img 
+                                src={app.logo_url.startsWith('http') 
+                                  ? app.logo_url 
+                                  : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${app.logo_url}`
+                                } 
+                                alt={app.agency_name}
+                                className="h-8 w-8 rounded-lg object-cover bg-white/10"
+                              />
+                            )}
+                            <div className="text-left">
+                              <h3 className="text-sm font-medium text-white">{app.agency_name}</h3>
+                              <p className="text-xs text-white/50 truncate">{app.agency_website.replace(/^https?:\/\//, '')}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="hidden lg:block text-right">
+                              <p className="text-xs text-white/50">Submitted</p>
+                              <p className="text-xs text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy')}</p>
+                            </div>
+                            {app.status === 'rejected' ? (
+                              <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Rejected
                               </Badge>
-                            ))}
+                            ) : (
+                              <Badge className="bg-white/20 text-white border-0 text-xs">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Pending
+                              </Badge>
+                            )}
+                            <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                           </div>
                         </div>
-                      )}
-                      <div className="lg:col-span-2">
-                        <p className="text-white/50 mb-1">Media Channels</p>
-                        <div className="flex flex-wrap gap-x-2 gap-y-1">
-                          {existingApplication.media_channels
-                            ? existingApplication.media_channels.split(',').map((channel, idx, arr) => {
-                                const trimmed = channel.trim();
-                                const display = trimmed.replace(/^https?:\/\//, '');
-                                return (
-                                  <span key={idx}>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setWebViewUrl(trimmed); setWebViewIsWebsite(true);
-                                      }}
-                                      className="text-white font-medium hover:underline hover:text-white/80"
-                                    >
-                                      {display}
-                                    </button>
-                                    {idx < arr.length - 1 && <span className="text-white/50">,</span>}
-                                  </span>
-                                );
-                              })
-                            : <p className="text-white font-medium">Not specified</p>
-                          }
+                        <div className="flex items-center justify-between lg:hidden">
+                          <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</span></p>
                         </div>
                       </div>
-                    </div>
+                    </CollapsibleTrigger>
                     
-                    {/* Action buttons */}
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true);
-                        }}
-                      >
-                        View Website
-                      </Button>
-                      {existingApplication.wp_blog_url && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setWebViewUrl(existingApplication.wp_blog_url!); setWebViewIsWebsite(true);
-                          }}
-                        >
-                          View Blog
-                        </Button>
-                      )}
-                      {existingApplication.incorporation_document_url && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            // Get signed URL for private document with original filename
-                            const storedPath = existingApplication.incorporation_document_url;
-                            // Extract original filename from stored path (format: userId/timestamp_originalname)
-                            const pathParts = storedPath.split('/');
-                            const fileNamePart = pathParts[pathParts.length - 1];
-                            const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
-                            const { data } = await supabase.storage
-                              .from('agency-documents')
-                              .createSignedUrl(storedPath, 3600, { download: originalName });
-                            if (data?.signedUrl) {
-                              setWebViewUrl(data.signedUrl); setWebViewIsWebsite(false);
-                            }
-                          }}
-                        >
-                          <FileText className="h-3 w-3 mr-1" />
-                          View Document
-                        </Button>
-                      )}
-                    </div>
+                    <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                      <div className="px-4 pb-4 pt-2 border-t border-white/10 space-y-4">
+                        
+                        {/* Full details */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <p className="text-white/50 mb-1">Full Name</p>
+                            <p className="text-white font-medium">{app.full_name}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">Email</p>
+                            <p className="text-white font-medium">{app.email}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">WhatsApp</p>
+                            <p className="text-white font-medium">{app.whatsapp_phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">Country</p>
+                            <p className="text-white font-medium">{app.country}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">Agency Website</p>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setWebViewUrl(app.agency_website); setWebViewIsWebsite(true);
+                              }}
+                              className="text-white font-medium hover:underline truncate max-w-full text-left"
+                            >
+                              {app.agency_website.replace(/^https?:\/\//, '')}
+                            </button>
+                          </div>
+                          {app.agency_description && (
+                            <div>
+                              <p className="text-white/50 mb-1">Description</p>
+                              <p className="text-white font-medium">{app.agency_description}</p>
+                            </div>
+                          )}
+                          {app.wp_blog_url && (
+                            <div>
+                              <p className="text-white/50 mb-1">WordPress Blog</p>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setWebViewUrl(app.wp_blog_url!); setWebViewIsWebsite(true);
+                                }}
+                                className="text-white font-medium hover:underline truncate max-w-full text-left"
+                              >
+                                {app.wp_blog_url.replace(/^https?:\/\//, '')}
+                              </button>
+                            </div>
+                          )}
+                          {app.media_niches && app.media_niches.length > 0 && (
+                            <div className="lg:col-span-2">
+                              <p className="text-white/50 mb-1">Media Niches</p>
+                              <div className="flex flex-wrap gap-1">
+                                {app.media_niches.map((niche, index) => (
+                                  <Badge key={index} className="bg-white/10 text-white border-0 text-xs">
+                                    {niche}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div className="lg:col-span-2">
+                            <p className="text-white/50 mb-1">Media Channels</p>
+                            <div className="flex flex-wrap gap-x-2 gap-y-1">
+                              {app.media_channels
+                                ? app.media_channels.split(',').map((channel, idx, arr) => {
+                                    const trimmed = channel.trim();
+                                    const display = trimmed.replace(/^https?:\/\//, '');
+                                    return (
+                                      <span key={idx}>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setWebViewUrl(trimmed); setWebViewIsWebsite(true);
+                                          }}
+                                          className="text-white font-medium hover:underline hover:text-white/80"
+                                        >
+                                          {display}
+                                        </button>
+                                        {idx < arr.length - 1 && <span className="text-white/50">,</span>}
+                                      </span>
+                                    );
+                                  })
+                                : <p className="text-white font-medium">Not specified</p>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWebViewUrl(app.agency_website); setWebViewIsWebsite(true);
+                            }}
+                          >
+                            View Website
+                          </Button>
+                          {app.wp_blog_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setWebViewUrl(app.wp_blog_url!); setWebViewIsWebsite(true);
+                              }}
+                            >
+                              View Blog
+                            </Button>
+                          )}
+                          {app.incorporation_document_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const storedPath = app.incorporation_document_url;
+                                const pathParts = storedPath.split('/');
+                                const fileNamePart = pathParts[pathParts.length - 1];
+                                const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
+                                const { data } = await supabase.storage
+                                  .from('agency-documents')
+                                  .createSignedUrl(storedPath, 3600, { download: originalName });
+                                if (data?.signedUrl) {
+                                  setWebViewUrl(data.signedUrl); setWebViewIsWebsite(false);
+                                }
+                              }}
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              View Document
+                            </Button>
+                          )}
+                        </div>
 
-                    {/* Rejection reason inside collapsible */}
-                    {existingApplication.status === 'rejected' && existingApplication.admin_notes && (
-                      <div className="p-3 bg-red-500/10 rounded-none border border-red-500/20">
-                        <p className="text-xs text-white/50 mb-1">Rejection Reason</p>
-                        <p className="text-xs text-white">{existingApplication.admin_notes}</p>
+                        {/* Rejection reason inside collapsible */}
+                        {app.status === 'rejected' && app.admin_notes && (
+                          <div className="p-3 bg-red-500/10 rounded-none border border-red-500/20">
+                            <p className="text-xs text-white/50 mb-1">Rejection Reason</p>
+                            <p className="text-xs text-white">{app.admin_notes}</p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </CollapsibleContent>
                   </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
+                </Collapsible>
+                );
+              })}
             </div>
           )}
         </div>
