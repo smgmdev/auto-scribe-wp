@@ -5593,54 +5593,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
               </div>
-              {/* Desktop: individual items */}
-              <div className="hidden md:flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 pl-9">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="flex items-center gap-1 cursor-help">
-                        {pendingOrder.price.toLocaleString()} credits
-                        <Info className="h-3 w-3" />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs">
-                      <p>Payment in credits. You should charge your account with appropriate amount of credits to place an order. 1 credit = 1 USD.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex items-center gap-1 cursor-help">
-                          • {formatDeliveryDuration(pendingOrder.delivery_duration)}
-                          <Info className="h-3 w-3" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-xs">
-                        <p>Estimated delivery time for the order.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                {pendingOrder.special_terms && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="flex items-center gap-1 cursor-help">
-                          • Special Terms
-                          <Info className="h-3 w-3" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-xs">
-                        <p>{pendingOrder.special_terms}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-              {/* Mobile: expandable Order Details */}
-              <div className="md:hidden pl-9">
+              {/* Expandable Order Details */}
+              <div className="pl-9">
                 <button
                   type="button"
                   onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
