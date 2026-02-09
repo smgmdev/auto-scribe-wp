@@ -105,7 +105,7 @@ const SiteMap = () => {
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-500 hover:bg-neutral-200 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-neutral-100 border border-neutral-200 text-neutral-500 hover:bg-neutral-200 transition-colors text-left"
             >
               <Search className="h-4 w-4" />
               <span>Search media outlets...</span>
