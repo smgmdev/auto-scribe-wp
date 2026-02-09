@@ -108,12 +108,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   useEffect(() => {
     if (isMobile || !chatHovered) return;
     const mainEl = document.querySelector('main');
-    const prevOverflow = mainEl?.style.overflow;
+    const prevMainOverflow = mainEl?.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
     if (mainEl) mainEl.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      if (mainEl) mainEl.style.overflow = prevOverflow || '';
-      document.body.style.overflow = '';
+      if (mainEl) mainEl.style.overflow = prevMainOverflow || '';
+      document.body.style.overflow = prevBodyOverflow || '';
+      document.documentElement.style.overflow = prevHtmlOverflow || '';
     };
   }, [isMobile, chatHovered]);
 
