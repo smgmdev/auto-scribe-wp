@@ -483,6 +483,42 @@ export function AgencyApplicationView() {
                 >
                   {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
                 </Button>
+                
+                {/* Application Summary - shown under the button when pending */}
+                {existingApplication?.status === 'pending' && (
+                  <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-medium text-white">Your Application</h3>
+                      <Badge className="bg-white/20 text-white border-0 text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <p className="text-white/50">Agency</p>
+                        <p className="text-white font-medium">{existingApplication.agency_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/50">Country</p>
+                        <p className="text-white font-medium">{existingApplication.country}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/50">Submitted</p>
+                        <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/50">Website</p>
+                        <button 
+                          onClick={() => setWebViewUrl(existingApplication.agency_website)} 
+                          className="text-white font-medium hover:underline truncate max-w-[120px] text-left"
+                        >
+                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
