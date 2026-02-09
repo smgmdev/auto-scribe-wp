@@ -211,16 +211,15 @@ export function BriefSubmissionDialog({
 
   return createPortal(
     <div 
-      className="fixed inset-0 z-[200]"
-      style={{ pointerEvents: isMobile ? 'auto' : 'none' }}
+      className="fixed inset-0 z-[200] pointer-events-none"
     >
       {isMobile ? (
         // Mobile: full-screen scrollable
         <div 
-          className="w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain"
+          className="pointer-events-auto w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
-          <div className="p-5 pb-8 space-y-4 relative min-h-[101dvh]">
+          <div className="p-5 pb-8 space-y-4 relative">
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
