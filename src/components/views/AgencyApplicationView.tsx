@@ -661,10 +661,15 @@ export function AgencyApplicationView() {
                           className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
                           onClick={async (e) => {
                             e.stopPropagation();
-                            // Get signed URL for private document
+                            // Get signed URL for private document with original filename
+                            const storedPath = existingApplication.incorporation_document_url;
+                            // Extract original filename from stored path (format: userId/timestamp_originalname)
+                            const pathParts = storedPath.split('/');
+                            const fileNamePart = pathParts[pathParts.length - 1];
+                            const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
                             const { data } = await supabase.storage
                               .from('agency-documents')
-                              .createSignedUrl(existingApplication.incorporation_document_url, 3600);
+                              .createSignedUrl(storedPath, 3600, { download: originalName });
                             if (data?.signedUrl) {
                               setWebViewUrl(data.signedUrl);
                             }

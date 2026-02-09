@@ -512,9 +512,13 @@ export function AdminAgenciesView() {
   };
 
   const getSignedUrl = async (path: string) => {
+    // Extract original filename from stored path (format: userId/timestamp_originalname)
+    const pathParts = path.split('/');
+    const fileNamePart = pathParts[pathParts.length - 1];
+    const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
     const { data, error } = await supabase.storage
       .from('agency-documents')
-      .createSignedUrl(path, 3600); // 1 hour expiry
+      .createSignedUrl(path, 3600, { download: originalName }); // 1 hour expiry
     if (error || !data) return null;
     return data.signedUrl;
   };
