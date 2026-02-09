@@ -5539,51 +5539,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p className="font-medium text-sm text-foreground">
                     {pendingOrder.media_site_name}
                   </p>
-                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1 cursor-help">
-                            {pendingOrder.price.toLocaleString()} credits
-                            <Info className="h-3 w-3" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs">
-                          <p>Payment in credits. You should charge your account with appropriate amount of credits to place an order. 1 credit = 1 USD.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • {formatDeliveryDuration(pendingOrder.delivery_duration)}
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>Estimated delivery time for the order.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {pendingOrder.special_terms && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • Special Terms
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>{pendingOrder.special_terms}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
                 </div>
                 {/* Action buttons - hidden for admin */}
                 {!isAdmin && (
@@ -5636,6 +5591,51 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-1 cursor-help">
+                        {pendingOrder.price.toLocaleString()} credits
+                        <Info className="h-3 w-3" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <p>Payment in credits. You should charge your account with appropriate amount of credits to place an order. 1 credit = 1 USD.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex items-center gap-1 cursor-help">
+                          • {formatDeliveryDuration(pendingOrder.delivery_duration)}
+                          <Info className="h-3 w-3" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p>Estimated delivery time for the order.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {pendingOrder.special_terms && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex items-center gap-1 cursor-help">
+                          • Special Terms
+                          <Info className="h-3 w-3" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p>{pendingOrder.special_terms}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             </div>
