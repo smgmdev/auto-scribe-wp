@@ -757,14 +757,11 @@ export function AgencyApplicationView() {
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 const storedPath = app.incorporation_document_url;
-                                const pathParts = storedPath.split('/');
-                                const fileNamePart = pathParts[pathParts.length - 1];
-                                const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
                                 const { data } = await supabase.storage
                                   .from('agency-documents')
-                                  .createSignedUrl(storedPath, 3600, { download: originalName });
+                                  .createSignedUrl(storedPath, 3600);
                                 if (data?.signedUrl) {
-                                  setWebViewUrl(data.signedUrl); setWebViewIsWebsite(false);
+                                  window.open(data.signedUrl, '_blank');
                                 }
                               }}
                             >
