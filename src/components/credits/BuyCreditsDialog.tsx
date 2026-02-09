@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -133,7 +134,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
@@ -255,6 +256,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
