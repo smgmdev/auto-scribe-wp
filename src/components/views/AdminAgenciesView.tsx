@@ -1784,13 +1784,7 @@ export function AdminAgenciesView() {
                   const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
                   return (
                     <>
-                      {/* Show pre-approval date separately if status is not rejected and reviewed_at exists but we also have other events */}
-                      {selectedApp.status === 'cancelled' && selectedApp.reviewed_at && (
-                        <div>
-                          <p className="text-muted-foreground">Pre-Approved Date</p>
-                          <p className="font-medium">{format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
-                        </div>
-                      )}
+                      {/* Pre-approval date already shown above for cancelled apps */}
                       {verification?.submitted_at && (
                         <div>
                           <p className="text-muted-foreground">Final Submission Date</p>
