@@ -509,11 +509,11 @@ export function AgencyApplicationView() {
 
         {/* Content Section - overlaps the sticky video, then pushes it out of view */}
         <div 
-          className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-24 pb-8 lg:pb-12" 
+          className="relative bg-[#1d1d1f] rounded-t-[40px] -mt-10 pb-8 lg:pb-12" 
           style={{ zIndex: 1 }}
         >
         
-        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' ? 'pt-8 pb-8' : 'pt-14'}`}>
+        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' ? 'pt-8 pb-8' : 'pt-5'}`}>
           
           {/* Application Summary Card - shown when pending */}
           {existingApplication?.status === 'pending' && (
