@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import agencyVerificationBanner from '@/assets/agency-verification-banner.jpg';
+import agencyDowngradedBanner from '@/assets/agency-downgraded-banner.jpg';
 import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock, UserMinus, Info } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
@@ -364,6 +365,14 @@ export function AgencyApplicationView() {
             ? `Reason: ${agencyPayout.downgrade_reason}`
             : 'Your account has been downgraded. Contact support for details.'}
         </p>
+
+        <div className="w-full overflow-hidden rounded-lg">
+          <img 
+            src={agencyDowngradedBanner} 
+            alt="Account downgraded" 
+            className="w-full h-[300px] object-cover"
+          />
+        </div>
 
         <AgencyFAQ />
       </div>
