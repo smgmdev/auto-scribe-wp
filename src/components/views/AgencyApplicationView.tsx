@@ -354,7 +354,7 @@ export function AgencyApplicationView() {
           />
           <div className="absolute inset-0 flex items-center justify-center p-6">
             <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/30 shrink-0">
                   <UserMinus className="h-6 w-6 text-red-500" />
                 </div>
