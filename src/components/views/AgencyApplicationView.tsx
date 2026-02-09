@@ -548,7 +548,7 @@ export function AgencyApplicationView() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between lg:hidden">
-                      <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</span></p>
+                      <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy h:mm a')}</span></p>
                     </div>
                   </div>
                 </CollapsibleTrigger>
