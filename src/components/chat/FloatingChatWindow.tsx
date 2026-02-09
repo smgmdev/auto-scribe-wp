@@ -102,11 +102,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [isMobile]);
 
-  // On desktop, block page scroll only when hovering over chat window
-  const [chatHovered, setChatHovered] = useState(false);
+  // On desktop, block page scroll when chat window is clicked/focused
+  const [chatFocused, setChatFocused] = useState(false);
+
+  // Click outside detection to unlock scroll
+  useEffect(() => {
+    if (isMobile) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (chatWindowRef.current && !chatWindowRef.current.contains(e.target as Node)) {
+        setChatFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside, true);
+    return () => document.removeEventListener('mousedown', handleClickOutside, true);
+  }, [isMobile]);
 
   useEffect(() => {
-    if (isMobile || !chatHovered) return;
+    if (isMobile || !chatFocused) return;
     const mainEl = document.querySelector('main');
     const prevMainOverflow = mainEl?.style.overflow;
     const prevBodyOverflow = document.body.style.overflow;
@@ -119,7 +133,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       document.body.style.overflow = prevBodyOverflow || '';
       document.documentElement.style.overflow = prevHtmlOverflow || '';
     };
-  }, [isMobile, chatHovered]);
+  }, [isMobile, chatFocused]);
 
   // Fetch order data on mount - ALWAYS fetch fresh data to ensure delivery_status is current
   useEffect(() => {
@@ -4873,6 +4887,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         onMouseDown={() => {
           handleWindowClick();
           setIsChatFocused(true);
+          setChatFocused(true);
         }}
         onFocus={() => setIsChatFocused(true)}
         onBlur={(e) => {
@@ -4881,8 +4896,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             setIsChatFocused(false);
           }
         }}
-        onMouseEnter={() => setChatHovered(true)}
-        onMouseLeave={() => setChatHovered(false)}
         tabIndex={-1}
       >
         {/* Header */}
@@ -7338,8 +7351,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className="fixed z-[300] bg-background border shadow-2xl w-[450px] flex flex-col"
             style={{ left: mediaListingPos.x, top: mediaListingPos.y }}
-            onMouseEnter={() => setChatHovered(true)}
-            onMouseLeave={() => setChatHovered(false)}
+            onMouseDown={() => setChatFocused(true)}
           >
             <div 
               className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
