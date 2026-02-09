@@ -666,7 +666,7 @@ export function AgencyApplicationView() {
                               .from('agency-documents')
                               .createSignedUrl(existingApplication.incorporation_document_url, 3600);
                             if (data?.signedUrl) {
-                              window.open(data.signedUrl, '_blank');
+                              setWebViewUrl(data.signedUrl);
                             }
                           }}
                         >
