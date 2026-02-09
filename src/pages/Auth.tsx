@@ -551,7 +551,7 @@ export default function Auth() {
           </p>
 
           {/* Form */}
-          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-4">
+          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-2">
             {/* Email Input */}
             <div>
               <Input
