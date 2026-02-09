@@ -144,6 +144,8 @@ export function AgencyApplicationView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewIsWebsite, setWebViewIsWebsite] = useState(false);
+  const [webViewDownloadUrl, setWebViewDownloadUrl] = useState<string | undefined>();
+  const [webViewDownloadName, setWebViewDownloadName] = useState<string | undefined>();
 
   // Track if initial data fetch has been done - persists across re-renders
   const initialFetchDoneRef = useRef(false);
@@ -757,11 +759,18 @@ export function AgencyApplicationView() {
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 const storedPath = app.incorporation_document_url;
+                                const pathParts = storedPath.split('/');
+                                const fileNamePart = pathParts[pathParts.length - 1];
+                                const originalName = fileNamePart.includes('_') ? fileNamePart.substring(fileNamePart.indexOf('_') + 1) : fileNamePart;
                                 const { data } = await supabase.storage
                                   .from('agency-documents')
                                   .createSignedUrl(storedPath, 3600);
                                 if (data?.signedUrl) {
-                                  window.open(data.signedUrl, '_blank');
+                                  const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(data.signedUrl)}&embedded=true`;
+                                  setWebViewDownloadUrl(data.signedUrl);
+                                  setWebViewDownloadName(originalName);
+                                  setWebViewUrl(viewerUrl);
+                                  setWebViewIsWebsite(false);
                                 }
                               }}
                             >
@@ -864,10 +873,12 @@ export function AgencyApplicationView() {
 
       <WebViewDialog
         open={!!webViewUrl}
-        onOpenChange={(open) => !open && setWebViewUrl(null)}
+        onOpenChange={(open) => { if (!open) { setWebViewUrl(null); setWebViewDownloadUrl(undefined); setWebViewDownloadName(undefined); } }}
         url={webViewUrl || ''}
         title={webViewIsWebsite ? "Agency Website" : "Document"}
         isWebsite={webViewIsWebsite}
+        downloadUrl={webViewDownloadUrl}
+        downloadName={webViewDownloadName}
       />
     </>
   );
