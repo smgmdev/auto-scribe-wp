@@ -372,13 +372,22 @@ export function AgencyApplicationView() {
                 </p>
               )}
             </div>
-            <Button
-              variant="outline"
-              className="rounded-none bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white hover:text-black"
-              onClick={() => window.open('mailto:support@arcanamace.com', '_blank')}
-            >
-              Contact Support
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="rounded-none bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white hover:text-black"
+                onClick={() => window.open('mailto:support@arcanamace.com', '_blank')}
+              >
+                Contact Support
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-none bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white hover:text-black"
+                onClick={() => window.open('/help', '_self')}
+              >
+                Visit Help Center
+              </Button>
+            </div>
           </div>
         </div>
 
