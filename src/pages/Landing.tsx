@@ -891,7 +891,7 @@ const Landing = () => {
             <Button 
               variant="outline"
               onClick={() => setSelectedSite(null)}
-              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-auto"
+              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-32"
             >
               Close
             </Button>
