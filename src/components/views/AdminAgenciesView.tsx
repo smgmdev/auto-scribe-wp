@@ -1328,7 +1328,7 @@ export function AdminAgenciesView() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex md:hidden justify-end">
+                            <div className="flex md:hidden flex-col items-end gap-1">
                               <Badge 
                                 className={`cursor-pointer transition-colors rounded-none ${
                                   verification?.read 
@@ -1343,9 +1343,14 @@ export function AdminAgenciesView() {
                               >
                                 <Clock className="h-3 w-3 mr-1" />Pending Review
                               </Badge>
+                              {verification?.submitted_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy')}
+                                </p>
+                              )}
                             </div>
 
-                            <div className="hidden md:flex items-center">
+                            <div className="hidden md:flex flex-col items-end gap-1">
                               <Badge 
                                 className={`cursor-pointer transition-colors rounded-none ${
                                   verification?.read 
@@ -1360,6 +1365,11 @@ export function AdminAgenciesView() {
                               >
                                 <Clock className="h-3 w-3 mr-1" />Pending Review
                               </Badge>
+                              {verification?.submitted_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy')}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </CardContent>
