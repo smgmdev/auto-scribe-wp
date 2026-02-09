@@ -1429,7 +1429,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
