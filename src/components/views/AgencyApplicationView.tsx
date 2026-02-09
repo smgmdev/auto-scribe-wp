@@ -369,37 +369,34 @@ export function AgencyApplicationView() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-black bg-transparent p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500/20">
-                <Clock className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-400">Verification Under Review</h3>
-                <p className="text-sm text-muted-foreground">
-                  Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
-                </p>
-              </div>
-              {getStatusBadge(customVerification.status)}
-            </div>
-            {customVerification.status === 'rejected' && customVerification.admin_notes && (
-              <div className="mt-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
-                <p className="text-sm">{customVerification.admin_notes}</p>
-              </div>
-            )}
-          </div>
-
-          <p className="text-sm text-muted-foreground text-center">
-            We'll notify you by email with updates. This process usually takes 1–3 business days.
-          </p>
-
-          <div className="w-full overflow-hidden rounded-none">
+          <div className="relative w-full overflow-hidden rounded-none">
             <img 
               src={agencyVerificationBanner} 
               alt="Agency verification in progress" 
-              className="w-full h-auto object-cover"
+              className="w-full h-[280px] object-cover"
             />
+            <div className="absolute inset-0 flex items-center justify-center p-6">
+              <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30">
+                    <Clock className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
+                    <p className="text-sm text-white/70">
+                      Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                    </p>
+                  </div>
+                  {getStatusBadge(customVerification.status)}
+                </div>
+                {customVerification.status === 'rejected' && customVerification.admin_notes && (
+                  <div className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-400/30">
+                    <p className="text-sm text-white/70 mb-1">Rejection Reason</p>
+                    <p className="text-sm text-white">{customVerification.admin_notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <AgencyFAQ />
