@@ -815,7 +815,7 @@ const HowItWorks = () => {
 
 
       {/* Hero Section */}
-      <section className="pt-20 md:pt-24 pb-16 bg-white">
+      <section className="pt-28 md:pt-32 pb-16 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
