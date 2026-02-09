@@ -382,19 +382,18 @@ export function AgencyApplicationView() {
                     <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
                       <Clock className="h-6 w-6 text-white" />
                     </div>
-                    <div className="flex md:hidden justify-end">
+                    {/* Mobile: badge top-right, icon top-left above title */}
+                    <div className="flex md:hidden justify-between items-start">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/30 shrink-0">
+                        <Clock className="h-5 w-5 text-white" />
+                      </div>
                       {getStatusBadge(customVerification.status)}
                     </div>
-                    <div className="flex items-center gap-3 md:flex-1">
-                      <div className="flex md:hidden h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
-                        <Clock className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
-                        <p className="text-sm text-white/70">
-                          Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                      </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
+                      <p className="text-sm text-white/70">
+                        Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                      </p>
                     </div>
                     <div className="hidden md:block">
                       {getStatusBadge(customVerification.status)}
