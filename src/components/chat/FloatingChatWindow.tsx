@@ -5531,7 +5531,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
                       Waiting for client approval
                     </span>
