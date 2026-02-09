@@ -1056,46 +1056,33 @@ export function AdminAgenciesView() {
                             )}
                             <div>
                               <h3 className="font-medium">{app.agency_name}</h3>
-                              <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
                               {app.admin_notes && (
                                 <p className="text-xs text-red-400 mt-1">Reason: {app.admin_notes}</p>
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col items-start md:items-end md:text-right gap-1">
-                            <p className="text-xs text-muted-foreground">
-                              Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                            </p>
-                            {app.reviewed_at && (
-                              <p className="text-xs text-red-500">
-                                Rejected {format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="hover:bg-destructive hover:text-white hover:border-destructive"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                // Update database to hide the application
-                                const { error } = await supabase
-                                  .from('agency_applications')
-                                  .update({ hidden: true })
-                                  .eq('id', app.id);
-                                
-                                if (error) {
-                                  toast({ variant: 'destructive', title: 'Error', description: error.message });
-                                  return;
-                                }
-                                
-                                // Remove from local state
-                                setApplications(prev => prev.filter(a => a.id !== app.id));
-                                toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-destructive hover:text-white hover:border-destructive"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const { error } = await supabase
+                                .from('agency_applications')
+                                .update({ hidden: true })
+                                .eq('id', app.id);
+                              
+                              if (error) {
+                                toast({ variant: 'destructive', title: 'Error', description: error.message });
+                                return;
+                              }
+                              
+                              setApplications(prev => prev.filter(a => a.id !== app.id));
+                              toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                            }}
+                          >
+                            Remove
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
