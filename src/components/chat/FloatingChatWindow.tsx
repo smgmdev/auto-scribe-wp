@@ -5594,7 +5594,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
               </div>
               {/* Desktop: individual items */}
-              <div className="hidden md:flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
+              <div className="hidden md:flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 pl-9">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -5640,7 +5640,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
               </div>
               {/* Mobile: single Order Info tooltip */}
-              <div className="flex md:hidden items-center text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
+              <div className="flex md:hidden items-center text-xs text-gray-500 dark:text-gray-400 pl-9">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
