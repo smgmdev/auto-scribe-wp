@@ -5593,7 +5593,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
+              {/* Desktop: individual items */}
+              <div className="hidden md:flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -5637,6 +5638,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </Tooltip>
                   </TooltipProvider>
                 )}
+              </div>
+              {/* Mobile: single Order Info tooltip */}
+              <div className="flex md:hidden items-center text-xs text-gray-500 dark:text-gray-400 mt-2 pl-9">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center gap-1 cursor-help">
+                        Order Info
+                        <Info className="h-3 w-3" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p>Price: {pendingOrder.price.toLocaleString()} credits</p>
+                        {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
+                          <p>Delivery: {formatDeliveryDuration(pendingOrder.delivery_duration)}</p>
+                        )}
+                        {pendingOrder.special_terms && (
+                          <p>Special Terms: {pendingOrder.special_terms}</p>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           );
