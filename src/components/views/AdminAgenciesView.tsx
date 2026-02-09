@@ -707,7 +707,7 @@ export function AdminAgenciesView() {
           .update({ 
             status: 'rejected',
             admin_notes: verificationRejectionReason.trim(),
-            reviewed_at: new Date().toISOString()
+            // Do NOT overwrite reviewed_at - it stores the original pre-approval date
           })
           .eq('user_id', linkedAgency.user_id)
           .eq('status', 'approved'); // Only update if currently approved
