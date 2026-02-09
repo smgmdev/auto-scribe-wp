@@ -568,17 +568,17 @@ export default function SelfPublishing() {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 mt-4">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 mt-4">
             <Button 
               variant="outline"
               onClick={() => setSelectedSite(null)}
-              className="hover:bg-black hover:text-white transition-colors"
+              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-32"
             >
               Close
             </Button>
             {selectedSite && (
               <Button 
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-fit px-3 border border-transparent hover:border-black"
                 onClick={() => handlePublishNewArticle(selectedSite.id)}
                 disabled={navigating}
               >
