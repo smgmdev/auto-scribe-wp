@@ -221,7 +221,7 @@ export default function SelfPublishing() {
                   navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetTab: 'local' } });
                 }
               }}
-              className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-[#f2a547] transition-all duration-200"
+              className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-black transition-all duration-200"
             >
               Browse Local Media Library
             </Button>
