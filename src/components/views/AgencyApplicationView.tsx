@@ -639,7 +639,7 @@ export function AgencyApplicationView() {
                                         e.stopPropagation();
                                         setWebViewUrl(trimmed); setWebViewIsWebsite(true);
                                       }}
-                                      className="text-white font-medium underline hover:text-white/80"
+                                      className="text-white font-medium hover:underline hover:text-white/80"
                                     >
                                       {display}
                                     </button>
