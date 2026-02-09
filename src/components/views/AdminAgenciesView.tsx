@@ -1731,15 +1731,39 @@ export function AdminAgenciesView() {
                 {(() => {
                   const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
                   const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
-                  if (verification?.submitted_at) {
-                    return (
-                      <div>
-                        <p className="text-muted-foreground">Submitted for Final Verification</p>
-                        <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
-                      </div>
-                    );
-                  }
-                  return null;
+                  return (
+                    <>
+                      {/* Show pre-approval date separately if status is not rejected and reviewed_at exists but we also have other events */}
+                      {selectedApp.status === 'cancelled' && selectedApp.reviewed_at && (
+                        <div>
+                          <p className="text-muted-foreground">Pre-Approved Date</p>
+                          <p className="font-medium">{format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                        </div>
+                      )}
+                      {verification?.submitted_at && (
+                        <div>
+                          <p className="text-muted-foreground">Final Submission Date</p>
+                          <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
+                        </div>
+                      )}
+                      {verification?.reviewed_at && (
+                        <div>
+                          <p className="text-muted-foreground">
+                            {verification.status === 'rejected' ? 'Verification Rejected Date' : 'Verification Approved Date'}
+                          </p>
+                          <p className={`font-medium ${verification.status === 'rejected' ? 'text-red-500' : ''}`}>
+                            {format(new Date(verification.reviewed_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      )}
+                      {agencyPayout?.created_at && agencyPayout.onboarding_complete && (
+                        <div>
+                          <p className="text-muted-foreground">Onboarded Date</p>
+                          <p className="font-medium">{format(new Date(agencyPayout.created_at), 'MMM d, yyyy h:mm a')}</p>
+                        </div>
+                      )}
+                    </>
+                  );
                 })()}
               </div>
 
