@@ -312,13 +312,15 @@ export function BriefSubmissionDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-lg z-[200] w-[100vw] h-[100dvh] sm:w-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-lg overflow-y-auto"
+        className="sm:max-w-lg z-[200] w-full h-[100dvh] sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none overflow-y-auto"
         style={{ 
           padding: 0,
           top: '0',
           left: '0',
+          right: '0',
           transform: 'none',
           maxHeight: '100dvh',
+          maxWidth: '100%',
         }}
       >
         <style>{`
