@@ -257,7 +257,8 @@ export default function AIArticleGeneration() {
       <div className="h-[92px]" />
 
       {/* Sub-header - Sticky dark */}
-      <div className={`sticky z-40 bg-black border-b border-white/10 transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-black border-b border-white/10">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
           <span className="text-xl font-semibold text-white">AI Article Generation</span>
           <nav className="hidden md:flex items-center gap-6">
@@ -269,6 +270,7 @@ export default function AIArticleGeneration() {
               Start Writing with AI
             </Button>
           </nav>
+        </div>
         </div>
       </div>
 
