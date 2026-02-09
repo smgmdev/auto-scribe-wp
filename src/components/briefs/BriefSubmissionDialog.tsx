@@ -211,13 +211,15 @@ export function BriefSubmissionDialog({
 
   return createPortal(
     <div 
-      className="fixed inset-0 z-[200] pointer-events-none"
+      className="fixed inset-0 z-[200]"
+      onClick={() => onOpenChange(false)}
     >
       {isMobile ? (
         // Mobile: full-screen scrollable
         <div 
-          className="pointer-events-auto w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain"
+          className="w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: 'touch' }}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="p-5 pb-8 space-y-4 relative">
             {/* Close Button */}
@@ -333,7 +335,8 @@ export function BriefSubmissionDialog({
         // Desktop: centered draggable popup
         <div className="flex items-center justify-center w-full h-full">
           <div
-            className="pointer-events-auto w-full max-w-lg border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] overflow-y-auto relative"
+            className="w-full max-w-lg border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] overflow-y-auto relative"
+            onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
             {/* Drag Handle */}
