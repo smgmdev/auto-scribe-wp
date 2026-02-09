@@ -1322,27 +1322,27 @@ export function AdminAgenciesView() {
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
                                 {verification && (
-                                  <div className="flex items-center justify-between gap-2">
-                                    <p className="text-xs text-muted-foreground">
-                                      {verification.country}
-                                    </p>
-                                    <Badge 
-                                      className={`md:hidden cursor-pointer transition-colors flex-shrink-0 rounded-none ${
-                                        verification?.read 
-                                          ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                                          : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
-                                      }`}
-                                      onClick={(e) => {
-                                        if (verification) {
-                                          handleOpenVerification(verification, e);
-                                        }
-                                      }}
-                                    >
-                                      <Clock className="h-3 w-3 mr-1" />Pending Review
-                                    </Badge>
-                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {verification.country}
+                                  </p>
                                 )}
                               </div>
+                            </div>
+                            <div className="flex md:hidden justify-end">
+                              <Badge 
+                                className={`cursor-pointer transition-colors rounded-none ${
+                                  verification?.read 
+                                    ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
+                                    : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                }`}
+                                onClick={(e) => {
+                                  if (verification) {
+                                    handleOpenVerification(verification, e);
+                                  }
+                                }}
+                              >
+                                <Clock className="h-3 w-3 mr-1" />Pending Review
+                              </Badge>
                             </div>
 
                             <div className="hidden md:flex items-center">
