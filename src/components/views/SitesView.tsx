@@ -1256,9 +1256,9 @@ export function SitesView() {
               <div className="flex items-center justify-end w-full">
                 {!isAdmin && !(userAgencyName && site.agency === userAgencyName) && (
                   openEngagements[site.id] ? (
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors w-full md:w-auto"
+                    <Button
+                      size="sm"
+                      className="h-7 px-3 text-xs group/btn bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 overflow-hidden border border-transparent hover:border-black w-full md:w-auto justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
                         const engagement = openEngagements[site.id];
@@ -1266,9 +1266,11 @@ export function SitesView() {
                         openGlobalChat(engagement, 'my-request');
                       }}
                     >
-                      <MessageSquare className="h-3 w-3" />
                       Engagement Open
-                    </Badge>
+                      <span className="inline-flex w-0 overflow-hidden group-hover/btn:w-4 group-hover/btn:ml-1 transition-all duration-200">
+                        <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                      </span>
+                    </Button>
                   ) : (
                     <Button
                       size="sm"
