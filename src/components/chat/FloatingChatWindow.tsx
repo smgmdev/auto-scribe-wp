@@ -6343,7 +6343,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className="sr-only">Close</span>
             </button>
 
-            <h2 className="text-lg font-semibold leading-none tracking-tight mb-4">
+            <h2 className="text-lg font-semibold leading-none tracking-tight mb-4 pt-4 sm:pt-0">
               {isResendMode ? 'Resend Offer' : 'Send Offer'}
             </h2>
           
