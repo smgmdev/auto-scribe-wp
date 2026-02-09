@@ -5604,7 +5604,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {bannerOrderDetailsOpen && (
-                  <div className="mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 p-2 rounded-none border-t border-border">
+                  <div className="mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 pt-2 rounded-none border-t border-border">
                     <p>Price: {pendingOrder.price.toLocaleString()} credits</p>
                     {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
                       <p>Delivery: {formatDeliveryDuration(pendingOrder.delivery_duration)}</p>
