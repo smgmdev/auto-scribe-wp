@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -309,150 +309,149 @@ export function BriefSubmissionDialog({
     }
   };
 
-  const dialogRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    if (open && dialogRef.current) {
-      const el = dialogRef.current.closest('[role="dialog"]');
-      if (el) {
-        const styles = window.getComputedStyle(el);
-        console.log('[Brief Dialog] computed:', {
-          maxHeight: styles.maxHeight,
-          overflow: styles.overflow,
-          overflowY: styles.overflowY,
-          height: styles.height,
-          display: styles.display,
-          position: styles.position,
-        });
-      }
-    }
-  }, [open, files.length]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200]" style={{ padding: 0, maxHeight: '85vh', overflowY: 'auto' }}>
-        <div ref={dialogRef}>
-          <div className="p-6 space-y-4">
-            <DialogHeader>
-              <DialogTitle>Send Your Brief</DialogTitle>
-              <DialogDescription>
-                Tell the agency what you're looking for. They'll review your request and respond.
-              </DialogDescription>
-            </DialogHeader>
+      <DialogContent 
+        className="sm:max-w-lg z-[200] w-[100vw] h-[100dvh] sm:w-full sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-lg overflow-y-auto"
+        style={{ 
+          padding: 0,
+          top: '0',
+          left: '0',
+          transform: 'none',
+          maxHeight: '100dvh',
+        }}
+      >
+        <style>{`
+          @media (min-width: 640px) {
+            [data-brief-dialog] {
+              top: 50% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              max-height: 85vh !important;
+              width: auto !important;
+              height: auto !important;
+            }
+          }
+        `}</style>
+        <div data-brief-dialog="" className="p-4 sm:p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle className="text-base sm:text-lg">Send Your Brief</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
+              Tell the agency what you're looking for. They'll review your request and respond.
+            </DialogDescription>
+          </DialogHeader>
 
-            {mediaSite && (
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                {mediaSite.favicon && (
-                  <img src={mediaSite.favicon} alt="" className="w-8 h-8 rounded" />
-                )}
-                <div>
-                  <p className="font-medium">{mediaSite.name}</p>
-                  <p className="text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
-                </div>
+          {mediaSite && (
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              {mediaSite.favicon && (
+                <img src={mediaSite.favicon} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded" />
+              )}
+              <div>
+                <p className="font-medium text-sm sm:text-base">{mediaSite.name}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
               </div>
-            )}
+            </div>
+          )}
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="description">What are you looking for?</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={6}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm">What are you looking for?</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                disabled={isSubmitting}
+                className="text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">Upload your materials (optional)</Label>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-colors ${
+                  isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary'
+                }`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Upload className="h-5 w-5 sm:h-6 sm:w-6 mx-auto text-muted-foreground mb-1.5" />
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Drag & drop or click to upload
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PDF, Word, PNG, JPG • Max 10MB total
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
                   disabled={isSubmitting}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label>Upload your materials (optional)</Label>
-                <div 
-                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                    isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary'
-                  }`}
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Drag & drop or click to upload
+              
+              {files.length > 0 && (
+                <div className="space-y-1.5 sm:space-y-2 mt-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      {isImageFile(file.name) ? (
+                        <Image className="h-4 w-4 text-muted-foreground shrink-0" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      )}
+                      <span className="text-xs sm:text-sm flex-1 truncate">{file.name}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {(file.size / 1024).toFixed(0)}KB
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        disabled={isSubmitting}
+                        className="h-6 w-6 p-0 shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground text-right">
+                    Total: {(getTotalSize(files) / 1024 / 1024).toFixed(2)}MB / 10MB
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    PDF, Word, PNG, JPG • Max 10MB total
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileChange}
-                    disabled={isSubmitting}
-                  />
                 </div>
-                
-                {files.length > 0 && (
-                  <div className="space-y-2 mt-2">
-                    {files.map((file, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                        {isImageFile(file.name) ? (
-                          <Image className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className="text-sm flex-1 truncate">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {(file.size / 1024).toFixed(0)}KB
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          disabled={isSubmitting}
-                          className="h-6 w-6 p-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground text-right">
-                      Total: {(getTotalSize(files) / 1024 / 1024).toFixed(2)}MB / 10MB
-                    </p>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
+          </div>
 
-            <div className="flex justify-between gap-3 pt-2">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  onOpenChange(false);
-                  onBack?.();
-                }} 
-                disabled={isSubmitting}
-                className="hover:bg-black hover:text-white transition-all duration-200 group w-fit px-3"
-              >
-                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
-                  <ArrowLeft className="h-4 w-4 shrink-0" />
-                </span>
-                <span>Back</span>
-              </Button>
-              <Button 
-                className="bg-foreground text-background hover:bg-foreground/80 transition-colors"
-                onClick={handleSubmit} 
-                disabled={isSubmitting || !description.trim()}
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
-                )}
-                Send Brief
-              </Button>
-            </div>
+          <div className="flex gap-3 pt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                onOpenChange(false);
+                onBack?.();
+              }} 
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-none hover:bg-foreground hover:text-background transition-all duration-200"
+            >
+              Back
+            </Button>
+            <Button 
+              className="flex-1 sm:flex-none bg-foreground text-background hover:bg-foreground/80 transition-colors"
+              onClick={handleSubmit} 
+              disabled={isSubmitting || !description.trim()}
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send Brief
+            </Button>
           </div>
         </div>
       </DialogContent>
