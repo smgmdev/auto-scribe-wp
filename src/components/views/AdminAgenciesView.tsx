@@ -843,7 +843,7 @@ export function AdminAgenciesView() {
                     <CardContent className="p-4">
                     <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                       <div className="absolute top-0 right-0 md:hidden">
-                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
+                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
                       </div>
@@ -882,7 +882,7 @@ export function AdminAgenciesView() {
                         </div>
                       </div>
                       <div className="hidden md:flex flex-col items-end text-right gap-1">
-                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">
+                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
                           <Clock className="h-3 w-3 mr-1" />Pending
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-1">
