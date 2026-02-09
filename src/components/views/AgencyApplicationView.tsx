@@ -507,7 +507,11 @@ export function AgencyApplicationView() {
           
           {/* Application Summary Card - shown when pending */}
           {existingApplication?.status === 'pending' && (
-            <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
+            <div className="space-y-4">
+              <h2 className="text-3xl font-bold text-center text-white">
+                My Applications
+              </h2>
+              <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
                   <div className="flex items-center justify-between mb-3">
@@ -614,6 +618,7 @@ export function AgencyApplicationView() {
                 </CollapsibleContent>
               </div>
             </Collapsible>
+            </div>
           )}
           
           <ExploreNetworkGrid dark />
