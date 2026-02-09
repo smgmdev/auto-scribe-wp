@@ -154,24 +154,23 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           </div>
         )}
 
-        {/* Close Button */}
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
-
-        <div className="flex flex-col space-y-1.5 text-left">
+        {/* Header with title and close button aligned */}
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
             <Coins className="h-5 w-5 text-accent" />
             Buy Credits
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Purchase credits to publish articles to media sites.
-          </p>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
         </div>
+        <p className="text-sm text-muted-foreground">
+          Purchase credits to publish articles to media sites.
+        </p>
 
         <div className="space-y-6 py-4">
           {/* Quick Select Buttons */}
