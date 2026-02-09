@@ -189,7 +189,7 @@ export function AgencyDetailsDialog({
           <Button 
             variant="outline"
             onClick={handleClose}
-            className="w-full sm:w-auto hover:bg-black hover:text-white transition-colors"
+            className="w-full sm:w-32 hover:bg-black hover:text-white transition-colors rounded-none"
           >
             Close
           </Button>
