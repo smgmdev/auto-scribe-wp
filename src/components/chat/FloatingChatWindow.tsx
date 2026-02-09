@@ -4894,7 +4894,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-auto min-w-40 z-[9999] bg-popover border shadow-lg">
+                  <DropdownMenuContent align="end" className="w-auto min-w-40 z-[9999] bg-popover border shadow-lg rounded-none">
                     {hasOrder && globalChatType === 'agency-request' && (
                       <DropdownMenuItem 
                         className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
