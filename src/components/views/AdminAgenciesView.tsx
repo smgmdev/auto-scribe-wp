@@ -2475,15 +2475,15 @@ export function AdminAgenciesView() {
                   setShowVerificationRejectDialog(false);
                   setVerificationRejectionReason('');
                 }}
-                className="flex-1"
+                className="flex-1 hover:bg-black hover:text-white"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleRejectVerification}
                 disabled={!verificationRejectionReason.trim() || processingVerification}
-                variant="destructive"
-                className="flex-1"
+                variant="outline"
+                className="flex-1 bg-transparent text-red-500 border-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
               >
                 {processingVerification ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
