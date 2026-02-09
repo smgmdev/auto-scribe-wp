@@ -447,6 +447,7 @@ export function MediaSiteDialog({
           top: `${positionRef.current.y}px`,
           willChange: isDragging ? 'left, top' : 'auto',
         }}
+        onWheel={(e) => e.stopPropagation()}
       >
         <div 
           className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
