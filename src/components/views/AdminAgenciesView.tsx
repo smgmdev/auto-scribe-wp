@@ -1288,8 +1288,8 @@ export function AdminAgenciesView() {
                           }
                         }}
                       >
-                        <CardContent className="p-4 relative">
-                          <div className="md:hidden absolute top-4 right-4">
+                        <CardContent className="p-4">
+                          <div className="md:hidden flex justify-end mb-2">
                             <Badge 
                               className={`cursor-pointer transition-colors ${
                                 verification?.read 
