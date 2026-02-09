@@ -1109,30 +1109,53 @@ export function AdminAgenciesView() {
                               )}
                             </div>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              setApplications(prev => prev.filter(a => a.id !== app.id));
-                              setHiddenRejectedCount(prev => prev + 1);
-                              
-                              const { error } = await supabase
-                                .from('agency_applications')
-                                .update({ hidden: true })
-                                .eq('id', app.id)
-                                .eq('hidden', false);
-                              
-                              if (error) {
-                                toast.error(`Error: ${error.message}`);
-                              } else {
-                                toast.success('Removed from view');
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const agencyPayout = agencies.find(a => a.user_id === app.user_id);
+                              const verification = agencyPayout 
+                                ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
+                                : customVerifications.find(v => v.user_id === app.user_id);
+                              if (verification?.submitted_at) {
+                                return (
+                                  <Badge 
+                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenVerification(verification, e);
+                                    }}
+                                  >
+                                    <FileText className="h-3 w-3 mr-1" />
+                                    View Verification
+                                  </Badge>
+                                );
                               }
-                            }}
-                          >
-                            Remove
-                          </Button>
+                              return null;
+                            })()}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                setApplications(prev => prev.filter(a => a.id !== app.id));
+                                setHiddenRejectedCount(prev => prev + 1);
+                                
+                                const { error } = await supabase
+                                  .from('agency_applications')
+                                  .update({ hidden: true })
+                                  .eq('id', app.id)
+                                  .eq('hidden', false);
+                                
+                                if (error) {
+                                  toast.error(`Error: ${error.message}`);
+                                } else {
+                                  toast.success('Removed from view');
+                                }
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
