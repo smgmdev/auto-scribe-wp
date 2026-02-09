@@ -36,6 +36,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     }
   }, [open]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onOpenChange]);
+
   const parsedAmount = parseInt(creditAmount) || 0;
   const isValidAmount = parsedAmount >= MIN_CREDITS;
   const totalPrice = parsedAmount * PRICE_PER_CREDIT;
