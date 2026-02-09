@@ -719,7 +719,7 @@ const Landing = () => {
                   <div>
                     {modalMediaSites.length === 0 ? (
                       <div className="px-4 py-12 text-center text-muted-foreground">
-                        No media outlets found
+                        {!user && activeTab === 'Agencies/People' ? 'Sign in to view' : 'No media outlets found'}
                       </div>
                     ) : (
                       modalMediaSites.map(site => (
