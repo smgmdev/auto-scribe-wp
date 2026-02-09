@@ -255,7 +255,7 @@ export default function MediaBuying() {
             <Button
               size="sm"
               onClick={handleGetStarted}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-full"
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-none"
             >
               Browse Global Media Library
             </Button>
