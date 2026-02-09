@@ -7286,7 +7286,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
             {/* Header with title and close button aligned */}
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+              <h2 className="text-base font-semibold leading-none tracking-tight flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 Confirm Order
               </h2>
