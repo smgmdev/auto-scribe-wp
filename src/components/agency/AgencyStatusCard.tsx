@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Building2, CheckCircle, Clock, XCircle, UserMinus, ExternalLink } from 'lucide-react';
+import { Building2, CheckCircle, Clock, XCircle, UserMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-
-interface ApplicationSummary {
-  agency_name: string;
-  country: string;
-  agency_website: string;
-  created_at: string;
-}
 
 interface AgencyStatusCardProps {
   applicationStatus: string | null;
@@ -19,7 +11,6 @@ interface AgencyStatusCardProps {
   isAgencyOnboarded: boolean;
   isDowngraded: boolean;
   customVerificationStatus: string | null;
-  applicationSummary?: ApplicationSummary | null;
   onNavigateToApplication: () => void;
   onStatusUpdate: (onboarded: boolean) => void;
   onRejectionSeen?: () => void;
@@ -33,7 +24,6 @@ export function AgencyStatusCard({
   isAgencyOnboarded,
   isDowngraded,
   customVerificationStatus,
-  applicationSummary,
   onNavigateToApplication,
   onStatusUpdate,
   onRejectionSeen
@@ -101,38 +91,6 @@ export function AgencyStatusCard({
           <Clock className="h-4 w-4 mr-2" />
           Pending Review
         </Button>
-        
-        {/* Application Summary */}
-        {applicationSummary && (
-          <div className="mt-3 pt-3 border-t border-gray-500/20 space-y-2">
-            <div>
-              <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wide">Agency</p>
-              <p className="text-xs text-sidebar-foreground/80">{applicationSummary.agency_name}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wide">Country</p>
-                <p className="text-xs text-sidebar-foreground/80">{applicationSummary.country}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wide">Submitted</p>
-                <p className="text-xs text-sidebar-foreground/80">{format(new Date(applicationSummary.created_at), 'MMM d, yyyy')}</p>
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wide">Website</p>
-              <a 
-                href={applicationSummary.agency_website} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                {applicationSummary.agency_website.replace(/^https?:\/\//, '').slice(0, 25)}...
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
