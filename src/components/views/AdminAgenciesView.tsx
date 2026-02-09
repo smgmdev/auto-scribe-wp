@@ -832,7 +832,7 @@ export function AdminAgenciesView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-1">
               {pendingApplications.map((app) => (
                 <Card 
                   key={app.id} 
@@ -934,7 +934,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-3">
+                <div className="grid gap-1">
                   {cancelledApplications.map((app) => (
                     <Card 
                       key={app.id} 
@@ -1016,7 +1016,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-3">
+                <div className="grid gap-1">
                   {rejectedApplications.map((app) => (
                     <Card 
                       key={app.id} 
