@@ -168,8 +168,10 @@ export function AgencyApplicationView() {
     }
   }, [user, isAdmin]);
 
-  // Set dark footer only for Case 4 (marketing/application page with no agency payout)
-  const isMarketingPage = dataLoaded && !loading && !isAdmin && !agencyPayout;
+  // Set dark footer for Case 4 (marketing/application page with no agency payout)
+  // Also covers cancelled users who return to Case 4 after payout deletion
+  const showsCase4 = !agencyPayout || (agencyPayout && !agencyPayout.onboarding_complete && existingApplication?.status !== 'approved');
+  const isMarketingPage = dataLoaded && !loading && !isAdmin && showsCase4;
   useEffect(() => {
     setAgencyDarkFooter(isMarketingPage);
     return () => setAgencyDarkFooter(false);
