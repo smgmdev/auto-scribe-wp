@@ -4443,7 +4443,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 !rounded-none"
+                  className="w-full bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] transition-all duration-200 !rounded-none"
                   onClick={handleCancelOrderRequest}
                   disabled={cancellingOrderRequestId === msg.id || hasOpenDispute}
                 >
