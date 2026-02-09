@@ -192,9 +192,14 @@ export default function HelpCenter() {
             )}
           </div>
         </div>
+      </header>
 
-        {/* Sub-header with Help Center title */}
-        <div>
+      {/* Spacer for fixed header */}
+      <div className="h-[92px]" />
+
+      {/* Sub-header - Sticky */}
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-white/90 backdrop-blur-sm">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
             <button 
@@ -211,9 +216,9 @@ export default function HelpCenter() {
           </div>
         </div>
 
-        {/* Expandable topics menu - inside header with slide animation */}
+        {/* Expandable topics menu */}
         <div 
-          className="overflow-hidden"
+          className="bg-white overflow-hidden"
           style={{
             display: 'grid',
             gridTemplateRows: isTopicsOpen ? '1fr' : '0fr',
@@ -272,16 +277,19 @@ export default function HelpCenter() {
           </div>
         </div>
 
-        {/* Border line - always visible, moves with expanded content */}
+        {/* Border line */}
         <div className="h-px bg-border" />
-      </header>
+      </div>
 
-      {/* Spacer for fixed header */}
+      {/* Blur overlay when topics menu is open */}
       <div 
-        style={{
-          height: isTopicsOpen ? 'calc(140px + 200px)' : '140px',
-          transition: 'height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+        className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-30 pointer-events-none"
+        style={{ 
+          opacity: isTopicsOpen ? 1 : 0,
+          transition: 'opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isTopicsOpen ? 'auto' : 'none'
         }}
+        onClick={() => setIsTopicsOpen(false)}
       />
 
       {/* Blur overlay when topics menu is open */}
