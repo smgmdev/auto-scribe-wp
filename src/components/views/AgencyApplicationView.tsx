@@ -360,7 +360,7 @@ export function AgencyApplicationView() {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-600">Account Downgraded</h3>
                   <p className="text-sm text-white/90">
-                    {agencyPayout?.agency_name}
+                    Agency: {agencyPayout?.agency_name}
                   </p>
                 </div>
                 {getStatusBadge('downgraded', false, true)}
