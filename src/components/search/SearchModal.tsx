@@ -469,6 +469,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         onOpenChange={setAgencyDetailsOpen}
         agencyName={selectedAgencyName}
         zIndex={200}
+        isAuthenticated={!!user}
       />
     </>
   );
