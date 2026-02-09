@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -309,10 +309,28 @@ export function BriefSubmissionDialog({
     }
   };
 
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (open && dialogRef.current) {
+      const el = dialogRef.current.closest('[role="dialog"]');
+      if (el) {
+        const styles = window.getComputedStyle(el);
+        console.log('[Brief Dialog] computed:', {
+          maxHeight: styles.maxHeight,
+          overflow: styles.overflow,
+          overflowY: styles.overflowY,
+          height: styles.height,
+          display: styles.display,
+          position: styles.position,
+        });
+      }
+    }
+  }, [open, files.length]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200] !p-0 !max-h-[85vh] !overflow-y-auto">
-        <div>
+      <DialogContent className="sm:max-w-lg z-[200]" style={{ padding: 0, maxHeight: '85vh', overflowY: 'auto' }}>
+        <div ref={dialogRef}>
           <div className="p-6 space-y-4">
             <DialogHeader>
               <DialogTitle>Send Your Brief</DialogTitle>
