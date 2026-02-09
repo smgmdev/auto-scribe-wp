@@ -200,7 +200,7 @@ export function AgencyApplicationView() {
       // Fetch existing application first to check status
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url, logo_url, payout_method, wp_blog_url')
+        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url, logo_url, payout_method, wp_blog_url, pre_approved_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -218,7 +218,22 @@ export function AgencyApplicationView() {
             .limit(1)
             .maybeSingle();
           
-          setCustomVerification(verificationData as CustomVerification | null);
+          // Only use verification if it was submitted AFTER the latest application's pre-approval
+          const latestApp = (appData || [])[0] as any;
+          const preApprovedAt = latestApp?.pre_approved_at ? new Date(latestApp.pre_approved_at).getTime() : null;
+          
+          if (verificationData && preApprovedAt && verificationData.submitted_at) {
+            const submittedAt = new Date(verificationData.submitted_at).getTime();
+            // Only show verification if it belongs to this approval cycle
+            if (submittedAt > preApprovedAt) {
+              setCustomVerification(verificationData as CustomVerification | null);
+            } else {
+              // Old verification from previous cycle - treat as no verification
+              setCustomVerification(null);
+            }
+          } else {
+            setCustomVerification(verificationData as CustomVerification | null);
+          }
         }
       } else {
         setAgencyPayout(null);
