@@ -977,7 +977,6 @@ export function AdminAgenciesView() {
                             )}
                             <div>
                               <h3 className="font-medium">{app.agency_name}</h3>
-                              <p className="text-sm text-muted-foreground">{app.full_name} • {app.email}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                             </div>
                           </div>
