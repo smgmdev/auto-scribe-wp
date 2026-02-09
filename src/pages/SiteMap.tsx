@@ -29,8 +29,7 @@ const SITEMAP_SECTIONS = [
   {
     title: 'For Business',
     links: [
-      { label: 'Become an Agency', href: '/dashboard', state: { targetView: 'agency-application' } },
-      { label: 'Agency Portal', href: '/dashboard', state: { targetView: 'my-agency' } },
+      { label: 'Agency Account', href: '/dashboard', state: { targetView: 'agency-application' } },
     ],
   },
   {
