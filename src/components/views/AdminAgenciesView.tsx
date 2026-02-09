@@ -1457,7 +1457,7 @@ export function AdminAgenciesView() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 md:hidden">
+                            <div className="flex items-center gap-2 md:hidden justify-end">
                               {verification && (
                                 <Badge 
                                   className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
