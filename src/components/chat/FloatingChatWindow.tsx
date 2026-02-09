@@ -5598,7 +5598,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <button
                   type="button"
                   onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+                  className="flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors"
                 >
                   Order Details
                   <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
