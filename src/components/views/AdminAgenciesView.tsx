@@ -2687,7 +2687,7 @@ export function AdminAgenciesView() {
               <p>• Agency account can still be restored</p>
             </div>
             
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 variant="outline"
                 className="flex-1 hover:bg-black hover:text-white"
