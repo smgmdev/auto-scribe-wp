@@ -1796,42 +1796,41 @@ export function AdminAgenciesView() {
             <div className="space-y-4">
               {/* Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {/* 1. Application Date - always shown */}
                 <div>
                   <p className="text-muted-foreground">Application Date</p>
                   <p className="font-medium">{format(new Date(selectedApp.created_at), 'MMM d, yyyy h:mm a')}</p>
                 </div>
-                {selectedApp.reviewed_at && (
-                  <div>
-                    <p className="text-muted-foreground">
-                      {selectedApp.status === 'rejected' ? 'Rejection Date' : 'Pre-Approved Date'}
-                    </p>
-                    <p className={`font-medium ${selectedApp.status === 'rejected' ? 'text-red-500' : ''}`}>
-                      {format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  </div>
-                )}
-                {selectedApp.status === 'cancelled' && selectedApp.updated_at && (
-                  <div>
-                    <p className="text-muted-foreground">Cancelled Date</p>
-                    <p className="font-medium text-red-500">
-                      {format(new Date(selectedApp.updated_at), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  </div>
-                )}
                 {(() => {
                   const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
                   const verification = agencyPayout 
                     ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
                     : customVerifications.find(v => v.user_id === selectedApp.user_id);
+                  const hasVerification = !!verification;
+                  
                   return (
                     <>
-                      {/* Pre-approval date already shown above for cancelled apps */}
+                      {/* 2. Pre-Approved Date - show reviewed_at as pre-approval if verification exists or app was approved/cancelled */}
+                      {selectedApp.reviewed_at && (
+                        <div>
+                          <p className="text-muted-foreground">
+                            {(hasVerification || selectedApp.status === 'cancelled' || selectedApp.status === 'approved')
+                              ? 'Pre-Approved Date'
+                              : 'Rejection Date'}
+                          </p>
+                          <p className={`font-medium ${(!hasVerification && selectedApp.status === 'rejected') ? 'text-red-500' : ''}`}>
+                            {format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      )}
+                      {/* 3. Final Submission Date */}
                       {verification?.submitted_at && (
                         <div>
                           <p className="text-muted-foreground">Final Submission Date</p>
                           <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
                         </div>
                       )}
+                      {/* 4. Verification Rejection / Approval Date */}
                       {verification?.reviewed_at && (
                         <div>
                           <p className="text-muted-foreground">
@@ -1842,6 +1841,16 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
+                      {/* Cancelled Date */}
+                      {selectedApp.status === 'cancelled' && selectedApp.updated_at && (
+                        <div>
+                          <p className="text-muted-foreground">Cancelled Date</p>
+                          <p className="font-medium text-red-500">
+                            {format(new Date(selectedApp.updated_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      )}
+                      {/* Onboarded Date */}
                       {agencyPayout?.created_at && agencyPayout.onboarding_complete && (
                         <div>
                           <p className="text-muted-foreground">Onboarded Date</p>
