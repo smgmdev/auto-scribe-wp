@@ -408,8 +408,7 @@ export function AgencyApplicationView() {
               </div>
             </div>
           </div>
-
-          <p className="text-sm text-muted-foreground text-left">
+          <p className="text-xs text-muted-foreground text-left -mt-2">
             Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
           </p>
 
