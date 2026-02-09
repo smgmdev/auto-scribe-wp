@@ -1021,10 +1021,7 @@ export function AdminAgenciesView() {
                     <Card 
                       key={app.id} 
                       className="cursor-pointer hover:bg-muted/50 hover:border-[#4771d9] transition-colors border-red-500/30"
-                      onClick={() => {
-                        setSelectedApp(app);
-                        setAdminNotes(app.admin_notes || '');
-                      }}
+                      onClick={() => handleOpenApplication(app)}
                     >
                       <CardContent className="p-4">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
