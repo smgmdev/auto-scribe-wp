@@ -1629,41 +1629,6 @@ export function AdminAgenciesView() {
                             </div>
 
                             <div className="flex items-center gap-2 flex-wrap">
-                              <Badge className="bg-orange-500/20 text-orange-500">
-                                <UserMinus className="h-3 w-3 mr-1" />
-                                Downgraded
-                              </Badge>
-                              {(() => {
-                                const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
-                                if (verification) {
-                                  return (
-                                    <Badge 
-                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenVerification(verification, e);
-                                      }}
-                                    >
-                                      <FileText className="h-3 w-3 mr-1" />
-                                      Details
-                                    </Badge>
-                                  );
-                                } else if (application) {
-                                  return (
-                                    <Badge 
-                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenApplication(application);
-                                      }}
-                                    >
-                                      <FileText className="h-3 w-3 mr-1" />
-                                      Details
-                                    </Badge>
-                                  );
-                                }
-                                return null;
-                              })()}
 
                               <Button
                                 variant="outline"
