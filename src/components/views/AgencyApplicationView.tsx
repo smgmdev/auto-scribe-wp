@@ -658,7 +658,7 @@ export function AgencyApplicationView() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
                         onClick={(e) => {
                           e.stopPropagation();
                           setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true);
@@ -670,7 +670,7 @@ export function AgencyApplicationView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             setWebViewUrl(existingApplication.wp_blog_url!); setWebViewIsWebsite(true);
@@ -683,7 +683,7 @@ export function AgencyApplicationView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs rounded-none"
                           onClick={async (e) => {
                             e.stopPropagation();
                             // Get signed URL for private document with original filename
