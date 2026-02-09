@@ -1698,7 +1698,30 @@ export function AdminAgenciesView() {
                   />
                 </>
               ) : null}
-              <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                {selectedApp?.agency_name}
+                {(() => {
+                  const agencyPayout = selectedApp ? agencies.find(a => a.user_id === selectedApp.user_id) : null;
+                  const verification = agencyPayout ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) : null;
+                  if (verification?.submitted_at) {
+                    return (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-none text-xs"
+                        onClick={() => {
+                          setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
+                          handleOpenVerification(verification);
+                        }}
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        View Verification
+                      </Button>
+                    );
+                  }
+                  return null;
+                })()}
+              </DialogTitle>
             </div>
           </DialogHeader>
 
