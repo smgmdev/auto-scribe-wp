@@ -5923,7 +5923,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
                   >
                     <div
-                      className={`relative group max-w-[85%] sm:max-w-[80%] min-w-0 rounded-lg p-2.5 sm:p-3 transition-all duration-300 break-words ${
+                      className={`relative group max-w-[85%] sm:max-w-[80%] min-w-0 rounded-none p-2.5 sm:p-3 transition-all duration-300 break-words ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
