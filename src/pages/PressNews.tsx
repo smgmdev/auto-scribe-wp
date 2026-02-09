@@ -370,7 +370,7 @@ export default function PressNews() {
                         <article 
                           key={release.id}
                           onClick={() => navigate(`/press/${release.id}`)}
-                          className={`group border-t border-border py-10 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 md:-mx-6 px-4 md:px-6 ${isLastItem ? 'border-b' : ''}`}
+                          className={`group border-t border-border py-5 cursor-pointer hover:bg-muted/20 transition-colors -mx-4 md:-mx-6 px-4 md:px-6 ${isLastItem ? 'border-b' : ''}`}
                         >
                           <div className="flex gap-8 items-center">
                             {/* Image or Logo placeholder */}
