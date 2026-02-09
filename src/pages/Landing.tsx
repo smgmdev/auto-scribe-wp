@@ -827,7 +827,7 @@ const Landing = () => {
 
       {/* WP Site Detail Dialog */}
       <Dialog open={!!selectedSite && selectedSiteType === 'wp'} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md z-[200]">
+        <DialogContent className="sm:max-w-md z-[200]" overlayClassName="bg-transparent">
 
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
