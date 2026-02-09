@@ -7183,7 +7183,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <Button 
               variant="outline"
               onClick={() => setMediaListingOpen(false)}
-              className="hover:bg-black hover:text-white transition-colors"
+              className="rounded-none w-full hover:bg-black hover:text-white transition-colors"
             >
               Close
             </Button>
