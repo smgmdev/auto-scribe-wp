@@ -983,7 +983,7 @@ export function AdminAgenciesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-destructive hover:text-white hover:border-destructive"
+                            className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
                             onClick={async (e) => {
                               e.stopPropagation();
                               const { error } = await supabase
@@ -1101,7 +1101,7 @@ export function AdminAgenciesView() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:bg-destructive hover:text-white hover:border-destructive"
+                            className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
                             onClick={async (e) => {
                               e.stopPropagation();
                               const { error } = await supabase
