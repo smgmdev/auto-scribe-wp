@@ -917,7 +917,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
             </Button>
             <Button
               onClick={handleCancel}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white"
               disabled={cancelling || !cancellationReason.trim()}
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
