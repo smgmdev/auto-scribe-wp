@@ -1026,7 +1026,11 @@ export function AdminAgenciesView() {
                     }
                     
                     if (data && data.length > 0) {
-                      setApplications(prev => [...data, ...prev]);
+                      setApplications(prev => {
+                        const existingIds = new Set(prev.map(a => a.id));
+                        const newItems = data.filter(d => !existingIds.has(d.id));
+                        return [...newItems, ...prev];
+                      });
                       toast({ title: 'Restored', description: `${data.length} cancelled application(s) restored` });
                     } else {
                       toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
@@ -1153,7 +1157,11 @@ export function AdminAgenciesView() {
                     }
                     
                     if (data && data.length > 0) {
-                      setApplications(prev => [...data, ...prev]);
+                      setApplications(prev => {
+                        const existingIds = new Set(prev.map(a => a.id));
+                        const newItems = data.filter(d => !existingIds.has(d.id));
+                        return [...newItems, ...prev];
+                      });
                       toast({ title: 'Restored', description: `${data.length} rejected application(s) restored` });
                     } else {
                       toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
