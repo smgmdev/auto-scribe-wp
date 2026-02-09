@@ -536,7 +536,7 @@ export function AgencyApplicationView() {
                       Pending
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-left">
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs text-left">
                     <div>
                       <p className="text-white/50">Agency</p>
                       <p className="text-white font-medium">{existingApplication.agency_name}</p>
@@ -555,9 +555,9 @@ export function AgencyApplicationView() {
                         {existingApplication.agency_website.replace(/^https?:\/\//, '')}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex justify-end mt-2">
-                    <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                    <div className="flex items-end justify-end">
+                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                    </div>
                   </div>
                 </CollapsibleTrigger>
                 
