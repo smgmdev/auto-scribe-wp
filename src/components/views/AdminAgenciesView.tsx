@@ -1774,6 +1774,20 @@ export function AdminAgenciesView() {
                   </Button>
                 );
               }
+              // Show disabled button for custom payout apps that never submitted verification
+              if (selectedApp?.payout_method === 'custom' && (selectedApp.status === 'rejected' || selectedApp.status === 'cancelled')) {
+                return (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-none w-full cursor-not-allowed opacity-60"
+                    style={{ backgroundColor: '#e5e5e5', color: '#888' }}
+                    disabled
+                  >
+                    No Verification Submitted
+                  </Button>
+                );
+              }
               return null;
             })()}
           </DialogHeader>
