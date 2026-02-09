@@ -887,17 +887,17 @@ const Landing = () => {
             </div>
           )}
 
-          <div className="flex justify-end gap-3 mt-4">
+          <div className="flex flex-col md:flex-row md:justify-end gap-3 mt-4">
             <Button 
               variant="outline"
               onClick={() => setSelectedSite(null)}
-              className="hover:bg-black hover:text-white transition-colors"
+              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-auto"
             >
               Close
             </Button>
             {selectedSiteType === 'wp' && selectedSite && (
               <Button 
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-fit px-3 border border-transparent hover:border-black"
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-fit px-3 border border-transparent hover:border-black"
                 onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
                 disabled={navigating}
               >
