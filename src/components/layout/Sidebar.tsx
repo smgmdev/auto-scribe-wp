@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -1479,7 +1479,7 @@ export function Sidebar({
               </Button>
               {isAdmin && (
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent")} onClick={() => navigate('/system-status')}>
-                  <Cog className="h-5 w-5" />
+                  <Terminal className="h-5 w-5" />
                   System
                 </Button>
               )}
