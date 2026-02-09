@@ -380,12 +380,12 @@ export function AgencyApplicationView() {
                 <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
                   <div className="flex flex-col md:flex-row md:items-center gap-3">
                     <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
-                      <Clock className="h-6 w-6 text-white" />
+                      <Clock className="h-6 w-6 text-white animate-clock-tick" />
                     </div>
                     {/* Mobile: badge top-right, icon top-left above title */}
                     <div className="flex md:hidden justify-between items-start">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/30 shrink-0">
-                        <Clock className="h-5 w-5 text-white" />
+                        <Clock className="h-5 w-5 text-white animate-clock-tick" />
                       </div>
                       {getStatusBadge(customVerification.status)}
                     </div>
