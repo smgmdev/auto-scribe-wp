@@ -426,6 +426,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
     
     onFocus(); // Bring to front when starting drag
+    
+    // Set initial DOM position before React stops controlling it
+    if (chatWindowRef.current) {
+      chatWindowRef.current.style.left = `${localPositionRef.current.x}px`;
+      chatWindowRef.current.style.top = `${localPositionRef.current.y}px`;
+    }
+    
     setIsDragging(true);
     dragStartRef.current = {
       x: e.clientX,
@@ -4820,8 +4827,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
           height: isMobile ? '100dvh' : '550px',
           maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
-          left: isMobile ? '0' : `${isDragging ? localPositionRef.current.x : localPosition.x}px`,
-          top: isMobile ? '0' : `${isDragging ? localPositionRef.current.y : localPosition.y}px`,
+          left: isMobile ? '0' : (isDragging ? undefined : `${localPosition.x}px`),
+          top: isMobile ? '0' : (isDragging ? undefined : `${localPosition.y}px`),
           zIndex: chat.zIndex + 100,
           overscrollBehavior: 'contain',
           willChange: isDragging ? 'left, top' : 'auto',
