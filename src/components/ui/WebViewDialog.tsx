@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, X, Loader2, AlertCircle, Download } from 'lucide-react';
+import { RefreshCw, X, Loader2, AlertCircle, Download, ExternalLink } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface WebViewDialogProps {
@@ -11,9 +11,11 @@ interface WebViewDialogProps {
   title?: string;
   downloadUrl?: string;
   downloadName?: string;
+  /** When true, show "New Tab" button instead of "Download" */
+  isWebsite?: boolean;
 }
 
-export function WebViewDialog({ open, onOpenChange, url, title = 'Website', downloadUrl, downloadName }: WebViewDialogProps) {
+export function WebViewDialog({ open, onOpenChange, url, title = 'Website', downloadUrl, downloadName, isWebsite = false }: WebViewDialogProps) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -128,7 +130,17 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              {(downloadUrl || url) && (
+              {isWebsite ? (
+                <Button
+                  onClick={() => window.open(normalizedUrl, '_blank')}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 md:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  New Tab
+                </Button>
+              ) : (downloadUrl || url) && (
                 <Button
                   onClick={handleDownload}
                   variant="outline"

@@ -140,6 +140,7 @@ export function AgencyApplicationView() {
   const [applicationExpanded, setApplicationExpanded] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [webViewIsWebsite, setWebViewIsWebsite] = useState(false);
 
   // Track if initial data fetch has been done - persists across re-renders
   const initialFetchDoneRef = useRef(false);
@@ -583,7 +584,7 @@ export function AgencyApplicationView() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            setWebViewUrl(existingApplication.agency_website);
+                            setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true);
                           }}
                           className="text-white font-medium hover:underline truncate max-w-full text-left"
                         >
@@ -602,7 +603,7 @@ export function AgencyApplicationView() {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              setWebViewUrl(existingApplication.wp_blog_url!);
+                              setWebViewUrl(existingApplication.wp_blog_url!); setWebViewIsWebsite(true);
                             }}
                             className="text-white font-medium hover:underline truncate max-w-full text-left"
                           >
@@ -636,7 +637,7 @@ export function AgencyApplicationView() {
                         className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setWebViewUrl(existingApplication.agency_website);
+                          setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true);
                         }}
                       >
                         View Website
@@ -648,7 +649,7 @@ export function AgencyApplicationView() {
                           className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setWebViewUrl(existingApplication.wp_blog_url!);
+                            setWebViewUrl(existingApplication.wp_blog_url!); setWebViewIsWebsite(true);
                           }}
                         >
                           View Blog
@@ -671,7 +672,7 @@ export function AgencyApplicationView() {
                               .from('agency-documents')
                               .createSignedUrl(storedPath, 3600, { download: originalName });
                             if (data?.signedUrl) {
-                              setWebViewUrl(data.signedUrl);
+                              setWebViewUrl(data.signedUrl); setWebViewIsWebsite(false);
                             }
                           }}
                         >
@@ -727,7 +728,7 @@ export function AgencyApplicationView() {
               </div>
               <div>
                 <p className="text-muted-foreground">Website</p>
-                <button onClick={() => setWebViewUrl(existingApplication.agency_website)} className="font-medium text-primary hover:underline cursor-pointer">
+                <button onClick={() => { setWebViewUrl(existingApplication.agency_website); setWebViewIsWebsite(true); }} className="font-medium text-primary hover:underline cursor-pointer">
                   {existingApplication.agency_website}
                 </button>
               </div>
@@ -791,7 +792,8 @@ export function AgencyApplicationView() {
         open={!!webViewUrl}
         onOpenChange={(open) => !open && setWebViewUrl(null)}
         url={webViewUrl || ''}
-        title="Agency Website"
+        title={webViewIsWebsite ? "Agency Website" : "Document"}
+        isWebsite={webViewIsWebsite}
       />
     </>
   );
