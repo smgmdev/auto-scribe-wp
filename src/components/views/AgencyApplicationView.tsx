@@ -409,7 +409,7 @@ export function AgencyApplicationView() {
                 </div>
               </div>
             </div>
-            <div className="flex items-start gap-2 bg-[#1d1d1f] text-white p-4 rounded-none">
+            <div className="flex items-start gap-2 bg-[#1d1d1f] text-white px-4 py-2 rounded-none">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
               <p className="text-sm">
                 Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
