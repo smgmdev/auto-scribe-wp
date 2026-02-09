@@ -139,6 +139,7 @@ export function AgencyApplicationView() {
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [applicationExpanded, setApplicationExpanded] = useState(false);
+  const myApplicationsRef = useRef<HTMLDivElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewIsWebsite, setWebViewIsWebsite] = useState(false);
@@ -516,7 +517,7 @@ export function AgencyApplicationView() {
           
           {/* Application Summary Card - shown when pending */}
           {existingApplication?.status === 'pending' && (
-            <div className="space-y-4">
+            <div ref={myApplicationsRef} className="space-y-4">
               <h2 className="text-3xl font-bold text-center text-white">
                 My Applications
               </h2>
@@ -712,7 +713,11 @@ export function AgencyApplicationView() {
           <ExploreNetworkGrid dark />
         </div>
 
-        <AgencyWorkBanner onApplyClick={() => setDialogOpen(true)} />
+        <AgencyWorkBanner 
+          onApplyClick={() => setDialogOpen(true)} 
+          isPending={existingApplication?.status === 'pending'}
+          onMyApplicationsClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        />
 
         <ConnectEarnCarousel />
 
