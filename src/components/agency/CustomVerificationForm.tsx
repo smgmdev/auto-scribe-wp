@@ -306,6 +306,16 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
     if (!formData.bank_country) errors.bank_country = true;
     if (!formData.bank_address.trim()) errors.bank_address = true;
 
+    // USDT validation - network is required if wallet address is provided
+    if (formData.usdt_wallet_address.trim() && !formData.usdt_network) {
+      errors.usdt_network = true;
+      toast({
+        variant: 'destructive',
+        title: 'Network required',
+        description: 'Please select a network when providing a USDT wallet address'
+      });
+    }
+
     setFieldErrors(errors);
 
     if (Object.keys(errors).length > 0) {
