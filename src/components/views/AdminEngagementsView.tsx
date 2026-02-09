@@ -571,8 +571,8 @@ export function AdminEngagementsView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none">
-          <TabsTrigger value="active" className="relative">
+        <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none bg-black p-0">
+          <TabsTrigger value="active" className="relative rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Active ({activeRequests.length})
             {activeRequests.filter(r => !r.read).length > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -580,7 +580,7 @@ export function AdminEngagementsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="relative">
+          <TabsTrigger value="closed" className="relative rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {(deliveredRequests.filter(r => !r.read).length + cancelledRequests.filter(r => !r.read).length) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -714,8 +714,8 @@ export function AdminEngagementsView() {
 
         <TabsContent value="closed" className="mt-0">
           <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
-            <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none">
-              <TabsTrigger value="delivered" className="relative">
+            <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none bg-black p-0">
+              <TabsTrigger value="delivered" className="relative rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
                 Delivered ({deliveredRequests.length})
                 {deliveredRequests.filter(r => !r.read).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -723,7 +723,7 @@ export function AdminEngagementsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="relative">
+              <TabsTrigger value="cancelled" className="relative rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
                 Cancelled ({cancelledRequests.length})
                 {cancelledRequests.filter(r => !r.read).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
