@@ -519,7 +519,6 @@ export function AgencyApplicationView() {
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      {/* Logo in header */}
                       {existingApplication.logo_url && (
                         <img 
                           src={existingApplication.logo_url.startsWith('http') 
@@ -531,7 +530,6 @@ export function AgencyApplicationView() {
                         />
                       )}
                       <h3 className="text-sm font-medium text-white">Your Application</h3>
-                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                     </div>
                     <Badge className="bg-white/20 text-white border-0 text-xs">
                       <Clock className="h-3 w-3 mr-1" />
@@ -557,6 +555,9 @@ export function AgencyApplicationView() {
                         {existingApplication.agency_website.replace(/^https?:\/\//, '')}
                       </p>
                     </div>
+                  </div>
+                  <div className="flex justify-end mt-2">
+                    <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                   </div>
                 </CollapsibleTrigger>
                 
