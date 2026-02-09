@@ -481,7 +481,11 @@ export function AgencyApplicationView() {
                 <h1 className="text-[40px] lg:text-[48px] font-bold text-white leading-tight">
                   Upgrade to Agency
                 </h1>
-                {existingApplication?.status !== 'pending' && (
+                {existingApplication?.status === 'pending' ? (
+                  <p className="mt-3 text-white/80 text-base lg:text-lg">
+                    You have submitted a new application. It takes between 1-3 days to review new applications. You will be notified.
+                  </p>
+                ) : (
                   <p className="mt-3 text-white/80 text-base lg:text-lg">
                     Become a media merchant on Arcana Mace and trade media products worldwide.
                   </p>
