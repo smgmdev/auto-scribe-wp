@@ -377,17 +377,27 @@ export function AgencyApplicationView() {
             />
             <div className="absolute inset-0 flex items-center justify-center p-6">
               <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30">
+                <div className="flex flex-col md:flex-row md:items-center gap-3">
+                  <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
-                    <p className="text-sm text-white/70">
-                      Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
-                    </p>
+                  <div className="flex md:hidden justify-end">
+                    {getStatusBadge(customVerification.status)}
                   </div>
-                  {getStatusBadge(customVerification.status)}
+                  <div className="flex items-center gap-3 md:flex-1">
+                    <div className="flex md:hidden h-12 w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
+                      <Clock className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white">Verification Under Review</h3>
+                      <p className="text-sm text-white/70">
+                        Submitted {customVerification.submitted_at && format(new Date(customVerification.submitted_at), 'MMM d, yyyy h:mm a')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    {getStatusBadge(customVerification.status)}
+                  </div>
                 </div>
                 {customVerification.status === 'rejected' && customVerification.admin_notes && (
                   <div className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-400/30">
