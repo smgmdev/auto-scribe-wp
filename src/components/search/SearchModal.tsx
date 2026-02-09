@@ -347,7 +347,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <div className="flex flex-wrap gap-1 md:gap-2">
                       <button
                         onClick={() => setActiveSubcategory(null)}
-                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                           !activeSubcategory
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -359,7 +359,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         <button
                           key={subcat}
                           onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                             activeSubcategory === subcat
                               ? 'bg-foreground text-background'
                               : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -402,7 +402,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           <img
                             src={site.favicon || getFaviconUrl(site.link)}
                             alt={site.name}
-                            className="h-10 w-10 rounded-lg bg-muted object-cover flex-shrink-0"
+                            className="h-10 w-10 rounded-none bg-muted object-cover flex-shrink-0"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
