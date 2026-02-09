@@ -19,7 +19,7 @@ import { OrderWithCreditsDialog } from '@/components/chat/OrderWithCreditsDialog
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
@@ -949,17 +949,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }
       }
       
-      toast({
-        title: "Joined Chat",
-        description: "You have joined the conversation.",
-      });
+      toast.success("You have joined the conversation.");
     } catch (error: any) {
       console.error('Error joining chat:', error);
-      toast({
-        title: "Error",
-        description: "Failed to join chat.",
-        variant: "destructive"
-      });
+      toast.error("Failed to join chat.");
     } finally {
       setJoiningChat(false);
     }
@@ -1053,17 +1046,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }
       }
       
-      toast({
-        title: "Left Chat",
-        description: "You have left the conversation.",
-      });
+      toast.success("You have left the conversation.");
     } catch (error: any) {
       console.error('Error leaving chat:', error);
-      toast({
-        title: "Error",
-        description: "Failed to leave chat.",
-        variant: "destructive"
-      });
+      toast.error("Failed to leave chat.");
     } finally {
       setLeavingChat(false);
     }
@@ -1275,17 +1261,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
       
-      toast({
-        title: "Offer rejected",
-        description: "The offer has been declined.",
-      });
+      toast.success("The offer has been declined.");
     } catch (error: any) {
       console.error('Error rejecting offer:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to reject offer.",
-      });
+      toast.error("Failed to reject offer.");
     } finally {
       setRejectingOrderRequestId(null);
     }
@@ -1355,17 +1334,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest?.id }
       }));
       
-      toast({
-        title: "Offer cancelled",
-        description: currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
-      });
+      toast.success(currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.");
     } catch (error: any) {
       console.error('Error cancelling order request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to cancel offer.",
-      });
+      toast.error("Failed to cancel offer.");
     } finally {
       setCancellingOrderRequestId(null);
     }
@@ -1453,17 +1425,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest?.id }
       }));
       
-      toast({
-        title: "Request cancelled",
-        description: "Your order request has been cancelled.",
-      });
+      toast.success("Your order request has been cancelled.");
     } catch (error: any) {
       console.error('Error cancelling client order request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to cancel request.",
-      });
+      toast.error("Failed to cancel request.");
     } finally {
       setCancellingOrderRequestId(null);
     }
@@ -1549,17 +1514,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest?.id }
       }));
       
-      toast({
-        title: "Order request accepted",
-        description: "Waiting for client to confirm the order.",
-      });
+      toast.success("Waiting for client to confirm the order.");
     } catch (error: any) {
       console.error('Error accepting order request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to accept order request.",
-      });
+      toast.error(error.message || "Failed to accept order request.");
     }
   };
   
@@ -1644,17 +1602,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest?.id }
       }));
       
-      toast({
-        title: "Order request rejected",
-        description: creditsLocked ? `Order request declined. ${orderData.price} credits released to client.` : "The order request has been declined.",
-      });
+      toast.success(creditsLocked ? `Order request declined. ${orderData.price} credits released to client.` : "The order request has been declined.");
     } catch (error: any) {
       console.error('Error rejecting order request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to reject order request.",
-      });
+      toast.error("Failed to reject order request.");
     } finally {
       setRejectingOrderRequestId(null);
     }
@@ -1829,20 +1780,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest.id }
       }));
       
-      toast({
-        title: "Engagement Cancelled",
-        description: "This engagement has been cancelled.",
-      });
+      toast.success("This engagement has been cancelled.");
       
       setCancelDialogOpen(false);
       setCancellationReason('');
     } catch (error) {
       console.error('Error cancelling engagement:', error);
-      toast({
-        title: "Error",
-        description: "Failed to cancel engagement. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to cancel engagement. Please try again.");
     } finally {
       setCancelling(false);
     }
@@ -1865,10 +1809,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       if (error) throw error;
       
-      toast({
-        title: "Engagement Removed",
-        description: "The cancelled engagement has been removed from your account.",
-      });
+      toast.success("The cancelled engagement has been removed from your account.");
       
       setRemoveDialogOpen(false);
       closeGlobalChat(globalChatRequest.id);
@@ -1876,11 +1817,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       window.dispatchEvent(new CustomEvent('engagement-removed', { detail: { id: globalChatRequest.id } }));
     } catch (error) {
       console.error('Error removing engagement:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove engagement. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to remove engagement. Please try again.");
     } finally {
       setRemoving(false);
     }
@@ -1903,20 +1840,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setLocalOrder(null);
       updateGlobalChatRequest({ order: null }, globalChatRequest.id);
       
-      toast({
-        title: "Order Cancelled",
-        description: `Order cancelled. ${data.credits_refunded} credits refunded.`,
-      });
+      toast.success(`Order cancelled. ${data.credits_refunded} credits refunded.`);
       
       setCancelOrderDialogOpen(false);
       setCancelOrderReason('');
     } catch (error: any) {
       console.error('Error cancelling order:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to cancel order. Please try again.",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Failed to cancel order. Please try again.");
     } finally {
       setCancellingOrder(false);
     }
@@ -1959,20 +1889,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       };
       setMessages(prev => [...prev, newMsg]);
 
-      toast({
-        title: "Cancellation Request Sent",
-        description: `Your request has been sent to the ${counterpartyLabel.toLowerCase()}.`,
-      });
+      toast.success(`Your request has been sent to the ${counterpartyLabel.toLowerCase()}.`);
 
       setCancelOrderRequestDialogOpen(false);
       setCancelOrderRequestReason('');
     } catch (error: any) {
       console.error('Error sending cancel request:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send cancellation request.",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Failed to send cancellation request.");
     } finally {
       setSendingCancelRequest(false);
     }
@@ -2012,17 +1935,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setLocalOrder(null);
       updateGlobalChatRequest({ order: null }, globalChatRequest.id);
       
-      toast({
-        title: "Order Cancelled",
-        description: `Order cancelled mutually. ${data.credits_refunded} credits refunded to client.`,
-      });
+      toast.success(`Order cancelled mutually. ${data.credits_refunded} credits refunded to client.`);
     } catch (error: any) {
       console.error('Error accepting cancellation:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to accept cancellation.",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Failed to accept cancellation.");
     } finally {
       setAcceptingCancellation(false);
     }
@@ -2065,21 +1981,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         });
       }
       
-      toast({
-        title: "Cancellation Rejected",
-        description: "You have rejected the cancellation request. The order remains active.",
-      });
+      toast.success("You have rejected the cancellation request. The order remains active.");
       
       setShowRejectReasonDialog(false);
       setRejectReason('');
       setPendingRejectMessageId(null);
     } catch (error: any) {
       console.error('Error rejecting cancellation:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to reject cancellation.",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Failed to reject cancellation.");
     } finally {
       setRejectingCancellation(false);
     }
@@ -2902,11 +2811,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Auto-focus input after sending
       setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send message',
-        description: error.message,
-      });
+      toast.error(error.message || "Failed to send message.");
     } finally {
       setSending(false);
     }
@@ -2926,21 +2831,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (!file) return;
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.',
-      });
+      toast.error('Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.');
       e.target.value = '';
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: 'Maximum file size is 2MB.',
-      });
+      toast.error('Maximum file size is 2MB.');
       e.target.value = '';
       return;
     }
@@ -3149,11 +3046,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send message',
-        description: error.message,
-      });
+      toast.error(error.message || "Failed to send message.");
     } finally {
       setSending(false);
       setUploadingFile(false);
@@ -3299,16 +3192,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       setLocalOrder(updatedOrder);
       updateGlobalChatRequest({ order: updatedOrder }, globalChatRequest.id);
 
-      toast({
-        title: 'Delivery accepted',
-        description: 'The order has been marked as completed.'
-      });
+      toast.success('The order has been marked as completed.');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error accepting delivery',
-        description: error.message
-      });
+      toast.error(error.message || "Failed to accept delivery.");
     } finally {
       setAcceptingDelivery(false);
     }
@@ -3349,19 +3235,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setMessages(prev => [...prev, revisionMsg as ServiceMessage]);
       }
 
-      toast({
-        title: 'Revision requested',
-        description: 'Your revision request has been sent.'
-      });
+      toast.success('Your revision request has been sent.');
 
       setRevisionDialogOpen(false);
       setRevisionReason('');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error requesting revision',
-        description: error.message
-      });
+      toast.error(error.message || "Failed to request revision.");
     } finally {
       setSubmittingRevision(false);
     }
@@ -3660,17 +3539,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             detail: { requestId: globalChatRequest?.id }
           }));
           
-          toast({
-            title: "Order request cancelled",
-            description: "The order request has been removed.",
-          });
+          toast.success("The order request has been removed.");
         } catch (error: any) {
           console.error('Error cancelling order request:', error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to cancel order request.",
-          });
+      toast.error("Failed to cancel order request.");
         } finally {
           setCancellingOrderRequestId(null);
         }
@@ -3754,17 +3626,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             detail: { requestId: globalChatRequest?.id }
           }));
           
-          toast({
-            title: "Order request rejected",
-            description: creditsLocked ? `Order request declined. ${clientOrderRequest.price} credits released to client.` : "The order request has been declined.",
-          });
+          toast.success(creditsLocked ? `Order request declined. ${clientOrderRequest.price} credits released to client.` : "The order request has been declined.");
         } catch (error: any) {
           console.error('Error rejecting order request:', error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to reject order request.",
-          });
+          toast.error("Failed to reject order request.");
         } finally {
           setRejectingOrderRequestId(null);
         }
@@ -3893,17 +3758,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       // Remove from local state
                       setMessages(prev => prev.filter(m => m.id !== msg.id));
                       
-                      toast({
-                        title: "Order request accepted",
-                        description: "The client can now confirm the order.",
-                      });
+                      toast.success("The client can now confirm the order.");
                     } catch (error: any) {
                       console.error('Error accepting order request:', error);
-                      toast({
-                        variant: "destructive",
-                        title: "Error",
-                        description: error.message || "Failed to accept order request.",
-                      });
+                      toast.error(error.message || "Failed to accept order request.");
                     } finally {
                       setAcceptingOrder(false);
                     }
@@ -4288,17 +4146,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             detail: { requestId: globalChatRequest?.id }
           }));
           
-          toast({
-            title: "Offer cancelled",
-            description: currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.",
-          });
+          toast.success(currentOrderMessages.length > 1 ? "All offers have been removed." : "The offer has been removed.");
         } catch (error: any) {
           console.error('Error cancelling order request:', error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to cancel offer.",
-          });
+          toast.error("Failed to cancel offer.");
         } finally {
           setCancellingOrderRequestId(null);
         }
@@ -4348,17 +4199,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
           
-          toast({
-            title: "Offer rejected",
-            description: "The offer has been declined.",
-          });
+          toast.success("The offer has been declined.");
         } catch (error: any) {
           console.error('Error rejecting offer:', error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to reject offer.",
-          });
+          toast.error("Failed to reject offer.");
         } finally {
           setRejectingOrderRequestId(null);
         }
@@ -6594,17 +6438,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       });
                     }
                     
-                    toast({
-                      title: isResendMode ? "Order Request Resent" : "Order Request Sent",
-                      description: "The client will be notified to complete the payment.",
-                    });
+                    toast.success("The client will be notified to complete the payment.");
                     // Form state reset is handled in finally block
                   } catch (error: any) {
-                    toast({
-                      variant: 'destructive',
-                      title: 'Failed to send offer',
-                      description: error.message,
-                    });
+                    toast.error(error.message || "Failed to send offer.");
                   } finally {
                     setSending(false);
                     // Always close dialog and reset form in finally block
@@ -6720,19 +6557,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   }
                   
                   setHasOpenDispute(true);
-                  toast({
-                    title: "Dispute Request Sent",
-                    description: "A staff member will join this chat within 6-24 hours.",
-                  });
+                  toast.success("A staff member will join this chat within 6-24 hours.");
                   setDisputeDialogOpen(false);
                   setDisputeReason('');
                 } catch (error: any) {
                   console.error('Error creating dispute:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: "Error",
-                    description: error.message || "Failed to submit dispute. Please try again.",
-                  });
+                  toast.error(error.message || "Failed to submit dispute. Please try again.");
                 } finally {
                   setSubmittingDispute(false);
                 }
@@ -7020,7 +6850,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
                     onClick={() => {
                       navigator.clipboard.writeText(orderDetails.order_number || orderDetails.id);
-                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                      toast.success("Order ID copied to clipboard");
                     }}
                   />
                 </p>
@@ -7475,10 +7305,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         // Increment the unread orders count for notification
                         incrementUserUnreadOrdersCount();
                         
-                        toast({
-                          title: "Order Accepted",
-                          description: `Successfully ordered from ${pendingOrderRequest.media_site_name}. ${data.credits_deducted} credits used.`,
-                        });
+                        toast.success(`Successfully ordered from ${pendingOrderRequest.media_site_name}. ${data.credits_deducted} credits used.`);
                         
                         setAcceptOrderDialogOpen(false);
                         setPendingOrderRequest(null);
@@ -7487,11 +7314,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       }
                     } catch (error: any) {
                       console.error('Order error:', error);
-                      toast({
-                        variant: 'destructive',
-                        title: 'Order Failed',
-                        description: error.message || 'Failed to place order.',
-                      });
+                      toast.error(error.message || 'Failed to place order.');
                     } finally {
                       setAcceptingOrder(false);
                     }
@@ -7661,21 +7484,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
                   }
                   
-                  toast({
-                    title: "Order Delivered",
-                    description: "The client has been notified about the delivery.",
-                  });
+                  toast.success("The client has been notified about the delivery.");
                   
                   setDeliverOrderDialogOpen(false);
                   setDeliveryLink('');
                   setDeliveryNotes('');
                 } catch (error: any) {
                   console.error('Error delivering order:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: 'Delivery Failed',
-                    description: error.message || 'Failed to submit delivery.',
-                  });
+                  toast.error(error.message || 'Failed to submit delivery.');
                 } finally {
                   setSubmittingDelivery(false);
                 }
@@ -7760,20 +7576,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (updateError) throw updateError;
                   
-                  toast({
-                    title: "Order Cancelled",
-                    description: "The order has been cancelled and the client has been notified.",
-                  });
+                  toast.success("The order has been cancelled and the client has been notified.");
                   
                   setCancelPlacedOrderDialogOpen(false);
                   setCancelPlacedOrderReason('');
                 } catch (error: any) {
                   console.error('Error cancelling order:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: 'Cancellation Failed',
-                    description: error.message || 'Failed to cancel order.',
-                  });
+                  toast.error(error.message || 'Failed to cancel order.');
                 } finally {
                   setCancellingPlacedOrder(false);
                 }
@@ -7849,20 +7658,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setLocalOrder(prev => prev ? { ...prev, status: 'completed', delivery_status: 'accepted' } : null);
                   setHasOpenDispute(false);
                   
-                  toast({
-                    title: "Order Completed",
-                    description: "The dispute has been resolved and the order marked as completed.",
-                  });
+                  toast.success("The dispute has been resolved and the order marked as completed.");
                   
                   setCompleteViaDisputeDialogOpen(false);
                   setDisputeResolutionReason('');
                 } catch (error: any) {
                   console.error('Error completing order via dispute:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: 'Resolution Failed',
-                    description: error.message || 'Failed to complete order.',
-                  });
+                  toast.error(error.message || 'Failed to complete order.');
                 } finally {
                   setResolvingDispute(false);
                 }
@@ -7963,20 +7765,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setLocalOrder(prev => prev ? { ...prev, status: 'cancelled' } : null);
                   setHasOpenDispute(false);
                   
-                  toast({
-                    title: "Order Cancelled",
-                    description: `The dispute has been resolved. ${data?.credits_refunded || 0} credits refunded to client.`,
-                  });
+                  toast.success(`The dispute has been resolved. ${data?.credits_refunded || 0} credits refunded to client.`);
                   
                   setCancelViaDisputeDialogOpen(false);
                   setDisputeResolutionReason('');
                 } catch (error: any) {
                   console.error('Error cancelling order via dispute:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: 'Resolution Failed',
-                    description: error.message || 'Failed to cancel order.',
-                  });
+                  toast.error(error.message || 'Failed to cancel order.');
                 } finally {
                   setResolvingDispute(false);
                 }

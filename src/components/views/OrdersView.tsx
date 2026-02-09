@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -107,7 +106,7 @@ export function OrdersView() {
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { toast } = useToast();
+  const toast = sonnerToast;
 
   // Timer tick for live countdown updates
   useEffect(() => {
