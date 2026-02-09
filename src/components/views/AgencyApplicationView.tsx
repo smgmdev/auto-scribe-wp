@@ -66,6 +66,9 @@ interface AgencyApplication {
   media_niches: string[] | null;
   agency_description: string | null;
   incorporation_document_url: string;
+  logo_url: string | null;
+  payout_method: string | null;
+  wp_blog_url: string | null;
 }
 
 interface AgencyPayout {
@@ -181,7 +184,7 @@ export function AgencyApplicationView() {
       // Fetch existing application first to check status
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url')
+        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url, logo_url, payout_method, wp_blog_url')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -548,6 +551,17 @@ export function AgencyApplicationView() {
                 
                 <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                   <div className="px-4 pb-4 pt-2 border-t border-white/10 space-y-4">
+                    {/* Logo if available */}
+                    {existingApplication.logo_url && (
+                      <div className="flex justify-center">
+                        <img 
+                          src={existingApplication.logo_url} 
+                          alt={existingApplication.agency_name}
+                          className="h-16 w-16 rounded-lg object-cover bg-white/10"
+                        />
+                      </div>
+                    )}
+                    
                     {/* Full details */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
                       <div>
@@ -563,9 +577,45 @@ export function AgencyApplicationView() {
                         <p className="text-white font-medium">{existingApplication.whatsapp_phone}</p>
                       </div>
                       <div>
+                        <p className="text-white/50 mb-1">Country</p>
+                        <p className="text-white font-medium">{existingApplication.country}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/50 mb-1">Agency Website</p>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setWebViewUrl(existingApplication.agency_website);
+                          }}
+                          className="text-white font-medium hover:underline truncate max-w-full text-left"
+                        >
+                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
+                        </button>
+                      </div>
+                      <div>
                         <p className="text-white/50 mb-1">Media Channels</p>
                         <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
                       </div>
+                      {existingApplication.payout_method && (
+                        <div>
+                          <p className="text-white/50 mb-1">Payout Method</p>
+                          <p className="text-white font-medium capitalize">{existingApplication.payout_method}</p>
+                        </div>
+                      )}
+                      {existingApplication.wp_blog_url && (
+                        <div>
+                          <p className="text-white/50 mb-1">WordPress Blog</p>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWebViewUrl(existingApplication.wp_blog_url!);
+                            }}
+                            className="text-white font-medium hover:underline truncate max-w-full text-left"
+                          >
+                            {existingApplication.wp_blog_url.replace(/^https?:\/\//, '')}
+                          </button>
+                        </div>
+                      )}
                       {existingApplication.media_niches && existingApplication.media_niches.length > 0 && (
                         <div className="lg:col-span-2">
                           <p className="text-white/50 mb-1">Media Niches</p>
@@ -599,6 +649,19 @@ export function AgencyApplicationView() {
                       >
                         View Website
                       </Button>
+                      {existingApplication.wp_blog_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setWebViewUrl(existingApplication.wp_blog_url!);
+                          }}
+                        >
+                          View Blog
+                        </Button>
+                      )}
                       {existingApplication.incorporation_document_url && (
                         <Button
                           size="sm"
