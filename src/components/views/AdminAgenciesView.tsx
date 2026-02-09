@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle, ArchiveRestore } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1008,10 +1008,10 @@ export function AdminAgenciesView() {
                   ))}
                 </div>
               )}
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-end mt-4">
                 <Button
-                  variant="outline"
                   size="sm"
+                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black"
                   onClick={async () => {
                     const { data, error } = await supabase
                       .from('agency_applications')
@@ -1033,7 +1033,7 @@ export function AdminAgenciesView() {
                     }
                   }}
                 >
-                  <RefreshCw className="h-4 w-4 mr-1" />
+                  <ArchiveRestore className="h-4 w-4 mr-1" />
                   Restore Hidden
                 </Button>
               </div>
@@ -1126,10 +1126,10 @@ export function AdminAgenciesView() {
                   ))}
                 </div>
               )}
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-end mt-4">
                 <Button
-                  variant="outline"
                   size="sm"
+                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black"
                   onClick={async () => {
                     const { data, error } = await supabase
                       .from('agency_applications')
@@ -1151,7 +1151,7 @@ export function AdminAgenciesView() {
                     }
                   }}
                 >
-                  <RefreshCw className="h-4 w-4 mr-1" />
+                  <ArchiveRestore className="h-4 w-4 mr-1" />
                   Restore Hidden
                 </Button>
               </div>
