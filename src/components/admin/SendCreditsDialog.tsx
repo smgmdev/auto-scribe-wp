@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,13 @@ export function SendCreditsDialog({
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Register on popup stack for layered Esc handling
+  useEffect(() => {
+    if (!open) { removePopup('send-credits-dialog'); return; }
+    pushPopup('send-credits-dialog', () => onOpenChange(false));
+    return () => removePopup('send-credits-dialog');
+  }, [open, onOpenChange]);
 
   const handleSubmit = async () => {
     const creditAmount = parseInt(amount);
@@ -78,7 +86,7 @@ export function SendCreditsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5" />
