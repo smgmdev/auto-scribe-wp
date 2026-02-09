@@ -63,18 +63,16 @@ export function MediaSiteDialog({
   const popupRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
 
-  // Center on first open
+  // Center every time it opens
   useEffect(() => {
-    if (open && !initialized.current) {
-      initialized.current = true;
+    if (open) {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const newPos = { x: (w - 450) / 2, y: (h - 500) / 2 };
+      const popupWidth = 450;
+      const popupHeight = Math.min(h * 0.85, 600);
+      const newPos = { x: (w - popupWidth) / 2, y: (h - popupHeight) / 2 };
       setPosition(newPos);
       positionRef.current = newPos;
-    }
-    if (!open) {
-      initialized.current = false;
     }
   }, [open]);
 
