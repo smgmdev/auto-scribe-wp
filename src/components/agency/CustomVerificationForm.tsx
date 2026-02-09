@@ -309,20 +309,37 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
     // USDT validation - network is required if wallet address is provided
     if (formData.usdt_wallet_address.trim() && !formData.usdt_network) {
       errors.usdt_network = true;
-      toast({
-        variant: 'destructive',
-        title: 'Network required',
-        description: 'Please select a network when providing a USDT wallet address'
-      });
     }
 
     setFieldErrors(errors);
 
     if (Object.keys(errors).length > 0) {
+      const fieldLabels: Record<string, string> = {
+        full_name: 'Full Name',
+        personal_country: 'Country',
+        email: 'Email',
+        phone: 'Phone Number',
+        passport: 'Passport',
+        company_name: 'Company Name',
+        company_country: 'Company Country',
+        company_address: 'Company Address',
+        company_id: 'Company ID',
+        companyDocs: 'Company Documents',
+        articles: 'Articles of Association',
+        license: 'License / Permit',
+        bank_account_holder: 'Account Holder Name',
+        bank_account_number: 'Account Number',
+        bank_name: 'Bank Name',
+        bank_swift_code: 'SWIFT Code',
+        bank_country: 'Bank Country',
+        bank_address: 'Bank Address',
+        usdt_network: 'USDT Network',
+      };
+      const missingNames = Object.keys(errors).map(k => fieldLabels[k] || k);
       toast({
         variant: 'destructive',
         title: 'Missing or invalid fields',
-        description: 'Please fill in all required fields correctly'
+        description: `Please fill in: ${missingNames.join(', ')}`
       });
       return;
     }
