@@ -139,7 +139,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       <div
         className={`pointer-events-auto bg-background relative overflow-y-auto ${
           isMobile
-            ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
+            ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
             : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
