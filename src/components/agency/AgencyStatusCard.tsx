@@ -89,7 +89,7 @@ export function AgencyStatusCard({
           onClick={onNavigateToApplication}
         >
           <Clock className="h-4 w-4 mr-2" />
-          Pending Review
+          Final Review
         </Button>
       </div>
     );
@@ -219,7 +219,7 @@ export function AgencyStatusCard({
             onClick={onNavigateToApplication}
           >
             <Clock className="h-4 w-4 mr-2" />
-            Pending Review
+            Final Review
           </Button>
         </div>
       );

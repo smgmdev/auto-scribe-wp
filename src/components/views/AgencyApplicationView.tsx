@@ -279,7 +279,7 @@ export function AgencyApplicationView() {
     switch (status) {
       case 'pending':
       case 'pending_review':
-        return <Badge className="bg-black text-white border border-black"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+        return <Badge className="bg-black text-white border border-black"><Clock className="h-3 w-3 mr-1" />Final Review</Badge>;
       case 'approved':
         return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
       case 'rejected':
