@@ -145,10 +145,7 @@ export function OrdersView() {
               const existingOrder = orders.find(o => o.id === updatedOrder.id);
               const siteName = existingOrder?.media_sites?.name || 'Your order';
               
-              toast({
-                title: "Order Delivered!",
-                description: `${siteName} has been marked as delivered. Please review and accept the delivery.`,
-              });
+              toast.success(`${siteName} has been marked as delivered. Please review and accept the delivery.`);
               
               // Increment the completed count for the notification badge
               incrementUserUnreadCompletedCount();
@@ -225,11 +222,7 @@ export function OrdersView() {
                   incrementUserUnreadDisputesCount();
                   
                   // Show toast notification
-                  toast({
-                    title: "Dispute Opened",
-                    description: "A dispute has been opened for one of your orders.",
-                    variant: "destructive",
-                  });
+                  toast.error("A dispute has been opened for one of your orders.");
                 }
                 
                 // Refetch orders to ensure the disputed order appears in the list
@@ -248,27 +241,17 @@ export function OrdersView() {
           const data = payload.payload as { action: string; message: string; reason?: string; mediaSiteName?: string };
           
           if (data.action === 'order-cancelled') {
-            toast({
-              title: "Order Cancelled by Arcana Mace Staff",
-              description: data.reason 
+            toast.error(data.reason 
                 ? `${data.message} Reason: ${data.reason}`
-                : data.message,
-              variant: "destructive",
-            });
+                : data.message);
             fetchOrders();
             fetchUserDisputes();
           } else if (data.action === 'dispute-resolved') {
-            toast({
-              title: "Dispute Resolved",
-              description: data.message,
-            });
+            toast.success(data.message);
             fetchOrders();
             fetchUserDisputes();
           } else if (data.action === 'order-delivered') {
-            toast({
-              title: "Order Delivered!",
-              description: data.message || `Your order for ${data.mediaSiteName || 'a media site'} has been delivered.`,
-            });
+            toast.success(data.message || `Your order for ${data.mediaSiteName || 'a media site'} has been delivered.`);
             // Increment the completed count for the notification badge
             incrementUserUnreadCompletedCount();
             fetchOrders();
@@ -349,11 +332,7 @@ export function OrdersView() {
     const { data, error } = await query;
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error loading orders',
-        description: error.message
-      });
+      toast.error(error.message || 'Error loading orders');
       setLoading(false);
       return;
     }
@@ -477,19 +456,12 @@ export function OrdersView() {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: 'Delivery accepted',
-        description: 'The order has been marked as completed.'
-      });
+      toast.success('The order has been marked as completed.');
 
       setSelectedOrder(null);
       fetchOrders();
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error accepting delivery',
-        description: error.message
-      });
+      toast.error(error.message || 'Error accepting delivery');
     } finally {
       setReleasing(false);
     }
@@ -508,21 +480,14 @@ export function OrdersView() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({
-        title: "Order Cancelled",
-        description: `Order cancelled. ${data.credits_refunded} credits have been refunded to your account.`,
-      });
+      toast.success(`Order cancelled. ${data.credits_refunded} credits have been refunded to your account.`);
       
       setCancelOrderDialogOpen(false);
       setSelectedOrder(null);
       fetchOrders();
     } catch (error: any) {
       console.error('Error cancelling order:', error);
-      toast({
-        variant: 'destructive',
-        title: "Error",
-        description: error.message || "Failed to cancel order. Please try again.",
-      });
+      toast.error(error.message || "Failed to cancel order. Please try again.");
     } finally {
       setCancellingOrder(false);
     }
@@ -1211,7 +1176,7 @@ export function OrdersView() {
                     className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
                     onClick={() => {
                       navigator.clipboard.writeText(selectedOrder.order_number || selectedOrder.id);
-                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                      toast.success("Order ID copied to clipboard");
                     }}
                   />
                 </p>
@@ -1302,20 +1267,13 @@ export function OrdersView() {
                   setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
                   // Don't add to unread since the client just opened it themselves
                   
-                  toast({
-                    title: "Dispute Request Sent",
-                    description: "A staff member will join your chat within 6-24 hours to help resolve your issue.",
-                  });
+                  toast.success("A staff member will join your chat within 6-24 hours to help resolve your issue.");
                   
                   setDisputeDialogOpen(false);
                   setSelectedOrder(null);
                 } catch (error: any) {
                   console.error('Error opening dispute:', error);
-                  toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: error.message || 'Failed to open dispute.',
-                  });
+                  toast.error(error.message || 'Failed to open dispute.');
                 } finally {
                   setSubmittingDispute(false);
                 }
