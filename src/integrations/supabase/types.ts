@@ -265,6 +265,7 @@ export type Database = {
           commission_percentage: number
           country: string | null
           created_at: string
+          downgrade_reason: string | null
           downgraded: boolean
           email: string | null
           id: string
@@ -283,6 +284,7 @@ export type Database = {
           commission_percentage?: number
           country?: string | null
           created_at?: string
+          downgrade_reason?: string | null
           downgraded?: boolean
           email?: string | null
           id?: string
@@ -301,6 +303,7 @@ export type Database = {
           commission_percentage?: number
           country?: string | null
           created_at?: string
+          downgrade_reason?: string | null
           downgraded?: boolean
           email?: string | null
           id?: string

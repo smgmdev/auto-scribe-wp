@@ -1,0 +1,1 @@
+ALTER TABLE public.agency_payouts ADD COLUMN downgrade_reason text DEFAULT NULL;
