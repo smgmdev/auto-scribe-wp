@@ -336,7 +336,7 @@ export function AgencyApplicationView() {
   if (isDowngraded) {
     return (
       <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-        <div className="max-w-[980px] mx-auto">
+        <div className="max-w-[980px] mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Agency Verification
@@ -397,8 +397,8 @@ export function AgencyApplicationView() {
           </div>
         </div>
 
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-2 pb-8">
-          <h2 className="text-3xl font-bold text-center mb-6 text-foreground">Why was my account downgraded?</h2>
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 py-8">
+          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Why was my account downgraded?</h2>
           <div className="divide-y divide-border">
             {[
               {
