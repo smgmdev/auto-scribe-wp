@@ -513,13 +513,14 @@ export function AgencyApplicationView() {
                   </div>
                 )}
                 
-                <Button 
-                  className={`mt-4 ${existingApplication?.status === 'pending' ? 'opacity-50 cursor-not-allowed bg-white text-black' : 'bg-white text-black hover:bg-white/90 transition-all duration-200'}`}
-                  onClick={() => setDialogOpen(true)}
-                  disabled={existingApplication?.status === 'pending'}
-                >
-                  {existingApplication?.status === 'pending' ? 'In Review' : 'Start New Application'}
-                </Button>
+                {existingApplication?.status !== 'pending' && (
+                  <Button 
+                    className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
+                    onClick={() => setDialogOpen(true)}
+                  >
+                    Start New Application
+                  </Button>
+                )}
               </div>
             </div>
           </div>
