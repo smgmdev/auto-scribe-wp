@@ -3718,7 +3718,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200"
+                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   onClick={async () => {
                     if (!globalChatRequest) return;
                     
@@ -3907,7 +3907,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
-                  className="w-full rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200"
+                  className="w-full rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
@@ -4006,7 +4006,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
-                  className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200 text-xs sm:text-sm"
+                  className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 text-xs sm:text-sm"
                   onClick={handleAcceptDeliveryFromChat}
                   disabled={acceptingDelivery || hasOpenDispute}
                 >
@@ -4284,7 +4284,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200"
+                  className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
@@ -5365,7 +5365,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
-                        className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200 shrink-0"
+                        className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
                         disabled={acceptingDelivery}
                       >
@@ -5415,7 +5415,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#1e4ba8] hover:border-[#1e4ba8] transition-all duration-200"
+                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => {
                             setPendingOrderRequest({
                               media_site_id: pendingOrder.media_site_id,
