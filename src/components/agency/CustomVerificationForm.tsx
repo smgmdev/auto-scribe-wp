@@ -41,6 +41,84 @@ const USDT_NETWORKS = [
   { value: 'ERC20', label: 'ERC20 (Ethereum)' },
 ];
 
+// Extracted outside component to prevent re-mount on parent re-render (which kills in-progress uploads)
+function FileUploadBox({
+  label,
+  required,
+  file,
+  url,
+  uploading,
+  accept,
+  maxSizeLabel,
+  hasError,
+  onChange,
+  onDrop,
+}: {
+  label: string;
+  required?: boolean;
+  file: File | null;
+  url: string | null;
+  uploading: boolean;
+  accept: string;
+  maxSizeLabel?: string;
+  hasError?: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDrop: (file: File) => void;
+}) {
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      onDrop(droppedFile);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>{label} {required && '*'}</Label>
+      <div 
+        className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+          url ? 'border-green-500 bg-green-500/10' : hasError ? 'border-red-500 bg-red-500/5' : 'border-border hover:border-primary/50'
+        }`}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {uploading ? (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="text-sm">Uploading...</span>
+          </div>
+        ) : url ? (
+          <div className="flex items-center justify-center gap-2 text-green-500">
+            <CheckCircle className="h-5 w-5" />
+            <span className="text-sm">{file?.name || 'Uploaded'}</span>
+          </div>
+        ) : (
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept={accept}
+              onChange={onChange}
+              className="hidden"
+            />
+            <div className="flex flex-col items-center gap-2">
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Drag & drop or click to upload</span>
+              {maxSizeLabel && <span className="text-xs text-muted-foreground">{maxSizeLabel}</span>}
+            </div>
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData, onSubmitSuccess, onCancel }: CustomVerificationFormProps) {
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
@@ -351,82 +429,6 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
     }
   };
 
-  const FileUploadBox = ({
-    label,
-    required,
-    file,
-    url,
-    uploading,
-    accept,
-    maxSizeLabel,
-    hasError,
-    onChange,
-    onDrop,
-  }: {
-    label: string;
-    required?: boolean;
-    file: File | null;
-    url: string | null;
-    uploading: boolean;
-    accept: string;
-    maxSizeLabel?: string;
-    hasError?: boolean;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onDrop: (file: File) => void;
-  }) => {
-    const handleDragOver = (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const droppedFile = e.dataTransfer.files?.[0];
-      if (droppedFile) {
-        onDrop(droppedFile);
-      }
-    };
-
-    return (
-      <div className="space-y-2">
-        <Label>{label} {required && '*'}</Label>
-        <div 
-          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-            url ? 'border-green-500 bg-green-500/10' : hasError ? 'border-red-500 bg-red-500/5' : 'border-border hover:border-primary/50'
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          {uploading ? (
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span className="text-sm">Uploading...</span>
-            </div>
-          ) : url ? (
-            <div className="flex items-center justify-center gap-2 text-green-500">
-              <CheckCircle className="h-5 w-5" />
-              <span className="text-sm">{file?.name || 'Uploaded'}</span>
-            </div>
-          ) : (
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                accept={accept}
-                onChange={onChange}
-                className="hidden"
-              />
-              <div className="flex flex-col items-center gap-2">
-                <Upload className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Drag & drop or click to upload</span>
-                {maxSizeLabel && <span className="text-xs text-muted-foreground">{maxSizeLabel}</span>}
-              </div>
-            </label>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="pb-8">
