@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, ArrowRight, Loader2, MessageSquare, Info } from 'lucide-react';
+import { ExternalLink, ArrowRight, Loader2, MessageSquare, Info, X, GripHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getFaviconUrl } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { BriefSubmissionDialog } from '@/components/briefs/BriefSubmissionDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MediaSite {
   id: string;
@@ -41,6 +42,7 @@ export function MediaSiteDialog({
 }: MediaSiteDialogProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [openEngagementData, setOpenEngagementData] = useState<any>(null);
   const [checkingEngagement, setCheckingEngagement] = useState(false);
   const [userAgencyName, setUserAgencyName] = useState<string | null>(null);
@@ -51,6 +53,30 @@ export function MediaSiteDialog({
   // Agency details popup state
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
+
+  // Drag state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const popupRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
+
+  // Center on first open
+  useEffect(() => {
+    if (open && !initialized.current) {
+      initialized.current = true;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const newPos = { x: (w - 450) / 2, y: (h - 500) / 2 };
+      setPosition(newPos);
+      positionRef.current = newPos;
+    }
+    if (!open) {
+      initialized.current = false;
+    }
+  }, [open]);
 
   // Check for open engagement when dialog opens
   useEffect(() => {
@@ -97,6 +123,56 @@ export function MediaSiteDialog({
     }
   }, [open, mediaSite?.id, user]);
 
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: positionRef.current.x,
+      posY: positionRef.current.y,
+    };
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (!isDraggingRef.current) {
+      positionRef.current = position;
+    }
+  }, [position]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const newX = dragStartRef.current.posX + dx;
+      const newY = dragStartRef.current.posY + dy;
+      positionRef.current = { x: newX, y: newY };
+      if (popupRef.current) {
+        popupRef.current.style.left = `${newX}px`;
+        popupRef.current.style.top = `${newY}px`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      setPosition(positionRef.current);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   const extractDomain = (url: string) => {
     try {
       return new URL(url).hostname.replace('www.', '');
@@ -114,186 +190,296 @@ export function MediaSiteDialog({
     setBriefDialogOpen(true);
   };
 
-  if (!mediaSite) return null;
+  if (!mediaSite || !open || briefDialogOpen) {
+    // Still render brief dialog and agency details even when main popup is hidden
+    return (
+      <>
+        {mediaSite && (
+          <BriefSubmissionDialog
+            open={briefDialogOpen}
+            onOpenChange={setBriefDialogOpen}
+            mediaSite={{
+              id: mediaSite.id,
+              name: mediaSite.name,
+              price: mediaSite.price,
+              agency: mediaSite.agency,
+              favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link)
+            }}
+            onBack={() => {
+              setBriefDialogOpen(false);
+            }}
+            onSuccess={(engagement) => {
+              setBriefDialogOpen(false);
+              if (engagement) {
+                setOpenEngagementData(engagement);
+              }
+              onSuccess?.(engagement);
+            }}
+          />
+        )}
+        <AgencyDetailsDialog
+          open={agencyDetailsOpen}
+          onOpenChange={setAgencyDetailsOpen}
+          agencyName={selectedAgencyName}
+          zIndex={250}
+        />
+      </>
+    );
+  }
 
   const isAgency = mediaSite.category === 'Agencies/People';
 
-  return (
-    <>
-    <Dialog open={open && !briefDialogOpen} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-lg z-[200] max-h-[100dvh] overflow-y-auto sm:max-h-none sm:overflow-y-visible" 
-        overlayClassName="bg-transparent"
-        onPointerDownOutside={(e) => { if (briefDialogOpen) e.preventDefault(); }}
-        onInteractOutside={(e) => { if (briefDialogOpen) e.preventDefault(); }}
-      >
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <img
-              src={mediaSite.favicon || getFaviconUrl(mediaSite.link)}
-              alt={mediaSite.name}
-              className="h-12 w-12 rounded-xl object-cover"
-            />
-            <span>{mediaSite.name}</span>
-          </DialogTitle>
-        </DialogHeader>
+  const content = (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <img
+          src={mediaSite.favicon || getFaviconUrl(mediaSite.link)}
+          alt={mediaSite.name}
+          className="h-12 w-12 rounded-xl object-cover shrink-0"
+        />
+        <span className="text-left font-semibold text-lg">{mediaSite.name}</span>
+      </div>
 
-        <div className="space-y-4 mt-4">
+      <div>
+        <p className="text-sm text-muted-foreground">Website</p>
+        <a 
+          href={mediaSite.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline flex items-center gap-1"
+        >
+          {extractDomain(mediaSite.link)}
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </div>
+      
+      {!isAgency && (
+        <div className="flex gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Website</p>
-            <a 
-              href={mediaSite.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent hover:underline flex items-center gap-1"
-            >
-              {extractDomain(mediaSite.link)}
-              <ExternalLink className="h-3 w-3" />
-            </a>
+            <p className="text-sm text-muted-foreground">Price</p>
+            <p className="text-foreground font-medium">{mediaSite.price.toLocaleString()} USD</p>
           </div>
-          
-          {!isAgency && (
-            <div className="flex gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Price</p>
-                <p className="text-foreground font-medium">{mediaSite.price.toLocaleString()} USD</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Format</p>
-                <Badge variant="secondary">{mediaSite.publication_format}</Badge>
-              </div>
-            </div>
-          )}
-          
-          {mediaSite.category && !isAgency && (
-            <div>
-              <p className="text-sm text-muted-foreground">Category</p>
-              <p className="text-foreground">{mediaSite.category}</p>
-            </div>
-          )}
-          
-          {mediaSite.subcategory && (
-            <div>
-              <p className="text-sm text-muted-foreground">Subcategory</p>
-              <p className="text-foreground">{mediaSite.subcategory}</p>
-            </div>
-          )}
-          
-          {mediaSite.agency && (
-            <div>
-              <p className="text-sm text-muted-foreground">Agency</p>
-              <p 
-                className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
-                onClick={() => handleAgencyClick(mediaSite.agency!)}
-              >
-                {mediaSite.agency}
-                <Info className="h-3 w-3" />
-              </p>
-            </div>
-          )}
-          
-          {mediaSite.about && (
-            <div>
-              <p className="text-sm text-muted-foreground">About</p>
-              <p className="text-foreground text-sm">{mediaSite.about}</p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm text-muted-foreground">Format</p>
+            <Badge variant="secondary">{mediaSite.publication_format}</Badge>
+          </div>
         </div>
-
-        <div className="flex flex-col-reverse md:flex-row gap-3 mt-6">
-          <Button 
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:flex-1"
+      )}
+      
+      {mediaSite.category && !isAgency && (
+        <div>
+          <p className="text-sm text-muted-foreground">Category</p>
+          <p className="text-foreground">{mediaSite.category}</p>
+        </div>
+      )}
+      
+      {mediaSite.subcategory && (
+        <div>
+          <p className="text-sm text-muted-foreground">Subcategory</p>
+          <p className="text-foreground">{mediaSite.subcategory}</p>
+        </div>
+      )}
+      
+      {mediaSite.agency && (
+        <div>
+          <p className="text-sm text-muted-foreground">Agency</p>
+          <p 
+            className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
+            onClick={() => handleAgencyClick(mediaSite.agency!)}
           >
-            Close
-          </Button>
-          {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
-            user ? (
-              checkingEngagement ? (
-                <Button disabled className="rounded-none bg-black text-white w-full md:flex-1">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Checking...
-                </Button>
-              ) : openEngagementData ? (
-                <Badge 
-                  variant="secondary" 
-                  className="text-sm flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3 rounded-none w-full md:flex-1"
-                  onClick={() => {
-                    const { openGlobalChat, clearUnreadMessageCount } = useAppStore.getState();
-                    clearUnreadMessageCount(openEngagementData.id);
-                    openGlobalChat(openEngagementData, 'my-request');
-                    onOpenChange(false);
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Engagement Open
-                </Badge>
-              ) : (
-                <Button 
-                  className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
-                  onClick={handleInterested}
-                >
-                  <span>I'm Interested - {mediaSite.price.toLocaleString()} USD</span>
-                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                    <ArrowRight className="h-4 w-4 shrink-0" />
-                  </span>
-                </Button>
-              )
-            ) : (
-              <Button 
-                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
-                onClick={() => {
-                  navigate('/auth', { 
-                    state: { 
-                      targetView: 'orders',
-                      pendingPurchase: mediaSite.id
-                    } 
-                  });
-                }}
-              >
-                <span>Sign In to Purchase</span>
-                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                  <ArrowRight className="h-4 w-4 shrink-0" />
-                </span>
-              </Button>
-            )
-          )}
+            {mediaSite.agency}
+            <Info className="h-3 w-3" />
+          </p>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+      
+      {mediaSite.about && (
+        <div>
+          <p className="text-sm text-muted-foreground">About</p>
+          <p className="text-foreground text-sm">{mediaSite.about}</p>
+        </div>
+      )}
+    </div>
+  );
 
-    {/* Brief Submission Dialog - single shared component */}
-    <BriefSubmissionDialog
-      open={briefDialogOpen}
-      onOpenChange={setBriefDialogOpen}
-      mediaSite={{
-        id: mediaSite.id,
-        name: mediaSite.name,
-        price: mediaSite.price,
-        agency: mediaSite.agency,
-        favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link)
-      }}
-      onBack={() => {
-        setBriefDialogOpen(false);
-        // Parent dialog will reopen automatically since open && !briefDialogOpen
-      }}
-      onSuccess={(engagement) => {
-        setBriefDialogOpen(false);
-        if (engagement) {
-          setOpenEngagementData(engagement);
-        }
-        onSuccess?.(engagement);
-      }}
-    />
+  const actionButtons = (
+    <div className="flex flex-col-reverse md:flex-row gap-3">
+      <Button 
+        variant="outline"
+        onClick={() => onOpenChange(false)}
+        className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:flex-1"
+      >
+        Close
+      </Button>
+      {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
+        user ? (
+          checkingEngagement ? (
+            <Button disabled className="rounded-none bg-black text-white w-full md:flex-1">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Checking...
+            </Button>
+          ) : openEngagementData ? (
+            <Badge 
+              variant="secondary" 
+              className="text-sm flex items-center justify-center gap-1.5 bg-black text-white hover:bg-gray-800 cursor-pointer transition-colors py-2 px-3 rounded-none w-full md:flex-1"
+              onClick={() => {
+                const { openGlobalChat, clearUnreadMessageCount } = useAppStore.getState();
+                clearUnreadMessageCount(openEngagementData.id);
+                openGlobalChat(openEngagementData, 'my-request');
+                onOpenChange(false);
+              }}
+            >
+              <MessageSquare className="h-4 w-4" />
+              Engagement Open
+            </Badge>
+          ) : (
+            <Button 
+              className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
+              onClick={handleInterested}
+            >
+              <span>I'm Interested - {mediaSite.price.toLocaleString()} USD</span>
+              <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+                <ArrowRight className="h-4 w-4 shrink-0" />
+              </span>
+            </Button>
+          )
+        ) : (
+          <Button 
+            className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
+            onClick={() => {
+              navigate('/auth', { 
+                state: { 
+                  targetView: 'orders',
+                  pendingPurchase: mediaSite.id
+                } 
+              });
+            }}
+          >
+            <span>Sign In to Purchase</span>
+            <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
+              <ArrowRight className="h-4 w-4 shrink-0" />
+            </span>
+          </Button>
+        )
+      )}
+    </div>
+  );
 
-    {/* Agency Details Dialog */}
-    <AgencyDetailsDialog
-      open={agencyDetailsOpen}
-      onOpenChange={setAgencyDetailsOpen}
-      agencyName={selectedAgencyName}
-      zIndex={250}
-    />
-    </>
+  // Mobile: fullscreen portal
+  if (isMobile) {
+    return createPortal(
+      <>
+        <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
+            <span className="font-medium text-sm">{mediaSite.name}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {content}
+          </div>
+          <div className="border-t p-4">
+            {actionButtons}
+          </div>
+        </div>
+
+        <BriefSubmissionDialog
+          open={briefDialogOpen}
+          onOpenChange={setBriefDialogOpen}
+          mediaSite={{
+            id: mediaSite.id,
+            name: mediaSite.name,
+            price: mediaSite.price,
+            agency: mediaSite.agency,
+            favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link)
+          }}
+          onBack={() => setBriefDialogOpen(false)}
+          onSuccess={(engagement) => {
+            setBriefDialogOpen(false);
+            if (engagement) setOpenEngagementData(engagement);
+            onSuccess?.(engagement);
+          }}
+        />
+        <AgencyDetailsDialog
+          open={agencyDetailsOpen}
+          onOpenChange={setAgencyDetailsOpen}
+          agencyName={selectedAgencyName}
+          zIndex={250}
+        />
+      </>,
+      document.body
+    );
+  }
+
+  // Desktop: draggable popup
+  return createPortal(
+    <>
+      <div
+        ref={popupRef}
+        className="fixed z-[200] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
+        style={{
+          left: `${positionRef.current.x}px`,
+          top: `${positionRef.current.y}px`,
+          willChange: isDragging ? 'left, top' : 'auto',
+        }}
+      >
+        <div 
+          className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          onMouseDown={handleDragStart}
+        >
+          <div className="flex items-center gap-2">
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-sm">{mediaSite.name}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 hover:bg-foreground hover:text-background"
+            onClick={() => onOpenChange(false)}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="overflow-y-auto p-4">
+          {content}
+        </div>
+        <div className="border-t p-4">
+          {actionButtons}
+        </div>
+      </div>
+
+      <BriefSubmissionDialog
+        open={briefDialogOpen}
+        onOpenChange={setBriefDialogOpen}
+        mediaSite={{
+          id: mediaSite.id,
+          name: mediaSite.name,
+          price: mediaSite.price,
+          agency: mediaSite.agency,
+          favicon: mediaSite.favicon || getFaviconUrl(mediaSite.link)
+        }}
+        onBack={() => setBriefDialogOpen(false)}
+        onSuccess={(engagement) => {
+          setBriefDialogOpen(false);
+          if (engagement) setOpenEngagementData(engagement);
+          onSuccess?.(engagement);
+        }}
+      />
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={selectedAgencyName}
+        zIndex={250}
+      />
+    </>,
+    document.body
   );
 }
