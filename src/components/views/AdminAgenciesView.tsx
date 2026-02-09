@@ -1139,7 +1139,10 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                            <div className="absolute top-0 right-0 md:hidden">
+                              {getOnboardingStatus(agency)}
+                            </div>
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
                                 <img 
@@ -1179,7 +1182,7 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center">
+                            <div className="hidden md:flex items-center">
                               {getOnboardingStatus(agency)}
                             </div>
                           </div>
