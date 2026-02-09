@@ -1171,10 +1171,9 @@ export function AdminAgenciesView() {
                               )}
                               <div>
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
-                                <p className="text-sm text-muted-foreground">{agency.email}</p>
                                 {application && (
                                   <p className="text-xs text-muted-foreground">
-                                    {application.full_name} • {application.country}
+                                    {application.country}
                                   </p>
                                 )}
                               </div>
