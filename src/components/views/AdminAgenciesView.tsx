@@ -1598,10 +1598,18 @@ export function AdminAgenciesView() {
                 {selectedApp.reviewed_at && (
                   <div>
                     <p className="text-muted-foreground">
-                      {selectedApp.status === 'rejected' ? 'Rejection Date' : 'Pre-Approved Date'}
+                      {selectedApp.status === 'rejected' ? 'Rejection Date' : selectedApp.status === 'cancelled' ? 'Cancelled Date' : 'Pre-Approved Date'}
                     </p>
-                    <p className={`font-medium ${selectedApp.status === 'rejected' ? 'text-red-500' : ''}`}>
+                    <p className={`font-medium ${selectedApp.status === 'rejected' || selectedApp.status === 'cancelled' ? 'text-red-500' : ''}`}>
                       {format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
+                    </p>
+                  </div>
+                )}
+                {selectedApp.status === 'cancelled' && !selectedApp.reviewed_at && selectedApp.updated_at && (
+                  <div>
+                    <p className="text-muted-foreground">Cancelled Date</p>
+                    <p className="font-medium text-red-500">
+                      {format(new Date(selectedApp.updated_at), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
                 )}
