@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +39,7 @@ export function BriefSubmissionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Drag state
@@ -210,16 +212,22 @@ export function BriefSubmissionDialog({
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none">
       <div
-        className="pointer-events-auto w-full max-w-lg border bg-background pt-2 px-4 sm:px-6 pb-4 sm:pb-6 shadow-lg sm:rounded-lg relative max-h-[100dvh] sm:max-h-[85vh] overflow-y-auto"
-        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+        className={`pointer-events-auto bg-background relative overflow-y-auto ${
+          isMobile 
+            ? 'w-full h-[100dvh]' 
+            : 'w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
+        }`}
+        style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag Handle */}
-        <div
-          className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-          onMouseDown={handleDragStart}
-        >
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-        </div>
+        {/* Drag Handle - desktop only */}
+        {!isMobile && (
+          <div
+            className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+            onMouseDown={handleDragStart}
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
 
         {/* Close Button */}
         <button
@@ -230,7 +238,7 @@ export function BriefSubmissionDialog({
           <span className="sr-only">Close</span>
         </button>
 
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 sm:p-0">
           <div className="flex flex-col space-y-1.5 text-left">
             <h2 className="text-base sm:text-lg font-semibold leading-none tracking-tight">Send Your Brief</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
