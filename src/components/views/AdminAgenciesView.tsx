@@ -884,13 +884,15 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between md:hidden">
-                        <p className="text-xs text-muted-foreground">
-                          Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
-                        </p>
-                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
-                          <Clock className="h-3 w-3 mr-1" />Pending
-                        </Badge>
+                      <div className="flex justify-end md:hidden">
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600 rounded-none">
+                            <Clock className="h-3 w-3 mr-1" />Pending
+                          </Badge>
+                          <p className="text-xs text-muted-foreground">
+                            Applied {format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
