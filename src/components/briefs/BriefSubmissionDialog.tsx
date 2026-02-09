@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -312,8 +311,8 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200] !p-0" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <ScrollArea className="flex-1" style={{ minHeight: 0 }}>
+      <DialogContent className="sm:max-w-lg z-[200] !p-0 !max-h-[85vh] !overflow-y-auto">
+        <div>
           <div className="p-6 space-y-4">
             <DialogHeader>
               <DialogTitle>Send Your Brief</DialogTitle>
@@ -437,7 +436,7 @@ export function BriefSubmissionDialog({
               </Button>
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
