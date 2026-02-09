@@ -247,17 +247,19 @@ const Landing = () => {
     setAgencyDetailsOpen(true);
   };
 
-  // Close on Escape key
+  // Close on Escape key & open with Ctrl+K / Cmd+K
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showSearchModal) {
         handleCloseSearchModal();
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearchModal(prev => !prev);
+      }
     };
-    if (showSearchModal) {
-      document.addEventListener('keydown', handleEsc);
-      return () => document.removeEventListener('keydown', handleEsc);
-    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showSearchModal]);
 
   // WP sites for landing page sections - not affected by search
