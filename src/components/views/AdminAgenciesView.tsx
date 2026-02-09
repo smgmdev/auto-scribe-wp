@@ -735,33 +735,30 @@ export function AdminAgenciesView() {
 
   const getOnboardingStatus = (agency: AgencyPayout) => {
     if (agency.onboarding_complete) {
-      return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
+      return <Badge className="bg-green-600 rounded-none"><CheckCircle className="h-3 w-3 mr-1" />Verified</Badge>;
     }
     
     // Custom payout agencies - check if verification has been submitted
     if (agency.payout_method === 'custom') {
-      // Check if this agency has a submitted custom verification
       const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
       
       if (verification && verification.status === 'pending_review') {
-        // Verification submitted - show green "Pending Review" badge
         return (
-          <Badge className="bg-green-600/20 text-green-600">
+          <Badge className="bg-green-600/20 text-green-600 rounded-none">
             <Clock className="h-3 w-3 mr-1" />Pending Review
           </Badge>
         );
       }
       
-      // No verification submitted yet - show pending status
       return (
-        <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600">
+        <Badge variant="secondary" className="bg-yellow-600/20 text-yellow-600 rounded-none">
           <Clock className="h-3 w-3 mr-1" />Pending Verification
         </Badge>
       );
     
-    return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
+    return <Badge variant="secondary" className="bg-red-600/20 text-red-600 rounded-none"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
     }
-    return <Badge variant="secondary" className="bg-red-600/20 text-red-600"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
+    return <Badge variant="secondary" className="bg-red-600/20 text-red-600 rounded-none"><XCircle className="h-3 w-3 mr-1" />Not Connected</Badge>;
   };
 
   if (loading) {
@@ -1211,52 +1208,46 @@ export function AdminAgenciesView() {
                         }}
                       >
                         <CardContent className="p-4">
-                          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div className="absolute top-0 right-0 md:hidden">
-                              {getOnboardingStatus(agency)}
-                            </div>
-                            <div className="flex items-center gap-4">
-                              {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
-                                <img 
-                                  src={logoUrls[application.id]} 
-                                  alt={agency.agency_name}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
-                              ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
-                                <>
-                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                    <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                                  </div>
-                                  <img 
-                                    src={logoUrls[application.id]} 
-                                    alt=""
-                                    className="hidden"
-                                    onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
-                                    onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
-                                  />
-                                </>
-                              ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
+                          <div className="flex items-center gap-4">
+                            {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
+                              <img 
+                                src={logoUrls[application.id]} 
+                                alt={agency.agency_name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : application && logoUrls[application.id] && !failedImageIds.has(application.id) ? (
+                              <>
                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                                 </div>
-                              ) : (
-                                <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                                  <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                                </div>
-                              )}
-                              <div>
-                                <h3 className="font-semibold">{agency.agency_name}</h3>
-                                {application && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {application.country}
-                                  </p>
-                                )}
+                                <img 
+                                  src={logoUrls[application.id]} 
+                                  alt=""
+                                  className="hidden"
+                                  onLoad={() => setLoadedImageIds(prev => new Set([...prev, application.id]))}
+                                  onError={() => setFailedImageIds(prev => new Set([...prev, application.id]))}
+                                />
+                              </>
+                            ) : application && loadingLogoIds.has(application.id) && !failedImageIds.has(application.id) ? (
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                               </div>
+                            ) : (
+                              <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                              </div>
+                            )}
+                            <div>
+                              <h3 className="font-semibold">{agency.agency_name}</h3>
+                              {application && (
+                                <p className="text-xs text-muted-foreground">
+                                  {application.country}
+                                </p>
+                              )}
                             </div>
-
-                            <div className="hidden md:flex items-center">
-                              {getOnboardingStatus(agency)}
-                            </div>
+                          </div>
+                          <div className="flex justify-end mt-2">
+                            {getOnboardingStatus(agency)}
                           </div>
                         </CardContent>
                       </Card>
