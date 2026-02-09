@@ -1321,10 +1321,9 @@ export function AdminAgenciesView() {
                               )}
                               <div>
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
-                                <p className="text-sm text-muted-foreground">{verification?.email || agency.email}</p>
                                 {verification && (
                                   <p className="text-xs text-muted-foreground">
-                                    {verification.full_name} • {verification.company_name} • {verification.country}
+                                    {verification.company_name} • {verification.country}
                                   </p>
                                 )}
                                 {verification?.submitted_at && (
