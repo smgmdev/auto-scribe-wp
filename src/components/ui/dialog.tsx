@@ -46,27 +46,26 @@ const DialogContent = React.forwardRef<
 >(({ className, children, overlayClassName, hideCloseButton, style, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay className={overlayClassName} />
-    <DialogPrimitive.Content
-      ref={ref}
-      onOpenAutoFocus={(e) => e.preventDefault()}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg max-h-[85vh] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out overflow-y-auto",
-        className,
-      )}
-      style={{ 
-        transform: 'translate(-50%, -50%)',
-        ...style, 
-      }}
-      {...props}
-    >
-      {children}
-      {!hideCloseButton && (
-        <DialogPrimitive.Close className="absolute right-3 top-3 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none disabled:pointer-events-none h-7 w-7 flex items-center justify-center">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-      )}
-    </DialogPrimitive.Content>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <DialogPrimitive.Content
+        ref={ref}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className={cn(
+          "relative z-50 grid w-full max-w-lg max-h-[85vh] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out overflow-y-auto pointer-events-auto",
+          className,
+        )}
+        style={style}
+        {...props}
+      >
+        {children}
+        {!hideCloseButton && (
+          <DialogPrimitive.Close className="absolute right-3 top-3 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none disabled:pointer-events-none h-7 w-7 flex items-center justify-center z-10 bg-background">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </div>
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
