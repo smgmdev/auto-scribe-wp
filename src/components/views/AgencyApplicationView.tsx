@@ -499,12 +499,22 @@ export function AgencyApplicationView() {
                 )}
                 
                 {existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? (
-                  <Button 
-                    className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
-                    onClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  >
-                    My Applications
-                  </Button>
+                  <div className="flex items-center gap-3 mt-4">
+                    <Button 
+                      className="bg-white text-black hover:bg-white/90 transition-all duration-200"
+                      onClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                      My Applications
+                    </Button>
+                    {existingApplication?.status === 'rejected' && (
+                      <Button 
+                        className="bg-white text-black hover:bg-white/90 transition-all duration-200"
+                        onClick={() => setDialogOpen(true)}
+                      >
+                        Start New Application
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   <Button 
                     className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
