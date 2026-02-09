@@ -141,8 +141,8 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     setDocumentFile(file);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const fileName = `${user.id}/${Date.now()}_${sanitizedName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('agency-documents')
