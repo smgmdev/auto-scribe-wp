@@ -864,19 +864,6 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         </Card>
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-3">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={submitting || cancelling}
-              onClick={() => setCancelDialogOpen(true)}
-              className="w-full lg:w-auto rounded-none bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
-            >
-              Cancel Application
-              Cancel Application
-            </Button>
-          )}
           <Button
             type="submit"
             size="sm"
@@ -892,6 +879,18 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               'Submit Verification'
             )}
           </Button>
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={submitting || cancelling}
+              onClick={() => setCancelDialogOpen(true)}
+              className="w-full lg:w-auto rounded-none bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
+            >
+              Cancel Application
+            </Button>
+          )}
         </div>
       </form>
 
