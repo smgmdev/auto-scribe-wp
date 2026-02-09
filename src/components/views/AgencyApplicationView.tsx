@@ -555,7 +555,10 @@ export function AgencyApplicationView() {
                     {existingApplication.logo_url && (
                       <div className="flex justify-center">
                         <img 
-                          src={existingApplication.logo_url} 
+                          src={existingApplication.logo_url.startsWith('http') 
+                            ? existingApplication.logo_url 
+                            : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
+                          } 
                           alt={existingApplication.agency_name}
                           className="h-16 w-16 rounded-lg object-cover bg-white/10"
                         />
@@ -667,9 +670,15 @@ export function AgencyApplicationView() {
                           size="sm"
                           variant="outline"
                           className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            window.open(existingApplication.incorporation_document_url, '_blank');
+                            // Get signed URL for private document
+                            const { data } = await supabase.storage
+                              .from('agency-documents')
+                              .createSignedUrl(existingApplication.incorporation_document_url, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            }
                           }}
                         >
                           <FileText className="h-3 w-3 mr-1" />
