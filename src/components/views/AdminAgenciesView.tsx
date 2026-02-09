@@ -1288,7 +1288,23 @@ export function AdminAgenciesView() {
                           }
                         }}
                       >
-                        <CardContent className="p-4">
+                        <CardContent className="p-4 relative">
+                          <div className="md:hidden absolute top-4 right-4">
+                            <Badge 
+                              className={`cursor-pointer transition-colors ${
+                                verification?.read 
+                                  ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
+                                  : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                              }`}
+                              onClick={(e) => {
+                                if (verification) {
+                                  handleOpenVerification(verification, e);
+                                }
+                              }}
+                            >
+                              <Clock className="h-3 w-3 mr-1" />Pending Review
+                            </Badge>
+                          </div>
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                             <div className="flex items-center gap-4">
                               {application && logoUrls[application.id] && loadedImageIds.has(application.id) && !failedImageIds.has(application.id) ? (
@@ -1329,7 +1345,7 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center">
+                            <div className="hidden md:flex items-center">
                               <Badge 
                                 className={`cursor-pointer transition-colors ${
                                   verification?.read 
