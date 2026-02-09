@@ -18,9 +18,10 @@ export function MainLayout({
   const [showSearchModal, setShowSearchModal] = useState(false);
   const navigate = useNavigate();
   const currentView = useAppStore((state) => state.currentView);
+  const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   
   // Check if we're on the agency application page (dark theme)
-  const isDarkFooter = currentView === 'agency-application';
+  const isDarkFooter = currentView === 'agency-application' && agencyDarkFooter;
 
   return <div className="min-h-screen bg-background">
       {/* Mobile Header with Burger Menu */}

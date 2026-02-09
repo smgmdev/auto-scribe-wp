@@ -210,6 +210,10 @@ interface AppState {
   userCustomVerificationStatus: string | null;
   setUserCustomVerificationStatus: (status: string | null) => void;
   
+  // Dark footer flag for agency application marketing page
+  agencyDarkFooter: boolean;
+  setAgencyDarkFooter: (dark: boolean) => void;
+  
   // Minimized chats
   minimizedChats: MinimizedChat[];
   addMinimizedChat: (chat: MinimizedChat) => void;
@@ -456,7 +460,9 @@ export const useAppStore = create<AppState>()((set) => ({
   userCustomVerificationStatus: null,
   setUserCustomVerificationStatus: (status) => set({ userCustomVerificationStatus: status }),
   
-  // Minimized chats (max 4)
+  // Dark footer flag for agency application marketing page
+  agencyDarkFooter: false,
+  setAgencyDarkFooter: (dark) => set({ agencyDarkFooter: dark }),
   minimizedChats: [],
   addMinimizedChat: (chat) => set((state) => {
     // Don't add if already minimized
