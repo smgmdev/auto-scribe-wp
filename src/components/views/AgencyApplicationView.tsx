@@ -536,7 +536,7 @@ export function AgencyApplicationView() {
                       Pending
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 text-xs text-left">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-left">
                     <div>
                       <p className="text-white/50">Agency</p>
                       <p className="text-white font-medium">{existingApplication.agency_name}</p>
@@ -549,14 +549,14 @@ export function AgencyApplicationView() {
                       <p className="text-white/50">Submitted</p>
                       <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
                     </div>
-                    <div>
-                      <p className="text-white/50">Website</p>
-                      <p className="text-white font-medium truncate">
-                        {existingApplication.agency_website.replace(/^https?:\/\//, '')}
-                      </p>
-                    </div>
-                    <div className="flex items-end justify-end col-start-2 lg:col-start-5">
-                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <p className="text-white/50">Website</p>
+                        <p className="text-white font-medium truncate">
+                          {existingApplication.agency_website.replace(/^https?:\/\//, '')}
+                        </p>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
                 </CollapsibleTrigger>
