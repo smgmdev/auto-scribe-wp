@@ -131,7 +131,7 @@ function AgencyFAQ({ dark = false }: { dark?: boolean }) {
 
 export function AgencyApplicationView() {
   const { user, isAdmin } = useAuth();
-  const { setUserApplicationStatus, setUserCustomVerificationStatus } = useAppStore();
+  const { setUserApplicationStatus, setUserCustomVerificationStatus, setAgencyDarkFooter } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [agencyPayout, setAgencyPayout] = useState<AgencyPayout | null>(null);
@@ -167,6 +167,13 @@ export function AgencyApplicationView() {
       setDataLoaded(true);
     }
   }, [user, isAdmin]);
+
+  // Set dark footer only for Case 4 (marketing/application page with no agency payout)
+  const isMarketingPage = dataLoaded && !loading && !isAdmin && !agencyPayout;
+  useEffect(() => {
+    setAgencyDarkFooter(isMarketingPage);
+    return () => setAgencyDarkFooter(false);
+  }, [isMarketingPage, setAgencyDarkFooter]);
 
   const fetchAgencyData = async () => {
     if (!user) return;
