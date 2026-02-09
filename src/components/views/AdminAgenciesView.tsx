@@ -334,7 +334,9 @@ export function AdminAgenciesView() {
         .update({
           status,
           admin_notes: adminNotes || null,
-          reviewed_at: new Date().toISOString()
+          reviewed_at: new Date().toISOString(),
+          ...(status === 'approved' ? { pre_approved_at: new Date().toISOString() } : {}),
+          ...(status === 'rejected' ? { rejected_at: new Date().toISOString() } : {})
         })
         .eq('id', selectedApp.id);
 
@@ -707,6 +709,7 @@ export function AdminAgenciesView() {
           .update({ 
             status: 'rejected',
             admin_notes: verificationRejectionReason.trim(),
+            rejected_at: new Date().toISOString()
             // Do NOT overwrite reviewed_at - it stores the original pre-approval date
           })
           .eq('user_id', linkedAgency.user_id)
@@ -1806,20 +1809,24 @@ export function AdminAgenciesView() {
                   const verification = agencyPayout 
                     ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
                     : customVerifications.find(v => v.user_id === selectedApp.user_id);
-                  const hasVerification = !!verification;
                   
                   return (
                     <>
-                      {/* 2. Pre-Approved Date - show reviewed_at as pre-approval if verification exists or app was approved/cancelled */}
-                      {selectedApp.reviewed_at && (
+                      {/* 2. Pre-Approved Date */}
+                      {((selectedApp as any).pre_approved_at || (selectedApp.reviewed_at && (selectedApp.status === 'approved' || selectedApp.status === 'cancelled' || !!verification))) && (
                         <div>
-                          <p className="text-muted-foreground">
-                            {(hasVerification || selectedApp.status === 'cancelled' || selectedApp.status === 'approved')
-                              ? 'Pre-Approved Date'
-                              : 'Rejection Date'}
+                          <p className="text-muted-foreground">Pre-Approved Date</p>
+                          <p className="font-medium">
+                            {format(new Date((selectedApp as any).pre_approved_at || selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
                           </p>
-                          <p className={`font-medium ${(!hasVerification && selectedApp.status === 'rejected') ? 'text-red-500' : ''}`}>
-                            {format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
+                        </div>
+                      )}
+                      {/* Direct Rejection Date (no verification involved) */}
+                      {((selectedApp as any).rejected_at && !verification) && (
+                        <div>
+                          <p className="text-muted-foreground">Rejection Date</p>
+                          <p className="font-medium text-red-500">
+                            {format(new Date((selectedApp as any).rejected_at), 'MMM d, yyyy h:mm a')}
                           </p>
                         </div>
                       )}
@@ -1842,11 +1849,11 @@ export function AdminAgenciesView() {
                         </div>
                       )}
                       {/* Cancelled Date */}
-                      {selectedApp.status === 'cancelled' && selectedApp.updated_at && (
+                      {selectedApp.status === 'cancelled' && (
                         <div>
                           <p className="text-muted-foreground">Cancelled Date</p>
                           <p className="font-medium text-red-500">
-                            {format(new Date(selectedApp.updated_at), 'MMM d, yyyy h:mm a')}
+                            {format(new Date((selectedApp as any).cancelled_at || selectedApp.updated_at), 'MMM d, yyyy h:mm a')}
                           </p>
                         </div>
                       )}

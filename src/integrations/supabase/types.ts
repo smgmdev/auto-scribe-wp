@@ -65,6 +65,7 @@ export type Database = {
           agency_description: string | null
           agency_name: string
           agency_website: string
+          cancelled_at: string | null
           country: string
           created_at: string
           email: string
@@ -76,7 +77,9 @@ export type Database = {
           media_channels: string | null
           media_niches: string[] | null
           payout_method: string | null
+          pre_approved_at: string | null
           read: boolean
+          rejected_at: string | null
           rejection_seen: boolean
           reviewed_at: string | null
           status: string
@@ -90,6 +93,7 @@ export type Database = {
           agency_description?: string | null
           agency_name: string
           agency_website: string
+          cancelled_at?: string | null
           country: string
           created_at?: string
           email: string
@@ -101,7 +105,9 @@ export type Database = {
           media_channels?: string | null
           media_niches?: string[] | null
           payout_method?: string | null
+          pre_approved_at?: string | null
           read?: boolean
+          rejected_at?: string | null
           rejection_seen?: boolean
           reviewed_at?: string | null
           status?: string
@@ -115,6 +121,7 @@ export type Database = {
           agency_description?: string | null
           agency_name?: string
           agency_website?: string
+          cancelled_at?: string | null
           country?: string
           created_at?: string
           email?: string
@@ -126,7 +133,9 @@ export type Database = {
           media_channels?: string | null
           media_niches?: string[] | null
           payout_method?: string | null
+          pre_approved_at?: string | null
           read?: boolean
+          rejected_at?: string | null
           rejection_seen?: boolean
           reviewed_at?: string | null
           status?: string

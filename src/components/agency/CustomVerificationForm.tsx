@@ -315,7 +315,8 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         .update({ 
           status: 'cancelled', 
           read: false,
-          admin_notes: cancellationReason.trim()
+          admin_notes: cancellationReason.trim(),
+          cancelled_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
         .eq('status', 'approved');
