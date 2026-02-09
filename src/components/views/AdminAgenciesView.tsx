@@ -1109,53 +1109,30 @@ export function AdminAgenciesView() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {(() => {
-                              const agencyPayout = agencies.find(a => a.user_id === app.user_id);
-                              const verification = agencyPayout 
-                                ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
-                                : customVerifications.find(v => v.user_id === app.user_id);
-                              if (verification?.submitted_at) {
-                                return (
-                                  <Badge 
-                                    className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenVerification(verification, e);
-                                    }}
-                                  >
-                                    <FileText className="h-3 w-3 mr-1" />
-                                    View Verification
-                                  </Badge>
-                                );
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setApplications(prev => prev.filter(a => a.id !== app.id));
+                              setHiddenRejectedCount(prev => prev + 1);
+                              
+                              const { error } = await supabase
+                                .from('agency_applications')
+                                .update({ hidden: true })
+                                .eq('id', app.id)
+                                .eq('hidden', false);
+                              
+                              if (error) {
+                                toast.error(`Error: ${error.message}`);
+                              } else {
+                                toast.success('Removed from view');
                               }
-                              return null;
-                            })()}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="hover:bg-destructive hover:text-white hover:border-destructive rounded-none"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                setApplications(prev => prev.filter(a => a.id !== app.id));
-                                setHiddenRejectedCount(prev => prev + 1);
-                                
-                                const { error } = await supabase
-                                  .from('agency_applications')
-                                  .update({ hidden: true })
-                                  .eq('id', app.id)
-                                  .eq('hidden', false);
-                                
-                                if (error) {
-                                  toast.error(`Error: ${error.message}`);
-                                } else {
-                                  toast.success('Removed from view');
-                                }
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
+                            }}
+                          >
+                            Remove
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1746,6 +1723,32 @@ export function AdminAgenciesView() {
               <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
             </div>
           </DialogHeader>
+            {(() => {
+              if (!selectedApp) return null;
+              const agencyPayout = agencies.find(a => a.user_id === selectedApp.user_id);
+              const verification = agencyPayout 
+                ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
+                : customVerifications.find(v => v.user_id === selectedApp.user_id);
+              if (verification?.submitted_at) {
+                return (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-none w-full"
+                    style={{ backgroundColor: '#f2a547', color: '#000' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
+                    onClick={() => {
+                      setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
+                      handleOpenVerification(verification);
+                    }}
+                  >
+                    View Verification
+                  </Button>
+                );
+              }
+              return null;
+            })()}
 
           {selectedApp && (
             <div className="space-y-4">
