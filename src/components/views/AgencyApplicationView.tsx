@@ -714,23 +714,25 @@ export function AgencyApplicationView() {
         </div>
 
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 space-y-8">
-          {/* Promo Video */}
-          <div className="w-full overflow-hidden relative">
-            <video
-              src={agencyPromoVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-              <div className="text-white text-base md:text-2xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg leading-tight">
-                <p>Have some ☕</p>
-                <p className="flex items-center gap-1 md:gap-2 justify-center">Your new application is in <Loader2 className="h-5 w-5 md:h-7 md:w-7 lg:h-10 lg:w-10 animate-spin" /></p>
+          {/* Promo Video - only shown when application is pending */}
+          {existingApplication?.status === 'pending' && (
+            <div className="w-full overflow-hidden relative">
+              <video
+                src={agencyPromoVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <div className="text-white text-base md:text-2xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg leading-tight">
+                  <p>Have some ☕</p>
+                  <p className="flex items-center gap-1 md:gap-2 justify-center">Your new application is in <Loader2 className="h-5 w-5 md:h-7 md:w-7 lg:h-10 lg:w-10 animate-spin" /></p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <ExploreNetworkGrid dark />
         </div>
