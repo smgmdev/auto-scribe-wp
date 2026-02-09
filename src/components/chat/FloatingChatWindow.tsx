@@ -7306,14 +7306,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
               {/* Insufficient Credits Warning */}
               {(credits || 0) < pendingOrderRequest.price && (
-                <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <X className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-destructive">Insufficient Credits</p>
-                    <p className="text-sm text-muted-foreground">
-                      You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
-                    </p>
-                  </div>
+                <div className="p-4 rounded-none bg-destructive/10 border border-destructive/20">
+                  <p className="font-medium text-destructive">Insufficient Credits</p>
+                  <p className="text-sm text-muted-foreground">
+                    You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
+                  </p>
                 </div>
               )}
 
@@ -7334,7 +7331,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 hover:bg-foreground hover:text-background transition-colors"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-colors"
                   onClick={() => {
                     setAcceptOrderDialogOpen(false);
                     setPendingOrderRequest(null);
@@ -7344,7 +7341,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-foreground text-background hover:bg-green-600 transition-all duration-200"
+                  className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200"
                   disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder}
                   onClick={async () => {
                     if (!pendingOrderRequest || !globalChatRequest) return;
