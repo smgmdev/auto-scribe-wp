@@ -1011,7 +1011,7 @@ export function AdminAgenciesView() {
               <div className="flex justify-end mt-4">
                 <Button
                   size="sm"
-                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black"
+                  
                   onClick={async () => {
                     const { data, error } = await supabase
                       .from('agency_applications')
@@ -1032,9 +1032,9 @@ export function AdminAgenciesView() {
                       toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
                     }
                   }}
+                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black rounded-none"
                 >
-                  <ArchiveRestore className="h-4 w-4 mr-1" />
-                  Restore Hidden
+                  Restore
                 </Button>
               </div>
             </TabsContent>
@@ -1129,7 +1129,7 @@ export function AdminAgenciesView() {
               <div className="flex justify-end mt-4">
                 <Button
                   size="sm"
-                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black"
+                  
                   onClick={async () => {
                     const { data, error } = await supabase
                       .from('agency_applications')
@@ -1150,9 +1150,9 @@ export function AdminAgenciesView() {
                       toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
                     }
                   }}
+                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black rounded-none"
                 >
-                  <ArchiveRestore className="h-4 w-4 mr-1" />
-                  Restore Hidden
+                  Restore
                 </Button>
               </div>
             </TabsContent>
