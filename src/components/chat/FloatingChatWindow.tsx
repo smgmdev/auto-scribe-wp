@@ -294,6 +294,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [removing, setRemoving] = useState(false);
   const [sendOrderDialogOpen, setSendOrderDialogOpen] = useState(false);
   const [specialTerms, setSpecialTerms] = useState('');
+  const [sendOfferPos, setSendOfferPos] = useState({ x: 0, y: 0 });
+  const [sendOfferDragging, setSendOfferDragging] = useState(false);
+  const sendOfferDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [imagePreview, setImagePreview] = useState<{ url: string; name: string } | null>(null);
@@ -450,6 +453,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     pushPopup(chatId, () => closeGlobalChat(globalChatRequest.id));
     return () => removePopup(chatId);
   }, [globalChatRequest.id, closeGlobalChat]);
+
+  // Send Offer popup: reset position on open + popup stack
+  useEffect(() => {
+    if (sendOrderDialogOpen) {
+      setSendOfferPos({ x: 0, y: 0 });
+      pushPopup('send-offer-dialog', () => setSendOrderDialogOpen(false));
+    } else {
+      removePopup('send-offer-dialog');
+    }
+    return () => removePopup('send-offer-dialog');
+  }, [sendOrderDialogOpen]);
+
+  // Send Offer drag handlers
+  const handleSendOfferDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
+    setSendOfferDragging(true);
+    sendOfferDragRef.current = { x: e.clientX, y: e.clientY, posX: sendOfferPos.x, posY: sendOfferPos.y };
+    e.preventDefault();
+  }, [sendOfferPos]);
+
+  useEffect(() => {
+    if (!sendOfferDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setSendOfferPos({
+        x: sendOfferDragRef.current.posX + e.clientX - sendOfferDragRef.current.x,
+        y: sendOfferDragRef.current.posY + e.clientY - sendOfferDragRef.current.y
+      });
+    };
+    const handleUp = () => setSendOfferDragging(false);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+    return () => { document.removeEventListener('mousemove', handleMove); document.removeEventListener('mouseup', handleUp); };
+  }, [sendOfferDragging]);
   
   // Timer tick for live countdown updates (every second)
   useEffect(() => {
@@ -6270,207 +6306,237 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Send Order Dialog (Agency) */}
-      <Dialog open={sendOrderDialogOpen} onOpenChange={setSendOrderDialogOpen}>
-        <DialogContent className="sm:max-w-md z-[10000]">
-          <DialogHeader className="pb-0">
-            <DialogTitle>
-              {isResendMode ? 'Resend Offer' : 'Send Offer'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
-              {globalChatRequest?.media_site?.favicon && (
-                <img 
-                  src={globalChatRequest.media_site.favicon} 
-                  alt="" 
-                  className="w-12 h-12 rounded-lg object-cover"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate">{globalChatRequest?.media_site?.name}</h3>
-                <p className="text-2xl font-bold text-primary">
-                  ${(globalChatRequest?.media_site?.price || 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* Delivery Duration */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Delivery Duration <span className="text-destructive">*</span></Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" avoidCollisions={false} className="z-[10001]">
-                      <p>Set the delivery time for this order. At least one value must be greater than 0.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="order-days" className="text-xs text-muted-foreground">Days</Label>
-                  <Input
-                    id="order-days"
-                    type="number"
-                    min="0"
-                    value={orderDeliveryDays}
-                    onChange={(e) => setOrderDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="text-center h-8 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="order-hours" className="text-xs text-muted-foreground">Hours</Label>
-                  <Input
-                    id="order-hours"
-                    type="number"
-                    min="0"
-                    max="23"
-                    value={orderDeliveryHours}
-                    onChange={(e) => setOrderDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="text-center h-8 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="order-minutes" className="text-xs text-muted-foreground">Minutes</Label>
-                  <Input
-                    id="order-minutes"
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={orderDeliveryMinutes}
-                    onChange={(e) => setOrderDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="text-center h-8 text-sm"
-                  />
-                </div>
-              </div>
-              {orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0 && (
-                <p className="text-xs text-destructive">Please enter a delivery duration</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Special Terms (optional)</Label>
-              <Input
-                placeholder="Any special terms or notes for this order..."
-                value={specialTerms}
-                onChange={(e) => setSpecialTerms(e.target.value)}
-                className="h-8 text-sm"
-              />
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              This will send an offer to the client. Client will need to accept and pay to proceed.
-            </p>
-
-            <div className="flex flex-col-reverse md:flex-row gap-2">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-none hover:bg-black hover:text-white hover:border-black transition-all duration-200 dark:hover:bg-white dark:hover:text-black dark:hover:border-white"
-                onClick={() => {
-                  setSendOrderDialogOpen(false);
-                  setSpecialTerms('');
-                  setIsResendMode(false);
-                  setOrderDeliveryDays(0);
-                  setOrderDeliveryHours(0);
-                  setOrderDeliveryMinutes(0);
-                }}
+      {/* Send Order Popup (Agency) - draggable portal */}
+      {sendOrderDialogOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto bg-background relative overflow-y-auto ${
+              isMobile
+                ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
+                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+            }`}
+            style={isMobile ? undefined : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
+          >
+            {/* Drag Handle - desktop only */}
+            {!isMobile && (
+              <div
+                className={`flex items-center justify-start py-2 ${sendOfferDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                onMouseDown={handleSendOfferDragStart}
               >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200"
-                onClick={async () => {
-                  if (!senderId || !globalChatRequest) return;
-                  
-                  setSending(true);
-                  try {
-                    // Delete ALL previous order request messages first (prevents duplicates)
-                    if (existingOrderMessages.length > 0) {
-                      const idsToDelete = existingOrderMessages.map(m => m.id);
-                      
-                      const { error: deleteError } = await supabase
-                        .from('service_messages')
-                        .delete()
-                        .in('id', idsToDelete);
-                      
-                      if (deleteError) {
-                        console.error('Failed to delete previous order requests:', deleteError);
-                      } else {
-                        // Remove from local state
-                        setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
-                      }
-                    }
-                    
-                    const orderRequestData = {
-                      type: 'order_request',
-                      media_site_id: globalChatRequest.media_site?.id,
-                      media_site_name: globalChatRequest.media_site?.name,
-                      media_site_favicon: globalChatRequest.media_site?.favicon,
-                      price: globalChatRequest.media_site?.price,
-                      special_terms: specialTerms.trim() || null,
-                      delivery_duration: {
-                        days: orderDeliveryDays,
-                        hours: orderDeliveryHours,
-                        minutes: orderDeliveryMinutes
-                      }
-                    };
-                    
-                    const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/ORDER_REQUEST]`;
-                    
-                    const { data: insertedMsg, error } = await supabase.from('service_messages').insert({
-                      request_id: globalChatRequest.id,
-                      sender_type: 'agency',
-                      sender_id: senderId,
-                      message: orderMessage
-                    }).select().single();
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
 
-                    if (error) throw error;
-                    
-                    // Add new message to local state (with duplicate check)
-                    if (insertedMsg) {
-                      setMessages(prev => {
-                        if (prev.some(m => m.id === insertedMsg.id)) return prev;
-                        return [...prev, insertedMsg as ServiceMessage];
-                      });
-                    }
-                    
-                    toast.success("The client will be notified to complete the payment.");
-                    // Form state reset is handled in finally block
-                  } catch (error: any) {
-                    toast.error(error.message || "Failed to send offer.");
-                  } finally {
-                    setSending(false);
-                    // Always close dialog and reset form in finally block
-                    // This prevents the button from getting stuck if there's a network error
-                    // (the message may have still been sent even if we got an error response)
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setSendOrderDialogOpen(false);
+                setSpecialTerms('');
+                setIsResendMode(false);
+                setOrderDeliveryDays(0);
+                setOrderDeliveryHours(0);
+                setOrderDeliveryMinutes(0);
+              }}
+              className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+
+            <h2 className="text-lg font-semibold leading-none tracking-tight mb-4">
+              {isResendMode ? 'Resend Offer' : 'Send Offer'}
+            </h2>
+          
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
+                {globalChatRequest?.media_site?.favicon && (
+                  <img 
+                    src={globalChatRequest.media_site.favicon} 
+                    alt="" 
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold truncate">{globalChatRequest?.media_site?.name}</h3>
+                  <p className="text-2xl font-bold text-primary">
+                    ${(globalChatRequest?.media_site?.price || 0).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Delivery Duration */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium">Delivery Duration <span className="text-destructive">*</span></Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" avoidCollisions={false} className="z-[10001]">
+                        <p>Set the delivery time for this order. At least one value must be greater than 0.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="order-days" className="text-xs text-muted-foreground">Days</Label>
+                    <Input
+                      id="order-days"
+                      type="number"
+                      min="0"
+                      value={orderDeliveryDays}
+                      onChange={(e) => setOrderDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="text-center h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="order-hours" className="text-xs text-muted-foreground">Hours</Label>
+                    <Input
+                      id="order-hours"
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={orderDeliveryHours}
+                      onChange={(e) => setOrderDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
+                      className="text-center h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="order-minutes" className="text-xs text-muted-foreground">Minutes</Label>
+                    <Input
+                      id="order-minutes"
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={orderDeliveryMinutes}
+                      onChange={(e) => setOrderDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                      className="text-center h-8 text-sm"
+                    />
+                  </div>
+                </div>
+                {orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0 && (
+                  <p className="text-xs text-destructive">Please enter a delivery duration</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Special Terms (optional)</Label>
+                <Input
+                  placeholder="Any special terms or notes for this order..."
+                  value={specialTerms}
+                  onChange={(e) => setSpecialTerms(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                This will send an offer to the client. Client will need to accept and pay to proceed.
+              </p>
+
+              <div className="flex flex-col-reverse md:flex-row gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                  onClick={() => {
                     setSendOrderDialogOpen(false);
                     setSpecialTerms('');
                     setIsResendMode(false);
                     setOrderDeliveryDays(0);
                     setOrderDeliveryHours(0);
                     setOrderDeliveryMinutes(0);
-                  }
-                }}
-                disabled={sending || (orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0)}
-              >
-                {sending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Sending...
-                  </>
-                ) : (
-                  isResendMode ? 'Resend Offer' : 'Send Offer'
-                )}
-              </Button>
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200"
+                  onClick={async () => {
+                    if (!senderId || !globalChatRequest) return;
+                    
+                    setSending(true);
+                    try {
+                      // Delete ALL previous order request messages first (prevents duplicates)
+                      if (existingOrderMessages.length > 0) {
+                        const idsToDelete = existingOrderMessages.map(m => m.id);
+                        
+                        const { error: deleteError } = await supabase
+                          .from('service_messages')
+                          .delete()
+                          .in('id', idsToDelete);
+                        
+                        if (deleteError) {
+                          console.error('Failed to delete previous order requests:', deleteError);
+                        } else {
+                          // Remove from local state
+                          setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
+                        }
+                      }
+                      
+                      const orderRequestData = {
+                        type: 'order_request',
+                        media_site_id: globalChatRequest.media_site?.id,
+                        media_site_name: globalChatRequest.media_site?.name,
+                        media_site_favicon: globalChatRequest.media_site?.favicon,
+                        price: globalChatRequest.media_site?.price,
+                        special_terms: specialTerms.trim() || null,
+                        delivery_duration: {
+                          days: orderDeliveryDays,
+                          hours: orderDeliveryHours,
+                          minutes: orderDeliveryMinutes
+                        }
+                      };
+                      
+                      const orderMessage = `[ORDER_REQUEST]${JSON.stringify(orderRequestData)}[/ORDER_REQUEST]`;
+                      
+                      const { data: insertedMsg, error } = await supabase.from('service_messages').insert({
+                        request_id: globalChatRequest.id,
+                        sender_type: 'agency',
+                        sender_id: senderId,
+                        message: orderMessage
+                      }).select().single();
+
+                      if (error) throw error;
+                      
+                      // Add new message to local state (with duplicate check)
+                      if (insertedMsg) {
+                        setMessages(prev => {
+                          if (prev.some(m => m.id === insertedMsg.id)) return prev;
+                          return [...prev, insertedMsg as ServiceMessage];
+                        });
+                      }
+                      
+                      toast.success("The client will be notified to complete the payment.");
+                    } catch (error: any) {
+                      toast.error(error.message || "Failed to send offer.");
+                    } finally {
+                      setSending(false);
+                      setSendOrderDialogOpen(false);
+                      setSpecialTerms('');
+                      setIsResendMode(false);
+                      setOrderDeliveryDays(0);
+                      setOrderDeliveryHours(0);
+                      setOrderDeliveryMinutes(0);
+                    }
+                  }}
+                  disabled={sending || (orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0)}
+                >
+                  {sending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    isResendMode ? 'Resend Offer' : 'Send Offer'
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>,
+        document.body
+      )}
 
       {/* Open Dispute Dialog */}
       <AlertDialog open={disputeDialogOpen} onOpenChange={(open) => {
