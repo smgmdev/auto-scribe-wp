@@ -1626,6 +1626,9 @@ export function AdminAgenciesView() {
                                     {application.country}
                                   </p>
                                 )}
+                                <p className="text-xs text-muted-foreground">
+                                  Downgraded: {new Date(agency.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {new Date(agency.updated_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
                               </div>
                             </div>
 
@@ -1645,9 +1648,6 @@ export function AdminAgenciesView() {
                                 ) : null}
                                 Restore
                               </Button>
-                              <p className="text-[10px] text-muted-foreground">
-                                {new Date(agency.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {new Date(agency.updated_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                              </p>
                             </div>
                           </div>
                         </CardContent>
