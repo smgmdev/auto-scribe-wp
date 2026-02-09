@@ -7244,7 +7244,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           {pendingOrderRequest && (
             <div className="space-y-2 pb-4">
               {/* Order Summary */}
-              <div className="rounded-lg border border-border bg-muted/50 p-4">
+              <div className="rounded-none border border-border bg-muted/50 p-4">
                 <div className="flex items-start gap-3">
                   {pendingOrderRequest.media_site_favicon && (
                     <img 
@@ -7267,7 +7267,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
               {/* Delivery Time */}
               {pendingOrderRequest.delivery_duration && (pendingOrderRequest.delivery_duration.days > 0 || pendingOrderRequest.delivery_duration.hours > 0 || pendingOrderRequest.delivery_duration.minutes > 0) && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 p-3 rounded-none bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
                   <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
                   <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                     Delivery Time: {formatDeliveryDuration(pendingOrderRequest.delivery_duration)}
@@ -7277,7 +7277,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
               {/* Special Terms */}
               {pendingOrderRequest.special_terms && (
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                <div className="p-3 rounded-none bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-300 mb-1">Special Terms</p>
                   <p className="text-sm text-amber-600 dark:text-amber-400">
                     {pendingOrderRequest.special_terms}
@@ -7286,7 +7286,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
 
               {/* Credit Balance */}
-              <div className="rounded-lg border border-border bg-background p-4">
+              <div className="rounded-none border border-border bg-background p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Your Credit Balance</span>
                   <span className="font-semibold">{(credits || 0).toLocaleString()} credits</span>
