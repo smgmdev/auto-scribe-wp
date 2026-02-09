@@ -7279,15 +7279,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Mobile: full-screen like engagement chat
           return createPortal(
             <div className="fixed inset-0 z-[300] bg-background flex flex-col">
-              <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={globalChatRequest.media_site.favicon || ''}
-                    alt={globalChatRequest.media_site.name}
-                    className="h-6 w-6 rounded bg-muted object-contain"
-                  />
-                  <span className="font-medium text-sm">{globalChatRequest.media_site.name}</span>
-                </div>
+              <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -7315,10 +7308,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
               onMouseDown={handleMediaDragStart}
             >
-              <div className="flex items-center gap-2">
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium text-sm">{globalChatRequest.media_site.name}</span>
-              </div>
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               <Button
                 variant="ghost"
                 size="icon"
