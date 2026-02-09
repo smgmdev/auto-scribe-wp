@@ -1323,12 +1323,7 @@ export function AdminAgenciesView() {
                                 <h3 className="font-semibold">{agency.agency_name}</h3>
                                 {verification && (
                                   <p className="text-xs text-muted-foreground">
-                                    {verification.company_name} • {verification.country}
-                                  </p>
-                                )}
-                                {verification?.submitted_at && (
-                                  <p className={`text-xs mt-1 ${verification.read ? 'text-muted-foreground' : 'text-green-500'}`}>
-                                    Submitted {format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}
+                                    {verification.country}
                                   </p>
                                 )}
                               </div>
