@@ -1032,7 +1032,7 @@ export function AdminAgenciesView() {
                       toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
                     }
                   }}
-                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black rounded-none"
+                  className="bg-[#f2a547] text-black hover:bg-transparent hover:text-black border border-[#f2a547] rounded-none"
                 >
                   Restore
                 </Button>
@@ -1150,7 +1150,7 @@ export function AdminAgenciesView() {
                       toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
                     }
                   }}
-                  className="bg-black text-white hover:bg-transparent hover:text-black border border-black rounded-none"
+                  className="bg-[#f2a547] text-black hover:bg-transparent hover:text-black border border-[#f2a547] rounded-none"
                 >
                   Restore
                 </Button>
