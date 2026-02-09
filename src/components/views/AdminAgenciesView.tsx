@@ -980,7 +980,28 @@ export function AdminAgenciesView() {
                               <p className="text-xs text-muted-foreground mt-0.5">{app.country}</p>
                             </div>
                           </div>
-                          <div />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-destructive hover:text-white hover:border-destructive"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const { error } = await supabase
+                                .from('agency_applications')
+                                .update({ hidden: true })
+                                .eq('id', app.id);
+                              
+                              if (error) {
+                                toast({ variant: 'destructive', title: 'Error', description: error.message });
+                                return;
+                              }
+                              
+                              setApplications(prev => prev.filter(a => a.id !== app.id));
+                              toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
+                            }}
+                          >
+                            Remove
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
