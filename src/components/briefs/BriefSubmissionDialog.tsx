@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -311,129 +312,132 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200]">
-        <DialogHeader>
-          <DialogTitle>Send Your Brief</DialogTitle>
-          <DialogDescription>
-            Tell the agency what you're looking for. They'll review your request and respond.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-lg z-[200] p-0 max-h-[85vh] flex flex-col" style={{ maxHeight: '85vh' }}>
+        <ScrollArea className="flex-1 overflow-auto">
+          <div className="p-6 space-y-4">
+            <DialogHeader>
+              <DialogTitle>Send Your Brief</DialogTitle>
+              <DialogDescription>
+                Tell the agency what you're looking for. They'll review your request and respond.
+              </DialogDescription>
+            </DialogHeader>
 
-        <div>
-        {mediaSite && (
-          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg mb-4">
-            {mediaSite.favicon && (
-              <img src={mediaSite.favicon} alt="" className="w-8 h-8 rounded" />
-            )}
-            <div>
-              <p className="font-medium">{mediaSite.name}</p>
-              <p className="text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="description">What are you looking for?</Label>
-            <Textarea
-              id="description"
-              placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={6}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Upload your materials (optional)</Label>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary'
-              }`}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">
-                Drag & drop or click to upload
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                PDF, Word, PNG, JPG • Max 10MB total
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-                disabled={isSubmitting}
-              />
-            </div>
-            
-            {files.length > 0 && (
-              <div className="space-y-2 mt-2">
-                {files.map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                    {isImageFile(file.name) ? (
-                      <Image className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className="text-sm flex-1 truncate">{file.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {(file.size / 1024).toFixed(0)}KB
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      disabled={isSubmitting}
-                      className="h-6 w-6 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <p className="text-xs text-muted-foreground text-right">
-                  Total: {(getTotalSize(files) / 1024 / 1024).toFixed(2)}MB / 10MB
-                </p>
+            {mediaSite && (
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                {mediaSite.favicon && (
+                  <img src={mediaSite.favicon} alt="" className="w-8 h-8 rounded" />
+                )}
+                <div>
+                  <p className="font-medium">{mediaSite.name}</p>
+                  <p className="text-sm text-muted-foreground">{mediaSite.price.toLocaleString()} USD</p>
+                </div>
               </div>
             )}
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="description">What are you looking for?</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe your ideas. What are you looking to publish? What is your story about? Provide specific details and instructions if any."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={6}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Upload your materials (optional)</Label>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+                    isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary'
+                  }`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Drag & drop or click to upload
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    PDF, Word, PNG, JPG • Max 10MB total
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                
+                {files.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {files.map((file, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        {isImageFile(file.name) ? (
+                          <Image className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="text-sm flex-1 truncate">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {(file.size / 1024).toFixed(0)}KB
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          disabled={isSubmitting}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground text-right">
+                      Total: {(getTotalSize(files) / 1024 / 1024).toFixed(2)}MB / 10MB
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  onOpenChange(false);
+                  onBack?.();
+                }} 
+                disabled={isSubmitting}
+                className="hover:bg-black hover:text-white transition-all duration-200 group w-fit px-3"
+              >
+                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
+                  <ArrowLeft className="h-4 w-4 shrink-0" />
+                </span>
+                <span>Back</span>
+              </Button>
+              <Button 
+                className="bg-foreground text-background hover:bg-foreground/80 transition-colors"
+                onClick={handleSubmit} 
+                disabled={isSubmitting || !description.trim()}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
+                Send Brief
+              </Button>
+            </div>
           </div>
-        </div>
-        </div>
-        <div className="flex justify-between gap-3 mt-4">
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              onOpenChange(false);
-              onBack?.();
-            }} 
-            disabled={isSubmitting}
-            className="hover:bg-black hover:text-white transition-all duration-200 group w-fit px-3"
-          >
-            <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
-              <ArrowLeft className="h-4 w-4 shrink-0" />
-            </span>
-            <span>Back</span>
-          </Button>
-          <Button 
-            className="bg-black text-white hover:bg-gray-800 transition-colors"
-            onClick={handleSubmit} 
-            disabled={isSubmitting || !description.trim()}
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Send className="h-4 w-4 mr-2" />
-            )}
-            Send Brief
-          </Button>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
