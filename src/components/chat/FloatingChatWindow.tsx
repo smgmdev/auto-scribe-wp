@@ -337,6 +337,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const localPositionRef = useRef(localPosition);
   const chatWindowRef = useRef<HTMLDivElement>(null);
@@ -382,9 +383,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [isChatFocused]);
   
-  // Sync position from props
+  // Sync position from props (only when not dragging)
   useEffect(() => {
-    setLocalPosition(chat.position);
+    if (!isDraggingRef.current) {
+      setLocalPosition(chat.position);
+      localPositionRef.current = chat.position;
+    }
   }, [chat.position]);
   
   // Escape key to close the focused chat
@@ -427,12 +431,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     onFocus(); // Bring to front when starting drag
     
-    // Set initial DOM position before React stops controlling it
-    if (chatWindowRef.current) {
-      chatWindowRef.current.style.left = `${localPositionRef.current.x}px`;
-      chatWindowRef.current.style.top = `${localPositionRef.current.y}px`;
-    }
-    
+    isDraggingRef.current = true;
     setIsDragging(true);
     dragStartRef.current = {
       x: e.clientX,
@@ -443,15 +442,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     e.preventDefault();
   }, [onFocus]);
 
-  // Keep ref in sync
+  // Keep ref in sync (only when not dragging to avoid overwriting drag position)
   useEffect(() => {
-    localPositionRef.current = localPosition;
+    if (!isDraggingRef.current) {
+      localPositionRef.current = localPosition;
+    }
   }, [localPosition]);
 
   useEffect(() => {
     if (!isDragging) return;
-
-    let rafId: number | null = null;
 
     const handleMouseMove = (e: MouseEvent) => {
       e.preventDefault();
@@ -469,7 +468,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
 
     const handleMouseUp = () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      isDraggingRef.current = false;
       setIsDragging(false);
       // Sync React state with final position so re-renders use correct pos
       setLocalPosition(localPositionRef.current);
@@ -480,7 +479,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -4827,8 +4825,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
           height: isMobile ? '100dvh' : '550px',
           maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
-          left: isMobile ? '0' : (isDragging ? undefined : `${localPosition.x}px`),
-          top: isMobile ? '0' : (isDragging ? undefined : `${localPosition.y}px`),
+          left: isMobile ? '0' : `${localPositionRef.current.x}px`,
+          top: isMobile ? '0' : `${localPositionRef.current.y}px`,
           zIndex: chat.zIndex + 100,
           overscrollBehavior: 'contain',
           willChange: isDragging ? 'left, top' : 'auto',
