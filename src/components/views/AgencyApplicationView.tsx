@@ -378,7 +378,7 @@ export function AgencyApplicationView() {
               />
               <div className="absolute inset-0 flex items-center justify-center p-6">
                 <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
-                  <div className="flex flex-col md:flex-row md:items-center gap-3">
+                  <div className="flex flex-row items-center gap-3">
                     <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-white/30 shrink-0">
                       <Clock className="h-5 w-5 md:h-6 md:w-6 text-white animate-clock-tick" />
                     </div>
