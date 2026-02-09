@@ -20,7 +20,7 @@ import {
 import { Loader2, Upload, CheckCircle, Image, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { COUNTRIES } from '@/constants/countries';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -120,20 +120,12 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
 
     // Only allow PDF files
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Only PDF files are allowed'
-      });
+      toast.error('Invalid file type: Only PDF files are allowed');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: 'Maximum file size is 5MB'
-      });
+      toast.error('File too large: Maximum file size is 5MB');
       return;
     }
 
@@ -151,13 +143,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       if (uploadError) throw uploadError;
 
       setDocumentUrl(fileName);
-      toast({ title: 'Document uploaded successfully' });
+      toast.success('Document uploaded successfully');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: error.message
-      });
+      toast.error(`Upload failed: ${error.message}`);
       setDocumentFile(null);
     } finally {
       setUploading(false);
@@ -169,11 +157,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     if (!file || !user) return;
 
     if (file.size > 1 * 1024 * 1024) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: 'Maximum logo size is 1MB'
-      });
+      toast.error('File too large: Maximum logo size is 1MB');
       return;
     }
 
@@ -182,11 +166,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
     
     if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Only JPG and PNG files are allowed'
-      });
+      toast.error('Invalid file type: Only JPG and PNG files are allowed');
       return;
     }
 
@@ -196,29 +176,17 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         const img = new window.Image();
         img.onload = () => {
           if (img.width !== img.height) {
-            toast({
-              variant: 'destructive',
-              title: 'Invalid image dimensions',
-              description: 'Logo must be square (equal width and height)'
-            });
+            toast.error('Invalid image dimensions: Logo must be square (equal width and height)');
             resolve(false);
           } else if (img.width < 300) {
-            toast({
-              variant: 'destructive',
-              title: 'Image too small',
-              description: 'Logo must be at least 300x300 pixels'
-            });
+            toast.error('Image too small: Logo must be at least 300x300 pixels');
             resolve(false);
           } else {
             resolve(true);
           }
         };
         img.onerror = () => {
-          toast({
-            variant: 'destructive',
-            title: 'Invalid image',
-            description: 'Could not read image file'
-          });
+          toast.error('Invalid image: Could not read image file');
           resolve(false);
         };
         img.src = URL.createObjectURL(file);
@@ -247,13 +215,9 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       if (uploadError) throw uploadError;
 
       setLogoUrl(fileName);
-      toast({ title: 'Logo uploaded successfully' });
+      toast.success('Logo uploaded successfully');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: error.message
-      });
+      toast.error(`Upload failed: ${error.message}`);
       setLogoFile(null);
       setLogoPreview(null);
     } finally {
@@ -335,33 +299,17 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
     if (hasError) {
       // Show specific error messages
       if (errors.email && email && !isValidEmail(email)) {
-        toast({
-          variant: 'destructive',
-          title: 'Invalid email',
-          description: 'Please enter a valid email address'
-        });
+        toast.error('Invalid email: Please enter a valid email address');
       } else if (errors.whatsapp_phone && whatsapp_phone && !isValidPhone(whatsapp_phone)) {
-        toast({
-          variant: 'destructive',
-          title: 'Invalid phone number',
-          description: 'Please enter a valid WhatsApp phone number (e.g., +1 234 567 8900)'
-        });
+        toast.error('Invalid phone number: Please enter a valid WhatsApp phone number (e.g., +1 234 567 8900)');
       } else if ((errors.agency_website || errors.media_channel_1 || errors.media_channel_2 || errors.media_channel_3) && 
                  ((agency_website && !isValidUrl(agency_website)) || 
                   (media_channel_1 && !isValidUrl(media_channel_1)) ||
                   (media_channel_2 && !isValidUrl(media_channel_2)) ||
                   (media_channel_3 && !isValidUrl(media_channel_3)))) {
-        toast({
-          variant: 'destructive',
-          title: 'Invalid URL',
-          description: 'Please enter valid URLs (e.g., example.com)'
-        });
+        toast.error('Invalid URL: Please enter valid URLs (e.g., example.com)');
       } else {
-        toast({
-          variant: 'destructive',
-          title: 'Missing fields',
-          description: 'Please fill in all required fields highlighted in red'
-        });
+        toast.error('Missing fields: Please fill in all required fields highlighted in red');
       }
       return;
     }
@@ -412,11 +360,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
         }
       }).catch(err => console.error('Failed to send admin notification:', err));
 
-      toast({
-        title: 'Application submitted!',
-        description: 'We will review your application and get back to you.',
-        className: 'bg-green-600 text-white border-green-600'
-      });
+      toast.success('Application submitted! We will review your application and get back to you.');
 
       localStorage.removeItem('agency_new_application_mode');
       // Update store status first, then call success callback, then close dialog
@@ -424,11 +368,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
       onSubmitSuccess?.();
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Submission failed',
-        description: error.message
-      });
+      toast.error(`Submission failed: ${error.message}`);
     } finally {
       setSubmitting(false);
     }

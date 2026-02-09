@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { COUNTRIES } from '@/constants/countries';
 
 
@@ -197,11 +197,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
 
     // Only allow PDF files
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Only PDF files are allowed'
-      });
+      toast.error('Invalid file type: Only PDF files are allowed');
       return;
     }
 
@@ -214,11 +210,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
     const maxSize = maxSizes[type] || 5 * 1024 * 1024;
     
     if (file.size > maxSize) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: `Maximum file size is ${maxSize / (1024 * 1024)}MB`
-      });
+      toast.error(`File too large: Maximum file size is ${maxSize / (1024 * 1024)}MB`);
       return;
     }
 
@@ -240,13 +232,9 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         articles: 'Articles of association',
         license: 'Business license',
       };
-      toast({ title: `${labels[type]} uploaded successfully` });
+      toast.success(`${labels[type]} uploaded successfully`);
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: error.message
-      });
+      toast.error(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -267,11 +255,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
       errors.email = true;
     } else if (!validateEmail(formData.email)) {
       errors.email = true;
-      toast({
-        variant: 'destructive',
-        title: 'Invalid email',
-        description: 'Please enter a valid email address'
-      });
+      toast.error('Invalid email: Please enter a valid email address');
     }
 
     // Phone validation
@@ -279,11 +263,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
       errors.phone = true;
     } else if (!validatePhone(formData.phone)) {
       errors.phone = true;
-      toast({
-        variant: 'destructive',
-        title: 'Invalid phone number',
-        description: 'Please enter a valid phone number with country code (e.g., +1 234 567 8900)'
-      });
+      toast.error('Invalid phone number: Please enter a valid phone number with country code (e.g., +1 234 567 8900)');
     }
 
     // Company info validation
@@ -336,11 +316,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         usdt_network: 'USDT Network',
       };
       const missingNames = Object.keys(errors).map(k => fieldLabels[k] || k);
-      toast({
-        variant: 'destructive',
-        title: 'Missing or invalid fields',
-        description: `Please fill in: ${missingNames.join(', ')}`
-      });
+      toast.error(`Missing or invalid fields: ${missingNames.join(', ')}`);
       return;
     }
 
@@ -390,19 +366,11 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         // Non-blocking - continue even if notification fails
       }
 
-      toast({
-        title: 'Verification submitted!',
-        description: 'Your verification documents are under review. We will notify you once approved.',
-        className: 'bg-green-600 text-white border-green-600'
-      });
+      toast.success('Verification submitted! Your documents are under review.');
 
       onSubmitSuccess();
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Submission failed',
-        description: error.message
-      });
+      toast.error(`Submission failed: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -438,19 +406,12 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         console.error('Error deleting agency payout:', deleteError);
       }
 
-      toast({
-        title: 'Application Cancelled',
-        description: 'Your agency application has been cancelled. You can reapply at any time.',
-      });
+      toast.success('Application Cancelled. You can reapply at any time.');
 
       setCancelDialogOpen(false);
       onCancel();
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to cancel',
-        description: error.message
-      });
+      toast.error(`Failed to cancel: ${error.message}`);
     } finally {
       setCancelling(false);
     }
