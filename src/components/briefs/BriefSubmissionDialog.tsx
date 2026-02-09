@@ -312,8 +312,8 @@ export function BriefSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg z-[200] p-0 max-h-[85vh] flex flex-col" style={{ maxHeight: '85vh' }}>
-        <ScrollArea className="flex-1 overflow-auto">
+      <DialogContent className="sm:max-w-lg z-[200] !p-0" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <ScrollArea className="flex-1" style={{ minHeight: 0 }}>
           <div className="p-6 space-y-4">
             <DialogHeader>
               <DialogTitle>Send Your Brief</DialogTitle>
