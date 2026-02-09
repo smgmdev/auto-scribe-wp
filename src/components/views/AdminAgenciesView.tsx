@@ -1596,7 +1596,7 @@ export function AdminAgenciesView() {
                 {selectedApp.reviewed_at && (
                   <div>
                     <p className="text-muted-foreground">
-                      {selectedApp.status === 'rejected' ? 'Rejection Date' : 'Reviewed Date'}
+                      {selectedApp.status === 'rejected' ? 'Rejection Date' : 'Pre-Approved Date'}
                     </p>
                     <p className={`font-medium ${selectedApp.status === 'rejected' ? 'text-red-500' : ''}`}>
                       {format(new Date(selectedApp.reviewed_at), 'MMM d, yyyy h:mm a')}
