@@ -873,7 +873,7 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               onClick={() => setCancelDialogOpen(true)}
               className="w-full lg:w-auto rounded-none bg-transparent text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
-              <XCircle className="h-4 w-4 mr-2" />
+              Cancel Application
               Cancel Application
             </Button>
           )}
