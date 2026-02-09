@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import agencyVerificationBanner from '@/assets/agency-verification-banner.jpg';
-import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock, UserMinus } from 'lucide-react';
+import { Loader2, ChevronDown, Send, AlertTriangle, CheckCircle, Clock, XCircle, ChevronUp, FileText, Building2, Gift, Workflow, CalendarClock, UserMinus, Info } from 'lucide-react';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { AgencyApplicationDialog } from '@/components/agency/AgencyApplicationDialog';
 import { CustomVerificationForm } from '@/components/agency/CustomVerificationForm';
@@ -408,9 +408,12 @@ export function AgencyApplicationView() {
               </div>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground text-left -mt-3">
-            Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
-          </p>
+          <div className="flex items-start gap-2 bg-[#1d1d1f] text-white p-4 rounded-none -mt-3">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <p className="text-sm">
+              Congratulations, you are on your final review. This can take between 1-3 days. You will be notified via email.
+            </p>
+          </div>
 
           <AgencyFAQ />
           </div>
