@@ -345,33 +345,33 @@ export function AgencyApplicationView() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
-              <UserMinus className="h-6 w-6 text-red-500" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-red-400">Account Downgraded</h3>
-              <p className="text-sm text-muted-foreground">
-                {agencyPayout?.agency_name}
-              </p>
-            </div>
-            {getStatusBadge('downgraded', false, true)}
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground text-center">
-          {agencyPayout?.downgrade_reason 
-            ? `Reason: ${agencyPayout.downgrade_reason}`
-            : 'Your account has been downgraded. Contact support for details.'}
-        </p>
-
-        <div className="w-full overflow-hidden rounded-lg">
+        <div className="relative w-full overflow-hidden rounded-lg">
           <img 
             src={agencyDowngradedBanner} 
             alt="Account downgraded" 
-            className="w-full h-[300px] object-cover"
+            className="w-full h-[420px] object-cover"
           />
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/30 shrink-0">
+                  <UserMinus className="h-6 w-6 text-red-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-600">Account Downgraded</h3>
+                  <p className="text-sm text-white/90">
+                    {agencyPayout?.agency_name}
+                  </p>
+                </div>
+                {getStatusBadge('downgraded', false, true)}
+              </div>
+              {agencyPayout?.downgrade_reason && (
+                <p className="text-sm text-white/80 text-center mt-4 pt-3 border-t border-white/20">
+                  Reason: {agencyPayout.downgrade_reason}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         <AgencyFAQ />
