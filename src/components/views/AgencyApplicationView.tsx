@@ -20,6 +20,7 @@ import { ExploreNetworkGrid } from '@/components/agency/ExploreNetworkGrid';
 import { AgencyWorkBanner } from '@/components/agency/AgencyWorkBanner';
 import { Footer } from '@/components/layout/Footer';
 import agencyHeroVideo from '@/assets/agency-hero.mp4';
+import agencyPromoVideo from '@/assets/agency-promo.mp4';
 
 const faqItems = [
   {
@@ -688,6 +689,18 @@ export function AgencyApplicationView() {
             </div>
           )}
           
+          {/* Full-width Promo Video */}
+          <div className="w-full rounded-2xl overflow-hidden">
+            <video
+              src={agencyPromoVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto object-cover"
+            />
+          </div>
+
           <ExploreNetworkGrid dark />
         </div>
 
