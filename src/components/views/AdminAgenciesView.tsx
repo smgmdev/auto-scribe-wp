@@ -1759,24 +1759,6 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
-                      {/* 3. Final Submission Date */}
-                      {verification?.submitted_at && (
-                        <div>
-                          <p className="text-muted-foreground">Final Submission Date</p>
-                          <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
-                        </div>
-                      )}
-                      {/* 4. Verification Rejection / Approval Date */}
-                      {verification?.reviewed_at && (
-                        <div>
-                          <p className="text-muted-foreground">
-                            {verification.status === 'rejected' ? 'Verification Rejected Date' : 'Verification Approved Date'}
-                          </p>
-                          <p className={`font-medium ${verification.status === 'rejected' ? 'text-red-500' : ''}`}>
-                            {format(new Date(verification.reviewed_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                        </div>
-                      )}
                       {/* Cancelled Date */}
                       {selectedApp.status === 'cancelled' && (
                         <div>
