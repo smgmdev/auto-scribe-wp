@@ -211,6 +211,12 @@ export function Sidebar({
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
+  const [applicationSummary, setApplicationSummary] = useState<{
+    agency_name: string;
+    country: string;
+    agency_website: string;
+    created_at: string;
+  } | null>(null);
 
   const navigation = getNavigation(isAdmin, isAgencyOnboarded);
 
@@ -263,6 +269,7 @@ export function Sidebar({
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
+      setApplicationSummary(null);
       setUserCustomVerificationStatus(null);
       // Reset sidebar dropdowns and navigation state on logout
       setExpandedMenus({});
@@ -386,7 +393,7 @@ export function Sidebar({
       // Regular user: fetch application data from DB
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, status, rejection_seen, payout_method')
+        .select('id, status, rejection_seen, payout_method, agency_name, country, agency_website, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -401,11 +408,19 @@ export function Sidebar({
           if (appData.payout_method) {
             setPayoutMethod(appData.payout_method);
           }
+          // Set application summary for sidebar display
+          setApplicationSummary({
+            agency_name: appData.agency_name,
+            country: appData.country,
+            agency_website: appData.agency_website,
+            created_at: appData.created_at
+          });
         } else {
           // No application exists - reset to null to show "Apply Now" box
           setUserApplicationStatus(null);
           setApplicationId(null);
           setRejectionSeen(false);
+          setApplicationSummary(null);
         }
       }
 
@@ -1436,6 +1451,7 @@ export function Sidebar({
                 isAgencyOnboarded={isAgencyOnboarded}
                 isDowngraded={isDowngraded}
                 customVerificationStatus={userCustomVerificationStatus}
+                applicationSummary={applicationSummary}
                 onNavigateToApplication={() => handleNavClick('agency-application')}
                 onStatusUpdate={setIsAgencyOnboarded}
                 onRejectionSeen={() => setRejectionSeen(true)}
