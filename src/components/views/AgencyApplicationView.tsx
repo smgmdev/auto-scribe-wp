@@ -570,7 +570,7 @@ export function AgencyApplicationView() {
                           <div className="flex items-center gap-3">
                             <div className="hidden lg:block text-right">
                               <p className="text-xs text-white/50">Submitted</p>
-                              <p className="text-xs text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy')}</p>
+                              <p className="text-xs text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</p>
                             </div>
                             {app.status === 'rejected' ? (
                               <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
