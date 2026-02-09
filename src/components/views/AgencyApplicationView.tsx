@@ -346,7 +346,7 @@ export function AgencyApplicationView() {
           </p>
         </div>
 
-        <div className="relative w-full overflow-hidden rounded-lg -mt-4 -mb-4">
+        <div className="relative w-full overflow-hidden rounded-none -mt-4 -mb-4">
           <img 
             src={agencyDowngradedBanner} 
             alt="Account downgraded" 
