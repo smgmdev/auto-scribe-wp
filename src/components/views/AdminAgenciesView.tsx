@@ -1260,12 +1260,24 @@ export function AdminAgenciesView() {
                                 </p>
                               )}
                             </div>
-                            <div className="hidden md:block">
+                            <div className="hidden md:flex flex-col items-end gap-1">
                               {getOnboardingStatus(agency)}
+                              {application?.reviewed_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Pre-approved {format(new Date(application.reviewed_at), 'MMM d, yyyy, h:mm a')}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="flex justify-end mt-2 md:hidden">
-                            {getOnboardingStatus(agency)}
+                            <div className="flex flex-col items-end gap-1">
+                              {getOnboardingStatus(agency)}
+                              {application?.reviewed_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  Pre-approved {format(new Date(application.reviewed_at), 'MMM d, yyyy, h:mm a')}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
