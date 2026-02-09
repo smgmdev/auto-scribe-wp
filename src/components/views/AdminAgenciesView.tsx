@@ -141,6 +141,8 @@ export function AdminAgenciesView() {
   const [documentLoading, setDocumentLoading] = useState(true);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
   const [webViewTitle, setWebViewTitle] = useState('');
+  const [hiddenCancelledCount, setHiddenCancelledCount] = useState(0);
+  const [hiddenRejectedCount, setHiddenRejectedCount] = useState(0);
   const { decrementUnreadAgencyApplicationsCount, decrementUnreadCustomVerificationsCount, setUnreadCustomVerificationsCount, setUnreadAgencyApplicationsCount } = useAppStore();
 
   useEffect(() => {
@@ -216,6 +218,20 @@ export function AdminAgenciesView() {
       // Update count of unread pending agency applications
       const unreadPendingApps = (appData || []).filter(a => a.status === 'pending' && !a.read).length;
       setUnreadAgencyApplicationsCount(unreadPendingApps);
+      // Fetch hidden counts
+      const { count: hiddenCancelled } = await supabase
+        .from('agency_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('hidden', true)
+        .eq('status', 'cancelled');
+      setHiddenCancelledCount(hiddenCancelled || 0);
+
+      const { count: hiddenRejected } = await supabase
+        .from('agency_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('hidden', true)
+        .eq('status', 'rejected');
+      setHiddenRejectedCount(hiddenRejected || 0);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
@@ -1004,6 +1020,7 @@ export function AdminAgenciesView() {
                               }
                               
                               setApplications(prev => prev.filter(a => a.id !== app.id));
+                              setHiddenCancelledCount(prev => prev + 1);
                               toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                             }}
                           >
@@ -1039,13 +1056,14 @@ export function AdminAgenciesView() {
                         return [...newItems, ...prev];
                       });
                       toast({ title: 'Restored', description: `${data.length} cancelled application(s) restored` });
+                      setHiddenCancelledCount(0);
                     } else {
                       toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
                     }
                   }}
                   className="bg-[#f2a547] text-black hover:bg-black hover:text-[#f2a547] border border-[#f2a547] hover:border-black rounded-none"
                 >
-                  Restore
+                  Restore ({hiddenCancelledCount})
                 </Button>
               </div>
             </TabsContent>
@@ -1135,6 +1153,7 @@ export function AdminAgenciesView() {
                               }
                               
                               setApplications(prev => prev.filter(a => a.id !== app.id));
+                              setHiddenRejectedCount(prev => prev + 1);
                               toast({ title: 'Removed from view', description: 'Application hidden but kept in database' });
                             }}
                           >
@@ -1170,13 +1189,14 @@ export function AdminAgenciesView() {
                         return [...newItems, ...prev];
                       });
                       toast({ title: 'Restored', description: `${data.length} rejected application(s) restored` });
+                      setHiddenRejectedCount(0);
                     } else {
                       toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
                     }
                   }}
                   className="bg-[#f2a547] text-black hover:bg-black hover:text-[#f2a547] border border-[#f2a547] hover:border-black rounded-none"
                 >
-                  Restore
+                  Restore ({hiddenRejectedCount})
                 </Button>
               </div>
             </TabsContent>
