@@ -97,7 +97,7 @@ export function AgencyRequestsView() {
     setRefreshing(true);
     await fetchRequests();
     setRefreshing(false);
-    sonnerToast.success('Requests refreshed');
+    toast.success('Requests refreshed');
   };
 
   // Update current time every second for real-time countdown
