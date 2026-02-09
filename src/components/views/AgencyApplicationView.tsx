@@ -62,6 +62,10 @@ interface AgencyApplication {
   created_at: string;
   updated_at: string;
   reviewed_at: string | null;
+  media_channels: string | null;
+  media_niches: string[] | null;
+  agency_description: string | null;
+  incorporation_document_url: string;
 }
 
 interface AgencyPayout {
@@ -130,6 +134,7 @@ export function AgencyApplicationView() {
   const [customVerification, setCustomVerification] = useState<CustomVerification | null>(null);
   const [existingApplication, setExistingApplication] = useState<AgencyApplication | null>(null);
   const [showRejectionReason, setShowRejectionReason] = useState(false);
+  const [applicationExpanded, setApplicationExpanded] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
 
@@ -176,7 +181,7 @@ export function AgencyApplicationView() {
       // Fetch existing application first to check status
       const { data: appData } = await supabase
         .from('agency_applications')
-        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at')
+        .select('id, agency_name, full_name, email, whatsapp_phone, country, agency_website, status, admin_notes, created_at, updated_at, reviewed_at, media_channels, media_niches, agency_description, incorporation_document_url')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -491,38 +496,113 @@ export function AgencyApplicationView() {
               
               {/* Application Summary - full width within 980px container */}
               {existingApplication?.status === 'pending' && (
-                <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 pointer-events-auto">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-white">Your Application</h3>
-                    <Badge className="bg-white/20 text-white border-0 text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
+                <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
+                  <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 pointer-events-auto overflow-hidden">
+                    <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-medium text-white">Your Application</h3>
+                          <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                        </div>
+                        <Badge className="bg-white/20 text-white border-0 text-xs">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-left">
+                        <div>
+                          <p className="text-white/50">Agency</p>
+                          <p className="text-white font-medium">{existingApplication.agency_name}</p>
+                        </div>
+                        <div>
+                          <p className="text-white/50">Country</p>
+                          <p className="text-white font-medium">{existingApplication.country}</p>
+                        </div>
+                        <div>
+                          <p className="text-white/50">Submitted</p>
+                          <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                        </div>
+                        <div>
+                          <p className="text-white/50">Website</p>
+                          <p className="text-white font-medium truncate">
+                            {existingApplication.agency_website.replace(/^https?:\/\//, '')}
+                          </p>
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                      <div className="px-4 pb-4 pt-2 border-t border-white/10 space-y-4">
+                        {/* Full details */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <p className="text-white/50 mb-1">Full Name</p>
+                            <p className="text-white font-medium">{existingApplication.full_name}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">Email</p>
+                            <p className="text-white font-medium">{existingApplication.email}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">WhatsApp</p>
+                            <p className="text-white font-medium">{existingApplication.whatsapp_phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-white/50 mb-1">Media Channels</p>
+                            <p className="text-white font-medium">{existingApplication.media_channels || 'Not specified'}</p>
+                          </div>
+                          {existingApplication.media_niches && existingApplication.media_niches.length > 0 && (
+                            <div className="lg:col-span-2">
+                              <p className="text-white/50 mb-1">Media Niches</p>
+                              <div className="flex flex-wrap gap-1">
+                                {existingApplication.media_niches.map((niche, index) => (
+                                  <Badge key={index} className="bg-white/10 text-white border-0 text-xs">
+                                    {niche}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {existingApplication.agency_description && (
+                            <div className="lg:col-span-2">
+                              <p className="text-white/50 mb-1">Description</p>
+                              <p className="text-white font-medium text-xs">{existingApplication.agency_description}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWebViewUrl(existingApplication.agency_website);
+                            }}
+                          >
+                            View Website
+                          </Button>
+                          {existingApplication.incorporation_document_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(existingApplication.incorporation_document_url, '_blank');
+                              }}
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              View Document
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CollapsibleContent>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                    <div>
-                      <p className="text-white/50">Agency</p>
-                      <p className="text-white font-medium">{existingApplication.agency_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-white/50">Country</p>
-                      <p className="text-white font-medium">{existingApplication.country}</p>
-                    </div>
-                    <div>
-                      <p className="text-white/50">Submitted</p>
-                      <p className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
-                    </div>
-                    <div>
-                      <p className="text-white/50">Website</p>
-                      <button 
-                        onClick={() => setWebViewUrl(existingApplication.agency_website)} 
-                        className="text-white font-medium hover:underline truncate max-w-full text-left"
-                      >
-                        {existingApplication.agency_website.replace(/^https?:\/\//, '')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                </Collapsible>
               )}
             </div>
           </div>
