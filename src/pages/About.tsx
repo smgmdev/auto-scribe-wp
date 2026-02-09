@@ -190,7 +190,7 @@ export default function About() {
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                className="bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -198,7 +198,7 @@ export default function About() {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
               >
                 Sign In
               </Button>
