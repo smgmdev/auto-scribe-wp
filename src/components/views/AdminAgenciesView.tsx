@@ -60,6 +60,7 @@ interface AgencyPayout {
   user_id: string | null;
   payout_method: string | null;
   downgraded: boolean;
+  downgrade_reason: string | null;
   updated_at: string;
 }
 
@@ -1627,6 +1628,11 @@ export function AdminAgenciesView() {
                                 {application && (
                                   <p className="text-xs text-muted-foreground">
                                     {application.country}
+                                  </p>
+                                )}
+                                {agency.downgrade_reason && (
+                                  <p className="text-xs text-destructive">
+                                    Reason: {agency.downgrade_reason}
                                   </p>
                                 )}
                                 <p className="text-xs text-muted-foreground">
