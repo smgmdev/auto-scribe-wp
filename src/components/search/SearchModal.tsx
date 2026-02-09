@@ -56,6 +56,18 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
 
+  // Global Ctrl+K / Cmd+K shortcut to open search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        onOpenChange(!open);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onOpenChange]);
+
   useEffect(() => {
     if (!open) return;
     
