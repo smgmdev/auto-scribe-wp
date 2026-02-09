@@ -8,6 +8,7 @@ import { Loader2, Send, Upload, X, FileText, Image, GripHorizontal, ArrowLeft } 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 
 interface MediaSite {
@@ -195,7 +196,7 @@ export function BriefSubmissionDialog({
       addMinimizedChat({ id: request.id, title: mediaSite.name, favicon: mediaSite.favicon, type: 'my-request', unreadCount: 0 });
       window.dispatchEvent(new CustomEvent('engagement-added', { detail: { id: request.id, title: request.title, description: request.description, favicon: mediaSite.favicon, media_site: mediaSite } }));
 
-      toast({ title: 'Request submitted!', description: 'Your brief has been sent to the agency for review.', className: 'bg-green-600 text-white border-green-600' });
+      sonnerToast.success('Brief sent to agency for review');
       setDescription('');
       setFiles([]);
       onOpenChange(false);
