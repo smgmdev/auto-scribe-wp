@@ -444,13 +444,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   useEffect(() => {
     if (!isDragging) return;
 
+    let rafId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
       const newX = dragStartRef.current.posX + deltaX;
       const newY = dragStartRef.current.posY + deltaY;
       localPositionRef.current = { x: newX, y: newY };
-      // Direct DOM update - bypasses React render cycle for smooth dragging
+      
+      // Direct DOM update for instant visual feedback
       if (chatWindowRef.current) {
         chatWindowRef.current.style.left = `${newX}px`;
         chatWindowRef.current.style.top = `${newY}px`;
@@ -458,8 +462,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
 
     const handleMouseUp = () => {
+      if (rafId) cancelAnimationFrame(rafId);
       setIsDragging(false);
-      // Sync React state with final position
+      // Sync React state with final position so re-renders use correct pos
       setLocalPosition(localPositionRef.current);
       updateChatPosition(globalChatRequest.id, localPositionRef.current);
     };
@@ -468,6 +473,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -4814,10 +4820,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
           height: isMobile ? '100dvh' : '550px',
           maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
-          left: isMobile ? '0' : `${localPosition.x}px`,
-          top: isMobile ? '0' : `${localPosition.y}px`,
+          left: isMobile ? '0' : `${isDragging ? localPositionRef.current.x : localPosition.x}px`,
+          top: isMobile ? '0' : `${isDragging ? localPositionRef.current.y : localPosition.y}px`,
           zIndex: chat.zIndex + 100,
-          overscrollBehavior: 'contain'
+          overscrollBehavior: 'contain',
+          willChange: isDragging ? 'left, top' : 'auto',
         }}
         onMouseDown={() => {
           handleWindowClick();
