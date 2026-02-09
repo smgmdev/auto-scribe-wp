@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Info, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -55,6 +56,16 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   // Agency details popup state
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
+
+  // Register on popup stack for layered Esc handling
+  useEffect(() => {
+    if (open) {
+      pushPopup('search-modal', () => onOpenChange(false));
+    } else {
+      removePopup('search-modal');
+    }
+    return () => removePopup('search-modal');
+  }, [open, onOpenChange]);
 
   // Global Ctrl+K / Cmd+K shortcut to open search
   useEffect(() => {

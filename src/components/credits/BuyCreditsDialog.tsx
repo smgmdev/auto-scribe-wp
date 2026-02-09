@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
@@ -36,14 +37,11 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     }
   }, [open]);
 
-  // Close on Escape key
+  // Register on popup stack for layered Esc handling
   useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    if (!open) { removePopup('buy-credits-dialog'); return; }
+    pushPopup('buy-credits-dialog', () => onOpenChange(false));
+    return () => removePopup('buy-credits-dialog');
   }, [open, onOpenChange]);
 
   const parsedAmount = parseInt(creditAmount) || 0;

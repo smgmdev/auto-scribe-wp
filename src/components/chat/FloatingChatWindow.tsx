@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
 import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
@@ -442,29 +443,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
   }, [chat.position]);
   
-  // Escape key to close the focused chat
+  // Register on popup stack for layered Esc handling
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        // Only close if this is the topmost chat (highest z-index)
-        const allChats = document.querySelectorAll('[data-chat-window]');
-        let maxZ = 0;
-        let topChatId = '';
-        allChats.forEach((el) => {
-          const z = parseInt((el as HTMLElement).style.zIndex || '0', 10);
-          if (z > maxZ) {
-            maxZ = z;
-            topChatId = el.getAttribute('data-chat-id') || '';
-          }
-        });
-        if (topChatId === globalChatRequest.id) {
-          closeGlobalChat(globalChatRequest.id);
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    const chatId = `floating-chat-${globalChatRequest.id}`;
+    pushPopup(chatId, () => closeGlobalChat(globalChatRequest.id));
+    return () => removePopup(chatId);
   }, [globalChatRequest.id, closeGlobalChat]);
   
   // Timer tick for live countdown updates (every second)

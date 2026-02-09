@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { closeTopPopup } from "@/lib/popup-stack";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -73,6 +74,19 @@ const usePreventBodyStyleChanges = () => {
   }, []);
 };
 
+// Global Escape key handler - closes the topmost popup
+const useGlobalEscapeHandler = () => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeTopPopup();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+};
+
 // Messaging widget wrapper that hides during loading screens and incomplete auth states
 function MessagingWidget() {
   const { loading, user, emailVerified, pinRequired, pinVerified } = useAuth();
@@ -94,7 +108,7 @@ function MessagingWidget() {
 
 const App = () => {
   usePreventBodyStyleChanges();
-  
+  useGlobalEscapeHandler();
   // HMR refresh v2
   return (
     <QueryClientProvider client={queryClient}>
