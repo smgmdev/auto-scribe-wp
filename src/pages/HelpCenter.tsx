@@ -143,7 +143,7 @@ export default function HelpCenter() {
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Main Header - matches About page */}
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -279,7 +279,7 @@ export default function HelpCenter() {
       {/* Spacer for fixed header */}
       <div 
         style={{
-          height: isTopicsOpen ? 'calc(112px + 200px)' : '112px',
+          height: isTopicsOpen ? 'calc(140px + 200px)' : '140px',
           transition: 'height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       />
