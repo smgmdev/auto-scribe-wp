@@ -801,7 +801,7 @@ const HowItWorks = () => {
               <Button
                 size="sm"
                 onClick={handleGetStarted}
-                className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs px-4 py-1 h-7 rounded-none"
+                className="bg-[#0071e3] hover:bg-transparent hover:text-[#0071e3] text-white text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-[#0071e3] transition-all duration-200"
               >
                 Get Started
               </Button>
