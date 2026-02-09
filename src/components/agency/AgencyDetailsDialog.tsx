@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
-import { Building2, Loader2, ExternalLink } from 'lucide-react';
+import { Loader2, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,14 +22,17 @@ interface AgencyDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
   agencyName: string | null;
   zIndex?: number;
+  isAuthenticated?: boolean;
 }
 
 export function AgencyDetailsDialog({ 
   open, 
   onOpenChange, 
   agencyName,
-  zIndex = 250
+  zIndex = 250,
+  isAuthenticated = true
 }: AgencyDetailsDialogProps) {
+  const navigate = useNavigate();
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetailsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoLoading, setLogoLoading] = useState(true);
@@ -136,9 +140,7 @@ export function AgencyDetailsDialog({
                   onError={() => setLogoLoading(false)}
                 />
               </div>
-            ) : (
-              <Building2 className="h-12 w-12 text-muted-foreground" />
-            )}
+            ) : null}
             <span>{agencyDetails?.agency_name || agencyName || 'Agency Details'}</span>
           </DialogTitle>
         </DialogHeader>
@@ -193,14 +195,25 @@ export function AgencyDetailsDialog({
           <p className="text-center text-muted-foreground py-8">Agency not found</p>
         )}
 
-        <div className="flex justify-end gap-3 mt-1">
+        <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 mt-1">
           <Button 
             variant="outline"
             onClick={handleClose}
-            className="w-full sm:w-32 hover:bg-black hover:text-white transition-colors rounded-none"
+            className="w-full md:w-32 hover:bg-black hover:text-white transition-colors rounded-none"
           >
             Close
           </Button>
+          {!isAuthenticated && (
+            <Button 
+              className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-foreground/90 transition-colors"
+              onClick={() => {
+                handleClose();
+                navigate('/auth');
+              }}
+            >
+              Sign In to View Details
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

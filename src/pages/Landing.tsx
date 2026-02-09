@@ -942,6 +942,7 @@ const Landing = () => {
         onOpenChange={setAgencyDetailsOpen}
         agencyName={selectedAgencyName}
         zIndex={250}
+        isAuthenticated={!!user}
       />
 
       <Footer narrow />
