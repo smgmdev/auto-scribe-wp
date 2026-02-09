@@ -529,7 +529,10 @@ export function AgencyApplicationView() {
                           className="h-8 w-8 rounded-lg object-cover bg-white/10"
                         />
                       )}
-                      <h3 className="text-sm font-medium text-white">Your Application</h3>
+                      <div>
+                        <h3 className="text-sm font-medium text-white">{existingApplication.agency_name}</h3>
+                        <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
+                      </div>
                     </div>
                     <Badge className="bg-white/20 text-white border-0 text-xs">
                       <Clock className="h-3 w-3 mr-1" />
