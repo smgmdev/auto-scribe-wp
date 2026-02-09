@@ -214,7 +214,7 @@ export function BriefSubmissionDialog({
       <div
         className={`pointer-events-auto bg-background relative overflow-y-auto ${
           isMobile 
-            ? 'w-full h-[100dvh]' 
+            ? 'w-full h-[100dvh] pt-4 px-4 pb-4' 
             : 'w-full max-w-lg border pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh]'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
