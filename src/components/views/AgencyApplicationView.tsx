@@ -692,7 +692,7 @@ export function AgencyApplicationView() {
 
         <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-10 pb-8 space-y-8">
           {/* Promo Video */}
-          <div className="w-full overflow-hidden rounded-2xl relative">
+          <div className="w-full overflow-hidden relative">
             <video
               src={agencyPromoVideo}
               autoPlay
