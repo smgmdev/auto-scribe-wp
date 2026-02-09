@@ -4810,7 +4810,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   if (!globalChatRequest) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Floating Chat Window */}
       <div
@@ -8053,6 +8053,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </>,
+    document.body
   );
 }
