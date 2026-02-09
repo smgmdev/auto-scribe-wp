@@ -350,6 +350,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [adminJoined, setAdminJoined] = useState(false);
   const [joiningChat, setJoiningChat] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [bannerOrderDetailsOpen, setBannerOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<{
     id: string;
     order_number: string | null;
@@ -5638,29 +5639,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </TooltipProvider>
                 )}
               </div>
-              {/* Mobile: single Order Info tooltip */}
-              <div className="flex md:hidden items-center text-xs text-gray-500 dark:text-gray-400 pl-9">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="flex items-center gap-1 cursor-help">
-                        Order Information
-                        <Info className="h-3 w-3" />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs">
-                      <div className="space-y-1">
-                        <p>Price: {pendingOrder.price.toLocaleString()} credits</p>
-                        {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                          <p>Delivery: {formatDeliveryDuration(pendingOrder.delivery_duration)}</p>
-                        )}
-                        {pendingOrder.special_terms && (
-                          <p>Special Terms: {pendingOrder.special_terms}</p>
-                        )}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              {/* Mobile: expandable Order Details */}
+              <div className="md:hidden pl-9">
+                <button
+                  type="button"
+                  onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+                >
+                  Order Details
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {bannerOrderDetailsOpen && (
+                  <div className="mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    <p>{pendingOrder.price.toLocaleString()} credits</p>
+                    {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
+                      <p>Delivery: {formatDeliveryDuration(pendingOrder.delivery_duration)}</p>
+                    )}
+                    {pendingOrder.special_terms && (
+                      <p>Special Terms: {pendingOrder.special_terms}</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
