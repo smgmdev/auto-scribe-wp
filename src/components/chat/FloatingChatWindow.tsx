@@ -256,6 +256,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   } | null>(null);
   const [loadingAdminAgency, setLoadingAdminAgency] = useState(false);
   const [mediaListingOpen, setMediaListingOpen] = useState(false);
+  const [fullMediaSite, setFullMediaSite] = useState<GlobalChatRequest['media_site']>(null);
   const [mediaListingPos, setMediaListingPos] = useState({ x: 0, y: 0 });
   const [mediaListingDragging, setMediaListingDragging] = useState(false);
   const mediaListingDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
@@ -5135,7 +5136,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                  onClick={() => setMediaListingOpen(true)}
+                  onClick={async () => {
+                    setMediaListingOpen(true);
+                    // Fetch full media site data if incomplete (e.g. opened from homepage event)
+                    const ms = globalChatRequest.media_site;
+                    if (ms && (!ms.publication_format && !ms.category && !ms.link)) {
+                      const { data } = await supabase
+                        .from('media_sites')
+                        .select('id, name, favicon, price, publication_format, link, category, subcategory, about, agency')
+                        .eq('id', ms.id)
+                        .maybeSingle();
+                      if (data) {
+                        setFullMediaSite(data);
+                        updateGlobalChatRequest({ media_site: data }, globalChatRequest.id);
+                      }
+                    }
+                  }}
                   onMouseDown={(e) => e.stopPropagation()}
                   title="Media Listing Info"
                 >
