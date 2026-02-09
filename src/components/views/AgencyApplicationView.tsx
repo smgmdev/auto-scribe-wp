@@ -349,7 +349,7 @@ export function AgencyApplicationView() {
           <img 
             src={agencyDowngradedBanner} 
             alt="Account downgraded" 
-            className="w-full h-[420px] object-cover"
+            className="w-full h-[520px] object-cover"
           />
           <div className="absolute inset-0 flex items-center justify-center p-6">
             <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
