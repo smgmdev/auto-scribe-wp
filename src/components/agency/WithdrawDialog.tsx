@@ -187,7 +187,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
         <DialogHeader>
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
-            Available balance: <span className="font-semibold text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            Available balance: <span className="text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </DialogDescription>
         </DialogHeader>
 
