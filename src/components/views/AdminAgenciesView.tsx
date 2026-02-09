@@ -1008,6 +1008,35 @@ export function AdminAgenciesView() {
                   ))}
                 </div>
               )}
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const { data, error } = await supabase
+                      .from('agency_applications')
+                      .update({ hidden: false })
+                      .eq('hidden', true)
+                      .eq('status', 'cancelled')
+                      .select();
+                    
+                    if (error) {
+                      toast({ variant: 'destructive', title: 'Error', description: error.message });
+                      return;
+                    }
+                    
+                    if (data && data.length > 0) {
+                      setApplications(prev => [...data, ...prev]);
+                      toast({ title: 'Restored', description: `${data.length} cancelled application(s) restored` });
+                    } else {
+                      toast({ title: 'Nothing to restore', description: 'No hidden cancelled applications found' });
+                    }
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Restore Hidden
+                </Button>
+              </div>
             </TabsContent>
 
             {/* Rejected Sub-Tab */}
@@ -1097,6 +1126,35 @@ export function AdminAgenciesView() {
                   ))}
                 </div>
               )}
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const { data, error } = await supabase
+                      .from('agency_applications')
+                      .update({ hidden: false })
+                      .eq('hidden', true)
+                      .eq('status', 'rejected')
+                      .select();
+                    
+                    if (error) {
+                      toast({ variant: 'destructive', title: 'Error', description: error.message });
+                      return;
+                    }
+                    
+                    if (data && data.length > 0) {
+                      setApplications(prev => [...data, ...prev]);
+                      toast({ title: 'Restored', description: `${data.length} rejected application(s) restored` });
+                    } else {
+                      toast({ title: 'Nothing to restore', description: 'No hidden rejected applications found' });
+                    }
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Restore Hidden
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </TabsContent>
