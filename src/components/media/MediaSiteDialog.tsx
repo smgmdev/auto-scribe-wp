@@ -370,7 +370,7 @@ export function MediaSiteDialog({
       <>
         <div className="fixed inset-0 z-[200] bg-background flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-            <span className="font-medium text-sm">{mediaSite.name}</span>
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
             <Button
               variant="ghost"
               size="icon"
