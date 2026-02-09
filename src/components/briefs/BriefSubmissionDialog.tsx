@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, Upload, X, FileText, Image, GripHorizontal } from 'lucide-react';
+import { Loader2, Send, Upload, X, FileText, Image, GripHorizontal, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -324,9 +324,12 @@ export function BriefSubmissionDialog({
                 variant="outline" 
                 onClick={() => { onOpenChange(false); onBack?.(); }} 
                 disabled={isSubmitting}
-                className="w-full hover:bg-foreground hover:text-background transition-all duration-200"
+                className="w-full hover:bg-foreground hover:text-background transition-all duration-200 group"
               >
-                Back
+                <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
+                  <ArrowLeft className="h-4 w-4 shrink-0" />
+                </span>
+                <span>Back</span>
               </Button>
             </div>
           </div>
@@ -442,9 +445,12 @@ export function BriefSubmissionDialog({
                   variant="outline" 
                   onClick={() => { onOpenChange(false); onBack?.(); }} 
                   disabled={isSubmitting}
-                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-all duration-200"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background transition-all duration-200 group"
                 >
-                  Back
+                  <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:mr-1">
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
+                  </span>
+                  <span>Back</span>
                 </Button>
                 <Button 
                   className="flex-1 rounded-none bg-foreground text-background hover:bg-foreground/80 transition-colors"
