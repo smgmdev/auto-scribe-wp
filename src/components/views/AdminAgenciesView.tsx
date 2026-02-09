@@ -1722,45 +1722,6 @@ export function AdminAgenciesView() {
               ) : null}
               <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
             </div>
-            {(() => {
-              const agencyPayout = selectedApp ? agencies.find(a => a.user_id === selectedApp.user_id) : null;
-              const verification = agencyPayout 
-                ? customVerifications.find(v => v.agency_payout_id === agencyPayout.id) 
-                : (selectedApp ? customVerifications.find(v => v.user_id === selectedApp.user_id) : null);
-              if (verification?.submitted_at) {
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-none w-full"
-                    style={{ backgroundColor: '#f2a547', color: '#000' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#f2a547'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f2a547'; e.currentTarget.style.color = '#000'; }}
-                    onClick={() => {
-                      setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null);
-                      handleOpenVerification(verification);
-                    }}
-                  >
-                    View Verification
-                  </Button>
-                );
-              }
-              // Show disabled button for custom payout apps that never submitted verification
-              if (selectedApp?.payout_method === 'custom' && (selectedApp.status === 'rejected' || selectedApp.status === 'cancelled')) {
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-none w-full cursor-not-allowed opacity-60"
-                    style={{ backgroundColor: '#e5e5e5', color: '#888' }}
-                    disabled
-                  >
-                    No Verification Submitted
-                  </Button>
-                );
-              }
-              return null;
-            })()}
           </DialogHeader>
 
           {selectedApp && (
