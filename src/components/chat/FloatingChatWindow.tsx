@@ -338,6 +338,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [localPosition, setLocalPosition] = useState(chat.position);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const localPositionRef = useRef(localPosition);
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -434,22 +435,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     e.preventDefault();
   }, [localPosition, onFocus]);
 
+  // Keep ref in sync
+  useEffect(() => {
+    localPositionRef.current = localPosition;
+  }, [localPosition]);
+
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
-      setLocalPosition({
+      const newPos = {
         x: dragStartRef.current.posX + deltaX,
         y: dragStartRef.current.posY + deltaY
-      });
+      };
+      setLocalPosition(newPos);
+      localPositionRef.current = newPos;
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      // Save position to store
-      updateChatPosition(globalChatRequest.id, localPosition);
+      updateChatPosition(globalChatRequest.id, localPositionRef.current);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -459,7 +466,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, localPosition, globalChatRequest.id, updateChatPosition]);
+  }, [isDragging, globalChatRequest.id, updateChatPosition]);
 
   // Media listing drag handlers
   useEffect(() => {
