@@ -185,7 +185,7 @@ export function AgencyDetailsDialog({
           <p className="text-center text-muted-foreground py-8">Agency not found</p>
         )}
 
-        <div className="flex justify-end gap-3 mt-6">
+        <div className="flex justify-end gap-3 mt-3">
           <Button 
             variant="outline"
             onClick={handleClose}
