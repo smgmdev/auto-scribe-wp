@@ -517,33 +517,38 @@ export function AgencyApplicationView() {
               <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
               <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {existingApplication.logo_url && (
-                        <img 
-                          src={existingApplication.logo_url.startsWith('http') 
-                            ? existingApplication.logo_url 
-                            : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
-                          } 
-                          alt={existingApplication.agency_name}
-                          className="h-8 w-8 rounded-lg object-cover bg-white/10"
-                        />
-                      )}
-                      <div className="text-left">
-                        <h3 className="text-sm font-medium text-white">{existingApplication.agency_name}</h3>
-                        <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
+                  <div className="space-y-2 lg:space-y-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {existingApplication.logo_url && (
+                          <img 
+                            src={existingApplication.logo_url.startsWith('http') 
+                              ? existingApplication.logo_url 
+                              : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
+                            } 
+                            alt={existingApplication.agency_name}
+                            className="h-8 w-8 rounded-lg object-cover bg-white/10"
+                          />
+                        )}
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium text-white">{existingApplication.agency_name}</h3>
+                          <p className="text-xs text-white/50 truncate">{existingApplication.agency_website.replace(/^https?:\/\//, '')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="hidden lg:block text-right">
+                          <p className="text-xs text-white/50">Submitted</p>
+                          <p className="text-xs text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
+                        </div>
+                        <Badge className="bg-white/20 text-white border-0 text-xs">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending
+                        </Badge>
+                        <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-xs text-white/50">Submitted</p>
-                        <p className="text-xs text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</p>
-                      </div>
-                      <Badge className="bg-white/20 text-white border-0 text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
-                      <ChevronDown className={`h-4 w-4 text-white/60 flex-shrink-0 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
+                    <div className="flex items-center justify-between lg:hidden">
+                      <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(existingApplication.created_at), 'MMM d, yyyy')}</span></p>
                     </div>
                   </div>
                 </CollapsibleTrigger>
