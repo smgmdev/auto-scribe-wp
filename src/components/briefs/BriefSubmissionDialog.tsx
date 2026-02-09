@@ -312,39 +312,12 @@ export function BriefSubmissionDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-lg z-[200] rounded-none overflow-y-auto"
+        className="sm:max-w-lg z-[200] rounded-none overflow-y-auto max-h-[100dvh] sm:max-h-[85vh]"
         hideCloseButton={false}
-        style={{ 
-          padding: 0,
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          height: '100dvh',
-          maxHeight: '100dvh',
-          maxWidth: '100%',
-          transform: 'none',
-        }}
+        style={{ padding: 0 }}
+        overlayClassName="z-[199]"
       >
-        <style>{`
-          @media (min-width: 640px) {
-            [data-brief-dialog] {
-              position: fixed !important;
-              top: 50% !important;
-              left: 50% !important;
-              right: auto !important;
-              bottom: auto !important;
-              transform: translate(-50%, -50%) !important;
-              max-height: 85vh !important;
-              max-width: 32rem !important;
-              width: 100% !important;
-              height: auto !important;
-            }
-          }
-        `}</style>
-        <div data-brief-dialog="" className="p-4 sm:p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">Send Your Brief</DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
