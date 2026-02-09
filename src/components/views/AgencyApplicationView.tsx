@@ -101,7 +101,7 @@ function AgencyFAQ({ dark = false }: { dark?: boolean }) {
   };
 
   return (
-    <div className="rounded-lg p-6">
+    <div className="rounded-lg py-6 px-0">
       <h2 className={`text-3xl font-bold text-center mb-8 ${dark ? 'text-white' : 'text-foreground'}`}>Questions? Answers.</h2>
       <div className={`divide-y ${dark ? 'divide-white/20' : 'divide-border'}`}>
         {faqItems.map((item, index) => (
