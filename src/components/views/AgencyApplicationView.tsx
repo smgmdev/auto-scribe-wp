@@ -238,16 +238,16 @@ export function AgencyApplicationView() {
   };
 
   const handleCancelled = () => {
-    // Clear local state immediately - this will cause the view to render the application form
+    // Clear local state immediately
     setAgencyPayout(null);
     setCustomVerification(null);
-    // Also update the existing application status immediately for proper UI display
-    if (existingApplication) {
-      setExistingApplication({ ...existingApplication, status: 'cancelled' });
-    }
-    setLoading(false);
     // Update global store immediately - this triggers sidebar to update
     setUserApplicationStatus('cancelled');
+    // Refetch data so cancelled app appears in history
+    initialFetchDoneRef.current = false;
+    setDataLoaded(false);
+    setLoading(true);
+    fetchAgencyData();
   };
 
   const handleCustomVerificationSubmit = () => {
@@ -500,13 +500,17 @@ export function AgencyApplicationView() {
                   <p className="mt-3 text-white/80 text-base lg:text-lg">
                     Your previous application was rejected. You can review the reason below and apply again.
                   </p>
+                ) : existingApplication?.status === 'cancelled' ? (
+                  <p className="mt-3 text-white/80 text-base lg:text-lg">
+                    Your application was cancelled. You can start a new application at any time.
+                  </p>
                 ) : (
                   <p className="mt-3 text-white/80 text-base lg:text-lg">
                     Become a media merchant on Arcana Mace and trade media products worldwide.
                   </p>
                 )}
                 
-                {existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? (
+                {existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled' ? (
                   <div className="flex items-center gap-3 mt-4">
                     <Button 
                       className="bg-white text-black hover:bg-white/90 transition-all duration-200"
@@ -514,7 +518,7 @@ export function AgencyApplicationView() {
                     >
                       My Applications
                     </Button>
-                    {existingApplication?.status === 'rejected' && (
+                    {(existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled') && (
                       <Button 
                         className="bg-white text-black hover:bg-white/90 transition-all duration-200"
                         onClick={() => setDialogOpen(true)}
@@ -542,10 +546,10 @@ export function AgencyApplicationView() {
           style={{ zIndex: 1 }}
         >
         
-        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' ? 'pt-8 pb-8' : 'pt-5'}`}>
+        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled' ? 'pt-8 pb-8' : 'pt-5'}`}>
           
           {/* Application Summary Cards - shown when there are pending/rejected applications */}
-          {allApplications.length > 0 && (existingApplication?.status === 'pending' || existingApplication?.status === 'rejected') && (
+          {allApplications.length > 0 && (existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled') && (
             <div ref={myApplicationsRef} className="space-y-2">
               <h2 className="text-3xl font-bold text-center text-white mb-4">
                 My Applications
@@ -581,6 +585,11 @@ export function AgencyApplicationView() {
                                   <p className="text-xs text-white/50">Processed</p>
                                   <p className="text-xs text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
                                 </>
+                              ) : app.status === 'cancelled' ? (
+                                <>
+                                  <p className="text-xs text-white/50">Cancelled</p>
+                                  <p className="text-xs text-white font-medium">{format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}</p>
+                                </>
                               ) : (
                                 <>
                                   <p className="text-xs text-white/50">Submitted</p>
@@ -592,6 +601,11 @@ export function AgencyApplicationView() {
                               <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">
                                 <XCircle className="h-3 w-3 mr-1" />
                                 Rejected
+                              </Badge>
+                            ) : app.status === 'cancelled' ? (
+                              <Badge className="bg-orange-500/20 text-orange-400 border-0 text-xs">
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Cancelled
                               </Badge>
                             ) : (
                               <Badge className="bg-white/20 text-white border-0 text-xs">
@@ -605,6 +619,8 @@ export function AgencyApplicationView() {
                         <div className="flex items-center justify-between lg:hidden">
                           {app.status === 'rejected' && app.reviewed_at ? (
                             <p className="text-xs text-white/50">Processed: <span className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</span></p>
+                          ) : app.status === 'cancelled' ? (
+                            <p className="text-xs text-white/50">Cancelled: <span className="text-white font-medium">{format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}</span></p>
                           ) : (
                             <p className="text-xs text-white/50">Submitted: <span className="text-white font-medium">{format(new Date(app.created_at), 'MMM d, yyyy h:mm a')}</span></p>
                           )}
@@ -764,6 +780,14 @@ export function AgencyApplicationView() {
                           </div>
                         )}
 
+                        {/* Cancellation reason inside collapsible */}
+                        {app.status === 'cancelled' && app.admin_notes && (
+                          <div className="p-3 bg-orange-500/10 rounded-none border border-orange-500/20">
+                            <p className="text-xs text-white/50 mb-1">Cancellation Reason</p>
+                            <p className="text-xs text-white">{app.admin_notes}</p>
+                          </div>
+                        )}
+
                         {/* Timestamps */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs pt-2 border-t border-white/10">
                           <div>
@@ -774,6 +798,12 @@ export function AgencyApplicationView() {
                             <div>
                               <p className="text-white/50 mb-1">Processed</p>
                               <p className="text-white font-medium">{format(new Date(app.reviewed_at), 'MMM d, yyyy h:mm a')}</p>
+                            </div>
+                          )}
+                          {app.status === 'cancelled' && (
+                            <div>
+                              <p className="text-white/50 mb-1">Cancelled</p>
+                              <p className="text-white font-medium">{format(new Date(app.updated_at), 'MMM d, yyyy h:mm a')}</p>
                             </div>
                           )}
                         </div>
