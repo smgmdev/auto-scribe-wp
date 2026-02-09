@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -247,12 +248,19 @@ const Landing = () => {
     setAgencyDetailsOpen(true);
   };
 
-  // Close on Escape key & open with Ctrl+K / Cmd+K
+  // Register search modal on popup stack for layered Esc & Ctrl+K shortcut
+  useEffect(() => {
+    if (showSearchModal) {
+      pushPopup('landing-search', () => handleCloseSearchModal());
+    } else {
+      removePopup('landing-search');
+    }
+    return () => removePopup('landing-search');
+  }, [showSearchModal]);
+
+  // Ctrl+K / Cmd+K shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showSearchModal) {
-        handleCloseSearchModal();
-      }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setShowSearchModal(prev => !prev);
@@ -260,7 +268,7 @@ const Landing = () => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showSearchModal]);
+  }, []);
 
   // WP sites for landing page sections - not affected by search
   const landingWpSites = useMemo(() => {

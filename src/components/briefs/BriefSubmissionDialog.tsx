@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
@@ -55,14 +56,11 @@ export function BriefSubmissionDialog({
     }
   }, [open]);
 
-  // Close on Escape key
+  // Register on popup stack for layered Esc handling
   useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    if (!open) { removePopup('brief-submission-dialog'); return; }
+    pushPopup('brief-submission-dialog', () => onOpenChange(false));
+    return () => removePopup('brief-submission-dialog');
   }, [open, onOpenChange]);
 
   const MAX_TOTAL_SIZE = 10 * 1024 * 1024;
@@ -133,13 +131,7 @@ export function BriefSubmissionDialog({
     };
   }, [isDragging]);
 
-  // Escape key
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onOpenChange(false); };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, onOpenChange]);
+  // (Esc handled via popup-stack registered above)
 
   const handleSubmit = async () => {
     if (!user || !mediaSite) return;

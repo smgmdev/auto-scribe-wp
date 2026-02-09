@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -76,14 +77,11 @@ export function MediaSiteDialog({
     }
   }, [open]);
 
-  // Close on Escape key
+  // Register on popup stack for layered Esc handling
   useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    if (!open) { removePopup('media-site-dialog'); return; }
+    pushPopup('media-site-dialog', () => onOpenChange(false));
+    return () => removePopup('media-site-dialog');
   }, [open, onOpenChange]);
 
   // On mobile, lock body scroll completely when popup is open
