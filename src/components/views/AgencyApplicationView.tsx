@@ -459,8 +459,9 @@ export function AgencyApplicationView() {
             playsInline
             className="w-full h-full object-cover"
           />
+          {/* Text Overlay on video */}
           <div 
-            className="absolute inset-0 flex items-start pt-6 lg:pt-8 pointer-events-none"
+            className="absolute inset-0 flex items-start pt-12 lg:pt-16 pointer-events-none"
           >
             <div className="max-w-[980px] mx-auto px-4 lg:px-8 w-full">
               <div className="max-w-xl pointer-events-auto">
