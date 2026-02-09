@@ -2690,7 +2690,7 @@ export function AdminAgenciesView() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 variant="outline"
-                className="flex-1 hover:bg-black hover:text-white"
+                className="flex-1 rounded-none hover:bg-black hover:text-white"
                 onClick={() => {
                   setShowDowngradeDialog(false);
                   setAgencyToDowngrade(null);
@@ -2700,7 +2700,7 @@ export function AdminAgenciesView() {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 hover:bg-black hover:text-white"
+                className="flex-1 rounded-none text-destructive border-destructive bg-transparent hover:bg-destructive hover:text-white"
                 onClick={handleDowngradeAgency}
                 disabled={deleting === agencyToDowngrade?.id}
               >
