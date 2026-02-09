@@ -236,7 +236,7 @@ export default function AIArticleGeneration() {
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                className="bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
+                className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -244,7 +244,7 @@ export default function AIArticleGeneration() {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white border border-white transition-all duration-300"
+                className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white border border-white transition-all duration-300"
               >
                 Sign In
               </Button>
