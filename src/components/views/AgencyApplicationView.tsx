@@ -522,7 +522,7 @@ export function AgencyApplicationView() {
                 My Applications
               </h2>
               <Collapsible open={applicationExpanded} onOpenChange={setApplicationExpanded}>
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+              <div className="bg-white/5 backdrop-blur-sm rounded-none border border-white/10 overflow-hidden">
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
                   <div className="space-y-2 lg:space-y-0">
                     <div className="flex items-center justify-between">
