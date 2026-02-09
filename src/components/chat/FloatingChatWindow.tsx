@@ -3718,7 +3718,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                   className="flex-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
                   onClick={async () => {
                     if (!globalChatRequest) return;
                     
@@ -3807,7 +3807,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   {acceptingOrder && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   )}
-                  <CheckCircle className="h-4 w-4 mr-2" />
                   Accept
                 </Button>
                 <Button
@@ -3908,7 +3907,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
-                  className="w-full rounded-none bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
                   disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
@@ -3922,7 +3921,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setAcceptOrderDialogOpen(true);
                   }}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
                   Confirm Order
                 </Button>
               </div>
@@ -4008,11 +4006,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-green-200 dark:border-green-800">
                 <Button
                   size="sm"
-                  className="flex-1 rounded-none bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
+                  className="flex-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 text-xs sm:text-sm"
                   onClick={handleAcceptDeliveryFromChat}
                   disabled={acceptingDelivery || hasOpenDispute}
                 >
-                  {acceptingDelivery ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                  {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                   Accept
                 </Button>
                 <Button
@@ -4286,7 +4284,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                  className="flex-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
                   disabled={hasOpenDispute}
                   onClick={() => {
                     setPendingOrderRequest({
@@ -4300,7 +4298,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setAcceptOrderDialogOpen(true);
                   }}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
                   Accept
                 </Button>
                 <Button
@@ -5368,7 +5365,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
-                        className="rounded-none bg-green-600 hover:bg-green-700 text-white shrink-0"
+                        className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
                         disabled={acceptingDelivery}
                       >
@@ -5418,7 +5415,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                          className="rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                           className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
                           onClick={() => {
                             setPendingOrderRequest({
                               media_site_id: pendingOrder.media_site_id,
@@ -5431,7 +5428,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             setAcceptOrderDialogOpen(true);
                           }}
                         >
-                          <CheckCircle className="h-4 w-4 mr-1" />
                           Accept
                         </Button>
                         <Button
