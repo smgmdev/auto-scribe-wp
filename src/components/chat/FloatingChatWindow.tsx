@@ -6320,7 +6320,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     min="0"
                     value={orderDeliveryDays}
                     onChange={(e) => setOrderDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="text-center"
+                    className="text-center h-8 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -6332,7 +6332,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     max="23"
                     value={orderDeliveryHours}
                     onChange={(e) => setOrderDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="text-center"
+                    className="text-center h-8 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -6344,7 +6344,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     max="59"
                     value={orderDeliveryMinutes}
                     onChange={(e) => setOrderDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                    className="text-center"
+                    className="text-center h-8 text-sm"
                   />
                 </div>
               </div>
@@ -6359,6 +6359,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 placeholder="Any special terms or notes for this order..."
                 value={specialTerms}
                 onChange={(e) => setSpecialTerms(e.target.value)}
+                className="h-8 text-sm"
               />
             </div>
 
