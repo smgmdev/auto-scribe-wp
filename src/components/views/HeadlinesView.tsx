@@ -345,6 +345,7 @@ export function HeadlinesView() {
         onOpenChange={(open) => !open && setWebViewUrl(null)}
         url={webViewUrl || ''}
         title={webViewTitle}
+        isWebsite
       />
       </div>
     </div>
