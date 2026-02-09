@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User } from 'lucide-react';
+import { Search, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import amblack from '@/assets/amblack.png';
 
 const DoNotSell = () => {
@@ -68,74 +74,153 @@ const DoNotSell = () => {
       {/* Search Modal */}
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
-      {/* Main Content */}
-      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-24">
-        <div className="max-w-3xl">
-          {/* Title Section */}
-          <div className="text-center mb-8 pb-8 border-b border-border">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              Do Not Sell or Share My Personal Information
-            </h1>
-          </div>
-
-          {/* Content */}
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              At Arcana Mace, we respect your privacy rights and are committed to giving you control over your personal information. This page explains your rights regarding the sale or sharing of your personal information and how you can exercise those rights.
-            </p>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              Your Privacy Rights
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Under certain privacy laws, including the California Consumer Privacy Act (CCPA) and similar state laws, you have the right to opt out of the "sale" or "sharing" of your personal information. These laws define "sale" and "sharing" broadly to include the disclosure of personal information to third parties in exchange for monetary or other valuable consideration, or for cross-context behavioral advertising purposes.
-            </p>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              How We Handle Your Information
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Arcana Mace does not sell your personal information in the traditional sense. However, like many companies, we may share certain information with third-party partners for advertising, analytics, or other business purposes. This may constitute a "sale" or "sharing" under some privacy laws.
-            </p>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              Exercising Your Rights
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              If you would like to opt out of the sale or sharing of your personal information, you can submit a request through one of the following methods:
-            </p>
-            <ul className="list-disc pl-6 text-muted-foreground space-y-2 mb-6">
-              <li>Email us at <a href="mailto:privacy@arcanamace.com" className="text-primary hover:underline">privacy@arcanamace.com</a> with the subject line "Do Not Sell or Share My Information"</li>
-              <li>If you are a registered user, you can manage your privacy preferences in your account settings</li>
-              <li>Use the Global Privacy Control (GPC) signal in your browser, which we honor as a valid opt-out request</li>
-            </ul>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              Verification Process
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              When you submit a request, we may need to verify your identity before processing it. This helps protect your privacy by ensuring that we only honor requests from you or your authorized agent. The verification process may require you to provide additional information that matches the data we have on file.
-            </p>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              No Discrimination
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              We will not discriminate against you for exercising your privacy rights. You have the right to receive equal service and pricing from us, regardless of whether you choose to opt out of the sale or sharing of your personal information.
-            </p>
-
-            <h2 className="text-2xl font-semibold text-foreground mt-10 mb-4">
-              Contact Us
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              If you have any questions about this policy or your privacy rights, please contact us at <a href="mailto:privacy@arcanamace.com" className="text-primary hover:underline">privacy@arcanamace.com</a>.
-            </p>
-
-            <p className="text-sm text-muted-foreground mt-12 pt-8 border-t border-border">
-              Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
-          </div>
+      {/* Content */}
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-28">
+        {/* Title Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
+            Do Not Sell or Share My Personal Information
+          </h1>
+          <p className="text-muted-foreground border-b border-border pb-8">
+            Updated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
+
+        {/* Introduction */}
+        <div className="mb-10">
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            At Arcana Mace, we respect your privacy rights and are committed to giving you control over your personal information. This page explains your rights regarding the sale or sharing of your personal information and how you can exercise those rights.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Under certain privacy laws, including the California Consumer Privacy Act (CCPA) and similar state laws, you have the right to opt out of the "sale" or "sharing" of your personal information. We are committed to honoring these rights for all users.
+          </p>
+        </div>
+
+        {/* Privacy Content - Apple-style accordion sections */}
+        <Accordion type="multiple" className="w-full">
+          
+          {/* Section 1 */}
+          <AccordionItem value="item-1" className="border-t border-border">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">Your Privacy Rights</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p className="mb-4">
+                Under certain privacy laws, including the California Consumer Privacy Act (CCPA) and similar state laws, you have the right to opt out of the "sale" or "sharing" of your personal information. <strong className="text-foreground">These laws define "sale" and "sharing" broadly</strong> to include the disclosure of personal information to third parties in exchange for monetary or other valuable consideration, or for cross-context behavioral advertising purposes.
+              </p>
+              <p>
+                At Arcana Mace, we believe in transparency and giving you control over your data. We provide these rights to our global customer base, and if you choose to exercise these privacy rights, you have the right not to be treated in a discriminatory way nor to receive a lesser degree of service from Arcana Mace.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 2 */}
+          <AccordionItem value="item-2" className="border-t border-border">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">How We Handle Your Information</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p className="mb-4">
+                <strong className="text-foreground">Arcana Mace does not sell your personal information in the traditional sense.</strong> However, like many companies, we may share certain information with third-party partners for advertising, analytics, or other business purposes. This may constitute a "sale" or "sharing" under some privacy laws.
+              </p>
+              <p>
+                We are committed to being transparent about our data practices and providing you with meaningful choices about how your information is used.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 3 */}
+          <AccordionItem value="item-3" className="border-t border-border">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">Exercising Your Rights</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p className="mb-4">
+                If you would like to opt out of the sale or sharing of your personal information, you can submit a request through one of the following methods:
+              </p>
+              <ul className="list-none space-y-3 mb-4">
+                <li className="pl-4 border-l-2 border-border">
+                  <strong className="text-foreground">Email Request.</strong> Email us at <a href="mailto:privacy@arcanamace.com" className="text-[#06c] hover:underline">privacy@arcanamace.com</a> with the subject line "Do Not Sell or Share My Information"
+                </li>
+                <li className="pl-4 border-l-2 border-border">
+                  <strong className="text-foreground">Account Settings.</strong> If you are a registered user, you can manage your privacy preferences in your account settings
+                </li>
+                <li className="pl-4 border-l-2 border-border">
+                  <strong className="text-foreground">Global Privacy Control.</strong> Use the Global Privacy Control (GPC) signal in your browser, which we honor as a valid opt-out request
+                </li>
+              </ul>
+              <p>
+                We will process your request promptly and in accordance with applicable law.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 4 */}
+          <AccordionItem value="item-4" className="border-t border-border">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">Verification Process</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p className="mb-4">
+                When you submit a request, we may need to verify your identity before processing it. <strong className="text-foreground">This helps protect your privacy by ensuring that we only honor requests from you or your authorized agent.</strong>
+              </p>
+              <p>
+                The verification process may require you to provide additional information that matches the data we have on file. If you use an authorized agent to submit a request on your behalf, we may require proof of authorization.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 5 */}
+          <AccordionItem value="item-5" className="border-t border-border">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">No Discrimination</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p>
+                <strong className="text-foreground">We will not discriminate against you for exercising your privacy rights.</strong> You have the right to receive equal service and pricing from us, regardless of whether you choose to opt out of the sale or sharing of your personal information. This includes no denial of goods or services, no different prices or rates, and no different quality of service.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section 6 */}
+          <AccordionItem value="item-6" className="border-t border-border border-b">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <span className="flex items-center justify-between w-full gap-3 text-left">
+                <span className="text-left">Contact Us</span>
+                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <p className="mb-4">
+                If you have any questions about this policy or your privacy rights, please contact us:
+              </p>
+              <ul className="list-none space-y-3">
+                <li className="pl-4 border-l-2 border-border">
+                  <strong className="text-foreground">Email.</strong> <a href="mailto:privacy@arcanamace.com" className="text-[#06c] hover:underline">privacy@arcanamace.com</a>
+                </li>
+                <li className="pl-4 border-l-2 border-border">
+                  <strong className="text-foreground">Response Time.</strong> We will respond to your request within the timeframe required by applicable law
+                </li>
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+
+        </Accordion>
       </main>
 
       {/* Footer */}
