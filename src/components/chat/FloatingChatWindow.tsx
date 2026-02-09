@@ -7301,7 +7301,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         // Desktop: draggable popup
         return createPortal(
           <div
-            className="fixed z-[300] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
+            className="fixed z-[300] bg-background border shadow-2xl w-[450px] flex flex-col"
             style={{ left: mediaListingPos.x, top: mediaListingPos.y }}
           >
             <div 
