@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale, CreditCard } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { OrderWithCreditsDialog } from '@/components/chat/OrderWithCreditsDialog';
+import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -317,6 +318,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     specialTerms?: string;
   } | undefined>(undefined);
   const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
+  const [confirmBuyCreditsOpen, setConfirmBuyCreditsOpen] = useState(false);
   const [acceptingOrder, setAcceptingOrder] = useState(false);
   const [pendingOrderRequest, setPendingOrderRequest] = useState<{
     media_site_id: string;
@@ -7315,6 +7317,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
 
+              {/* Buy Credits Button when insufficient */}
+              {(credits || 0) < pendingOrderRequest.price && (
+                <Button
+                  onClick={() => setConfirmBuyCreditsOpen(true)}
+                  variant="default"
+                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+                  size="lg"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Buy Credits
+                </Button>
+              )}
+
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Button
@@ -7919,6 +7934,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           </div>
         </DialogContent>
       </Dialog>
+      <BuyCreditsDialog open={confirmBuyCreditsOpen} onOpenChange={setConfirmBuyCreditsOpen} />
     </>,
     document.body
   );
