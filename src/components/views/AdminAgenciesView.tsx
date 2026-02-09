@@ -1357,16 +1357,11 @@ export function AdminAgenciesView() {
                             </div>
                             <div className="flex md:hidden flex-col items-end gap-1">
                               <Badge 
-                                className={`cursor-pointer transition-colors rounded-none ${
+                                className={`rounded-none ${
                                   verification?.read 
-                                    ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                                    : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                    ? 'bg-muted text-muted-foreground' 
+                                    : 'bg-green-600/20 text-green-600'
                                 }`}
-                                onClick={(e) => {
-                                  if (verification) {
-                                    handleOpenVerification(verification, e);
-                                  }
-                                }}
                               >
                                 <Clock className="h-3 w-3 mr-1" />Pending Review
                               </Badge>
@@ -1379,16 +1374,11 @@ export function AdminAgenciesView() {
 
                             <div className="hidden md:flex flex-col items-end gap-1">
                               <Badge 
-                                className={`cursor-pointer transition-colors rounded-none ${
+                                className={`rounded-none ${
                                   verification?.read 
-                                    ? 'bg-muted text-muted-foreground hover:bg-muted/80' 
-                                    : 'bg-green-600/20 text-green-600 hover:bg-green-600/30'
+                                    ? 'bg-muted text-muted-foreground' 
+                                    : 'bg-green-600/20 text-green-600'
                                 }`}
-                                onClick={(e) => {
-                                  if (verification) {
-                                    handleOpenVerification(verification, e);
-                                  }
-                                }}
                               >
                                 <Clock className="h-3 w-3 mr-1" />Pending Review
                               </Badge>
