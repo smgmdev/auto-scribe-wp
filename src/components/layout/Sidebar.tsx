@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
@@ -254,20 +254,39 @@ export function Sidebar({
     setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
   };
 
-  // Reset state when user changes (logout/login)
+  // Reset state when user changes (logout or account switch)
+  const prevSidebarUserIdRef = useRef<string | null>(null);
   useEffect(() => {
+    const prevId = prevSidebarUserIdRef.current;
+    
     if (!user?.id) {
+      // Logout - reset everything
       setAgencyDataLoaded(false);
       setIsAgencyOnboarded(false);
       setIsDowngraded(false);
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
+      setUserApplicationStatus(null);
       setUserCustomVerificationStatus(null);
-      // Reset sidebar dropdowns and navigation state on logout
+      setExpandedMenus({});
+      setHasUserNavigated(false);
+    } else if (prevId !== null && prevId !== user.id) {
+      // Account switch - reset all agency-related state for new user
+      console.log('[Sidebar] User switched from', prevId, 'to', user.id, ', resetting agency state');
+      setAgencyDataLoaded(false);
+      setIsAgencyOnboarded(false);
+      setIsDowngraded(false);
+      setPayoutMethod(null);
+      setApplicationId(null);
+      setRejectionSeen(false);
+      setUserApplicationStatus(null);
+      setUserCustomVerificationStatus(null);
       setExpandedMenus({});
       setHasUserNavigated(false);
     }
+    
+    prevSidebarUserIdRef.current = user?.id || null;
   }, [user?.id]);
 
   // Track userApplicationStatus changes to reset agency data immediately
