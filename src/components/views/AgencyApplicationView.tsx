@@ -494,7 +494,14 @@ export function AgencyApplicationView() {
                   </p>
                 )}
                 
-                {existingApplication?.status !== 'pending' && (
+                {existingApplication?.status === 'pending' ? (
+                  <Button 
+                    className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
+                    onClick={() => myApplicationsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    My Applications
+                  </Button>
+                ) : (
                   <Button 
                     className="mt-4 bg-white text-black hover:bg-white/90 transition-all duration-200"
                     onClick={() => setDialogOpen(true)}
