@@ -660,7 +660,7 @@ export function DashboardView() {
             </CardHeader>
             <CardContent>
               {/* Financial Stats - Modern Cards */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
