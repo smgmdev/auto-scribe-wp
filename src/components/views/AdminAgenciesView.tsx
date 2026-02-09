@@ -60,6 +60,7 @@ interface AgencyPayout {
   user_id: string | null;
   payout_method: string | null;
   downgraded: boolean;
+  updated_at: string;
 }
 
 interface CustomVerification {
@@ -1628,12 +1629,11 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 flex-wrap">
-
+                            <div className="flex flex-col items-end gap-1">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="hover:bg-green-500 hover:text-white hover:border-green-500"
+                                className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRestoreAgency(agency);
@@ -1642,11 +1642,12 @@ export function AdminAgenciesView() {
                               >
                                 {deleting === agency.id ? (
                                   <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                                ) : (
-                                  <UserCheck className="h-4 w-4 mr-1" />
-                                )}
+                                ) : null}
                                 Restore
                               </Button>
+                              <p className="text-[10px] text-muted-foreground">
+                                {new Date(agency.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {new Date(agency.updated_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
                             </div>
                           </div>
                         </CardContent>
