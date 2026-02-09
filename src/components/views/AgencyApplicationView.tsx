@@ -342,7 +342,7 @@ export function AgencyApplicationView() {
             Agency Verification
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Your agency account status
+            We're sorry, but your agency's account status has been downgraded.
           </p>
         </div>
 
