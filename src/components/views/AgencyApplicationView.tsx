@@ -365,7 +365,7 @@ export function AgencyApplicationView() {
               Agency Verification
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Your agency verification is under final review.
+              Your agency verification is under final review. This can take between 1-3 days. You will be notified via email.
             </p>
           </div>
 
