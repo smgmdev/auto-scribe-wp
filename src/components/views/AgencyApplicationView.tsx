@@ -352,7 +352,7 @@ export function AgencyApplicationView() {
             alt="Account downgraded" 
             className="w-full h-[520px] object-cover"
           />
-          <div className="absolute inset-0 flex items-center justify-center p-6">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-4">
             <div className="w-full max-w-[700px] backdrop-blur-md bg-white/20 border border-white/30 rounded-lg p-6 shadow-lg">
               <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/30 shrink-0">
@@ -372,6 +372,13 @@ export function AgencyApplicationView() {
                 </p>
               )}
             </div>
+            <Button
+              variant="outline"
+              className="rounded-none bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white hover:text-black"
+              onClick={() => window.open('mailto:support@arcanamace.com', '_blank')}
+            >
+              Contact Support
+            </Button>
           </div>
         </div>
 
