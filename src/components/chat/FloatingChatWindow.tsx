@@ -3676,7 +3676,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-lg border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
+              : 'bg-white dark:bg-background border-gray-200 dark:border-gray-700'
           }`}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 flex items-center justify-center shrink-0">
@@ -4247,7 +4247,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-none border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border-blue-200 dark:border-blue-800'
+              : 'bg-white dark:bg-background border-gray-200 dark:border-gray-700'
           }`}>
             <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
