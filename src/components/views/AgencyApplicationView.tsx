@@ -519,6 +519,17 @@ export function AgencyApplicationView() {
                 <CollapsibleTrigger className="w-full p-4 cursor-pointer hover:bg-white/5 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
+                      {/* Logo in header */}
+                      {existingApplication.logo_url && (
+                        <img 
+                          src={existingApplication.logo_url.startsWith('http') 
+                            ? existingApplication.logo_url 
+                            : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
+                          } 
+                          alt={existingApplication.agency_name}
+                          className="h-8 w-8 rounded-lg object-cover bg-white/10"
+                        />
+                      )}
                       <h3 className="text-sm font-medium text-white">Your Application</h3>
                       <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-200 ${applicationExpanded ? 'rotate-180' : ''}`} />
                     </div>
@@ -551,19 +562,6 @@ export function AgencyApplicationView() {
                 
                 <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                   <div className="px-4 pb-4 pt-2 border-t border-white/10 space-y-4">
-                    {/* Logo if available */}
-                    {existingApplication.logo_url && (
-                      <div className="flex justify-center">
-                        <img 
-                          src={existingApplication.logo_url.startsWith('http') 
-                            ? existingApplication.logo_url 
-                            : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/agency-logos/${existingApplication.logo_url}`
-                          } 
-                          alt={existingApplication.agency_name}
-                          className="h-16 w-16 rounded-lg object-cover bg-white/10"
-                        />
-                      </div>
-                    )}
                     
                     {/* Full details */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
