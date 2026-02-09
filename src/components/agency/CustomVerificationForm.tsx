@@ -39,8 +39,6 @@ interface CustomVerificationFormProps {
 const USDT_NETWORKS = [
   { value: 'TRC20', label: 'TRC20 (Tron)' },
   { value: 'ERC20', label: 'ERC20 (Ethereum)' },
-  { value: 'BEP20', label: 'BEP20 (BNB Chain)' },
-  { value: 'SOL', label: 'Solana' },
 ];
 
 export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData, onSubmitSuccess, onCancel }: CustomVerificationFormProps) {
