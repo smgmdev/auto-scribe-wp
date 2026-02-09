@@ -97,11 +97,26 @@ export function MediaSiteDialog({
     };
   }, [open, isMobile]);
 
-  // On desktop, block page scroll only when hovering over popup
-  const [popupHovered, setPopupHovered] = useState(false);
+  // On desktop, block page scroll when popup is open and user clicks inside it
+  const [popupFocused, setPopupFocused] = useState(false);
+  const popupContainerRef = useRef<HTMLDivElement>(null);
+
+  // Click outside detection to unlock scroll
+  useEffect(() => {
+    if (!open || isMobile) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (popupContainerRef.current && !popupContainerRef.current.contains(e.target as Node)) {
+        setPopupFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside, true);
+    return () => document.removeEventListener('mousedown', handleClickOutside, true);
+  }, [open, isMobile]);
 
   useEffect(() => {
-    if (!open || isMobile || !popupHovered) return;
+    if (!open || isMobile || !popupFocused) return;
 
     const mainEl = document.querySelector('main');
     const prevMainOverflow = mainEl?.style.overflow;
@@ -116,7 +131,7 @@ export function MediaSiteDialog({
       document.body.style.overflow = prevBodyOverflow || '';
       document.documentElement.style.overflow = prevHtmlOverflow || '';
     };
-  }, [open, isMobile, popupHovered]);
+  }, [open, isMobile, popupFocused]);
 
   // Check for open engagement when dialog opens
   useEffect(() => {
@@ -462,15 +477,17 @@ export function MediaSiteDialog({
   return createPortal(
     <>
       <div
-        ref={popupRef}
+        ref={(el) => {
+          (popupRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+          popupContainerRef.current = el;
+        }}
         className="fixed z-[200] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
         style={{
           left: `${positionRef.current.x}px`,
           top: `${positionRef.current.y}px`,
           willChange: isDragging ? 'left, top' : 'auto',
         }}
-        onMouseEnter={() => setPopupHovered(true)}
-        onMouseLeave={() => setPopupHovered(false)}
+        onMouseDown={() => setPopupFocused(true)}
       >
         <div 
           className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
