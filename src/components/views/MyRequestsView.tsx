@@ -1243,13 +1243,11 @@ export function MyRequestsView() {
                             <div className="flex items-center gap-2 flex-wrap">
                               {!request.order && hasPendingOffer(request.id) && (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Received an Offer
                                 </Badge>
                               )}
                               {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Order Request Sent
                                 </Badge>
                               )}
@@ -1286,13 +1284,11 @@ export function MyRequestsView() {
                             <div className="hidden md:flex items-center gap-2 flex-wrap">
                               {!request.order && hasPendingOffer(request.id) && (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Received an Offer
                                 </Badge>
                               )}
                               {!request.order && !hasPendingOffer(request.id) && hasClientOrderRequestPending(request.id) && (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Order Request Sent
                                 </Badge>
                               )}
