@@ -2015,7 +2015,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
+                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2106,7 +2106,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
+                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2183,14 +2183,14 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
+                              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
                               Order Completed: {format(new Date(order.accepted_at || order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
                               {/* Desktop: inline messages count */}
                               {requestMessages.length > 0 && (
                                 <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                               )}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
                             {/* Mobile: messages count on new row */}
                             {requestMessages.length > 0 && (
@@ -2203,7 +2203,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-medium text-foreground text-sm">${(order.amount_cents / 100).toFixed(0)}</span>
+                            <span className="font-medium text-foreground text-sm">${(order.amount_cents / 100).toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2279,7 +2279,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toFixed(0)}</span>
+                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
