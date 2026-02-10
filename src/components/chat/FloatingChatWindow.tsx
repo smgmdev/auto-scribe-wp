@@ -6788,7 +6788,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative flex flex-col ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+                ? 'w-full h-[100dvh] px-6 pt-6 pb-6 overflow-y-auto'
                 : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg'
             }`}
             style={isMobile ? undefined : { transform: `translate(${orderDetailsDragPos.x}px, ${orderDetailsDragPos.y}px)` }}
@@ -6820,8 +6820,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : orderDetails ? (
-              <ScrollArea className="flex-1 overflow-hidden">
-              <div className="space-y-4 mt-4">
+              <div className="flex-1 overflow-y-auto mt-4">
+              <div className="space-y-4">
                 <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                   {globalChatRequest?.media_site?.favicon ? (
                     <img src={globalChatRequest.media_site.favicon} alt="" className="w-12 h-12 rounded object-cover" />
@@ -7073,7 +7073,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </div>
               </div>
-              </ScrollArea>
+              </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">Order not found</p>
             )}
