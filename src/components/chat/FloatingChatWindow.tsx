@@ -6346,8 +6346,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative overflow-y-auto ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-2 pb-6'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-none'
             }`}
             style={isMobile ? undefined : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
           >
@@ -6361,25 +6361,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
 
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                setSendOrderDialogOpen(false);
-                setSpecialTerms('');
-                setIsResendMode(false);
-                setOrderDeliveryDays(0);
-                setOrderDeliveryHours(0);
-                setOrderDeliveryMinutes(0);
-              }}
-              className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-
-            <h2 className="text-lg font-semibold leading-none tracking-tight mb-4 pt-4 sm:pt-0">
-              {isResendMode ? 'Resend Offer' : 'Send Offer'}
-            </h2>
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">
+                {isResendMode ? 'Resend Offer' : 'Send Offer'}
+              </h2>
+              <button
+                onClick={() => {
+                  setSendOrderDialogOpen(false);
+                  setSpecialTerms('');
+                  setIsResendMode(false);
+                  setOrderDeliveryDays(0);
+                  setOrderDeliveryHours(0);
+                  setOrderDeliveryMinutes(0);
+                }}
+                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
+            </div>
           
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
