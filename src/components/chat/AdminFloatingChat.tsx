@@ -1564,7 +1564,7 @@ export function AdminFloatingChat({
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
                         Order Details
                       </summary>
-                      <div className="relative mt-1 pt-1 pb-0 text-xs text-white/70 space-y-0.5">
+                      <div className="relative mt-1 pt-0.5 pb-0.5 text-xs text-white/70 space-y-0.5">
                         <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
                         {credits && (
                           <p>Price: <span className="text-white font-medium">{credits.toLocaleString()} credits</span></p>
