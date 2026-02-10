@@ -6786,10 +6786,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {orderDetailsOpen && createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
           <div
-            className={`pointer-events-auto bg-background relative overflow-y-auto ${
+            className={`pointer-events-auto bg-background relative flex flex-col ${
               isMobile
                 ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+                : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg'
             }`}
             style={isMobile ? undefined : { transform: `translate(${orderDetailsDragPos.x}px, ${orderDetailsDragPos.y}px)` }}
           >
@@ -6820,7 +6820,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : orderDetails ? (
-              <ScrollArea className={isMobile ? 'h-[calc(100dvh-100px)]' : 'max-h-[calc(90vh-120px)]'}>
+              <ScrollArea className="flex-1 overflow-hidden">
               <div className="space-y-4 mt-4">
                 <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                   {globalChatRequest?.media_site?.favicon ? (
