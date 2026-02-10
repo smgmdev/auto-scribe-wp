@@ -633,7 +633,6 @@ export function AdminEngagementsView() {
                       </div>
                       {/* Desktop: Badge at right side */}
                       <div className="hidden md:flex items-center gap-1">
-                        {getEngagementBadge(r)}
                         {!r.order_id && hasPendingOfferSent(r.id) && (
                           <Badge className="bg-blue-600 text-white">
                             Offer Sent
@@ -644,6 +643,7 @@ export function AdminEngagementsView() {
                             Client Order Request
                           </Badge>
                         )}
+                        {getEngagementBadge(r)}
                       </div>
                     </div>
                   </CardHeader>
