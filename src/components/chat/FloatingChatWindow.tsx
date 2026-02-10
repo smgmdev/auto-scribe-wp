@@ -3908,7 +3908,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full bg-black text-white border-black hover:bg-white hover:text-black hover:border-white transition-all duration-200 dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white dark:hover:border-black"
+                  className="w-full bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 dark:bg-[#f2a547] dark:text-black dark:border-[#f2a547] dark:hover:bg-black dark:hover:text-[#f2a547] dark:hover:border-black"
                   onClick={handleCancelClientOrderRequest}
                   disabled={cancellingOrderRequestId === msg.id || hasOpenDispute}
                 >
@@ -5703,7 +5703,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <div className="flex flex-col items-end gap-1.5">
                         <Button
                           size="sm"
-                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                           className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
                           onClick={handleBannerCancelClientOrderRequest}
                           disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
                         >
