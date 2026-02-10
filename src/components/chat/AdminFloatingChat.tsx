@@ -1534,50 +1534,49 @@ export function AdminFloatingChat({
           const isOverdue = timeInfo?.isOverdue || false;
           
           return (
-            <div className="p-3 bg-black text-white border-b border-black">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                    <CheckCircle className={`h-6 w-6 ${isOverdue ? 'text-red-400' : 'text-green-500'}`} />
+            <div className="p-3 pb-0 md:pb-3 bg-black text-white border-b border-white/20 overflow-hidden">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 md:gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0">
+                    <CheckCircle className={`h-5 w-5 md:h-6 md:w-6 ${isOverdue ? 'text-red-400' : 'text-green-500'}`} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm text-white truncate">{mediaSiteName}</p>
-                    <div className="flex items-center gap-3 flex-wrap mt-0.5">
-                      {credits && (
-                        <span className="text-xs text-white/70">{credits.toLocaleString()} credits</span>
-                      )}
+                  <div className="min-w-0 overflow-visible">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-sm text-white truncate">{mediaSiteName}</p>
+                    </div>
+                    <div className="flex items-center gap-3 -mt-0.5">
                       {orderDetails.delivery_status === 'pending' && orderDetails.delivery_deadline && (
-                        <>
-                          {credits && <span className="text-white/40">•</span>}
-                          <div key={`countdown-${timerTick}`} className="flex items-center gap-1">
-                            <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-white/70'}`} />
-                            <span className={`text-xs font-medium ${isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              {isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo?.text}`}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                      {specialTerms && (
-                        <>
-                          <span className="text-white/40">•</span>
-                          <span className="text-xs text-white/70 underline decoration-dotted underline-offset-2 cursor-help" title={specialTerms}>
-                            Special Terms
+                        <div key={`countdown-${timerTick}`} className={`flex items-center gap-1 ${isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                          <span className="text-xs font-medium">
+                            {isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo?.text}`}
                           </span>
-                        </>
+                        </div>
                       )}
                       {orderDetails.delivery_status === 'delivered' && (
-                        <>
-                          {credits && <span className="text-white/40">•</span>}
-                          <span className="text-xs text-green-400 font-medium">Awaiting client approval</span>
-                        </>
+                        <span className="text-xs text-green-400 font-medium">Awaiting client approval</span>
                       )}
                       {orderDetails.delivery_status === 'accepted' && (
-                        <>
-                          {credits && <span className="text-white/40">•</span>}
-                          <span className="text-xs text-green-400 font-medium">Completed</span>
-                        </>
+                        <span className="text-xs text-green-400 font-medium">Completed</span>
                       )}
                     </div>
+                    {/* Order Details expandable */}
+                    <details className="mt-0 -mb-1 md:mb-0">
+                      <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
+                        Order Details
+                      </summary>
+                      <div className="relative mt-1 pt-1 pb-1 text-xs text-white/70 space-y-0.5">
+                        <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
+                        {credits && (
+                          <p>Price: <span className="text-white font-medium">{credits.toLocaleString()} credits</span></p>
+                        )}
+                        {orderDetails.delivery_deadline && (
+                          <p>Delivery: <span className="text-white font-medium">{timeInfo?.text || 'N/A'}</span></p>
+                        )}
+                        {specialTerms && (
+                          <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                        )}
+                      </div>
+                    </details>
                   </div>
                 </div>
                 <Badge 
