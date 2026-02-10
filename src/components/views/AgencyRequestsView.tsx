@@ -1353,7 +1353,7 @@ export function AgencyRequestsView() {
           placeholder="Search requests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 w-full"
+          className="pl-9 w-full h-8 text-xs"
         />
       </div>
 
