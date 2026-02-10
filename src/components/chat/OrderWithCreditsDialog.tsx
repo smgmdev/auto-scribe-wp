@@ -62,6 +62,7 @@ export function OrderWithCreditsDialog({
   const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
   const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [calculatedAvailable, setCalculatedAvailable] = useState<number | null>(null);
   const { credits, user } = useAuth();
   const isMobile = useIsMobile();
 
@@ -86,9 +87,28 @@ export function OrderWithCreditsDialog({
 
   // Fetch locked credits when dialog opens
   React.useEffect(() => {
-    const fetchLockedCredits = async () => {
+    const fetchAvailableCredits = async () => {
       if (!open || !user) return;
       
+      // Fetch all credit transactions to calculate available balance the same way as Credit Management
+      const { data: allTransactions } = await supabase
+        .from('credit_transactions')
+        .select('amount, type, description')
+        .eq('user_id', user.id);
+
+      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+      
+      const incomingCredits = (allTransactions || [])
+        .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type))
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const outgoingCredits = (allTransactions || [])
+        .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      
+      const totalBalance = incomingCredits - outgoingCredits;
+
+      // Calculate locked credits from active orders
       let totalLocked = 0;
 
       const { data: activeOrders } = await supabase
@@ -99,13 +119,14 @@ export function OrderWithCreditsDialog({
         .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
 
-      if (activeOrders && activeOrders.length > 0) {
+      if (activeOrders) {
         for (const order of activeOrders) {
           const ms = order.media_sites as { price: number } | null;
           if (ms?.price) totalLocked += ms.price;
         }
       }
 
+      // Locked credits from pending requests with order requests
       const { data: pendingRequests } = await supabase
         .from('service_requests')
         .select('id, media_site_id, media_sites(price)')
@@ -129,10 +150,33 @@ export function OrderWithCreditsDialog({
         }
       }
 
+      // Calculate withdrawal amounts (locked + completed)
+      let withdrawalLockedCents = 0;
+      let withdrawalCompletedCents = 0;
+      
+      const withdrawalTxs = (allTransactions || []).filter(t => withdrawalTypes.includes(t.type));
+      for (const tx of withdrawalTxs) {
+        if (tx.type === 'withdrawal_locked') {
+          withdrawalLockedCents += Math.abs(tx.amount);
+        } else if (tx.type === 'withdrawal_unlocked') {
+          withdrawalLockedCents -= Math.abs(tx.amount);
+        } else if (tx.type === 'withdrawal_completed') {
+          withdrawalLockedCents -= Math.abs(tx.amount);
+          withdrawalCompletedCents += Math.abs(tx.amount);
+        }
+      }
+      withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
+      const withdrawalLockedDollars = withdrawalLockedCents / 100;
+      const withdrawalCompletedDollars = withdrawalCompletedCents / 100;
+
+      // Available = Total Balance - Locked Credits - Pending Withdrawals - Completed Withdrawals
+      const available = totalBalance - totalLocked - withdrawalLockedDollars - withdrawalCompletedDollars;
+      
       setLockedCredits(totalLocked);
+      setCalculatedAvailable(available);
     };
 
-    fetchLockedCredits();
+    fetchAvailableCredits();
   }, [open, user]);
 
   // Update state when initialData changes (for resend mode)
@@ -146,7 +190,7 @@ export function OrderWithCreditsDialog({
   }, [open, initialData]);
 
   const creditCost = mediaSite?.price || 0;
-  const availableCredits = (credits || 0) - lockedCredits;
+  const availableCredits = calculatedAvailable !== null ? calculatedAvailable : (credits || 0) - lockedCredits;
   const hasEnoughCredits = availableCredits >= creditCost;
   const totalDurationMinutes = (deliveryDays * 24 * 60) + (deliveryHours * 60) + deliveryMinutes;
   const hasValidDuration = totalDurationMinutes > 0;
