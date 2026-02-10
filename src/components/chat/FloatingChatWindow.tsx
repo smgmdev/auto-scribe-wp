@@ -5299,11 +5299,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         {acceptedOrderData?.price && (
                           <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
                         )}
-                        {acceptedOrderData?.delivery_duration && (acceptedOrderData.delivery_duration.days > 0 || acceptedOrderData.delivery_duration.hours > 0 || acceptedOrderData.delivery_duration.minutes > 0) && (
-                          <p>Delivery: <span className="text-white font-medium">
-                            {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
-                          </span></p>
-                        )}
+                        {(() => {
+                          const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
+                          if (isDelivered) {
+                            return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
+                          }
+                          const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
+                          if (countdown) {
+                            return (
+                              <p key={`detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                                {countdown.isOverdue ? 'Overdue' : countdown.text}
+                              </span></p>
+                            );
+                          }
+                          return (
+                            <p>Delivery: <span className="text-white font-medium">
+                              {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                            </span></p>
+                          );
+                        })()}
                         {specialTerms && (
                           <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
                         )}

@@ -1569,9 +1569,21 @@ export function AdminFloatingChat({
                         {credits && (
                           <p>Price: <span className="text-white font-medium">{credits.toLocaleString()} credits</span></p>
                         )}
-                        {orderDetails.delivery_deadline && (
-                          <p>Delivery: <span className="text-white font-medium">{timeInfo?.text || 'N/A'}</span></p>
-                        )}
+                        {(() => {
+                          const isDelivered = orderDetails.delivery_status === 'delivered' || orderDetails.delivery_status === 'accepted' || orderDetails.status === 'completed';
+                          if (isDelivered) {
+                            return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
+                          }
+                          if (orderDetails.delivery_deadline) {
+                            const deadlineInfo = formatTimeRemaining(orderDetails.delivery_deadline);
+                            return (
+                              <p key={`detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${deadlineInfo.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                                {deadlineInfo.isOverdue ? 'Overdue' : deadlineInfo.text}
+                              </span></p>
+                            );
+                          }
+                          return null;
+                        })()}
                         {specialTerms && (
                           <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
                         )}
