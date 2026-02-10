@@ -3923,11 +3923,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/40 dark:to-slate-950/40 border-gray-200 dark:border-gray-800'
           }`}>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                <Clock className="h-8 w-8 text-white animate-clock-tick" />
-              </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                     {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}
@@ -3960,7 +3956,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </p>
                 )}
               </div>
-            </div>
             
             {/* Confirm Order button for client */}
             {isClient && !hasOrder && !isOwnMessage && (
