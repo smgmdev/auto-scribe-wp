@@ -1701,17 +1701,7 @@ export function AgencyRequestsView() {
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     Completed: {request.order?.released_at ? format(new Date(request.order.released_at), 'MMM d, yyyy h:mm a') : request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
-                                    {/* Desktop: inline messages count */}
-                                    {requestMessages.length > 0 && (
-                                      <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                    )}
                                   </p>
-                                  {/* Mobile: messages count on new row */}
-                                  {requestMessages.length > 0 && (
-                                    <p className="text-xs text-muted-foreground md:hidden">
-                                      {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                                    </p>
-                                  )}
                                 </div>
                                 <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                   {request.media_site?.publication_format && (
@@ -1798,17 +1788,7 @@ export function AgencyRequestsView() {
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                                    {/* Desktop: inline messages count */}
-                                    {requestMessages.length > 0 && (
-                                      <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                    )}
                                   </p>
-                                  {/* Mobile: messages count on new row */}
-                                  {requestMessages.length > 0 && (
-                                    <p className="text-xs text-muted-foreground md:hidden">
-                                      {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                                    </p>
-                                  )}
                                 </div>
                                 <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                   {request.media_site?.publication_format && (
@@ -2187,17 +2167,7 @@ export function AgencyRequestsView() {
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Order Completed: {format(new Date(order.accepted_at || order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
-                              {/* Desktop: inline messages count */}
-                              {requestMessages.length > 0 && (
-                                <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                              )}
                             </p>
-                            {/* Mobile: messages count on new row */}
-                            {requestMessages.length > 0 && (
-                              <p className="text-xs text-muted-foreground md:hidden">
-                                {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}
-                              </p>
-                            )}
                           </div>
                           <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                             {order.media_site?.publication_format && (
