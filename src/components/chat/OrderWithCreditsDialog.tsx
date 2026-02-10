@@ -365,9 +365,8 @@ export function OrderWithCreditsDialog({
           {/* Credit Balance */}
           <div className="rounded-none border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground flex items-center gap-2">
-                <Coins className="h-4 w-4" />
-                Available Balance
+              <span className="text-sm text-muted-foreground">
+                Available Credit Balance
               </span>
               <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
                 {availableCredits.toLocaleString()} credits
