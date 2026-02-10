@@ -1301,17 +1301,15 @@ export function MyRequestsView() {
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
-                                Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                <span className="hidden md:inline">Opened Engagement: </span>
+                                <span className="md:hidden">Opened: </span>
+                                {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                <span>Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
-                              </div>
-                              {requestMessages.length > 0 && (
-                                <span className="text-xs text-muted-foreground block md:hidden">
-                                  {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
-                                </span>
-                              )}
+                              <span className="text-xs text-muted-foreground block md:flex md:items-center md:gap-1">
+                                <span className="hidden md:inline"><Clock className="h-3 w-3 inline mr-1" />Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
+                                <span className="md:hidden block">Last Event: {eventName}</span>
+                                <span className="md:hidden block">{format(eventTime, 'MMM d, h:mm a')}</span>
+                              </span>
                             </div>
                             <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                               {request.media_site?.publication_format && (
@@ -1419,21 +1417,13 @@ export function MyRequestsView() {
                             <div className="flex items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
-                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  <span className="hidden md:inline">Opened Engagement: </span>
+                                  <span className="md:hidden">Opened: </span>
+                                  {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   Completed: {request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
-                                  <span className="hidden md:inline">
-                                    {requestMessages.length > 0 && (
-                                      <span> • {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}</span>
-                                    )}
-                                  </span>
                                 </p>
-                                {requestMessages.length > 0 && (
-                                  <p className="text-xs text-muted-foreground block md:hidden">
-                                    {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
-                                  </p>
-                                )}
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                 {request.media_site?.publication_format && (
@@ -1516,21 +1506,13 @@ export function MyRequestsView() {
                             <div className="flex items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
-                                  Cancelled Engagement: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
-                                  <span className="hidden md:inline">
-                                    {requestMessages.length > 0 && (
-                                      <span> • {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}</span>
-                                    )}
-                                  </span>
+                                  Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  <span className="hidden md:inline">Opened Engagement: </span>
+                                  <span className="md:hidden">Opened: </span>
+                                  {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                 </p>
-                                {requestMessages.length > 0 && (
-                                  <p className="text-xs text-muted-foreground block md:hidden">
-                                    {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
-                                  </p>
-                                )}
                               </div>
                               <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
                                 {request.media_site?.publication_format && (
