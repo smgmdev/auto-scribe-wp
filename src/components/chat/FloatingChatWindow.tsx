@@ -5493,7 +5493,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           if (!pendingOrder) return null;
           const isClient = actualSenderType === 'client';
           return (
-            <div className="sticky top-0 left-0 z-10 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+             <div className="sticky top-0 left-0 z-10 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="flex items-center gap-3">
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
@@ -5506,9 +5506,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {pendingOrder.media_site_name}
                   </p>
                 </div>
-                {/* Action buttons - hidden for admin */}
+                {/* Desktop: Action buttons inline */}
                 {!isAdmin && (
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="hidden md:flex items-center gap-2 shrink-0">
                     {isClient ? (
                       <>
                         <Button
@@ -5541,23 +5541,70 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                       </>
                     ) : (
-                      <div className="flex flex-col items-end gap-1.5">
-                        <Button
-                          size="sm"
-                          className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 rounded-none"
-                          onClick={handleBannerCancelOrderRequest}
-                          disabled={cancellingOrderRequestId === pendingOrder.messageId}
-                        >
-                          {cancellingOrderRequestId === pendingOrder.messageId && (
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          )}
-                          Cancel Offer
-                        </Button>
-                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 rounded-none"
+                        onClick={handleBannerCancelOrderRequest}
+                        disabled={cancellingOrderRequestId === pendingOrder.messageId}
+                      >
+                        {cancellingOrderRequestId === pendingOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Cancel Offer
+                      </Button>
                     )}
                   </div>
                 )}
               </div>
+              {/* Mobile: Action buttons full-width below */}
+              {!isAdmin && (
+                <div className="md:hidden mt-3 flex gap-2">
+                  {isClient ? (
+                    <>
+                      <Button
+                        size="sm"
+                        className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                        onClick={() => {
+                          setPendingOrderRequest({
+                            media_site_id: pendingOrder.media_site_id,
+                            media_site_name: pendingOrder.media_site_name,
+                            media_site_favicon: pendingOrder.media_site_favicon,
+                            price: pendingOrder.price,
+                            special_terms: pendingOrder.special_terms,
+                            delivery_duration: pendingOrder.delivery_duration
+                          });
+                          setAcceptOrderDialogOpen(true);
+                        }}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                        onClick={handleBannerRejectOrderRequest}
+                        disabled={rejectingOrderRequestId === pendingOrder.messageId}
+                      >
+                        {rejectingOrderRequestId === pendingOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Reject
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 rounded-none"
+                      onClick={handleBannerCancelOrderRequest}
+                      disabled={cancellingOrderRequestId === pendingOrder.messageId}
+                    >
+                      {cancellingOrderRequestId === pendingOrder.messageId && (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      )}
+                      Cancel Offer
+                    </Button>
+                  )}
+                </div>
+              )}
               {/* Expandable Order Details */}
               <div className="pl-9">
                 <button
