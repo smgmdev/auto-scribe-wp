@@ -284,9 +284,9 @@ export function OrderWithCreditsDialog({
           {isResendMode ? 'Resend an order request to the agency for approval' : 'Send an order request to the agency for approval'}
         </p>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 py-3">
           {/* Proposed Delivery Duration */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-sm font-medium">Proposed Delivery Duration <span className="text-destructive">*</span></Label>
               <TooltipProvider>
