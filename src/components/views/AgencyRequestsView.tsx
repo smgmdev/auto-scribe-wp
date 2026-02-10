@@ -1492,12 +1492,10 @@ export function AgencyRequestsView() {
                                 </Badge>
                               ) : hasPendingOfferSent(request.id) ? (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Offer Sent
                                 </Badge>
                               ) : hasClientOrderRequestPending(request.id) ? (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Received an Order Request
                                 </Badge>
                               ) : (
@@ -1565,12 +1563,10 @@ export function AgencyRequestsView() {
                                 </Badge>
                               ) : hasPendingOfferSent(request.id) ? (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Offer Sent
                                 </Badge>
                               ) : hasClientOrderRequestPending(request.id) ? (
                                 <Badge className="bg-blue-600 text-white">
-                                  <Tag className="h-3 w-3 mr-1" />
                                   Received an Order Request
                                 </Badge>
                               ) : (
