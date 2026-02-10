@@ -4539,7 +4539,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
+              : 'bg-white dark:bg-background border-border'
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
