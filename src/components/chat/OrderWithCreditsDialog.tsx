@@ -400,6 +400,7 @@ export function OrderWithCreditsDialog({
             </div>
           )}
 
+          <div className="space-y-2">
           {!hasEnoughCredits && (
             <Button
               onClick={() => setBuyCreditsOpen(true)}
@@ -431,6 +432,7 @@ export function OrderWithCreditsDialog({
               'Insufficient Credits'
             )}
           </Button>
+          </div>
         </div>
       </div>
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
