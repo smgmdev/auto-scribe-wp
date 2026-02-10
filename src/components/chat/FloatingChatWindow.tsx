@@ -6344,12 +6344,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {sendOrderDialogOpen && createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
           <div
-            className={`pointer-events-auto bg-background relative overflow-y-auto ${
+            className={`pointer-events-auto bg-background relative ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-none'
+                ? 'w-full h-[100dvh] px-4 pt-4 pb-4 overflow-y-auto'
+                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-none overflow-y-auto'
             }`}
-            style={isMobile ? undefined : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
+            style={isMobile ? { maxHeight: '100dvh' } : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
           >
             {/* Drag Handle - desktop only */}
             {!isMobile && (
@@ -6383,7 +6383,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
           
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
+              <div className="flex items-center gap-4 p-4 rounded-none border border-border bg-muted/50">
                 {globalChatRequest?.media_site?.favicon && (
                   <img 
                     src={globalChatRequest.media_site.favicon} 
@@ -6423,7 +6423,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       min="0"
                       value={orderDeliveryDays}
                       onChange={(e) => setOrderDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="text-center h-8 text-sm"
+                      className="text-center h-9 text-sm rounded-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -6435,7 +6435,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       max="23"
                       value={orderDeliveryHours}
                       onChange={(e) => setOrderDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
-                      className="text-center h-8 text-sm"
+                      className="text-center h-9 text-sm rounded-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -6447,7 +6447,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       max="59"
                       value={orderDeliveryMinutes}
                       onChange={(e) => setOrderDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                      className="text-center h-8 text-sm"
+                      className="text-center h-9 text-sm rounded-none"
                     />
                   </div>
                 </div>
@@ -6462,7 +6462,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   placeholder="Any special terms or notes for this order..."
                   value={specialTerms}
                   onChange={(e) => setSpecialTerms(e.target.value)}
-                  className="h-8 text-sm"
+                  className="h-9 text-sm rounded-none"
                 />
               </div>
 
