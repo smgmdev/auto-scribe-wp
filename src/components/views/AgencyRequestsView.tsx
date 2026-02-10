@@ -1578,7 +1578,7 @@ export function AgencyRequestsView() {
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0 pb-3 px-4">
-                          <div className="flex items-end justify-between">
+                          <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
                                 Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
@@ -1588,7 +1588,7 @@ export function AgencyRequestsView() {
                                 Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
                               </span>
                             </div>
-                            <div className="flex flex-col items-end gap-0.5">
+                            <div className="flex flex-col items-end gap-0.5 self-end">
                               {request.media_site?.publication_format && (
                                 <span className="text-xs text-muted-foreground capitalize">{request.media_site.publication_format}</span>
                               )}
@@ -1691,7 +1691,7 @@ export function AgencyRequestsView() {
                               </div>
                             </CardHeader>
                             <CardContent className="pt-0 pb-3 px-4">
-                              <div className="flex items-end justify-between">
+                              <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
                                     Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
@@ -1700,7 +1700,7 @@ export function AgencyRequestsView() {
                                     Completed: {request.order?.released_at ? format(new Date(request.order.released_at), 'MMM d, yyyy h:mm a') : request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                 </div>
-                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground self-end">
                                   {request.media_site?.publication_format && (
                                     <span className="capitalize">{request.media_site.publication_format}</span>
                                   )}
@@ -1778,7 +1778,7 @@ export function AgencyRequestsView() {
                               </div>
                             </CardHeader>
                             <CardContent className="pt-0 pb-3 px-4">
-                              <div className="flex items-end justify-between">
+                              <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
                                     Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
@@ -1787,7 +1787,7 @@ export function AgencyRequestsView() {
                                     Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                 </div>
-                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                                <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground self-end">
                                   {request.media_site?.publication_format && (
                                     <span className="capitalize">{request.media_site.publication_format}</span>
                                   )}
@@ -1972,7 +1972,7 @@ export function AgencyRequestsView() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
                               Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
@@ -1988,7 +1988,7 @@ export function AgencyRequestsView() {
                               </span>
                             )}
                           </div>
-                          <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex flex-col items-end gap-0.5 self-end">
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
@@ -2068,7 +2068,7 @@ export function AgencyRequestsView() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
                               Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
@@ -2079,7 +2079,7 @@ export function AgencyRequestsView() {
                               </span>
                             )}
                           </div>
-                          <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex flex-col items-end gap-0.5 self-end">
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
@@ -2157,7 +2157,7 @@ export function AgencyRequestsView() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
                               Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
@@ -2166,7 +2166,7 @@ export function AgencyRequestsView() {
                               Order Completed: {format(new Date(order.accepted_at || order.delivered_at || order.created_at), 'MMM d, yyyy h:mm a')}
                             </p>
                           </div>
-                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground">
+                          <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground self-end">
                             {order.media_site?.publication_format && (
                               <span className="capitalize">{order.media_site.publication_format}</span>
                             )}
@@ -2233,7 +2233,7 @@ export function AgencyRequestsView() {
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-4">
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
                               Order Started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
@@ -2242,7 +2242,7 @@ export function AgencyRequestsView() {
                               Cancelled Order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                           </div>
-                          <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex flex-col items-end gap-0.5 self-end">
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
