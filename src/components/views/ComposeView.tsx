@@ -1160,7 +1160,7 @@ export function ComposeView() {
     {/* Publishing Overlay - Outside animated container for true fixed positioning */}
     {isPublishing && (
       <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
-        <div className="fixed top-20 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+        <div className="fixed top-20 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
           <Loader2 className="h-10 w-10 animate-spin text-accent" />
           <div className="text-center">
             <p className="text-lg font-medium text-foreground">Publishing Article...</p>
@@ -1176,7 +1176,7 @@ export function ComposeView() {
       {/* Saving Draft Overlay */}
       {isSavingDraft && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <Loader2 className="h-10 w-10 animate-spin text-accent" />
             <div className="text-center">
               <p className="text-lg font-medium text-foreground">Saving Draft...</p>
@@ -1189,7 +1189,7 @@ export function ComposeView() {
       {/* Draft Success Overlay */}
       {showDraftSuccess && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <div className="relative">
               <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
                 <CheckCircle2 className="h-10 w-10 text-green-500" />
@@ -1206,7 +1206,7 @@ export function ComposeView() {
       {/* Publish Success Overlay */}
       {showPublishSuccess && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <div className="relative">
               <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
                 <CheckCircle2 className="h-10 w-10 text-green-500" />
@@ -1333,7 +1333,7 @@ export function ComposeView() {
             <Label htmlFor="title">Article Title</Label>
             {isGenerating ? (
               <div className="flex gap-2">
-                <div className="flex-1 h-10 bg-muted animate-pulse rounded-md flex items-center px-3">
+                <div className="flex-1 h-10 bg-muted animate-pulse rounded-none flex items-center px-3">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
                   <span className="text-sm text-muted-foreground">Generating title...</span>
                 </div>
@@ -1344,7 +1344,7 @@ export function ComposeView() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="hover:bg-black hover:text-white"
+                   className="hover:bg-black hover:text-white rounded-none"
                   onClick={async () => {
                     if (!title) {
                       toast({
@@ -1412,7 +1412,7 @@ export function ComposeView() {
           <div className="space-y-2">
             <Label htmlFor="content">Article Content</Label>
             {isGenerating ? (
-              <div className="min-h-[400px] bg-muted/50 rounded-md border border-border p-4 space-y-3 animate-pulse">
+              <div className="min-h-[400px] bg-muted/50 rounded-none border border-border p-4 space-y-3 animate-pulse">
                 <div className="flex items-center gap-2 text-muted-foreground mb-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm">Generating article content...</span>
@@ -1623,7 +1623,7 @@ export function ComposeView() {
                 Insufficient credits. You need {getSiteCreditCost(selectedSite)} credits to publish.
               </p>
             )}
-            {editingArticle && editingArticle.status === 'draft' && <Button variant="default" className="w-full border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
+            {editingArticle && editingArticle.status === 'draft' && <Button variant="default" className="w-full rounded-none border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
                 {isSavingDraft ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...

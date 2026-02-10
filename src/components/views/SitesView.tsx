@@ -1548,7 +1548,7 @@ export function SitesView() {
                 
                 {/* Search Results Dropdown */}
                 {showSearchDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-none shadow-lg z-50 max-h-[300px] overflow-y-auto">
                     {(() => {
                       const mediaSiteResults = mediaSites
                         .filter(site => site.category !== 'Agencies/People') // Exclude agencies from mediaSites
@@ -1726,7 +1726,7 @@ export function SitesView() {
                       <div className="mb-3 flex flex-wrap gap-2">
                         <button
                           onClick={() => setActiveSubcategory(null)}
-                          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                             activeSubcategory === null
                               ? 'bg-foreground text-background'
                               : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -1738,7 +1738,7 @@ export function SitesView() {
                           <button
                             key={sub}
                             onClick={() => setActiveSubcategory(sub)}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                            className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
                               activeSubcategory === sub
                                 ? 'bg-foreground text-background'
                                 : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -2073,7 +2073,7 @@ export function SitesView() {
                     Clear
                   </Button>
                 </div>
-                <div className="border border-border rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
+                <div className="border border-border rounded-none overflow-hidden max-h-[300px] overflow-y-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50 sticky top-0">
                       <tr>
@@ -2199,7 +2199,7 @@ export function SitesView() {
                 placeholder="Brief description..."
                 value={agencyFormData.about}
                 onChange={e => setAgencyFormData(prev => ({ ...prev, about: e.target.value }))}
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-[80px] w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
@@ -2236,11 +2236,11 @@ export function SitesView() {
           
           <div className="space-y-4 mt-4">
             {/* Input Type Tabs */}
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+            <div className="flex gap-2 p-1 bg-muted rounded-none">
               <button
                 type="button"
                 onClick={() => setLogoInputType('url')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-none text-sm font-medium transition-colors ${
                   logoInputType === 'url' 
                     ? 'bg-background text-foreground shadow-sm' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -2252,7 +2252,7 @@ export function SitesView() {
               <button
                 type="button"
                 onClick={() => setLogoInputType('upload')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-none text-sm font-medium transition-colors ${
                   logoInputType === 'upload' 
                     ? 'bg-background text-foreground shadow-sm' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -2316,7 +2316,7 @@ export function SitesView() {
                       reader.readAsDataURL(file);
                     }
                   }}
-                  className={`w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                  className={`w-full flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed rounded-none cursor-pointer transition-colors ${
                     isDragging 
                       ? 'border-accent bg-accent/10' 
                       : 'border-border hover:border-accent hover:bg-muted/50'
@@ -2337,7 +2337,7 @@ export function SitesView() {
             {logoPreview && (
               <div className="space-y-2">
                 <Label>Preview</Label>
-                <div className="flex items-center justify-center p-4 bg-muted rounded-lg">
+                <div className="flex items-center justify-center p-4 bg-muted rounded-none">
                   <img 
                     src={logoPreview} 
                     alt="Logo preview" 
