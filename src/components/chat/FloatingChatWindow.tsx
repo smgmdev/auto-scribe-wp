@@ -6205,10 +6205,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       {/* Cancel Dialog */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Engagement</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="z-[250] text-left">
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle className="text-left">Cancel Engagement</AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
               Please provide a reason for cancelling this engagement.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -6216,13 +6216,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             placeholder="Reason for cancellation..."
             value={cancellationReason}
             onChange={(e) => setCancellationReason(e.target.value)}
+            className="rounded-none h-9 text-sm"
           />
           <AlertDialogFooter>
-            <AlertDialogCancel className="hover:bg-black hover:text-white hover:border-black">Keep Engagement</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-none hover:bg-black hover:text-white hover:border-black">Keep Engagement</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleCancelEngagement}
               disabled={!cancellationReason.trim() || cancelling}
-              className="bg-destructive text-white border border-destructive transition-all duration-200 hover:!bg-transparent hover:!text-destructive"
+              className="rounded-none bg-transparent text-destructive border border-destructive transition-all duration-200 hover:!bg-destructive hover:!text-white"
             >
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cancel Engagement
