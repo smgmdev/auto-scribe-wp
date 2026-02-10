@@ -4118,7 +4118,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div className={`rounded-none border p-3 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
-              : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
+              : 'bg-white dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
           }`}>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
