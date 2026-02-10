@@ -86,25 +86,58 @@ serve(async (req) => {
     const creditCost = mediaSite.price;
     logStep("Media site found", { name: mediaSite.name, price: creditCost });
 
-    // Get user's current available credits
-    const { data: userCredits, error: creditsError } = await supabaseAdmin
-      .from("user_credits")
-      .select("credits")
-      .eq("user_id", user.id)
-      .single();
+    // Calculate available credits from transaction history (same as Credit Management)
+    // This ensures the edge function matches the frontend calculation exactly
+    const { data: transactions, error: txError } = await supabaseAdmin
+      .from("credit_transactions")
+      .select("amount, type")
+      .eq("user_id", user.id);
 
-    if (creditsError) {
-      logStep("Error fetching user credits", { error: creditsError.message });
+    if (txError) {
+      logStep("Error fetching transactions", { error: txError.message });
       return new Response(
-        JSON.stringify({ error: "Failed to fetch user credits" }),
+        JSON.stringify({ error: "Failed to fetch credit transactions" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
 
-    const currentCredits = userCredits?.credits || 0;
+    // Withdrawal types stored in cents - must be excluded from regular credit calculations
+    const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
     
-    // Calculate already locked credits from active orders and pending requests with order requests
-    // Active orders (not cancelled, not completed, not accepted)
+    let incoming = 0;
+    let outgoing = 0;
+    let withdrawn = 0; // completed withdrawals in dollars
+    let offerLocked = 0;
+    
+    for (const tx of (transactions || [])) {
+      // Handle withdrawal_completed separately - stored in cents
+      if (tx.type === 'withdrawal_completed') {
+        withdrawn += Math.abs(tx.amount) / 100;
+        continue;
+      }
+      
+      // Skip other withdrawal transactions
+      if (withdrawalTypes.includes(tx.type)) continue;
+      
+      // Incoming = all positive amounts
+      if (tx.amount > 0) {
+        incoming += tx.amount;
+      }
+      
+      // Outgoing = negative amounts, excluding locked/offer_accepted/order types
+      if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
+        outgoing += Math.abs(tx.amount);
+      }
+      
+      // Track offer_accepted for locked credits
+      if (tx.type === 'offer_accepted' && tx.amount < 0) {
+        offerLocked += Math.abs(tx.amount);
+      }
+    }
+
+    const totalBalance = incoming - outgoing;
+    
+    // Calculate locked from active orders
     const { data: activeOrders } = await supabaseAdmin
       .from("orders")
       .select("id, media_sites(price)")
@@ -123,42 +156,15 @@ serve(async (req) => {
       }
     }
 
-    // Pending requests with CLIENT_ORDER_REQUEST messages (excluding current request)
-    const { data: pendingRequests } = await supabaseAdmin
-      .from("service_requests")
-      .select("id, media_sites(price)")
-      .eq("user_id", user.id)
-      .is("order_id", null)
-      .neq("status", "cancelled")
-      .neq("id", service_request_id);
-
-    let lockedInPending = 0;
-    if (pendingRequests && pendingRequests.length > 0) {
-      for (const request of pendingRequests) {
-        const { data: orderRequestMessages } = await supabaseAdmin
-          .from("service_messages")
-          .select("id")
-          .eq("request_id", request.id)
-          .like("message", "%CLIENT_ORDER_REQUEST%")
-          .limit(1);
-
-        if (orderRequestMessages && orderRequestMessages.length > 0) {
-          const mediaSiteData = request.media_sites as unknown as { price: number } | null;
-          if (mediaSiteData?.price) {
-            lockedInPending += mediaSiteData.price;
-          }
-        }
-      }
-    }
-
-    const totalLocked = lockedInOrders + lockedInPending;
-    const availableCredits = currentCredits - totalLocked;
+    const totalLocked = lockedInOrders + offerLocked;
+    const availableCredits = totalBalance - totalLocked - withdrawn;
     
     // Check if user has enough AVAILABLE credits
     if (availableCredits < creditCost) {
       logStep("Insufficient available credits", { 
-        totalCredits: currentCredits, 
+        totalBalance, 
         locked: totalLocked, 
+        withdrawn,
         available: availableCredits, 
         required: creditCost 
       });
@@ -193,7 +199,7 @@ serve(async (req) => {
 
     logStep("Credits locked successfully (no balance deduction)", { 
       creditCost, 
-      totalBalance: currentCredits, 
+      totalBalance, 
       previouslyLocked: totalLocked,
       newTotalLocked: totalLocked + creditCost,
       newAvailableBalance: availableCredits - creditCost
@@ -203,7 +209,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         credits_locked: creditCost,
-        new_balance: currentCredits // Balance stays the same
+        new_balance: totalBalance // Balance stays the same
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
