@@ -5308,7 +5308,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </div>
                     )}
                     {/* Order Details expandable */}
-                    <details className="mt-1">
+                    <details className="mt-0">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
                         Order Details
                       </summary>
