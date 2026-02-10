@@ -5261,53 +5261,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return null;
                       })()}
                     </div>
-                    {/* Mobile-only action buttons */}
-                    {!hasOpenDispute && (
-                      <div className="flex md:hidden items-center gap-2 w-full mt-1">
-                        {canDeliver && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="bg-white text-black border-white transition-all duration-200 hover:bg-black hover:text-white hover:border-white w-full"
-                            onClick={() => setDeliverOrderDialogOpen(true)}
-                          >
-                            Deliver Order
-                          </Button>
-                        )}
-                        {isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="bg-black text-white border-white shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white w-full"
-                            onClick={() => setDeliverOrderDialogOpen(true)}
-                          >
-                            Deliver Again
-                          </Button>
-                        )}
-                        {canAcceptDelivery && (
-                          <div className="flex items-center gap-2 w-full">
-                            <Button
-                              size="sm"
-                              className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 flex-1"
-                              onClick={handleAcceptDeliveryFromChat}
-                              disabled={acceptingDelivery}
-                            >
-                              {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                              Accept
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
-                              onClick={() => setRevisionDialogOpen(true)}
-                            >
-                              Request Revision
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {/* Order Details expandable */}
+                    {/* Order Details expandable — mobile buttons moved outside flex row */}
                     <details className="mt-0">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
                         Order Details
@@ -5392,6 +5346,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 )}
               </div>
+              {/* Mobile-only action buttons — full width */}
+              {!hasOpenDispute && (
+                <div className="flex md:hidden items-center gap-2 w-full mt-1">
+                  {canDeliver && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-white text-black border-white transition-all duration-200 hover:bg-black hover:text-white hover:border-white w-full"
+                      onClick={() => setDeliverOrderDialogOpen(true)}
+                    >
+                      Deliver Order
+                    </Button>
+                  )}
+                  {isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-black text-white border-white transition-all duration-200 hover:bg-white hover:text-black hover:border-white w-full"
+                      onClick={() => setDeliverOrderDialogOpen(true)}
+                    >
+                      Deliver Again
+                    </Button>
+                  )}
+                  {canAcceptDelivery && (
+                    <div className="flex items-center gap-2 w-full">
+                      <Button
+                        size="sm"
+                        className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 flex-1"
+                        onClick={handleAcceptDeliveryFromChat}
+                        disabled={acceptingDelivery}
+                      >
+                        {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
+                        onClick={() => setRevisionDialogOpen(true)}
+                      >
+                        Request Revision
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })()}
