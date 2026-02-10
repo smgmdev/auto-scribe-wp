@@ -799,7 +799,7 @@ export function OrdersView() {
         </div>
       </CardHeader>
       <CardContent className="pt-0 pb-3 px-4">
-        <div className="flex justify-between items-end">
+        <div className="flex flex-col md:flex-row justify-between md:items-end gap-1">
           <div className="space-y-0.5">
             <span className="text-xs text-muted-foreground block">
               Order Started: {format(new Date(order.created_at), 'MMM d, yyyy h:mm a')}
