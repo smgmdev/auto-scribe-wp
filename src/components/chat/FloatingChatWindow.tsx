@@ -5626,12 +5626,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           if (!pendingClientOrder) return null;
           const isClient = actualSenderType === 'client';
           return (
-            <div className="sticky top-0 left-0 z-10 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="sticky top-0 left-0 z-10 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="flex items-center gap-3">
-                <Tag className="h-6 w-6 text-blue-600 dark:text-blue-400 shrink-0" />
+                <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <Clock className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                     <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
                       {isClient ? `Waiting for ${counterpartyLabel} approval` : 'Order request from client'}
                     </span>
