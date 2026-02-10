@@ -1457,7 +1457,8 @@ export function AgencyRequestsView() {
                         <CardHeader className="py-3 px-4">
                           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                             {/* Mobile: Badge at top right */}
-                            <div className="flex justify-end md:hidden">
+                            <div className="flex justify-end gap-2 md:hidden">
+                              {getStatusBadge(request.status, request.read, request.id)}
                               {isInDispute ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
@@ -1525,12 +1526,12 @@ export function AgencyRequestsView() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <CardTitle className="text-base">{request.media_site?.name || request.title}</CardTitle>
-                                  {getStatusBadge(request.status, request.read, request.id)}
                                 </div>
                               </div>
                             </div>
                             {/* Desktop: Badge on the right */}
-                            <div className="hidden md:flex flex-col items-end gap-1">
+                            <div className="hidden md:flex items-center gap-2">
+                              {getStatusBadge(request.status, request.read, request.id)}
                               {isInDispute ? (
                                 <Badge variant="destructive" className="bg-red-600 text-white border-red-600">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
