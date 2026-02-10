@@ -1560,7 +1560,7 @@ export function AdminFloatingChat({
                       )}
                     </div>
                     {/* Order Details expandable */}
-                    <details className="mt-0 -mb-1 md:mb-0">
+                    <details className="mt-0 -mb-3 md:mb-0">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
                         Order Details
                       </summary>
