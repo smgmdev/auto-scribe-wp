@@ -1794,14 +1794,14 @@ export function AgencyRequestsView() {
                               <div className="flex items-end justify-between">
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
+                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
                                     Cancelled: {format(new Date(request.cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
                                     {/* Desktop: inline messages count */}
                                     {requestMessages.length > 0 && (
                                       <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                     )}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                   {/* Mobile: messages count on new row */}
                                   {requestMessages.length > 0 && (
@@ -2269,10 +2269,10 @@ export function AgencyRequestsView() {
                         <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <p className="text-xs text-muted-foreground">
-                              Cancelled Order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                              Order Started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Order Started: {order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                              Cancelled Order: {relatedRequest?.cancelled_at ? format(new Date(relatedRequest.cancelled_at), 'MMM d, yyyy h:mm a') : 'N/A'}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-0.5">
