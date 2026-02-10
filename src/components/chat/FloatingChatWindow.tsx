@@ -5164,9 +5164,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
           return (
-            <div className="p-2 md:p-3 bg-black text-white border-b border-black">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-                <div className="flex items-start gap-2 md:gap-3 min-w-0">
+            <div className="p-3 bg-black text-white border-b border-black">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 md:gap-3 min-w-0 flex-1">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -5261,6 +5261,52 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return null;
                       })()}
                     </div>
+                    {/* Mobile-only action buttons */}
+                    {!hasOpenDispute && (
+                      <div className="flex md:hidden items-center gap-2 w-full mt-2">
+                        {canDeliver && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white w-full"
+                            onClick={() => setDeliverOrderDialogOpen(true)}
+                          >
+                            Deliver Order
+                          </Button>
+                        )}
+                        {isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-black text-white border-white shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white w-full"
+                            onClick={() => setDeliverOrderDialogOpen(true)}
+                          >
+                            Deliver Again
+                          </Button>
+                        )}
+                        {canAcceptDelivery && (
+                          <div className="flex items-center gap-2 w-full">
+                            <Button
+                              size="sm"
+                              className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 flex-1"
+                              onClick={handleAcceptDeliveryFromChat}
+                              disabled={acceptingDelivery}
+                            >
+                              {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
+                              onClick={() => setRevisionDialogOpen(true)}
+                            >
+                              Request Revision
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {/* Order Details expandable */}
                     <details className="mt-1">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
@@ -5283,7 +5329,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 </div>
                 {!hasOpenDispute && (
-                <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="hidden md:flex items-center gap-2">
                   {canDeliver && (
                     <TooltipProvider>
                       <Tooltip>
@@ -5291,7 +5337,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white w-full md:w-auto"
+                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
                             onClick={() => setDeliverOrderDialogOpen(true)}
                           >
                             Deliver Order
@@ -5303,7 +5349,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Tooltip>
                     </TooltipProvider>
                   )}
-                  {/* Deliver Again button for agency when revision is requested */}
                   {isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
                     <TooltipProvider>
                       <Tooltip>
@@ -5323,7 +5368,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Tooltip>
                     </TooltipProvider>
                   )}
-                  {/* Accept/Request Revision buttons for client when order is delivered */}
                   {canAcceptDelivery && (
                     <div className="flex items-center gap-2">
                       <Button
@@ -5371,14 +5415,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {pendingOrder.media_site_name}
                   </p>
                 </div>
-                {/* Desktop: Action buttons inline */}
+                {/* Desktop: Action buttons */}
                 {!isAdmin && (
-                  <div className="hidden md:flex items-center gap-2 shrink-0">
+                  <div className="hidden md:flex gap-2">
                     {isClient ? (
                       <>
                         <Button
                           size="sm"
-                           className="rounded-none px-8 bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                          className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => {
                             setPendingOrderRequest({
                               media_site_id: pendingOrder.media_site_id,
@@ -5395,7 +5439,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                         <Button
                           size="sm"
-                           className="rounded-none px-8 bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                          className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={handleBannerRejectOrderRequest}
                           disabled={rejectingOrderRequestId === pendingOrder.messageId}
                         >
