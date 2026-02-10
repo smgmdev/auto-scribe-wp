@@ -610,13 +610,11 @@ export function AdminEngagementsView() {
                     {getEngagementBadge(r)}
                     {!r.order_id && hasPendingOfferSent(r.id) && (
                       <Badge className="bg-blue-600 text-white">
-                        <Tag className="h-3 w-3 mr-1" />
                         Offer Sent
                       </Badge>
                     )}
                     {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
                       <Badge className="bg-blue-600 text-white">
-                        <Tag className="h-3 w-3 mr-1" />
                         Client Order Request
                       </Badge>
                     )}
@@ -638,13 +636,11 @@ export function AdminEngagementsView() {
                         {getEngagementBadge(r)}
                         {!r.order_id && hasPendingOfferSent(r.id) && (
                           <Badge className="bg-blue-600 text-white">
-                            <Tag className="h-3 w-3 mr-1" />
                             Offer Sent
                           </Badge>
                         )}
                         {!r.order_id && !hasPendingOfferSent(r.id) && hasClientOrderRequestPending(r.id) && (
                           <Badge className="bg-blue-600 text-white">
-                            <Tag className="h-3 w-3 mr-1" />
                             Client Order Request
                           </Badge>
                         )}
