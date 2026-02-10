@@ -1398,7 +1398,7 @@ export function ComposeView() {
           </div>
 
           {/* Generate Button */}
-          <Button className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
+          <Button className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
             {isGenerating ? <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Generating...
@@ -1450,7 +1450,7 @@ export function ComposeView() {
                 <img 
                   src={imagePreview} 
                   alt="Preview" 
-                  className="w-full h-48 object-cover rounded-lg border border-border"
+                  className="w-full h-48 object-cover rounded-none border border-border"
                 />
                 <Button 
                   variant="destructive" 
@@ -1463,7 +1463,7 @@ export function ComposeView() {
               </div>
             ) : (
               <label 
-                className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDragging ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted/50'}`}
+                className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-none cursor-pointer transition-colors ${isDragging ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted/50'}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -1594,7 +1594,7 @@ export function ComposeView() {
           {/* Actions - At Top */}
           <div className="space-y-3">
             <Button 
-              className="w-full border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
+              className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
               disabled={
                 isPublishing || 
@@ -1629,7 +1629,7 @@ export function ComposeView() {
                     Saving...
                   </> : 'Save Draft'}
               </Button>}
-            {!editingArticle && <Button variant="outline" className="w-full hover:bg-black hover:text-white" onClick={handleSaveDraft} disabled={!title || isPublishing}>
+            {!editingArticle && <Button variant="outline" className="w-full rounded-none hover:bg-black hover:text-white" onClick={handleSaveDraft} disabled={!title || isPublishing}>
                 Save as Draft
               </Button>}
           </div>
