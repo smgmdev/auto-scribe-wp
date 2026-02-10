@@ -3916,6 +3916,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Calculate countdown for this specific message
       const cardCountdown = getDeliveryCountdown(msg.created_at, orderRequestAccepted.delivery_duration);
       
+      // Check if order was already delivered
+      const wasDeliveredCard = messages.some(m => m.message.includes('[ORDER_DELIVERED]'));
+      let deliveredOnTimeCard = false;
+      if (wasDeliveredCard && orderRequestAccepted.delivery_duration) {
+        const { days = 0, hours = 0, minutes = 0 } = orderRequestAccepted.delivery_duration;
+        const totalMs = ((days * 24 * 60) + (hours * 60) + minutes) * 60 * 1000;
+        const deadlineTime = new Date(msg.created_at).getTime() + totalMs;
+        const deliveredMsg = messages.find(m => m.message.includes('[ORDER_DELIVERED]'));
+        if (deliveredMsg) {
+          deliveredOnTimeCard = new Date(deliveredMsg.created_at).getTime() <= deadlineTime;
+        }
+      }
+      
       return (
         <div className="space-y-1">
           <div className={`rounded-lg border p-4 ${
@@ -3940,14 +3953,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
                 {cardCountdown && (
                   <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${
-                    cardCountdown.isOverdue 
-                      ? 'text-red-600 dark:text-red-400' 
-                      : isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    wasDeliveredCard
+                      ? (deliveredOnTimeCard 
+                          ? (isOwnMessage ? 'text-primary-foreground/80' : 'text-green-600 dark:text-green-400')
+                          : 'text-red-600 dark:text-red-400')
+                      : cardCountdown.isOverdue 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
                   }`}>
-                    <Clock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-xs">
-                      {cardCountdown.isOverdue ? 'Overdue' : `Delivery in: ${cardCountdown.text}`}
-                    </span>
+                    {wasDeliveredCard ? (
+                      deliveredOnTimeCard ? (
+                        <>
+                          <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                          <span className="text-xs">Order Delivered</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="h-3.5 w-3.5 shrink-0" />
+                          <span className="text-xs">Delivered late</span>
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs">
+                          {cardCountdown.isOverdue ? 'Overdue' : `Delivery in: ${cardCountdown.text}`}
+                        </span>
+                      </>
+                    )}
                   </div>
                 )}
                 {orderRequestAccepted.special_terms && (
