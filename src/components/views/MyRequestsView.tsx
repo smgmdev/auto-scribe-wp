@@ -1294,7 +1294,7 @@ export function MyRequestsView() {
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0 pb-3 px-4">
-                          <div className="flex flex-col md:flex-row md:items-end justify-between gap-1">
+                          <div className="flex flex-col md:flex-row md:items-end justify-between">
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
                                 <span className="hidden md:inline">Opened Engagement: </span>
@@ -1410,7 +1410,7 @@ export function MyRequestsView() {
                             </div>
                           </CardHeader>
                           <CardContent className="pt-0 pb-3 px-4">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-1">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
                                   <span className="hidden md:inline">Opened Engagement: </span>
@@ -1499,7 +1499,7 @@ export function MyRequestsView() {
                             </div>
                           </CardHeader>
                           <CardContent className="pt-0 pb-3 px-4">
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-1">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between">
                               <div className="space-y-0.5">
                                 <p className="text-xs text-muted-foreground">
                                   Cancelled: {format(new Date((request as any).cancelled_at || request.updated_at), 'MMM d, yyyy h:mm a')}
