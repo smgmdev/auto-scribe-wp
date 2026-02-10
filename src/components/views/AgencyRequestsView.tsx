@@ -1584,11 +1584,11 @@ export function AgencyRequestsView() {
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
                               <span className="text-xs text-muted-foreground block">
-                                <Clock className="h-3 w-3 inline mr-1" />
-                                Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
+                                Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                               </span>
                               <span className="text-xs text-muted-foreground block">
-                                Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                <Clock className="h-3 w-3 inline mr-1" />
+                                Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}
                               </span>
                             </div>
                             <div className="flex flex-col items-end gap-0.5">

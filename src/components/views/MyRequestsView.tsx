@@ -1304,13 +1304,13 @@ export function MyRequestsView() {
                         <CardContent className="pt-0 pb-3 px-4">
                           <div className="flex items-end justify-between">
                             <div className="space-y-0.5">
+                              <span className="text-xs text-muted-foreground block">
+                                Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                              </span>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" />
                                 <span>Last Event: {eventName} · {format(eventTime, 'MMM d, h:mm a')}</span>
                               </div>
-                              <span className="text-xs text-muted-foreground block">
-                                Opened Engagement: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
-                              </span>
                               {requestMessages.length > 0 && (
                                 <span className="text-xs text-muted-foreground block md:hidden">
                                   {requestMessages.length} Message{requestMessages.length > 1 ? 's' : ''}
