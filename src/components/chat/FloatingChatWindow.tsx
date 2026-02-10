@@ -6788,7 +6788,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative flex flex-col ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-6 pb-6 overflow-y-auto'
+                ? 'w-full h-[100dvh] px-6 pt-6 pb-6 overflow-y-auto scrollbar-hide'
                 : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg'
             }`}
             style={isMobile ? undefined : { transform: `translate(${orderDetailsDragPos.x}px, ${orderDetailsDragPos.y}px)` }}
