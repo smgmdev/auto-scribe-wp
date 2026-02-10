@@ -7519,7 +7519,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="space-y-2">
               <Label htmlFor="delivery-link">Delivery Link <span className="text-destructive">*</span></Label>
               <div className="flex">
-                <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-sm text-muted-foreground">
+                <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-xs text-muted-foreground h-9">
                   https://
                 </div>
                 <Input
@@ -7527,7 +7527,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   placeholder="example.com/article-link"
                   value={deliveryLink}
                   onChange={(e) => setDeliveryLink(e.target.value)}
-                  className="rounded-l-none"
+                  className="rounded-l-none h-9 text-sm"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
