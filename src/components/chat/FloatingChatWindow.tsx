@@ -7545,7 +7545,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               />
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse md:flex-row gap-2">
             <Button
               variant="outline"
               className="flex-1 transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
