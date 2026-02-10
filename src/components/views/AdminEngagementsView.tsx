@@ -824,7 +824,7 @@ export function AdminEngagementsView() {
                 </div>
               )}
               {deliveredRequests.some(r => !r.read) && (
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-end mt-4">
                   <Button
                     variant="outline"
                     onClick={async () => {
@@ -846,9 +846,9 @@ export function AdminEngagementsView() {
                       }
                     }}
                     disabled={markingAllRead}
-                    className="rounded-none hover:bg-black hover:text-white hover:border-black"
+                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
                   >
-                    {markingAllRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-2" />}
+                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Mark All Read
                   </Button>
                 </div>
@@ -966,7 +966,7 @@ export function AdminEngagementsView() {
                 </div>
               )}
               {cancelledRequests.some(r => !r.read) && (
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-end mt-4">
                   <Button
                     variant="outline"
                     onClick={async () => {
@@ -988,9 +988,9 @@ export function AdminEngagementsView() {
                       }
                     }}
                     disabled={markingAllRead}
-                    className="rounded-none hover:bg-black hover:text-white hover:border-black"
+                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
                   >
-                    {markingAllRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-2" />}
+                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Mark All Read
                   </Button>
                 </div>
