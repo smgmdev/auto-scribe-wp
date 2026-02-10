@@ -5257,11 +5257,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       })()}
                     </div>
                     {/* Order Details expandable */}
-                    <details className="mt-0 -mb-1 md:mb-0">
+                    <details className="mt-0 -mb-3 md:mb-0">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
                         Order Details
                       </summary>
-                      <div className="relative mt-1 pt-1 pb-1 text-xs text-white/70 space-y-0.5">
+                      <div className="relative mt-1 pt-1 pb-0 text-xs text-white/70 space-y-0.5">
                         <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
                         {acceptedOrderData?.price && (
                           <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
