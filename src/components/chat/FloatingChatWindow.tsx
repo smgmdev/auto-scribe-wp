@@ -5344,7 +5344,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
               {/* Mobile-only action buttons — full width */}
               {!hasOpenDispute && (
-                <div className="flex md:hidden items-center gap-2 w-full mt-3 px-1">
+                <div className="flex md:hidden items-center gap-2 w-full mt-3 pr-2">
                   {canDeliver && (
                     <Button
                       size="sm"
