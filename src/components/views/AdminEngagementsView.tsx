@@ -806,11 +806,7 @@ export function AdminEngagementsView() {
                             <span className="text-xs text-muted-foreground block">
                               Opened: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
-                            <span className="text-xs text-muted-foreground block">
-                              Last Message: {messages[r.id]?.length > 0 
-                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                                : 'No messages'}
-                            </span>
+                            
                           </div>
                           <div className="flex justify-end">
                             <div className="flex flex-col items-end gap-0.5">
@@ -917,9 +913,7 @@ export function AdminEngagementsView() {
                               <span className="text-xs text-muted-foreground block">
                                 Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
                               </span>
-                              {requestMessages.length > 0 && (
-                                <span className="text-xs text-muted-foreground block">{requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                              )}
+                              
                               {r.cancelled_by === 'admin' ? (
                                 <span className="text-xs text-destructive block">
                                   Reason: Cancelled by Arcana Mace Staff{r.cancellation_reason ? ` - ${r.cancellation_reason}` : ''}
