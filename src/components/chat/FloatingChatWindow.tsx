@@ -5178,7 +5178,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           ) : localOrder.status === 'completed' ? (
                             <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           ) : (
-                            <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
+                            <Clock className="h-5 w-5 md:h-6 md:w-6 text-white animate-clock-tick" />
                           )}
                         </div>
                       </TooltipTrigger>
