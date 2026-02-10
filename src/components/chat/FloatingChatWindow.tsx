@@ -5684,23 +5684,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     )}
                   </div>
                 </div>
-                {/* Action buttons - hidden for admin */}
+                {/* Desktop: Action buttons inline - hidden for admin */}
                 {!isAdmin && (
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="hidden md:flex items-center gap-2 shrink-0">
                     {isClient ? (
-                      <div className="flex flex-col items-end gap-1.5">
-                        <Button
-                          size="sm"
-                           className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
-                          onClick={handleBannerCancelClientOrderRequest}
-                          disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
-                        >
-                          {cancellingOrderRequestId === pendingClientOrder.messageId && (
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          )}
-                          Cancel Request
-                        </Button>
-                      </div>
+                      <Button
+                        size="sm"
+                        className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
+                        onClick={handleBannerCancelClientOrderRequest}
+                        disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
+                      >
+                        {cancellingOrderRequestId === pendingClientOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Cancel Request
+                      </Button>
                     ) : (
                       <>
                         <Button
@@ -5724,9 +5722,49 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                       </>
                     )}
-              </div>
+                  </div>
                 )}
               </div>
+              {/* Mobile: Action buttons full-width below */}
+              {!isAdmin && (
+                <div className="md:hidden mt-1 pl-9 flex gap-2">
+                  {isClient ? (
+                    <Button
+                      size="sm"
+                      className="flex-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
+                      onClick={handleBannerCancelClientOrderRequest}
+                      disabled={cancellingOrderRequestId === pendingClientOrder.messageId}
+                    >
+                      {cancellingOrderRequestId === pendingClientOrder.messageId && (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      )}
+                      Cancel Request
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        className="flex-1 rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                        onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                        onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
+                        disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
+                      >
+                        {rejectingOrderRequestId === pendingClientOrder.messageId && (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        )}
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
               {/* Expandable Order Details */}
               <div className="pl-9 mt-1">
                 <button
