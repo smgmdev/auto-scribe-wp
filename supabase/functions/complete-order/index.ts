@@ -257,55 +257,26 @@ serve(async (req) => {
 
     // Start transaction-like operations
     const now = new Date().toISOString();
+    const mediaSiteName = mediaSiteData?.name || "Unknown";
 
-    // 1. NOW deduct credits from user's balance (this is when credits are actually spent)
-    const { data: clientCredits, error: clientCreditsError } = await supabaseAdmin
-      .from("user_credits")
-      .select("credits")
+    // Credits were already validated and locked during lock-order-credits.
+    // No need to re-check user_credits.credits balance - just convert locked → completed.
+
+    // 1. Delete the "locked" transaction from lock-order-credits
+    const { error: deleteLockedError } = await supabaseAdmin
+      .from("credit_transactions")
+      .delete()
       .eq("user_id", order.user_id)
-      .single();
+      .eq("type", "locked")
+      .eq("order_id", order_id);
 
-    if (clientCreditsError) {
-      logStep("ERROR", { message: "Failed to fetch client credits", error: clientCreditsError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch client credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
+    if (deleteLockedError) {
+      logStep("Error deleting locked transaction by order_id", { error: deleteLockedError.message });
+    } else {
+      logStep("Locked transaction deleted (by order_id)");
     }
-
-    const currentClientCredits = clientCredits?.credits || 0;
-    const newClientCredits = currentClientCredits - creditCost;
-
-    if (newClientCredits < 0) {
-      logStep("ERROR", { message: "Insufficient credits for completion", current: currentClientCredits, required: creditCost });
-      return new Response(
-        JSON.stringify({ error: "Insufficient credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
-    // Deduct credits from client's balance
-    const { error: deductError } = await supabaseAdmin
-      .from("user_credits")
-      .update({ credits: newClientCredits, updated_at: now })
-      .eq("user_id", order.user_id);
-
-    if (deductError) {
-      logStep("ERROR", { message: "Failed to deduct credits", error: deductError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to deduct credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
-    }
-
-    logStep("Credits deducted from client", { 
-      previousBalance: currentClientCredits, 
-      deducted: creditCost, 
-      newBalance: newClientCredits 
-    });
 
     // 2. Delete the "offer_accepted" transaction (will be replaced by "order_completed")
-    const mediaSiteName = mediaSiteData?.name || "Unknown";
     const { error: deleteLockError } = await supabaseAdmin
       .from("credit_transactions")
       .delete()
@@ -315,10 +286,20 @@ serve(async (req) => {
 
     if (deleteLockError) {
       logStep("Error deleting offer_accepted transaction", { error: deleteLockError.message });
-      // Don't fail - continue with order_completed transaction
     } else {
       logStep("Offer_accepted transaction deleted");
     }
+
+    // Also clean up any locked transactions without order_id (legacy)
+    // Match by description containing the media site name
+    await supabaseAdmin
+      .from("credit_transactions")
+      .delete()
+      .eq("user_id", order.user_id)
+      .eq("type", "locked")
+      .like("description", `%${mediaSiteName}%`);
+
+    logStep("Credits converted from locked to completed (no balance deduction needed - was never deducted)");
 
     // 3. Record credit transaction for client (order_completed - permanent deduction)
     await supabaseAdmin
@@ -460,7 +441,6 @@ serve(async (req) => {
     logStep("Order completion flow finished successfully", {
       orderId: order_id,
       clientCreditsSpent: creditCost,
-      clientNewBalance: newClientCredits,
       agencyCreditsAllocated: creditsToAllocate,
       platformFee: platformFeeCredits
     });
@@ -470,7 +450,6 @@ serve(async (req) => {
         success: true,
         order_id,
         credits_spent: creditCost,
-        new_balance: newClientCredits,
         credits_allocated: creditsToAllocate,
         platform_fee: platformFeeCredits
       }),
