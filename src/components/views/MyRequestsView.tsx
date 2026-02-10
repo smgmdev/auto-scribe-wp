@@ -449,11 +449,7 @@ export function MyRequestsView() {
                   description: 'The agency has requested changes to your brief.',
                 });
               } else if (updated.status === 'cancelled') {
-                toast({
-                  variant: 'destructive',
-                  title: 'Engagement Cancelled',
-                  description: `Your engagement for ${currentRequest.media_site?.name || 'this media site'} has been cancelled.`,
-                });
+                sonnerToast.error(`Engagement Cancelled: ${currentRequest.media_site?.name || 'this media site'}`);
               }
             }
             
