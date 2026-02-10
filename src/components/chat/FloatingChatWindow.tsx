@@ -358,6 +358,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [adminJoined, setAdminJoined] = useState(false);
   const [joiningChat, setJoiningChat] = useState(false);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [orderDetailsDragPos, setOrderDetailsDragPos] = useState({ x: 0, y: 0 });
+  const [orderDetailsDragging, setOrderDetailsDragging] = useState(false);
+  const orderDetailsDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const [bannerOrderDetailsOpen, setBannerOrderDetailsOpen] = useState(false);
   const [orderDetails, setOrderDetails] = useState<{
     id: string;
@@ -376,6 +379,45 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   } | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
+
+  // Reset order details drag position when dialog opens
+  useEffect(() => {
+    if (orderDetailsOpen) {
+      setOrderDetailsDragPos({ x: 0, y: 0 });
+    }
+  }, [orderDetailsOpen]);
+
+  // Register order details on popup stack
+  useEffect(() => {
+    if (!orderDetailsOpen) { removePopup(`order-details-${chat.request.id}`); return; }
+    pushPopup(`order-details-${chat.request.id}`, () => setOrderDetailsOpen(false));
+    return () => removePopup(`order-details-${chat.request.id}`);
+  }, [orderDetailsOpen, chat.request.id]);
+
+  // Order details drag handlers
+  const handleOrderDetailsDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+    setOrderDetailsDragging(true);
+    orderDetailsDragStartRef.current = {
+      x: e.clientX, y: e.clientY,
+      posX: orderDetailsDragPos.x, posY: orderDetailsDragPos.y
+    };
+    e.preventDefault();
+  }, [orderDetailsDragPos]);
+
+  useEffect(() => {
+    if (!orderDetailsDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      setOrderDetailsDragPos({
+        x: orderDetailsDragStartRef.current.posX + (e.clientX - orderDetailsDragStartRef.current.x),
+        y: orderDetailsDragStartRef.current.posY + (e.clientY - orderDetailsDragStartRef.current.y)
+      });
+    };
+    const handleMouseUp = () => setOrderDetailsDragging(false);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => { document.removeEventListener('mousemove', handleMouseMove); document.removeEventListener('mouseup', handleMouseUp); };
+  }, [orderDetailsDragging]);
   
   // Admin dispute resolution states
   const [completeViaDisputeDialogOpen, setCompleteViaDisputeDialogOpen] = useState(false);
@@ -6746,294 +6788,304 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
-        <DialogContent className="max-w-md z-[9999]" hideCloseButton>
-          <div className="absolute right-3 top-3 flex items-center gap-1 z-10">
-            <DialogClose className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogClose>
-          </div>
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-          </DialogHeader>
-          {loadingOrderDetails ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : orderDetails ? (
-            <ScrollArea className="max-h-[calc(90vh-120px)] -mr-4 pr-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                {globalChatRequest?.media_site?.favicon ? (
-                  <img src={globalChatRequest.media_site.favicon} alt="" className="w-12 h-12 rounded object-cover" />
-                ) : (
-                  <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                    <ShoppingCart className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-semibold">{globalChatRequest?.media_site?.name}</h3>
-                  {globalChatRequest?.media_site?.agency && (
-                    <p className="text-sm text-muted-foreground">via {globalChatRequest.media_site.agency}</p>
-                  )}
-                </div>
+      {orderDetailsOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto bg-background relative overflow-y-auto ${
+              isMobile
+                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+            }`}
+            style={isMobile ? undefined : { transform: `translate(${orderDetailsDragPos.x}px, ${orderDetailsDragPos.y}px)` }}
+          >
+            {/* Drag Handle - desktop only */}
+            {!isMobile && (
+              <div
+                className={`flex items-center justify-start py-2 ${orderDetailsDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                onMouseDown={handleOrderDetailsDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               </div>
+            )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment Status</p>
-                  <Badge variant="secondary" className="mt-1 bg-black text-green-500 dark:bg-white dark:text-green-600">
-                    <CheckCircle className="h-3 w-3 mr-1 text-green-500 dark:text-green-600" />
-                    Paid
-                  </Badge>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    <p className="text-sm text-muted-foreground">Delivery Status</p>
-                    {(() => {
-                      const acceptedData = getLastAcceptedOrderRequestData();
-                      if (acceptedData?.delivery_duration) {
-                        const { days = 0, hours = 0, minutes = 0 } = acceptedData.delivery_duration;
-                        const parts = [];
-                        if (days > 0) parts.push(`${days}d`);
-                        if (hours > 0) parts.push(`${hours}h`);
-                        if (minutes > 0) parts.push(`${minutes}m`);
-                        const durationText = parts.join(' ') || '0m';
-                        return (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs">Agreed delivery time: {durationText}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        );
-                      }
-                      return null;
-                    })()}
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">Order Details</h2>
+              <button
+                onClick={() => setOrderDetailsOpen(false)}
+                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
+            </div>
+
+            {loadingOrderDetails ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : orderDetails ? (
+              <ScrollArea className={isMobile ? 'h-[calc(100dvh-100px)]' : 'max-h-[calc(90vh-120px)]'}>
+              <div className="space-y-4 mt-4">
+                <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                  {globalChatRequest?.media_site?.favicon ? (
+                    <img src={globalChatRequest.media_site.favicon} alt="" className="w-12 h-12 rounded object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                      <ShoppingCart className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold">{globalChatRequest?.media_site?.name}</h3>
+                    {globalChatRequest?.media_site?.agency && (
+                      <p className="text-sm text-muted-foreground">via {globalChatRequest.media_site.agency}</p>
+                    )}
                   </div>
-                  {hasOpenDispute && (
-                    <Badge variant="secondary" className="mt-1 bg-red-600 text-white">
-                      In Dispute
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Payment Status</p>
+                    <Badge variant="secondary" className="mt-1 bg-black text-green-500 dark:bg-white dark:text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1 text-green-500 dark:text-green-600" />
+                      Paid
                     </Badge>
-                  )}
-                  {!hasOpenDispute && orderDetails.delivery_status === 'accepted' && (
-                    <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
-                      Completed
-                    </Badge>
-                  )}
-                  {!hasOpenDispute && orderDetails.delivery_status === 'pending_revision' && (
-                    <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
-                      Revision Requested
-                    </Badge>
-                  )}
-                  {!hasOpenDispute && orderDetails.delivery_status === 'delivered' && (() => {
-                    // Check if there's a pending revision request (revision requested after the last delivery)
-                    const lastDeliveryIdx = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
-                    const hasRevision = messages.slice(lastDeliveryIdx + 1).some(m => parseRevisionRequested(m.message));
-                    
-                    if (hasRevision) {
-                      return (
-                        <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
-                          Revision Requested
-                        </Badge>
-                      );
-                    }
-                    
-                    return (
-                      <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
-                        Pending Approval
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground">Delivery Status</p>
+                      {(() => {
+                        const acceptedData = getLastAcceptedOrderRequestData();
+                        if (acceptedData?.delivery_duration) {
+                          const { days = 0, hours = 0, minutes = 0 } = acceptedData.delivery_duration;
+                          const parts: string[] = [];
+                          if (days > 0) parts.push(`${days}d`);
+                          if (hours > 0) parts.push(`${hours}h`);
+                          if (minutes > 0) parts.push(`${minutes}m`);
+                          const durationText = parts.join(' ') || '0m';
+                          return (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Agreed delivery time: {durationText}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                    {hasOpenDispute && (
+                      <Badge variant="secondary" className="mt-1 bg-red-600 text-white">
+                        In Dispute
                       </Badge>
-                    );
-                  })()}
-                  {!hasOpenDispute && orderDetails.delivery_status === 'pending' && (() => {
-                    // Try to get countdown from delivery_deadline first
-                    if (orderDetails.delivery_deadline) {
-                      const deadline = new Date(orderDetails.delivery_deadline);
-                      const now = new Date();
-                      const diff = deadline.getTime() - now.getTime();
-                      const isOverdue = diff <= 0;
+                    )}
+                    {!hasOpenDispute && orderDetails.delivery_status === 'accepted' && (
+                      <Badge variant="secondary" className="mt-1 bg-green-600 text-white">
+                        Completed
+                      </Badge>
+                    )}
+                    {!hasOpenDispute && orderDetails.delivery_status === 'pending_revision' && (
+                      <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
+                        Revision Requested
+                      </Badge>
+                    )}
+                    {!hasOpenDispute && orderDetails.delivery_status === 'delivered' && (() => {
+                      const lastDeliveryIdx = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
+                      const hasRevision = messages.slice(lastDeliveryIdx + 1).some(m => parseRevisionRequested(m.message));
                       
-                      if (isOverdue) {
+                      if (hasRevision) {
                         return (
-                          <Badge variant="secondary" className="mt-1 bg-red-600/20 text-red-600">
-                            Overdue
+                          <Badge variant="secondary" className="mt-1 bg-black text-orange-400">
+                            Revision Requested
                           </Badge>
                         );
                       }
                       
-                      const totalSeconds = Math.floor(diff / 1000);
-                      const days = Math.floor(totalSeconds / 86400);
-                      const hours = Math.floor((totalSeconds % 86400) / 3600);
-                      const minutes = Math.floor((totalSeconds % 3600) / 60);
-                      const seconds = totalSeconds % 60;
-                      
-                      let countdownText = '';
-                      if (days > 0) {
-                        countdownText = `${days}d ${hours}h ${minutes}m`;
-                      } else if (hours > 0) {
-                        countdownText = `${hours}h ${minutes}m ${seconds}s`;
-                      } else {
-                        countdownText = `${minutes}m ${seconds}s`;
-                      }
-                      
                       return (
-                        <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
-                          {countdownText}
+                        <Badge variant="secondary" className="mt-1 bg-purple-600/20 text-purple-600">
+                          Pending Approval
                         </Badge>
                       );
-                    }
-                    
-                    // Fallback to accepted order data from messages
-                    const acceptedData = getLastAcceptedOrderRequestData();
-                    if (acceptedData?.accepted_at && acceptedData?.delivery_duration) {
-                      const countdown = getDeliveryCountdown(acceptedData.accepted_at, acceptedData.delivery_duration);
-                      if (countdown) {
-                        if (countdown.isOverdue) {
+                    })()}
+                    {!hasOpenDispute && orderDetails.delivery_status === 'pending' && (() => {
+                      if (orderDetails.delivery_deadline) {
+                        const deadline = new Date(orderDetails.delivery_deadline);
+                        const now = new Date();
+                        const diff = deadline.getTime() - now.getTime();
+                        const isOverdue = diff <= 0;
+                        
+                        if (isOverdue) {
                           return (
                             <Badge variant="secondary" className="mt-1 bg-red-600/20 text-red-600">
                               Overdue
                             </Badge>
                           );
                         }
+                        
+                        const totalSeconds = Math.floor(diff / 1000);
+                        const days = Math.floor(totalSeconds / 86400);
+                        const hours = Math.floor((totalSeconds % 86400) / 3600);
+                        const minutes = Math.floor((totalSeconds % 3600) / 60);
+                        const seconds = totalSeconds % 60;
+                        
+                        let countdownText = '';
+                        if (days > 0) {
+                          countdownText = `${days}d ${hours}h ${minutes}m`;
+                        } else if (hours > 0) {
+                          countdownText = `${hours}h ${minutes}m ${seconds}s`;
+                        } else {
+                          countdownText = `${minutes}m ${seconds}s`;
+                        }
+                        
                         return (
                           <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
-                            {countdown.text}
+                            {countdownText}
                           </Badge>
                         );
                       }
-                    }
-                    
-                    // Fallback to Pending if no countdown available
+                      
+                      const acceptedData = getLastAcceptedOrderRequestData();
+                      if (acceptedData?.accepted_at && acceptedData?.delivery_duration) {
+                        const countdown = getDeliveryCountdown(acceptedData.accepted_at, acceptedData.delivery_duration);
+                        if (countdown) {
+                          if (countdown.isOverdue) {
+                            return (
+                              <Badge variant="secondary" className="mt-1 bg-red-600/20 text-red-600">
+                                Overdue
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
+                              {countdown.text}
+                            </Badge>
+                          );
+                        }
+                      }
+                      
+                      return (
+                        <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
+                          Pending
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Amount Paid</span>
+                    <span className="font-semibold">${(orderDetails.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {(() => {
+                  const storedTerms = orderDetails.special_terms;
+                  const acceptedData = getLastAcceptedOrderRequestData();
+                  const terms = storedTerms || acceptedData?.special_terms;
+                  
+                  if (terms) {
                     return (
-                      <Badge variant="secondary" className="mt-1 bg-black text-white dark:bg-white dark:text-black">
-                        Pending
-                      </Badge>
+                      <div className="border-t pt-4">
+                        <p className="text-sm text-muted-foreground mb-1">Special Terms</p>
+                        <p className="text-sm">{terms}</p>
+                      </div>
                     );
-                  })()}
-                </div>
-              </div>
+                  }
+                  return null;
+                })()}
 
-
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-semibold">${(orderDetails.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-
-              {/* Special Terms - prefer order's stored terms, fallback to chat history */}
-              {(() => {
-                // First try to get from the order itself (for completed orders)
-                const storedTerms = orderDetails.special_terms;
-                // Fallback to chat history (for in-progress orders)
-                const acceptedData = getLastAcceptedOrderRequestData();
-                const terms = storedTerms || acceptedData?.special_terms;
-                
-                if (terms) {
-                  return (
-                    <div className="border-t pt-4">
-                      <p className="text-sm text-muted-foreground mb-1">Special Terms</p>
-                      <p className="text-sm">{terms}</p>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {/* Good to Know */}
-              {globalChatRequest?.media_site?.about && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-1">Good to Know</p>
-                  <p className="text-sm">{globalChatRequest.media_site.about}</p>
-                </div>
-              )}
-
-              {orderDetails.delivery_url && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-1">Delivery Link</p>
-                  <a 
-                    href={orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline flex items-center gap-1"
-                  >
-                    {orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              )}
-
-              {orderDetails.delivery_notes && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-1">Delivery Notes</p>
-                  <p className="text-sm">{orderDetails.delivery_notes}</p>
-                </div>
-              )}
-
-              <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
-                <p className="flex items-center gap-1">
-                  Order ID: {orderDetails.order_number || orderDetails.id.slice(0, 8)}
-                  <Copy 
-                    className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
-                    onClick={() => {
-                      navigator.clipboard.writeText(orderDetails.order_number || orderDetails.id);
-                      toast.success("Order ID copied to clipboard");
-                    }}
-                  />
-                </p>
-                <p>Order Placed and Paid: {new Date(orderDetails.created_at).toLocaleString()}</p>
-                {orderDetails.delivery_status === 'pending_revision' && orderDetails.delivered_at && (
-                  <p>Last Order Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                {globalChatRequest?.media_site?.about && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-muted-foreground mb-1">Good to Know</p>
+                    <p className="text-sm">{globalChatRequest.media_site.about}</p>
+                  </div>
                 )}
-                {orderDetails.delivery_status !== 'pending_revision' && orderDetails.delivered_at && (
-                  <>
-                    {(() => {
-                      // Get all delivery messages to find the first one
-                      const deliveryMessages = messages.filter(m => parseOrderDelivered(m.message));
-                      const revisionMessages = messages.filter(m => parseRevisionRequested(m.message));
-                      
-                      // Get the first delivery date
-                      const firstDeliveryMsg = deliveryMessages[0];
-                      const firstDeliveryDate = firstDeliveryMsg ? new Date(firstDeliveryMsg.created_at) : new Date(orderDetails.delivered_at);
-                      
-                      // If there are revision messages and multiple deliveries, show both dates
-                      if (revisionMessages.length > 0 && deliveryMessages.length > 1) {
+
+                {orderDetails.delivery_url && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-muted-foreground mb-1">Delivery Link</p>
+                    <a 
+                      href={orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline flex items-center gap-1"
+                    >
+                      {orderDetails.delivery_url.startsWith('http') ? orderDetails.delivery_url : `https://${orderDetails.delivery_url}`}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+
+                {orderDetails.delivery_notes && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-muted-foreground mb-1">Delivery Notes</p>
+                    <p className="text-sm">{orderDetails.delivery_notes}</p>
+                  </div>
+                )}
+
+                <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
+                  <p className="flex items-center gap-1">
+                    Order ID: {orderDetails.order_number || orderDetails.id.slice(0, 8)}
+                    <Copy 
+                      className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
+                      onClick={() => {
+                        navigator.clipboard.writeText(orderDetails.order_number || orderDetails.id);
+                        toast.success("Order ID copied to clipboard");
+                      }}
+                    />
+                  </p>
+                  <p>Order Placed and Paid: {new Date(orderDetails.created_at).toLocaleString()}</p>
+                  {orderDetails.delivery_status === 'pending_revision' && orderDetails.delivered_at && (
+                    <p>Last Order Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                  )}
+                  {orderDetails.delivery_status !== 'pending_revision' && orderDetails.delivered_at && (
+                    <>
+                      {(() => {
+                        const deliveryMessages = messages.filter(m => parseOrderDelivered(m.message));
+                        const revisionMessages = messages.filter(m => parseRevisionRequested(m.message));
+                        
+                        const firstDeliveryMsg = deliveryMessages[0];
+                        const firstDeliveryDate = firstDeliveryMsg ? new Date(firstDeliveryMsg.created_at) : new Date(orderDetails.delivered_at);
+                        
+                        if (revisionMessages.length > 0 && deliveryMessages.length > 1) {
+                          return (
+                            <>
+                              <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
+                              <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
+                              {orderDetails.accepted_at && (
+                                <p>Order Completed: {new Date(orderDetails.accepted_at).toLocaleString()}</p>
+                              )}
+                            </>
+                          );
+                        }
+                        
                         return (
                           <>
                             <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
-                            <p>Last Revised Delivery: {new Date(orderDetails.delivered_at).toLocaleString()}</p>
                             {orderDetails.accepted_at && (
                               <p>Order Completed: {new Date(orderDetails.accepted_at).toLocaleString()}</p>
                             )}
                           </>
                         );
-                      }
-                      
-                      // Otherwise just show the delivered date
-                      return (
-                        <>
-                          <p>Delivered: {firstDeliveryDate.toLocaleString()}</p>
-                          {orderDetails.accepted_at && (
-                            <p>Order Completed: {new Date(orderDetails.accepted_at).toLocaleString()}</p>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </>
-                )}
+                      })()}
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-            </ScrollArea>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">Order not found</p>
-          )}
-        </DialogContent>
-      </Dialog>
+              </ScrollArea>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">Order not found</p>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Order With Credits Dialog */}
       <OrderWithCreditsDialog
