@@ -5724,6 +5724,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                       </>
                     )}
+              </div>
+                )}
+              </div>
+              {/* Expandable Order Details */}
+              <div className="pl-9 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+                >
+                  Order Details
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {bannerOrderDetailsOpen && (
+                  <div className="mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 pt-2 rounded-none border-t border-border">
+                    <p>Price: {pendingClientOrder.price.toLocaleString()} credits</p>
+                    {pendingClientOrder.delivery_duration && (pendingClientOrder.delivery_duration.days > 0 || pendingClientOrder.delivery_duration.hours > 0 || pendingClientOrder.delivery_duration.minutes > 0) && (
+                      <p>Delivery: {formatDeliveryDuration(pendingClientOrder.delivery_duration)}</p>
+                    )}
+                    {pendingClientOrder.special_terms && (
+                      <p>Special Terms: {pendingClientOrder.special_terms}</p>
+                    )}
                   </div>
                 )}
               </div>
