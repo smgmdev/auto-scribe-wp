@@ -678,15 +678,19 @@ export function AdminEngagementsView() {
                     <div className="md:hidden space-y-2">
                       <div className="space-y-0.5">
                         <span className="text-xs text-muted-foreground block">
-                          Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                          Opened: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                         {(() => {
                           const lastEvent = getLastEventInfo(r);
                           return (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              Last Event: <span className="font-medium">{lastEvent.eventName}</span> • {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
-                            </span>
+                            <>
+                              <span className="text-xs text-muted-foreground block">
+                                Last Event: {lastEvent.eventName}
+                              </span>
+                              <span className="text-xs text-muted-foreground block">
+                                {format(lastEvent.eventTime, 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </>
                           );
                         })()}
                       </div>
@@ -800,10 +804,9 @@ export function AdminEngagementsView() {
                         <div className="md:hidden space-y-2">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
-                              Opened Engagement: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
+                              Opened: {format(new Date(r.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
+                            <span className="text-xs text-muted-foreground block">
                               Last Message: {messages[r.id]?.length > 0 
                                 ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
                                 : 'No messages'}
