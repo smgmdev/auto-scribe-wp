@@ -4357,7 +4357,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             {isClient && !hasOrder && !isOwnMessage && (
               <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
                 <Button
-                  size="sm"
+                  size="default"
                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   disabled={hasOpenDispute}
                   onClick={() => {
@@ -4375,7 +4375,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Accept
                 </Button>
                 <Button
-                  size="sm"
+                  size="default"
                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectOrderRequest}
                   disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
