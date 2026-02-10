@@ -34,7 +34,7 @@
     --input: 220 15% 88%;
     --ring: currentColor;
 
-    --radius: 0.625rem;
+    --radius: 0;
 
     /* Custom tokens */
     --success: 152 69% 40%;
