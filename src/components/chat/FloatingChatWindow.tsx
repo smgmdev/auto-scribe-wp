@@ -5263,7 +5263,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </div>
                     {/* Mobile-only action buttons */}
                     {!hasOpenDispute && (
-                      <div className="flex md:hidden items-center gap-2 w-full mt-2">
+                      <div className="flex md:hidden items-center gap-2 w-full mt-1">
                         {canDeliver && (
                           <Button
                             size="sm"
