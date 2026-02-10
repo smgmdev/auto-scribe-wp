@@ -318,7 +318,7 @@ export function HeadlinesView() {
                     </div>
                     <div className="hidden md:flex items-center gap-2 flex-shrink-0">
                       <button 
-                        className="p-2 rounded-md hover:bg-muted transition-colors"
+                        className="p-2 rounded-none hover:bg-muted transition-colors"
                         onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
                         title={headline.url}
                       >

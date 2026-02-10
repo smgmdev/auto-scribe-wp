@@ -251,7 +251,7 @@ export function ArticlesView() {
       {/* Deleting Overlay */}
       {isDeleting && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <Loader2 className="h-10 w-10 animate-spin text-destructive" />
             <div className="text-center">
               <p className="text-lg font-medium text-foreground">Deleting Article...</p>
@@ -264,7 +264,7 @@ export function ArticlesView() {
       {/* Delete Success Overlay */}
       {showDeleteSuccess && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-lg bg-card border border-border shadow-lg animate-scale-in">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <div className="relative">
               <div className="h-16 w-16 rounded-full bg-success/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
                 <CheckCircle2 className="h-10 w-10 text-success" />
