@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, RefreshCw } from 'lucide-react';
+import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, RefreshCw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -62,6 +62,7 @@ export function AdminAIArticlesView() {
   const [editTags, setEditTags] = useState('');
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Pagination state
   const [displayedArticles, setDisplayedArticles] = useState<PublishedSource[]>([]);
@@ -613,10 +614,23 @@ export function AdminAIArticlesView() {
       {/* Articles List */}
       <Card>
         <CardHeader>
-          <CardTitle>Published Articles</CardTitle>
-          <CardDescription>
-            {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
-          </CardDescription>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <CardTitle>Published Articles</CardTitle>
+              <CardDescription>
+                {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
+              </CardDescription>
+            </div>
+            <div className="relative w-full md:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 rounded-none"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -625,15 +639,24 @@ export function AdminAIArticlesView() {
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
-          ) : displayedArticles.length === 0 ? (
+          ) : (() => {
+            const filtered = searchQuery.trim()
+              ? displayedArticles.filter(a => {
+                  const q = searchQuery.toLowerCase();
+                  return (a.ai_title || a.source_title || '').toLowerCase().includes(q) ||
+                    (a.focus_keyword || '').toLowerCase().includes(q) ||
+                    (a.tags || []).some(t => t.toLowerCase().includes(q));
+                })
+              : displayedArticles;
+            return filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No articles published yet</p>
-              <p className="text-sm">Articles will appear here once auto-publishing runs</p>
+              <p>{searchQuery.trim() ? 'No articles match your search' : 'No articles published yet'}</p>
+              <p className="text-sm">{searchQuery.trim() ? 'Try a different search term' : 'Articles will appear here once auto-publishing runs'}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {displayedArticles.map((article) => {
+              {filtered.map((article) => {
                   // Helper function to highlight focus keyword in title
                   const highlightFocusKeyword = (title: string, focusKeyword: string | null) => {
                     if (!focusKeyword || !title) return title;
@@ -803,7 +826,8 @@ export function AdminAIArticlesView() {
                 </div>
               )}
             </div>
-          )}
+          );
+          })()}
         </CardContent>
       </Card>
 
