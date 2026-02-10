@@ -309,7 +309,7 @@ export function OrderWithCreditsDialog({
                   min="0"
                   value={deliveryDays}
                   onChange={(e) => setDeliveryDays(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="text-center"
+                  className="text-center h-9 text-sm"
                 />
               </div>
               <div className="space-y-1">
@@ -321,7 +321,7 @@ export function OrderWithCreditsDialog({
                   max="23"
                   value={deliveryHours}
                   onChange={(e) => setDeliveryHours(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
-                  className="text-center"
+                  className="text-center h-9 text-sm"
                 />
               </div>
               <div className="space-y-1">
@@ -333,7 +333,7 @@ export function OrderWithCreditsDialog({
                   max="59"
                   value={deliveryMinutes}
                   onChange={(e) => setDeliveryMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                  className="text-center"
+                  className="text-center h-9 text-sm"
                 />
               </div>
             </div>
@@ -358,8 +358,8 @@ export function OrderWithCreditsDialog({
               placeholder="Enter any special terms or requirements..."
               value={specialTerms}
               onChange={(e) => setSpecialTerms(e.target.value)}
-              className="resize-none"
-              rows={3}
+              className="resize-none text-sm"
+              rows={2}
             />
           </div>
 
