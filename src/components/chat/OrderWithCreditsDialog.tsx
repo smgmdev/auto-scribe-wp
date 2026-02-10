@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Coins, Tag, AlertTriangle, Info, CreditCard } from 'lucide-react';
+import { Loader2, Coins, AlertTriangle, Info, CreditCard, GripHorizontal, X, SendHorizonal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+
 interface MediaSiteInfo {
   id: string;
   name: string;
@@ -62,6 +63,19 @@ export function OrderWithCreditsDialog({
   const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const { credits, user } = useAuth();
+  const isMobile = useIsMobile();
+
+  // Drag state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+  // Reset position when dialog opens
+  useEffect(() => {
+    if (open) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [open]);
 
   // Register on popup stack for layered Esc handling
   useEffect(() => {
@@ -70,14 +84,13 @@ export function OrderWithCreditsDialog({
     return () => removePopup('order-with-credits-dialog');
   }, [open, onOpenChange]);
 
-  // Fetch locked credits when dialog opens (includes active orders AND pending requests)
+  // Fetch locked credits when dialog opens
   React.useEffect(() => {
     const fetchLockedCredits = async () => {
       if (!open || !user) return;
       
       let totalLocked = 0;
 
-      // Fetch active orders
       const { data: activeOrders } = await supabase
         .from('orders')
         .select('id, media_sites(price)')
@@ -88,14 +101,11 @@ export function OrderWithCreditsDialog({
 
       if (activeOrders && activeOrders.length > 0) {
         for (const order of activeOrders) {
-          const mediaSite = order.media_sites as { price: number } | null;
-          if (mediaSite?.price) {
-            totalLocked += mediaSite.price;
-          }
+          const ms = order.media_sites as { price: number } | null;
+          if (ms?.price) totalLocked += ms.price;
         }
       }
 
-      // Also fetch pending service requests with locked credits (CLIENT_ORDER_REQUEST sent but no order created)
       const { data: pendingRequests } = await supabase
         .from('service_requests')
         .select('id, media_site_id, media_sites(price)')
@@ -105,7 +115,6 @@ export function OrderWithCreditsDialog({
 
       if (pendingRequests && pendingRequests.length > 0) {
         for (const request of pendingRequests) {
-          // Check if this request has a CLIENT_ORDER_REQUEST message (credits locked)
           const { data: orderRequestMessages } = await supabase
             .from('service_messages')
             .select('id')
@@ -114,10 +123,8 @@ export function OrderWithCreditsDialog({
             .limit(1);
 
           if (orderRequestMessages && orderRequestMessages.length > 0) {
-            const mediaSite = request.media_sites as { price: number } | null;
-            if (mediaSite?.price) {
-              totalLocked += mediaSite.price;
-            }
+            const ms = request.media_sites as { price: number } | null;
+            if (ms?.price) totalLocked += ms.price;
           }
         }
       }
@@ -141,8 +148,6 @@ export function OrderWithCreditsDialog({
   const creditCost = mediaSite?.price || 0;
   const availableCredits = (credits || 0) - lockedCredits;
   const hasEnoughCredits = availableCredits >= creditCost;
-  
-  // Check if delivery duration is valid (at least some time specified)
   const totalDurationMinutes = (deliveryDays * 24 * 60) + (deliveryHours * 60) + deliveryMinutes;
   const hasValidDuration = totalDurationMinutes > 0;
 
@@ -152,7 +157,6 @@ export function OrderWithCreditsDialog({
     setSending(true);
 
     try {
-      // First, lock the credits via edge function
       const { data: lockResult, error: lockError } = await supabase.functions.invoke('lock-order-credits', {
         body: {
           media_site_id: mediaSite.id,
@@ -160,15 +164,9 @@ export function OrderWithCreditsDialog({
         }
       });
 
-      if (lockError) {
-        throw new Error(lockError.message || 'Failed to lock credits');
-      }
+      if (lockError) throw new Error(lockError.message || 'Failed to lock credits');
+      if (!lockResult?.success) throw new Error(lockResult?.error || 'Failed to lock credits');
 
-      if (!lockResult?.success) {
-        throw new Error(lockResult?.error || 'Failed to lock credits');
-      }
-
-      // Create the order request message (from client to agency)
       const orderRequestData = {
         type: 'CLIENT_ORDER_REQUEST',
         media_site_id: mediaSite.id,
@@ -196,7 +194,6 @@ export function OrderWithCreditsDialog({
         .single();
 
       if (error) {
-        // If message insert fails, release the locked credits
         await supabase.functions.invoke('release-order-credits', {
           body: {
             media_site_id: mediaSite.id,
@@ -208,13 +205,10 @@ export function OrderWithCreditsDialog({
       }
 
       toast.success(`Order request sent. ${creditCost} credits locked.`);
-      
-      // Reset form
       setDeliveryDays(0);
       setDeliveryHours(0);
       setDeliveryMinutes(0);
       setSpecialTerms('');
-      
       onOpenChange(false);
       onSuccess(insertedMsg as ServiceMessage);
     } catch (error: any) {
@@ -225,42 +219,72 @@ export function OrderWithCreditsDialog({
     }
   };
 
-  if (!mediaSite) return null;
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, textarea, [role="button"]')) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY, posX: position.x, posY: position.y };
+    e.preventDefault();
+  }, [position]);
 
-  return (
-    <Dialog open={open} onOpenChange={(newOpen) => !sending && onOpenChange(newOpen)}>
-      <DialogContent className="sm:max-w-md z-[9999] max-h-[90vh] flex flex-col" onEscapeKeyDown={(e) => e.preventDefault()}>
-        <DialogHeader className="shrink-0">
-          <DialogTitle>
-            {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
-          </DialogTitle>
-          <DialogDescription>
-            {isResendMode ? 'Resend an order request to the agency for approval' : 'Send an order request to the agency for approval'}
-          </DialogDescription>
-        </DialogHeader>
+  useEffect(() => {
+    if (!isDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({
+        x: dragStartRef.current.posX + (e.clientX - dragStartRef.current.x),
+        y: dragStartRef.current.posY + (e.clientY - dragStartRef.current.y)
+      });
+    };
+    const handleMouseUp = () => setIsDragging(false);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
-        <ScrollArea className="flex-1 -mx-6 px-6 overflow-y-auto">
-          <div className="space-y-4 pb-2">
-          {/* Media Site Info */}
-          <div className="flex items-center gap-4 p-4 rounded-lg border border-border bg-muted/50">
-            {mediaSite.favicon && (
-              <img 
-                src={mediaSite.favicon} 
-                alt="" 
-                className="w-12 h-12 rounded-lg object-cover"
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold truncate">{mediaSite.name}</h3>
-              <p className="text-2xl font-bold text-primary">
-                ${creditCost.toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {creditCost.toLocaleString()} credits
-              </p>
-            </div>
+  if (!open || !mediaSite) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+      <div
+        className={`pointer-events-auto bg-background relative overflow-y-auto ${
+          isMobile
+            ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+            : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+        }`}
+        style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
+      >
+        {/* Drag Handle - desktop only */}
+        {!isMobile && (
+          <div
+            className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+            onMouseDown={handleDragStart}
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
           </div>
+        )}
 
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+            <SendHorizonal className="h-5 w-5 text-accent" />
+            {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
+          </h2>
+          <button
+            onClick={() => !sending && onOpenChange(false)}
+            className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {isResendMode ? 'Resend an order request to the agency for approval' : 'Send an order request to the agency for approval'}
+        </p>
+
+        <div className="space-y-4 py-4">
           {/* Proposed Delivery Duration */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -340,7 +364,7 @@ export function OrderWithCreditsDialog({
           </div>
 
           {/* Credit Balance */}
-          <div className="rounded-lg border border-border bg-background p-4">
+          <div className="rounded-none border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <Coins className="h-4 w-4" />
@@ -356,7 +380,7 @@ export function OrderWithCreditsDialog({
             </div>
             <div className="border-t border-border my-3" />
             <div className="flex items-center justify-between">
-              <span className="font-medium">After Order</span>
+              <span className="font-semibold">After Order</span>
               <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
                 {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
               </span>
@@ -365,7 +389,7 @@ export function OrderWithCreditsDialog({
 
           {/* Insufficient Credits Warning */}
           {!hasEnoughCredits && (
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <div className="flex items-start gap-3 p-4 rounded-none bg-destructive/10 border border-destructive/20">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
@@ -376,12 +400,11 @@ export function OrderWithCreditsDialog({
             </div>
           )}
 
-
           {!hasEnoughCredits && (
             <Button
               onClick={() => setBuyCreditsOpen(true)}
               variant="default"
-              className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+              className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
               size="lg"
             >
               <CreditCard className="h-4 w-4 mr-2" />
@@ -392,7 +415,7 @@ export function OrderWithCreditsDialog({
           <Button
             onClick={handleSendRequest}
             disabled={sending || !hasEnoughCredits || !hasValidDuration}
-            className="w-full border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             size="lg"
           >
             {sending ? (
@@ -408,10 +431,10 @@ export function OrderWithCreditsDialog({
               'Insufficient Credits'
             )}
           </Button>
-          </div>
-        </ScrollArea>
-        <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+      <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
+    </div>,
+    document.body
   );
 }
