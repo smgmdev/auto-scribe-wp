@@ -5426,8 +5426,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           );
         })()}
 
-        {/* Pending Order Banner - Sticky (hide when order exists or accepted) */}
-        {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !hasAcceptedOrderRequest && !loadingMessages && (() => {
+        {/* Pending Order Banner - Sticky (hide when order exists, accepted, or rejection in progress) */}
+        {hasExistingOrderRequest && !globalChatRequest?.order && !localOrder && !hasAcceptedOrderRequest && !loadingMessages && !rejectingOrderRequestId && (() => {
           const pendingOrder = getLastOrderRequestData();
           if (!pendingOrder) return null;
           const isClient = actualSenderType === 'client';
