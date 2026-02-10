@@ -5193,7 +5193,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 -mt-0.5">
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
