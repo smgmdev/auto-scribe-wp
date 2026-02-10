@@ -4527,9 +4527,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle order placed special message
     if (orderPlaced && !quote) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
-      // Check if there was an offer (ORDER_REQUEST) before this order - if so, show "Offer Accepted"
+      // Check if there was an offer (ORDER_REQUEST) before this order
       const hasOffer = messages.some(m => m.message.includes('[ORDER_REQUEST]'));
-      const orderLabel = hasOffer ? 'Offer Accepted' : 'Order Placed';
+      // Client (sender) sees "Offer Accepted", agency (receiver) sees "Order Placed"
+      const orderLabel = hasOffer && isOwnMessage ? 'Offer Accepted' : 'Order Placed';
       
       return (
         <div className="space-y-1">
