@@ -6403,16 +6403,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm font-medium">Delivery Duration <span className="text-destructive">*</span></Label>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button type="button" className="focus:outline-none">
                         <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" align="start" className="z-[10001] max-w-[calc(100vw-3rem)] md:max-w-[380px]">
-                        <p className="text-xs">Set the delivery time for this order. At least one value must be greater than 0.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" className="z-[10001] text-xs p-3 w-auto max-w-[calc(100%-2rem)]" style={{ maxWidth: 'var(--radix-popover-content-available-width, 350px)' }}>
+                      Set the delivery time for this order. At least one value must be greater than 0.
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
