@@ -3766,7 +3766,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {clientOrderRequest.media_site_name}
                 </p>
-                {/* Order details shown via expandable section in banner */}
+                <div className={`mt-2 space-y-1 text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <p>Price: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{clientOrderRequest.price?.toLocaleString()} credits</span></p>
+                  {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
+                    <p>Delivery: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                      {[clientOrderRequest.delivery_duration.days > 0 && `${clientOrderRequest.delivery_duration.days}d`, clientOrderRequest.delivery_duration.hours > 0 && `${clientOrderRequest.delivery_duration.hours}h`, clientOrderRequest.delivery_duration.minutes > 0 && `${clientOrderRequest.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                    </span></p>
+                  )}
+                  {clientOrderRequest.special_terms && (
+                    <p>Terms: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{clientOrderRequest.special_terms}</span></p>
+                  )}
+                </div>
             </div>
             
             {/* Action buttons for agency */}
