@@ -4073,7 +4073,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (deliveryAccepted && !quote) {
       return (
         <div className="space-y-1 min-w-0 max-w-full">
-          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${
+          <div className={`rounded-none border p-3 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'

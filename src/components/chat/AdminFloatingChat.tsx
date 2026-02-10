@@ -1125,7 +1125,7 @@ export function AdminFloatingChat({
     if (deliveryAccepted) {
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+            <div className="rounded-none border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <Package className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">
