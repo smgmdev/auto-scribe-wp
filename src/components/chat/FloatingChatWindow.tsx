@@ -3180,7 +3180,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       return isOwnMessage ? 'Offer Sent' : 'Offer Received';
     }
     if (cleanMessage.startsWith('[ORDER_PLACED]')) {
-      return 'Order Placed';
+      return 'Order Placed'; // Will be dynamically replaced in render
     }
     if (cleanMessage.startsWith('[ORDER_CANCELLED]')) {
       return 'Order Cancelled';
@@ -4527,6 +4527,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle order placed special message
     if (orderPlaced && !quote) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
+      // Check if there was an offer (ORDER_REQUEST) before this order - if so, show "Offer Accepted"
+      const hasOffer = messages.some(m => m.message.includes('[ORDER_REQUEST]'));
+      const orderLabel = hasOffer ? 'Offer Accepted' : 'Order Placed';
       
       return (
         <div className="space-y-1">
@@ -4537,7 +4540,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>Order Placed</span>
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}</span>
             </div>
             <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}

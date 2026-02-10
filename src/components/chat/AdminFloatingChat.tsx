@@ -1235,13 +1235,16 @@ export function AdminFloatingChat({
     // Handle order placed special message
     if (orderPlaced) {
       const timeInfo = orderPlaced.delivery_deadline ? formatTimeRemaining(orderPlaced.delivery_deadline) : null;
+      // Check if there was an offer (ORDER_REQUEST) before this order
+      const hasOffer = messages.some(m => m.message.includes('[ORDER_REQUEST]'));
+      const orderLabel = hasOffer ? 'Offer Accepted' : 'Order Placed';
       
       return (
         <div className="space-y-1">
           <div className="rounded-none border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="font-semibold text-sm text-green-700 dark:text-green-300">Order Placed</span>
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">{orderLabel}</span>
             </div>
             <p className="text-sm text-muted-foreground">
               {orderPlaced.media_site_name}
