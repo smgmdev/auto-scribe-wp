@@ -2287,7 +2287,7 @@ export function ChatListPanel() {
 
       {/* Expanded state - Chat list panel */}
       {isExpanded && (
-        <div className="w-full bg-card border border-border rounded-t-lg rounded-b-none shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+        <div className="w-full min-h-[420px] bg-card border border-border rounded-t-lg rounded-b-none shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
           {/* Header - clickable to minimize */}
           <div 
             className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
