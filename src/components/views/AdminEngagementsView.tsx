@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag, Mail } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag, Mail, CheckCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
@@ -85,6 +85,7 @@ interface Dispute {
 
 export function AdminEngagementsView() {
   const { openGlobalChat, decrementAdminUnreadEngagementsCount, incrementAdminUnreadEngagementsCount, decrementAdminUnreadDeliveredCount, decrementAdminUnreadCancelledEngagementsCount } = useAppStore();
+  const [markingAllRead, setMarkingAllRead] = useState(false);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [messages, setMessages] = useState<Record<string, ServiceMessage[]>>({});
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -822,6 +823,36 @@ export function AdminEngagementsView() {
                   ))}
                 </div>
               )}
+              {deliveredRequests.some(r => !r.read) && (
+                <div className="flex justify-center mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      setMarkingAllRead(true);
+                      try {
+                        const unreadIds = deliveredRequests.filter(r => !r.read).map(r => r.id);
+                        const { error } = await supabase
+                          .from('service_requests')
+                          .update({ read: true })
+                          .in('id', unreadIds);
+                        if (error) throw error;
+                        setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
+                        unreadIds.forEach(() => decrementAdminUnreadDeliveredCount());
+                        sonnerToast.success(`Marked ${unreadIds.length} delivered engagements as read`);
+                      } catch (error: any) {
+                        sonnerToast.error(error.message || 'Failed to mark all as read');
+                      } finally {
+                        setMarkingAllRead(false);
+                      }
+                    }}
+                    disabled={markingAllRead}
+                    className="rounded-none hover:bg-black hover:text-white hover:border-black"
+                  >
+                    {markingAllRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-2" />}
+                    Mark All Read
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="cancelled" className="mt-0">
@@ -932,6 +963,36 @@ export function AdminEngagementsView() {
                       </Card>
                     );
                   })}
+                </div>
+              )}
+              {cancelledRequests.some(r => !r.read) && (
+                <div className="flex justify-center mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      setMarkingAllRead(true);
+                      try {
+                        const unreadIds = cancelledRequests.filter(r => !r.read).map(r => r.id);
+                        const { error } = await supabase
+                          .from('service_requests')
+                          .update({ read: true })
+                          .in('id', unreadIds);
+                        if (error) throw error;
+                        setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
+                        unreadIds.forEach(() => decrementAdminUnreadCancelledEngagementsCount());
+                        sonnerToast.success(`Marked ${unreadIds.length} cancelled engagements as read`);
+                      } catch (error: any) {
+                        sonnerToast.error(error.message || 'Failed to mark all as read');
+                      } finally {
+                        setMarkingAllRead(false);
+                      }
+                    }}
+                    disabled={markingAllRead}
+                    className="rounded-none hover:bg-black hover:text-white hover:border-black"
+                  >
+                    {markingAllRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-2" />}
+                    Mark All Read
+                  </Button>
                 </div>
               )}
             </TabsContent>
