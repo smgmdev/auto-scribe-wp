@@ -5513,7 +5513,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                           className="rounded-none px-8 bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => {
                             setPendingOrderRequest({
                               media_site_id: pendingOrder.media_site_id,
@@ -5530,7 +5530,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                         <Button
                           size="sm"
-                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                           className="rounded-none px-8 bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={handleBannerRejectOrderRequest}
                           disabled={rejectingOrderRequestId === pendingOrder.messageId}
                         >
