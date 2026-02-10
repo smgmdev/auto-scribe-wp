@@ -5165,8 +5165,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           return (
             <div className="p-2 md:p-3 bg-black text-white border-b border-black">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 md:gap-3 min-w-0">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
