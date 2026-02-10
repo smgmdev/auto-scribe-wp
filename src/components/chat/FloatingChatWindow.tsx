@@ -3924,8 +3924,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/40 dark:to-slate-950/40 border-gray-200 dark:border-gray-800'
           }`}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full border-2 border-white/60 flex items-center justify-center shrink-0 animate-clock-tick">
-                <Clock className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                <Clock className="h-8 w-8 text-white animate-clock-tick" />
               </div>
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
