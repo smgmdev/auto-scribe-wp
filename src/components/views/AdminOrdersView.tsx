@@ -1139,9 +1139,6 @@ export function AdminOrdersView() {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-base">{order.media_sites?.name || 'Unknown Site'}</CardTitle>
-                            {hasUnreadNotification && (
-                              <Badge className="hidden md:inline-flex bg-green-500 text-white border-green-500">New Order</Badge>
-                            )}
                           </div>
                           {order.media_sites?.agency && (
                             <span className="text-xs text-muted-foreground">via {order.media_sites.agency}</span>
@@ -1151,6 +1148,9 @@ export function AdminOrdersView() {
                       {/* Desktop: Badge at right side */}
                       <div className="hidden md:flex flex-col items-end gap-1">
                           <div className="flex gap-2">
+                            {hasUnreadNotification && (
+                              <Badge className="bg-green-500 text-white border-green-500">New Order</Badge>
+                            )}
                             {order.status === 'cancelled' ? (
                               <Badge className="bg-muted text-muted-foreground border-muted-foreground/30">Cancelled</Badge>
                             ) : isDisputedOrder ? (
