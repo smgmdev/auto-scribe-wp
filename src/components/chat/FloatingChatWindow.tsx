@@ -5329,7 +5329,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 </div>
                 {!hasOpenDispute && (
-                <div className="hidden md:flex items-center gap-2">
+                <div className="hidden md:flex items-start gap-2 pt-0.5">
                   {canDeliver && (
                     <TooltipProvider>
                       <Tooltip>
