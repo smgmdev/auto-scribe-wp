@@ -673,7 +673,7 @@ export function AdminEngagementsView() {
                           <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                         )}
                         {r.media_sites?.price !== undefined && (
-                          <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                          <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                         )}
                       </div>
                     </div>
@@ -700,7 +700,7 @@ export function AdminEngagementsView() {
                             <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                           )}
                           {r.media_sites?.price !== undefined && (
-                            <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                            <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                           )}
                         </div>
                       </div>
@@ -798,7 +798,7 @@ export function AdminEngagementsView() {
                               <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                             )}
                             {r.media_sites?.price !== undefined && (
-                              <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                              <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                             )}
                           </div>
                         </div>
@@ -828,7 +828,7 @@ export function AdminEngagementsView() {
                                 <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                               )}
                               {r.media_sites?.price !== undefined && (
-                                <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                                <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                               )}
                             </div>
                           </div>
@@ -913,7 +913,7 @@ export function AdminEngagementsView() {
                                 <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                               )}
                               {r.media_sites?.price !== undefined && (
-                                <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                                <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                               )}
                             </div>
                           </div>
@@ -944,7 +944,7 @@ export function AdminEngagementsView() {
                                   <span className="text-xs text-muted-foreground capitalize">{r.media_sites.publication_format}</span>
                                 )}
                                 {r.media_sites?.price !== undefined && (
-                                  <span className="font-semibold text-sm">${r.media_sites.price}</span>
+                                  <span className="font-semibold text-sm">${r.media_sites.price.toLocaleString()}</span>
                                 )}
                               </div>
                             </div>
