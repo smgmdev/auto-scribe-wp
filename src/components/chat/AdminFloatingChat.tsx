@@ -1050,7 +1050,7 @@ export function AdminFloatingChat({
       const isCompleted = disputeResolved.type === 'dispute_resolved_complete';
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
+          <div className={`rounded-none border p-3 ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
             <div className="flex items-center gap-2 mb-2">
               <Scale className={`h-4 w-4 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
               <span className={`font-semibold text-sm ${isCompleted ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
@@ -1082,7 +1082,7 @@ export function AdminFloatingChat({
     if (orderDelivered) {
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800">
+          <div className="rounded-none border p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <Truck className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">
@@ -1150,7 +1150,7 @@ export function AdminFloatingChat({
     if (revisionRequested) {
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+          <div className="rounded-none border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
             <div className="flex items-center gap-2 mb-2">
               <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">
@@ -1179,7 +1179,7 @@ export function AdminFloatingChat({
 
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+          <div className="rounded-none border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
             <div className="flex items-center gap-2 mb-2">
               <X className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">
@@ -1211,7 +1211,7 @@ export function AdminFloatingChat({
     if (cancelAccepted) {
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+          <div className="rounded-none border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">
@@ -1238,7 +1238,7 @@ export function AdminFloatingChat({
       
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+          <div className="rounded-none border p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2 mb-2">
               <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="font-semibold text-sm text-green-700 dark:text-green-300">Order Placed</span>
@@ -1271,7 +1271,7 @@ export function AdminFloatingChat({
       
       return (
         <div className="space-y-1">
-          <div className="rounded-lg border p-3 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
+          <div className="rounded-none border p-3 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
             <div className="flex items-center gap-2 mb-2">
               <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <span className="font-semibold text-sm text-red-700 dark:text-red-300">Order Cancelled</span>

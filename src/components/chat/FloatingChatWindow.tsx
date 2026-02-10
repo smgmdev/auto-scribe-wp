@@ -3391,7 +3391,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const isCompleted = disputeResolved.type === 'dispute_resolved_complete';
       return (
         <div className="space-y-1 min-w-0 max-w-full">
-          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
+          <div className={`rounded-none border p-3 min-w-0 overflow-hidden ${isCompleted ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'}`}>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Scale className={`h-4 w-4 shrink-0 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
               <span className={`font-semibold text-sm ${isCompleted ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
@@ -3992,7 +3992,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       return (
         <div className="space-y-1 min-w-0 max-w-full">
-          <div className={`rounded-lg border p-3 md:p-4 min-w-0 overflow-hidden ${
+          <div className={`rounded-none border p-3 md:p-4 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
@@ -4102,7 +4102,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (revisionRequested && !quote) {
       return (
         <div className="space-y-1 min-w-0 max-w-full">
-          <div className={`rounded-lg border p-3 min-w-0 overflow-hidden ${
+          <div className={`rounded-none border p-3 min-w-0 overflow-hidden ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
@@ -4397,7 +4397,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+          <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
@@ -4465,7 +4465,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (cancelRejected) {
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+          <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
@@ -4499,7 +4499,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (cancelAccepted && !quote) {
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+          <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
@@ -4530,7 +4530,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+          <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
@@ -4567,7 +4567,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-3 ${
+          <div className={`rounded-none border p-3 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
