@@ -293,7 +293,7 @@ export function OrderWithCreditsDialog({
                   <TooltipTrigger asChild>
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="z-[10001]">
                     <p>Specify a delivery time for the agency. Recommended to discuss with the agency.</p>
                   </TooltipContent>
                 </Tooltip>
@@ -347,7 +347,7 @@ export function OrderWithCreditsDialog({
                   <TooltipTrigger asChild>
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="z-[10001]">
                     <p>Add any special requirements or conditions for this order.</p>
                   </TooltipContent>
                 </Tooltip>
