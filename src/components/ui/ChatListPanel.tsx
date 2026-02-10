@@ -2365,7 +2365,7 @@ export function ChatListPanel() {
                 >
                   Service Requests
                   {agencyUnreadServiceRequestsCount > 0 && (
-                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
                       {agencyUnreadServiceRequestsCount}
                     </Badge>
                   )}
@@ -2379,7 +2379,7 @@ export function ChatListPanel() {
                 >
                   My Engagements
                   {userUnreadEngagementsCount > 0 && (
-                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1">
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
                       {userUnreadEngagementsCount}
                     </Badge>
                   )}
