@@ -3766,25 +3766,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {clientOrderRequest.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
-                  <span className="text-xs">
-                    Price: {clientOrderRequest.price.toLocaleString()} credits
-                  </span>
-                </div>
-                {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-xs">
-                      Delivery: {formatDeliveryDuration(clientOrderRequest.delivery_duration)}
-                    </span>
-                  </div>
-                )}
-                {clientOrderRequest.special_terms && (
-                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    <span className="font-medium">Special Terms:</span> {clientOrderRequest.special_terms}
-                  </p>
-                )}
+                {/* Order details shown via expandable section in banner */}
             </div>
             
             {/* Action buttons for agency */}
