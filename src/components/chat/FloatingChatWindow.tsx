@@ -6381,8 +6381,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <span className="sr-only">Close</span>
               </button>
             </div>
-          
-            <div className="space-y-4">
+
+            <div className="space-y-4 mt-4">
               <div className="flex items-center gap-4 p-4 rounded-none border border-border bg-muted/50">
                 {globalChatRequest?.media_site?.favicon && (
                   <img 
