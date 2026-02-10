@@ -4530,6 +4530,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // If there was an offer in this conversation, show "Offer Accepted" instead of "Order Placed"
       const hasOffer = messages.some(m => m.message.includes('[ORDER_REQUEST]'));
       const orderLabel = hasOffer ? 'Offer Accepted' : 'Order Placed';
+      // Check if order was delivered on time
+      const wasDelivered = messages.some(m => m.message.includes('[ORDER_DELIVERED]'));
+      const deliveredOnTime = wasDelivered && orderPlaced.delivery_deadline && new Date(messages.find(m => m.message.includes('[ORDER_DELIVERED]'))?.created_at || '') <= new Date(orderPlaced.delivery_deadline);
       
       return (
         <div className="space-y-1">
@@ -4550,10 +4553,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </p>
             {timeInfo && (
               <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
-                <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
-                <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
-                  {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
-                </span>
+                {deliveredOnTime ? (
+                  <>
+                    <CheckCircle className={`h-3.5 w-3.5 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
+                    <span className={`text-xs font-medium ${isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
+                      Delivered on time
+                    </span>
+                  </>
+                ) : wasDelivered ? (
+                  <>
+                    <Clock className="h-3.5 w-3.5 text-red-500" />
+                    <span className="text-xs font-medium text-red-500">
+                      Delivered late
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`} />
+                    <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-primary-foreground/70' : 'text-green-600 dark:text-green-400'}`}>
+                      {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>
