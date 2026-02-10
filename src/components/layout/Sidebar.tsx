@@ -1035,13 +1035,9 @@ export function Sidebar({
           const updated = payload.new as any;
           const old = payload.old as any;
           
-          // If status changed to cancelled, show toast and update count
+          // If status changed to cancelled, just update counts (toast handled by FloatingChatWindow)
           if (old?.status !== 'cancelled' && updated.status === 'cancelled') {
-            toast({
-              variant: 'destructive',
-              title: 'Engagement Cancelled',
-              description: 'One of your engagements has been cancelled.',
-            });
+            // No toast here - FloatingChatWindow or ChatListPanel already shows one
           }
           
           // Refetch counts when any engagement is updated using timestamp-based logic
