@@ -785,9 +785,7 @@ export function AdminEngagementsView() {
                             </span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              Last Message: {messages[r.id]?.length > 0 
-                                ? format(new Date(messages[r.id][messages[r.id].length - 1].created_at), 'MMM d, yyyy h:mm a')
-                                : 'No messages'}
+                              Delivered: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                           <div className="flex flex-col items-end gap-0.5">
@@ -882,9 +880,6 @@ export function AdminEngagementsView() {
                               </span>
                               <span className="text-xs text-muted-foreground block">
                                 Cancelled: {format(new Date(r.updated_at), 'MMM d, yyyy h:mm a')}
-                                {requestMessages.length > 0 && (
-                                  <span> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
-                                )}
                               </span>
                               {r.cancelled_by === 'admin' ? (
                                 <span className="text-xs text-destructive block">
