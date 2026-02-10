@@ -5638,51 +5638,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p className="font-medium text-sm text-foreground">
                     {pendingClientOrder.media_site_name}
                   </p>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1 cursor-help">
-                            {pendingClientOrder.price.toLocaleString()} credits
-                            <Info className="h-3 w-3" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs">
-                          <p>Payment in credits. 1 credit = 1 USD.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    {pendingClientOrder.delivery_duration && (pendingClientOrder.delivery_duration.days > 0 || pendingClientOrder.delivery_duration.hours > 0 || pendingClientOrder.delivery_duration.minutes > 0) && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • {formatDeliveryDuration(pendingClientOrder.delivery_duration)}
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>Requested delivery time.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {pendingClientOrder.special_terms && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • Special Terms
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>{pendingClientOrder.special_terms}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
                 </div>
                 {/* Desktop: Action buttons inline - hidden for admin */}
                 {!isAdmin && (
@@ -5703,7 +5658,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                          className="rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                          className="rounded-none px-8 bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
                           onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
@@ -5711,7 +5666,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </Button>
                         <Button
                           size="sm"
-                          className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                          className="rounded-none px-8 bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
                           disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
                         >
@@ -5747,7 +5702,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         className="flex-1 rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
                         onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
                         Accept
                       </Button>
                       <Button
@@ -5791,31 +5745,66 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           );
         })()}
 
-        {/* Accepted Order Request Banner - Black (when agency accepted, waiting for client to pay) */}
-        {hasAcceptedOrderRequest && !loadingMessages && (() => {
-          const acceptedOrder = getLastAcceptedOrderRequestData();
+        {/* Accepted Order Banner - Sticky (shows when order is placed and active) */}
+        {localOrder && !loadingMessages && (() => {
+          const acceptedOrderData = getLastAcceptedOrderRequestData();
+          const lastOrderRequestData = getLastOrderRequestData();
+          const lastClientOrderData = getLastClientOrderRequestData();
+          const acceptedOrder = acceptedOrderData || lastOrderRequestData || lastClientOrderData;
           if (!acceptedOrder) return null;
-          const isClient = actualSenderType === 'client';
           
-          // Get countdown data
-          const countdown = acceptedOrder.accepted_at && acceptedOrder.delivery_duration 
-            ? getDeliveryCountdown(acceptedOrder.accepted_at, acceptedOrder.delivery_duration)
-            : null;
+          const specialTerms = acceptedOrder.special_terms;
+          const isCompleted = localOrder.status === 'completed';
+          const isAgencyView2 = globalChatType === 'agency-request' && !isAdmin;
+          const isClientView2 = globalChatType === 'my-request' || actualSenderType === 'client';
           
+          // Check revision state
+          const lastDeliveryIndex2 = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
+          const hasRevisionAfterDelivery2 = messages.slice(lastDeliveryIndex2 + 1).some(m => parseRevisionRequested(m.message));
+          const canAcceptDelivery2 = isClientView2 && localOrder.delivery_status === 'delivered' && !hasRevisionAfterDelivery2;
+          
+          // Calculate countdown
+          const countdown = (() => {
+            if (!localOrder.delivery_deadline || isCompleted) return null;
+            const deadline = new Date(localOrder.delivery_deadline);
+            const now = new Date();
+            const diff = deadline.getTime() - now.getTime();
+            if (diff <= 0) return { text: 'Overdue', isOverdue: true };
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const parts: string[] = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            return { text: parts.join(' ') || '< 1m', isOverdue: false };
+          })();
+
+          // Determine delivery status display
+          const deliveryStatus = (() => {
+            if (isCompleted) {
+              return { text: 'Completed', color: 'text-green-400' };
+            }
+            
+            if (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') {
+              return { text: 'Delivery Submitted - Awaiting Review', color: 'text-blue-400' };
+            }
+            
+            return null;
+          })();
+
+          // Check if there was a client order request that was accepted (for label change)
+          const wasClientOrder = !!lastClientOrderData && !!acceptedOrderData;
+          const wasOffer = !!lastOrderRequestData && !wasClientOrder;
+
           return (
-            <div className="p-3 bg-black text-white border-b border-black">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {acceptedOrder.media_site_favicon ? (
-                    <img 
-                      src={acceptedOrder.media_site_favicon} 
-                      alt="" 
-                      className="w-10 h-10 rounded-lg object-cover shrink-0"
-                    />
+            <div className={`sticky top-0 left-0 z-10 px-4 py-3 border-b shadow-sm ${isCompleted ? 'bg-gray-900' : 'bg-black'}`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-6 w-6 text-green-400 shrink-0" />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
+                    <ShoppingCart className="h-6 w-6 text-white shrink-0" />
                   )}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -5823,69 +5812,33 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         {acceptedOrder.media_site_name}
                       </p>
                       <div className="flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                        <span className="font-medium text-xs text-green-400">
-                          Order Placed - Awaiting Delivery
-                        </span>
+                        {isCompleted ? (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />
+                            <span className="font-medium text-xs text-green-400">
+                              {deliveryStatus?.text || 'Completed'}
+                            </span>
+                          </>
+                        ) : deliveryStatus ? (
+                          <>
+                            <Truck className="h-3.5 w-3.5 text-blue-400" />
+                            <span className={`font-medium text-xs ${deliveryStatus.color}`}>
+                              {deliveryStatus.text}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-3.5 w-3.5 text-green-400" />
+                            <span className="font-medium text-xs text-green-400">
+                              {wasOffer ? 'Offer Accepted' : wasClientOrder ? 'Offer Accepted' : 'Order Placed'} - Awaiting Delivery
+                            </span>
+                          </>
+                        )}
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1 text-white/70 cursor-help">
-                              <span className="text-xs">{acceptedOrder.price.toLocaleString()} credits</span>
-                              <Info className="h-3 w-3" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>Payment in credits. 1 credit = 1 USD.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      {countdown && (
-                        <>
-                          <span className="text-white/40">•</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className={`flex items-center gap-1 cursor-help ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                                  <Clock className="h-3 w-3" />
-                                  <span className="text-xs">
-                                    {countdown.isOverdue ? 'Overdue' : countdown.text}
-                                  </span>
-                                  <Info className="h-3 w-3" />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{countdown.isOverdue ? 'Delivery deadline has passed' : 'Time remaining until delivery deadline'}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
-                      {acceptedOrder.special_terms && (
-                        <>
-                          <span className="text-white/40">•</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                  <span className="text-xs">Special Terms</span>
-                                  <Info className="h-3 w-3" />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{acceptedOrder.special_terms}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
-                {globalChatType === 'agency-request' && !isAdmin && (
+                {globalChatType === 'agency-request' && !isAdmin && !isCompleted && localOrder.delivery_status !== 'delivered' && localOrder.delivery_status !== 'pending_revision' && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -5895,10 +5848,89 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     Deliver Order
                   </Button>
                 )}
+                {/* Deliver Again button for agency when revision is requested */}
+                {isAgencyView2 && (hasRevisionAfterDelivery2 || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision') && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-black text-white border-white shrink-0 transition-all duration-200 hover:bg-white hover:text-black hover:border-white"
+                          onClick={() => setDeliverOrderDialogOpen(true)}
+                        >
+                          Deliver Again
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>Submit a new delivery after addressing the revision request</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {/* Accept/Request Revision buttons for client when order is delivered */}
+                {canAcceptDelivery2 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 shrink-0"
+                      onClick={handleAcceptDeliveryFromChat}
+                      disabled={acceptingDelivery}
+                    >
+                      {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
+                      onClick={() => setRevisionDialogOpen(true)}
+                    >
+                      Request Revision
+                    </Button>
+                  </div>
+                )}
               </div>
+              {/* Order Details expandable */}
+              {!isCompleted && (
+                <div className="pl-9 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                    className="flex items-center gap-1 text-xs text-white/60 hover:text-white/90 transition-colors"
+                  >
+                    Order Details
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {bannerOrderDetailsOpen && (
+                    <div className="mt-1.5 space-y-0.5 text-xs text-white/60 pt-2 border-t border-white/20">
+                      <p>Price: {acceptedOrder.price.toLocaleString()} credits</p>
+                      {acceptedOrder.delivery_duration && (acceptedOrder.delivery_duration.days > 0 || acceptedOrder.delivery_duration.hours > 0 || acceptedOrder.delivery_duration.minutes > 0) && (
+                        <p>Delivery: {formatDeliveryDuration(acceptedOrder.delivery_duration)}</p>
+                      )}
+                      {specialTerms && (
+                        <p>Special Terms: {specialTerms}</p>
+                      )}
+                      {countdown && !countdown.isOverdue && (
+                        <p>Time Remaining: {countdown.text}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })()}
+
+        {/* Cancellation notice */}
+        {isCancelled && (
+          <div className="px-4 py-2 bg-destructive/5 border-b">
+            <p className="text-sm text-destructive font-medium">This engagement has been cancelled.</p>
+            {globalChatRequest?.cancellation_reason && (
+              <p className="text-sm text-muted-foreground">{globalChatRequest.cancellation_reason}</p>
+            )}
+          </div>
+        )}
 
         {/* Messages */}
         <div 
@@ -5914,43 +5946,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <p className="text-sm text-muted-foreground">Loading Messages...</p>
             </div>
           ) : (
-            <div className="space-y-2 p-2 sm:p-3 md:p-4 w-full min-w-0 max-w-full overflow-x-hidden box-border">
+            <div className="space-y-2 p-3">
               {messages.map((msg) => {
-                const quote = parseQuote(msg.message);
-                const isOwnMessage = msg.sender_type === senderType;
-                
-                // Check if this is a CLIENT_ORDER_REQUEST message that has been accepted
-                const clientOrderRequestMatch = msg.message.match(/\[CLIENT_ORDER_REQUEST\](.*?)\[\/CLIENT_ORDER_REQUEST\]/);
-                if (clientOrderRequestMatch && !quote) {
-                  const msgIndex = messages.findIndex(m => m.id === msg.id);
-                  try {
-                    const clientOrderData = JSON.parse(clientOrderRequestMatch[1]);
-                    const isAccepted = messages.slice(msgIndex + 1).some(m => {
-                      if (!m.message.includes('[ORDER_REQUEST_ACCEPTED]')) return false;
-                      const match = m.message.match(/\[ORDER_REQUEST_ACCEPTED\](.*?)\[\/ORDER_REQUEST_ACCEPTED\]/);
-                      if (!match) return false;
-                      try {
-                        const data = JSON.parse(match[1]);
-                        return data.media_site_id === clientOrderData.media_site_id;
-                      } catch { return false; }
-                    });
-                    const isRejected = messages.slice(msgIndex + 1).some(m => {
-                      if (m.sender_type !== 'agency' || !m.message.includes('[ORDER_REQUEST_REJECTED]')) return false;
-                      const match = m.message.match(/\[ORDER_REQUEST_REJECTED\](.*?)\[\/ORDER_REQUEST_REJECTED\]/);
-                      if (!match) return false;
-                      try {
-                        const data = JSON.parse(match[1]);
-                        return data.media_site_id === clientOrderData.media_site_id;
-                      } catch { return false; }
-                    });
-                    // Skip rendering entire message wrapper if accepted or rejected
-                    if (isAccepted || isRejected) {
-                      return null;
-                    }
-                  } catch {}
-                }
-                
-                // Check for admin joined message - render as independent centered text
+                // Check for admin joined message
                 const adminJoinedMatch = msg.message.match(/\[ADMIN_JOINED\](.*?)\[\/ADMIN_JOINED\]/);
                 if (adminJoinedMatch) {
                   return (
@@ -5960,7 +5958,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   );
                 }
                 
-                // Check for admin left message - render as independent centered text
+                // Check for admin left message
                 const adminLeftMatch = msg.message.match(/\[ADMIN_LEFT\](.*?)\[\/ADMIN_LEFT\]/);
                 if (adminLeftMatch) {
                   return (
@@ -5969,191 +5967,165 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </p>
                   );
                 }
-                
-                // For admin view: agency messages on right, client messages on left
-                // For others: own messages on right, others on left
-                const isRightAligned = isAdmin 
-                  ? (msg.sender_type === 'agency' || msg.sender_type === 'admin')
-                  : isOwnMessage;
-                
+
+                const isOwnMessage = msg.sender_id === senderId || (isAdmin && msg.sender_type === 'admin');
+                const quote = parseQuote(msg.message);
+
                 return (
-                  <div
-                    key={msg.id}
-                    id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
+                  <div 
+                    key={msg.id} 
+                    id={`msg-${globalChatRequest?.id}-${msg.id}`}
+                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} w-full`}
                   >
-                    <div
-                      className={`relative group ${msg.message.startsWith('[ORDER_REQUEST]') ? 'max-w-full sm:max-w-[80%]' : 'max-w-[85%] sm:max-w-[80%]'} min-w-0 rounded-none p-2.5 sm:p-3 transition-all duration-300 break-words ${
-                        msg.sender_type === 'admin'
-                          ? 'bg-blue-500 text-white'
-                          : isRightAligned
-                          ? 'bg-black text-white'
-                          : 'bg-muted'
-                      } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
-                    >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className={`absolute top-0.5 right-0.5 h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
-                              isRightAligned 
-                                ? 'text-primary-foreground/70' 
-                                : 'text-muted-foreground'
-                            }`}
+                    <div className={`group relative w-full md:max-w-[85%] ${
+                      // Check if it's a special message type (order cards etc)
+                      parseOrderPlaced(msg.message) || parseOrderCancelled(msg.message) || 
+                      parseCancelOrderRequest(msg.message) || parseCancelOrderAccepted(msg.message) ||
+                      parseOrderRequest(msg.message) || parseClientOrderRequest(msg.message) ||
+                      parseOrderDelivered(msg.message) || parseDeliveryAccepted(msg.message) ||
+                      parseRevisionRequested(msg.message) || parseOfferRejected(msg.message) ||
+                      parseOrderRequestAccepted(msg.message) || parseOrderRequestRejected(msg.message) ||
+                      parseDisputeOpened(msg.message) || parseDisputeResolved(msg.message)
+                        ? '' 
+                        : 'p-3 rounded-none'
+                    } transition-all duration-300 ${
+                      parseOrderPlaced(msg.message) || parseOrderCancelled(msg.message) || 
+                      parseCancelOrderRequest(msg.message) || parseCancelOrderAccepted(msg.message) ||
+                      parseOrderRequest(msg.message) || parseClientOrderRequest(msg.message) ||
+                      parseOrderDelivered(msg.message) || parseDeliveryAccepted(msg.message) ||
+                      parseRevisionRequested(msg.message) || parseOfferRejected(msg.message) ||
+                      parseOrderRequestAccepted(msg.message) || parseOrderRequestRejected(msg.message) ||
+                      parseDisputeOpened(msg.message) || parseDisputeResolved(msg.message)
+                        ? '' 
+                        : (isOwnMessage 
+                          ? (msg.sender_type === 'admin' ? 'bg-blue-500 text-white' : 'bg-primary text-primary-foreground')
+                          : 'bg-muted')
+                    } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}>
+                      {/* Message Actions Dropdown */}
+                      {!(parseOrderPlaced(msg.message) || parseOrderCancelled(msg.message) || 
+                        parseCancelOrderRequest(msg.message) || parseCancelOrderAccepted(msg.message) ||
+                        parseOrderRequest(msg.message) || parseClientOrderRequest(msg.message) ||
+                        parseOrderDelivered(msg.message) || parseDeliveryAccepted(msg.message) ||
+                        parseRevisionRequested(msg.message) || parseOfferRejected(msg.message) ||
+                        parseOrderRequestAccepted(msg.message) || parseOrderRequestRejected(msg.message) ||
+                        parseDisputeOpened(msg.message) || parseDisputeResolved(msg.message)) && (
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isOwnMessage 
+                                  ? 'text-primary-foreground hover:bg-primary-foreground/20' 
+                                  : 'text-foreground hover:bg-background/50'
+                              }`}
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            align="end" 
+                            className="bg-popover border shadow-lg"
+                            style={{ zIndex: 99999 }}
+                            sideOffset={5}
                           >
-                            <ChevronDown className="h-3 w-3 pointer-events-none" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent 
-                          align={isRightAligned ? "end" : "start"}
-                          side="bottom"
-                          sideOffset={5}
-                          collisionPadding={16}
-                          className="bg-popover border shadow-lg z-[99999]"
-                        >
-                          <DropdownMenuItem 
-                            onSelect={() => {
-                              setReplyToMessage(msg);
-                              // Use longer timeout to ensure dropdown fully closes before focusing
-                              setTimeout(() => {
-                                if (inputRef.current) {
-                                  inputRef.current.focus();
-                                }
-                              }, 150);
-                            }}
-                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          >
-                            <Reply className="h-4 w-4 mr-2" />
-                            Reply
-                          </DropdownMenuItem>
-                          {isAdmin && msg.sender_type !== 'admin' && (
                             <DropdownMenuItem 
-                              onSelect={async () => {
-                                setUserDetailsLoading(true);
-                                setUserDetailsLogoLoading(true);
-                                setUserDetailsDialogOpen(true);
-                                setUserDetails(null);
-                                
-                                try {
-                                  if (msg.sender_type === 'client') {
-                                    // Fetch client profile including whatsapp_phone
-                                    const { data: profile } = await supabase
-                                      .from('profiles')
-                                      .select('email, whatsapp_phone')
-                                      .eq('id', msg.sender_id)
-                                      .maybeSingle();
-                                    
-                                    setUserDetails({
-                                      email: profile?.email || null,
-                                      phone: profile?.whatsapp_phone || null,
-                                      type: 'client'
-                                    });
-                                  } else if (msg.sender_type === 'agency') {
-                                    // Fetch agency details from agency_payouts
-                                    const { data: agency } = await supabase
-                                      .from('agency_payouts')
-                                      .select('agency_name, email, user_id')
-                                      .eq('id', msg.sender_id)
-                                      .maybeSingle();
-                                    
-                                    let whatsappPhone: string | null = null;
-                                    
-                                    // Fetch whatsapp_phone and logo_url from agency_applications using the user_id
-                                    let logoUrl: string | null = null;
-                                    if (agency?.user_id) {
-                                      const { data: application } = await supabase
-                                        .from('agency_applications')
-                                        .select('whatsapp_phone, logo_url')
-                                        .eq('user_id', agency.user_id)
-                                        .eq('status', 'approved')
-                                        .maybeSingle();
-                                      
-                                      whatsappPhone = application?.whatsapp_phone || null;
-                                      // Get public URL from agency-logos bucket
-                                      if (application?.logo_url) {
-                                        const { data: publicUrl } = supabase.storage
-                                          .from('agency-logos')
-                                          .getPublicUrl(application.logo_url);
-                                        logoUrl = publicUrl?.publicUrl || null;
-                                      }
-                                    }
-                                    
-                                    setUserDetails({
-                                      email: agency?.email || null,
-                                      phone: whatsappPhone,
-                                      type: 'agency',
-                                      name: agency?.agency_name || null,
-                                      logo_url: logoUrl
-                                    });
-                                  }
-                                } catch (error) {
-                                  console.error('Error fetching user details:', error);
-                                } finally {
-                                  setUserDetailsLoading(false);
-                                }
+                              onClick={() => {
+                                setReplyToMessage(msg);
+                                setTimeout(() => inputRef.current?.focus(), 0);
                               }}
                               className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                             >
-                              <Eye className="h-4 w-4 mr-2" />
-                              User Details
+                              <Reply className="h-4 w-4 mr-2" />
+                              Reply
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <div className="flex items-center gap-1.5 text-xs font-medium mb-1 pr-5">
-                        {/* Show loading spinner while fetching agency info for client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
-                          <img 
-                            src={counterpartyLogo} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        {/* Show loading spinner while fetching agency info for admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
-                          <img 
-                            src={adminAgencyInfo.logo_url} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        <span className="opacity-70">
-                          {msg.sender_type === 'admin' 
-                            ? 'Arcana Mace Staff' 
-                            : isOwnMessage 
-                              ? 'You' 
-                              : isAdmin 
-                                ? (msg.sender_type === 'agency' 
-                                    ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
-                                    : 'Client')
-                                : loadingCounterpartyAgency && msg.sender_type === 'agency'
-                                  ? 'Loading...'
-                                  : counterpartyLabel}
-                        </span>
-                      </div>
-                      {renderMessageContent(msg, isRightAligned, quote)}
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                const textContent = msg.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/g, '').replace(/> \[.*?\]:.*?\n\n/g, '').trim();
+                                if (textContent) navigator.clipboard.writeText(textContent);
+                                toast.success('Message copied');
+                              }}
+                              className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                            >
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </DropdownMenuItem>
+                            {isOwnMessage && msg.sender_type !== 'admin' && (
+                              <DropdownMenuItem 
+                                onClick={async () => {
+                                  try {
+                                    const { error } = await supabase
+                                      .from('service_messages')
+                                      .delete()
+                                      .eq('id', msg.id);
+                                    if (error) throw error;
+                                    setMessages(prev => prev.filter(m => m.id !== msg.id));
+                                    toast.success('Message deleted');
+                                  } catch (e: any) {
+                                    toast.error('Failed to delete message');
+                                  }
+                                }}
+                                className="cursor-pointer text-destructive focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                      {!(parseOrderPlaced(msg.message) || parseOrderCancelled(msg.message) || 
+                        parseCancelOrderRequest(msg.message) || parseCancelOrderAccepted(msg.message) ||
+                        parseOrderRequest(msg.message) || parseClientOrderRequest(msg.message) ||
+                        parseOrderDelivered(msg.message) || parseDeliveryAccepted(msg.message) ||
+                        parseRevisionRequested(msg.message) || parseOfferRejected(msg.message) ||
+                        parseOrderRequestAccepted(msg.message) || parseOrderRequestRejected(msg.message) ||
+                        parseDisputeOpened(msg.message) || parseDisputeResolved(msg.message)) && (
+                        <p className="text-xs font-medium mb-1 opacity-70 capitalize pr-5">
+                          {msg.sender_type === 'admin' ? 'Arcana Mace Staff' : isOwnMessage ? 'You' : msg.sender_type}
+                        </p>
+                      )}
+                      {/* Quoted message */}
+                      {quote && (
+                        <button
+                          type="button"
+                          className={`w-full text-left mb-2 pl-2 border-l-2 cursor-pointer hover:opacity-80 transition-opacity ${
+                            isOwnMessage ? 'border-primary-foreground/50' : 'border-primary/50'
+                          }`}
+                          onClick={() => {
+                            if (quote.originalId) {
+                              const el = document.getElementById(`msg-${globalChatRequest?.id}-${quote.originalId}`);
+                              if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                setHighlightedMessageId(quote.originalId);
+                                setTimeout(() => setHighlightedMessageId(null), 2000);
+                              }
+                            }
+                          }}
+                        >
+                          <p className={`text-xs italic truncate ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                            {quote.quoteText}
+                          </p>
+                        </button>
+                      )}
+                      {renderMessageContent(msg, isOwnMessage, quote)}
                     </div>
                   </div>
                 );
               })}
-              {messages.length === 0 && (
+              
+              {messages.length === 0 && !loadingMessages && (
                 <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
               )}
+              
+              {/* Scroll anchor */}
               <div ref={messagesEndRef} />
             </div>
           )}
         </ScrollArea>
         </div>
 
-        {/* Typing Indicator */}
+        {/* Typing indicators */}
         {typingUsers.length > 0 && (
           <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground border-t">
             <div className="flex gap-1">
@@ -6161,368 +6133,162 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span className="flex items-center gap-1.5">
-              {/* Show agency logo in typing indicator if agency is typing */}
-              {typingUsers.some(u => u.sender_type === 'agency') && counterpartyLogo && (
-                <img 
-                  src={counterpartyLogo} 
-                  alt="" 
-                  className="w-4 h-4 rounded-full object-cover"
-                />
-              )}
+            <span>
               {typingUsers.map(u => 
-                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? counterpartyLabel : 'Client'
+                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? 'Agency' : 'Client'
               ).filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
             </span>
           </div>
         )}
 
         {/* Input */}
-        {isCancelled ? (
-          <div className="border-t py-3 px-4 bg-muted/30">
-            <p className="text-sm text-muted-foreground text-center">
-              This engagement was cancelled.
-              {globalChatRequest.cancellation_reason && (
-                <span className="block mt-1 text-xs">
-                  Reason: {globalChatRequest.cancellation_reason}
-                </span>
-              )}
-            </p>
-          </div>
-        ) : globalChatRequest.status !== 'rejected' && (
+        {!isCancelled && localOrder?.status !== 'completed' && (
           <div className="border-t">
-            {hasOpenDispute && !isAdmin && (globalChatType === 'my-request' || globalChatType === 'agency-request') ? (
-              <div className="py-2 px-4 text-center bg-muted/30">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute. Arcana Mace Staff may contact Client and the Agency separately for details.
-                </p>
-              </div>
-            ) : hasOpenDispute && isAdmin && !adminJoined ? (
-              <div className="py-2 px-4 bg-muted/30">
-                <p className="text-xs text-muted-foreground leading-relaxed text-center mb-2">
-                  Client has opened a dispute. Arcana Mace Staff will take 6-24h to investigate the dispute.
-                </p>
-                <div className="flex items-center justify-center">
-                  <button
-                    onClick={handleAdminJoinChat}
-                    disabled={joiningChat}
-                    className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {joiningChat ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <MessageSquare className="h-3.5 w-3.5" />
-                    )}
-                    Join Chat
-                  </button>
+            {replyToMessage && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-b">
+                <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">
+                    Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type}
+                  </p>
+                  <p className="text-sm truncate">{replyToMessage.message.substring(0, 50)}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={() => setReplyToMessage(null)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
-            ) : localOrder?.delivery_status === 'accepted' ? (
-              <div className="flex flex-col items-center justify-center py-2 px-3 bg-muted/20 gap-1">
-                <span className="text-muted-foreground text-sm">
-                  Order delivery was completed
-                </span>
-                {(() => {
-                  // Find the completion reason from messages
-                  const disputeResolvedMsg = messages.find(m => m.message.includes('[DISPUTE_RESOLVED]') && m.message.includes('dispute_resolved_complete'));
-                  if (disputeResolvedMsg) {
-                    const parsed = parseDisputeResolved(disputeResolvedMsg.message);
-                    if (parsed?.reason) {
-                      return (
-                        <span className="text-muted-foreground text-xs text-center">
-                          Reason: {parsed.reason}
-                        </span>
-                      );
+            )}
+            {selectedFile && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-b">
+                <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-sm truncate flex-1">{selectedFile.name}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={() => setSelectedFile(null)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const ALLOWED_FILE_TYPES = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'image/png',
+                    'image/jpeg'
+                  ];
+                  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+                    toast.error('Only PDF, DOC, DOCX, PNG, and JPG files are allowed');
+                    return;
+                  }
+                  if (file.size > 10 * 1024 * 1024) {
+                    toast.error('File size must be less than 10MB');
+                    return;
+                  }
+                  setSelectedFile(file);
+                  e.target.value = '';
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || uploadingFile}
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Input
+                ref={inputRef}
+                placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
+                value={newMessage}
+                onChange={handleInputChange}
+                disabled={sending || uploadingFile}
+                className="rounded-none border-0 flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (selectedFile) {
+                      uploadFileAndSendMessage();
+                    } else {
+                      sendMessage();
                     }
                   }
-                  return null;
-                })()}
-              </div>
-            ) : isAdminInvestigating ? (
-              <div className="flex items-center justify-center py-2 px-3 bg-muted/20">
-                <button
-                  onClick={handleAdminJoinChat}
-                  disabled={joiningChat}
-                  className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {joiningChat ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <MessageSquare className="h-3.5 w-3.5" />
-                  )}
-                  Join Chat
-                </button>
-              </div>
-            ) : (
-              <>
-                {replyToMessage && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
-                    <Reply className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        {/* Show agency logo when replying to agency message */}
-                        {replyToMessage.sender_type === 'agency' && counterpartyLogo && (
-                          <img 
-                            src={counterpartyLogo} 
-                            alt="" 
-                            className="w-3.5 h-3.5 rounded-full object-cover"
-                          />
-                        )}
-                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}</span>
-                      </div>
-                      <p className="text-sm truncate">
-                        {getReplyContentOnly(replyToMessage.message, replyToMessage.sender_type === senderType)}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 shrink-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                      onClick={() => setReplyToMessage(null)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0"
+                onClick={() => {
+                  if (selectedFile) {
+                    uploadFileAndSendMessage();
+                  } else {
+                    sendMessage();
+                  }
+                }}
+                disabled={sending || uploadingFile || (!newMessage.trim() && !selectedFile)}
+              >
+                {sending || uploadingFile ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
                 )}
-                {selectedFile && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-b">
-                    {getFileIcon(selectedFile)}
-                    <span className="text-sm truncate flex-1">{selectedFile.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 shrink-0"
-                      onClick={() => setSelectedFile(null)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-                <div className="flex items-center">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    onChange={handleFileSelect}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={sending}
-                    title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                  <Input
-                    ref={inputRef}
-                    placeholder={replyToMessage ? "Type your reply..." : "Type your message..."}
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    disabled={sending}
-                    className="rounded-none border-0 flex-1 h-8 text-sm sm:h-10 sm:text-base"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
-                        e.preventDefault();
-                        uploadFileAndSendMessage();
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                    disabled={sending || (!newMessage.trim() && !selectedFile)}
-                    onClick={uploadFileAndSendMessage}
-                  >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                  {isAdmin && adminJoined && (
-                    <button
-                      onClick={handleAdminLeaveChat}
-                      disabled={leavingChat}
-                      className="text-muted-foreground hover:text-destructive text-xs px-3 flex items-center gap-1 disabled:opacity-50"
-                    >
-                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-                      Leave
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
+              </Button>
+            </div>
+          </div>
+        )}
+        {localOrder?.status === 'completed' && (
+          <div className="flex items-center justify-center py-2 px-3 bg-muted/20 border-t">
+            <span className="text-muted-foreground text-sm">
+              Order delivery was completed
+            </span>
           </div>
         )}
       </div>
 
-      {/* Cancel Dialog */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <AlertDialogContent className="z-[250] text-left">
-          <AlertDialogHeader className="text-left">
-            <AlertDialogTitle className="text-left">Cancel Engagement</AlertDialogTitle>
-            <AlertDialogDescription className="text-left">
-              Please provide a reason for cancelling this engagement.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input
-            placeholder="Reason for cancellation..."
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            className="rounded-none h-9 text-sm"
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-none hover:bg-black hover:text-white hover:border-black">Keep Engagement</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleCancelEngagement}
-              disabled={!cancellationReason.trim() || cancelling}
-              className="rounded-none bg-transparent text-destructive border border-destructive transition-all duration-200 hover:!bg-destructive hover:!text-white"
-            >
-              {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Cancel Engagement
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Remove Dialog */}
-      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Engagement</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove this cancelled engagement from your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleRemoveEngagement}
-              disabled={removing}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {removing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Cancel Order Dialog */}
-      <AlertDialog open={cancelOrderDialogOpen} onOpenChange={setCancelOrderDialogOpen}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel this order? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Order</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleCancelOrder}
-              disabled={cancellingOrder}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {cancellingOrder ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Cancel Order
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Cancel Order Request Dialog */}
-      <AlertDialog open={cancelOrderRequestDialogOpen} onOpenChange={setCancelOrderRequestDialogOpen}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Request Order Cancellation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your cancellation request will be sent to the {counterpartyLabel.toLowerCase()}. The order will be cancelled once they accept.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input
-            placeholder="Reason for cancellation (optional)..."
-            value={cancelOrderRequestReason}
-            onChange={(e) => setCancelOrderRequestReason(e.target.value)}
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Order</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleSendCancelRequest}
-              disabled={sendingCancelRequest}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {sendingCancelRequest ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Send Request
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Reject Cancellation Dialog */}
-      <AlertDialog open={showRejectReasonDialog} onOpenChange={setShowRejectReasonDialog}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reject Cancellation Request</AlertDialogTitle>
-            <AlertDialogDescription>
-              You can provide a reason for rejecting this cancellation request. The order will remain active.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Textarea
-            placeholder="Reason for rejection (optional)"
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            className="min-h-[80px]"
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setRejectReason('');
-              setPendingRejectMessageId(null);
-            }}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleRejectCancellation}
-              disabled={rejectingCancellation}
-              className="bg-foreground text-background hover:bg-background hover:text-foreground border border-foreground transition-colors duration-200"
-            >
-              {rejectingCancellation ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Reject Cancellation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Send Order Popup (Agency) - draggable portal */}
+      {/* Send Offer Dialog - Portal */}
       {sendOrderDialogOpen && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
-          <div
-            className={`pointer-events-auto bg-background relative ${
-              isMobile
-                ? 'w-full h-[100dvh] px-4 pt-4 pb-4 overflow-y-auto'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-none overflow-y-auto'
-            }`}
-            style={isMobile ? { maxHeight: '100dvh' } : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => {
+            setSendOrderDialogOpen(false);
+            setSpecialTerms('');
+            setIsResendMode(false);
+            setOrderDeliveryDays(0);
+            setOrderDeliveryHours(0);
+            setOrderDeliveryMinutes(0);
+          }} />
+          <div 
+            className="relative bg-background border shadow-xl w-full max-w-md mx-4 p-6 space-y-4"
+            style={!isMobile ? {
+              position: 'absolute',
+              left: `${sendOfferDragRef.current.posX || 50}%`,
+              top: `${sendOfferDragRef.current.posY || 50}%`,
+              transform: 'translate(-50%, -50%)'
+            } : undefined}
           >
-            {/* Drag Handle - desktop only */}
-            {!isMobile && (
-              <div
-                className={`flex items-center justify-start py-2 ${sendOfferDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-                onMouseDown={handleSendOfferDragStart}
-              >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
-
-            {/* Header */}
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold leading-none tracking-tight">
-                {isResendMode ? 'Resend Offer' : 'Send Offer'}
-              </h2>
-              <button
+              <h3 className="font-semibold text-lg">{isResendMode ? 'Resend Offer' : 'Send Offer'}</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
                 onClick={() => {
                   setSendOrderDialogOpen(false);
                   setSpecialTerms('');
@@ -6531,52 +6297,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setOrderDeliveryHours(0);
                   setOrderDeliveryMinutes(0);
                 }}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
               >
                 <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </button>
+              </Button>
             </div>
-
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center gap-4 p-4 rounded-none border border-border bg-muted/50">
-                {globalChatRequest?.media_site?.favicon && (
-                  <img 
-                    src={globalChatRequest.media_site.favicon} 
-                    alt="" 
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{globalChatRequest?.media_site?.name}</h3>
-                  <p className="text-2xl font-bold text-primary">
-                    ${(globalChatRequest?.media_site?.price || 0).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Delivery Duration */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium">Delivery Duration <span className="text-destructive">*</span></Label>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span tabIndex={0} className="inline-flex">
-                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent 
-                        side="bottom" 
-                        align="start" 
-                        className="z-[10001] max-w-[320px] p-3 text-sm"
-                      >
-                        <p>Set the delivery time for this order. At least one value must be greater than 0.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Delivery Duration</Label>
+                <div className="grid grid-cols-3 gap-3 mt-2">
                   <div className="space-y-1">
                     <Label htmlFor="order-days" className="text-xs text-muted-foreground">Days</Label>
                     <Input
@@ -6614,7 +6343,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 </div>
                 {orderDeliveryDays === 0 && orderDeliveryHours === 0 && orderDeliveryMinutes === 0 && (
-                  <p className="text-xs text-destructive">Please enter a delivery duration</p>
+                  <p className="text-xs text-destructive mt-1">Please enter a delivery duration</p>
                 )}
               </div>
 
