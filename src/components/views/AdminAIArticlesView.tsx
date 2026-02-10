@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Trash2, ExternalLink, Loader2, Filter, Pencil, RefreshCw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,6 +63,16 @@ export function AdminAIArticlesView() {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Debounce search input
+  useEffect(() => {
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+    }, 400);
+    return () => clearTimeout(searchTimerRef.current);
+  }, [searchQuery]);
   
   // Pagination state
   const [displayedArticles, setDisplayedArticles] = useState<PublishedSource[]>([]);
@@ -124,7 +134,7 @@ export function AdminAIArticlesView() {
 
   // Fetch total count for pagination
   const { data: totalCount, refetch: refetchCount } = useQuery({
-    queryKey: ['ai-published-sources-count', selectedSource, selectedSite],
+    queryKey: ['ai-published-sources-count', selectedSource, selectedSite, debouncedSearch],
     queryFn: async () => {
       let query = supabase
         .from('ai_published_sources')
@@ -134,9 +144,12 @@ export function AdminAIArticlesView() {
         query = query.eq('setting_id', selectedSource);
       }
       
-      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
         query = query.eq('wordpress_site_id', selectedSite);
+      }
+
+      if (debouncedSearch) {
+        query = query.or(`ai_title.ilike.%${debouncedSearch}%,source_title.ilike.%${debouncedSearch}%,focus_keyword.ilike.%${debouncedSearch}%`);
       }
 
       const { count, error } = await query;
@@ -172,9 +185,8 @@ export function AdminAIArticlesView() {
 
   // Fetch published sources with pagination
   const { data: articles, isLoading: articlesLoading, isSuccess: articlesSuccess } = useQuery({
-    queryKey: ['ai-published-sources', selectedSource, selectedSite],
+    queryKey: ['ai-published-sources', selectedSource, selectedSite, debouncedSearch],
     queryFn: async () => {
-      // Use left join so articles persist even if setting is deleted
       let query = supabase
         .from('ai_published_sources')
         .select(`
@@ -192,9 +204,12 @@ export function AdminAIArticlesView() {
         query = query.eq('setting_id', selectedSource);
       }
       
-      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
         query = query.eq('wordpress_site_id', selectedSite);
+      }
+
+      if (debouncedSearch) {
+        query = query.or(`ai_title.ilike.%${debouncedSearch}%,source_title.ilike.%${debouncedSearch}%,focus_keyword.ilike.%${debouncedSearch}%`);
       }
 
       const { data, error } = await query;
@@ -209,7 +224,7 @@ export function AdminAIArticlesView() {
     setDisplayedArticles([]);
     setOffset(0);
     setHasMore(true);
-  }, [selectedSource, selectedSite]);
+  }, [selectedSource, selectedSite, debouncedSearch]);
 
   // Update displayed articles and pagination state when articles are fetched
   useEffect(() => {
@@ -248,21 +263,22 @@ export function AdminAIArticlesView() {
         query = query.eq('setting_id', selectedSource);
       }
       
-      // Filter by site using preserved wordpress_site_id field
       if (selectedSite !== 'all') {
         query = query.eq('wordpress_site_id', selectedSite);
+      }
+
+      if (debouncedSearch) {
+        query = query.or(`ai_title.ilike.%${debouncedSearch}%,source_title.ilike.%${debouncedSearch}%,focus_keyword.ilike.%${debouncedSearch}%`);
       }
 
       const { data, error } = await query;
       if (error) throw error;
 
       if (data && data.length > 0) {
-        // Append new articles directly - the range query ensures no duplicates
         const newDisplayed = [...displayedArticles, ...(data as PublishedSource[])];
         setDisplayedArticles(newDisplayed);
         setOffset(newDisplayed.length);
         
-        // If we got less than a full page, no more articles
         setHasMore(data.length === ARTICLES_PER_PAGE && newDisplayed.length < (totalCount || 0));
       } else {
         setHasMore(false);
@@ -277,7 +293,7 @@ export function AdminAIArticlesView() {
     } finally {
       setLoadingMore(false);
     }
-  }, [hasMore, loadingMore, selectedSource, selectedSite, totalCount, displayedArticles]);
+  }, [hasMore, loadingMore, selectedSource, selectedSite, debouncedSearch, totalCount, displayedArticles]);
 
   // Delete mutation - deletes from both local DB and WordPress via edge function
   const deleteMutation = useMutation({
@@ -614,22 +630,18 @@ export function AdminAIArticlesView() {
       {/* Articles List */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <CardTitle>Published Articles</CardTitle>
-              <CardDescription>
-                {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
-              </CardDescription>
-            </div>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 rounded-none"
-              />
-            </div>
+          <CardTitle>Published Articles</CardTitle>
+          <CardDescription>
+            {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
+          </CardDescription>
+          <div className="relative w-full pt-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 mt-1 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search articles by title, keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 rounded-none w-full"
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -639,24 +651,15 @@ export function AdminAIArticlesView() {
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
-          ) : (() => {
-            const filtered = searchQuery.trim()
-              ? displayedArticles.filter(a => {
-                  const q = searchQuery.toLowerCase();
-                  return (a.ai_title || a.source_title || '').toLowerCase().includes(q) ||
-                    (a.focus_keyword || '').toLowerCase().includes(q) ||
-                    (a.tags || []).some(t => t.toLowerCase().includes(q));
-                })
-              : displayedArticles;
-            return filtered.length === 0 ? (
+          ) : displayedArticles.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{searchQuery.trim() ? 'No articles match your search' : 'No articles published yet'}</p>
-              <p className="text-sm">{searchQuery.trim() ? 'Try a different search term' : 'Articles will appear here once auto-publishing runs'}</p>
+              <p>{debouncedSearch ? 'No articles match your search' : 'No articles published yet'}</p>
+              <p className="text-sm">{debouncedSearch ? 'Try a different search term' : 'Articles will appear here once auto-publishing runs'}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {filtered.map((article) => {
+              {displayedArticles.map((article) => {
                   // Helper function to highlight focus keyword in title
                   const highlightFocusKeyword = (title: string, focusKeyword: string | null) => {
                     if (!focusKeyword || !title) return title;
@@ -826,8 +829,7 @@ export function AdminAIArticlesView() {
                 </div>
               )}
             </div>
-          );
-          })()}
+          )}
         </CardContent>
       </Card>
 
