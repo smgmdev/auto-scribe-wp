@@ -5159,7 +5159,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
           return (
-            <div className="p-3 bg-black text-white border-b border-black">
+            <div className="p-3 bg-black text-white border-b border-black overflow-hidden">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 md:gap-3 min-w-0 flex-1">
                   <TooltipProvider>
@@ -5182,7 +5182,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div className="min-w-0">
+                  <div className="min-w-0 overflow-visible">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-sm text-white truncate">
                         {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
@@ -5261,7 +5261,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
                         Order Details
                       </summary>
-                      <div className="mt-1 pt-1 text-xs text-white/70 space-y-0.5 -mx-3 px-3 border-t border-white/20" style={{ marginLeft: '-12px', marginRight: '-12px', paddingLeft: '12px', paddingRight: '12px', width: 'calc(100% + 24px)' }}>
+                      <div className="relative mt-1 pt-1 text-xs text-white/70 space-y-0.5">
+                        <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
                         {acceptedOrderData?.price && (
                           <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
                         )}
