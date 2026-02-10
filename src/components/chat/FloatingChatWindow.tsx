@@ -5943,8 +5943,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return data.media_site_id === clientOrderData.media_site_id;
                       } catch { return false; }
                     });
-                    // Skip rendering entire message wrapper if accepted or rejected
+                    // Skip rendering entire message wrapper if accepted, rejected, or banner is showing
                     if (isAccepted || isRejected) {
+                      return null;
+                    }
+                    // Hide the chat bubble when the sticky banner is already displaying the same info
+                    if (hasExistingClientOrderRequest && !globalChatRequest?.order && !hasAcceptedOrderRequest) {
                       return null;
                     }
                   } catch {}
