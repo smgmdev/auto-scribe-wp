@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 
 interface ChatItem {
@@ -1713,11 +1714,7 @@ export function ChatListPanel() {
         const { action, message, reason } = payload.payload || {};
         
         if (action === 'engagement-cancelled') {
-          toast({
-            variant: 'destructive',
-            title: "Engagement Cancelled by Staff",
-            description: reason ? `Reason: ${reason}` : message,
-          });
+          sonnerToast.error(reason ? `Engagement Cancelled by Staff: ${reason}` : "Engagement Cancelled by Staff");
         } else if (action === 'order-cancelled') {
           toast({
             variant: 'destructive',
@@ -1820,11 +1817,7 @@ export function ChatListPanel() {
         const { action, message, reason } = payload.payload || {};
         
         if (action === 'engagement-cancelled') {
-          toast({
-            variant: 'destructive',
-            title: "Engagement Cancelled by Staff",
-            description: reason ? `Reason: ${reason}` : message,
-          });
+          sonnerToast.error(reason ? `Engagement Cancelled by Staff: ${reason}` : "Engagement Cancelled by Staff");
         } else if (action === 'order-cancelled') {
           toast({
             variant: 'destructive',
@@ -1855,11 +1848,7 @@ export function ChatListPanel() {
         const { action, message, reason } = payload.payload || {};
         
         if (action === 'engagement-cancelled') {
-          toast({
-            variant: 'destructive',
-            title: "Engagement Cancelled by Client",
-            description: reason ? `Reason: ${reason}` : message,
-          });
+          sonnerToast.error(reason ? `Engagement Cancelled by Client: ${reason}` : "Engagement Cancelled by Client");
         }
       })
       .subscribe((status) => {
