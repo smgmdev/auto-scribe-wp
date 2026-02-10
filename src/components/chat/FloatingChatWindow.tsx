@@ -5165,7 +5165,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           return (
             <div className="p-2 md:p-3 bg-black text-white border-b border-black">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                 <div className="flex items-start gap-2 md:gap-3 min-w-0">
                   <TooltipProvider>
                     <Tooltip>
@@ -5283,7 +5283,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 </div>
                 {!hasOpenDispute && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full md:w-auto">
                   {canDeliver && (
                     <TooltipProvider>
                       <Tooltip>
@@ -5291,7 +5291,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white"
+                            className="bg-white text-black border-white shrink-0 transition-all duration-200 hover:bg-black hover:text-white hover:border-white w-full md:w-auto"
                             onClick={() => setDeliverOrderDialogOpen(true)}
                           >
                             Deliver Order
