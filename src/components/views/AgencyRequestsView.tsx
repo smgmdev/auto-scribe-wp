@@ -1697,14 +1697,14 @@ export function AgencyRequestsView() {
                               <div className="flex items-end justify-between">
                                 <div className="space-y-0.5">
                                   <p className="text-xs text-muted-foreground">
+                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
                                     Completed: {request.order?.released_at ? format(new Date(request.order.released_at), 'MMM d, yyyy h:mm a') : request.order?.accepted_at ? format(new Date(request.order.accepted_at), 'MMM d, yyyy h:mm a') : format(new Date(request.updated_at), 'MMM d, yyyy h:mm a')}
                                     {/* Desktop: inline messages count */}
                                     {requestMessages.length > 0 && (
                                       <span className="hidden md:inline"> • {requestMessages.length} message{requestMessages.length > 1 ? 's' : ''}</span>
                                     )}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Request Received: {format(new Date(request.created_at), 'MMM d, yyyy h:mm a')}
                                   </p>
                                   {/* Mobile: messages count on new row */}
                                   {requestMessages.length > 0 && (
