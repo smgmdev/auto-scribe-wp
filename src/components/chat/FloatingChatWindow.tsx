@@ -5189,35 +5189,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </TooltipProvider>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className="font-medium text-sm text-white truncate cursor-help">
-                              {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
-                            </p>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            <p>Media site for this order</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <p className="font-medium text-sm text-white truncate">
+                        {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
+                      </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      {acceptedOrderData?.price && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1 text-white/70 cursor-help">
-                                <span className="text-xs">{acceptedOrderData.price.toLocaleString()} credits</span>
-                                <Info className="h-3 w-3" />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="max-w-xs">
-                              <p>Payment in credits. 1 credit = 1 USD.</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
@@ -5229,173 +5205,83 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           : null;
                         const revisionData = lastRevisionMessage ? parseRevisionRequested(lastRevisionMessage.message) : null;
                         
-                        // Show In Dispute if there's an open dispute - takes priority
                         if (hasOpenDispute) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 cursor-help text-red-400">
-                                      <span className="text-xs font-medium">
-                                        In Dispute
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>This order is under dispute. A staff member will investigate.</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <span className="text-xs font-medium text-red-400">In Dispute</span>
                           );
                         }
                         
-                        // Show Revision Requested for pending_revision status
                         if (isPendingRevision) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 cursor-help text-orange-400">
-                                      <span className="text-xs font-medium">
-                                        Revision Requested
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>{revisionData ? <><span className="font-medium">Reason:</span> {revisionData.reason}</> : 'Client has requested a revision for this delivery.'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <span className="text-xs font-medium text-orange-400">Revision Requested</span>
                           );
                         }
                         
                         if (isDelivered && hasRevisionAfterDelivery && revisionData) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 cursor-help text-orange-400">
-                                      <span className="text-xs font-medium">
-                                        Revision Requested
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p><span className="font-medium">Reason:</span> {revisionData.reason}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <span className="text-xs font-medium text-orange-400">Revision Requested</span>
                           );
                         }
                         
                         if (isDelivered) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 cursor-help text-green-400">
-                                      <span className="text-xs font-medium">
-                                        {isAgencyView ? 'Awaiting client approval' : 'Delivered'}
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>{isAgencyView ? 'Order has been delivered. Awaiting client approval.' : 'Order has been delivered. Awaiting client acceptance.'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <span className="text-xs font-medium text-green-400">
+                              {isAgencyView ? 'Awaiting client approval' : 'Delivered'}
+                            </span>
                           );
                         }
                         
-                        // Calculate real-time countdown from accepted order data
                         const countdown = acceptedOrderData?.accepted_at && acceptedOrderData?.delivery_duration 
                           ? getDeliveryCountdown(acceptedOrderData.accepted_at, acceptedOrderData.delivery_duration)
                           : null;
                         
-                        // Use order's delivery_deadline if available, otherwise use calculated countdown
                         const showTimeInfo = timeInfo && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
                         const showCountdown = !showTimeInfo && countdown && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
                         
                         if (showTimeInfo) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className={`flex items-center gap-1 cursor-help ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                                      <Clock className="h-3 w-3" />
-                                      <span className="text-xs font-medium">
-                                        {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>{timeInfo.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <div className={`flex items-center gap-1 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                              <Clock className="h-3 w-3" />
+                              <span className="text-xs font-medium">
+                                {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
+                              </span>
+                            </div>
                           );
                         }
                         
                         if (showCountdown && countdown) {
                           return (
-                            <>
-                              {acceptedOrderData?.price && <span className="text-white/40">•</span>}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className={`flex items-center gap-1 cursor-help ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                                      <Clock className="h-3 w-3" />
-                                      <span className="text-xs font-medium">
-                                        {countdown.isOverdue ? 'Overdue' : `Est. Delivery: ${countdown.text}`}
-                                      </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="bottom" className="max-w-xs">
-                                    <p>{countdown.isOverdue ? 'Delivery deadline has passed. Please deliver as soon as possible.' : 'Estimated time remaining until delivery deadline'}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </>
+                            <div className={`flex items-center gap-1 ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
+                              <Clock className="h-3 w-3" />
+                              <span className="text-xs font-medium">
+                                {countdown.isOverdue ? 'Overdue' : `Est. Delivery: ${countdown.text}`}
+                              </span>
+                            </div>
                           );
                         }
                         
                         return null;
                       })()}
-                      {/* Hide special terms for completed orders - they can view in Order Details */}
-                      {specialTerms && localOrder.status !== 'completed' && (
-                        <>
-                          <span className="text-white/40">•</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-1 text-xs text-white/70 cursor-help">
-                                  <Info className="h-3 w-3" />
-                                  <span>Special Terms</span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs">
-                                <p>{specialTerms}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
                     </div>
+                    {/* Order Details expandable */}
+                    <details className="mt-1">
+                      <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
+                        Order Details
+                      </summary>
+                      <div className="mt-1 text-xs text-white/70 space-y-0.5">
+                        {acceptedOrderData?.price && (
+                          <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                        )}
+                        {acceptedOrderData?.delivery_duration && (acceptedOrderData.delivery_duration.days > 0 || acceptedOrderData.delivery_duration.hours > 0 || acceptedOrderData.delivery_duration.minutes > 0) && (
+                          <p>Delivery: <span className="text-white font-medium">
+                            {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                          </span></p>
+                        )}
+                        {specialTerms && (
+                          <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                        )}
+                      </div>
+                    </details>
                   </div>
                 </div>
                 {!hasOpenDispute && (
