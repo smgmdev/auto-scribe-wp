@@ -7337,7 +7337,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7"
+                  className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black"
                   onClick={() => { setMediaListingOpen(false); mediaListingInitialized.current = false; }}
                 >
                   <X className="h-4 w-4" />
@@ -7366,7 +7366,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 hover:bg-foreground hover:text-background"
+                className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black"
                 onClick={() => { setMediaListingOpen(false); mediaListingInitialized.current = false; }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
