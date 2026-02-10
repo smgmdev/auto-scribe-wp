@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Coins, AlertTriangle, Info, CreditCard, GripHorizontal, X, SendHorizonal } from 'lucide-react';
+import { Loader2, Coins, AlertTriangle, Info, CreditCard, GripHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -268,8 +268,7 @@ export function OrderWithCreditsDialog({
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
-            <SendHorizonal className="h-5 w-5 text-accent" />
+          <h2 className="text-lg font-semibold leading-none tracking-tight">
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </h2>
           <button
