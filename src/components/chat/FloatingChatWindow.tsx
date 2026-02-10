@@ -3752,16 +3752,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       return (
         <div className="space-y-1">
-          <div className={`rounded-lg border p-4 ${
+          <div className={`rounded-none border p-4 ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-white dark:bg-background border-gray-200 dark:border-gray-700'
           }`}>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                <Tag className={`h-5 w-5 ${isOwnMessage ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-              </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
                     {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
@@ -3789,21 +3785,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <span className="font-medium">Special Terms:</span> {clientOrderRequest.special_terms}
                   </p>
                 )}
-              </div>
             </div>
             
             {/* Action buttons for agency */}
             {isAgency && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex gap-2">
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row w-full gap-1">
                 <Button
-                  size="sm"
-                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                  size="default"
+                  className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   onClick={async () => {
                     if (!globalChatRequest) return;
                     
                     setAcceptingOrder(true);
                     try {
-                      // First get the client user_id from the service request
                       const { data: serviceRequest, error: fetchError } = await supabase
                         .from('service_requests')
                         .select('user_id')
@@ -3814,7 +3808,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         throw new Error('Failed to fetch service request details');
                       }
 
-                      // Create a pending_payment order via edge function
                       const { data: orderResult, error: orderError } = await supabase.functions.invoke('accept-order-request', {
                         body: {
                           service_request_id: globalChatRequest.id,
@@ -3834,7 +3827,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         throw new Error(orderResult.error);
                       }
 
-                      // Send acceptance message with order_id
                       const acceptanceData = {
                         type: 'ORDER_REQUEST_ACCEPTED',
                         media_site_id: clientOrderRequest.media_site_id,
@@ -3859,18 +3851,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       
                       if (error) throw error;
                       
-                      // Add acceptance message to local state
                       if (insertedMsg) {
                         setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
                       }
                       
-                      // Delete the original order request message
                       await supabase
                         .from('service_messages')
                         .delete()
                         .eq('id', msg.id);
                       
-                      // Remove from local state
                       setMessages(prev => prev.filter(m => m.id !== msg.id));
                       
                       toast.success("The client can now confirm the order.");
@@ -3889,8 +3878,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Accept
                 </Button>
                 <Button
-                  size="sm"
-                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                  size="default"
+                  className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectClientOrderRequest}
                   disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
                 >
@@ -3908,7 +3897,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="w-full bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200 dark:bg-[#f2a547] dark:text-black dark:border-[#f2a547] dark:hover:bg-black dark:hover:text-[#f2a547] dark:hover:border-black"
+                  className="w-full bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] transition-all duration-200 !rounded-none"
                   onClick={handleCancelClientOrderRequest}
                   disabled={cancellingOrderRequestId === msg.id || hasOpenDispute}
                 >
