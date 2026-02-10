@@ -5289,8 +5289,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return null;
                       })()}
                     </div>
-                    {/* Order Details expandable */}
-                    <details className="mt-0 -mb-3 md:mb-0">
+                    {/* Order Details expandable - desktop only inline */}
+                    <details className="mt-0 -mb-3 md:mb-0 hidden md:block">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
                         Order Details
                       </summary>
@@ -5435,6 +5435,43 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </div>
               )}
+              {/* Mobile-only Order Details - full width button below action buttons */}
+              <details className="md:hidden w-full mt-1 pb-2 pr-2">
+                <summary className="w-full cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+                  <div className="w-full py-2 px-3 bg-transparent text-white border border-white/50 hover:bg-white hover:text-black transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1">
+                    Order Details
+                    <ChevronDown className="h-3 w-3" />
+                  </div>
+                </summary>
+                <div className="relative mt-1 pt-1.5 pb-0 text-xs text-white/70 space-y-0.5 px-1">
+                  <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
+                  {acceptedOrderData?.price && (
+                    <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                  )}
+                  {(() => {
+                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
+                    if (isDelivered) {
+                      return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
+                    }
+                    const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
+                    if (countdown) {
+                      return (
+                        <p key={`mob-detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                          {countdown.isOverdue ? 'Overdue' : countdown.text}
+                        </span></p>
+                      );
+                    }
+                    return (
+                      <p>Delivery: <span className="text-white font-medium">
+                        {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                      </span></p>
+                    );
+                  })()}
+                  {specialTerms && (
+                    <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                  )}
+                </div>
+              </details>
             </div>
           );
         })()}
