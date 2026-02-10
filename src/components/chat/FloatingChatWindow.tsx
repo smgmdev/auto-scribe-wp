@@ -5256,27 +5256,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return null;
                       })()}
                     </div>
-                    {/* Order Details expandable — mobile buttons moved outside flex row */}
-                    <details className="mt-0">
-                      <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
-                        Order Details
-                      </summary>
-                      <div className="mt-1 pt-1 text-xs text-white/70 space-y-0.5 -mx-3 px-3 border-t border-white/20">
-                        {acceptedOrderData?.price && (
-                          <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
-                        )}
-                        {acceptedOrderData?.delivery_duration && (acceptedOrderData.delivery_duration.days > 0 || acceptedOrderData.delivery_duration.hours > 0 || acceptedOrderData.delivery_duration.minutes > 0) && (
-                          <p>Delivery: <span className="text-white font-medium">
-                            {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
-                          </span></p>
-                        )}
-                        {specialTerms && (
-                          <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
-                        )}
-                      </div>
-                    </details>
                   </div>
                 </div>
+                {/* Order Details expandable — moved outside flex row for full-width border */}
+                <details className="mt-0">
+                  <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pl-10 md:pl-[52px]">
+                    Order Details
+                  </summary>
+                  <div className="mt-1 pt-1 text-xs text-white/70 space-y-0.5 -mx-3 px-3 border-t border-white/20">
+                    {acceptedOrderData?.price && (
+                      <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                    )}
+                    {acceptedOrderData?.delivery_duration && (acceptedOrderData.delivery_duration.days > 0 || acceptedOrderData.delivery_duration.hours > 0 || acceptedOrderData.delivery_duration.minutes > 0) && (
+                      <p>Delivery: <span className="text-white font-medium">
+                        {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                      </span></p>
+                    )}
+                    {specialTerms && (
+                      <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                    )}
+                  </div>
+                </details>
                 {!hasOpenDispute && (
                 <div className="hidden md:flex items-start gap-2 pt-0.5">
                   {canDeliver && (
