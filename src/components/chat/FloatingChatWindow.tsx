@@ -5312,7 +5312,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none">
                         Order Details
                       </summary>
-                      <div className="mt-1 pt-1 border-t border-white/20 text-xs text-white/70 space-y-0.5">
+                      <div className="mt-1 pt-1 text-xs text-white/70 space-y-0.5 relative before:absolute before:top-0 before:left-[-100px] before:right-[-100px] before:h-px before:bg-white/20">
                         {acceptedOrderData?.price && (
                           <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
                         )}
