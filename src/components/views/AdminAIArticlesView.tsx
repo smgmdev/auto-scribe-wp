@@ -12,8 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 interface PublishedSource {
@@ -95,11 +94,7 @@ export function AdminAIArticlesView() {
       }
     } catch (error) {
       console.error('Failed to generate description:', error);
-      toast({
-        title: "Generation failed",
-        description: "Could not generate description. Please enter manually.",
-        variant: "destructive",
-      });
+      toast.error('Could not generate description. Please enter manually.');
     } finally {
       setIsGeneratingDescription(false);
     }
@@ -285,11 +280,7 @@ export function AdminAIArticlesView() {
       }
     } catch (error) {
       console.error('Error loading more articles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load more articles",
-        variant: "destructive",
-      });
+      toast.error('Failed to load more articles');
     } finally {
       setLoadingMore(false);
     }
@@ -357,24 +348,16 @@ export function AdminAIArticlesView() {
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources-count'] });
       
       if (result.wpDeleteSuccess) {
-        toast({ title: "Article deleted", description: "Removed from database and WordPress" });
+        toast.success('Removed from database and WordPress');
       } else if (result.wpDeleteError) {
-        toast({ 
-          title: "Partially deleted", 
-          description: `Removed from database but WordPress deletion failed: ${result.wpDeleteError}`,
-          variant: "destructive",
-        });
+        toast.error(`Removed from database but WordPress deletion failed: ${result.wpDeleteError}`);
       } else {
-        toast({ title: "Article deleted", description: "Removed from database (no WordPress post to delete)" });
+        toast.success('Removed from database');
       }
     },
     onError: (error) => {
       setDeletingArticleId(null);
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : 'Delete failed');
     },
   });
 
@@ -503,15 +486,11 @@ export function AdminAIArticlesView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-published-sources'] });
-      toast({ title: "Article updated", description: "Local record and WordPress post have been updated" });
+      toast.success('Article updated and synced to WordPress');
       setEditingArticle(null);
     },
     onError: (error) => {
-      toast({
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : 'Update failed');
     },
   });
 
@@ -566,7 +545,7 @@ export function AdminAIArticlesView() {
             setOffset(0);
             setHasMore(true);
             setIsRefreshing(false);
-            sonnerToast.success('Articles refreshed');
+            toast.success('Articles refreshed');
           }}
           disabled={isRefreshing || isLoading}
           className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
