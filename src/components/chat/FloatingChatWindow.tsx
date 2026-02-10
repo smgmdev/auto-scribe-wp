@@ -6828,7 +6828,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 <TooltipTrigger asChild>
                                   <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="z-[10001]">
                                   <p className="text-xs">Agreed delivery time: {durationText}</p>
                                 </TooltipContent>
                               </Tooltip>
