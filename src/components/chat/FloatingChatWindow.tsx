@@ -5606,7 +5606,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
               {/* Expandable Order Details */}
-              <div className="pl-9 mt-3">
+              <div className="pl-9 mt-1">
                 <button
                   type="button"
                   onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
