@@ -5638,51 +5638,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <p className="font-medium text-sm text-foreground">
                     {pendingClientOrder.media_site_name}
                   </p>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1 cursor-help">
-                            {pendingClientOrder.price.toLocaleString()} credits
-                            <Info className="h-3 w-3" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs">
-                          <p>Payment in credits. 1 credit = 1 USD.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    {pendingClientOrder.delivery_duration && (pendingClientOrder.delivery_duration.days > 0 || pendingClientOrder.delivery_duration.hours > 0 || pendingClientOrder.delivery_duration.minutes > 0) && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • {formatDeliveryDuration(pendingClientOrder.delivery_duration)}
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>Requested delivery time.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {pendingClientOrder.special_terms && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center gap-1 cursor-help">
-                              • Special Terms
-                              <Info className="h-3 w-3" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs">
-                            <p>{pendingClientOrder.special_terms}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
                 </div>
                 {/* Desktop: Action buttons inline - hidden for admin */}
                 {!isAdmin && (
@@ -5943,12 +5898,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return data.media_site_id === clientOrderData.media_site_id;
                       } catch { return false; }
                     });
-                    // Skip rendering entire message wrapper if accepted, rejected, or banner is showing
+                    // Skip rendering entire message wrapper if accepted or rejected
                     if (isAccepted || isRejected) {
-                      return null;
-                    }
-                    // Hide the chat bubble when the sticky banner is already displaying the same info
-                    if (hasExistingClientOrderRequest && !globalChatRequest?.order && !hasAcceptedOrderRequest) {
                       return null;
                     }
                   } catch {}
