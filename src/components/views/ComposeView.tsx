@@ -1276,7 +1276,7 @@ export function ComposeView() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full md:flex-1">
+                <SelectTrigger className="w-full md:flex-1 h-9 text-sm rounded-none">
                   <SelectValue placeholder="Select a media site">
                     {selectedSite && currentSite && <div className="flex items-center gap-2">
                         <img src={currentSite.favicon || getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
@@ -1340,7 +1340,7 @@ export function ComposeView() {
               </div>
             ) : (
               <div className="flex gap-2">
-                <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-sm flex-1" />
+                <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-sm flex-1 h-9 rounded-none" />
                 <Button
                   variant="outline"
                   size="icon"
