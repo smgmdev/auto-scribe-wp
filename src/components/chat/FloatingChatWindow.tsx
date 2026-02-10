@@ -5640,10 +5640,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <>
                         <Button
                           size="sm"
-                          className="rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                          className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
                         >
-                          <CheckCircle className="h-4 w-4 mr-1" />
                           Accept
                         </Button>
                         <Button
@@ -5681,10 +5680,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <>
                       <Button
                         size="sm"
-                        className="flex-1 rounded-none bg-green-600 text-white border border-green-600 hover:bg-transparent hover:text-green-600 transition-all duration-200"
+                        className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                         onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
                         Accept
                       </Button>
                       <Button
