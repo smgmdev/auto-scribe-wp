@@ -4355,7 +4355,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Action buttons for client */}
             {isClient && !hasOrder && !isOwnMessage && (
-              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex w-full gap-2">
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row w-full gap-2">
                 <Button
                   size="default"
                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
