@@ -4021,7 +4021,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Order Delivered
               </span>
               {hasRevision && (
-                <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">
+                <Badge variant="secondary" className="text-xs bg-black text-orange-400">
                   Revision Requested
                 </Badge>
               )}
