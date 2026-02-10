@@ -370,7 +370,7 @@ export function OrderWithCreditsDialog({
                 Available Balance
               </span>
               <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
-                {availableCredits.toLocaleString()} credits (${availableCredits.toLocaleString()})
+                {availableCredits.toLocaleString()} credits
               </span>
             </div>
             <div className="flex items-center justify-between mt-2">
@@ -393,7 +393,7 @@ export function OrderWithCreditsDialog({
               <div>
                 <p className="font-medium text-destructive">Insufficient Credits</p>
                 <p className="text-sm text-muted-foreground">
-                  You need {(creditCost - availableCredits).toLocaleString()} more credits (${(creditCost - availableCredits).toLocaleString()}) to send this order request.
+                  You need {(creditCost - availableCredits).toLocaleString()} more credits to send this order request.
                 </p>
               </div>
             </div>
