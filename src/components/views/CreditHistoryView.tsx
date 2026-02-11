@@ -21,6 +21,7 @@ interface CreditTransaction {
   description: string | null;
   created_at: string;
   order_id: string | null;
+  order_number?: string | null;
 }
 
 interface LockedOrder {
@@ -435,6 +436,24 @@ export function CreditHistoryView() {
         setWithdrawalDetails(prev => ({ ...prev, ...withdrawalDetailsMap }));
       }
       
+      // Fetch order numbers for transactions with order_ids
+      const orderIds = [...new Set(transactionsWithDates.filter(t => t.order_id).map(t => t.order_id!))];
+      if (orderIds.length > 0) {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('id, order_number')
+          .in('id', orderIds);
+        
+        if (orders) {
+          const orderNumberMap: Record<string, string> = {};
+          orders.forEach(o => { if (o.order_number) orderNumberMap[o.id] = o.order_number; });
+          transactionsWithDates = transactionsWithDates.map(t => ({
+            ...t,
+            order_number: t.order_id ? orderNumberMap[t.order_id] || null : null
+          }));
+        }
+      }
+
       // Sort transactions by the actual event date (processed_at for withdrawals, created_at for others)
       transactionsWithDates.sort((a, b) => {
         const dateA = withdrawalDetailsMap[a.id]?.processed_at || a.created_at;
@@ -1495,8 +1514,8 @@ export function CreditHistoryView() {
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">{transaction.order_id ? 'Order ID:' : 'Transaction ID:'}</span>
-                                <p className="font-medium text-xs font-mono">{(transaction.order_id || transaction.id).slice(0, 8)}...</p>
+                                <span className="text-muted-foreground">{transaction.order_number ? 'Order ID:' : 'Transaction ID:'}</span>
+                                <p className="font-medium text-xs font-mono">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
                               </div>
                             </div>
                           )}
