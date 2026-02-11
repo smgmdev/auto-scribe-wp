@@ -6380,7 +6380,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <button
                       onClick={handleAdminLeaveChat}
                       disabled={leavingChat}
-                      className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs px-4 py-2 inline-flex items-center justify-center gap-1 disabled:opacity-50 transition-colors rounded-none"
+                      className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs px-4 inline-flex items-center justify-center gap-1 disabled:opacity-50 transition-colors rounded-none self-stretch"
                     >
                       {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
                       Leave
