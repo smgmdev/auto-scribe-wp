@@ -6359,7 +6359,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     value={newMessage}
                     onChange={handleInputChange}
                     disabled={sending}
-                    className="rounded-none border-0 flex-1 h-8 text-sm sm:h-10 sm:text-base"
+                    className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
                         e.preventDefault();
