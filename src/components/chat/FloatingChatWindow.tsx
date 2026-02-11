@@ -5968,11 +5968,51 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           : 'bg-muted'
                       } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                     >
-                      <DropdownMenu>
+                      <div className="flex items-center justify-between gap-1.5 text-xs font-medium mb-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                        {/* Show loading spinner while fetching agency info for client view */}
+                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        )}
+                        {/* Show agency logo next to name for agency messages in client view */}
+                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
+                          <img 
+                            src={counterpartyLogo} 
+                            alt="" 
+                            className="w-4 h-4 rounded-full object-cover"
+                          />
+                        )}
+                        {/* Show loading spinner while fetching agency info for admin view */}
+                        {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        )}
+                        {/* Show agency logo next to name for agency messages in admin view */}
+                        {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
+                          <img 
+                            src={adminAgencyInfo.logo_url} 
+                            alt="" 
+                            className="w-4 h-4 rounded-full object-cover"
+                          />
+                        )}
+                        <span className="opacity-70 truncate">
+                          {msg.sender_type === 'admin' 
+                            ? 'Arcana Mace Staff' 
+                            : isOwnMessage 
+                              ? 'You' 
+                              : isAdmin 
+                                ? (msg.sender_type === 'agency' 
+                                    ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
+                                    : 'Client')
+                                : loadingCounterpartyAgency && msg.sender_type === 'agency'
+                                  ? 'Loading...'
+                                  : counterpartyLabel}
+                        </span>
+                        </div>
+                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
-                            className={`absolute top-0.5 right-0.5 h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent ${
+                            className={`h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent shrink-0 ${
                               isRightAligned 
                                 ? 'text-primary-foreground/70' 
                                 : 'text-muted-foreground'
@@ -6077,44 +6117,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <div className="flex items-center gap-1.5 text-xs font-medium mb-1 pr-5">
-                        {/* Show loading spinner while fetching agency info for client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
-                          <img 
-                            src={counterpartyLogo} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        {/* Show loading spinner while fetching agency info for admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
-                          <img 
-                            src={adminAgencyInfo.logo_url} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        <span className="opacity-70">
-                          {msg.sender_type === 'admin' 
-                            ? 'Arcana Mace Staff' 
-                            : isOwnMessage 
-                              ? 'You' 
-                              : isAdmin 
-                                ? (msg.sender_type === 'agency' 
-                                    ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
-                                    : 'Client')
-                                : loadingCounterpartyAgency && msg.sender_type === 'agency'
-                                  ? 'Loading...'
-                                  : counterpartyLabel}
-                        </span>
                       </div>
                       {renderMessageContent(msg, isRightAligned, quote)}
                     </div>
