@@ -1316,16 +1316,28 @@ export function CreditHistoryView() {
                               {getTransactionBadge(transaction.type)}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
-                              {transaction.order_number && (
-                                <div>
-                                  <span className="text-muted-foreground">Order ID:</span>
-                                  <p className="font-medium">{transaction.order_number}</p>
-                                </div>
-                              )}
                               {(transaction as any).order_details?.media_sites?.name && (
                                 <div>
                                   <span className="text-muted-foreground">Media Site:</span>
                                   <p className="font-medium">{(transaction as any).order_details.media_sites.name}</p>
+                                </div>
+                              )}
+                              {transaction.order_number && (
+                                <div>
+                                  <span className="text-muted-foreground">Order ID:</span>
+                                  <p className="font-medium flex items-center gap-1.5">
+                                    {transaction.order_number}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(transaction.order_number!);
+                                        toast.success('Order ID copied');
+                                      }}
+                                      className="text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                      <Copy className="h-3.5 w-3.5" />
+                                    </button>
+                                  </p>
                                 </div>
                               )}
                               {(transaction as any).order_details?.amount_cents != null && (
@@ -1335,12 +1347,12 @@ export function CreditHistoryView() {
                                 </div>
                               )}
                               <div>
-                                <span className="text-muted-foreground">Platform Fee:</span>
-                                <p className="font-medium">{platformFee.toLocaleString()} credits</p>
-                              </div>
-                              <div>
                                 <span className="text-muted-foreground">Net Earnings:</span>
                                 <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Platform Fee:</span>
+                                <p className="font-medium">{platformFee.toLocaleString()} credits</p>
                               </div>
                               {(transaction as any).order_details?.delivered_at && (
                                 <div>
