@@ -5456,7 +5456,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
                   {(() => {
-                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
+                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.delivery_status === 'pending_revision' || localOrder.status === 'completed';
                     if (isDelivered) {
                       return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
                     }
@@ -5493,7 +5493,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
                   {(() => {
-                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
+                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.delivery_status === 'pending_revision' || localOrder.status === 'completed';
                     if (isDelivered) {
                       return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
                     }
