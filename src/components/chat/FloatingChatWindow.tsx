@@ -4644,8 +4644,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-white dark:bg-background border-border'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-white' : 'text-green-600 dark:text-green-400'}`} />
+            <div className="mb-2">
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
             <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
