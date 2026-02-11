@@ -5444,7 +5444,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
               {/* Mobile-only Order Details - full width button below action buttons */}
-              <details className="md:hidden w-full mt-0 pb-2 pr-2">
+              <details className="md:hidden w-full mt-0.5 pb-2 pr-2">
                 <summary className="w-full cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                   <div className="w-full py-2 px-3 bg-transparent text-white border border-white hover:bg-white hover:text-black transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1">
                     Order Details
