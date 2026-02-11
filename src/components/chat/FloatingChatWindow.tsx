@@ -5271,7 +5271,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </TooltipProvider>
                   <div className="min-w-0 overflow-visible leading-tight">
                     <p className="font-medium text-sm text-white truncate">
-                      {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
+                      {localOrder.status === 'completed' ? 'Order Completed' : `Offer Accepted: ${acceptedOrderData?.media_site_name || 'Order'}`}
                     </p>
                     {localOrder.status !== 'completed' && (
                     <div className="flex items-center gap-3">
@@ -5413,7 +5413,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="bg-transparent text-white/60 border-white/30 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0 text-xs"
+                    className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
                     onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
                   >
                     Order Details
