@@ -5553,7 +5553,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
               {/* Mobile: Action buttons full-width below */}
               {!isAdmin && (
-                <div className="md:hidden mt-1 pl-9 flex gap-2">
+                <div className="md:hidden mt-1 pl-9 flex flex-col gap-2">
+                  <div className="flex gap-2">
                   {isClient ? (
                     <>
                       <Button
@@ -5598,16 +5599,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       )}
                       Cancel Offer
                     </Button>
-                    <button
-                      type="button"
-                      onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                      className="flex-1 py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
-                    >
-                      Order Details
-                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
-                    </button>
                     </>
                   )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                    className="w-full py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
+                  >
+                    Order Details
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                  </button>
                 </div>
               )}
               {/* Expandable Order Details content */}
