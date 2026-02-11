@@ -4386,7 +4386,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       return (
         <div className="space-y-1">
-          <div className={`rounded-none border p-3 ${
+          <div className={`rounded-none border p-3 ${hasOrder ? 'pb-2' : ''} ${
             isOwnMessage 
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-white dark:bg-background border-gray-200 dark:border-gray-700'
