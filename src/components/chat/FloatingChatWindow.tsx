@@ -4104,10 +4104,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-white dark:from-green-950/40 dark:to-emerald-950/40 border-green-200 dark:border-green-800'
           }`}>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <CheckCircle className="h-4 w-4 text-green-400 dark:text-green-300 shrink-0" />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
-                Order Delivered
-              </span>
+               <CheckCircle className="h-4 w-4 text-foreground shrink-0" />
+               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                 Order Delivered
+               </span>
               {hasRevision ? (
                 <Badge variant="secondary" className="text-xs bg-black text-orange-400">
                   Revision Requested
