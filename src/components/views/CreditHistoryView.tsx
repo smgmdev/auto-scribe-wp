@@ -1489,47 +1489,59 @@ export function CreditHistoryView() {
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                             </div>
-                          ) : (
-                          /* Other transaction types - Show standard details */
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
-                              <div>
-                                <span className="text-muted-foreground">Transaction Type:</span>
-                                <p className="font-medium capitalize">{transaction.type.replace(/_/g, ' ')}</p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Amount:</span>
-                                <p className={`font-medium ${
-                                  transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                                    ? 'text-amber-500' 
-                                    : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                                }`}>
-                                  {transaction.type === 'withdrawal_locked' 
-                                    ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
-                                    : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
-                                  }
-                                </p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Date & Time:</span>
-                                <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">{transaction.order_number ? 'Order ID:' : 'Transaction ID:'}</span>
-                                <div className="flex items-center gap-1.5">
-                                  <p className="font-medium">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
-                                  <button
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(transaction.order_number || transaction.id);
-                                      toast.success('Copied to clipboard');
-                                    }}
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                  >
-                                    <Copy className="h-3.5 w-3.5" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                           ) : (
+                           /* Other transaction types - Show standard details */
+                             <>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                               <div>
+                                 <span className="text-muted-foreground">Transaction Type:</span>
+                                 <p className="font-medium capitalize">{transaction.type.replace(/_/g, ' ')}</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Amount:</span>
+                                 <p className={`font-medium ${
+                                   transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                                     ? 'text-amber-500' 
+                                     : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                                 }`}>
+                                   {transaction.type === 'withdrawal_locked' 
+                                     ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
+                                     : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
+                                   }
+                                 </p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Date & Time:</span>
+                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">{transaction.order_number ? 'Order ID:' : 'Transaction ID:'}</span>
+                                 <div className="flex items-center gap-1.5">
+                                   <p className="font-medium">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
+                                   <button
+                                     onClick={() => {
+                                       navigator.clipboard.writeText(transaction.order_number || transaction.id);
+                                       toast.success('Copied to clipboard');
+                                     }}
+                                     className="text-muted-foreground hover:text-foreground transition-colors"
+                                   >
+                                     <Copy className="h-3.5 w-3.5" />
+                                   </button>
+                                 </div>
+                               </div>
+                             </div>
+                             {transaction.type === 'offer_accepted' && transaction.order_id && (
+                               <div className="mt-3 pt-3 border-t border-border/50">
+                                 <button
+                                   onClick={() => handleOrderCompletedClick(transaction.order_id!)}
+                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                 >
+                                   View Order Details →
+                                 </button>
+                               </div>
+                             )}
+                             </>
+                           )}
                           
                           {reasonText && (
                             <div className="mt-2 pt-2 border-t border-border/50">
