@@ -548,8 +548,8 @@ export function DashboardView() {
                 <Loader2 className="h-3 w-3 animate-spin" />
               </Badge>
             ) : isAgency ? (
-              <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black w-fit">
-                <CheckCircle className="h-3 w-3" />
+              <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black w-fit whitespace-nowrap">
+                <CheckCircle className="h-3 w-3 shrink-0" />
                 Active Agency
               </Badge>
             ) : (
@@ -567,8 +567,8 @@ export function DashboardView() {
               <Loader2 className="h-3 w-3 animate-spin" />
             </Badge>
           ) : isAgency ? (
-            <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black">
-              <CheckCircle className="h-3 w-3" />
+            <Badge className="bg-black text-white border-black flex items-center gap-1 px-3 py-1 hover:bg-black whitespace-nowrap">
+              <CheckCircle className="h-3 w-3 shrink-0" />
               Active Agency
             </Badge>
           ) : (
