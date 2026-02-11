@@ -4393,7 +4393,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderRequest.media_site_name}</span>
                   </span>
                 </div>
@@ -4643,7 +4643,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-white dark:bg-background border-border'
           }`}>
             <div className="mb-2">
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-foreground'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
             <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               Price: {orderPlaced.credits_used.toLocaleString()} credits
