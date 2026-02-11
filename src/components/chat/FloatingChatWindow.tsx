@@ -5603,30 +5603,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       )}
                       Cancel Offer
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                      className="flex-1 py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
+                    >
+                      Order Details
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                    </button>
                     </>
                   )}
                 </div>
               )}
-              {/* Mobile-only full-width Order Details button */}
-              <div className="md:hidden pl-9 mt-1">
-                <button
-                  type="button"
-                  onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                  className="w-full py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
-                >
-                  Order Details
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
               {/* Expandable Order Details content */}
               {bannerOrderDetailsOpen && (
-                <div className="pl-9 mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 pt-2 rounded-none border-t border-border">
-                  <p>Price: {pendingOrder.price.toLocaleString()} credits</p>
+                <div className="pl-9 mt-1.5 space-y-0.5 text-sm text-muted-foreground pt-2 rounded-none border-t border-border">
+                  <p>Price: <span className="font-bold text-foreground">{pendingOrder.price.toLocaleString()} credits</span></p>
                   {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
-                    <p>Delivery: {formatDeliveryDuration(pendingOrder.delivery_duration)}</p>
+                    <p>Delivery: <span className="font-bold text-foreground">{formatDeliveryDuration(pendingOrder.delivery_duration)}</span></p>
                   )}
                   {pendingOrder.special_terms && (
-                    <p>Special Terms: {pendingOrder.special_terms}</p>
+                    <p>Special Terms: <span className="font-bold text-foreground">{pendingOrder.special_terms}</span></p>
                   )}
                 </div>
               )}
@@ -5705,6 +5702,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {!isAdmin && (
                 <div className="md:hidden mt-1 pl-9 flex gap-2">
                   {isClient ? (
+                    <>
                     <Button
                       size="sm"
                       className="flex-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black transition-all duration-200"
@@ -5716,6 +5714,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       )}
                       Cancel Request
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                      className="flex-1 py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
+                    >
+                      Order Details
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    </>
                   ) : (
                     <>
                       <Button
@@ -5738,28 +5745,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Button>
                     </>
                   )}
+                  {!isClient && (
+                    <button
+                      type="button"
+                      onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                      className="flex-1 py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
+                    >
+                      Order Details
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  )}
                 </div>
               )}
-              {/* Mobile-only full-width Order Details button */}
-              <div className="md:hidden pl-9 mt-1">
-                <button
-                  type="button"
-                  onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                  className="w-full py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
-                >
-                  Order Details
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
               {/* Expandable Order Details content */}
               {bannerOrderDetailsOpen && (
-                <div className="pl-9 mt-1.5 space-y-0.5 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 pt-2 rounded-none border-t border-border">
-                  <p>Price: {pendingClientOrder.price.toLocaleString()} credits</p>
+                <div className="pl-9 mt-1.5 space-y-0.5 text-sm text-muted-foreground pt-2 rounded-none border-t border-border">
+                  <p>Price: <span className="font-bold text-foreground">{pendingClientOrder.price.toLocaleString()} credits</span></p>
                   {pendingClientOrder.delivery_duration && (pendingClientOrder.delivery_duration.days > 0 || pendingClientOrder.delivery_duration.hours > 0 || pendingClientOrder.delivery_duration.minutes > 0) && (
-                    <p>Delivery: {formatDeliveryDuration(pendingClientOrder.delivery_duration)}</p>
+                    <p>Delivery: <span className="font-bold text-foreground">{formatDeliveryDuration(pendingClientOrder.delivery_duration)}</span></p>
                   )}
                   {pendingClientOrder.special_terms && (
-                    <p>Special Terms: {pendingClientOrder.special_terms}</p>
+                    <p>Special Terms: <span className="font-bold text-foreground">{pendingClientOrder.special_terms}</span></p>
                   )}
                 </div>
               )}
