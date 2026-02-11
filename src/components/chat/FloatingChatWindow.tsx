@@ -4643,7 +4643,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-[#c8f6d3]' : 'text-green-600 dark:text-green-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-[#c8f6d3]' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
             <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               {orderPlaced.credits_used.toLocaleString()} credits
