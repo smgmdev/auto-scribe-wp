@@ -399,11 +399,14 @@ export function AdminUsersView() {
             id,
             amount_cents,
             agency_payout_cents,
+            platform_fee_cents,
             status,
             delivery_status,
             created_at,
             delivered_at,
-            media_sites(name)
+            delivery_url,
+            order_number,
+            media_sites(name, favicon, price, link)
           `)
           .eq('status', 'completed');
         
@@ -436,8 +439,32 @@ export function AdminUsersView() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
+      // Merge agency delivery orders into userOrders so credit history can find them
+      const allOrders = [...(orders || [])];
+      if (deliveries.length > 0) {
+        const existingIds = new Set(allOrders.map(o => o.id));
+        for (const d of deliveries) {
+          if (!existingIds.has(d.id)) {
+            allOrders.push({
+              id: d.id,
+              amount_cents: d.amount_cents,
+              status: d.status,
+              delivery_status: d.delivery_status,
+              created_at: d.created_at,
+              order_number: (d as any).order_number || null,
+              platform_fee_cents: (d as any).platform_fee_cents || 0,
+              agency_payout_cents: d.agency_payout_cents,
+              delivery_url: (d as any).delivery_url || null,
+              delivered_at: d.delivered_at,
+              media_sites: d.media_sites as any,
+              service_requests: null,
+            } as any);
+          }
+        }
+      }
+      
       setUserCreditTransactions(prev => ({ ...prev, [userId]: transactions || [] }));
-      setUserOrders(prev => ({ ...prev, [userId]: orders || [] }));
+      setUserOrders(prev => ({ ...prev, [userId]: allOrders }));
       setUserEngagements(prev => ({ ...prev, [userId]: engagements || [] }));
       setUserDeliveries(prev => ({ ...prev, [userId]: deliveries }));
       setUserWithdrawals(prev => ({ ...prev, [userId]: (withdrawals || []) as unknown as WithdrawalDetails[] }));
