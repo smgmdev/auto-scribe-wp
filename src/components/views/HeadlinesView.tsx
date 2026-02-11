@@ -291,9 +291,9 @@ export function HeadlinesView() {
                 onClick={() => handleSelectHeadline(headline)}
               >
                 <CardContent className="p-4 md:p-6">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
                         <Badge 
                           variant="outline" 
                           className={sourceColors[headline.source]}
@@ -304,27 +304,27 @@ export function HeadlinesView() {
                           {formatTimeAgo(headline.publishedAt)}
                         </span>
                       </div>
-                      <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
-                        {headline.title}
-                      </h3>
-                      {headline.summary && (
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                          {headline.summary}
-                        </p>
-                      )}
-                      <p className="mt-2 text-xs text-muted-foreground/70 truncate">
-                        {headline.url}
-                      </p>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="hidden md:inline-flex h-7 w-7 flex-shrink-0 hover:bg-muted"
+                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                        title={headline.url}
+                      >
+                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      </Button>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="hidden md:inline-flex h-8 w-8 flex-shrink-0 mt-1 hover:bg-muted"
-                      onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
-                      title={headline.url}
-                    >
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                    <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
+                      {headline.title}
+                    </h3>
+                    {headline.summary && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {headline.summary}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground/70 truncate">
+                      {headline.url}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
