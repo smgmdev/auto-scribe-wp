@@ -4469,7 +4469,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Status indicator if order already placed */}
             {hasOrder && (
-              <div className={`mt-1.5 pt-1.5 flex items-center justify-center`}>
+              <div className="flex items-center justify-center">
                 <span className="text-sm font-medium text-foreground">Offer Accepted</span>
               </div>
             )}
