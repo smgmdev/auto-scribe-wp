@@ -5263,7 +5263,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div className="min-w-0 overflow-visible leading-tight">
+                  <div className="min-w-0 overflow-visible leading-none md:leading-tight">
                     <p className="font-medium text-sm text-white truncate">
                       {localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
                     </p>
