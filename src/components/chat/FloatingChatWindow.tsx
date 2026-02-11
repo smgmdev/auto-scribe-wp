@@ -4158,7 +4158,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="default"
                   variant="outline"
-                  className="flex-1 bg-white text-black border-gray-300 hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-sm"
+                  className="flex-1 bg-white text-black border-white hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-sm"
                   onClick={() => setRevisionDialogOpen(true)}
                   disabled={hasOpenDispute}
                 >
@@ -5377,7 +5377,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
+                        className="bg-transparent text-white border-white hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
                         onClick={() => setRevisionDialogOpen(true)}
                       >
                         Request Revision
@@ -5434,7 +5434,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-transparent text-white border-white/50 hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
+                        className="bg-transparent text-white border-white hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
                         onClick={() => setRevisionDialogOpen(true)}
                       >
                         Request Revision
