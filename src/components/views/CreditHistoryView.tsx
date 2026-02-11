@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -1515,7 +1515,18 @@ export function CreditHistoryView() {
                               </div>
                               <div>
                                 <span className="text-muted-foreground">{transaction.order_number ? 'Order ID:' : 'Transaction ID:'}</span>
-                                <p className="font-medium text-xs font-mono">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-medium">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(transaction.order_number || transaction.id);
+                                      toast.success('Copied to clipboard');
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           )}
