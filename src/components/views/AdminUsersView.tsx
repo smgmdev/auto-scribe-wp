@@ -1423,6 +1423,11 @@ export function AdminUsersView() {
                                                     const feeMatch = tx.description?.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
                                                     const platformFee = feeMatch ? parseInt(feeMatch[1]) : null;
                                                     
+                                                    // Try to find service_request_id from deliveries or engagements
+                                                    const delivery = (userDeliveries[user.id] || []).find(d => d.id === tx.order_id);
+                                                    const engagement = (userEngagements[user.id] || []).find(e => e.order_id === tx.order_id);
+                                                    const serviceRequestId = delivery?.service_request_id || engagement?.id;
+                                                    
                                                     return (
                                                       <>
                                                         {siteName && (
@@ -1447,6 +1452,17 @@ export function AdminUsersView() {
                                                           <div>
                                                             <span className="text-muted-foreground uppercase tracking-wide">Order Value</span>
                                                             <p className="font-medium">{(tx.amount + platformFee).toLocaleString()} credits</p>
+                                                          </div>
+                                                        )}
+                                                        {serviceRequestId && (
+                                                          <div className="col-span-2">
+                                                            <button
+                                                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                                                              onClick={(e) => { e.stopPropagation(); handleEngagementClick(serviceRequestId); }}
+                                                            >
+                                                              <ExternalLink className="h-3 w-3" />
+                                                              View Order Chat
+                                                            </button>
                                                           </div>
                                                         )}
                                                       </>
@@ -1510,6 +1526,22 @@ export function AdminUsersView() {
                                                           </a>
                                                         </div>
                                                       )}
+                                                      {(() => {
+                                                        const serviceRequestId = order.service_requests?.[0]?.id 
+                                                          || (userDeliveries[user.id] || []).find(d => d.id === order.id)?.service_request_id
+                                                          || (userEngagements[user.id] || []).find(e => e.order_id === order.id)?.id;
+                                                        return serviceRequestId ? (
+                                                          <div className="col-span-2">
+                                                            <button
+                                                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                                                              onClick={(e) => { e.stopPropagation(); handleEngagementClick(serviceRequestId); }}
+                                                            >
+                                                              <ExternalLink className="h-3 w-3" />
+                                                              View Order Chat
+                                                            </button>
+                                                          </div>
+                                                        ) : null;
+                                                      })()}
                                                     </>
                                                   );
                                                 })()}
