@@ -344,3 +344,7 @@ button:focus-visible,
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+details[open] .details-open-rotate {
+  transform: rotate(180deg);
+}
