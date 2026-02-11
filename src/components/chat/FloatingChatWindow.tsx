@@ -5960,7 +5960,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
                   >
                     <div
-                      className={`relative group ${msg.message.startsWith('[ORDER_REQUEST]') ? 'max-w-full sm:max-w-[80%]' : 'max-w-[85%] sm:max-w-[80%]'} min-w-0 rounded-none p-2.5 sm:p-3 transition-all duration-300 break-words ${
+                      className={`relative group ${msg.message.startsWith('[ORDER_REQUEST]') ? 'max-w-full sm:max-w-[80%]' : 'max-w-[85%] sm:max-w-[80%]'} min-w-0 rounded-none px-2.5 py-2 sm:px-3 sm:py-2.5 transition-all duration-300 break-words ${
                         msg.sender_type === 'admin'
                           ? 'bg-blue-500 text-white'
                           : isRightAligned
@@ -6247,7 +6247,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             className="w-3.5 h-3.5 rounded-full object-cover"
                           />
                         )}
-                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : replyToMessage.sender_type === 'agency' ? (counterpartyAgencyInfo?.name || counterpartyLabel) : counterpartyLabel}</span>
+                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : replyToMessage.sender_type === 'agency' ? (counterpartyAgencyInfo?.name || adminAgencyInfo?.name || 'Agency') : counterpartyLabel}</span>
                       </div>
                       <p className="text-sm truncate">
                         {getReplyContentOnly(replyToMessage.message, replyToMessage.sender_type === senderType)}
