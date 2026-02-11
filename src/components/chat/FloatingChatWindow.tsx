@@ -4630,6 +4630,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // If there was an offer in this conversation, show "Offer Accepted" instead of "Order Placed"
       const hasOffer = messages.some(m => m.message.includes('[ORDER_REQUEST]'));
       const orderLabel = hasOffer ? 'Offer Accepted' : 'Order Placed';
+      // Get special terms from the order request message
+      const orderRequestMsg = messages.find(m => m.message.includes('[ORDER_REQUEST]'));
+      const orderRequestSpecialTerms = orderRequestMsg ? (() => { try { const d = JSON.parse(orderRequestMsg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/)?.[1] || '{}'); return d.special_terms; } catch { return null; } })() : null;
       // Check if order was delivered on time
       const wasDelivered = messages.some(m => m.message.includes('[ORDER_DELIVERED]'));
       const deliveredOnTime = wasDelivered && orderPlaced.delivery_deadline && new Date(messages.find(m => m.message.includes('[ORDER_DELIVERED]'))?.created_at || '') <= new Date(orderPlaced.delivery_deadline);
@@ -4646,8 +4649,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
             <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-              {orderPlaced.credits_used.toLocaleString()} credits
+              Price: {orderPlaced.credits_used.toLocaleString()} credits
             </p>
+            {orderRequestSpecialTerms && (
+              <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                Special Terms: <span className={`${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>{orderRequestSpecialTerms}</span>
+              </p>
+            )}
             {timeInfo && (
               <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-green-200/30' : 'border-green-200 dark:border-green-800'}`}>
                 {deliveredOnTime ? (
