@@ -34,7 +34,7 @@ interface LockedOrder {
 export function CreditHistoryView() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId } = useAppStore();
+  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId, setAgencyRequestsTargetOrderId } = useAppStore();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
@@ -152,9 +152,14 @@ export function CreditHistoryView() {
 
   // Navigate to completed orders tab and open the chat for a specific order
   const handleOrderCompletedClick = (orderId: string) => {
-    setOrdersTargetTab('completed');
-    setOrdersTargetOrderId(orderId);
-    setCurrentView('orders');
+    if (isAgency) {
+      setAgencyRequestsTargetOrderId(orderId);
+      setCurrentView('agency-requests');
+    } else {
+      setOrdersTargetTab('completed');
+      setOrdersTargetOrderId(orderId);
+      setCurrentView('orders');
+    }
   };
 
   // Toggle withdrawal details expansion and fetch details if needed

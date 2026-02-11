@@ -85,6 +85,10 @@ interface AppState {
   ordersTargetOrderId: string | null;
   setOrdersTargetOrderId: (orderId: string | null) => void;
   
+  // Agency requests view targeting (for navigating from credit history)
+  agencyRequestsTargetOrderId: string | null;
+  setAgencyRequestsTargetOrderId: (orderId: string | null) => void;
+  
   // Admin users view targeting (for navigating from withdrawals to specific user)
   adminUsersTargetUserId: string | null;
   setAdminUsersTargetUserId: (userId: string | null) => void;
@@ -281,6 +285,10 @@ export const useAppStore = create<AppState>()((set) => ({
   setOrdersTargetTab: (tab) => set({ ordersTargetTab: tab }),
   ordersTargetOrderId: null,
   setOrdersTargetOrderId: (orderId) => set({ ordersTargetOrderId: orderId }),
+  
+  // Agency requests view targeting
+  agencyRequestsTargetOrderId: null,
+  setAgencyRequestsTargetOrderId: (orderId) => set({ agencyRequestsTargetOrderId: orderId }),
   
   // Admin users view targeting
   adminUsersTargetUserId: null,
