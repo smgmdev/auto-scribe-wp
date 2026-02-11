@@ -4105,7 +4105,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
                <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                 Order Delivered
+                 Order Delivered: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderDelivered.media_site_name}</span>
                </span>
               {hasRevision ? (
                 <Badge variant="secondary" className="text-xs bg-black text-orange-400">
@@ -4117,9 +4117,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </Badge>
               )}
             </div>
-            <p className={`text-sm font-medium break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>
-              {orderDelivered.media_site_name}
-            </p>
             <p className={`text-sm mt-2 break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               Here is your delivery. Please review and accept or request a revision.
             </p>
