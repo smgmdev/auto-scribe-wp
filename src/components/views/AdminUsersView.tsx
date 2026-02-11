@@ -54,6 +54,9 @@ interface Order {
   status: string;
   delivery_status: string;
   created_at: string;
+  order_number?: string | null;
+  platform_fee_cents: number;
+  agency_payout_cents: number;
   media_sites?: { name: string } | null;
   service_requests?: { id: string }[] | null;
 }
@@ -366,7 +369,7 @@ export function AdminUsersView() {
       // Fetch orders with media site info and service request
       const { data: orders } = await supabase
         .from('orders')
-        .select('id, amount_cents, status, delivery_status, created_at, media_sites(name), service_requests(id)')
+        .select('id, amount_cents, status, delivery_status, created_at, order_number, platform_fee_cents, agency_payout_cents, media_sites(name), service_requests(id)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
@@ -1364,8 +1367,57 @@ export function AdminUsersView() {
                                                   </div>
                                                 )}
                                                 
+                                                {/* Order details for order-related transactions */}
+                                                {tx.order_id && !withdrawal && (() => {
+                                                  const order = (userOrders[user.id] || []).find(o => o.id === tx.order_id);
+                                                  if (!order) {
+                                                    return (
+                                                      <div className="col-span-2">
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Order ID</span>
+                                                        <p className="font-medium">{tx.order_id?.slice(0, 8)}...</p>
+                                                      </div>
+                                                    );
+                                                  }
+                                                  return (
+                                                    <>
+                                                      {order.order_number && (
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Order ID</span>
+                                                          <p className="font-medium">{order.order_number}</p>
+                                                        </div>
+                                                      )}
+                                                      {(order as any).media_sites?.name && (
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Media Site</span>
+                                                          <p className="font-medium">{(order as any).media_sites.name}</p>
+                                                        </div>
+                                                      )}
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Order Value</span>
+                                                        <p className="font-medium">{Math.round(order.amount_cents / 100).toLocaleString()} credits</p>
+                                                      </div>
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Status</span>
+                                                        <p className="font-medium capitalize">{order.status?.replace(/_/g, ' ')}</p>
+                                                      </div>
+                                                      {order.platform_fee_cents > 0 && (
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Platform Fee</span>
+                                                          <p className="font-medium">{Math.round(order.platform_fee_cents / 100).toLocaleString()} credits</p>
+                                                        </div>
+                                                      )}
+                                                      {order.agency_payout_cents > 0 && (
+                                                        <div>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Agency Payout</span>
+                                                          <p className="font-medium">{Math.round(order.agency_payout_cents / 100).toLocaleString()} credits</p>
+                                                        </div>
+                                                      )}
+                                                    </>
+                                                  );
+                                                })()}
+
                                                 {/* Platform fee for order earnings */}
-                                                {tx.description?.includes('Platform fee:') && (() => {
+                                                {tx.description?.includes('Platform fee:') && !tx.order_id && (() => {
                                                   const match = tx.description.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
                                                   if (match) {
                                                     return (
