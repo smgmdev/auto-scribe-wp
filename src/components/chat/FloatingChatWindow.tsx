@@ -5324,25 +5324,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         const showTimeInfo = timeInfo && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
                         const showCountdown = !showTimeInfo && countdown && (!localOrder.delivery_status || localOrder.delivery_status === 'pending');
                         
-                        if (showTimeInfo) {
-                          return (
-                            <div className={`flex items-center gap-1 ${timeInfo.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              <span className="text-xs font-medium">
-                                {timeInfo.isOverdue ? 'Overdue' : `Est. Delivery: ${timeInfo.text}`}
-                              </span>
-                            </div>
-                          );
-                        }
-                        
-                        if (showCountdown && countdown) {
-                          return (
-                            <div className={`flex items-center gap-1 ${countdown.isOverdue ? 'text-red-400' : 'text-white/70'}`}>
-                              <span className="text-xs font-medium">
-                                {countdown.isOverdue ? 'Overdue' : `Est. Delivery: ${countdown.text}`}
-                              </span>
-                            </div>
-                          );
-                        }
+                        // Countdown moved to expanded Order Details area
                         
                         return null;
                       })()}
