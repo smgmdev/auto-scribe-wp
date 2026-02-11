@@ -6335,18 +6335,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </Button>
                   </div>
                 )}
-                {/* Mobile: Leave button floating above the input bar on the right */}
-                {isMobile && isAdmin && adminJoined && (
-                  <div className="flex justify-end pr-2 -mb-px relative z-20">
-                    <button
-                      onClick={handleAdminLeaveChat}
-                      disabled={leavingChat}
-                      className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs flex items-center justify-center disabled:opacity-50 transition-colors rounded-md shrink-0 leading-none h-7 px-2.5 gap-1 shadow-sm"
-                    >
-                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <><LogOut className="h-3 w-3" /><span className="text-[10px]">Leave</span></>}
-                    </button>
-                  </div>
-                )}
                 <div className="flex items-stretch relative z-10">
                   <input
                     type="file"
@@ -6388,14 +6376,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   >
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
-                  {/* Desktop: Leave button inline */}
-                  {!isMobile && isAdmin && adminJoined && (
+                  {isAdmin && adminJoined && (
                     <button
                       onClick={handleAdminLeaveChat}
                       disabled={leavingChat}
-                      className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs flex items-center justify-center disabled:opacity-50 transition-colors rounded-none shrink-0 leading-none h-10 px-4"
+                      className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs flex items-center justify-center disabled:opacity-50 transition-colors rounded-none shrink-0 leading-none h-10 w-10 sm:w-auto sm:px-4"
                     >
-                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <span>Leave</span>}
+                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <><LogOut className="h-3 w-3 sm:hidden" /><span className="hidden sm:inline">Leave</span></>}
                     </button>
                   )}
                 </div>
