@@ -5500,7 +5500,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     ) : null;
                   })()}
                   {specialTerms && (
-                    <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                    <p>Special Terms: <span className="text-white font-medium">{specialTerms}</span></p>
                   )}
                 </div>
               </details>
@@ -5530,7 +5530,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     ) : null;
                   })()}
                   {specialTerms && (
-                    <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                    <p>Special Terms: <span className="text-white font-medium">{specialTerms}</span></p>
                   )}
                 </div>
               )}
