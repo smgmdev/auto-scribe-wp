@@ -5457,7 +5457,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <summary className="w-full cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                   <div className="w-full py-2 px-3 bg-transparent text-white border border-white/50 hover:bg-white hover:text-black transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1">
                     Order Details
-                    <ChevronDown className="h-3 w-3" />
+                    <ChevronDown className="h-3 w-3 transition-transform duration-200 details-open-rotate" />
                   </div>
                 </summary>
                 <div className="relative mt-1 pt-1.5 pb-0 text-sm text-white/70 space-y-0.5 px-1">
