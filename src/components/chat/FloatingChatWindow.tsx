@@ -5233,6 +5233,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const orderRequestData = getLastOrderRequestData();
           // Merge special_terms: prefer accepted order data, fallback to order request data
           const specialTerms = acceptedOrderData?.special_terms || orderRequestData?.special_terms;
+          const orderPrice = acceptedOrderData?.price || orderRequestData?.price;
           const timeInfo = localOrder.delivery_deadline ? formatTimeRemaining(localOrder.delivery_deadline) : null;
           const isAgencyView = globalChatType === 'agency-request' && !isAdmin;
           const isClientView = globalChatType === 'my-request' || actualSenderType === 'client';
@@ -5477,8 +5478,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </summary>
                 <div className="relative mt-1 pt-1.5 pb-0 text-sm text-white/70 space-y-0.5 px-1">
                   <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
-                  {acceptedOrderData?.price && (
-                    <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                  {orderPrice != null && orderPrice > 0 && (
+                    <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
                   {(() => {
                     const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
@@ -5507,8 +5508,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               {/* Desktop expandable Order Details content */}
               {bannerOrderDetailsOpen && (
                 <div className="hidden md:block pl-9 mt-1.5 pb-2 space-y-0.5 text-xs text-white/70 pt-2 border-t border-white/10">
-                  {acceptedOrderData?.price && (
-                    <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                  {orderPrice != null && orderPrice > 0 && (
+                    <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
                   {(() => {
                     const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
