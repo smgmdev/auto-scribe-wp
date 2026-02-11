@@ -4053,9 +4053,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
                 Order Delivered
               </span>
-              {hasRevision && (
+              {hasRevision ? (
                 <Badge variant="secondary" className="text-xs bg-black text-orange-400">
                   Revision Requested
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-xs bg-green-600 text-white border-0">
+                  Delivered
                 </Badge>
               )}
             </div>
