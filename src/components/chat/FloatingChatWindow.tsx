@@ -6774,7 +6774,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         if (!open) setDisputeReason('');
       }}>
         <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Open Dispute</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>
