@@ -4467,12 +4467,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
             )}
             
-            {/* Status indicator if order already placed */}
-            {hasOrder && (
-              <div className="flex items-center justify-center">
-                <span className="text-sm font-medium text-foreground">Offer Accepted</span>
-              </div>
-            )}
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
