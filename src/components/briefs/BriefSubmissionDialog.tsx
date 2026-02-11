@@ -342,7 +342,7 @@ export function BriefSubmissionDialog({
         // Desktop: centered draggable popup
         <div className="flex items-center justify-center w-full h-full">
           <div
-            className="w-full max-w-lg border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
+            className="w-full max-w-lg border bg-background pt-1 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
