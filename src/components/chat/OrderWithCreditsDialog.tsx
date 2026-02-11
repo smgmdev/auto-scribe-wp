@@ -63,6 +63,7 @@ export function OrderWithCreditsDialog({
   const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [calculatedAvailable, setCalculatedAvailable] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(false);
   const { credits, user } = useAuth();
   const isMobile = useIsMobile();
 
@@ -89,7 +90,7 @@ export function OrderWithCreditsDialog({
   React.useEffect(() => {
     const fetchAvailableCredits = async () => {
       if (!open || !user) return;
-      
+      setLoadingCredits(true);
       // Fetch all credit transactions to calculate available balance the same way as Credit Management
       const { data: allTransactions } = await supabase
         .from('credit_transactions')
@@ -174,6 +175,7 @@ export function OrderWithCreditsDialog({
       
       setLockedCredits(totalLocked);
       setCalculatedAvailable(available);
+      setLoadingCredits(false);
     };
 
     fetchAvailableCredits();
@@ -407,43 +409,51 @@ export function OrderWithCreditsDialog({
           </div>
 
           {/* Credit Balance */}
-          <div className="rounded-none border border-border bg-muted/50 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Available Credit Balance
-              </span>
-              <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
-                {availableCredits.toLocaleString()} credits
-              </span>
+          {loadingCredits ? (
+            <div className="rounded-none border border-border bg-muted/50 p-8 flex items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-muted-foreground">Order Cost</span>
-              <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
-            </div>
-            <div className="border-t border-border my-3" />
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">After Order</span>
-              <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
-                {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
-              </span>
-            </div>
-          </div>
-
-          {/* Insufficient Credits Warning */}
-          {!hasEnoughCredits && (
-            <div className="flex items-start gap-3 p-4 rounded-none bg-destructive/10 border border-destructive/20">
-              <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-destructive">Insufficient Credits</p>
-                <p className="text-sm text-muted-foreground">
-                  You need {(creditCost - availableCredits).toLocaleString()} more credits to send this order request.
-                </p>
+          ) : (
+            <>
+              <div className="rounded-none border border-border bg-muted/50 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Available Credit Balance
+                  </span>
+                  <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
+                    {availableCredits.toLocaleString()} credits
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-muted-foreground">Order Cost</span>
+                  <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+                </div>
+                <div className="border-t border-border my-3" />
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">After Order</span>
+                  <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
+                    {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
+                  </span>
+                </div>
               </div>
-            </div>
+
+              {/* Insufficient Credits Warning */}
+              {!hasEnoughCredits && (
+                <div className="flex items-start gap-3 p-4 rounded-none bg-destructive/10 border border-destructive/20">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-destructive">Insufficient Credits</p>
+                    <p className="text-sm text-muted-foreground">
+                      You need {(creditCost - availableCredits).toLocaleString()} more credits to send this order request.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <div className="space-y-2">
-          {!hasEnoughCredits && (
+          {!loadingCredits && !hasEnoughCredits && (
             <Button
               onClick={() => setBuyCreditsOpen(true)}
               variant="default"
@@ -457,7 +467,7 @@ export function OrderWithCreditsDialog({
 
           <Button
             onClick={handleSendRequest}
-            disabled={sending || !hasEnoughCredits || !hasValidDuration}
+            disabled={sending || loadingCredits || !hasEnoughCredits || !hasValidDuration}
             className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             size="lg"
           >
@@ -465,6 +475,11 @@ export function OrderWithCreditsDialog({
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Sending...
+              </>
+            ) : loadingCredits ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Loading...
               </>
             ) : !hasValidDuration ? (
               'Enter Delivery Duration'
