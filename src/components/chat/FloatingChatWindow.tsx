@@ -4642,8 +4642,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-white dark:bg-background border-border'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="font-semibold text-sm text-green-700 dark:text-green-300">{orderLabel}</span>
+              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-[#c8f6d3]' : 'text-green-600 dark:text-green-400'}`} />
+              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-[#c8f6d3]' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}</span>
             </div>
             <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}
@@ -4669,8 +4669,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </>
                 ) : (
                   <>
-                    <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`} />
-                    <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
+                    <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-green-600 dark:text-green-400'}`} />
+                    <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-green-600 dark:text-green-400'}`}>
                       {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
                     </span>
                   </>
