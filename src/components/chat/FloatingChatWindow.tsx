@@ -6335,7 +6335,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </Button>
                   </div>
                 )}
-                <div className="flex items-stretch">
+                <div className="flex items-stretch relative z-10">
                   <input
                     type="file"
                     ref={fileInputRef}
