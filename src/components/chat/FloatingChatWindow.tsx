@@ -5617,7 +5617,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               {/* Expandable Order Details content */}
               {bannerOrderDetailsOpen && (
-                <div className="pl-9 mt-1.5 space-y-0.5 text-sm text-muted-foreground pt-2 rounded-none border-t border-border">
+                <div className="pl-9 mt-1.5 space-y-0.5 text-sm md:text-xs text-muted-foreground pt-2 rounded-none border-t border-border">
                   <p>Price: <span className="text-foreground">{pendingOrder.price.toLocaleString()} credits</span></p>
                   {pendingOrder.delivery_duration && (pendingOrder.delivery_duration.days > 0 || pendingOrder.delivery_duration.hours > 0 || pendingOrder.delivery_duration.minutes > 0) && (
                     <p>Delivery: <span className="text-foreground">{formatDeliveryDuration(pendingOrder.delivery_duration)}</span></p>
@@ -5759,7 +5759,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
               {/* Expandable Order Details content */}
               {bannerOrderDetailsOpen && (
-                <div className="pl-9 mt-1.5 space-y-0.5 text-sm text-muted-foreground pt-2 rounded-none border-t border-border">
+                <div className="pl-9 mt-1.5 space-y-0.5 text-sm md:text-xs text-muted-foreground pt-2 rounded-none border-t border-border">
                   <p>Price: <span className="text-foreground">{pendingClientOrder.price.toLocaleString()} credits</span></p>
                   {pendingClientOrder.delivery_duration && (pendingClientOrder.delivery_duration.days > 0 || pendingClientOrder.delivery_duration.hours > 0 || pendingClientOrder.delivery_duration.minutes > 0) && (
                     <p>Delivery: <span className="text-foreground">{formatDeliveryDuration(pendingClientOrder.delivery_duration)}</span></p>
