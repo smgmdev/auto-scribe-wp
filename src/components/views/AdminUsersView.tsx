@@ -1416,11 +1416,40 @@ export function AdminUsersView() {
                                                 {tx.order_id && !withdrawal && !(tx.type === 'admin_deduct' || tx.type === 'gifted') && (() => {
                                                   const order = (userOrders[user.id] || []).find(o => o.id === tx.order_id);
                                                   if (!order) {
+                                                    // Parse details from description as fallback
+                                                    const isEarnings = tx.type === 'order_payout';
+                                                    const siteMatch = tx.description?.match(/order:\s*(.+?)(?:\s*\(|$)/);
+                                                    const siteName = siteMatch ? siteMatch[1].trim() : null;
+                                                    const feeMatch = tx.description?.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
+                                                    const platformFee = feeMatch ? parseInt(feeMatch[1]) : null;
+                                                    
                                                     return (
-                                                      <div className="col-span-2">
-                                                        <span className="text-muted-foreground uppercase tracking-wide">Order ID</span>
-                                                        <p className="font-medium">{tx.order_id?.slice(0, 8)}...</p>
-                                                      </div>
+                                                      <>
+                                                        {siteName && (
+                                                          <div>
+                                                            <span className="text-muted-foreground uppercase tracking-wide">Media Site</span>
+                                                            <p className="font-medium">{siteName}</p>
+                                                          </div>
+                                                        )}
+                                                        {isEarnings && (
+                                                          <div>
+                                                            <span className="text-muted-foreground uppercase tracking-wide">Net Earnings</span>
+                                                            <p className="font-medium text-green-600">{tx.amount.toLocaleString()} credits</p>
+                                                          </div>
+                                                        )}
+                                                        {isEarnings && platformFee !== null && (
+                                                          <div>
+                                                            <span className="text-muted-foreground uppercase tracking-wide">Platform Fee</span>
+                                                            <p className="font-medium">{platformFee.toLocaleString()} credits</p>
+                                                          </div>
+                                                        )}
+                                                        {isEarnings && platformFee !== null && (
+                                                          <div>
+                                                            <span className="text-muted-foreground uppercase tracking-wide">Order Value</span>
+                                                            <p className="font-medium">{(tx.amount + platformFee).toLocaleString()} credits</p>
+                                                          </div>
+                                                        )}
+                                                      </>
                                                     );
                                                   }
                                                   
