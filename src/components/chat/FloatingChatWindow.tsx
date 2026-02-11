@@ -4339,12 +4339,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
-                    {isOwnMessage ? 'Offer Sent' : 'Offer Received'}
+                    {isOwnMessage ? 'Offer Sent' : 'Offer Received'}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderRequest.media_site_name}</span>
                   </span>
                 </div>
-                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                  {orderRequest.media_site_name}
-                </p>
                 <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <DollarSign className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-xs">
@@ -5489,8 +5486,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex items-center gap-3">
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
+                      Waiting for client approval
+                    </span>
+                  </div>
                   <p className="font-medium text-sm text-foreground">
-                    Offer Sent: {pendingOrder.media_site_name}
+                    {pendingOrder.media_site_name}
                   </p>
                 </div>
                 {/* Desktop: Action buttons */}
@@ -5636,8 +5638,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex items-center gap-3">
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
+                      {isClient ? `Waiting for ${counterpartyLabel} approval` : 'Order request from client'}
+                    </span>
+                  </div>
                   <p className="font-medium text-sm text-foreground">
-                    {isClient ? 'Offer Sent' : 'Order Request'}: {pendingClientOrder.media_site_name}
+                    {pendingClientOrder.media_site_name}
                   </p>
                 </div>
                 {/* Desktop: Action buttons inline - hidden for admin */}
