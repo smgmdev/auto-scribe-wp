@@ -7680,7 +7680,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Deliver Order Dialog */}
       <Dialog open={deliverOrderDialogOpen} onOpenChange={setDeliverOrderDialogOpen}>
         <DialogContent className="z-[9999] max-w-md">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>
               Deliver Order
             </DialogTitle>
