@@ -4342,15 +4342,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderRequest.media_site_name}</span>
                   </span>
                 </div>
-                <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
+                <div className={`mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <span className="text-xs">
                     Price: {orderRequest.price.toLocaleString()} credits
                   </span>
                 </div>
                 {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5 shrink-0" />
+                  <div className={`mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                     <span className="text-xs">
                       Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
                     </span>
