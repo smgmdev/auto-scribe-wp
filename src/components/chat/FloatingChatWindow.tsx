@@ -5475,13 +5475,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
                     if (countdown) {
                       return (
-                        <p key={`mob-detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                        <p key={`mob-detail-countdown-${timerTick}`}>Est. Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
                           {countdown.isOverdue ? 'Overdue' : countdown.text}
                         </span></p>
                       );
                     }
+                    if (timeInfo) {
+                      return (
+                        <p key={`mob-timeinfo-${timerTick}`}>Est. Delivery: <span className={`font-medium ${timeInfo.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                          {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                        </span></p>
+                      );
+                    }
                     return acceptedOrderData?.delivery_duration ? (
-                      <p>Delivery: <span className="text-white font-medium">
+                      <p>Est. Delivery: <span className="text-white font-medium">
                         {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
                       </span></p>
                     ) : null;
@@ -5505,13 +5512,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
                     if (countdown) {
                       return (
-                        <p key={`desktop-detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                        <p key={`desktop-detail-countdown-${timerTick}`}>Est. Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
                           {countdown.isOverdue ? 'Overdue' : countdown.text}
                         </span></p>
                       );
                     }
+                    if (timeInfo) {
+                      return (
+                        <p key={`desktop-timeinfo-${timerTick}`}>Est. Delivery: <span className={`font-medium ${timeInfo.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                          {timeInfo.isOverdue ? 'Overdue' : timeInfo.text}
+                        </span></p>
+                      );
+                    }
                     return acceptedOrderData?.delivery_duration ? (
-                      <p>Delivery: <span className="text-white font-medium">
+                      <p>Est. Delivery: <span className="text-white font-medium">
                         {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
                       </span></p>
                     ) : null;
