@@ -4471,8 +4471,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Status indicator if order already placed */}
             {hasOrder && (
-              <div className={`mt-3 pt-3 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-green-200 dark:border-green-800'}`}>
-                <div className={`flex items-center gap-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-green-600 dark:text-green-400'}`}>
+              <div className={`mt-3 pt-3 border-t ${isOwnMessage ? 'border-green-200/30' : 'border-green-200 dark:border-green-800'}`}>
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                   <CheckCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">Offer Accepted</span>
                 </div>
@@ -4642,8 +4642,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               : 'bg-white dark:bg-background border-border'
           }`}>
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className={`h-4 w-4 ${isOwnMessage ? 'text-primary-foreground' : 'text-green-600 dark:text-green-400'}`} />
-              <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>{orderLabel}</span>
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <span className="font-semibold text-sm text-green-700 dark:text-green-300">{orderLabel}</span>
             </div>
             <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {orderPlaced.media_site_name}
