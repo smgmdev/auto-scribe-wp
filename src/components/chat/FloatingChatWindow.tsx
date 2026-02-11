@@ -5500,7 +5500,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </details>
               {/* Desktop expandable Order Details content */}
               {bannerOrderDetailsOpen && (
-                <div className="hidden md:block pl-9 mt-1.5 pb-2 space-y-0.5 text-xs text-white/70 pt-2 border-t border-white/10">
+                <div className="hidden md:block pl-9 mt-1.5 pb-0 space-y-0.5 text-xs text-white/70 pt-2 border-t border-white/10">
                   {orderPrice != null && orderPrice > 0 && (
                     <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
