@@ -5265,7 +5265,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </TooltipProvider>
                   <div className="min-w-0 overflow-visible leading-tight">
                     <p className="font-medium text-sm text-white truncate">
-                      {localOrder.status === 'completed' ? 'Order Completed' : 'Order in Progress'}
+                      {localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
                     </p>
                     {localOrder.status !== 'completed' && (
                     <div className="flex items-center gap-3">
