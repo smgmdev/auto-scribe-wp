@@ -5939,7 +5939,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             e.stopPropagation();
           }}
         >
-        <ScrollArea className="h-full w-full [&>div>div]:!w-full" style={{ overscrollBehavior: 'contain' }}>
+        <ScrollArea className="h-full w-full [&>div>div]:!w-full [&>div>div[data-radix-scroll-area-scrollbar]]:sm:block [&>div>div[data-radix-scroll-area-scrollbar]]:hidden" style={{ overscrollBehavior: 'contain' }}>
           {loadingMessages ? (
             <div className="flex flex-col items-center justify-center h-full py-12">
               <img src={amblackLogo} alt="Loading" className="w-16 h-16 animate-pulse mb-4" />
