@@ -441,15 +441,20 @@ export function CreditHistoryView() {
       if (orderIds.length > 0) {
         const { data: orders } = await supabase
           .from('orders')
-          .select('id, order_number')
+          .select('id, order_number, amount_cents, status, delivery_status, created_at, delivered_at, accepted_at, media_sites(name, favicon)')
           .in('id', orderIds);
         
         if (orders) {
           const orderNumberMap: Record<string, string> = {};
-          orders.forEach(o => { if (o.order_number) orderNumberMap[o.id] = o.order_number; });
+          const orderDetailsMap: Record<string, any> = {};
+          orders.forEach(o => { 
+            if (o.order_number) orderNumberMap[o.id] = o.order_number;
+            orderDetailsMap[o.id] = o;
+          });
           transactionsWithDates = transactionsWithDates.map(t => ({
             ...t,
-            order_number: t.order_id ? orderNumberMap[t.order_id] || null : null
+            order_number: t.order_id ? orderNumberMap[t.order_id] || null : null,
+            order_details: t.order_id ? orderDetailsMap[t.order_id] || null : null
           }));
         }
       }
@@ -1306,6 +1311,24 @@ export function CreditHistoryView() {
                               {getTransactionBadge(transaction.type)}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                              {transaction.order_number && (
+                                <div>
+                                  <span className="text-muted-foreground">Order ID:</span>
+                                  <p className="font-medium">{transaction.order_number}</p>
+                                </div>
+                              )}
+                              {(transaction as any).order_details?.media_sites?.name && (
+                                <div>
+                                  <span className="text-muted-foreground">Media Site:</span>
+                                  <p className="font-medium">{(transaction as any).order_details.media_sites.name}</p>
+                                </div>
+                              )}
+                              {(transaction as any).order_details?.amount_cents != null && (
+                                <div>
+                                  <span className="text-muted-foreground">Order Value:</span>
+                                  <p className="font-medium">{((transaction as any).order_details.amount_cents).toLocaleString()} credits</p>
+                                </div>
+                              )}
                               <div>
                                 <span className="text-muted-foreground">Platform Fee:</span>
                                 <p className="font-medium">{platformFee.toLocaleString()} credits</p>
@@ -1314,6 +1337,12 @@ export function CreditHistoryView() {
                                 <span className="text-muted-foreground">Net Earnings:</span>
                                 <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
                               </div>
+                              {(transaction as any).order_details?.delivered_at && (
+                                <div>
+                                  <span className="text-muted-foreground">Delivered:</span>
+                                  <p className="font-medium">{format(new Date((transaction as any).order_details.delivered_at), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
+                              )}
                             </div>
                             {transaction.order_id && (
                               <div className="mt-3 pt-3 border-t border-border/50">
