@@ -6189,7 +6189,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 );
               })}
               {messages.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-8">No messages yet</p>
+                <div className="flex flex-col items-center justify-center flex-1 py-12">
+                  <CheckCircle2 className="w-12 h-12 text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground">No messages yet</p>
+                </div>
               )}
               <div ref={messagesEndRef} />
             </div>
