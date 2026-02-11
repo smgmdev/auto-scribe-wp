@@ -5219,7 +5219,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <p className="font-medium text-sm text-white truncate">
                       {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
                     </p>
-                    <div className="flex items-center gap-3 [&:not(:has(*))]:hidden">
+                    {localOrder.status !== 'completed' && (
+                    <div className="flex items-center gap-3">
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
@@ -5287,6 +5288,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         return null;
                       })()}
                     </div>
+                    )}
                     {/* Order Details expandable - desktop only inline */}
                     <details className="mt-0 -mb-3 md:mb-0 hidden md:block">
                       <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
