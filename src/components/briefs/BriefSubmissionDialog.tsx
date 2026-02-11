@@ -216,6 +216,7 @@ export function BriefSubmissionDialog({
     <div 
       className="fixed inset-0 z-[200]"
       onClick={() => onOpenChange(false)}
+      onWheel={(e) => e.stopPropagation()}
     >
       {isMobile ? (
         // Mobile: full-screen scrollable
@@ -339,9 +340,9 @@ export function BriefSubmissionDialog({
         </div>
       ) : (
         // Desktop: centered draggable popup
-        <div className="flex items-center justify-center w-full h-full pointer-events-none">
+        <div className="flex items-center justify-center w-full h-full">
           <div
-            className="w-full max-w-lg border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative pointer-events-auto"
+            className="w-full max-w-lg border bg-background pt-2 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
