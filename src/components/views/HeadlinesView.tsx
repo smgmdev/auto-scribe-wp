@@ -316,18 +316,20 @@ export function HeadlinesView() {
                         {headline.url}
                       </p>
                     </div>
-                    <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-                      <button 
-                        className="p-2 rounded-none hover:bg-muted transition-colors"
-                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
-                        title={headline.url}
-                      >
-                        <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-accent" />
-                      </button>
+                    <div className="hidden md:flex items-center gap-1 flex-shrink-0">
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                        className="h-8 w-8 hover:bg-muted"
+                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                        title={headline.url}
+                      >
+                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
                       >
                         <ArrowRight className="h-4 w-4" />
                       </Button>
