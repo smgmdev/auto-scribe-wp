@@ -150,9 +150,12 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'purchase' && t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Navigate to completed orders tab and open the chat for a specific order
-  const handleOrderCompletedClick = (orderId: string) => {
-    if (isAgency) {
+  // Navigate to the correct engagement chat for a specific order
+  const handleOrderCompletedClick = (orderId: string, transactionType?: string) => {
+    // If transaction is an earnings/payout type, navigate to agency's Client Requests
+    // Otherwise navigate to buyer's My Orders
+    const isSellerTransaction = transactionType === 'order_payout' || transactionType === 'earnings';
+    if (isSellerTransaction) {
       setAgencyRequestsTargetOrderId(orderId);
       setCurrentView('agency-requests');
     } else {
@@ -1366,7 +1369,7 @@ export function CreditHistoryView() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleOrderCompletedClick(transaction.order_id!);
+                                    handleOrderCompletedClick(transaction.order_id!, transaction.type);
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
                                 >
@@ -1515,7 +1518,7 @@ export function CreditHistoryView() {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleOrderCompletedClick(transaction.order_id!);
+                                        handleOrderCompletedClick(transaction.order_id!, transaction.type);
                                       }}
                                       className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
                                     >
@@ -1592,7 +1595,7 @@ export function CreditHistoryView() {
                              {transaction.type === 'offer_accepted' && transaction.order_id && (
                                <div className="mt-3 pt-3 border-t border-border/50">
                                  <button
-                                   onClick={() => handleOrderCompletedClick(transaction.order_id!)}
+                                   onClick={() => handleOrderCompletedClick(transaction.order_id!, transaction.type)}
                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
                                  >
                                    View Order Details →
