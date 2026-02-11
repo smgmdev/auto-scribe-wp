@@ -6247,7 +6247,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             className="w-3.5 h-3.5 rounded-full object-cover"
                           />
                         )}
-                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : counterpartyLabel}</span>
+                        <span>Replying to {replyToMessage.sender_type === senderType ? 'yourself' : replyToMessage.sender_type === 'admin' ? 'Arcana Mace Staff' : replyToMessage.sender_type === 'agency' ? `Agency/${counterpartyAgencyInfo?.name || 'Agency'}` : counterpartyLabel}</span>
                       </div>
                       <p className="text-sm truncate">
                         {getReplyContentOnly(replyToMessage.message, replyToMessage.sender_type === senderType)}
