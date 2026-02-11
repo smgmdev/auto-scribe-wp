@@ -57,7 +57,9 @@ interface Order {
   order_number?: string | null;
   platform_fee_cents: number;
   agency_payout_cents: number;
-  media_sites?: { name: string } | null;
+  delivery_url?: string | null;
+  delivered_at?: string | null;
+  media_sites?: { name: string; favicon?: string; price?: number; link?: string } | null;
   service_requests?: { id: string }[] | null;
 }
 
@@ -369,7 +371,7 @@ export function AdminUsersView() {
       // Fetch orders with media site info and service request
       const { data: orders } = await supabase
         .from('orders')
-        .select('id, amount_cents, status, delivery_status, created_at, order_number, platform_fee_cents, agency_payout_cents, media_sites(name), service_requests(id)')
+        .select('id, amount_cents, status, delivery_status, created_at, order_number, platform_fee_cents, agency_payout_cents, delivery_url, delivered_at, media_sites(name, favicon, price, link), service_requests(id)')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
@@ -1299,8 +1301,18 @@ export function AdminUsersView() {
                                                       <p className="font-medium">{withdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT'}</p>
                                                     </div>
                                                     <div>
-                                                      <span className="text-muted-foreground uppercase tracking-wide">Status</span>
-                                                      <p className="font-medium capitalize">{withdrawal.status}</p>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Amount</span>
+                                                      <p className="font-medium">{(withdrawal.amount_cents / 100).toLocaleString()}</p>
+                                                    </div>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Requested</span>
+                                                      <p className="font-medium">{formatDateTime(withdrawal.created_at)}</p>
+                                                    </div>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">
+                                                        {withdrawal.status === 'rejected' ? 'Rejected' : 'Completed'}
+                                                      </span>
+                                                      <p className="font-medium">{withdrawal.processed_at ? formatDateTime(withdrawal.processed_at) : 'N/A'}</p>
                                                     </div>
                                                     {withdrawal.withdrawal_method === 'bank' && withdrawal.bank_details && (
                                                       <>
@@ -1315,19 +1327,19 @@ export function AdminUsersView() {
                                                         {withdrawal.bank_details.bank_account_number && (
                                                           <div className="col-span-2">
                                                             <span className="text-muted-foreground uppercase tracking-wide">Account Number</span>
-                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_account_number}</p>
+                                                            <p className="font-medium">{withdrawal.bank_details.bank_account_number}</p>
                                                           </div>
                                                         )}
                                                         {withdrawal.bank_details.bank_iban && (
                                                           <div className="col-span-2">
                                                             <span className="text-muted-foreground uppercase tracking-wide">IBAN</span>
-                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_iban}</p>
+                                                            <p className="font-medium">{withdrawal.bank_details.bank_iban}</p>
                                                           </div>
                                                         )}
                                                         {withdrawal.bank_details.bank_swift_code && (
                                                           <div>
                                                             <span className="text-muted-foreground uppercase tracking-wide">SWIFT/BIC</span>
-                                                            <p className="font-medium font-mono">{withdrawal.bank_details.bank_swift_code}</p>
+                                                            <p className="font-medium">{withdrawal.bank_details.bank_swift_code}</p>
                                                           </div>
                                                         )}
                                                       </>
@@ -1344,12 +1356,6 @@ export function AdminUsersView() {
                                                         </div>
                                                       </>
                                                     )}
-                                                    {withdrawal.processed_at && (
-                                                      <div>
-                                                        <span className="text-muted-foreground uppercase tracking-wide">Processed</span>
-                                                        <p className="font-medium">{formatDateTime(withdrawal.processed_at)}</p>
-                                                      </div>
-                                                    )}
                                                     {withdrawal.admin_notes && (
                                                       <div className="col-span-2">
                                                         <span className="text-muted-foreground uppercase tracking-wide">Notes</span>
@@ -1361,14 +1367,26 @@ export function AdminUsersView() {
                                                 
                                                 {/* Gift/Deduction reason */}
                                                 {(tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') && (
-                                                  <div className="col-span-2">
-                                                    <span className="text-muted-foreground uppercase tracking-wide">Reason</span>
-                                                    <p>{tx.description.split(': ').slice(1).join(': ')}</p>
-                                                  </div>
+                                                  <>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Transaction Type</span>
+                                                      <p className="font-medium capitalize">{tx.type.replace(/_/g, ' ')}</p>
+                                                    </div>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Amount</span>
+                                                      <p className={`font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                                                        {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} credits
+                                                      </p>
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Reason</span>
+                                                      <p>{tx.description.split(': ').slice(1).join(': ')}</p>
+                                                    </div>
+                                                  </>
                                                 )}
                                                 
                                                 {/* Order details for order-related transactions */}
-                                                {tx.order_id && !withdrawal && (() => {
+                                                {tx.order_id && !withdrawal && !(tx.type === 'admin_deduct' || tx.type === 'gifted') && (() => {
                                                   const order = (userOrders[user.id] || []).find(o => o.id === tx.order_id);
                                                   if (!order) {
                                                     return (
@@ -1378,45 +1396,69 @@ export function AdminUsersView() {
                                                       </div>
                                                     );
                                                   }
+                                                  
+                                                  const isEarnings = tx.type === 'order_payout';
+                                                  const platformFeeMatch = isEarnings && tx.description?.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
+                                                  const platformFee = platformFeeMatch ? parseInt(platformFeeMatch[1]) : null;
+                                                  
                                                   return (
                                                     <>
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Media Site</span>
+                                                        <div className="flex items-center gap-1 mt-0.5">
+                                                          {order.media_sites?.favicon && (
+                                                            <img src={order.media_sites.favicon} alt="" className="h-3 w-3 rounded" />
+                                                          )}
+                                                          <p className="font-medium">{order.media_sites?.name || 'Unknown'}</p>
+                                                        </div>
+                                                      </div>
+                                                      <div>
+                                                        <span className="text-muted-foreground uppercase tracking-wide">Order Value</span>
+                                                        <p className="font-medium">{order.media_sites?.price?.toLocaleString() || Math.round(order.amount_cents / 100).toLocaleString()} credits</p>
+                                                      </div>
                                                       {order.order_number && (
                                                         <div>
                                                           <span className="text-muted-foreground uppercase tracking-wide">Order ID</span>
                                                           <p className="font-medium">{order.order_number}</p>
                                                         </div>
                                                       )}
-                                                      {(order as any).media_sites?.name && (
+                                                      {isEarnings && (
                                                         <div>
-                                                          <span className="text-muted-foreground uppercase tracking-wide">Media Site</span>
-                                                          <p className="font-medium">{(order as any).media_sites.name}</p>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Net Earnings</span>
+                                                          <p className="font-medium text-green-600">{tx.amount.toLocaleString()} credits</p>
                                                         </div>
                                                       )}
-                                                      <div>
-                                                        <span className="text-muted-foreground uppercase tracking-wide">Order Value</span>
-                                                        <p className="font-medium">{Math.round(order.amount_cents / 100).toLocaleString()} credits</p>
-                                                      </div>
-                                                      <div>
-                                                        <span className="text-muted-foreground uppercase tracking-wide">Status</span>
-                                                        <p className="font-medium capitalize">{order.status?.replace(/_/g, ' ')}</p>
-                                                      </div>
-                                                      {order.platform_fee_cents > 0 && (
+                                                      {isEarnings && platformFee !== null && (
                                                         <div>
                                                           <span className="text-muted-foreground uppercase tracking-wide">Platform Fee</span>
-                                                          <p className="font-medium">{Math.round(order.platform_fee_cents / 100).toLocaleString()} credits</p>
+                                                          <p className="font-medium">{platformFee.toLocaleString()} credits</p>
                                                         </div>
                                                       )}
-                                                      {order.agency_payout_cents > 0 && (
+                                                      {!isEarnings && (
                                                         <div>
-                                                          <span className="text-muted-foreground uppercase tracking-wide">Agency Payout</span>
-                                                          <p className="font-medium">{Math.round(order.agency_payout_cents / 100).toLocaleString()} credits</p>
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Completed</span>
+                                                          <p className="font-medium">{formatDateTime(tx.created_at)}</p>
+                                                        </div>
+                                                      )}
+                                                      {order.delivery_url && (
+                                                        <div className="col-span-2">
+                                                          <span className="text-muted-foreground uppercase tracking-wide">Published URL</span>
+                                                          <a 
+                                                            href={order.delivery_url} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="font-medium text-primary hover:underline block truncate"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                          >
+                                                            {order.delivery_url}
+                                                          </a>
                                                         </div>
                                                       )}
                                                     </>
                                                   );
                                                 })()}
 
-                                                {/* Platform fee for order earnings */}
+                                                {/* Platform fee for order earnings without order_id */}
                                                 {tx.description?.includes('Platform fee:') && !tx.order_id && (() => {
                                                   const match = tx.description.match(/\(Platform fee:\s*(\d+)\s*credits?\)/i);
                                                   if (match) {
@@ -1429,6 +1471,22 @@ export function AdminUsersView() {
                                                   }
                                                   return null;
                                                 })()}
+                                                
+                                                {/* Other standard transactions without order_id and not withdrawal/gifted */}
+                                                {!tx.order_id && !withdrawal && !(tx.type === 'admin_deduct' || tx.type === 'gifted') && !tx.description?.includes('Platform fee:') && (
+                                                  <>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Transaction Type</span>
+                                                      <p className="font-medium capitalize">{tx.type.replace(/_/g, ' ')}</p>
+                                                    </div>
+                                                    <div>
+                                                      <span className="text-muted-foreground uppercase tracking-wide">Amount</span>
+                                                      <p className={`font-medium ${tx.amount > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                                                        {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} credits
+                                                      </p>
+                                                    </div>
+                                                  </>
+                                                )}
                                               </div>
                                             </div>
                                           )}
