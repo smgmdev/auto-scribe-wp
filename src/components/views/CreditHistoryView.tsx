@@ -1458,7 +1458,7 @@ export function CreditHistoryView() {
                                         e.stopPropagation();
                                         handleOrderCompletedClick(transaction.order_id!);
                                       }}
-                                      className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 font-medium"
+                                      className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
                                     >
                                       View Order Details →
                                     </button>
