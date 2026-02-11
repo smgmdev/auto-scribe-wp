@@ -4652,7 +4652,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </p>
             {orderRequestSpecialTerms && (
               <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-                Special Terms: <span className={`${isOwnMessage ? 'text-primary-foreground/80' : 'text-foreground'}`}>{orderRequestSpecialTerms}</span>
+                Special Terms: {orderRequestSpecialTerms}
               </p>
             )}
             {timeInfo && (
