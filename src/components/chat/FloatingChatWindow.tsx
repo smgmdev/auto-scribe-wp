@@ -5489,13 +5489,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex items-center gap-3">
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
-                      Waiting for client approval
-                    </span>
-                  </div>
                   <p className="font-medium text-sm text-foreground">
-                    {pendingOrder.media_site_name}
+                    Offer Sent: {pendingOrder.media_site_name}
                   </p>
                 </div>
                 {/* Desktop: Action buttons */}
@@ -5641,13 +5636,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex items-center gap-3">
                 <Clock className="h-6 w-6 text-gray-500 dark:text-gray-400 shrink-0 animate-spin" style={{ animationDuration: '3s' }} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-medium text-xs text-gray-600 dark:text-gray-300">
-                      {isClient ? `Waiting for ${counterpartyLabel} approval` : 'Order request from client'}
-                    </span>
-                  </div>
                   <p className="font-medium text-sm text-foreground">
-                    {pendingClientOrder.media_site_name}
+                    {isClient ? 'Offer Sent' : 'Order Request'}: {pendingClientOrder.media_site_name}
                   </p>
                 </div>
                 {/* Desktop: Action buttons inline - hidden for admin */}
