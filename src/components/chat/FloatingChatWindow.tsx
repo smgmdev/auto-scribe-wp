@@ -5390,7 +5390,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
               </div>
               {/* Mobile-only action buttons — full width */}
-              {!hasOpenDispute && (
+              {!hasOpenDispute && (canDeliver || canAcceptDelivery || (isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision'))) && (
                 <div className="flex md:hidden items-center gap-2 w-full mt-3 pb-2 pr-2">
                   {canDeliver && (
                     <Button
