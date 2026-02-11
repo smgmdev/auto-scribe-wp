@@ -1331,7 +1331,7 @@ export function CreditHistoryView() {
                               {(transaction as any).order_details?.amount_cents != null && (
                                 <div>
                                   <span className="text-muted-foreground">Order Value:</span>
-                                  <p className="font-medium">{((transaction as any).order_details.amount_cents).toLocaleString()} credits</p>
+                                  <p className="font-medium">{Math.round((transaction as any).order_details.amount_cents / 100).toLocaleString()} credits</p>
                                 </div>
                               )}
                               <div>
