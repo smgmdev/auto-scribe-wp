@@ -592,7 +592,7 @@ export function AdminUsersView() {
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromOffers = lockedFromOffersMap.get(profile.id) || 0;
       const withdrawn = withdrawnMap.get(profile.id) || 0;
-      const totalLocked = lockedFromOrders + lockedFromOffers;
+      const totalLocked = lockedFromOrders;
       const availableCredits = totalBalance - totalLocked - withdrawn;
 
       return {
