@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale, CreditCard } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale, CreditCard, LogOut } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6382,7 +6382,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       disabled={leavingChat}
                       className="bg-black text-[#f2a547] hover:bg-[#f2a547] hover:text-black text-xs px-3 sm:px-4 flex items-center justify-center disabled:opacity-50 transition-colors rounded-none shrink-0 leading-none"
                     >
-                      {leavingChat ? <><Loader2 className="h-3 w-3 animate-spin mr-1" />Leaving...</> : 'Leave'}
+                      {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <><LogOut className="h-3 w-3 sm:hidden" /><span className="hidden sm:inline">Leave</span></>}
                     </button>
                   )}
                 </div>
