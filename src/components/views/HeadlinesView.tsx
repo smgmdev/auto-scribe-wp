@@ -291,8 +291,8 @@ export function HeadlinesView() {
                 onClick={() => handleSelectHeadline(headline)}
               >
                 <CardContent className="p-4 md:p-6">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                    <div className="flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <Badge 
                           variant="outline" 
@@ -316,24 +316,15 @@ export function HeadlinesView() {
                         {headline.url}
                       </p>
                     </div>
-                    <div className="hidden md:flex items-center gap-1 flex-shrink-0">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 hover:bg-muted"
-                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
-                        title={headline.url}
-                      >
-                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="hidden md:inline-flex h-8 w-8 flex-shrink-0 mt-1 hover:bg-muted"
+                      onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                      title={headline.url}
+                    >
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
