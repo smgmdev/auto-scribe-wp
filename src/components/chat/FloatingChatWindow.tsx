@@ -5458,7 +5458,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 </summary>
                 <div className="relative mt-1 pt-1.5 pb-0 text-sm text-white/70 space-y-0.5 px-1">
-                  <div className="absolute top-0 left-[-100vw] right-[-100vw] h-px bg-white/20" />
                   {orderPrice != null && orderPrice > 0 && (
                     <p>Price: <span className="text-white font-medium">{orderPrice.toLocaleString()} credits</span></p>
                   )}
