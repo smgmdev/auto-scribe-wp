@@ -5598,11 +5598,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
               {/* Expandable Order Details */}
-              <div className="pl-9 mt-1">
+              <div className="pl-9 md:pl-9 mt-1">
                 <button
                   type="button"
                   onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+                  className="w-full py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
                 >
                   Order Details
                   <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
@@ -5722,11 +5722,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
               {/* Expandable Order Details */}
-              <div className="pl-9 mt-1">
+              <div className="pl-9 md:pl-9 mt-1">
                 <button
                   type="button"
                   onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
-                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+                  className="w-full py-2 px-3 bg-transparent text-foreground border border-border hover:bg-black hover:text-white transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1"
                 >
                   Order Details
                   <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
