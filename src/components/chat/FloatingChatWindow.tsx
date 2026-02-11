@@ -4648,10 +4648,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-border'}`}>
                 {deliveredOnTime ? (
                   <>
-                    <CheckCircle className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                    <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                      Delivered on time
-                    </span>
+                     <CheckCircle className="h-3.5 w-3.5 text-green-400 dark:text-green-300" />
+                     <span className="text-xs font-medium text-green-400 dark:text-green-300">
+                       Delivered on time
+                     </span>
                   </>
                 ) : wasDelivered ? (
                   <>
