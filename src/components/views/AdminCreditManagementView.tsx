@@ -231,8 +231,8 @@ export const AdminCreditManagementView = () => {
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
-        // Total locked = credits locked in active orders + credits locked via offer_accepted
-        const totalLocked = lockedFromOrders + lockedFromOffers;
+        // Total locked = credits locked in active orders (offer_accepted transactions represent the same lock, so don't double-count)
+        const totalLocked = lockedFromOrders;
         
         // Total Balance = Incoming - Outgoing (excluding locked types)
         const calculatedTotalBalance = incoming - outgoing;
