@@ -5365,11 +5365,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                               </span></p>
                             );
                           }
-                          return (
+                          return acceptedOrderData?.delivery_duration ? (
                             <p>Delivery: <span className="text-white font-medium">
                               {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
                             </span></p>
-                          );
+                          ) : null;
                         })()}
                         {specialTerms && (
                           <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
@@ -5514,11 +5514,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </span></p>
                       );
                     }
-                    return (
+                    return acceptedOrderData?.delivery_duration ? (
                       <p>Delivery: <span className="text-white font-medium">
                         {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
                       </span></p>
-                    );
+                    ) : null;
                   })()}
                   {specialTerms && (
                     <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
