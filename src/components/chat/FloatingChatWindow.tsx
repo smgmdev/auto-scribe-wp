@@ -5263,12 +5263,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div className="min-w-0 overflow-visible leading-none md:leading-tight">
-                    <p className="font-medium text-sm text-white truncate">
-                      {localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
-                    </p>
-                    {localOrder.status !== 'completed' && (
-                    <div className="flex items-center gap-3">
+                   <div className="min-w-0 overflow-visible" style={{ lineHeight: 1 }}>
+                     <p className="font-medium text-sm text-white truncate m-0 p-0">
+                       {localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
+                     </p>
+                     {localOrder.status !== 'completed' && (
+                     <div className="flex items-center gap-3 -mt-px">
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
