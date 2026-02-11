@@ -4469,8 +4469,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             
             {/* Status indicator if order already placed */}
             {hasOrder && (
-              <div className={`mt-1.5 pt-1.5 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-border'} flex items-center justify-center gap-2`}>
-                <CheckCircle className="h-4 w-4 text-green-500" />
+              <div className={`mt-1.5 pt-1.5 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-border'} flex items-center justify-center`}>
                 <span className="text-sm font-medium text-foreground">Offer Accepted</span>
               </div>
             )}
