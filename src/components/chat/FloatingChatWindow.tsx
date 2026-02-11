@@ -4987,7 +4987,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           setDisputeDialogOpen(true);
                         }}
                       >
-                        Request Revision
+                        Open Dispute
                       </DropdownMenuItem>
                     )}
                     {globalChatType === 'agency-request' && hasOpenDispute && !isAdmin && (
