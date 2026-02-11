@@ -342,13 +342,13 @@ export function BriefSubmissionDialog({
         // Desktop: centered draggable popup
         <div className="flex items-center justify-center w-full h-full">
           <div
-            className="w-full max-w-lg border bg-background pt-1 px-6 pb-6 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
+            className="w-full max-w-lg border bg-background pt-1 pl-6 pb-6 pr-0 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
             {/* Drag Handle */}
             <div
-              className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              className={`flex items-center justify-start py-2 pr-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
               onMouseDown={handleDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
@@ -363,7 +363,7 @@ export function BriefSubmissionDialog({
               <span className="sr-only">Close</span>
             </button>
 
-            <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+            <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 pr-6">
               <div className="space-y-4">
                 <div className="flex flex-col space-y-1.5 text-left">
                   <h2 className="text-lg font-semibold leading-none tracking-tight">Send Your Brief</h2>
