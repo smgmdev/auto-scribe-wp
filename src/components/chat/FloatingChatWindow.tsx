@@ -4397,23 +4397,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     {isOwnMessage ? 'Offer Sent' : 'Offer Received'}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderRequest.media_site_name}</span>
                   </span>
                 </div>
-                <div className={`mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <span className="text-xs">
+                <div className={`mt-1.5 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'} space-y-0`}>
+                  <p className="text-xs">
                     Price: {orderRequest.price.toLocaleString()} credits
-                  </span>
-                </div>
-                {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
-                  <div className={`mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <span className="text-xs">
-                      Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
-                    </span>
-                  </div>
-                )}
-                {orderRequest.special_terms && (
-                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    <span className="font-medium">Special Terms:</span> {orderRequest.special_terms}
                   </p>
-                )}
+                  {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
+                    <p className="text-xs">
+                      Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
+                    </p>
+                  )}
+                  {orderRequest.special_terms && (
+                    <p className="text-xs break-words">
+                      Special Terms: {orderRequest.special_terms}
+                    </p>
+                  )}
+                </div>
             </div>
             
             {/* Action buttons for client */}
