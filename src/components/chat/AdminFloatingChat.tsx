@@ -1829,7 +1829,7 @@ export function AdminFloatingChat({
                 <button
                   onClick={handleLeaveChat}
                   disabled={leavingChat}
-                  className="text-muted-foreground hover:bg-black hover:text-red-500 text-xs px-3 py-1 flex items-center gap-1 disabled:opacity-50 transition-colors rounded"
+                  className="text-muted-foreground hover:bg-black hover:text-[#f2a547] text-xs px-3 py-2 flex items-center gap-1 disabled:opacity-50 transition-colors rounded-none h-full"
                 >
                   {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <LogOut className="h-3 w-3" />}
                   Leave
