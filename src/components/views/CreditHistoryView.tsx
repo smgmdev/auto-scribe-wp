@@ -1315,6 +1315,19 @@ export function CreditHistoryView() {
                                 <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
                               </div>
                             </div>
+                            {transaction.order_id && (
+                              <div className="mt-3 pt-3 border-t border-border/50">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOrderCompletedClick(transaction.order_id!);
+                                  }}
+                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                >
+                                  View Order Details →
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
