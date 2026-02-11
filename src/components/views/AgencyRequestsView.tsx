@@ -72,7 +72,9 @@ export function AgencyRequestsView() {
     unreadMessageCounts,
     setUnreadMessageCount,
     clearUnreadMessageCount,
-    openGlobalChat
+    openGlobalChat,
+    agencyRequestsTargetOrderId,
+    setAgencyRequestsTargetOrderId
   } = useAppStore();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -301,6 +303,46 @@ export function AgencyRequestsView() {
   useEffect(() => {
     fetchRequests();
   }, [user]);
+
+  // Handle deep-linking from credit history to a specific order's chat
+  useEffect(() => {
+    if (!agencyRequestsTargetOrderId || loading || requests.length === 0) return;
+    
+    const targetRequest = requests.find(r => r.order?.id === agencyRequestsTargetOrderId);
+    if (targetRequest) {
+      // Determine correct tab
+      const isCompleted = targetRequest.order?.delivery_status === 'accepted';
+      const isCancelled = targetRequest.status === 'cancelled';
+      
+      if (isCompleted) {
+        setActiveTab('orders');
+        setOrdersSubTab('completed');
+      } else if (isCancelled) {
+        setActiveTab('cancelled');
+      } else if (targetRequest.order) {
+        setActiveTab('orders');
+        setOrdersSubTab('active');
+      } else {
+        setActiveTab('active');
+      }
+      
+      // Open the chat
+      const chatRequest: GlobalChatRequest = {
+        id: targetRequest.id,
+        title: targetRequest.title,
+        description: targetRequest.description,
+        status: targetRequest.status,
+        read: targetRequest.read,
+        created_at: targetRequest.created_at,
+        updated_at: targetRequest.updated_at,
+        cancellation_reason: targetRequest.cancellation_reason,
+        media_site: targetRequest.media_site,
+        order: targetRequest.order,
+      };
+      openGlobalChat(chatRequest, 'agency-request');
+    }
+    setAgencyRequestsTargetOrderId(null);
+  }, [agencyRequestsTargetOrderId, loading, requests, openGlobalChat, setAgencyRequestsTargetOrderId]);
 
   // Listen for service request sync events from ChatListPanel
   useEffect(() => {
