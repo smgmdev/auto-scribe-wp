@@ -1495,8 +1495,8 @@ export function CreditHistoryView() {
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Transaction ID:</span>
-                                <p className="font-medium text-xs font-mono">{transaction.id.slice(0, 8)}...</p>
+                                <span className="text-muted-foreground">{transaction.order_id ? 'Order ID:' : 'Transaction ID:'}</span>
+                                <p className="font-medium text-xs font-mono">{(transaction.order_id || transaction.id).slice(0, 8)}...</p>
                               </div>
                             </div>
                           )}
