@@ -5343,43 +5343,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       })()}
                     </div>
                     )}
-                    {/* Order Details expandable - desktop only inline */}
-                    <details className="mt-0 -mb-3 md:mb-0 hidden md:block">
-                      <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors select-none pb-0">
-                        Order Details
-                      </summary>
-                      <div className="mt-1 pt-1 pb-0 text-xs text-white/70 space-y-0.5 border-t border-white/10">
-                        {acceptedOrderData?.price && (
-                          <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
-                        )}
-                        {(() => {
-                          const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
-                          if (isDelivered) {
-                            return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
-                          }
-                          const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
-                          if (countdown) {
-                            return (
-                              <p key={`detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
-                                {countdown.isOverdue ? 'Overdue' : countdown.text}
-                              </span></p>
-                            );
-                          }
-                          return acceptedOrderData?.delivery_duration ? (
-                            <p>Delivery: <span className="text-white font-medium">
-                              {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
-                            </span></p>
-                          ) : null;
-                        })()}
-                        {specialTerms && (
-                          <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
-                        )}
-                      </div>
-                    </details>
+                    
                   </div>
                 </div>
-                {!hasOpenDispute && (
                 <div className="hidden md:flex items-start gap-2 pt-0.5">
+                  {!hasOpenDispute && (
+                    <>
                   {canDeliver && (
                     <TooltipProvider>
                       <Tooltip>
@@ -5439,8 +5408,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </Button>
                     </div>
                   )}
+                    </>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-transparent text-white/60 border-white/30 hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0 text-xs"
+                    onClick={() => setBannerOrderDetailsOpen(!bannerOrderDetailsOpen)}
+                  >
+                    Order Details
+                    <ChevronDown className={`h-3 w-3 ml-1 transition-transform duration-200 ${bannerOrderDetailsOpen ? 'rotate-180' : ''}`} />
+                  </Button>
                 </div>
-                )}
               </div>
               {/* Mobile-only action buttons — full width */}
               {!hasOpenDispute && (canDeliver || canAcceptDelivery || (isAgencyView && (hasRevisionAfterDelivery || localOrder.delivery_status === 'pending_revision') && (localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'pending_revision'))) && (
@@ -5525,6 +5504,36 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </div>
               </details>
+              {/* Desktop expandable Order Details content */}
+              {bannerOrderDetailsOpen && (
+                <div className="hidden md:block pl-9 mt-1.5 pb-2 space-y-0.5 text-xs text-white/70 pt-2 border-t border-white/10">
+                  {acceptedOrderData?.price && (
+                    <p>Price: <span className="text-white font-medium">{acceptedOrderData.price.toLocaleString()} credits</span></p>
+                  )}
+                  {(() => {
+                    const isDelivered = localOrder.delivery_status === 'delivered' || localOrder.delivery_status === 'accepted' || localOrder.status === 'completed';
+                    if (isDelivered) {
+                      return <p>Delivery: <span className="text-green-400 font-medium">Delivered</span></p>;
+                    }
+                    const countdown = getDeliveryCountdown(acceptedOrderData?.accepted_at || '', acceptedOrderData?.delivery_duration);
+                    if (countdown) {
+                      return (
+                        <p key={`desktop-detail-countdown-${timerTick}`}>Delivery: <span className={`font-medium ${countdown.isOverdue ? 'text-red-400' : 'text-white'}`}>
+                          {countdown.isOverdue ? 'Overdue' : countdown.text}
+                        </span></p>
+                      );
+                    }
+                    return acceptedOrderData?.delivery_duration ? (
+                      <p>Delivery: <span className="text-white font-medium">
+                        {[acceptedOrderData.delivery_duration.days > 0 && `${acceptedOrderData.delivery_duration.days}d`, acceptedOrderData.delivery_duration.hours > 0 && `${acceptedOrderData.delivery_duration.hours}h`, acceptedOrderData.delivery_duration.minutes > 0 && `${acceptedOrderData.delivery_duration.minutes}m`].filter(Boolean).join(' ')}
+                      </span></p>
+                    ) : null;
+                  })()}
+                  {specialTerms && (
+                    <p>Terms: <span className="text-white font-medium">{specialTerms}</span></p>
+                  )}
+                </div>
+              )}
             </div>
           );
         })()}
