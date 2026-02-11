@@ -5192,7 +5192,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
           return (
-            <div className="p-3 pb-1 md:pb-3 bg-black text-white border-b border-white/20 overflow-hidden">
+            <div className="p-3 pb-0 md:pb-3 bg-black text-white border-b border-white/20 overflow-hidden">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
                   <TooltipProvider>
@@ -5215,13 +5215,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div className="min-w-0 overflow-visible">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-sm text-white truncate">
-                        {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 -mt-0.5">
+                  <div className="min-w-0 overflow-visible leading-tight">
+                    <p className="font-medium text-sm text-white truncate">
+                      {localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Placed')}
+                    </p>
+                    <div className="flex items-center gap-3 [&:not(:has(*))]:hidden">
                       {(() => {
                         // Check if order has been delivered (awaiting client acceptance)
                         const isDelivered = localOrder.delivery_status === 'delivered';
@@ -5436,7 +5434,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 </div>
               )}
               {/* Mobile-only Order Details - full width button below action buttons */}
-              <details className="md:hidden w-full mt-0 pb-2 pr-2">
+              <details className="md:hidden w-full mt-0 pb-1 pr-2">
                 <summary className="w-full cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                   <div className="w-full py-2 px-3 bg-transparent text-white border border-white/50 hover:bg-white hover:text-black transition-all duration-200 text-sm font-medium text-center rounded-none flex items-center justify-center gap-1">
                     Order Details
