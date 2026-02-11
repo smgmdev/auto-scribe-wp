@@ -6875,7 +6875,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Request Revision Dialog */}
       <AlertDialog open={revisionDialogOpen} onOpenChange={setRevisionDialogOpen}>
         <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
+           <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Request Revision</AlertDialogTitle>
             <AlertDialogDescription>
               Please describe what changes you need for this delivery.
