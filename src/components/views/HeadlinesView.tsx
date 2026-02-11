@@ -304,15 +304,24 @@ export function HeadlinesView() {
                           {formatTimeAgo(headline.publishedAt)}
                         </span>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="hidden md:inline-flex h-7 w-7 flex-shrink-0 hover:bg-muted"
-                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
-                        title={headline.url}
-                      >
-                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                      </Button>
+                      <div className="hidden md:flex items-center gap-1 flex-shrink-0">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-7 w-7 hover:bg-muted"
+                          onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                          title={headline.url}
+                        >
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <h3 className="text-lg md:text-xl font-semibold text-foreground group-hover:text-accent transition-colors">
                       {headline.title}
