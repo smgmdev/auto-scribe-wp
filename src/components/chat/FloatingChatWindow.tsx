@@ -4157,7 +4157,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="default"
                   variant="outline"
-                  className="flex-1 bg-white text-black border-white hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-sm"
+                  className="flex-1 bg-white text-black border-black hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-sm"
                   onClick={() => setRevisionDialogOpen(true)}
                   disabled={hasOpenDispute}
                 >
