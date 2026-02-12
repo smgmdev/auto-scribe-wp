@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 
 interface AddWordPressSiteDialogProps {
@@ -97,19 +97,11 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
   const processLogoFile = (file: File) => {
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!validTypes.includes(file.type)) {
-      toast({
-        title: 'Invalid file type',
-        description: 'Please upload a PNG or JPG image.',
-        variant: 'destructive',
-      });
+      toast.error('Please upload a PNG or JPG image.');
       return;
     }
     if (file.size > 1 * 1024 * 1024) {
-      toast({
-        title: 'File too large',
-        description: 'Logo must be less than 1MB.',
-        variant: 'destructive',
-      });
+      toast.error('Logo must be less than 1MB.');
       return;
     }
     
@@ -121,11 +113,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       URL.revokeObjectURL(objectUrl);
       
       if (img.width !== 300 || img.height !== 300) {
-        toast({
-          title: 'Invalid resolution',
-          description: 'Logo must be exactly 300x300 pixels.',
-          variant: 'destructive',
-        });
+        toast.error('Logo must be exactly 300x300 pixels.');
         return;
       }
       
@@ -142,11 +130,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
     
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      toast({
-        title: 'Error',
-        description: 'Failed to load image.',
-        variant: 'destructive',
-      });
+      toast.error('Failed to load image.');
     };
     
     img.src = objectUrl;
@@ -196,11 +180,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
     e.preventDefault();
     
     if (!user) {
-      toast({
-        title: 'Error',
-        description: 'You must be logged in to submit a site.',
-        variant: 'destructive',
-      });
+      toast.error('You must be logged in to submit a site.');
       return;
     }
 
@@ -220,11 +200,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      toast({
-        title: 'Validation Error',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
-      });
+      toast.error('Please fill in all required fields.');
       return;
     }
 
@@ -234,11 +210,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
     try {
       new URL(siteUrl);
     } catch {
-      toast({
-        title: 'Invalid URL',
-        description: 'Please enter a valid website URL.',
-        variant: 'destructive',
-      });
+      toast.error('Please enter a valid website URL.');
       return;
     }
 
@@ -254,11 +226,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
         .limit(1);
 
       if (existingSites && existingSites.length > 0) {
-        toast({
-          title: 'Duplicate Site',
-          description: 'This site is already registered on Arcana Mace.',
-          variant: 'destructive',
-        });
+        toast.error('This site is already registered on Arcana Mace.');
         setIsSubmitting(false);
         return;
       }
@@ -272,11 +240,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
         .limit(1);
 
       if (pendingSubmissions && pendingSubmissions.length > 0) {
-        toast({
-          title: 'Duplicate Site',
-          description: 'This site is already pending review on Arcana Mace.',
-          variant: 'destructive',
-        });
+        toast.error('This site is already pending review on Arcana Mace.');
         setIsSubmitting(false);
         return;
       }
@@ -309,26 +273,15 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
           errorMessage += `Server returned error ${testResponse.status}.`;
         }
         
-        toast({
-          title: 'Connection Failed',
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        toast.error(errorMessage);
         setIsSubmitting(false);
         return;
       }
 
-      toast({
-        title: 'Connection Verified',
-        description: 'WordPress credentials validated successfully.',
-      });
+      toast.success('WordPress credentials validated successfully.');
     } catch (connectionError: any) {
       console.error('WordPress connection error:', connectionError);
-      toast({
-        title: 'Connection Failed',
-        description: 'Could not connect to WordPress site. Please check the URL and ensure the site is accessible.',
-        variant: 'destructive',
-      });
+      toast.error('Could not connect to WordPress site. Please check the URL and ensure the site is accessible.');
       setIsSubmitting(false);
       return;
     }
@@ -385,10 +338,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
         console.error('Failed to notify admin:', emailError);
       }
 
-      toast({
-        title: 'Submission Successful',
-        description: 'Your WordPress site has been submitted for approval. You will be notified once reviewed.',
-      });
+      toast.success('Your WordPress site has been submitted for approval. You will be notified once reviewed.');
 
       resetForm();
       onOpenChange(false);
@@ -400,11 +350,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       setCurrentView('agency-media');
     } catch (error: any) {
       console.error('Error submitting WordPress site:', error);
-      toast({
-        title: 'Submission Failed',
-        description: error.message || 'Failed to submit WordPress site for approval.',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'Failed to submit WordPress site for approval.');
     } finally {
       setIsSubmitting(false);
     }

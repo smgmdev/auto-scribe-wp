@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
@@ -31,7 +31,6 @@ export function AddMediaSiteDialog({
   onSuccess 
 }: AddMediaSiteDialogProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const { setCurrentView, setAgencyMediaTargetTab, setAgencyMediaTargetSubTab } = useAppStore();
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,17 +40,10 @@ export function AddMediaSiteDialog({
     try {
       await navigator.clipboard.writeText(SAMPLE_SHEET_URL);
       setCopied(true);
-      toast({
-        title: "Link copied",
-        description: "Sample Google Sheet link has been copied to clipboard.",
-      });
+      toast.success('Sample Google Sheet link has been copied to clipboard.');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({
-        title: "Failed to copy",
-        description: "Please copy the link manually.",
-        variant: "destructive",
-      });
+      toast.error('Please copy the link manually.');
     }
   };
 
@@ -63,30 +55,18 @@ export function AddMediaSiteDialog({
     e.preventDefault();
     
     if (!user || !agencyName) {
-      toast({
-        title: "Error",
-        description: "Please ensure you are logged in as an agency.",
-        variant: "destructive",
-      });
+      toast.error('Please ensure you are logged in as an agency.');
       return;
     }
 
     if (!googleSheetUrl.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter your Google Sheet URL.",
-        variant: "destructive",
-      });
+      toast.error('Please enter your Google Sheet URL.');
       return;
     }
 
     // Basic validation for Google Sheets URL
     if (!googleSheetUrl.includes('docs.google.com/spreadsheets')) {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid Google Sheets URL.",
-        variant: "destructive",
-      });
+      toast.error('Please enter a valid Google Sheets URL.');
       return;
     }
 
@@ -104,10 +84,7 @@ export function AddMediaSiteDialog({
 
       if (error) throw error;
 
-      toast({
-        title: "Submission successful",
-        description: "Your media list has been submitted for approval.",
-      });
+      toast.success('Your media list has been submitted for approval.');
 
       setGoogleSheetUrl('');
       onOpenChange(false);
@@ -119,11 +96,7 @@ export function AddMediaSiteDialog({
       setCurrentView('agency-media');
     } catch (error: any) {
       console.error('Error submitting media site:', error);
-      toast({
-        title: "Submission failed",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
+      toast.error(error.message || 'Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
