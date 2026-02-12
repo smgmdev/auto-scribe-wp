@@ -789,7 +789,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                             </>
                           ) : (
                             <>
-                              {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
+                              {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
                               {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
                                 ? (orders.get(tx.order_id)!.amount_cents / 100).toLocaleString()
                                 : Math.abs(tx.amount).toLocaleString()}
