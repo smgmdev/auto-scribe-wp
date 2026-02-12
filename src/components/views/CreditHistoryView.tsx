@@ -201,9 +201,7 @@ export function CreditHistoryView() {
     if (requests) {
       const match = requests.find((r: any) => r.media_sites?.name === mediaName);
       if (match) {
-        setOrdersTargetTab('active');
-        setOrdersTargetOrderId(match.id);
-        setCurrentView('orders');
+        setCurrentView('my-requests');
         return;
       }
     }
