@@ -624,7 +624,7 @@ export function AgencyMediaView() {
         </TabsList>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-2 space-y-4">
+        <TabsContent value="wordpress" className="mt-0 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
             <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
@@ -965,7 +965,7 @@ export function AgencyMediaView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-2 space-y-4">
+        <TabsContent value="media" className="mt-0 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
