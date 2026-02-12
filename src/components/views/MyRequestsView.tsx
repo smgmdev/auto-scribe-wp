@@ -1190,12 +1190,12 @@ export function MyRequestsView() {
         </TabsList>
 
         <div className="relative mt-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search engagements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10 h-9 text-sm"
+            className="pl-10 pr-10 h-9 text-sm bg-black text-white placeholder:text-gray-400 border-black rounded-none"
           />
           {searchQuery && (
             <Button
