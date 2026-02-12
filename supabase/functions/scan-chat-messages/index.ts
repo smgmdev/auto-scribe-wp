@@ -10,7 +10,7 @@ const corsHeaders = {
 // Regex patterns for detecting contact sharing
 const PATTERNS: { type: string; regex: RegExp; label: string }[] = [
   { type: "email", regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/gi, label: "Email" },
-  { type: "phone", regex: /(?:\+\d{1,4}[\s\-.]?)?\(?\d{2,4}\)?[\s\-.]?\d{3,4}[\s\-.]?\d{3,4}/g, label: "Phone Number" },
+  { type: "phone", regex: /\+\d{1,4}[\s\-.]?\(?\d{2,4}\)?[\s\-.]?\d{3,4}[\s\-.]?\d{3,4}/g, label: "Phone Number" },
   { type: "whatsapp", regex: /\b(?:whatsapp|whats\s?app|wa\.me|wa\s+number|wa\s*:)\b/gi, label: "WhatsApp" },
   { type: "telegram", regex: /\b(?:telegram|tele\.?gram|t\.me\/?\w*|@\w{5,})\b/gi, label: "Telegram" },
   { type: "discord", regex: /\b(?:discord(?:\.gg)?|disc(?:ord)?[\s:#]+\w+)\b/gi, label: "Discord" },
@@ -156,14 +156,11 @@ serve(async (req) => {
     let aiFlags: any[] = [];
 
     if (LOVABLE_API_KEY && messagesToScan.length > 0) {
-      // Only AI-scan messages that weren't already caught by regex (limit batch size)
-      const regexFlaggedIds = new Set(newFlags.map((f) => f.message_id));
-      const unflaggedMessages = messagesToScan
-        .filter((m: any) => !regexFlaggedIds.has(m.id))
-        .slice(0, 50); // Limit to 50 for API efficiency
+      // AI-scan ALL messages for contextual contact-sharing intent (not just regex misses)
+      const messagesToAIScan = messagesToScan.slice(0, 100); // Limit batch size
 
-      if (unflaggedMessages.length > 0) {
-        const messageBatch = unflaggedMessages.map((m: any, i: number) => 
+      if (messagesToAIScan.length > 0) {
+        const messageBatch = messagesToAIScan.map((m: any, i: number) => 
           `[${i}] ${m.message}`
         ).join("\n");
 
@@ -179,15 +176,24 @@ serve(async (req) => {
               messages: [
                 {
                   role: "system",
-                  content: `You are a security analyst. Analyze chat messages for attempts to share contact details or move communication off-platform. Look for:
-- Coded/obfuscated emails (e.g., "john at gmail dot com")
-- Partial phone numbers or requests for phone numbers
-- References to meeting on other platforms (Discord, Telegram, WhatsApp, Skype, Signal, etc.)
-- Sharing social media handles
-- Any attempt to exchange contact information
+                  content: `You are a security analyst monitoring chat messages on a media services marketplace. Your job is to detect when users are trying to exchange contact information to communicate OUTSIDE the platform. Focus on CONVERSATIONAL CONTEXT and INTENT.
 
-For each flagged message, return JSON array: [{"index": <number>, "type": "<detection_type>", "value": "<what was detected>"}]
-Types: email, phone, whatsapp, telegram, discord, skype, instagram, twitter, facebook, linkedin, snapchat, signal, social_media, other
+Flag messages where users:
+- ASK for someone's phone number, email, or social media ("what's your number?", "can I get your email?", "do you have WhatsApp?")
+- OFFER their own contact details ("here's my email", "reach me at", "my telegram is")
+- Share obfuscated contact info ("john at gmail dot com", "add me on insta")
+- Suggest moving to another platform ("let's talk on Discord", "message me on Telegram", "add me on WhatsApp")
+- Share actual contact details (emails, phone numbers with country codes, social handles)
+
+DO NOT flag:
+- Random numbers that are NOT phone numbers (order amounts, dates, IDs, timestamps)
+- Plain numbers without context suggesting they are contact details
+- System messages or automated notifications
+- General discussion that doesn't involve exchanging contact information
+
+For each flagged message, return JSON array: [{"index": <number>, "type": "<detection_type>", "value": "<brief description of what was detected and the context>"}]
+Types: email, phone, whatsapp, telegram, discord, skype, instagram, twitter, facebook, linkedin, snapchat, signal, social_media, contact_exchange
+Use "contact_exchange" when users are asking for or offering to share contact details without specifying a particular platform.
 If no violations found, return empty array [].
 ONLY return the JSON array, nothing else.`,
                 },
@@ -207,18 +213,24 @@ ONLY return the JSON array, nothing else.`,
             try {
               const jsonMatch = content.match(/\[[\s\S]*\]/);
               if (jsonMatch) {
-                const detected = JSON.parse(jsonMatch[0]);
+              const detected = JSON.parse(jsonMatch[0]);
                 for (const d of detected) {
                   const idx = d.index;
-                  if (idx >= 0 && idx < unflaggedMessages.length) {
-                    const msg = unflaggedMessages[idx];
+                  if (idx >= 0 && idx < messagesToAIScan.length) {
+                    const msg = messagesToAIScan[idx];
+                    // Skip if regex already flagged this message with same type
+                    const alreadyFlagged = newFlags.some(
+                      (f) => f.message_id === msg.id && f.detected_type === (d.type || "contact_exchange")
+                    );
+                    if (alreadyFlagged) continue;
+                    
                     aiFlags.push({
                       message_id: msg.id,
                       request_id: msg.request_id,
                       sender_id: msg.sender_id,
                       sender_type: msg.sender_type,
                       message_text: msg.message,
-                      detected_type: d.type || "other",
+                      detected_type: d.type || "contact_exchange",
                       detected_value: d.value || "AI detected contact sharing attempt",
                     });
                   }
