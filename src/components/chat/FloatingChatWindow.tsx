@@ -5692,7 +5692,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         })()}
 
         {/* Client Order Request Banner - Sticky (when client sends order request to agency, hide when accepted) */}
-        {hasExistingClientOrderRequest && !globalChatRequest?.order && !hasAcceptedOrderRequest && !loadingMessages && (() => {
+        {hasExistingClientOrderRequest && !hasOrder && !hasAcceptedOrderRequest && !loadingMessages && (() => {
           const pendingClientOrder = getLastClientOrderRequestData();
           if (!pendingClientOrder) return null;
           const isClient = actualSenderType === 'client';
