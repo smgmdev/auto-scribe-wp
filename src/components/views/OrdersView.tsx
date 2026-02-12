@@ -920,8 +920,8 @@ export function OrdersView() {
       ) : (
         <div className="space-y-0">
           <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-2xl md:grid-cols-4 scrollbar-hide justify-start">
-              <TabsTrigger value="active" className="gap-2 relative">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:max-w-2xl md:grid-cols-4 scrollbar-hide justify-start bg-black rounded-none">
+              <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {userUnreadOrdersCount > 0 && !isAdmin && (
@@ -930,7 +930,7 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="disputes" className="gap-2 relative">
+              <TabsTrigger value="disputes" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputeOrders.length})
                 {userUnreadDisputesCount > 0 && !isAdmin && (
@@ -939,7 +939,7 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2 relative">
+              <TabsTrigger value="completed" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
                 {userUnreadCompletedCount > 0 && !isAdmin && (
@@ -948,7 +948,7 @@ export function OrdersView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2 relative">
+              <TabsTrigger value="history" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <X className="h-4 w-4" />
                 Cancelled Orders ({historyOrders.length})
                 {userUnreadHistoryCount > 0 && !isAdmin && (
