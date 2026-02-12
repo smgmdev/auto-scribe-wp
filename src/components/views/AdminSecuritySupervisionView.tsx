@@ -340,10 +340,9 @@ export function AdminSecuritySupervisionView() {
     <div className="bg-white -m-4 lg:-m-8 min-h-[calc(100vh-56px)] lg:min-h-screen">
       <div className="max-w-[980px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            <h1 className="text-lg font-semibold">Security Supervision</h1>
+            <h1 className="text-4xl font-bold text-foreground">Security Supervision</h1>
             {unreviewedCount > 0 && (
               <Badge className="bg-red-600 text-white text-xs">{unreviewedCount}</Badge>
             )}
@@ -352,7 +351,7 @@ export function AdminSecuritySupervisionView() {
             onClick={handleScan}
             disabled={scanning}
             size="sm"
-            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground"
+            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto"
           >
             {scanning ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
             {scanning ? 'Scanning...' : 'Scan All Chats'}
