@@ -1327,8 +1327,8 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-0">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
-                <TabsTrigger value="delivered" className="gap-2 relative flex-1">
+              <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
+                <TabsTrigger value="delivered" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
                   {unreadDeliveredCount > 0 && (
@@ -1337,7 +1337,7 @@ export function MyRequestsView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="cancelled" className="gap-2 relative flex-1">
+                <TabsTrigger value="cancelled" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <XCircle className="h-4 w-4" />
                   Cancelled ({cancelledRequests.length})
                   {unreadCancelledCount > 0 && (
