@@ -425,7 +425,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               </p>
             </div>
           )}
-          <div className="col-span-2 pt-1">
+          <div className="col-span-2 pt-2 border-t border-border mt-1">
             <button
               onClick={handleViewOrderChat}
               className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
@@ -571,7 +571,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Status</p>
             <p className="font-medium">Pending</p>
           </div>
-          <div className="col-span-2 pt-1">
+          <div className="col-span-2 pt-2 border-t border-border mt-1">
             <button
               onClick={handleViewOrderChat}
               className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
