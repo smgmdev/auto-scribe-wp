@@ -37,12 +37,17 @@ function isSystemMessage(text: string): boolean {
 }
 
 // Filter out false positives for phone numbers
-function isValidPhone(match: string): boolean {
+function isValidPhone(match: string, fullText: string): boolean {
   const digits = match.replace(/\D/g, "");
-  // Must be 7-15 digits and not look like a date (e.g., 2026-02-08) or UUID segment
   if (digits.length < 7 || digits.length > 15) return false;
   // Reject if it looks like a year-month-day pattern
   if (/^\d{4}\d{2}\d{2}/.test(digits) && parseInt(digits.slice(0, 4)) > 1990) return false;
+  // Reject if the match appears inside a URL
+  const matchIdx = fullText.indexOf(match);
+  if (matchIdx >= 0) {
+    const before = fullText.slice(Math.max(0, matchIdx - 100), matchIdx);
+    if (/https?:\/\/\S*$/.test(before)) return false;
+  }
   return true;
 }
 
@@ -124,7 +129,7 @@ serve(async (req) => {
         if (matches) {
           for (const match of matches) {
             // Filter false positive phone numbers
-            if (pattern.type === "phone" && !isValidPhone(match)) continue;
+            if (pattern.type === "phone" && !isValidPhone(match, text)) continue;
             
             // Check if this exact detection already exists for this message
             const exists = newFlags.some(
