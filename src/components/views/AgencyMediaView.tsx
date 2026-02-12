@@ -468,6 +468,10 @@ export function AgencyMediaView() {
 
       if (error) throw error;
 
+      // If the deleted site was unread, decrement the notification count
+      if (!siteToDelete.read) {
+        decrementAgencyUnreadWpSubmissionsCount();
+      }
       setWordpressSites(prev => prev.filter(s => s.id !== siteToDelete.id));
       toast.success('Site removed successfully');
       setIsDeleteDialogOpen(false);
