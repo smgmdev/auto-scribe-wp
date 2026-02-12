@@ -1869,15 +1869,25 @@ export function CreditHistoryView() {
                                </div>
                              )}
                              {transaction.type === 'locked' && (
-                               <div className="mt-3 pt-3 border-t border-border/50">
-                                 <button
-                                   onClick={() => handleLockedTransactionClick(transaction)}
-                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                 >
-                                   View Order Details →
-                                 </button>
-                               </div>
-                             )}
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  <button
+                                    onClick={() => handleLockedTransactionClick(transaction)}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Order Details →
+                                  </button>
+                                </div>
+                              )}
+                              {transaction.type === 'order_accepted' && transaction.order_id && (
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  <button
+                                    onClick={() => handleOrderCompletedClick(transaction.order_id!, transaction.type)}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Order Details →
+                                  </button>
+                                </div>
+                              )}
                              </>
                            )}
                           
