@@ -37,7 +37,7 @@ export default function ReportBug() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('bug_reports').insert({
+      const { error } = await (supabase.from('bug_reports' as any) as any).insert({
         subject: subject.trim(),
         category,
         description: description.trim(),
