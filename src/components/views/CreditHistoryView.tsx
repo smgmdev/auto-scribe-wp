@@ -709,7 +709,43 @@ export function CreditHistoryView() {
   );
 
   // Filter out withdrawal_locked transactions that have a matching completed or rejected withdrawal
+  // Also filter out locked transactions that have a matching unlocked transaction (order request cancelled)
+  const unlockedTransactions = filteredTransactions.filter(t => t.type === 'unlocked');
+  
+  // Build a tracking set for unlocked amounts to match against locked transactions
+  // Each unlocked "consumes" one locked transaction with the same amount, matched by closest time
+  const usedUnlockIds = new Set<string>();
+  const lockedToHide = new Set<string>();
+  
+  // For each unlocked transaction, find the closest earlier locked transaction with the same amount
+  for (const unlock of unlockedTransactions) {
+    const unlockTime = new Date(unlock.created_at).getTime();
+    let bestMatch: typeof filteredTransactions[0] | null = null;
+    let bestTimeDiff = Infinity;
+    
+    for (const lock of filteredTransactions) {
+      if (lock.type !== 'locked') continue;
+      if (lockedToHide.has(lock.id)) continue; // Already matched
+      if (Math.abs(lock.amount) !== unlock.amount) continue; // Amount must match
+      
+      const lockTime = new Date(lock.created_at).getTime();
+      const timeDiff = unlockTime - lockTime;
+      if (timeDiff > 0 && timeDiff < bestTimeDiff) {
+        bestTimeDiff = timeDiff;
+        bestMatch = lock;
+      }
+    }
+    
+    if (bestMatch) {
+      lockedToHide.add(bestMatch.id);
+    }
+  }
+
   const displayedTransactions = filteredTransactions.filter(t => {
+    // Hide locked transactions that have been matched with an unlocked transaction
+    if (t.type === 'locked' && lockedToHide.has(t.id)) {
+      return false;
+    }
     if (t.type === 'withdrawal_locked') {
       const method = t.description?.includes('Bank Transfer') ? 'bank' : t.description?.includes('USDT') ? 'usdt' : 'unknown';
       const key = `${Math.abs(t.amount)}-${method}`;
