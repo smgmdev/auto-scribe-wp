@@ -477,7 +477,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             </div>
           )}
           <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Reserved</p>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Locked</p>
             <p className="font-medium">{Math.abs(tx.amount).toLocaleString()}</p>
           </div>
           {lockedAt && (
@@ -559,7 +559,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             </div>
           )}
           <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Reserved</p>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Locked</p>
             <p className="font-medium">{Math.abs(tx.amount).toLocaleString()}</p>
           </div>
           <div>
@@ -723,6 +723,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         <TableCell>
                           {tx.type === 'offer_accepted' ? (
                             <Lock className="h-4 w-4 text-amber-500" />
+                          ) : tx.type === 'locked' ? (
+                            <Lock className="h-4 w-4 text-destructive" />
+                          ) : tx.type === 'unlocked' ? (
+                            <Unlock className="h-4 w-4 text-green-600" />
                           ) : tx.type === 'withdrawal_unlocked' ? (
                             <Unlock className="h-4 w-4 text-muted-foreground" />
                           ) : tx.type === 'withdrawal_completed' ? (

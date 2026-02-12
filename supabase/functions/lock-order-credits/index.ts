@@ -189,7 +189,7 @@ serve(async (req) => {
         user_id: user.id,
         amount: -creditCost,
         type: "locked",
-        description: `Order request sent: ${mediaSite.name} (credits reserved)`
+        description: `Order request sent: ${mediaSite.name} (credits locked)`
       });
 
     if (transactionError) {

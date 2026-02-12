@@ -1778,7 +1778,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         detail: { requestId: globalChatRequest?.id }
       }));
       
-      toast.success(creditsLocked ? `Order request declined. ${orderData.price} credits released to client.` : "The order request has been declined.");
+      toast.success(creditsLocked ? `Order request declined. ${orderData.price} credits unlocked to client.` : "The order request has been declined.");
     } catch (error: any) {
       console.error('Error rejecting order request:', error);
       toast.error("Failed to reject order request.");
@@ -3807,7 +3807,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             detail: { requestId: globalChatRequest?.id }
           }));
           
-          toast.success(creditsLocked ? `Order request declined. ${clientOrderRequest.price} credits released to client.` : "The order request has been declined.");
+          toast.success(creditsLocked ? `Order request declined. ${clientOrderRequest.price} credits unlocked to client.` : "The order request has been declined.");
         } catch (error: any) {
           console.error('Error rejecting order request:', error);
           toast.error("Failed to reject order request.");
