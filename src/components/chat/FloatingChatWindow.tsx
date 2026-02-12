@@ -3590,17 +3590,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                   {offerRejected.media_site_name}
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5" />
-                  <span className="text-xs">
-                    Price: {offerRejected.price.toLocaleString()} credits
+                <div className={`mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <span className="text-sm">
+                    <span className="font-semibold">Price:</span> {offerRejected.price.toLocaleString()} credits
                   </span>
                 </div>
                 {offerRejected.delivery_duration && (offerRejected.delivery_duration.days > 0 || offerRejected.delivery_duration.hours > 0 || offerRejected.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs">
-                      Delivery: {formatDeliveryDuration(offerRejected.delivery_duration)}
+                  <div className={`mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                    <span className="text-sm">
+                      <span className="font-semibold">Delivery:</span> {formatDeliveryDuration(offerRejected.delivery_duration)}
                     </span>
                   </div>
                 )}
