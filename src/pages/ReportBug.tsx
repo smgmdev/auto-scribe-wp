@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -311,8 +312,11 @@ export default function ReportBug() {
                 )}
               </div>
 
-              <Button type="submit" disabled={submitting || uploading} className="w-full rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200">
-                {uploading ? 'Uploading...' : submitting ? 'Submitting...' : 'Submit Bug Report'}
+              <Button type="submit" disabled={submitting || uploading} className="w-full rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200 group">
+                <span className="flex items-center justify-center gap-2">
+                  <span className="transition-transform duration-200 group-hover:-translate-x-1">{uploading ? 'Uploading...' : submitting ? 'Submitting...' : 'Submit Bug Report'}</span>
+                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                </span>
               </Button>
             </form>
           )}
