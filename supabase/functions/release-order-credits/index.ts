@@ -105,14 +105,15 @@ serve(async (req) => {
     // Keep full history - DO NOT delete the locked transaction
     // Just create an "unlocked" transaction to show the request was cancelled/rejected
     if (service_request_id) {
-      const unlockReason = reason || "Order request cancelled";
+      const isRejection = reason && reason.toLowerCase().includes('rejected');
+      const descriptionPrefix = isRejection ? 'Order request rejected' : 'Request cancelled';
       const { error: unlockTransactionError } = await supabaseAdmin
         .from("credit_transactions")
         .insert({
           user_id: targetUserId,
           amount: creditAmount,
           type: "unlocked",
-          description: `Request cancelled: ${mediaSite.name} (credits unlocked)`
+          description: `${descriptionPrefix}: ${mediaSite.name} (credits unlocked)`
         });
 
       if (unlockTransactionError) {
