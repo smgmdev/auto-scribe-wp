@@ -431,7 +431,7 @@ export function AdminAISettingsView() {
           <Button 
             onClick={handleRefresh}
             disabled={settingsLoading || isRefreshing}
-            className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+            className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
