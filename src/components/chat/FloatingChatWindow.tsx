@@ -4197,7 +4197,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <p className={`text-sm break-words ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               {isOwnMessage ? 'You accepted' : 'Client accepted'} the delivery for {deliveryAccepted.media_site_name}
             </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+            <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               Order has been marked as completed
             </p>
           </div>
