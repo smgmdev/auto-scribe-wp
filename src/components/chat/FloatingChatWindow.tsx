@@ -5372,7 +5372,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                         <p>{localOrder.status === 'cancelled' ? 'Order Cancelled' : hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' && completedViaDispute ? 'Order Completed (Dispute Resolved)' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
+                         <p>{localOrder.status === 'cancelled' ? 'Order Cancelled' : hasOpenDispute ? 'Order In Dispute' : localOrder.status === 'completed' ? 'Order Completed' : hasRevisionAfterDelivery ? 'Revision Requested' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
