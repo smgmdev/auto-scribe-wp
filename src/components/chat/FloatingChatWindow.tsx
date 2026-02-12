@@ -3584,12 +3584,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`}>
-                    Offer Rejected
+                    Offer Rejected: <span className={`font-normal ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{offerRejected.media_site_name}</span>
                   </span>
                 </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                  {offerRejected.media_site_name}
-                </p>
                 <div className={`mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <p className="text-sm">
                     <span className="font-semibold">Price:</span> {offerRejected.price.toLocaleString()} credits
