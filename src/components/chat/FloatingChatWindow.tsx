@@ -4013,12 +4013,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                    {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}
+                    {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}: <span className="font-normal">{orderRequestAccepted.media_site_name}</span>
                   </span>
                 </div>
-                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                  {orderRequestAccepted.media_site_name}
-                </p>
                 <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <span className="text-xs">
                     Price: {orderRequestAccepted.price.toLocaleString()} credits
@@ -4049,7 +4046,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     ) : (
                       <>
                         <span className="text-xs">
-                          {cardCountdown.isOverdue ? 'Overdue' : `Delivery: ${cardCountdown.text}`}
+                          {cardCountdown.isOverdue ? 'Delivery: Overdue' : `Delivery: ${cardCountdown.text}`}
                         </span>
                       </>
                     )}
