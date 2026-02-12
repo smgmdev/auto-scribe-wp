@@ -320,6 +320,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [acceptOrderDialogOpen, setAcceptOrderDialogOpen] = useState(false);
   const [confirmBuyCreditsOpen, setConfirmBuyCreditsOpen] = useState(false);
   const [acceptingOrder, setAcceptingOrder] = useState(false);
+  const acceptingOrderRef = useRef(false);
   const [confirmOrderPos, setConfirmOrderPos] = useState({ x: 0, y: 0 });
   const [confirmOrderDragging, setConfirmOrderDragging] = useState(false);
   const [confirmOrderCredits, setConfirmOrderCredits] = useState<number | null>(null);
@@ -1606,7 +1607,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   
   // Handle accept client order request from banner (agency side)
   const handleBannerAcceptClientOrderRequest = async (orderData: { media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number }; messageId?: string }) => {
-    if (!globalChatRequest || !orderData.messageId) return;
+    if (!globalChatRequest || !orderData.messageId || acceptingOrderRef.current) return;
+    acceptingOrderRef.current = true;
     
     try {
       // First get the client user_id from the service request
@@ -1688,6 +1690,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     } catch (error: any) {
       console.error('Error accepting order request:', error);
       toast.error(error.message || "Failed to accept order request.");
+    } finally {
+      acceptingOrderRef.current = false;
     }
   };
   
@@ -3855,8 +3859,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="default"
                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                   onClick={async () => {
-                    if (!globalChatRequest) return;
-                    
+                    if (!globalChatRequest || acceptingOrderRef.current) return;
+                    acceptingOrderRef.current = true;
                     setAcceptingOrder(true);
                     try {
                       const { data: serviceRequest, error: fetchError } = await supabase
@@ -3929,6 +3933,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       toast.error(error.message || "Failed to accept order request.");
                     } finally {
                       setAcceptingOrder(false);
+                      acceptingOrderRef.current = false;
                     }
                   }}
                   disabled={acceptingOrder || hasOpenDispute}
