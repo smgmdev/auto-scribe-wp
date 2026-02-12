@@ -4403,16 +4403,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </span>
                 </div>
                 <div className={`mt-1.5 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'} space-y-0`}>
-                  <p className="text-xs">
+                  <p className="text-sm">
                     Price: {orderRequest.price.toLocaleString()} credits
                   </p>
                   {orderRequest.delivery_duration && (orderRequest.delivery_duration.days > 0 || orderRequest.delivery_duration.hours > 0 || orderRequest.delivery_duration.minutes > 0) && (
-                    <p className="text-xs">
+                    <p className="text-sm">
                       Delivery: {formatDeliveryDuration(orderRequest.delivery_duration)}
                     </p>
                   )}
                   {orderRequest.special_terms && (
-                    <p className="text-xs break-words">
+                    <p className="text-sm break-words">
                       Special Terms: {orderRequest.special_terms}
                     </p>
                   )}
@@ -4638,11 +4638,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="mb-2">
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-foreground'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
-            <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
               Price: {orderPlaced.credits_used.toLocaleString()} credits
             </p>
             {orderRequestSpecialTerms && (
-              <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+              <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                 Special Terms: {orderRequestSpecialTerms}
               </p>
             )}
