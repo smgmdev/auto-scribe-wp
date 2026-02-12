@@ -4020,7 +4020,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   {orderRequestAccepted.media_site_name}
                 </p>
                 <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
+                  <CreditCard className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-xs">
                     Price: {orderRequestAccepted.price.toLocaleString()} credits
                   </span>
