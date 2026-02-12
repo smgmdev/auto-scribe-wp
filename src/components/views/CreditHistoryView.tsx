@@ -1748,7 +1748,7 @@ export function CreditHistoryView() {
                                </div>
                                )}
                              </div>
-                             {transaction.type === 'offer_accepted' && transaction.order_id && (
+                             {(transaction.type === 'offer_accepted' || transaction.type === 'locked') && transaction.order_id && (
                                <div className="mt-3 pt-3 border-t border-border/50">
                                  <button
                                    onClick={() => handleOrderCompletedClick(transaction.order_id!, transaction.type)}
