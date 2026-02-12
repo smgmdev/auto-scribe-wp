@@ -1483,7 +1483,7 @@ export function CreditHistoryView() {
                   if (transaction.type === 'locked') {
                     const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
                     const mediaName = mediaMatch ? mediaMatch[1] : '';
-                    return mediaName ? `Order request sent: ${mediaName} (credits cancelled)` : (transaction.description || 'Credits locked');
+                    return mediaName ? `Order request sent: ${mediaName} (credits locked)` : (transaction.description || 'Credits locked');
                   }
                   if (transaction.type === 'unlocked') {
                     const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
