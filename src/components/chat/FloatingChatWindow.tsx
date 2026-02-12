@@ -3604,7 +3604,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
                 {offerRejected.special_terms && (
                   <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    <span className="font-medium">Special Terms:</span> {offerRejected.special_terms}
+                    <span className="font-semibold">Special Terms:</span> {offerRejected.special_terms}
                   </p>
                 )}
               </div>
