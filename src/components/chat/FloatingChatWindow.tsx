@@ -4176,7 +4176,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="default"
                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 text-sm"
                   onClick={handleAcceptDeliveryFromChat}
-                  disabled={acceptingDelivery || hasOpenDispute}
+                  disabled={acceptingDelivery || submittingRevision || hasOpenDispute}
                 >
                   {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                   Accept
@@ -4186,7 +4186,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   variant="outline"
                   className="flex-1 bg-white text-black border-black hover:bg-black hover:text-white hover:border-black transition-all duration-200 text-sm"
                   onClick={() => setRevisionDialogOpen(true)}
-                  disabled={hasOpenDispute}
+                  disabled={acceptingDelivery || submittingRevision || hasOpenDispute}
                 >
                   Request Revision
                 </Button>
@@ -5394,7 +5394,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 shrink-0"
                         onClick={handleAcceptDeliveryFromChat}
-                        disabled={acceptingDelivery}
+                        disabled={acceptingDelivery || submittingRevision}
                       >
                         {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                         Accept
@@ -5403,7 +5403,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         variant="outline"
                         className="bg-transparent text-white border-white hover:bg-white hover:text-black hover:border-white transition-all duration-200 shrink-0"
-                        onClick={() => setRevisionDialogOpen(true)}
+                        onClick={() => !acceptingDelivery && !submittingRevision && setRevisionDialogOpen(true)}
+                        disabled={acceptingDelivery || submittingRevision}
                       >
                         Request Revision
                       </Button>
@@ -5451,7 +5452,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200 flex-1"
                         onClick={handleAcceptDeliveryFromChat}
-                        disabled={acceptingDelivery}
+                        disabled={acceptingDelivery || submittingRevision}
                       >
                         {acceptingDelivery && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
                         Accept
@@ -5460,7 +5461,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         variant="outline"
                         className="bg-transparent text-white border-white hover:bg-white hover:text-black hover:border-white transition-all duration-200 flex-1"
-                        onClick={() => setRevisionDialogOpen(true)}
+                        onClick={() => !acceptingDelivery && !submittingRevision && setRevisionDialogOpen(true)}
+                        disabled={acceptingDelivery || submittingRevision}
                       >
                         Request Revision
                       </Button>
