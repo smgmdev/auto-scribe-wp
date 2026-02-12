@@ -816,9 +816,53 @@ export function CreditHistoryView() {
       .map(t => t.order_id!)
   );
 
+  // Also hide locked transactions when a matching order_accepted exists (order was accepted by agency)
+  // Match by extracting media site name from description
+  const orderAcceptedTransactions = filteredTransactions.filter(t => t.type === 'order_accepted');
+  const lockedToHideForAccepted = new Set<string>();
+  // Map from order_accepted transaction ID to the matched locked transaction for expanded view
+  const acceptedToLockedMap = new Map<string, typeof filteredTransactions[0]>();
+  
+  for (const accepted of orderAcceptedTransactions) {
+    // Extract media site name from "Order accepted by agency: Site Name"
+    const acceptedMediaMatch = accepted.description?.match(/:\s*(.+)$/);
+    const acceptedMediaName = acceptedMediaMatch ? acceptedMediaMatch[1].trim() : null;
+    if (!acceptedMediaName) continue;
+    
+    const acceptedTime = new Date(accepted.created_at).getTime();
+    let bestMatch: typeof filteredTransactions[0] | null = null;
+    let bestTimeDiff = Infinity;
+    
+    for (const lock of filteredTransactions) {
+      if (lock.type !== 'locked') continue;
+      if (lockedToHide.has(lock.id) || lockedToHideForAccepted.has(lock.id)) continue;
+      
+      // Extract media site name from "Order request sent: Site Name (credits reserved)"
+      const lockMediaMatch = lock.description?.match(/:\s*(.+?)\s*\(/);
+      const lockMediaName = lockMediaMatch ? lockMediaMatch[1].trim() : null;
+      if (lockMediaName !== acceptedMediaName) continue;
+      
+      const lockTime = new Date(lock.created_at).getTime();
+      const timeDiff = acceptedTime - lockTime;
+      if (timeDiff > 0 && timeDiff < bestTimeDiff) {
+        bestTimeDiff = timeDiff;
+        bestMatch = lock;
+      }
+    }
+    
+    if (bestMatch) {
+      lockedToHideForAccepted.add(bestMatch.id);
+      acceptedToLockedMap.set(accepted.id, bestMatch);
+    }
+  }
+
   const displayedTransactions = filteredTransactions.filter(t => {
     // Hide locked transactions that have been matched with an unlocked transaction
     if (t.type === 'locked' && lockedToHide.has(t.id)) {
+      return false;
+    }
+    // Hide locked transactions that have been matched with an order_accepted transaction
+    if (t.type === 'locked' && lockedToHideForAccepted.has(t.id)) {
       return false;
     }
     // Hide order_accepted if there's a corresponding order_completed for the same order
