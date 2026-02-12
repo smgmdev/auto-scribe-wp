@@ -340,6 +340,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [disputeReason, setDisputeReason] = useState('');
   const [cancellingOrderRequestId, setCancellingOrderRequestId] = useState<string | null>(null);
   const [rejectingOrderRequestId, setRejectingOrderRequestId] = useState<string | null>(null);
+  const rejectingOfferRef = useRef(false);
   const [acceptingDelivery, setAcceptingDelivery] = useState(false);
   const [revisionDialogOpen, setRevisionDialogOpen] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
@@ -1402,13 +1403,32 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   // Handle reject order request from banner (client side)
   const handleBannerRejectOrderRequest = async () => {
     const lastOrderMsg = existingOrderMessages[existingOrderMessages.length - 1];
-    if (!lastOrderMsg || !globalChatRequest) return;
+    if (!lastOrderMsg || !globalChatRequest || rejectingOfferRef.current) return;
+    rejectingOfferRef.current = true;
     
     const orderData = parseOrderRequest(lastOrderMsg.message);
-    if (!orderData) return;
+    if (!orderData) { rejectingOfferRef.current = false; return; }
     
     setRejectingOrderRequestId(lastOrderMsg.id);
     try {
+      // Check DB for existing rejection to prevent duplicates
+      const { data: existingRejection } = await supabase
+        .from('service_messages')
+        .select('id')
+        .eq('request_id', globalChatRequest.id)
+        .like('message', '%OFFER_REJECTED%')
+        .like('message', `%${orderData.media_site_id}%`)
+        .like('message', `%"price":${orderData.price}%`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (existingRejection) {
+        toast.info("This offer has already been declined.");
+        // Just remove the offer card from local state
+        setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
+        return;
+      }
       // Send rejection message
       const rejectionData = {
         type: 'OFFER_REJECTED',
@@ -1456,6 +1476,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       toast.error("Failed to reject offer.");
     } finally {
       setRejectingOrderRequestId(null);
+      rejectingOfferRef.current = false;
     }
   };
   
@@ -3601,19 +3622,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle offer rejected message
     // Skip if this is a quoted reply - the quote contains the tag but this is a reply message
     if (offerRejected && !quote) {
-      // Only show the latest OFFER_REJECTED for this media site - hide older ones
-      const allRejections = messages.filter(m => {
-        const match = m.message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
-        if (!match) return false;
-        try {
-          const data = JSON.parse(match[1]);
-          return data.media_site_id === offerRejected.media_site_id;
-        } catch { return false; }
-      });
-      const latestRejection = allRejections[allRejections.length - 1];
-      if (latestRejection && latestRejection.id !== msg.id) {
-        return null;
-      }
       return (
         <div className="space-y-1">
           <div className={`rounded-none border p-4 ${
@@ -4409,10 +4417,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       
       // Handle reject order request (client side)
       const handleRejectOrderRequest = async () => {
-        if (!globalChatRequest) return;
+        if (!globalChatRequest || rejectingOfferRef.current) return;
+        rejectingOfferRef.current = true;
         
         setRejectingOrderRequestId(msg.id);
         try {
+          // Check DB for existing rejection to prevent duplicates
+          const { data: existingRejection } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', globalChatRequest.id)
+            .like('message', '%OFFER_REJECTED%')
+            .like('message', `%${orderRequest.media_site_id}%`)
+            .like('message', `%"price":${orderRequest.price}%`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (existingRejection) {
+            toast.info("This offer has already been declined.");
+            setMessages(prev => prev.filter(m => m.id !== msg.id));
+            return;
+          }
+          
           // Send rejection message
           const rejectionData = {
             type: 'OFFER_REJECTED',
@@ -4460,6 +4487,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           toast.error("Failed to reject offer.");
         } finally {
           setRejectingOrderRequestId(null);
+          rejectingOfferRef.current = false;
         }
       };
       
