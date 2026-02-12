@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/layout/Footer';
-import { Search, User, Send } from 'lucide-react';
+import { Search, User, Send, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +24,9 @@ export default function ReportBug() {
   const [submitted, setSubmitted] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const lastScrollY = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +50,19 @@ export default function ReportBug() {
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File must be under 10MB.');
+      return;
+    }
+    
+    setAttachment(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -62,6 +78,27 @@ export default function ReportBug() {
 
     setSubmitting(true);
     try {
+      let attachmentUrl: string | null = null;
+
+      if (attachment) {
+        setUploading(true);
+        const fileExt = attachment.name.split('.').pop();
+        const filePath = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('bug-attachments')
+          .upload(filePath, attachment);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('bug-attachments')
+          .getPublicUrl(filePath);
+
+        attachmentUrl = urlData.publicUrl;
+        setUploading(false);
+      }
+
       const { error } = await (supabase.from('bug_reports' as any) as any).insert({
         subject: subject.trim(),
         category,
@@ -69,6 +106,7 @@ export default function ReportBug() {
         steps_to_reproduce: stepsToReproduce.trim() || null,
         reporter_email: user?.email || email.trim(),
         user_id: user?.id || null,
+        attachment_url: attachmentUrl,
       });
 
       if (error) throw error;
@@ -80,6 +118,7 @@ export default function ReportBug() {
       toast.error('Failed to submit bug report. Please try again.');
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -95,7 +134,6 @@ export default function ReportBug() {
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           
-          {/* Search Trigger - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setShowSearchModal(true)}
@@ -106,7 +144,6 @@ export default function ReportBug() {
             </button>
           </div>
           
-          {/* Right side buttons */}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -137,10 +174,8 @@ export default function ReportBug() {
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
       <div className="h-[120px]" />
 
-      {/* Sub-header - Sticky with transition like Help Center */}
       <div className={`sticky z-50 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
         <div className="bg-white/90 backdrop-blur-sm">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
@@ -168,7 +203,7 @@ export default function ReportBug() {
                 We'll investigate this issue and work on a fix. You may be contacted for more details.
               </p>
               <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); }}>
+                <Button variant="outline" onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}>
                   Submit Another
                 </Button>
                 <Button onClick={() => navigate('/')}>
@@ -187,6 +222,19 @@ export default function ReportBug() {
                   className="h-9"
                 />
               </div>
+
+              {!user && (
+                <div>
+                  <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Your Email *</label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="h-9"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Category *</label>
@@ -227,21 +275,45 @@ export default function ReportBug() {
                 />
               </div>
 
-              {!user && (
-                <div>
-                  <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Your Email *</label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="h-9"
-                  />
-                </div>
-              )}
+              {/* Attachment */}
+              <div>
+                <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Attachment</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*,.pdf,.doc,.docx,.txt,.log"
+                  className="hidden"
+                />
+                {attachment ? (
+                  <div className="flex items-center gap-2 p-2.5 border border-border bg-muted/30">
+                    <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground truncate flex-1">{attachment.name}</span>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {(attachment.size / 1024).toFixed(0)} KB
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { setAttachment(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                      className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center gap-2 p-2.5 border border-dashed border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors text-sm"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    <span>Attach a screenshot or file (max 10MB)</span>
+                  </button>
+                )}
+              </div>
 
-              <Button type="submit" disabled={submitting} className="w-full">
-                {submitting ? 'Submitting...' : 'Submit Bug Report'}
+              <Button type="submit" disabled={submitting || uploading} className="w-full">
+                {uploading ? 'Uploading...' : submitting ? 'Submitting...' : 'Submit Bug Report'}
               </Button>
             </form>
           )}
