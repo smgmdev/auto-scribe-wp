@@ -491,7 +491,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                           "text-right font-medium",
                           tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : 
                           tx.type === 'withdrawal_completed' ? 'text-foreground' : 
-                          tx.type === 'offer_accepted' ? 'text-amber-600' : 
+                          tx.type === 'offer_accepted' ? 'text-foreground' : 
+                          tx.type === 'order_accepted' ? 'text-foreground' :
+                          tx.type === 'locked' ? 'text-foreground' :
+                          tx.type === 'unlocked' ? 'text-foreground' :
                           tx.type === 'order_completed' ? 'text-destructive' : 
                           tx.amount > 0 ? 'text-green-600' : 'text-destructive'
                         )}>
@@ -503,7 +506,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                             </>
                           ) : (
                             <>
-                              {tx.type === 'order_completed' ? '-' : tx.amount > 0 ? '+' : ''}{Math.abs(tx.amount).toLocaleString()}
+                              {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '' : tx.amount > 0 ? '+' : ''}
+                              {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
+                                ? (orders.get(tx.order_id)!.amount_cents / 100).toLocaleString()
+                                : Math.abs(tx.amount).toLocaleString()}
                             </>
                           )}
                         </TableCell>
