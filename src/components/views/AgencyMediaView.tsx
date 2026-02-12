@@ -604,8 +604,8 @@ export function AgencyMediaView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible rounded-none">
-          <TabsTrigger value="media" className="relative overflow-visible">
+        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible rounded-none bg-black">
+          <TabsTrigger value="media" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -613,7 +613,7 @@ export function AgencyMediaView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="relative overflow-visible">
+          <TabsTrigger value="wordpress" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             WordPress Sites
             {(unreadConnectedWpCount + unreadRejectedWpCount) > 0 && (
               <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -627,8 +627,8 @@ export function AgencyMediaView() {
         <TabsContent value="wordpress" className="mt-0 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
-              <TabsTrigger value="connected" className="relative overflow-visible">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none bg-black">
+              <TabsTrigger value="connected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
                   <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -636,10 +636,10 @@ export function AgencyMediaView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending">
+              <TabsTrigger value="pending" className="text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative overflow-visible">
+              <TabsTrigger value="rejected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({rejectedSubmissions.length})
                 {unreadRejectedWpCount > 0 && (
                   <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -968,8 +968,8 @@ export function AgencyMediaView() {
         <TabsContent value="media" className="mt-0 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none">
-              <TabsTrigger value="added" className="relative overflow-visible">
+            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none bg-black">
+              <TabsTrigger value="added" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
                   <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
@@ -977,10 +977,10 @@ export function AgencyMediaView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending">
+              <TabsTrigger value="pending" className="text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingMediaSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative overflow-visible">
+              <TabsTrigger value="rejected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({totalRejectedCount})
                 {unreadRejectedMediaCount > 0 && (
                   <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
