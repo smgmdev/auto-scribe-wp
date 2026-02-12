@@ -409,36 +409,42 @@ export function OrderWithCreditsDialog({
           </div>
 
           {/* Credit Balance */}
-          {loadingCredits ? (
-            <div className="rounded-none border border-border bg-muted/50 p-8 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <>
               <div className="rounded-none border border-border bg-muted/50 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     Available Credit Balance
                   </span>
-                  <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
-                    {availableCredits.toLocaleString()} credits
-                  </span>
+                  {loadingCredits ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className={`font-semibold ${!hasEnoughCredits ? 'text-destructive' : ''}`}>
+                      {availableCredits.toLocaleString()} credits
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-sm text-muted-foreground">Order Cost</span>
-                  <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+                  {loadingCredits ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className="font-semibold">-{creditCost.toLocaleString()} credits</span>
+                  )}
                 </div>
                 <div className="border-t border-border my-3" />
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">After Order</span>
-                  <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
-                    {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
-                  </span>
+                  {loadingCredits ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className={`font-bold ${!hasEnoughCredits ? 'text-destructive' : 'text-primary'}`}>
+                      {Math.max(0, availableCredits - creditCost).toLocaleString()} credits
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Insufficient Credits Warning */}
-              {!hasEnoughCredits && (
+              {!loadingCredits && !hasEnoughCredits && (
                 <div className="flex items-start gap-3 p-4 rounded-none bg-destructive/10 border border-destructive/20">
                   <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                   <div>
@@ -449,8 +455,6 @@ export function OrderWithCreditsDialog({
                   </div>
                 </div>
               )}
-            </>
-          )}
 
           <div className="space-y-2">
           {!loadingCredits && !hasEnoughCredits && (
