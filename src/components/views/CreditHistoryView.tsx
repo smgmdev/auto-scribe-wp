@@ -185,6 +185,31 @@ export function CreditHistoryView() {
     }
   };
 
+  // Navigate to the engagement chat for a locked transaction (no order_id, find by media site name)
+  const handleLockedTransactionClick = async (transaction: CreditTransaction) => {
+    const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
+    const mediaName = mediaMatch ? mediaMatch[1].trim() : null;
+    if (!mediaName || !user) return;
+
+    // Find matching service request by media site name
+    const { data: requests } = await supabase
+      .from('service_requests')
+      .select('id, media_site_id, media_sites!inner(name)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (requests) {
+      const match = requests.find((r: any) => r.media_sites?.name === mediaName);
+      if (match) {
+        setOrdersTargetTab('active');
+        setOrdersTargetOrderId(match.id);
+        setCurrentView('orders');
+        return;
+      }
+    }
+    toast.error('Could not find the engagement for this order');
+  };
+
   // Toggle withdrawal details expansion and fetch details if needed
   const toggleWithdrawalDetails = async (transactionId: string, amount: number, description: string | null, type: string) => {
     const newExpanded = new Set(expandedWithdrawals);
@@ -1748,10 +1773,20 @@ export function CreditHistoryView() {
                                </div>
                                )}
                              </div>
-                             {(transaction.type === 'offer_accepted' || transaction.type === 'locked') && transaction.order_id && (
+                             {transaction.type === 'offer_accepted' && transaction.order_id && (
                                <div className="mt-3 pt-3 border-t border-border/50">
                                  <button
                                    onClick={() => handleOrderCompletedClick(transaction.order_id!, transaction.type)}
+                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                 >
+                                   View Order Details →
+                                 </button>
+                               </div>
+                             )}
+                             {transaction.type === 'locked' && (
+                               <div className="mt-3 pt-3 border-t border-border/50">
+                                 <button
+                                   onClick={() => handleLockedTransactionClick(transaction)}
                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
                                  >
                                    View Order Details →
