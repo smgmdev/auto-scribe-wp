@@ -5244,7 +5244,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center cursor-help shrink-0">
-                          {hasOpenDispute ? (
+                          {localOrder.status === 'cancelled' ? (
+                            <XCircle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
+                          ) : hasOpenDispute ? (
                             <AlertTriangle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                           ) : hasRevisionAfterDelivery ? (
                             <RefreshCw className="h-5 w-5 md:h-6 md:w-6 text-orange-400 animate-spin" style={{ animationDuration: '3s' }} />
@@ -5256,14 +5258,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p>{hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
+                         <p>{localOrder.status === 'cancelled' ? 'Order Cancelled' : hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                    <div className="min-w-0 overflow-visible" style={{ lineHeight: 1 }}>
                      <p className="font-medium text-sm text-white truncate m-0 p-0">
-                       {localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
-                     </p>
+                        {localOrder.status === 'cancelled' ? 'Order Cancelled' : localOrder.status === 'completed' ? 'Order Completed' : localOrder.delivery_status === 'delivered' ? 'Order Delivered' : 'Order in Progress'}
+                      </p>
                      {localOrder.status !== 'completed' && (
                      <div className="flex items-center gap-3 -mt-px">
                       {(() => {
