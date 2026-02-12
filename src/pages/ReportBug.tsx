@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/layout/Footer';
-import { Search, User, Bug, Send } from 'lucide-react';
+import { Search, User, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,29 @@ export default function ReportBug() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const lastScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 64) {
+        setIsHeaderHidden(true);
+      } else {
+        setIsHeaderHidden(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,9 +84,11 @@ export default function ReportBug() {
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Header - matching How It Works */}
-      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
+      {/* Header - hide on scroll like Help Center */}
+      <header 
+        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+      >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
@@ -113,15 +138,16 @@ export default function ReportBug() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-[120px]" />
+      <div className="h-[92px]" />
 
-      {/* Sub-header - Sticky */}
-      <div className="sticky top-[92px] z-40 bg-white">
-        <div className="bg-white border-b border-border">
+      {/* Sub-header - Sticky with transition like Help Center */}
+      <div className={`sticky z-50 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-white/90 backdrop-blur-sm">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Report a Bug</span>
           </div>
         </div>
+        <div className="h-px bg-border" />
       </div>
 
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
