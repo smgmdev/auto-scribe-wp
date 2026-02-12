@@ -908,7 +908,7 @@ export function CreditHistoryView() {
             onClick={handleRefresh}
             disabled={refreshing}
             variant="outline"
-            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border gap-2"
+            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
