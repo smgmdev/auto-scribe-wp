@@ -2419,6 +2419,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
+            // Also deduplicate by content+timestamp for system messages to prevent double cards
+            if (isSystemMessage && prev.some(m => m.message === newMsg.message && m.sender_id === newMsg.sender_id && Math.abs(new Date(m.created_at).getTime() - new Date(newMsg.created_at).getTime()) < 5000)) return prev;
             return [...prev, newMsg];
           });
           
