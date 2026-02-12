@@ -1392,15 +1392,31 @@ export function CreditHistoryView() {
                 const isOrderCompleted = transaction.type === 'order_completed';
                 const orderInfo = orderDetails[transaction.id];
                 
-                const displayDescription = hasReason 
-                  ? transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
-                  : transaction.type === 'withdrawal_locked' 
-                    ? (transaction.description?.includes('Bank Transfer') 
-                        ? 'Withdrawal via Bank Transfer' 
-                        : transaction.description?.includes('USDT')
-                          ? 'Withdrawal via USDT'
-                          : 'Withdrawal Pending')
-                    : transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
+                const displayDescription = (() => {
+                  // Format locked/unlocked credit transactions with better labels
+                  if (transaction.type === 'locked') {
+                    // Extract media name from description like "Order request sent: CIO Times (credits reserved)"
+                    const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
+                    const mediaName = mediaMatch ? mediaMatch[1] : '';
+                    return mediaName ? `Order request sent: ${mediaName} (credits reserved)` : (transaction.description || 'Credits locked');
+                  }
+                  if (transaction.type === 'unlocked') {
+                    const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
+                    const mediaName = mediaMatch ? mediaMatch[1] : '';
+                    return mediaName ? `Order request cancelled: ${mediaName} (credits unlocked)` : (transaction.description || 'Credits unlocked');
+                  }
+                  if (hasReason) {
+                    return transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff');
+                  }
+                  if (transaction.type === 'withdrawal_locked') {
+                    return transaction.description?.includes('Bank Transfer') 
+                      ? 'Withdrawal via Bank Transfer' 
+                      : transaction.description?.includes('USDT')
+                        ? 'Withdrawal via USDT'
+                        : 'Withdrawal Pending';
+                  }
+                  return transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
+                })();
                 
                 // Handle click: expand card and fetch order details if needed
                 const handleCardClick = async () => {
