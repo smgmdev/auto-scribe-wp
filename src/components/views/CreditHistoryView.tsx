@@ -862,6 +862,45 @@ export function CreditHistoryView() {
     }
   }
 
+  // Also hide offer_accepted transactions when a matching unlocked (cancelled) transaction exists
+  const offerAcceptedToHide = new Set<string>();
+  const offerAcceptedTransactions = filteredTransactions.filter(t => t.type === 'offer_accepted');
+  // Track which unlocked transactions have already been used to hide a locked transaction
+  const usedUnlockForOffer = new Set<string>();
+  
+  for (const offer of offerAcceptedTransactions) {
+    // Extract media site name from "Offer accepted: Site Name (credits locked)"
+    const offerMediaMatch = offer.description?.match(/:\s*(.+?)\s*\(/);
+    const offerMediaName = offerMediaMatch ? offerMediaMatch[1].trim() : null;
+    if (!offerMediaName) continue;
+    
+    const offerTime = new Date(offer.created_at).getTime();
+    let bestMatch: typeof filteredTransactions[0] | null = null;
+    let bestTimeDiff = Infinity;
+    
+    for (const unlock of unlockedTransactions) {
+      if (usedUnlockForOffer.has(unlock.id)) continue;
+      if (unlock.amount !== Math.abs(offer.amount)) continue;
+      
+      // Extract media site name from unlocked description
+      const unlockMediaMatch = unlock.description?.match(/:\s*(.+?)\s*\(/);
+      const unlockMediaName = unlockMediaMatch ? unlockMediaMatch[1].trim() : null;
+      if (unlockMediaName !== offerMediaName) continue;
+      
+      const unlockTime = new Date(unlock.created_at).getTime();
+      const timeDiff = unlockTime - offerTime;
+      if (timeDiff > 0 && timeDiff < bestTimeDiff) {
+        bestTimeDiff = timeDiff;
+        bestMatch = unlock;
+      }
+    }
+    
+    if (bestMatch) {
+      offerAcceptedToHide.add(offer.id);
+      usedUnlockForOffer.add(bestMatch.id);
+    }
+  }
+
   const displayedTransactions = filteredTransactions.filter(t => {
     // Hide locked transactions that have been matched with an unlocked transaction
     if (t.type === 'locked' && lockedToHide.has(t.id)) {
@@ -877,6 +916,10 @@ export function CreditHistoryView() {
     }
     // Hide offer_accepted if there's a corresponding order_completed for the same order
     if (t.type === 'offer_accepted' && t.order_id && completedOrderIds.has(t.order_id)) {
+      return false;
+    }
+    // Hide offer_accepted if there's a corresponding unlocked (cancelled) transaction
+    if (t.type === 'offer_accepted' && offerAcceptedToHide.has(t.id)) {
       return false;
     }
     if (t.type === 'withdrawal_locked') {
