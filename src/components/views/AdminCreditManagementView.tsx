@@ -298,12 +298,11 @@ export const AdminCreditManagementView = () => {
         // Total locked = credits locked in active orders + credits locked in offer requests + credits locked in pending requests
         const totalLocked = lockedFromOrders + lockedFromOffers + lockedFromRequests;
         
-        // Use user_credits.credits as the authoritative balance (maintained by the system)
-        // Then subtract locked amounts to get available
-        const dbCredits = credit.credits;
-        const calculatedTotalBalance = dbCredits;
-        // Available = DB credits - Total Locked Credits - Completed Withdrawals
-        const calculatedAvailable = dbCredits - totalLocked - withdrawn;
+        // Calculate total balance from transactions (incoming - outgoing)
+        // This is more accurate than user_credits.credits which may be stale
+        const calculatedTotalBalance = incoming - outgoing;
+        // Available = Total Balance - Total Locked Credits - Completed Withdrawals
+        const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
         
         const purchasedOnline = purchasedOnlineMap.get(credit.user_id) || 0;
         const purchasedInvoice = purchasedInvoiceMap.get(credit.user_id) || 0;

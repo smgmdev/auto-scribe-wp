@@ -660,8 +660,8 @@ export function AdminUsersView() {
       const userAgency = agencies?.find((a) => a.user_id === profile.id);
       const authInfo = authUsersMap[profile.id];
       
-      // Calculate available credits using DB credits as authoritative balance
-      const dbCredits = dbCreditsMap.get(profile.id) || 0;
+      // Calculate available credits from transactions (more accurate than stale user_credits.credits)
+      const calculatedBalance = calculatedCreditsMap.get(profile.id) || 0;
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromOffers = lockedFromOffersMap.get(profile.id) || 0;
       // Per-entry matching for locked requests
@@ -679,7 +679,7 @@ export function AdminUsersView() {
       }
       const withdrawn = withdrawnMap.get(profile.id) || 0;
       const totalLocked = lockedFromOrders + lockedFromRequests;
-      const availableCredits = dbCredits - totalLocked - withdrawn;
+      const availableCredits = calculatedBalance - totalLocked - withdrawn;
 
       return {
         id: profile.id,
