@@ -942,6 +942,10 @@ export function CreditHistoryView() {
                 </>
               )}
               <div className="flex justify-between gap-4">
+                <span className="text-white/70">Locked in Offer Requests:</span>
+                <span className="font-semibold text-amber-400">{Math.round(creditsInPendingRequests).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
                 <span className="text-white/70">Locked in Orders:</span>
                 <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
               </div>
@@ -967,7 +971,7 @@ export function CreditHistoryView() {
             <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Locked in Orders
+                  Locked Credits
                 </CardTitle>
                 <Lock className="h-4 w-4 text-muted-foreground/60" />
               </CardHeader>
@@ -976,7 +980,7 @@ export function CreditHistoryView() {
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
-                    creditsInOrders.toLocaleString()
+                    (creditsInOrders + creditsInPendingRequests).toLocaleString()
                   )}
                 </div>
               </CardContent>
@@ -987,26 +991,43 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[320px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
           >
-            {lockedOrders.filter(o => o.type === 'order').length === 0 ? (
-              <p>No credits currently locked in orders</p>
+            {lockedOrders.length === 0 ? (
+              <p>No credits currently locked</p>
             ) : (
               <div className="space-y-2">
-                {/* Active Orders Section */}
-                <div>
-                  <p className="font-medium text-xs uppercase tracking-wide mb-1">Active Orders</p>
-                  <div className="space-y-1 max-h-[150px] overflow-y-auto">
-                    {lockedOrders.filter(o => o.type === 'order').map((order) => (
-                      <div key={order.id} className="flex justify-between gap-4 text-xs">
-                        <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
-                        <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
-                      </div>
-                    ))}
+                {/* Locked in Offer Requests Section */}
+                {lockedOrders.filter(o => o.type === 'pending_request').length > 0 && (
+                  <div>
+                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Locked in Offer Requests</p>
+                    <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                      {lockedOrders.filter(o => o.type === 'pending_request').map((order) => (
+                        <div key={order.id} className="flex justify-between gap-4 text-xs">
+                          <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
+                          <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Locked in Orders Section */}
+                {lockedOrders.filter(o => o.type === 'order').length > 0 && (
+                  <div>
+                    <p className="font-medium text-xs uppercase tracking-wide mb-1">Locked in Orders</p>
+                    <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                      {lockedOrders.filter(o => o.type === 'order').map((order) => (
+                        <div key={order.id} className="flex justify-between gap-4 text-xs">
+                          <span className="text-muted-foreground truncate max-w-[180px]">{order.mediaName}</span>
+                          <span className="font-medium text-amber-400">{order.credits.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="border-t border-muted-foreground/20 pt-1 mt-2 flex justify-between gap-4">
-                  <span className="text-muted-foreground">Total locked in orders:</span>
-                  <span className="font-medium">{creditsInOrders.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Total locked:</span>
+                  <span className="font-medium">{(creditsInOrders + creditsInPendingRequests).toLocaleString()}</span>
                 </div>
               </div>
             )}
