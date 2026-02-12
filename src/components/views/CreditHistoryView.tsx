@@ -497,12 +497,21 @@ export function CreditHistoryView() {
       setTransactions(transactionsWithDates);
     }
     setLoading(false);
-  }, [user]);
+  }, [user?.id]);
+
+  // Track if initial fetch has been done to prevent refetch on tab switch
+  const hasFetchedRef = useRef(false);
+  const fetchedUserIdRef = useRef<string | null>(null);
 
   // Initial data fetch
   useEffect(() => {
+    if (!user) return;
+    // Only fetch if we haven't fetched for this user yet
+    if (hasFetchedRef.current && fetchedUserIdRef.current === user.id) return;
+    hasFetchedRef.current = true;
+    fetchedUserIdRef.current = user.id;
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, user?.id]);
 
   // Real-time subscriptions for live updates
   useEffect(() => {
