@@ -3815,12 +3815,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-blue-700 dark:text-blue-300'}`}>
-                    {isOwnMessage ? 'Order Request Sent' : 'Order Request Received'}
+                    {isOwnMessage ? `Order Request Sent: ${clientOrderRequest.media_site_name}` : `Order Request Received: ${clientOrderRequest.media_site_name}`}
                   </span>
                 </div>
-                <p className={`font-medium break-words ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                  {clientOrderRequest.media_site_name}
-                </p>
                 <div className={`mt-2 text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                   <p>Price: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{clientOrderRequest.price?.toLocaleString()} credits</span></p>
                   {clientOrderRequest.delivery_duration && (clientOrderRequest.delivery_duration.days > 0 || clientOrderRequest.delivery_duration.hours > 0 || clientOrderRequest.delivery_duration.minutes > 0) && (
