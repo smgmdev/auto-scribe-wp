@@ -919,7 +919,7 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5 mt-2">
+      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5 mt-4">
         {/* Available Credits */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
