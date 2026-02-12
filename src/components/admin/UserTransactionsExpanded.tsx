@@ -337,13 +337,37 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   };
 
   // Filter out withdrawal_locked entries if a final status exists
+  // Filter out offer_accepted entries if a matching order_completed exists (same order_id)
+  // Filter out locked entries if a matching unlocked entry exists
   const processedTransactions = transactions.filter(tx => {
-    if (tx.type !== 'withdrawal_locked') return true;
-    const hasCompletedOrReturned = transactions.some(other => 
-      (other.type === 'withdrawal_completed' || other.type === 'withdrawal_unlocked') &&
-      Math.abs(other.amount) === Math.abs(tx.amount)
-    );
-    return !hasCompletedOrReturned;
+    // Hide withdrawal_locked if completed or rejected
+    if (tx.type === 'withdrawal_locked') {
+      const hasCompletedOrReturned = transactions.some(other => 
+        (other.type === 'withdrawal_completed' || other.type === 'withdrawal_unlocked') &&
+        Math.abs(other.amount) === Math.abs(tx.amount)
+      );
+      return !hasCompletedOrReturned;
+    }
+
+    // Hide offer_accepted if a matching order_completed exists for same order_id
+    if (tx.type === 'offer_accepted' && tx.order_id) {
+      const hasOrderCompleted = transactions.some(other =>
+        other.type === 'order_completed' && other.order_id === tx.order_id
+      );
+      return !hasOrderCompleted;
+    }
+
+    // Hide locked if a matching unlocked exists (cancelled order requests)
+    if (tx.type === 'locked') {
+      const matchingUnlocked = transactions.find(other =>
+        other.type === 'unlocked' &&
+        Math.abs(other.amount) === Math.abs(tx.amount) &&
+        new Date(other.created_at) >= new Date(tx.created_at)
+      );
+      return !matchingUnlocked;
+    }
+
+    return true;
   });
 
   const filteredTransactions = activeType === 'all' 
