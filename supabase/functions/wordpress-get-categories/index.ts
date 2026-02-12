@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Fetch WordPress site credentials directly via REST API
+    // Fetch WordPress site credentials - first try approved sites, then pending submissions
     const siteRes = await fetch(`${supabaseUrl}/rest/v1/wordpress_sites?id=eq.${siteId}&connected=eq.true&select=id,url,username,app_password,name`, {
       headers: {
         'Authorization': `Bearer ${supabaseServiceKey}`,
@@ -32,7 +32,20 @@ Deno.serve(async (req) => {
     });
     
     const sites = await siteRes.json();
-    const site = sites?.[0];
+    let site = sites?.[0];
+
+    // Fallback: check wordpress_site_submissions for pending sites (admin testing)
+    if (!site) {
+      console.log('[wordpress-get-categories] Site not in wordpress_sites, checking submissions...');
+      const subRes = await fetch(`${supabaseUrl}/rest/v1/wordpress_site_submissions?id=eq.${siteId}&select=id,url,username,app_password,name`, {
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'apikey': supabaseServiceKey,
+        },
+      });
+      const subs = await subRes.json();
+      site = subs?.[0];
+    }
 
     if (!site) {
       console.error('[wordpress-get-categories] Site not found');
