@@ -311,7 +311,7 @@ export default function ReportBug() {
                 )}
               </div>
 
-              <Button type="submit" disabled={submitting || uploading} className="w-full">
+              <Button type="submit" disabled={submitting || uploading} className="w-full rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200">
                 {uploading ? 'Uploading...' : submitting ? 'Submitting...' : 'Submit Bug Report'}
               </Button>
             </form>
