@@ -2416,9 +2416,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                   newMsg.message.includes('[ORDER_REQUEST_ACCEPTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST_REJECTED]');
           
-          // Skip messages from same sender type UNLESS it's a system message
-          // System messages are inserted by edge functions, not the user directly
-          if (newMsg.sender_type === senderType && !isSystemMessage) return;
+          // Skip messages from same sender type (they're already added to local state)
+          if (newMsg.sender_type === senderType) return;
           
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
