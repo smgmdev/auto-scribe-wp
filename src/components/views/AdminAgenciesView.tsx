@@ -766,7 +766,7 @@ export function AdminAgenciesView() {
           <p className="mt-2 text-muted-foreground">Manage agency applications and approvals</p>
         </div>
         <Button
-          className="w-full md:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none gap-2"
+          className="w-full md:w-auto border border-foreground shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:shadow-none gap-2"
           onClick={() => fetchData(true)}
           disabled={isRefreshing}
         >
