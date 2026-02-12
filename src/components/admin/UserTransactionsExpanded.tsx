@@ -213,6 +213,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     if (tx.type === 'unlocked') {
       return true;
     }
+    // Locked (order request sent) - show details
+    if (tx.type === 'locked') {
+      return true;
+    }
     // Order-related transactions with order_id
     if (tx.order_id && orders.has(tx.order_id)) {
       return true;
@@ -470,6 +474,81 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <p className="font-medium">{durationStr}</p>
             </div>
           )}
+        </div>
+      );
+    }
+
+    // Locked (order request sent) - show details and link to engagement chat
+    if (tx.type === 'locked') {
+      const siteName = tx.description?.match(/Order request sent: (.+?) \(/)?.[1] || '';
+      const sentAt = new Date(tx.created_at);
+
+      const handleViewOrderChat = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+          // Find service request by matching media site name and user
+          const { data: requests } = await supabase
+            .from('service_requests')
+            .select('*, media_sites!inner(*), orders(*)')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+          if (requests && requests.length > 0) {
+            const match = siteName 
+              ? requests.find((r: any) => r.media_sites?.name === siteName)
+              : requests[0];
+            if (match) {
+              const chatRequest = {
+                id: match.id,
+                title: match.title,
+                description: match.description,
+                status: match.status,
+                read: match.read,
+                created_at: match.created_at,
+                updated_at: match.updated_at,
+                cancellation_reason: match.cancellation_reason,
+                media_site: match.media_sites,
+                order: match.orders?.[0] || null,
+              };
+              const { openGlobalChat } = useAppStore.getState();
+              openGlobalChat(chatRequest as any, 'agency-request');
+            }
+          }
+        } catch (err) {
+          console.error('Error opening order chat:', err);
+        }
+      };
+
+      return (
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {siteName && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
+              <p className="font-medium">{siteName}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Reserved</p>
+            <p className="font-medium">{Math.abs(tx.amount).toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Request Sent</p>
+            <p className="font-medium">
+              {sentAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Status</p>
+            <p className="font-medium">Pending</p>
+          </div>
+          <div className="col-span-2 pt-1">
+            <button
+              onClick={handleViewOrderChat}
+              className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+            >
+              View Order Chat →
+            </button>
+          </div>
         </div>
       );
     }
