@@ -361,7 +361,7 @@ export function AdminSecuritySupervisionView() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-          <TabsList className="w-full bg-foreground text-background grid grid-cols-3 h-9">
+          <TabsList className="w-full bg-foreground text-background grid grid-cols-3 h-auto gap-0">
             <TabsTrigger value="unreviewed" className="text-xs data-[state=active]:bg-background data-[state=active]:text-foreground">
               Unreviewed ({flags.filter(f => !f.reviewed).length})
             </TabsTrigger>
