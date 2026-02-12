@@ -189,10 +189,24 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     return <Badge className={`${badge.className} whitespace-nowrap rounded-none`}>{badge.label}</Badge>;
   };
 
+  // Find matching locked transaction for an unlocked transaction
+  const findMatchingLocked = (tx: Transaction): Transaction | undefined => {
+    if (tx.type !== 'unlocked') return undefined;
+    return transactions.find(other =>
+      other.type === 'locked' &&
+      Math.abs(other.amount) === Math.abs(tx.amount) &&
+      new Date(other.created_at) <= new Date(tx.created_at)
+    );
+  };
+
   // Check if a transaction has expandable details
   const hasExpandableDetails = (tx: Transaction): boolean => {
     // Withdrawal transactions
     if (['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type)) {
+      return true;
+    }
+    // Unlocked (request cancelled) - show matching locked details
+    if (tx.type === 'unlocked') {
       return true;
     }
     // Order-related transactions with order_id
@@ -315,6 +329,67 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Platform Fee</p>
               <p className="font-medium">{(order.platform_fee_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Unlocked (request cancelled) - show original lock details and timeline
+    if (tx.type === 'unlocked') {
+      const matchingLocked = findMatchingLocked(tx);
+      const lockedAt = matchingLocked ? new Date(matchingLocked.created_at) : null;
+      const cancelledAt = new Date(tx.created_at);
+      
+      let durationStr = '';
+      if (lockedAt) {
+        const diffMs = cancelledAt.getTime() - lockedAt.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays > 0) {
+          durationStr = `${diffDays}d ${diffHours % 24}h`;
+        } else if (diffHours > 0) {
+          durationStr = `${diffHours}h ${diffMins % 60}m`;
+        } else {
+          durationStr = `${diffMins}m`;
+        }
+      }
+
+      // Extract media site name from description
+      const siteName = matchingLocked?.description?.match(/Order request sent: (.+?) \(/)?.[1] || 
+                       tx.description?.match(/Request cancelled: (.+?) \(/)?.[1] || '';
+
+      return (
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {siteName && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
+              <p className="font-medium">{siteName}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Credits Reserved</p>
+            <p className="font-medium">{Math.abs(tx.amount).toLocaleString()}</p>
+          </div>
+          {lockedAt && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Request Sent</p>
+              <p className="font-medium">
+                {lockedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {lockedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          )}
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Cancelled</p>
+            <p className="font-medium">
+              {cancelledAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {cancelledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+          {durationStr && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Duration Locked</p>
+              <p className="font-medium">{durationStr}</p>
             </div>
           )}
         </div>
