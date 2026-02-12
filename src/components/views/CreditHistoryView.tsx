@@ -1831,7 +1831,7 @@ export function CreditHistoryView() {
                                     {transaction.type === 'withdrawal_locked' 
                                       ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
                                       : transaction.type === 'order_accepted' && orderInfo
-                                        ? `-${(orderInfo.media_sites?.price || 0).toLocaleString()} credits`
+                                        ? `${(orderInfo.media_sites?.price || 0).toLocaleString()} credits`
                                         : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
                                     }
                                   </p>
