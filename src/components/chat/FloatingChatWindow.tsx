@@ -4012,8 +4012,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </span>
                 </div>
                 <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <span className="text-sm font-semibold">
-                    Price: {orderRequestAccepted.price.toLocaleString()} credits
+                  <span className="text-sm">
+                    <span className="font-semibold">Price:</span> {orderRequestAccepted.price.toLocaleString()} credits
                   </span>
                 </div>
                 {cardCountdown && (
