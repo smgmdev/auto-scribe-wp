@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, ReactNode, useRef } fro
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAppStore } from '@/stores/appStore';
 
 type AppRole = 'admin' | 'user';
 
@@ -233,6 +234,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPinRequired(false);
           setPinVerified(false);
           hasShownWelcomeRef.current = false;
+          // Reset all notification counts to prevent stale data from previous user
+          useAppStore.getState().resetAllNotifications();
+          useAppStore.getState().closeAllChats();
         }
         
         previousUserIdRef.current = newUserId;
@@ -312,22 +316,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Import appStore to clear chat state
-    const { useAppStore } = await import('@/stores/appStore');
     const store = useAppStore.getState();
     
-    // Clear all chat state FIRST before anything else
+    // Clear all notifications and chat state
+    store.resetAllNotifications();
     store.closeAllChats();
-    store.clearMinimizedChats();
-    store.setUserUnreadEngagementsCount(0);
-    store.setAgencyUnreadServiceRequestsCount(0);
-    store.setUnreadAgencyApplicationsCount(0);
-    store.setUnreadCustomVerificationsCount(0);
-    store.setUnreadMediaSubmissionsCount(0);
-    store.setUnreadOrdersCount(0);
-    store.setUnreadDisputesCount(0);
-    store.setAgencyUnreadWpSubmissionsCount(0);
-    store.setAgencyUnreadMediaSubmissionsCount(0);
     store.setUserApplicationStatus(null);
     store.setUserCustomVerificationStatus(null);
     

@@ -247,6 +247,9 @@ interface AppState {
   focusChat: (requestId: string) => void;
   updateChatPosition: (requestId: string, position: { x: number; y: number }) => void;
   updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>, requestId?: string) => void;
+  
+  // Reset all notification counts (for user switch)
+  resetAllNotifications: () => void;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -658,5 +661,33 @@ export const useAppStore = create<AppState>()((set) => ({
       openChats: updated,
       globalChatRequest: updatedRequest
     };
+  }),
+  
+  // Reset all notification counts
+  resetAllNotifications: () => set({
+    unreadAgencyApplicationsCount: 0,
+    unreadCustomVerificationsCount: 0,
+    unreadMediaSubmissionsCount: 0,
+    unreadOrdersCount: 0,
+    unreadDisputesCount: 0,
+    adminUnreadEngagementsCount: 0,
+    adminUnreadDeliveredCount: 0,
+    adminUnreadCancelledEngagementsCount: 0,
+    agencyUnreadWpSubmissionsCount: 0,
+    agencyUnreadMediaSubmissionsCount: 0,
+    agencyUnreadServiceRequestsCount: 0,
+    agencyUnreadCancelledCount: 0,
+    agencyUnreadOrdersCount: 0,
+    agencyUnreadDisputesCount: 0,
+    agencyUnreadCompletedCount: 0,
+    userUnreadEngagementsCount: 0,
+    userUnreadCancelledCount: 0,
+    userUnreadDeliveredCount: 0,
+    userUnreadOrdersCount: 0,
+    userUnreadDisputesCount: 0,
+    userUnreadCompletedCount: 0,
+    userUnreadHistoryCount: 0,
+    unreadMessageCounts: {},
+    minimizedChats: [],
   }),
 }));
