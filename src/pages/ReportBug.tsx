@@ -153,7 +153,7 @@ export default function ReportBug() {
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       <main className="flex-1">
-        <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-20 pb-16">
+        <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
           <p className="text-sm text-muted-foreground mb-10">
             Help us improve Arcana Mace by reporting issues you encounter. We review every report.
           </p>
