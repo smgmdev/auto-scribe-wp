@@ -3591,22 +3591,20 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   {offerRejected.media_site_name}
                 </p>
                 <div className={`mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <span className="text-sm">
+                  <p className="text-sm">
                     <span className="font-semibold">Price:</span> {offerRejected.price.toLocaleString()} credits
-                  </span>
-                </div>
-                {offerRejected.delivery_duration && (offerRejected.delivery_duration.days > 0 || offerRejected.delivery_duration.hours > 0 || offerRejected.delivery_duration.minutes > 0) && (
-                  <div className={`mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <span className="text-sm">
-                      <span className="font-semibold">Delivery:</span> {formatDeliveryDuration(offerRejected.delivery_duration)}
-                    </span>
-                  </div>
-                )}
-                {offerRejected.special_terms && (
-                  <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <span className="font-semibold">Special Terms:</span> {offerRejected.special_terms}
                   </p>
-                )}
+                  {offerRejected.delivery_duration && (offerRejected.delivery_duration.days > 0 || offerRejected.delivery_duration.hours > 0 || offerRejected.delivery_duration.minutes > 0) && (
+                    <p className="text-sm">
+                      <span className="font-semibold">Delivery:</span> {formatDeliveryDuration(offerRejected.delivery_duration)}
+                    </p>
+                  )}
+                  {offerRejected.special_terms && (
+                    <p className="text-sm break-words">
+                      <span className="font-semibold">Special Terms:</span> {offerRejected.special_terms}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
