@@ -173,7 +173,7 @@ export function DashboardView() {
       // Calculate incoming/outgoing matching CreditHistoryView logic
       const incomingCredits = transactions
         ? transactions
-            .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type))
+            .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
             .reduce((sum, t) => sum + t.amount, 0)
         : 0;
       

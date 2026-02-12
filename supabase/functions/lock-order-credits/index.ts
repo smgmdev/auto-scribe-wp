@@ -119,8 +119,8 @@ serve(async (req) => {
       // Skip other withdrawal transactions
       if (withdrawalTypes.includes(tx.type)) continue;
       
-      // Incoming = all positive amounts
-      if (tx.amount > 0) {
+      // Incoming = all positive amounts, excluding 'unlocked' (which is a reversal of 'locked', not new credits)
+      if (tx.amount > 0 && tx.type !== 'unlocked') {
         incoming += tx.amount;
       }
       

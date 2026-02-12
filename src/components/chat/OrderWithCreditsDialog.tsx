@@ -100,7 +100,7 @@ export function OrderWithCreditsDialog({
       const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
       
       const incomingCredits = (allTransactions || [])
-        .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type))
+        .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
         .reduce((sum, t) => sum + t.amount, 0);
       
       const outgoingCredits = (allTransactions || [])
