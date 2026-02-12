@@ -146,8 +146,8 @@ export const AdminCreditManagementView = () => {
         // Skip other withdrawal transactions - they don't affect credit balance
         if (withdrawalTypes.includes(tx.type)) return;
         
-        // Calculate incoming (all positive amounts)
-        if (tx.amount > 0) {
+        // Calculate incoming (all positive amounts, excluding 'unlocked' which is a reversal of 'locked')
+        if (tx.amount > 0 && tx.type !== 'unlocked') {
           incomingMap.set(tx.user_id, (incomingMap.get(tx.user_id) || 0) + tx.amount);
         }
         
@@ -231,8 +231,8 @@ export const AdminCreditManagementView = () => {
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
-        // Total locked = credits locked in active orders (offer_accepted transactions represent the same lock, so don't double-count)
-        const totalLocked = lockedFromOrders;
+        // Total locked = credits locked in active orders + credits locked in offer requests
+        const totalLocked = lockedFromOrders + lockedFromOffers;
         
         // Total Balance = Incoming - Outgoing (excluding locked types)
         const calculatedTotalBalance = incoming - outgoing;
@@ -405,6 +405,10 @@ export const AdminCreditManagementView = () => {
                         <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
                       </div>
                       <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Locked in Offer Requests:</span>
+                        <span className="font-semibold text-amber-400">{Math.round(activeUsers.reduce((sum, user) => sum + (user.lockedFromWithdrawals || 0), 0)).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Orders:</span>
                         <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
                       </div>
@@ -531,6 +535,10 @@ export const AdminCreditManagementView = () => {
                                             </div>
                                           )}
                                           <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Locked in Offer Requests:</span>
+                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromWithdrawals || 0).toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Locked in Orders:</span>
                                             <span className="font-semibold text-amber-400">{Math.round(user.lockedFromOrders).toLocaleString()}</span>
                                           </div>
@@ -558,9 +566,9 @@ export const AdminCreditManagementView = () => {
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
-                                          <p className="font-medium mb-1">Credits locked in active orders/withdrawals</p>
-                                          <p><span className="opacity-70">Credits locked in active orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Credits locked in withdrawals:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
+                                          <p className="font-medium mb-1">Locked Credits</p>
+                                          <p><span className="opacity-70">Locked in Offer Requests:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Locked in Orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
