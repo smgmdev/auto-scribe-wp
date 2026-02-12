@@ -1168,8 +1168,8 @@ export function MyRequestsView() {
 
       <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none p-0">
-          <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none h-full">
+        <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
+          <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
             {unreadActiveCount > 0 && (
@@ -1178,7 +1178,7 @@ export function MyRequestsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none h-full">
+          <TabsTrigger value="closed" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <History className="h-4 w-4" />
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {unreadClosedCount > 0 && (
@@ -1327,8 +1327,8 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-0">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none p-0">
-                <TabsTrigger value="delivered" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none h-full">
+              <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
+                <TabsTrigger value="delivered" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
                   {unreadDeliveredCount > 0 && (
@@ -1337,7 +1337,7 @@ export function MyRequestsView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="cancelled" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none h-full">
+                <TabsTrigger value="cancelled" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <XCircle className="h-4 w-4" />
                   Cancelled ({cancelledRequests.length})
                   {unreadCancelledCount > 0 && (
