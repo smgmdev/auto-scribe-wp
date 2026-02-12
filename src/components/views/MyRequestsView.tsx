@@ -1166,27 +1166,7 @@ export function MyRequestsView() {
         </Button>
       </div>
 
-      <div className="space-y-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search engagements..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10 h-9 text-sm"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-              onClick={() => setSearchQuery('')}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-
+      <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
           <TabsTrigger value="active" className="gap-2 relative">
@@ -1209,7 +1189,27 @@ export function MyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-          <TabsContent value="active" className="mt-2">
+        <div className="relative mt-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search engagements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10 h-9 text-sm"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+              onClick={() => setSearchQuery('')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+          <TabsContent value="active" className="mt-0">
             {sortedActiveRequests.length === 0 ? (
               <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1325,7 +1325,7 @@ export function MyRequestsView() {
             )}
           </TabsContent>
 
-          <TabsContent value="closed" className="mt-2">
+          <TabsContent value="closed" className="mt-0">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
               <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
                 <TabsTrigger value="delivered" className="gap-2 relative flex-1">
