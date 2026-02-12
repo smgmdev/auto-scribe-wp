@@ -190,7 +190,7 @@ export default function ReportBug() {
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
           <p className="text-sm text-muted-foreground mb-10 mt-[100px]">
-            Help us improve Arcana Mace by reporting issues you encounter. We review every report.
+            Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.
           </p>
 
           {submitted ? (
@@ -232,6 +232,7 @@ export default function ReportBug() {
                   placeholder={user?.email || 'your@email.com'}
                   className="h-9"
                 />
+                <p className="text-xs text-muted-foreground mt-1.5">Please enter the email address associated with your account to receive bug-reporting gift credits.</p>
               </div>
 
               <div>
