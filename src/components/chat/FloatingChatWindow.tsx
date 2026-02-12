@@ -1609,6 +1609,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const handleBannerAcceptClientOrderRequest = async (orderData: { media_site_id: string; media_site_name: string; media_site_favicon?: string; price: number; special_terms?: string; delivery_duration?: { days: number; hours: number; minutes: number }; messageId?: string }) => {
     if (!globalChatRequest || !orderData.messageId || acceptingOrderRef.current) return;
     acceptingOrderRef.current = true;
+    setAcceptingOrder(true);
     
     try {
       // First get the client user_id from the service request
@@ -1692,6 +1693,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       toast.error(error.message || "Failed to accept order request.");
     } finally {
       acceptingOrderRef.current = false;
+      setAcceptingOrder(false);
     }
   };
   
@@ -5716,14 +5718,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           size="sm"
                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
+                          disabled={acceptingOrder}
                         >
+                          {acceptingOrder && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                           Accept
                         </Button>
                         <Button
                           size="sm"
                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
-                          disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
+                          disabled={rejectingOrderRequestId === pendingClientOrder.messageId || acceptingOrder}
                         >
                           {rejectingOrderRequestId === pendingClientOrder.messageId && (
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5774,14 +5778,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                         onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
+                        disabled={acceptingOrder}
                       >
+                        {acceptingOrder && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                         Accept
                       </Button>
                       <Button
                         size="sm"
                         className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                         onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
-                        disabled={rejectingOrderRequestId === pendingClientOrder.messageId}
+                        disabled={rejectingOrderRequestId === pendingClientOrder.messageId || acceptingOrder}
                       >
                         {rejectingOrderRequestId === pendingClientOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
