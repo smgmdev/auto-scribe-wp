@@ -241,9 +241,7 @@ export function OrdersView() {
           const data = payload.payload as { action: string; message: string; reason?: string; mediaSiteName?: string };
           
           if (data.action === 'order-cancelled') {
-            toast.error(data.reason 
-                ? `${data.message} Reason: ${data.reason}`
-                : data.message);
+            // No toast here — dispute-resolved already shows a success toast
             fetchOrders();
             fetchUserDisputes();
           } else if (data.action === 'dispute-resolved') {

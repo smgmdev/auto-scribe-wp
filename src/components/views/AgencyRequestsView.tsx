@@ -657,7 +657,7 @@ export function AgencyRequestsView() {
           toast(`Dispute Resolved: ${data.message}`);
           fetchRequests();
         } else if (data.action === 'order-cancelled') {
-          toast.error(`Order Cancelled: ${data.message}`);
+          // No toast here — dispute-resolved already shows a success toast
           fetchRequests();
         }
       })
