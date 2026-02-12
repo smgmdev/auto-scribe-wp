@@ -60,13 +60,13 @@ export function MainLayout({
         <footer className={`border-t py-4 px-4 lg:px-8 mb-[50px] ${isDarkFooter ? 'bg-[#1d1d1f] border-white/20' : 'border-border/50'}`}>
           <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
             <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <Link to="/terms" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
-              <Link to="/privacy" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
-              <Link to="/help" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
-              <Link to="/system-status" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
-              <Link to="/sitemap" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
-              <Link to="/report-bug" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
+            <div className={`flex flex-wrap items-center gap-2 sm:gap-4 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
+              <Link to="/terms" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
+              <Link to="/privacy" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
+              <Link to="/help" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
+              <Link to="/system-status" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
+              <Link to="/sitemap" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
+              <Link to="/report-bug" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
             </div>
           </div>
         </footer>
