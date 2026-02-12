@@ -3553,7 +3553,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {orderRequestRejected.special_terms && (
-                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {orderRequestRejected.special_terms}
                   </p>
                 )}
@@ -3605,7 +3605,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {offerRejected.special_terms && (
-                  <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {offerRejected.special_terms}
                   </p>
                 )}
@@ -4048,7 +4048,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </div>
                 )}
                 {orderRequestAccepted.special_terms && (
-                  <p className={`text-xs mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-sm mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     <span className="font-medium">Special Terms:</span> {orderRequestAccepted.special_terms}
                   </p>
                 )}
