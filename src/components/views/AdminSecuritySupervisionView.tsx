@@ -361,14 +361,14 @@ export function AdminSecuritySupervisionView() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-          <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0 bg-foreground text-background">
-            <TabsTrigger value="unreviewed" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+          <TabsList className="w-full md:grid md:grid-cols-3 justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0 bg-foreground text-background">
+            <TabsTrigger value="unreviewed" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
               Unreviewed ({flags.filter(f => !f.reviewed).length})
             </TabsTrigger>
-            <TabsTrigger value="all" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+            <TabsTrigger value="all" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
               All ({flags.length})
             </TabsTrigger>
-            <TabsTrigger value="reviewed" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+            <TabsTrigger value="reviewed" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
               Reviewed ({flags.filter(f => f.reviewed).length})
             </TabsTrigger>
           </TabsList>
