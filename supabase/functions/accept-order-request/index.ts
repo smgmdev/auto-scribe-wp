@@ -209,11 +209,12 @@ serve(async (req) => {
       );
     }
 
-    // Link order to service request
+    // Link order to service request and update status to prevent race conditions
     const { error: linkError } = await supabaseAdmin
       .from("service_requests")
-      .update({ order_id: order.id })
-      .eq("id", service_request_id);
+      .update({ order_id: order.id, status: "accepted" })
+      .eq("id", service_request_id)
+      .is("order_id", null);
 
     if (linkError) {
       console.error("Error linking order to service request:", linkError);

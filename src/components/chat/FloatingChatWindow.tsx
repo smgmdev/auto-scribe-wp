@@ -1706,6 +1706,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setRejectingOrderRequestId(messageId);
     try {
+      // Guard: check if order was already accepted (race condition prevention)
+      const { data: reqCheck } = await supabase
+        .from('service_requests')
+        .select('order_id, status')
+        .eq('id', globalChatRequest.id)
+        .single();
+      
+      if (reqCheck?.order_id || reqCheck?.status === 'accepted') {
+        toast.error("This order request has already been accepted.");
+        setRejectingOrderRequestId(null);
+        return;
+      }
+
       // Check if credits were locked with this order request
       const creditsLocked = (orderData as any).credits_locked === true;
       
@@ -3735,6 +3748,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         
         setRejectingOrderRequestId(msg.id);
         try {
+          // Guard: check if order was already accepted (race condition prevention)
+          const { data: reqCheck } = await supabase
+            .from('service_requests')
+            .select('order_id, status')
+            .eq('id', globalChatRequest.id)
+            .single();
+          
+          if (reqCheck?.order_id || reqCheck?.status === 'accepted') {
+            toast.error("This order request has already been accepted.");
+            setRejectingOrderRequestId(null);
+            return;
+          }
+
           // Check if credits were locked with this order request
           const creditsLocked = (clientOrderRequest as any).credits_locked === true;
           
