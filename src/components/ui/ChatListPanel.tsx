@@ -1715,17 +1715,8 @@ export function ChatListPanel() {
         
         if (action === 'engagement-cancelled') {
           sonnerToast.error(reason ? `Engagement Cancelled by Staff: ${reason}` : "Engagement Cancelled by Staff");
-        } else if (action === 'order-cancelled') {
-          toast({
-            variant: 'destructive',
-            title: "Order Cancelled by Staff",
-            description: reason ? `Reason: ${reason}` : message,
-          });
-        } else if (action === 'dispute-resolved') {
-          toast({
-            title: "Dispute Resolved by Staff",
-            description: message || "A dispute has been resolved.",
-          });
+        } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
+          // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
           toast({
             title: "Staff Action",
@@ -1818,17 +1809,8 @@ export function ChatListPanel() {
         
         if (action === 'engagement-cancelled') {
           sonnerToast.error(reason ? `Engagement Cancelled by Staff: ${reason}` : "Engagement Cancelled by Staff");
-        } else if (action === 'order-cancelled') {
-          toast({
-            variant: 'destructive',
-            title: "Order Cancelled by Staff",
-            description: reason ? `Reason: ${reason}` : message,
-          });
-        } else if (action === 'dispute-resolved') {
-          toast({
-            title: "Dispute Resolved by Staff",
-            description: message || "A dispute has been resolved.",
-          });
+        } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
+          // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
           toast({
             title: "Staff Action",
