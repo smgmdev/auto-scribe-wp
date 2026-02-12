@@ -223,18 +223,16 @@ export default function ReportBug() {
                 />
               </div>
 
-              {!user && (
-                <div>
-                  <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Your Email *</label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="h-9"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Email {!user && '*'}</label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={user?.email || 'your@email.com'}
+                  className="h-9"
+                />
+              </div>
 
               <div>
                 <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Category *</label>
