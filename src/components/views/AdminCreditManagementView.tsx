@@ -422,12 +422,8 @@ export const AdminCreditManagementView = () => {
                         <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
                       </div>
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Requests:</span>
+                        <span className="text-white/70">Locked in Order Requests:</span>
                         <span className="font-semibold text-amber-400">{Math.round(activeUsers.reduce((sum, user) => sum + (user.lockedFromRequests || 0), 0)).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Offer Requests:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(activeUsers.reduce((sum, user) => sum + (user.lockedFromWithdrawals || 0), 0)).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Orders:</span>
@@ -556,12 +552,8 @@ export const AdminCreditManagementView = () => {
                                             </div>
                                           )}
                                           <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Locked in Requests:</span>
+                                            <span className="text-white/70">Locked in Order Requests:</span>
                                             <span className="font-semibold text-amber-400">{Math.round(user.lockedFromRequests || 0).toLocaleString()}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Locked in Offer Requests:</span>
-                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromWithdrawals || 0).toLocaleString()}</span>
                                           </div>
                                           <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Locked in Orders:</span>
@@ -592,8 +584,7 @@ export const AdminCreditManagementView = () => {
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
                                           <p className="font-medium mb-1">Locked Credits</p>
-                                          <p><span className="opacity-70">Locked in Requests:</span> {(user.lockedFromRequests || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Locked in Offer Requests:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Locked in Order Requests:</span> {(user.lockedFromRequests || 0).toLocaleString()}</p>
                                           <p><span className="opacity-70">Locked in Orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
