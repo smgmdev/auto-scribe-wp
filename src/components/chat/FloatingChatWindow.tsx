@@ -3926,7 +3926,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       acceptingOrderRef.current = false;
                     }
                   }}
-                  disabled={acceptingOrder || hasOpenDispute}
+                  disabled={acceptingOrder || !!rejectingOrderRequestId || hasOpenDispute}
                 >
                   {acceptingOrder && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -3937,7 +3937,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="default"
                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectClientOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
+                  disabled={rejectingOrderRequestId === msg.id || acceptingOrder || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -4439,7 +4439,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="default"
                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id || hasOpenDispute}
+                  disabled={rejectingOrderRequestId === msg.id || acceptingOrder || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -5571,7 +5571,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           size="sm"
                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={handleBannerRejectOrderRequest}
-                          disabled={rejectingOrderRequestId === pendingOrder.messageId}
+                          disabled={rejectingOrderRequestId === pendingOrder.messageId || acceptingOrder}
                         >
                           {rejectingOrderRequestId === pendingOrder.messageId && (
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5630,7 +5630,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                         onClick={handleBannerRejectOrderRequest}
-                        disabled={rejectingOrderRequestId === pendingOrder.messageId}
+                        disabled={rejectingOrderRequestId === pendingOrder.messageId || acceptingOrder}
                       >
                         {rejectingOrderRequestId === pendingOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5720,7 +5720,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           size="sm"
                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                           onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
-                          disabled={acceptingOrder}
+                          disabled={acceptingOrder || !!rejectingOrderRequestId}
                         >
                           {acceptingOrder && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                           Accept
@@ -5780,7 +5780,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
                         onClick={() => handleBannerAcceptClientOrderRequest(pendingClientOrder)}
-                        disabled={acceptingOrder}
+                        disabled={acceptingOrder || !!rejectingOrderRequestId}
                       >
                         {acceptingOrder && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                         Accept
