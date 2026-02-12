@@ -248,7 +248,7 @@ export default function ReportBug() {
         </div>
       </main>
 
-      <Footer narrow showTopBorder />
+      <Footer narrow />
     </div>
   );
 }
