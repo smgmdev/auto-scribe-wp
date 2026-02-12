@@ -629,13 +629,25 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     }
 
     // Hide locked if a matching unlocked exists (cancelled order requests)
+    // OR if a matching order_accepted exists (order was accepted by agency)
     if (tx.type === 'locked') {
       const matchingUnlocked = transactions.find(other =>
         other.type === 'unlocked' &&
         Math.abs(other.amount) === Math.abs(tx.amount) &&
         new Date(other.created_at) >= new Date(tx.created_at)
       );
-      return !matchingUnlocked;
+      if (matchingUnlocked) return false;
+
+      // Check for matching order_accepted by media site name
+      const lockedSiteName = tx.description?.match(/Order request sent: (.+?)(?:\s*\(|$)/)?.[1]?.trim();
+      if (lockedSiteName) {
+        const matchingAccepted = transactions.find(other =>
+          other.type === 'order_accepted' &&
+          other.description?.includes(lockedSiteName) &&
+          new Date(other.created_at) >= new Date(tx.created_at)
+        );
+        if (matchingAccepted) return false;
+      }
     }
 
     return true;
