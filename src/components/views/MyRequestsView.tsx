@@ -80,6 +80,7 @@ export function MyRequestsView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
   const [, setTimerTick] = useState(0);
   const [disputeOrderIds, setDisputeOrderIds] = useState<Set<string>>(new Set());
   const [disputeCreatedDates, setDisputeCreatedDates] = useState<Record<string, string>>({});
@@ -1523,6 +1524,36 @@ export function MyRequestsView() {
                         </Card>
                       );
                     })}
+                  </div>
+                )}
+                {cancelledRequests.some(r => !r.read) && (
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        setMarkingAllRead(true);
+                        try {
+                          const unreadIds = cancelledRequests.filter(r => !r.read).map(r => r.id);
+                          const { error } = await supabase
+                            .from('service_requests')
+                            .update({ client_read: true, client_last_read_at: new Date().toISOString() })
+                            .in('id', unreadIds);
+                          if (error) throw error;
+                          setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
+                          setUserUnreadCancelledCount(0);
+                          sonnerToast.success(`Marked ${unreadIds.length} cancelled engagements as read`);
+                        } catch (error: any) {
+                          sonnerToast.error(error.message || 'Failed to mark all as read');
+                        } finally {
+                          setMarkingAllRead(false);
+                        }
+                      }}
+                      disabled={markingAllRead}
+                      className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
+                    >
+                      {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      Mark All Read
+                    </Button>
                   </div>
                 )}
               </TabsContent>
