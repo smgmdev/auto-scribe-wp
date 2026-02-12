@@ -140,7 +140,27 @@ export function CreditHistoryView() {
     }
   }, [highlightedOrderId, highlightedWithdrawalId, loading, transactions]);
 
-  // Calculate earned credits from order_payout transactions
+  // Auto-fetch order details for order_accepted transactions so the credit amount shows immediately
+  useEffect(() => {
+    if (loading || transactions.length === 0) return;
+    const orderAcceptedTxs = transactions.filter(t => t.type === 'order_accepted' && t.order_id && !orderDetails[t.id]);
+    if (orderAcceptedTxs.length === 0) return;
+    
+    const fetchOrderAcceptedDetails = async () => {
+      for (const tx of orderAcceptedTxs) {
+        const { data: order } = await supabase
+          .from('orders')
+          .select('*, media_sites(name, favicon, price, link)')
+          .eq('id', tx.order_id!)
+          .single();
+        if (order) {
+          setOrderDetails(prev => ({ ...prev, [tx.id]: order }));
+        }
+      }
+    };
+    fetchOrderAcceptedDetails();
+  }, [loading, transactions]);
+
   const earnedCredits = transactions
     .filter(t => t.type === 'order_payout' && t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
@@ -1429,6 +1449,7 @@ export function CreditHistoryView() {
                 const reasonText = hasReason ? transaction.description?.split(': ').slice(1).join(': ') : null;
                 const isGiftedOrRemoved = transaction.type === 'gifted' || transaction.type === 'admin_credit' || transaction.type === 'admin_deduct';
                 const isOrderCompleted = transaction.type === 'order_completed';
+                const isOrderAccepted = transaction.type === 'order_accepted';
                 const isUnlocked = transaction.type === 'unlocked';
                 const matchedLocked = isUnlocked ? unlockToLockedMap.get(transaction.id) : null;
                 const orderInfo = orderDetails[transaction.id];
@@ -1466,8 +1487,8 @@ export function CreditHistoryView() {
                   } else {
                     newExpanded.add(transaction.id);
                     
-                    // Fetch order details for order_completed transactions
-                    if (isOrderCompleted && transaction.order_id && !orderDetails[transaction.id]) {
+                    // Fetch order details for order_completed or order_accepted transactions
+                    if ((isOrderCompleted || isOrderAccepted) && transaction.order_id && !orderDetails[transaction.id]) {
                       const { data: order } = await supabase
                         .from('orders')
                         .select('*, media_sites(name, favicon, price, link)')
@@ -1497,7 +1518,7 @@ export function CreditHistoryView() {
                         <div className="flex-1">
                           <p className="font-medium">{displayDescription}</p>
                           <div className={`text-lg md:hidden mt-1 ${
-                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted'
+                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                               ? 'text-foreground'
                               : transaction.type === 'withdrawal_locked' 
                                 ? 'text-amber-500' 
@@ -1505,6 +1526,8 @@ export function CreditHistoryView() {
                           }`}>
                             {transaction.type === 'withdrawal_locked' ? (
                               <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                            ) : transaction.type === 'order_accepted' && orderInfo ? (
+                              <>{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
                             ) : (
                               <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                             )}
@@ -1515,7 +1538,7 @@ export function CreditHistoryView() {
                         </div>
                       </div>
                       <div className={`text-lg hidden md:block ${
-                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted'
+                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                           ? 'text-foreground'
                           : transaction.type === 'withdrawal_locked' 
                             ? 'text-amber-500' 
@@ -1523,6 +1546,8 @@ export function CreditHistoryView() {
                       }`}>
                         {transaction.type === 'withdrawal_locked' ? (
                           <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                        ) : transaction.type === 'order_accepted' && orderInfo ? (
+                          <>{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
                         ) : (
                           <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                         )}
