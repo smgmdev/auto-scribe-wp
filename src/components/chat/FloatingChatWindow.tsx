@@ -3507,11 +3507,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 Reason: {disputeResolved.reason}
               </p>
             )}
-            {!isCompleted && disputeResolved.credits_refunded !== undefined && (
-              <p className="text-xs mt-1 text-muted-foreground">
-                {disputeResolved.credits_refunded} credits refunded to client
-              </p>
-            )}
           </div>
           <p className="text-xs opacity-50">
             {format(new Date(msg.created_at), 'HH:mm')}
@@ -4611,9 +4606,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
               Order for {cancelAccepted.media_site_name} has been cancelled mutually
-            </p>
-            <p className={`text-xs mt-1 ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-              {cancelAccepted.credits_refunded} credits refunded to client
             </p>
           </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
