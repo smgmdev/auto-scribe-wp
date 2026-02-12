@@ -4049,7 +4049,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 )}
                 {orderRequestAccepted.special_terms && (
                   <p className={`text-sm mt-1 break-words ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    <span className="font-medium">Special Terms:</span> {orderRequestAccepted.special_terms}
+                    <span className="font-semibold">Special Terms:</span> {orderRequestAccepted.special_terms}
                   </p>
                 )}
               </div>
