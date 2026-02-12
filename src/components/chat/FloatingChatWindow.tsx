@@ -1231,7 +1231,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const filtered = messages.filter(msg => {
       if (msg.sender_type !== 'agency') return false;
       const match = msg.message.match(/\[ORDER_REQUEST\](.*?)\[\/ORDER_REQUEST\]/);
-      return !!match;
+      if (!match) return false;
+      // Exclude offers that have been rejected
+      try {
+        const data = JSON.parse(match[1]);
+        const msgIdx = messages.indexOf(msg);
+        const hasRejection = messages.slice(msgIdx + 1).some(m => {
+          if (!m.message.includes('[OFFER_REJECTED]')) return false;
+          const rejMatch = m.message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
+          if (!rejMatch) return false;
+          try {
+            const rejData = JSON.parse(rejMatch[1]);
+            return rejData.media_site_id === data.media_site_id;
+          } catch { return false; }
+        });
+        return !hasRejection;
+      } catch { return true; }
     });
     console.log('[FloatingChatWindow] existingOrderMessages computed, count:', filtered.length, 'from messages count:', messages.length);
     return filtered;
@@ -4280,6 +4295,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       const hasOrder = globalChatRequest?.order;
       const isClient = actualSenderType === 'client';
       const isAgency = actualSenderType === 'agency';
+      
+      // Check if this offer has been rejected - hide original offer card if so
+      const msgIndex = messages.findIndex(m => m.id === msg.id);
+      const isRejected = messages.slice(msgIndex + 1).some(m => {
+        if (!m.message.includes('[OFFER_REJECTED]')) return false;
+        const match = m.message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
+        if (!match) return false;
+        try {
+          const data = JSON.parse(match[1]);
+          return data.media_site_id === orderRequest.media_site_id;
+        } catch { return false; }
+      });
+      
+      // Check if this offer has been accepted (order placed)
+      const isAccepted = messages.slice(msgIndex + 1).some(m => 
+        m.message.includes('[ORDER_PLACED]')
+      );
+      
+      if (isRejected || isAccepted) {
+        return null;
+      }
       
       // Handle cancel order request - deletes ALL order request messages (including resent offers)
       const handleCancelOrderRequest = async () => {
