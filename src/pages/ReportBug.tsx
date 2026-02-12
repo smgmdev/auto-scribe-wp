@@ -63,7 +63,7 @@ export default function ReportBug() {
   return (
     <div className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - matching How It Works */}
-      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm">
+      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
             <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
@@ -112,14 +112,22 @@ export default function ReportBug() {
         </div>
       </header>
 
+      {/* Spacer for fixed header */}
+      <div className="h-[92px]" />
+
+      {/* Sub-header - Sticky */}
+      <div className="sticky top-[92px] z-40">
+        <div className="bg-white border-b border-border">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+            <span className="text-xl font-semibold text-foreground">Report a Bug</span>
+          </div>
+        </div>
+      </div>
+
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 py-16">
-          <div className="flex items-center gap-3 mb-2">
-            <Bug className="h-6 w-6 text-[#1d1d1f]" />
-            <h1 className="text-3xl font-semibold text-[#1d1d1f] tracking-tight">Report a Bug</h1>
-          </div>
           <p className="text-sm text-muted-foreground mb-10">
             Help us improve Arcana Mace by reporting issues you encounter. We review every report.
           </p>
