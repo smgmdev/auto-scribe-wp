@@ -795,6 +795,54 @@ export type Database = {
           },
         ]
       }
+      flagged_chat_messages: {
+        Row: {
+          created_at: string
+          detected_type: string
+          detected_value: string
+          flagged_at: string
+          id: string
+          message_id: string
+          message_text: string
+          request_id: string
+          reviewed: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          created_at?: string
+          detected_type: string
+          detected_value: string
+          flagged_at?: string
+          id?: string
+          message_id: string
+          message_text: string
+          request_id: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          created_at?: string
+          detected_type?: string
+          detected_value?: string
+          flagged_at?: string
+          id?: string
+          message_id?: string
+          message_text?: string
+          request_id?: string
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: []
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null
