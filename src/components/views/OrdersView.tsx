@@ -979,7 +979,7 @@ export function OrdersView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-2">
+            <TabsContent value="active" className="mt-0">
               {filteredActiveOrders.length === 0 ? (
                 renderEmptyState(searchQuery 
                   ? 'No matching active orders found'
@@ -993,7 +993,7 @@ export function OrdersView() {
               )}
             </TabsContent>
 
-            <TabsContent value="disputes" className="mt-2">
+            <TabsContent value="disputes" className="mt-0">
               {filteredDisputeOrders.length === 0 ? (
                 renderEmptyState(searchQuery 
                   ? 'No matching disputed orders found'
@@ -1005,7 +1005,7 @@ export function OrdersView() {
               )}
             </TabsContent>
 
-            <TabsContent value="completed" className="mt-2">
+            <TabsContent value="completed" className="mt-0">
               {filteredCompletedOrders.length === 0 ? (
                 renderEmptyState(searchQuery 
                   ? 'No matching completed orders found'
@@ -1019,7 +1019,7 @@ export function OrdersView() {
               )}
             </TabsContent>
 
-            <TabsContent value="history" className="mt-2">
+            <TabsContent value="history" className="mt-0">
               {filteredHistoryOrders.length === 0 ? (
                 renderEmptyState(searchQuery 
                   ? 'No matching cancelled orders found'
