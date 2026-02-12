@@ -34,7 +34,7 @@ interface LockedOrder {
 export function CreditHistoryView() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId, setAgencyRequestsTargetOrderId } = useAppStore();
+  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId, setAgencyRequestsTargetOrderId, openGlobalChat } = useAppStore();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
@@ -191,17 +191,30 @@ export function CreditHistoryView() {
     const mediaName = mediaMatch ? mediaMatch[1].trim() : null;
     if (!mediaName || !user) return;
 
-    // Find matching service request by media site name
+    // Find matching service request by media site name with full data for chat
     const { data: requests } = await supabase
       .from('service_requests')
-      .select('id, media_site_id, media_sites!inner(name)')
+      .select('*, media_sites!inner(*), orders(*)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (requests) {
       const match = requests.find((r: any) => r.media_sites?.name === mediaName);
       if (match) {
+        const chatRequest = {
+          id: match.id,
+          title: match.title,
+          description: match.description,
+          status: match.status,
+          read: match.read,
+          created_at: match.created_at,
+          updated_at: match.updated_at,
+          cancellation_reason: match.cancellation_reason,
+          media_site: match.media_sites,
+          order: match.orders?.[0] || null,
+        };
         setCurrentView('my-requests');
+        openGlobalChat(chatRequest as any, 'my-request');
         return;
       }
     }
