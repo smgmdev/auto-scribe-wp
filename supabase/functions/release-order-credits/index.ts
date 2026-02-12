@@ -119,7 +119,7 @@ serve(async (req) => {
       if (unlockTransactionError) {
         logStep("Error creating unlock transaction", { error: unlockTransactionError.message });
       } else {
-        logStep("Unlock transaction created", { creditAmount, reason: unlockReason });
+        logStep("Unlock transaction created", { creditAmount, reason: reason || "cancelled" });
       }
     }
 
