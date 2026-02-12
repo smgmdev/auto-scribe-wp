@@ -313,7 +313,7 @@ export function AgencyPayoutsView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-0">
+      <div className="max-w-[980px] mx-auto space-y-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
@@ -343,7 +343,7 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-0 md:grid-cols-4 mt-4">
+      <div className="grid gap-0 md:grid-cols-4">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="transition-colors py-3 cursor-help border-0 bg-[#1e3a5f]">

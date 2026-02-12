@@ -886,7 +886,7 @@ export function CreditHistoryView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-0">
+      <div className="max-w-[980px] mx-auto space-y-4">
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
@@ -919,7 +919,7 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5 mt-4">
+      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5">
         {/* Available Credits */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
