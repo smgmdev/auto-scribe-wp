@@ -8031,9 +8031,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Admin: Cancel Order via Dispute Dialog */}
       <AlertDialog open={cancelViaDisputeDialogOpen} onOpenChange={setCancelViaDisputeDialogOpen}>
         <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Cancel Order via Dispute</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-left">
               This will cancel the order, refund credits to the client, and resolve the dispute. Please provide a reason for this decision.
             </AlertDialogDescription>
           </AlertDialogHeader>
