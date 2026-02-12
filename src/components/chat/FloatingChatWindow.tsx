@@ -5360,12 +5360,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <XCircle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                           ) : hasOpenDispute ? (
                             <AlertTriangle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
-                          ) : hasRevisionAfterDelivery ? (
-                            <RefreshCw className="h-5 w-5 md:h-6 md:w-6 text-orange-400 animate-spin" style={{ animationDuration: '3s' }} />
                           ) : localOrder.status === 'completed' && completedViaDispute ? (
                             <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           ) : localOrder.status === 'completed' ? (
                             <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
+                          ) : hasRevisionAfterDelivery ? (
+                            <RefreshCw className="h-5 w-5 md:h-6 md:w-6 text-orange-400 animate-spin" style={{ animationDuration: '3s' }} />
                           ) : (
                             <Clock className="h-5 w-5 md:h-6 md:w-6 text-white animate-clock-tick" />
                           )}
