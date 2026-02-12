@@ -1411,15 +1411,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     
     setRejectingOrderRequestId(lastOrderMsg.id);
     try {
-      // Check DB for existing rejection to prevent duplicates
+      // Check DB for existing rejection AFTER this offer was sent to prevent duplicates
       const { data: existingRejection } = await supabase
         .from('service_messages')
         .select('id')
         .eq('request_id', globalChatRequest.id)
         .like('message', '%OFFER_REJECTED%')
         .like('message', `%${orderData.media_site_id}%`)
-        .like('message', `%"price":${orderData.price}%`)
-        .order('created_at', { ascending: false })
+        .gt('created_at', lastOrderMsg.created_at)
         .limit(1)
         .maybeSingle();
       
@@ -4422,15 +4421,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         
         setRejectingOrderRequestId(msg.id);
         try {
-          // Check DB for existing rejection to prevent duplicates
+          // Check DB for existing rejection AFTER this offer was sent to prevent duplicates
           const { data: existingRejection } = await supabase
             .from('service_messages')
             .select('id')
             .eq('request_id', globalChatRequest.id)
             .like('message', '%OFFER_REJECTED%')
             .like('message', `%${orderRequest.media_site_id}%`)
-            .like('message', `%"price":${orderRequest.price}%`)
-            .order('created_at', { ascending: false })
+            .gt('created_at', msg.created_at)
             .limit(1)
             .maybeSingle();
           
