@@ -1423,11 +1423,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
       }
       
-      // Delete the original order request message
-      await supabase
+      // Delete the original order request message (non-blocking)
+      supabase
         .from('service_messages')
         .delete()
-        .eq('id', lastOrderMsg.id);
+        .eq('id', lastOrderMsg.id)
+        .then(({ error: delError }) => {
+          if (delError) console.log('Could not delete original offer message:', delError.message);
+        });
       
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== lastOrderMsg.id));
@@ -3962,7 +3965,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   size="default"
                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                   onClick={handleRejectClientOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id || acceptingOrder || hasOpenDispute}
+                  disabled={!!rejectingOrderRequestId || acceptingOrder || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -4391,11 +4394,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
           }
           
-          // Delete the original order request message
-          await supabase
+          // Delete the original order request message (non-blocking - may fail due to RLS if not own message)
+          supabase
             .from('service_messages')
             .delete()
-            .eq('id', msg.id);
+            .eq('id', msg.id)
+            .then(({ error: delError }) => {
+              if (delError) console.log('Could not delete original offer message:', delError.message);
+            });
           
           // Remove from local state
           setMessages(prev => prev.filter(m => m.id !== msg.id));
@@ -4445,26 +4451,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 <Button
                   size="default"
                   className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
-                  disabled={hasOpenDispute}
-                  onClick={() => {
-                    setPendingOrderRequest({
-                      media_site_id: orderRequest.media_site_id,
-                      media_site_name: orderRequest.media_site_name,
-                      media_site_favicon: orderRequest.media_site_favicon,
-                      price: orderRequest.price,
-                      special_terms: orderRequest.special_terms,
-                      delivery_duration: orderRequest.delivery_duration
-                    });
-                    setAcceptOrderDialogOpen(true);
-                  }}
-                >
-                  Accept
-                </Button>
-                <Button
-                  size="default"
-                  className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
-                  onClick={handleRejectOrderRequest}
-                  disabled={rejectingOrderRequestId === msg.id || acceptingOrder || hasOpenDispute}
+                  disabled={!!rejectingOrderRequestId || acceptingOrder || hasOpenDispute}
+                   onClick={() => {
+                     setPendingOrderRequest({
+                       media_site_id: orderRequest.media_site_id,
+                       media_site_name: orderRequest.media_site_name,
+                       media_site_favicon: orderRequest.media_site_favicon,
+                       price: orderRequest.price,
+                       special_terms: orderRequest.special_terms,
+                       delivery_duration: orderRequest.delivery_duration
+                     });
+                     setAcceptOrderDialogOpen(true);
+                   }}
+                 >
+                   Accept
+                 </Button>
+                 <Button
+                   size="default"
+                   className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
+                   onClick={handleRejectOrderRequest}
+                   disabled={!!rejectingOrderRequestId || acceptingOrder || hasOpenDispute}
                 >
                   {rejectingOrderRequestId === msg.id && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -5580,6 +5586,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         <Button
                           size="sm"
                           className="rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                         disabled={!!rejectingOrderRequestId || acceptingOrder}
                           onClick={() => {
                             setPendingOrderRequest({
                               media_site_id: pendingOrder.media_site_id,
@@ -5598,7 +5605,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           size="sm"
                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={handleBannerRejectOrderRequest}
-                          disabled={rejectingOrderRequestId === pendingOrder.messageId || acceptingOrder}
+                          disabled={!!rejectingOrderRequestId || acceptingOrder}
                         >
                           {rejectingOrderRequestId === pendingOrder.messageId && (
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5639,6 +5646,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       <Button
                         size="sm"
                         className="flex-1 rounded-none bg-[#2961d5] text-white border border-[#2961d5] hover:bg-[#3874ef] hover:border-[#3874ef] transition-all duration-200"
+                        disabled={!!rejectingOrderRequestId || acceptingOrder}
                         onClick={() => {
                           setPendingOrderRequest({
                             media_site_id: pendingOrder.media_site_id,
@@ -5657,7 +5665,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                         onClick={handleBannerRejectOrderRequest}
-                        disabled={rejectingOrderRequestId === pendingOrder.messageId || acceptingOrder}
+                        disabled={!!rejectingOrderRequestId || acceptingOrder}
                       >
                         {rejectingOrderRequestId === pendingOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5756,7 +5764,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           size="sm"
                           className="rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                           onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
-                          disabled={rejectingOrderRequestId === pendingClientOrder.messageId || acceptingOrder}
+                          disabled={!!rejectingOrderRequestId || acceptingOrder}
                         >
                           {rejectingOrderRequestId === pendingClientOrder.messageId && (
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -5816,7 +5824,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         size="sm"
                         className="flex-1 rounded-none bg-black text-gray-400 border border-black hover:bg-black hover:text-white transition-all duration-200"
                         onClick={() => handleBannerRejectClientOrderRequest(pendingClientOrder.messageId || '')}
-                        disabled={rejectingOrderRequestId === pendingClientOrder.messageId || acceptingOrder}
+                        disabled={!!rejectingOrderRequestId || acceptingOrder}
                       >
                         {rejectingOrderRequestId === pendingClientOrder.messageId && (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
