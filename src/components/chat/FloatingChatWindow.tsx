@@ -4634,12 +4634,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="mb-2">
               <span className={`font-semibold text-sm ${isOwnMessage ? 'text-white' : 'text-foreground'}`}>{orderLabel}: <span className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>{orderPlaced.media_site_name}</span></span>
             </div>
-            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-              Price: {orderPlaced.credits_used.toLocaleString()} credits
+            <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+              <span className="font-semibold">Price:</span> {orderPlaced.credits_used.toLocaleString()} credits
             </p>
             {orderRequestSpecialTerms && (
-              <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-                Special Terms: {orderRequestSpecialTerms}
+              <p className={`text-sm ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                <span className="font-semibold">Special Terms:</span> {orderRequestSpecialTerms}
               </p>
             )}
             {timeInfo && (
