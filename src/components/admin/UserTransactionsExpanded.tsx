@@ -61,6 +61,7 @@ interface UserTransactionsExpandedProps {
 
 const transactionTypes = [
   { key: 'all', label: 'All' },
+  { key: 'order_payout', label: 'Earnings' },
   { key: 'purchase', label: 'Purchase' },
   { key: 'gifted', label: 'Gifted' },
   { key: 'spent', label: 'Spent' },
@@ -201,7 +202,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       offer_accepted: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Credits Locked' },
       order_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Completed' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
-      order_payout: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Payout' },
+      order_payout: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Earnings' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
       admin_deduct: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Deduction' },
