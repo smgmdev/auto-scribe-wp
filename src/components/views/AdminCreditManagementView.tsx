@@ -22,6 +22,7 @@ interface UserCredit {
   totalCredits: number;
   locked: number;
   lockedFromOrders: number;
+  lockedFromRequests: number;
   lockedFromWithdrawals: number;
   available: number;
   orders: number;
@@ -128,6 +129,10 @@ export const AdminCreditManagementView = () => {
       const deductionsMap = new Map<string, number>();
       // Track offer_accepted (credits locked for pending orders)
       const offerLockedMap = new Map<string, number>();
+      // Track locked (credits reserved for pending order requests, not yet cancelled)
+      const lockedRequestsMap = new Map<string, number>();
+      // Track unlocked amounts per user to net against locked
+      const unlockedRequestsMap = new Map<string, number>();
       // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
       const withdrawnMap = new Map<string, number>();
       
@@ -159,6 +164,14 @@ export const AdminCreditManagementView = () => {
         // Track offer_accepted for locked credits calculation
         if (tx.type === 'offer_accepted' && tx.amount < 0) {
           offerLockedMap.set(tx.user_id, (offerLockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+        
+        // Track locked (order request sent) and unlocked (request cancelled)
+        if (tx.type === 'locked' && tx.amount < 0) {
+          lockedRequestsMap.set(tx.user_id, (lockedRequestsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
+        if (tx.type === 'unlocked' && tx.amount > 0) {
+          unlockedRequestsMap.set(tx.user_id, (unlockedRequestsMap.get(tx.user_id) || 0) + tx.amount);
         }
         
         // Track specific types for display columns
@@ -229,10 +242,13 @@ export const AdminCreditManagementView = () => {
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
+        const totalLockedRequests = lockedRequestsMap.get(credit.user_id) || 0;
+        const totalUnlockedRequests = unlockedRequestsMap.get(credit.user_id) || 0;
+        const lockedFromRequests = Math.max(0, totalLockedRequests - totalUnlockedRequests);
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
-        // Total locked = credits locked in active orders + credits locked in offer requests
-        const totalLocked = lockedFromOrders + lockedFromOffers;
+        // Total locked = credits locked in active orders + credits locked in offer requests + credits locked in pending requests
+        const totalLocked = lockedFromOrders + lockedFromOffers + lockedFromRequests;
         
         // Total Balance = Incoming - Outgoing (excluding locked types)
         const calculatedTotalBalance = incoming - outgoing;
@@ -254,6 +270,7 @@ export const AdminCreditManagementView = () => {
           totalCredits: calculatedTotalBalance,
           locked: totalLocked,
           lockedFromOrders,
+          lockedFromRequests,
           lockedFromWithdrawals: lockedFromOffers,
           available: calculatedAvailable,
           orders: purchaseOrders + deliveryOrders,
@@ -405,6 +422,10 @@ export const AdminCreditManagementView = () => {
                         <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
                       </div>
                       <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Locked in Requests:</span>
+                        <span className="font-semibold text-amber-400">{Math.round(activeUsers.reduce((sum, user) => sum + (user.lockedFromRequests || 0), 0)).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Offer Requests:</span>
                         <span className="font-semibold text-amber-400">{Math.round(activeUsers.reduce((sum, user) => sum + (user.lockedFromWithdrawals || 0), 0)).toLocaleString()}</span>
                       </div>
@@ -535,6 +556,10 @@ export const AdminCreditManagementView = () => {
                                             </div>
                                           )}
                                           <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Locked in Requests:</span>
+                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromRequests || 0).toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Locked in Offer Requests:</span>
                                             <span className="font-semibold text-amber-400">{Math.round(user.lockedFromWithdrawals || 0).toLocaleString()}</span>
                                           </div>
@@ -567,6 +592,7 @@ export const AdminCreditManagementView = () => {
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
                                           <p className="font-medium mb-1">Locked Credits</p>
+                                          <p><span className="opacity-70">Locked in Requests:</span> {(user.lockedFromRequests || 0).toLocaleString()}</p>
                                           <p><span className="opacity-70">Locked in Offer Requests:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
                                           <p><span className="opacity-70">Locked in Orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
                                         </div>
