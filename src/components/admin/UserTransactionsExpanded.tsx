@@ -357,6 +357,14 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       return !hasOrderCompleted;
     }
 
+    // Hide order_accepted if a matching order_completed exists for same order_id
+    if (tx.type === 'order_accepted' && tx.order_id) {
+      const hasOrderCompleted = transactions.some(other =>
+        other.type === 'order_completed' && other.order_id === tx.order_id
+      );
+      return !hasOrderCompleted;
+    }
+
     // Hide locked if a matching unlocked exists (cancelled order requests)
     if (tx.type === 'locked') {
       const matchingUnlocked = transactions.find(other =>
