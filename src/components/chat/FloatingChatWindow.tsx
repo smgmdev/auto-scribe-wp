@@ -4650,22 +4650,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div key={`countdown-${timerTick}`} className={`flex items-center gap-1.5 mt-2 pt-2 border-t ${isOwnMessage ? 'border-primary-foreground/20' : 'border-border'}`}>
                 {deliveredOnTime ? (
                   <>
-                     <CheckCircle className="h-3.5 w-3.5 text-green-400 dark:text-green-300" />
-                     <span className="text-xs font-medium text-green-400 dark:text-green-300">
+                     <CheckCircle className="h-4 w-4 text-green-400 dark:text-green-300" />
+                     <span className="text-sm font-medium text-green-400 dark:text-green-300">
                        Delivered on time
                      </span>
                   </>
                 ) : wasDelivered ? (
                   <>
-                    <Clock className="h-3.5 w-3.5 text-red-500" />
-                    <span className="text-xs font-medium text-red-500">
+                    <Clock className="h-4 w-4 text-red-500" />
+                    <span className="text-sm font-medium text-red-500">
                       Delivered late
                     </span>
                   </>
                 ) : (
                   <>
-                    <Clock className={`h-3.5 w-3.5 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-foreground'}`} />
-                    <span className={`text-xs font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-foreground'}`}>
+                    <Clock className={`h-4 w-4 ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-foreground'}`} />
+                    <span className={`text-sm font-medium ${timeInfo.isOverdue ? 'text-red-500' : isOwnMessage ? 'text-white' : 'text-foreground'}`}>
                       {timeInfo.isOverdue ? 'Delivery overdue' : `Expected delivery in: ${timeInfo.text}`}
                     </span>
                   </>
