@@ -544,6 +544,8 @@ export function AdminUsersView() {
     const calculatedCreditsMap = new Map<string, number>();
     const lockedFromOrdersMap = new Map<string, number>();
     const lockedFromOffersMap = new Map<string, number>();
+    const lockedFromRequestsMap = new Map<string, number>();
+    const unlockedRequestsMap = new Map<string, number>();
     const withdrawnMap = new Map<string, number>();
 
     // Calculate incoming and outgoing from transactions
@@ -570,9 +572,19 @@ export function AdminUsersView() {
         lockedFromOffersMap.set(userId, (lockedFromOffersMap.get(userId) || 0) + Math.abs(tx.amount));
       }
       
+      // Track locked (order requests) and unlocked (cancelled requests)
+      if (tx.type === 'locked' && tx.amount < 0) {
+        lockedFromRequestsMap.set(userId, (lockedFromRequestsMap.get(userId) || 0) + Math.abs(tx.amount));
+      }
+      if (tx.type === 'unlocked' && tx.amount > 0) {
+        unlockedRequestsMap.set(userId, (unlockedRequestsMap.get(userId) || 0) + tx.amount);
+      }
+      
       if (tx.amount > 0) {
-        // Incoming credits
-        calculatedCreditsMap.set(userId, currentTotal + tx.amount);
+        // Incoming credits - exclude 'unlocked' to prevent inflating balance
+        if (tx.type !== 'unlocked') {
+          calculatedCreditsMap.set(userId, currentTotal + tx.amount);
+        }
       } else if (tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
         // Outgoing credits (excluding locked types)
         calculatedCreditsMap.set(userId, currentTotal + tx.amount);
@@ -623,8 +635,9 @@ export function AdminUsersView() {
       const totalBalance = calculatedCreditsMap.get(profile.id) || 0;
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromOffers = lockedFromOffersMap.get(profile.id) || 0;
+      const lockedFromRequests = Math.max(0, (lockedFromRequestsMap.get(profile.id) || 0) - (unlockedRequestsMap.get(profile.id) || 0));
       const withdrawn = withdrawnMap.get(profile.id) || 0;
-      const totalLocked = lockedFromOrders;
+      const totalLocked = lockedFromOrders + lockedFromRequests;
       const availableCredits = totalBalance - totalLocked - withdrawn;
 
       return {
