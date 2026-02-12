@@ -677,33 +677,7 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Real-time subscription for admin engagement notifications (new requests only)
-  useEffect(() => {
-    if (!user || !isAdmin) return;
-
-    const channel = supabase
-      .channel('admin-engagements-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'service_requests'
-        },
-        (payload) => {
-          console.log('[Sidebar] New service request created:', payload.new);
-          // Increment the admin engagement count when a new request is created
-          if (payload.new && (payload.new as any).status !== 'cancelled') {
-            incrementAdminUnreadEngagementsCount();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, isAdmin]);
+  // Note: Admin engagement realtime is handled by the unified subscription below (admin-engagements-realtime-v2)
 
   // Real-time subscription for admin disputes notifications (new disputes)
   useEffect(() => {
@@ -851,7 +825,7 @@ export function Sidebar({
     };
 
     const channel = supabase
-      .channel('admin-engagements-realtime')
+      .channel('admin-engagements-realtime-v2')
       .on(
         'postgres_changes',
         {
