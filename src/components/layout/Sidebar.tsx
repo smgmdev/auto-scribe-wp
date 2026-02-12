@@ -92,9 +92,13 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         { id: 'admin-agency-withdrawals', label: 'Agency Withdrawals', icon: Wallet }
       ]
     }, {
-      id: 'admin-users',
+    id: 'admin-users-group',
       label: 'Users',
-      icon: Users
+      icon: Users,
+      submenu: [
+        { id: 'admin-users', label: 'User Management', icon: Users },
+        { id: 'admin-security-supervision', label: 'Security Supervision', icon: null }
+      ]
     }, {
     id: 'admin-more',
       label: 'More',
@@ -226,6 +230,7 @@ export function Sidebar({
     const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
     const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
     const aiPublishingIds = ['admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
+    const adminUsersGroupIds = ['admin-users', 'admin-security-supervision'];
     
     if (instantPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'instant-publishing': true }));
@@ -247,6 +252,9 @@ export function Sidebar({
     }
     if (aiPublishingIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'admin-ai-publishing': true }));
+    }
+    if (adminUsersGroupIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-users-group': true }));
     }
   }, [currentView, hasUserNavigated]);
 

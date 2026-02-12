@@ -141,3 +141,6 @@ verify_jwt = true
 
 [functions.wordpress-get-tags]
 verify_jwt = true
+
+[functions.scan-chat-messages]
+verify_jwt = false
