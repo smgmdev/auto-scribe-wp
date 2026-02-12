@@ -139,7 +139,76 @@ export function AdminSecuritySupervisionView() {
         schema: 'public',
         table: 'flagged_chat_messages',
       }, (payload) => {
-        setFlags(prev => [payload.new as FlaggedMessage, ...prev]);
+        const newFlag = payload.new as FlaggedMessage;
+        setFlags(prev => {
+          // Avoid duplicates
+          if (prev.some(f => f.id === newFlag.id)) return prev;
+          return [newFlag, ...prev];
+        });
+        // Fetch engagement data for new request_id if missing
+        if (!engagementData[newFlag.request_id]) {
+          supabase
+            .from('service_requests')
+            .select('id, title, media_sites(name, favicon)')
+            .eq('id', newFlag.request_id)
+            .maybeSingle()
+            .then(({ data }) => {
+              if (data) {
+                setEngagementData(prev => ({
+                  ...prev,
+                  [(data as any).id]: {
+                    title: (data as any).title,
+                    media_site_name: (data as any).media_sites?.name || 'Unknown',
+                    media_site_favicon: (data as any).media_sites?.favicon || null,
+                  },
+                }));
+              }
+            });
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [engagementData]);
+
+  // Real-time listener for new service messages — triggers immediate single-message scan
+  useEffect(() => {
+    const scanSingleMessage = async (message: any) => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-single-message`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              message_id: message.id,
+              request_id: message.request_id,
+              sender_id: message.sender_id,
+              sender_type: message.sender_type,
+              message: message.message,
+            }),
+          }
+        );
+        // Results will appear via the flagged_chat_messages realtime subscription above
+      } catch (err) {
+        console.error('Real-time scan error:', err);
+      }
+    };
+
+    const channel = supabase
+      .channel('service-messages-realtime-scan')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'service_messages',
+      }, (payload) => {
+        scanSingleMessage(payload.new);
       })
       .subscribe();
 
