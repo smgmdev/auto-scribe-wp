@@ -716,6 +716,8 @@ export function CreditHistoryView() {
   // Each unlocked "consumes" one locked transaction with the same amount, matched by closest time
   const usedUnlockIds = new Set<string>();
   const lockedToHide = new Set<string>();
+  // Map from unlocked transaction ID to the matched locked transaction for display in expanded details
+  const unlockToLockedMap = new Map<string, typeof filteredTransactions[0]>();
   
   // For each unlocked transaction, find the closest earlier locked transaction with the same amount
   for (const unlock of unlockedTransactions) {
@@ -738,6 +740,7 @@ export function CreditHistoryView() {
     
     if (bestMatch) {
       lockedToHide.add(bestMatch.id);
+      unlockToLockedMap.set(unlock.id, bestMatch);
     }
   }
 
@@ -1426,6 +1429,8 @@ export function CreditHistoryView() {
                 const reasonText = hasReason ? transaction.description?.split(': ').slice(1).join(': ') : null;
                 const isGiftedOrRemoved = transaction.type === 'gifted' || transaction.type === 'admin_credit' || transaction.type === 'admin_deduct';
                 const isOrderCompleted = transaction.type === 'order_completed';
+                const isUnlocked = transaction.type === 'unlocked';
+                const matchedLocked = isUnlocked ? unlockToLockedMap.get(transaction.id) : null;
                 const orderInfo = orderDetails[transaction.id];
                 
                 const displayDescription = (() => {
@@ -1584,6 +1589,51 @@ export function CreditHistoryView() {
                                 </div>
                               )}
                             </>
+                          ) : isUnlocked ? (
+                          /* Unlocked (Order Request Cancelled) - Show offer request details */
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                <div>
+                                  <span className="text-muted-foreground">Media Site:</span>
+                                  <p className="font-medium">
+                                    {(() => {
+                                      const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
+                                      return mediaMatch ? mediaMatch[1] : 'Unknown';
+                                    })()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Credits Released:</span>
+                                  <p className="font-medium text-green-500">+{transaction.amount.toLocaleString()} credits</p>
+                                </div>
+                                {matchedLocked && (
+                                  <div>
+                                    <span className="text-muted-foreground">Originally Locked:</span>
+                                    <p className="font-medium">{format(new Date(matchedLocked.created_at), 'MMM d, yyyy h:mm:ss a')}</p>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-muted-foreground">Cancelled At:</span>
+                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm:ss a')}</p>
+                                </div>
+                                {matchedLocked && (
+                                  <div className="md:col-span-2">
+                                    <span className="text-muted-foreground">Duration Locked:</span>
+                                    <p className="font-medium">
+                                      {(() => {
+                                        const diffMs = new Date(transaction.created_at).getTime() - new Date(matchedLocked.created_at).getTime();
+                                        const diffMins = Math.floor(diffMs / 60000);
+                                        const diffHours = Math.floor(diffMins / 60);
+                                        const remainMins = diffMins % 60;
+                                        if (diffHours > 0) return `${diffHours}h ${remainMins}m`;
+                                        if (diffMins > 0) return `${diffMins}m`;
+                                        return 'Less than a minute';
+                                      })()}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           ) : isGiftedOrRemoved ? (
                           /* Gifted/Admin Credit/Admin Deduct - No transaction ID */
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
