@@ -1591,6 +1591,11 @@ export function CreditHistoryView() {
                     const mediaName = mediaMatch ? mediaMatch[1] : '';
                     return mediaName ? `Order request cancelled: ${mediaName} (credits unlocked)` : (transaction.description || 'Credits unlocked');
                   }
+                  if (transaction.type === 'order_accepted') {
+                    const mediaMatch = transaction.description?.match(/:\s*(.+)$/);
+                    const mediaName = mediaMatch ? mediaMatch[1].trim() : '';
+                    return mediaName ? `Order accepted by agency: ${mediaName} (credits locked)` : (transaction.description || 'Order accepted');
+                  }
                   if (hasReason) {
                     return transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff');
                   }
@@ -1817,17 +1822,21 @@ export function CreditHistoryView() {
                                <div>
                                  <span className="text-muted-foreground">Amount:</span>
                                  <p className={`font-medium ${
-                                   transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                                     ? 'text-amber-500' 
-                                     : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                                 }`}>
-                                   {transaction.type === 'withdrawal_locked' 
-                                     ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
-                                     : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
-                                   }
-                                 </p>
-                               </div>
-                               <div>
+                                    transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
+                                      ? 'text-amber-500' 
+                                      : transaction.type === 'order_accepted'
+                                        ? 'text-foreground'
+                                        : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                                  }`}>
+                                    {transaction.type === 'withdrawal_locked' 
+                                      ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
+                                      : transaction.type === 'order_accepted' && orderInfo
+                                        ? `${(orderInfo.media_sites?.price || 0).toLocaleString()} credits`
+                                        : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
+                                    }
+                                  </p>
+                                </div>
+                                <div>
                                  <span className="text-muted-foreground">Date & Time:</span>
                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                </div>
