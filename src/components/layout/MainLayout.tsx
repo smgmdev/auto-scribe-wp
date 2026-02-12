@@ -66,6 +66,7 @@ export function MainLayout({
               <Link to="/help" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
               <Link to="/system-status" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
               <Link to="/sitemap" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
+              <Link to="/report-bug" className={`transition-colors text-left ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
             </div>
           </div>
         </footer>
