@@ -548,8 +548,13 @@ export function AdminUsersView() {
     const lockedFromRequestsMap = new Map<string, number>();
     const lockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
     const unlockedRequestsMap = new Map<string, number>();
+    const unlockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
     const orderAcceptedSites = new Map<string, string[]>();
     const withdrawnMap = new Map<string, number>();
+    
+    // Build a map of user_credits.credits for authoritative balance
+    const dbCreditsMap = new Map<string, number>();
+    credits?.forEach(c => dbCreditsMap.set(c.user_id, c.credits));
 
     // Calculate incoming and outgoing from transactions
     // Withdrawal transactions are stored in cents, not credits - handle separately
@@ -587,6 +592,12 @@ export function AdminUsersView() {
       }
       if (tx.type === 'unlocked' && tx.amount > 0) {
         unlockedRequestsMap.set(userId, (unlockedRequestsMap.get(userId) || 0) + tx.amount);
+        const siteMatch = tx.description?.match(/(?:Order cancelled|Request cancelled):\s*(.+?)(?:\s*\(|$)/);
+        if (siteMatch) {
+          const details = unlockedDetailsByUser.get(userId) || [];
+          details.push({ siteName: siteMatch[1].trim(), amount: tx.amount });
+          unlockedDetailsByUser.set(userId, details);
+        }
       }
       // Track order_accepted site names for matching against locked
       if (tx.type === 'order_accepted' && tx.description) {
@@ -649,26 +660,26 @@ export function AdminUsersView() {
       const userAgency = agencies?.find((a) => a.user_id === profile.id);
       const authInfo = authUsersMap[profile.id];
       
-      // Calculate available credits: Total Balance - Locked - Withdrawn
-      const totalBalance = calculatedCreditsMap.get(profile.id) || 0;
+      // Calculate available credits using DB credits as authoritative balance
+      const dbCredits = dbCreditsMap.get(profile.id) || 0;
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromOffers = lockedFromOffersMap.get(profile.id) || 0;
-      // Calculate how much of locked requests were consumed by order_accepted
-      const acceptedSites = orderAcceptedSites.get(profile.id) || [];
-      const lockedDetails = lockedDetailsByUser.get(profile.id) || [];
-      let totalAcceptedFromLocked = 0;
-      const usedLockedIndices = new Set<number>();
-      for (const site of acceptedSites) {
-        const idx = lockedDetails.findIndex((d, i) => !usedLockedIndices.has(i) && d.siteName === site);
-        if (idx >= 0) {
-          totalAcceptedFromLocked += lockedDetails[idx].amount;
-          usedLockedIndices.add(idx);
-        }
+      // Per-entry matching for locked requests
+      const lockedDetails = [...(lockedDetailsByUser.get(profile.id) || [])];
+      const unlockedDetails = [...(unlockedDetailsByUser.get(profile.id) || [])];
+      const acceptedSites = [...(orderAcceptedSites.get(profile.id) || [])];
+      
+      let lockedFromRequests = 0;
+      for (const locked of lockedDetails) {
+        const unlockedIdx = unlockedDetails.findIndex(d => d.siteName === locked.siteName && d.amount === locked.amount);
+        if (unlockedIdx >= 0) { unlockedDetails.splice(unlockedIdx, 1); continue; }
+        const acceptedIdx = acceptedSites.findIndex(site => site === locked.siteName);
+        if (acceptedIdx >= 0) { acceptedSites.splice(acceptedIdx, 1); continue; }
+        lockedFromRequests += locked.amount;
       }
-      const lockedFromRequests = Math.max(0, (lockedFromRequestsMap.get(profile.id) || 0) - (unlockedRequestsMap.get(profile.id) || 0) - totalAcceptedFromLocked);
       const withdrawn = withdrawnMap.get(profile.id) || 0;
       const totalLocked = lockedFromOrders + lockedFromRequests;
-      const availableCredits = totalBalance - totalLocked - withdrawn;
+      const availableCredits = dbCredits - totalLocked - withdrawn;
 
       return {
         id: profile.id,

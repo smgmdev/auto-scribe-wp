@@ -135,6 +135,8 @@ export const AdminCreditManagementView = () => {
       const lockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
       // Track unlocked amounts per user to net against locked
       const unlockedRequestsMap = new Map<string, number>();
+      // Track unlocked details per user with site names for matching
+      const unlockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
       // Track order_accepted media site names per user to match against locked
       const orderAcceptedSites = new Map<string, string[]>();
       // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
@@ -182,6 +184,13 @@ export const AdminCreditManagementView = () => {
         }
         if (tx.type === 'unlocked' && tx.amount > 0) {
           unlockedRequestsMap.set(tx.user_id, (unlockedRequestsMap.get(tx.user_id) || 0) + tx.amount);
+          // Track unlocked site names for matching against order_accepted
+          const siteMatch = tx.description?.match(/(?:Order cancelled|Request cancelled):\s*(.+?)(?:\s*\(|$)/);
+          if (siteMatch) {
+            const details = unlockedDetailsByUser.get(tx.user_id) || [];
+            details.push({ siteName: siteMatch[1].trim(), amount: tx.amount });
+            unlockedDetailsByUser.set(tx.user_id, details);
+          }
         }
         // Track order_accepted site names for matching against locked
         if (tx.type === 'order_accepted' && tx.description) {
@@ -261,30 +270,40 @@ export const AdminCreditManagementView = () => {
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
-        const totalLockedRequests = lockedRequestsMap.get(credit.user_id) || 0;
-        const totalUnlockedRequests = unlockedRequestsMap.get(credit.user_id) || 0;
-        // Calculate how much of locked requests were consumed by order_accepted
-        const acceptedSites = orderAcceptedSites.get(credit.user_id) || [];
-        const lockedDetails = lockedDetailsByUser.get(credit.user_id) || [];
-        let totalAcceptedFromLocked = 0;
-        const usedLockedIndices = new Set<number>();
-        for (const site of acceptedSites) {
-          const idx = lockedDetails.findIndex((d, i) => !usedLockedIndices.has(i) && d.siteName === site);
-          if (idx >= 0) {
-            totalAcceptedFromLocked += lockedDetails[idx].amount;
-            usedLockedIndices.add(idx);
+        // Calculate still-locked request credits using per-entry matching
+        // For each locked entry, check if it was consumed by an unlocked or order_accepted
+        const lockedDetails = [...(lockedDetailsByUser.get(credit.user_id) || [])];
+        const unlockedDetails = [...(unlockedDetailsByUser.get(credit.user_id) || [])];
+        const acceptedSites = [...(orderAcceptedSites.get(credit.user_id) || [])];
+        
+        let lockedFromRequests = 0;
+        for (const locked of lockedDetails) {
+          // First check if there's a matching unlocked entry (request was cancelled)
+          const unlockedIdx = unlockedDetails.findIndex(d => d.siteName === locked.siteName && d.amount === locked.amount);
+          if (unlockedIdx >= 0) {
+            unlockedDetails.splice(unlockedIdx, 1);
+            continue;
           }
+          // Then check if there's a matching order_accepted (request transitioned to order)
+          const acceptedIdx = acceptedSites.findIndex(site => site === locked.siteName);
+          if (acceptedIdx >= 0) {
+            acceptedSites.splice(acceptedIdx, 1);
+            continue;
+          }
+          // Neither unlocked nor accepted - still locked
+          lockedFromRequests += locked.amount;
         }
-        const lockedFromRequests = Math.max(0, totalLockedRequests - totalUnlockedRequests - totalAcceptedFromLocked);
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
         // Total locked = credits locked in active orders + credits locked in offer requests + credits locked in pending requests
         const totalLocked = lockedFromOrders + lockedFromOffers + lockedFromRequests;
         
-        // Total Balance = Incoming - Outgoing (excluding locked types)
-        const calculatedTotalBalance = incoming - outgoing;
-        // Available = Total Balance - Total Locked Credits - Completed Withdrawals
-        const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
+        // Use user_credits.credits as the authoritative balance (maintained by the system)
+        // Then subtract locked amounts to get available
+        const dbCredits = credit.credits;
+        const calculatedTotalBalance = dbCredits;
+        // Available = DB credits - Total Locked Credits - Completed Withdrawals
+        const calculatedAvailable = dbCredits - totalLocked - withdrawn;
         
         const purchasedOnline = purchasedOnlineMap.get(credit.user_id) || 0;
         const purchasedInvoice = purchasedInvoiceMap.get(credit.user_id) || 0;
