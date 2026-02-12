@@ -1389,7 +1389,7 @@ export function AgencyRequestsView() {
         </Button>
       </div>
 
-      <div className="relative mb-2">
+      <div className="relative mb-0">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search requests..."
@@ -1419,7 +1419,7 @@ export function AgencyRequestsView() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="requests" className="mt-2">
+        <TabsContent value="requests" className="mt-0">
           <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
               <TabsTrigger value="active" className="gap-2 relative">
