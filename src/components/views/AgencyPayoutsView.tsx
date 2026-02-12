@@ -343,7 +343,7 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-0 md:grid-cols-4">
+      <div className="grid gap-0 md:grid-cols-4 mt-2">
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
             <Card className="transition-colors py-3 cursor-help border-0 bg-[#1e3a5f]">
