@@ -4012,7 +4012,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           }`}>
               <div className="min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-green-700 dark:text-green-300'}`}>
+                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {isOwnMessage ? 'Order Request Accepted' : 'Your Order Request Was Accepted'}
                   </span>
                 </div>
