@@ -810,7 +810,7 @@ export function AgencyRequestsView() {
         // No badge for read pending_review requests or those with agency replies
         return null;
       case 'accepted':
-        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="h-3 w-3 mr-1" />Accepted</Badge>;
+        return null;
       case 'rejected':
         return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       case 'changes_requested':
