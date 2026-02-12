@@ -3601,6 +3601,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     // Handle offer rejected message
     // Skip if this is a quoted reply - the quote contains the tag but this is a reply message
     if (offerRejected && !quote) {
+      // Only show the latest OFFER_REJECTED for this media site - hide older ones
+      const allRejections = messages.filter(m => {
+        const match = m.message.match(/\[OFFER_REJECTED\](.*?)\[\/OFFER_REJECTED\]/);
+        if (!match) return false;
+        try {
+          const data = JSON.parse(match[1]);
+          return data.media_site_id === offerRejected.media_site_id;
+        } catch { return false; }
+      });
+      const latestRejection = allRejections[allRejections.length - 1];
+      if (latestRejection && latestRejection.id !== msg.id) {
+        return null;
+      }
       return (
         <div className="space-y-1">
           <div className={`rounded-none border p-4 ${
