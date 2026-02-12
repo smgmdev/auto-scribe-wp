@@ -4017,7 +4017,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </span>
                 </div>
                 <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <span className="text-xs">
+                  <span className="text-sm">
                     Price: {orderRequestAccepted.price.toLocaleString()} credits
                   </span>
                 </div>
@@ -4035,17 +4035,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       deliveredOnTimeCard ? (
                         <>
                           <CheckCircle className="h-3.5 w-3.5 shrink-0" />
-                          <span className="text-xs">Order Delivered</span>
+                          <span className="text-sm">Order Delivered</span>
                         </>
                       ) : (
                         <>
                           <Clock className="h-3.5 w-3.5 shrink-0" />
-                          <span className="text-xs">Delivered late</span>
+                          <span className="text-sm">Delivered late</span>
                         </>
                       )
                     ) : (
                       <>
-                        <span className="text-xs">
+                        <span className="text-sm">
                           {cardCountdown.isOverdue ? 'Delivery: Overdue' : `Delivery: ${cardCountdown.text}`}
                         </span>
                       </>
