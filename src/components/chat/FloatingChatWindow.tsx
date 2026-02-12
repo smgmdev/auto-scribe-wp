@@ -7949,9 +7949,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Admin: Complete Order via Dispute Dialog */}
       <AlertDialog open={completeViaDisputeDialogOpen} onOpenChange={setCompleteViaDisputeDialogOpen}>
         <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Complete Order via Dispute</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-left">
               This will mark the order as completed and resolve the dispute in favor of completing the order. Please provide a reason for this decision.
             </AlertDialogDescription>
           </AlertDialogHeader>
