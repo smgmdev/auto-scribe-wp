@@ -81,6 +81,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalDetails[]>([]);
   const [orders, setOrders] = useState<Map<string, OrderDetails>>(new Map());
+  const [mediaSitesByName, setMediaSitesByName] = useState<Map<string, { name: string; favicon: string | null }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [activeType, setActiveType] = useState('all');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -108,6 +109,25 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           const orderMap = new Map<string, OrderDetails>();
           orderData.forEach(order => orderMap.set(order.id, order as OrderDetails));
           setOrders(orderMap);
+        }
+      }
+
+      // Fetch media sites for locked/unlocked transactions (by name from description)
+      const lockedUnlocked = (data || []).filter(tx => tx.type === 'locked' || tx.type === 'unlocked');
+      const siteNames = new Set<string>();
+      lockedUnlocked.forEach(tx => {
+        const match = tx.description?.match(/(?:Order request sent|Request cancelled): (.+?) \(/);
+        if (match) siteNames.add(match[1]);
+      });
+      if (siteNames.size > 0) {
+        const { data: sitesData } = await supabase
+          .from('media_sites')
+          .select('name, favicon')
+          .in('name', Array.from(siteNames));
+        if (sitesData) {
+          const map = new Map<string, { name: string; favicon: string | null }>();
+          sitesData.forEach(s => map.set(s.name, s));
+          setMediaSitesByName(map);
         }
       }
     } catch (error) {
@@ -447,7 +467,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           {siteName && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
-              <p className="font-medium">{siteName}</p>
+              <div className="flex items-center gap-1.5">
+                {mediaSitesByName.get(siteName)?.favicon && (
+                  <img src={mediaSitesByName.get(siteName)!.favicon!} alt="" className="h-4 w-4 rounded-sm" />
+                )}
+                <p className="font-medium">{siteName}</p>
+              </div>
             </div>
           )}
           <div>
@@ -524,7 +549,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           {siteName && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
-              <p className="font-medium">{siteName}</p>
+              <div className="flex items-center gap-1.5">
+                {mediaSitesByName.get(siteName)?.favicon && (
+                  <img src={mediaSitesByName.get(siteName)!.favicon!} alt="" className="h-4 w-4 rounded-sm" />
+                )}
+                <p className="font-medium">{siteName}</p>
+              </div>
             </div>
           )}
           <div>
