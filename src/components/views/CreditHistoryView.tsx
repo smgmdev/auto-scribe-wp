@@ -1730,13 +1730,14 @@ export function CreditHistoryView() {
                                  <span className="text-muted-foreground">Date & Time:</span>
                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                </div>
+                               {transaction.order_number && (
                                <div>
-                                 <span className="text-muted-foreground">{transaction.order_number ? 'Order ID:' : 'Transaction ID:'}</span>
+                                 <span className="text-muted-foreground">Order ID:</span>
                                  <div className="flex items-center gap-1.5">
-                                   <p className="font-medium">{transaction.order_number || `${transaction.id.slice(0, 8)}...`}</p>
+                                   <p className="font-medium">{transaction.order_number}</p>
                                    <button
                                      onClick={() => {
-                                       navigator.clipboard.writeText(transaction.order_number || transaction.id);
+                                       navigator.clipboard.writeText(transaction.order_number!);
                                        toast.success('Copied to clipboard');
                                      }}
                                      className="text-muted-foreground hover:text-foreground transition-colors"
@@ -1745,6 +1746,7 @@ export function CreditHistoryView() {
                                    </button>
                                  </div>
                                </div>
+                               )}
                              </div>
                              {transaction.type === 'offer_accepted' && transaction.order_id && (
                                <div className="mt-3 pt-3 border-t border-border/50">
