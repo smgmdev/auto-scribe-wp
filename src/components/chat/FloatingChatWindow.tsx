@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
-import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale, CreditCard, LogOut } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Send, ChevronDown, Reply, X, Info, Building2, Clock, CheckCircle, CheckCircle2, Trash2, ShoppingCart, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, RefreshCw, Copy, Truck, DollarSign, XCircle, Tag, AlertTriangle, Eye, Scale, CreditCard, LogOut, ShieldCheck } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5338,6 +5338,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           const lastDeliveryIndex = messages.map((m, i) => ({ m, i })).filter(({ m }) => parseOrderDelivered(m.message)).pop()?.i ?? -1;
           const hasRevisionAfterDelivery = messages.slice(lastDeliveryIndex + 1).some(m => parseRevisionRequested(m.message));
           
+          // Check if order was completed via dispute resolution
+          const completedViaDispute = localOrder.status === 'completed' && messages.some(m => {
+            const match = m.message.match(/\[DISPUTE_RESOLVED\]([\s\S]*?)\[\/DISPUTE_RESOLVED\]/);
+            if (!match) return false;
+            try { return JSON.parse(match[1]).type === 'dispute_resolved_complete'; } catch { return false; }
+          });
+          
           const canAcceptDelivery = isClientView && localOrder.delivery_status === 'delivered' && !hasRevisionAfterDelivery;
           const canCancel = isAgencyView && localOrder.delivery_status !== 'accepted' && localOrder.delivery_status !== 'delivered';
           
@@ -5355,6 +5362,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                             <AlertTriangle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
                           ) : hasRevisionAfterDelivery ? (
                             <RefreshCw className="h-5 w-5 md:h-6 md:w-6 text-orange-400 animate-spin" style={{ animationDuration: '3s' }} />
+                          ) : localOrder.status === 'completed' && completedViaDispute ? (
+                            <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           ) : localOrder.status === 'completed' ? (
                             <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
                           ) : (
@@ -5363,7 +5372,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                         <p>{localOrder.status === 'cancelled' ? 'Order Cancelled' : hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
+                         <p>{localOrder.status === 'cancelled' ? 'Order Cancelled' : hasOpenDispute ? 'Order In Dispute' : hasRevisionAfterDelivery ? 'Revision Requested' : localOrder.status === 'completed' && completedViaDispute ? 'Order Completed (Dispute Resolved)' : localOrder.status === 'completed' ? 'Order Completed' : (acceptedOrderData?.media_site_name || 'Order Accepted')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
