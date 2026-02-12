@@ -764,9 +764,24 @@ export function CreditHistoryView() {
     }
   }
 
+  // Build a set of order_ids that have order_completed transactions
+  const completedOrderIds = new Set(
+    filteredTransactions
+      .filter(t => t.type === 'order_completed' && t.order_id)
+      .map(t => t.order_id!)
+  );
+
   const displayedTransactions = filteredTransactions.filter(t => {
     // Hide locked transactions that have been matched with an unlocked transaction
     if (t.type === 'locked' && lockedToHide.has(t.id)) {
+      return false;
+    }
+    // Hide order_accepted if there's a corresponding order_completed for the same order
+    if (t.type === 'order_accepted' && t.order_id && completedOrderIds.has(t.order_id)) {
+      return false;
+    }
+    // Hide offer_accepted if there's a corresponding order_completed for the same order
+    if (t.type === 'offer_accepted' && t.order_id && completedOrderIds.has(t.order_id)) {
       return false;
     }
     if (t.type === 'withdrawal_locked') {
