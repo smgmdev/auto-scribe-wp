@@ -1348,7 +1348,7 @@ export function MyRequestsView() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="delivered" className="mt-2">
+              <TabsContent value="delivered" className="mt-0">
                 {sortedDeliveredRequests.length === 0 ? (
                   <Card className="border-border/50">
                     <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1439,7 +1439,7 @@ export function MyRequestsView() {
                 )}
               </TabsContent>
 
-              <TabsContent value="cancelled" className="mt-2">
+              <TabsContent value="cancelled" className="mt-0">
                 {sortedCancelledRequests.length === 0 ? (
                   <Card className="border-border/50">
                     <CardContent className="flex flex-col items-center justify-center py-12">
