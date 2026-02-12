@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/layout/Footer';
-import { ArrowLeft, Bug, Send } from 'lucide-react';
+import { Search, User, Bug, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import amlogo from '@/assets/amlogo.png';
+import { SearchModal } from '@/components/search/SearchModal';
+import amblack from '@/assets/amblack.png';
 
 export default function ReportBug() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function ReportBug() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,20 +61,58 @@ export default function ReportBug() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-[#d2d2d7] bg-white/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <img src={amlogo} alt="Logo" className="h-5 w-5 object-contain" />
-            <span className="text-sm font-semibold text-[#1d1d1f]">Arcana Mace</span>
+    <div className="h-screen overflow-y-auto bg-white flex flex-col">
+      {/* Header - matching How It Works */}
+      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm">
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
-          <button onClick={() => navigate(-1)} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-            <ArrowLeft className="h-3 w-3" />
-            Back
-          </button>
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
       </header>
+
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 py-16">
