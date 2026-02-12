@@ -138,7 +138,7 @@ export default function ReportBug() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
+      <div className="h-[120px]" />
 
       {/* Sub-header - Sticky with transition like Help Center */}
       <div className={`sticky z-50 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
