@@ -717,6 +717,12 @@ export function CreditHistoryView() {
     if (type === 'withdrawal_completed') {
       return <ArrowDownCircle className="h-5 w-5 text-foreground" />;
     }
+    if (type === 'locked') {
+      return <Lock className="h-5 w-5 text-red-500" />;
+    }
+    if (type === 'unlocked') {
+      return <LockOpen className="h-5 w-5 text-green-500" />;
+    }
     if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
     }
@@ -1762,7 +1768,7 @@ export function CreditHistoryView() {
                                   </p>
                                 </div>
                                 <div>
-                                  <span className="text-muted-foreground">Credits Released:</span>
+                                  <span className="text-muted-foreground">Credits Unlocked:</span>
                                   <p className="font-medium">{transaction.amount.toLocaleString()} credits</p>
                                 </div>
                                 {matchedLocked && (

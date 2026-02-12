@@ -112,7 +112,7 @@ serve(async (req) => {
           user_id: targetUserId,
           amount: creditAmount,
           type: "unlocked",
-          description: `Request cancelled: ${mediaSite.name} (credits released)`
+          description: `Request cancelled: ${mediaSite.name} (credits unlocked)`
         });
 
       if (unlockTransactionError) {

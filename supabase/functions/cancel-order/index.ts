@@ -208,7 +208,7 @@ serve(async (req) => {
         user_id: orderOwnerId,
         amount: creditAmount,
         type: "unlocked",
-        description: `Order cancelled: ${mediaSiteName} (credits released)`,
+        description: `Order cancelled: ${mediaSiteName} (credits unlocked)`,
         order_id: order_id
       });
 
