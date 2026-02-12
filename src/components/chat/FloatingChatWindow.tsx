@@ -3660,6 +3660,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         console.log('[FloatingChatWindow] Inline cancel client order request for msg:', msg.id);
         setCancellingOrderRequestId(msg.id);
         try {
+          // Release locked credits for this order request
+          if (clientOrderRequest?.media_site_id) {
+            const { error: releaseError } = await supabase.functions.invoke('release-order-credits', {
+              body: {
+                media_site_id: clientOrderRequest.media_site_id,
+                service_request_id: globalChatRequest?.id,
+                reason: 'Client cancelled order request'
+              }
+            });
+            
+            if (releaseError) {
+              console.error('Error releasing credits:', releaseError);
+            } else {
+              refreshCredits();
+            }
+          }
+
           const { error } = await supabase
             .from('service_messages')
             .delete()
