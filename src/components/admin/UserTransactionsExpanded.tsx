@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAppStore } from '@/stores/appStore';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -43,8 +44,11 @@ interface OrderDetails {
   order_number: string | null;
   amount_cents: number;
   platform_fee_cents: number;
+  agency_payout_cents: number;
   status: string;
   delivery_status: string;
+  delivered_at: string | null;
+  created_at: string;
   media_sites: {
     name: string;
     favicon: string | null;
@@ -97,7 +101,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       if (orderIds.length > 0) {
         const { data: orderData } = await supabase
           .from('orders')
-          .select('id, order_number, amount_cents, platform_fee_cents, status, delivery_status, media_sites(name, favicon)')
+          .select('id, order_number, amount_cents, platform_fee_cents, agency_payout_cents, status, delivery_status, delivered_at, created_at, media_sites(name, favicon)')
           .in('id', orderIds);
         
         if (orderData) {
@@ -319,11 +323,63 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     // Order details
     if (tx.order_id && orders.has(tx.order_id)) {
       const order = orders.get(tx.order_id)!;
+      const netEarnings = tx.type === 'order_completed' 
+        ? (order.amount_cents - order.platform_fee_cents) / 100 
+        : null;
+
+      const handleViewOrderChat = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+          const { data: requests } = await supabase
+            .from('service_requests')
+            .select('*, media_sites!inner(*), orders(*)')
+            .eq('order_id', tx.order_id!)
+            .limit(1);
+
+          if (requests && requests.length > 0) {
+            const match = requests[0];
+            const chatRequest = {
+              id: match.id,
+              title: match.title,
+              description: match.description,
+              status: match.status,
+              read: match.read,
+              created_at: match.created_at,
+              updated_at: match.updated_at,
+              cancellation_reason: match.cancellation_reason,
+              media_site: match.media_sites,
+              order: match.orders?.[0] || null,
+            };
+            const { openGlobalChat } = useAppStore.getState();
+            openGlobalChat(chatRequest as any, 'agency-request');
+          }
+        } catch (err) {
+          console.error('Error opening order chat:', err);
+        }
+      };
+
       return (
         <div className="grid grid-cols-2 gap-4 text-sm">
+          {order.media_sites?.name && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Media Site</p>
+              <div className="flex items-center gap-1.5">
+                {order.media_sites.favicon && (
+                  <img src={order.media_sites.favicon} alt="" className="h-4 w-4 rounded-sm" />
+                )}
+                <p className="font-medium">{order.media_sites.name}</p>
+              </div>
+            </div>
+          )}
+          {order.order_number && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order ID</p>
+              <p className="font-medium font-mono text-xs">{order.order_number}</p>
+            </div>
+          )}
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
-            <p className="font-medium">{(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="font-medium">{(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
           </div>
           {order.platform_fee_cents > 0 && (
             <div>
@@ -331,6 +387,28 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <p className="font-medium">{(order.platform_fee_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
             </div>
           )}
+          {netEarnings !== null && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Net Earnings</p>
+              <p className="font-medium">{netEarnings.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
+            </div>
+          )}
+          {order.delivered_at && (
+            <div>
+              <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Delivered</p>
+              <p className="font-medium">
+                {new Date(order.delivered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(order.delivered_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          )}
+          <div className="col-span-2 pt-1">
+            <button
+              onClick={handleViewOrderChat}
+              className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+            >
+              View Order Chat →
+            </button>
+          </div>
         </div>
       );
     }
