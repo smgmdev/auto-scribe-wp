@@ -1168,8 +1168,8 @@ export function MyRequestsView() {
 
       <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:max-w-md">
-          <TabsTrigger value="active" className="gap-2 relative">
+        <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
+          <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
             {unreadActiveCount > 0 && (
@@ -1178,7 +1178,7 @@ export function MyRequestsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="gap-2 relative">
+          <TabsTrigger value="closed" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <History className="h-4 w-4" />
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {unreadClosedCount > 0 && (
