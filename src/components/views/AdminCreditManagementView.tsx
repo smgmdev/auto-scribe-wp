@@ -99,7 +99,7 @@ export const AdminCreditManagementView = () => {
       // Fetch transactions to calculate credits per user
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('credit_transactions')
-        .select('user_id, amount, type');
+        .select('user_id, amount, type, description');
 
       if (transactionsError) throw transactionsError;
 
@@ -131,8 +131,12 @@ export const AdminCreditManagementView = () => {
       const offerLockedMap = new Map<string, number>();
       // Track locked (credits reserved for pending order requests, not yet cancelled)
       const lockedRequestsMap = new Map<string, number>();
+      // Track locked transactions per user with site names for matching
+      const lockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
       // Track unlocked amounts per user to net against locked
       const unlockedRequestsMap = new Map<string, number>();
+      // Track order_accepted media site names per user to match against locked
+      const orderAcceptedSites = new Map<string, string[]>();
       // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
       const withdrawnMap = new Map<string, number>();
       
@@ -169,9 +173,24 @@ export const AdminCreditManagementView = () => {
         // Track locked (order request sent) and unlocked (request cancelled)
         if (tx.type === 'locked' && tx.amount < 0) {
           lockedRequestsMap.set(tx.user_id, (lockedRequestsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+          const siteMatch = tx.description?.match(/Order request sent:\s*(.+?)(?:\s*\(|$)/);
+          if (siteMatch) {
+            const details = lockedDetailsByUser.get(tx.user_id) || [];
+            details.push({ siteName: siteMatch[1].trim(), amount: Math.abs(tx.amount) });
+            lockedDetailsByUser.set(tx.user_id, details);
+          }
         }
         if (tx.type === 'unlocked' && tx.amount > 0) {
           unlockedRequestsMap.set(tx.user_id, (unlockedRequestsMap.get(tx.user_id) || 0) + tx.amount);
+        }
+        // Track order_accepted site names for matching against locked
+        if (tx.type === 'order_accepted' && tx.description) {
+          const siteMatch = tx.description.match(/:\s*(.+)$/);
+          if (siteMatch) {
+            const sites = orderAcceptedSites.get(tx.user_id) || [];
+            sites.push(siteMatch[1].trim());
+            orderAcceptedSites.set(tx.user_id, sites);
+          }
         }
         
         // Track specific types for display columns
@@ -244,7 +263,19 @@ export const AdminCreditManagementView = () => {
         const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
         const totalLockedRequests = lockedRequestsMap.get(credit.user_id) || 0;
         const totalUnlockedRequests = unlockedRequestsMap.get(credit.user_id) || 0;
-        const lockedFromRequests = Math.max(0, totalLockedRequests - totalUnlockedRequests);
+        // Calculate how much of locked requests were consumed by order_accepted
+        const acceptedSites = orderAcceptedSites.get(credit.user_id) || [];
+        const lockedDetails = lockedDetailsByUser.get(credit.user_id) || [];
+        let totalAcceptedFromLocked = 0;
+        const usedLockedIndices = new Set<number>();
+        for (const site of acceptedSites) {
+          const idx = lockedDetails.findIndex((d, i) => !usedLockedIndices.has(i) && d.siteName === site);
+          if (idx >= 0) {
+            totalAcceptedFromLocked += lockedDetails[idx].amount;
+            usedLockedIndices.add(idx);
+          }
+        }
+        const lockedFromRequests = Math.max(0, totalLockedRequests - totalUnlockedRequests - totalAcceptedFromLocked);
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
         // Total locked = credits locked in active orders + credits locked in offer requests + credits locked in pending requests
