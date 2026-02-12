@@ -3551,41 +3551,27 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               ? 'bg-primary-foreground/10 border-primary-foreground/30' 
               : 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/40 dark:to-slate-950/40 border-gray-200 dark:border-gray-800'
           }`}>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                <XCircle className="h-8 w-8 text-red-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-red-500'}`}>
-                    Order Request Rejected
-                  </span>
-                </div>
-                <p className={`font-medium ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
-                  {orderRequestRejected.media_site_name}
+            <div className="flex-1 min-w-0">
+                <p className={`font-semibold text-sm ${isOwnMessage ? 'text-primary-foreground' : 'text-foreground'}`}>
+                  Order Request Rejected: <span className="font-normal">{orderRequestRejected.media_site_name}</span>
                 </p>
-                <div className={`flex items-center gap-1.5 mt-2 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                  <DollarSign className="h-3.5 w-3.5" />
-                  <span className="text-xs">
+                <div className={`mt-2 space-y-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                  <p className="text-sm">
                     Price: {orderRequestRejected.price.toLocaleString()} credits
-                  </span>
-                </div>
+                  </p>
                 {orderRequestRejected.delivery_duration && (orderRequestRejected.delivery_duration.days > 0 || orderRequestRejected.delivery_duration.hours > 0 || orderRequestRejected.delivery_duration.minutes > 0) && (
-                  <div className={`flex items-center gap-1.5 mt-1 ${isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                    <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs">
-                      Delivery: {formatDeliveryDuration(orderRequestRejected.delivery_duration)}
-                    </span>
-                  </div>
-                )}
-                {orderRequestRejected.special_terms && (
-                  <p className={`text-sm mt-1 ${isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                    <span className="font-medium">Special Terms:</span> {orderRequestRejected.special_terms}
+                  <p className="text-sm">
+                    Delivery: {formatDeliveryDuration(orderRequestRejected.delivery_duration)}
                   </p>
                 )}
+                {orderRequestRejected.special_terms && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Special Terms:</span> {orderRequestRejected.special_terms}
+                  </p>
+                )}
+                </div>
               </div>
             </div>
-          </div>
           <p className={`text-xs ${isOwnMessage ? 'text-primary-foreground/50' : 'opacity-50'}`}>
             {format(new Date(msg.created_at), 'HH:mm')}
           </p>
