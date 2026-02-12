@@ -1031,6 +1031,31 @@ export function OrdersView() {
                   {filteredHistoryOrders.map(renderOrderCard)}
                 </div>
               )}
+              {historyOrders.some(o => !o.read) && !isAdmin && (
+                <div className="flex justify-end mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      const unreadIds = historyOrders.filter(o => !o.read).map(o => o.id);
+                      try {
+                        const { error } = await supabase
+                          .from('orders')
+                          .update({ read: true })
+                          .in('id', unreadIds);
+                        if (error) throw error;
+                        setOrders(prev => prev.map(o => unreadIds.includes(o.id) ? { ...o, read: true } : o));
+                        setUserUnreadHistoryCount(0);
+                        sonnerToast.success(`Marked ${unreadIds.length} cancelled orders as read`);
+                      } catch (error: any) {
+                        sonnerToast.error(error.message || 'Failed to mark all as read');
+                      }
+                    }}
+                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
+                  >
+                    Mark All Read
+                  </Button>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
