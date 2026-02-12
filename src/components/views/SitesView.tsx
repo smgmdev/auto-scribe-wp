@@ -2385,7 +2385,7 @@ export function SitesView() {
               [engagement.media_site_id]: engagement
             }));
           }
-          toast({ title: 'Brief submitted! View it in My Engagements.' });
+          // Toast already shown by BriefSubmissionDialog
         }}
       />
 
