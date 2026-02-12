@@ -1497,9 +1497,11 @@ export function CreditHistoryView() {
                         <div className="flex-1">
                           <p className="font-medium">{displayDescription}</p>
                           <div className={`text-lg md:hidden mt-1 ${
-                            transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                              ? 'text-amber-500' 
-                              : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted'
+                              ? 'text-foreground'
+                              : transaction.type === 'withdrawal_locked' 
+                                ? 'text-amber-500' 
+                                : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                           }`}>
                             {transaction.type === 'withdrawal_locked' ? (
                               <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
@@ -1513,9 +1515,11 @@ export function CreditHistoryView() {
                         </div>
                       </div>
                       <div className={`text-lg hidden md:block ${
-                        transaction.type === 'offer_accepted' || transaction.type === 'withdrawal_locked' 
-                          ? 'text-amber-500' 
-                          : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted'
+                          ? 'text-foreground'
+                          : transaction.type === 'withdrawal_locked' 
+                            ? 'text-amber-500' 
+                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                       }`}>
                         {transaction.type === 'withdrawal_locked' ? (
                           <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
