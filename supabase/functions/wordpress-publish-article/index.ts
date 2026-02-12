@@ -91,16 +91,30 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch the WordPress site credentials
-    const { data: site, error: siteError } = await supabase
+    // Fetch the WordPress site credentials - first try approved sites, then pending submissions
+    let site: any = null;
+    const { data: approvedSite } = await supabase
       .from('wordpress_sites')
       .select('id, url, username, app_password, seo_plugin')
       .eq('id', siteId)
       .eq('connected', true)
-      .single();
+      .maybeSingle();
 
-    if (siteError || !site) {
-      console.error('[wordpress-publish-article] Site not found:', siteError);
+    site = approvedSite;
+
+    // Fallback: check wordpress_site_submissions for pending sites (admin testing)
+    if (!site) {
+      console.log('[wordpress-publish-article] Site not in wordpress_sites, checking submissions...');
+      const { data: submission } = await supabase
+        .from('wordpress_site_submissions')
+        .select('id, url, username, app_password, seo_plugin')
+        .eq('id', siteId)
+        .maybeSingle();
+      site = submission;
+    }
+
+    if (!site) {
+      console.error('[wordpress-publish-article] Site not found');
       return new Response(
         JSON.stringify({ 
           success: false,
