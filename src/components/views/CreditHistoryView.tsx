@@ -1652,12 +1652,12 @@ export function CreditHistoryView() {
                                 </div>
                                 {matchedLocked && (
                                   <div>
-                                    <span className="text-muted-foreground">Originally Locked:</span>
+                                    <span className="text-muted-foreground">Order Request Sent:</span>
                                     <p className="font-medium">{format(new Date(matchedLocked.created_at), 'MMM d, yyyy h:mm:ss a')}</p>
                                   </div>
                                 )}
                                 <div>
-                                  <span className="text-muted-foreground">Cancelled At:</span>
+                                  <span className="text-muted-foreground">Order Request Cancelled:</span>
                                   <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm:ss a')}</p>
                                 </div>
                                 {matchedLocked && (
