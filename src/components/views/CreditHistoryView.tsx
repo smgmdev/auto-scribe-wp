@@ -1395,10 +1395,9 @@ export function CreditHistoryView() {
                 const displayDescription = (() => {
                   // Format locked/unlocked credit transactions with better labels
                   if (transaction.type === 'locked') {
-                    // Extract media name from description like "Order request sent: CIO Times (credits reserved)"
                     const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
                     const mediaName = mediaMatch ? mediaMatch[1] : '';
-                    return mediaName ? `Order request sent: ${mediaName} (credits reserved)` : (transaction.description || 'Credits locked');
+                    return mediaName ? `Order request sent: ${mediaName} (credits cancelled)` : (transaction.description || 'Credits locked');
                   }
                   if (transaction.type === 'unlocked') {
                     const mediaMatch = transaction.description?.match(/:\s*(.+?)\s*\(/);
