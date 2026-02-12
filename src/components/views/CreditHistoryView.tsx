@@ -1593,7 +1593,7 @@ export function CreditHistoryView() {
                                     </div>
                                     <div>
                                       <span className="text-muted-foreground">Order Value:</span>
-                                      <p className="font-medium">{orderInfo.media_sites?.price?.toLocaleString() || Math.abs(transaction.amount).toLocaleString()} credits</p>
+                                      <p className="font-medium text-red-500">-{orderInfo.media_sites?.price?.toLocaleString() || Math.abs(transaction.amount).toLocaleString()} credits</p>
                                     </div>
                                     <div>
                                       <span className="text-muted-foreground">Completed:</span>
