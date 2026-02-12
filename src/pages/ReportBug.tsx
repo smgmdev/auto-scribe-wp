@@ -113,7 +113,7 @@ export default function ReportBug() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
+      <div className="h-[120px]" />
 
       {/* Sub-header - Sticky */}
       <div className="sticky top-[92px] z-40">
