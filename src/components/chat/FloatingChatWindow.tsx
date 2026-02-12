@@ -1786,6 +1786,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== messageId));
       
+      // Update service request status to cancelled so it's no longer counted as locked
+      await supabase
+        .from('service_requests')
+        .update({ 
+          status: 'cancelled', 
+          cancelled_at: new Date().toISOString(),
+          cancelled_by: 'agency',
+          cancellation_reason: 'Order request rejected by agency'
+        })
+        .eq('id', globalChatRequest.id);
+
       // Dispatch event so other components can update
       window.dispatchEvent(new CustomEvent('service-message-updated', {
         detail: { requestId: globalChatRequest?.id }
