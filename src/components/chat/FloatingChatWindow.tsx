@@ -4977,7 +4977,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                         </DropdownMenuItem>
                       )
                     )}
-                    {globalChatType === 'agency-request' && (hasAcceptedOrderRequest || (hasOrder && (!localOrder?.delivery_status || localOrder?.delivery_status === 'pending'))) && (
+                    {globalChatType === 'agency-request' && !hasOpenDispute && (hasAcceptedOrderRequest || (hasOrder && (!localOrder?.delivery_status || localOrder?.delivery_status === 'pending'))) && (
                       <DropdownMenuItem 
                         className={`cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black ${isAdmin ? 'opacity-50' : ''}`}
                         disabled={isAdmin}
