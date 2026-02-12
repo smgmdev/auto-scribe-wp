@@ -920,7 +920,7 @@ export function OrdersView() {
       ) : (
         <div className="space-y-0">
           <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex w-full grid grid-cols-4 scrollbar-hide bg-black rounded-none">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
