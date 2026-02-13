@@ -78,23 +78,12 @@ const updates = [
     ],
   },
   {
-    date: 'February 7, 2026',
-    title: 'Admin Panel Enhancements',
-    changes: [
-      'Added bulk credit sending capability for admin users',
-      'Improved user management view with expandable transaction history',
-      'Added security supervision dashboard for monitoring flagged chat messages',
-      'Introduced admin notes on agency applications, withdrawals, and disputes',
-    ],
-  },
-  {
     date: 'February 6, 2026',
     title: 'Press & Newsroom Section',
     changes: [
       'Launched public Newsroom page with press releases and company announcements',
       'Added press release detail pages with rich text content and media contacts',
       'Implemented category filtering for press releases',
-      'Added admin interface for creating and publishing press releases',
     ],
   },
   {
@@ -128,7 +117,6 @@ const updates = [
       'Implemented Stripe Checkout for secure credit purchases',
       'Added payment success and cancellation pages with proper redirect handling',
       'Introduced credit transaction history with detailed descriptions',
-      'Added admin credit management for manually sending credits to users',
     ],
   },
   {
@@ -147,7 +135,6 @@ const updates = [
     changes: [
       'Added Bug Report page accessible from the footer',
       'Implemented categorized bug reporting form with file attachment support',
-      'Added admin feedback view for reviewing and managing bug reports',
       'Introduced status tracking for reported bugs (Open, In Progress, Resolved)',
     ],
   },
@@ -166,8 +153,7 @@ const updates = [
     title: 'Dispute Resolution System',
     changes: [
       'Added dispute creation flow for completed orders',
-      'Implemented admin investigation tools for reviewing disputed orders',
-      'Added resolution workflow with admin notes and outcome tracking',
+      'Added resolution workflow with outcome tracking',
       'Introduced automatic credit refund on dispute resolution in client favor',
     ],
   },
@@ -189,7 +175,6 @@ const updates = [
       'Added tone selection (Professional, Casual, News, Opinion) and customization options',
       'Integrated automatic publishing to connected WordPress sites with SEO metadata',
       'Added featured image fetching and automatic media upload to WordPress',
-      'Introduced source management for admins to configure headline feeds',
       'Added auto-publish scheduling with configurable intervals per source',
       'Implemented tag generation and category mapping for published articles',
     ],
@@ -229,8 +214,6 @@ const updates = [
     title: 'Chat & Communication System',
     changes: [
       'Launched real-time chat system for service request communication between clients and agencies',
-      'Added minimized chat windows with unread message counters',
-      'Implemented admin floating chat for monitoring and participating in conversations',
       'Added new message sound notifications with browser notification support',
       'Introduced chat message security scanning for contact information detection',
       'Added chat presence indicators showing online/offline status',
@@ -242,7 +225,6 @@ const updates = [
     changes: [
       'Built agency application form with document upload and business verification',
       'Added multi-niche selection for agency media specializations',
-      'Implemented admin review interface for approving or rejecting applications',
       'Added automated welcome and status notification emails for agencies',
       'Introduced agency profile with logo, description, and country display',
     ],
@@ -255,7 +237,6 @@ const updates = [
       'Added email verification requirement before account activation',
       'Built user profile system with username and WhatsApp contact fields',
       'Added protected routes with automatic redirect to login for unauthenticated users',
-      'Implemented role-based access control for admin and standard user roles',
     ],
   },
   {
