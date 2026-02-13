@@ -122,9 +122,12 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
             { id: 'admin-ai-settings', label: 'AI Config', icon: Cog },
             { id: 'admin-ai-articles', label: 'AI Articles', icon: ScrollText }
           ]
-        },
-        { id: 'admin-feedback', label: 'Feedback', icon: MessageSquareText }
+        }
       ]
+    }, {
+      id: 'admin-feedback',
+      label: 'Feedback',
+      icon: MessageSquareText
     }];
   }
   return base;
@@ -231,7 +234,7 @@ export function Sidebar({
     const b2bMediaBuyingIds = ['orders', 'my-requests', 'admin-orders', 'admin-engagements'];
     const agencyManagementIds = ['agency-requests', 'agency-payouts', 'agency-media', 'my-agency'];
     const adminAgenciesIds = ['admin-agencies', 'admin-media-management'];
-    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles', 'admin-feedback'];
+    const adminMoreIds = ['admin-new-press-release', 'admin-all-news', 'admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
     const pressReleasesIds = ['admin-new-press-release', 'admin-all-news'];
     const aiPublishingIds = ['admin-ai-sources', 'admin-ai-settings', 'admin-ai-articles'];
     const adminUsersGroupIds = ['admin-users', 'admin-security-supervision'];
