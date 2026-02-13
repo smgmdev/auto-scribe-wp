@@ -347,7 +347,7 @@ export function AdminSecuritySupervisionView() {
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-bold text-foreground">Security Supervision</h1>
             {unreviewedCount > 0 && (
-              <Badge className="bg-red-600 text-white text-xs">{unreviewedCount}</Badge>
+              <span className="min-w-[24px] h-[24px] px-1.5 text-xs font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">{unreviewedCount}</span>
             )}
           </div>
           <Button
