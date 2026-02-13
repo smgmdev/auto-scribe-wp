@@ -324,7 +324,7 @@ export function AgencyPayoutsView() {
             Track your earnings from completed orders
           </p>
         </div>
-        <div className="flex flex-col md:flex-row gap-0 md:gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row gap-0 w-full md:w-auto">
           <Button
             onClick={handleWithdraw}
             className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
