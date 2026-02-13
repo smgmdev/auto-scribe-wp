@@ -278,7 +278,7 @@ export function ArticlesView() {
         </div>
       )}
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-0 md:mb-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground">
