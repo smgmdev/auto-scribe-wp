@@ -962,9 +962,9 @@ export function DashboardView() {
       </div>
 
       {/* My Recent Articles */}
-      <Card className="border-border/50 bg-card">
+        <Card className="border-0 bg-black">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl">My Recent Articles</CardTitle>
+          <CardTitle className="text-xl text-white">My Recent Articles</CardTitle>
           <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="hidden md:flex text-muted-foreground hover:bg-black hover:text-white">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
@@ -1052,9 +1052,9 @@ export function DashboardView() {
       </Card>
 
       {/* Latest Global Articles */}
-      <Card className="border-border/50 bg-card">
+      <Card className="border-0 bg-black">
         <CardHeader>
-          <CardTitle className="text-xl">Latest Global Articles</CardTitle>
+          <CardTitle className="text-xl text-white">Latest Global Articles</CardTitle>
         </CardHeader>
         <CardContent>
           <LatestGlobalArticles />
