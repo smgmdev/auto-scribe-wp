@@ -1242,7 +1242,7 @@ export function ComposeView() {
                 <Button
                   variant="outline"
                   size="icon"
-                   className="hover:bg-black hover:text-white rounded-none"
+                   className="h-9 w-9 hover:bg-black hover:text-white rounded-none"
                   onClick={async () => {
                     if (!title) {
                       toast.error("Please enter a title first");
