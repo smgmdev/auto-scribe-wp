@@ -68,7 +68,7 @@ export default function UpdateLog() {
           Back
         </Button>
 
-        <h1 className="text-4xl font-bold text-foreground mb-2">Update Log</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2">Changelog</h1>
         <p className="text-muted-foreground mb-10">
           A chronological list of platform updates, improvements, and new features.
         </p>
