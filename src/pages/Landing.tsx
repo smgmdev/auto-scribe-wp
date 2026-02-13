@@ -819,7 +819,6 @@ const Landing = () => {
           <>
             <LatestPublishedCarousel />
             {renderSection('Self Publishing Local Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
-            {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
 
             {/* Media Buying Marketplace Section */}
             <section className="relative overflow-hidden rounded-3xl my-10 bg-[#1d1d1f]">
@@ -848,6 +847,7 @@ const Landing = () => {
               </div>
             </section>
 
+            {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
         )}
