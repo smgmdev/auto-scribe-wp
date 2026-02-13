@@ -334,6 +334,14 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
                 'Confirm Withdrawal'
               )}
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full border-foreground text-foreground hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
           </div>
         )}
       </DialogContent>
