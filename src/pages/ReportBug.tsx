@@ -195,7 +195,7 @@ export default function ReportBug() {
           <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">
             {submitted ? 'Thank you for your report' : 'Send us your feedback and get rewards'}
           </h1>
-          <p className="text-sm text-muted-foreground mb-10">
+          <p className="text-base text-muted-foreground mb-10">
             {submitted
               ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
