@@ -839,7 +839,7 @@ const Landing = () => {
                 <h2 className="text-xl md:text-5xl font-bold text-white tracking-tight mb-0 md:mb-2">
                   Control the Narrative.
                 </h2>
-                <h2 className="text-xl md:text-5xl font-bold text-white tracking-tight mb-8">
+                <h2 className="text-xl md:text-5xl font-bold text-white tracking-tight mb-6">
                   Media Buying Marketplace.
                 </h2>
                 <Button
