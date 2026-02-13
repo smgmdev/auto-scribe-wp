@@ -65,7 +65,7 @@ export function MainLayout({
               <Link to="/privacy" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
               <Link to="/help" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
               <Link to="/system-status" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
-              <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Platform Guidelines</Link>
+              <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</Link>
               <Link to="/report-bug" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
               <Link to="/sitemap" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
             </div>
