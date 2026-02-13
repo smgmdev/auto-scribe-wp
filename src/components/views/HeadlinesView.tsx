@@ -337,7 +337,7 @@ export function HeadlinesView() {
                     <p className="text-xs text-muted-foreground/70 truncate">
                       {headline.url}
                     </p>
-                    <div className="flex md:hidden items-center gap-2 pt-2">
+                    <div className="flex md:hidden items-center pt-2">
                       <Button 
                         variant="default"
                         className="flex-1 h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
