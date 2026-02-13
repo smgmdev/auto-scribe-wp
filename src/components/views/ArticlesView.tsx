@@ -305,7 +305,7 @@ export function ArticlesView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-xs grid-cols-2">
+        <TabsList className="grid w-full max-w-xs md:max-w-xs max-md:max-w-full grid-cols-2">
           <TabsTrigger value="published">
             Published ({publishedCount})
           </TabsTrigger>
