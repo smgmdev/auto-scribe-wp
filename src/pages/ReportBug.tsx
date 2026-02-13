@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/layout/Footer';
-import { Search, User, Send, Paperclip, X } from 'lucide-react';
+import { Search, User, Paperclip, X, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -198,18 +198,19 @@ export default function ReportBug() {
           {submitted ? (
             <div className="text-center py-16">
               <div className="w-12 h-12 bg-[#1d1d1f] flex items-center justify-center mx-auto mb-4">
-                <Send className="h-5 w-5 text-white" />
+                <Gift className="h-5 w-5 text-white" />
               </div>
               <h2 className="text-xl font-semibold text-[#1d1d1f] mb-2">Thank you for your report</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                We'll investigate this issue and work on a fix. You may be contacted for more details.
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help.
               </p>
-              <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}>
+              <div className="flex justify-center">
+                <Button 
+                  className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300"
+                  onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
+                >
                   Submit Another
-                </Button>
-                <Button onClick={() => navigate('/')}>
-                  Back to Home
+                  <ArrowRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>
               </div>
             </div>
