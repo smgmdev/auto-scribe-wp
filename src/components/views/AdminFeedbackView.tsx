@@ -47,7 +47,9 @@ export function AdminFeedbackView() {
   const [activeTab, setActiveTab] = useState<'open' | 'all' | 'resolved'>('open');
   const [updatingStatus, setUpdatingStatus] = useState<Set<string>>(new Set());
 
-  const fetchReports = useCallback(async () => {
+  const [isManualRefresh, setIsManualRefresh] = useState(false);
+
+  const fetchReports = useCallback(async (manual = false) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -57,6 +59,9 @@ export function AdminFeedbackView() {
 
       if (error) throw error;
       setReports(data || []);
+      if (manual) {
+        toast.success('Reports refreshed');
+      }
     } catch (err) {
       console.error('Error fetching bug reports:', err);
       toast.error('Failed to load bug reports');
@@ -119,13 +124,17 @@ export function AdminFeedbackView() {
             )}
           </div>
           <Button
-            onClick={fetchReports}
+            onClick={() => fetchReports(true)}
             disabled={loading}
             size="sm"
-            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto"
+            className="w-full md:w-auto border border-foreground shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:shadow-none"
           >
-            {loading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
-            {loading ? 'Loading...' : 'Refresh'}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
           </Button>
         </div>
 
