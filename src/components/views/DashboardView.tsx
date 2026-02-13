@@ -90,6 +90,7 @@ export function DashboardView() {
     completedBankWithdrawals: 0,
     completedCryptoWithdrawals: 0,
     lockedInOrders: 0,
+    lockedInOrderRequests: 0,
     loading: true
   });
   
@@ -348,6 +349,21 @@ export function DashboardView() {
         });
       }
 
+      // Fetch pending order requests (service_requests without orders yet)
+      let lockedInOrderRequests = 0;
+      const { data: pendingRequests } = await supabase
+        .from('service_requests')
+        .select('media_site_id, media_sites!inner(price)')
+        .eq('agency_payout_id', agencyPayout.id)
+        .is('order_id', null)
+        .not('status', 'in', '("cancelled","completed")');
+
+      if (pendingRequests) {
+        pendingRequests.forEach((req: any) => {
+          lockedInOrderRequests += (req.media_sites?.price || 0) / 100;
+        });
+      }
+
       // Fetch withdrawals to calculate wallet balance and withdrawal stats
       const { data: withdrawals } = await supabase
         .from('agency_withdrawals')
@@ -383,7 +399,7 @@ export function DashboardView() {
         });
       }
 
-      const walletBalance = totalEarnings - completedWithdrawalsAmount;
+      const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount - lockedInOrders - lockedInOrderRequests;
 
       setAgencySummary({
         walletBalance,
@@ -396,6 +412,7 @@ export function DashboardView() {
         completedBankWithdrawals,
         completedCryptoWithdrawals,
         lockedInOrders,
+        lockedInOrderRequests,
         loading: false
       });
     };
@@ -714,6 +731,10 @@ export function DashboardView() {
                           <span className="text-white/50">None</span>
                         </div>
                       )}
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Locked in Order Requests:</span>
+                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Orders:</span>
                         <span className="font-semibold text-amber-400">${agencySummary.lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
