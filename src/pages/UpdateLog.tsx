@@ -27,6 +27,25 @@ const updates = [
     ],
   },
   {
+    date: 'February 12, 2026',
+    title: 'Changelog & Footer Updates',
+    changes: [
+      'Added Changelog page accessible from the footer on all pages',
+      'Redesigned footer link layout with improved wrapping on mobile devices',
+      'Updated footer navigation order across landing and dashboard views',
+    ],
+  },
+  {
+    date: 'February 11, 2026',
+    title: 'Global Library Refinements',
+    changes: [
+      'Removed duplicate border lines under subcategory navigation tabs',
+      'Improved media site card hover states with smoother transitions',
+      'Fixed favicon display issues for certain agency-managed sites',
+      'Added logo hover overlay on media site cards in the network view',
+    ],
+  },
+  {
     date: 'February 10, 2026',
     title: 'Search & Navigation Improvements',
     changes: [
@@ -39,6 +58,46 @@ const updates = [
     ],
   },
   {
+    date: 'February 9, 2026',
+    title: 'Order Flow & Credit Locking',
+    changes: [
+      'Implemented credit locking when placing an order to prevent double-spending',
+      'Added automatic credit release when orders are cancelled or rejected',
+      'Improved order status notifications with real-time updates',
+      'Fixed edge case where credits were deducted but order creation failed',
+    ],
+  },
+  {
+    date: 'February 8, 2026',
+    title: 'Mobile Responsiveness Pass',
+    changes: [
+      'Optimized all dashboard views for mobile with zero-spacing compact layouts',
+      'Fixed dialog scrolling issues on small screens with max-height 90vh',
+      'Improved button sizing and touch targets for mobile users',
+      'Adjusted sidebar collapse behavior for tablet-sized screens',
+    ],
+  },
+  {
+    date: 'February 7, 2026',
+    title: 'Admin Panel Enhancements',
+    changes: [
+      'Added bulk credit sending capability for admin users',
+      'Improved user management view with expandable transaction history',
+      'Added security supervision dashboard for monitoring flagged chat messages',
+      'Introduced admin notes on agency applications, withdrawals, and disputes',
+    ],
+  },
+  {
+    date: 'February 6, 2026',
+    title: 'Press & Newsroom Section',
+    changes: [
+      'Launched public Newsroom page with press releases and company announcements',
+      'Added press release detail pages with rich text content and media contacts',
+      'Implemented category filtering for press releases',
+      'Added admin interface for creating and publishing press releases',
+    ],
+  },
+  {
     date: 'February 5, 2026',
     title: 'Agency Management Updates',
     changes: [
@@ -48,6 +107,78 @@ const updates = [
       'Introduced custom verification form for agencies requiring bank or crypto payout methods',
       'Added agency downgrade notifications with detailed reason explanations',
       'Improved media site submission flow with Google Sheets integration for bulk uploads',
+    ],
+  },
+  {
+    date: 'February 4, 2026',
+    title: 'WordPress Integration Improvements',
+    changes: [
+      'Added WordPress site submission form for agencies to connect their blogs',
+      'Implemented automatic favicon fetching for connected WordPress sites',
+      'Added SEO plugin detection (Yoast, RankMath) during site connection',
+      'Improved app password validation and connection testing',
+      'Added category and tag syncing from WordPress to the platform',
+    ],
+  },
+  {
+    date: 'February 3, 2026',
+    title: 'Credit System & Payments',
+    changes: [
+      'Added multiple credit pack options with tiered pricing',
+      'Implemented Stripe Checkout for secure credit purchases',
+      'Added payment success and cancellation pages with proper redirect handling',
+      'Introduced credit transaction history with detailed descriptions',
+      'Added admin credit management for manually sending credits to users',
+    ],
+  },
+  {
+    date: 'February 2, 2026',
+    title: 'Help Center Launch',
+    changes: [
+      'Published comprehensive Help Center with nine topic categories',
+      'Added articles covering Getting Started, Publishing, Media Buying, AI Generation, and more',
+      'Implemented breadcrumb navigation for help article pages',
+      'Added quick links from dashboard to relevant help topics',
+    ],
+  },
+  {
+    date: 'February 1, 2026',
+    title: 'Bug Report System',
+    changes: [
+      'Added Bug Report page accessible from the footer',
+      'Implemented categorized bug reporting form with file attachment support',
+      'Added admin feedback view for reviewing and managing bug reports',
+      'Introduced status tracking for reported bugs (Open, In Progress, Resolved)',
+    ],
+  },
+  {
+    date: 'January 31, 2026',
+    title: 'Account Security & PIN System',
+    changes: [
+      'Added optional PIN-based security for sensitive account actions',
+      'Implemented PIN verification dialog for withdrawals and account changes',
+      'Added login attempt tracking with IP-based monitoring',
+      'Introduced email verification flow with token-based confirmation',
+    ],
+  },
+  {
+    date: 'January 30, 2026',
+    title: 'Dispute Resolution System',
+    changes: [
+      'Added dispute creation flow for completed orders',
+      'Implemented admin investigation tools for reviewing disputed orders',
+      'Added resolution workflow with admin notes and outcome tracking',
+      'Introduced automatic credit refund on dispute resolution in client favor',
+    ],
+  },
+  {
+    date: 'January 29, 2026',
+    title: 'Delivery & Completion Flow',
+    changes: [
+      'Added delivery URL and notes submission for agencies completing orders',
+      'Implemented delivery deadline tracking with countdown indicators',
+      'Added automatic order completion after delivery confirmation',
+      'Introduced delivery status badges across order management views',
     ],
   },
   {
@@ -64,6 +195,36 @@ const updates = [
     ],
   },
   {
+    date: 'January 27, 2026',
+    title: 'Service Request System',
+    changes: [
+      'Built service request submission form with media site selection',
+      'Added request lifecycle management (Pending, Accepted, In Progress, Completed)',
+      'Implemented agency-side request inbox with unread indicators',
+      'Added special terms and requirements field for custom order instructions',
+    ],
+  },
+  {
+    date: 'January 26, 2026',
+    title: 'Media Buying Marketplace',
+    changes: [
+      'Launched Global Media Library with categorized media outlets',
+      'Added site detail dialogs with pricing, publishing time, and format information',
+      'Implemented subcategory filtering (Business, Crypto, Tech, Campaign, Politics, MENA, China)',
+      'Added Google Index status and publication format indicators for each site',
+    ],
+  },
+  {
+    date: 'January 25, 2026',
+    title: 'Self-Publishing Features',
+    changes: [
+      'Added rich text article editor with TipTap integration',
+      'Implemented article drafts with auto-save functionality',
+      'Added WordPress publishing with category, tag, and featured image support',
+      'Introduced article management view with status filtering and search',
+    ],
+  },
+  {
     date: 'January 24, 2026',
     title: 'Chat & Communication System',
     changes: [
@@ -76,18 +237,38 @@ const updates = [
     ],
   },
   {
+    date: 'January 22, 2026',
+    title: 'Agency Onboarding Flow',
+    changes: [
+      'Built agency application form with document upload and business verification',
+      'Added multi-niche selection for agency media specializations',
+      'Implemented admin review interface for approving or rejecting applications',
+      'Added automated welcome and status notification emails for agencies',
+      'Introduced agency profile with logo, description, and country display',
+    ],
+  },
+  {
+    date: 'January 21, 2026',
+    title: 'Authentication & User Accounts',
+    changes: [
+      'Implemented email/password authentication with secure session management',
+      'Added email verification requirement before account activation',
+      'Built user profile system with username and WhatsApp contact fields',
+      'Added protected routes with automatic redirect to login for unauthenticated users',
+      'Implemented role-based access control for admin and standard user roles',
+    ],
+  },
+  {
     date: 'January 20, 2026',
     title: 'Platform Launch',
     changes: [
       'Initial release of the Arcana Mace platform',
-      'Self-publishing feature allowing users to publish articles to their connected WordPress sites',
-      'Media buying marketplace with 200+ global media outlets across multiple categories',
-      'Agency onboarding and verification system with document-based approval workflow',
-      'Credit-based payment system with Stripe integration and multiple credit pack options',
-      'Service request system for ordering media placements from agency-managed sites',
-      'Order lifecycle management with acceptance, delivery, and dispute resolution flows',
-      'User account management with email verification and PIN-based security',
-      'Help center with categorized articles covering all platform features',
+      'Landing page with product overview, feature highlights, and call-to-action sections',
+      'Informational pages: How It Works, Self-Publishing, Media Buying, AI Article Generation',
+      'Legal pages: Terms of Service, Privacy Policy, Do Not Sell, User Guidelines',
+      'Responsive design with mobile-first approach across all pages',
+      'System Status page for monitoring platform health',
+      'Site Map for comprehensive navigation overview',
     ],
   },
 ];
