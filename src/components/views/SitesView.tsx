@@ -1723,10 +1723,10 @@ export function SitesView() {
                   <TabsContent key={category} value={category} className="mt-3">
                     {/* Subcategories for Global */}
                     {category === 'Global' && (
-                      <div className="mb-3 flex flex-wrap gap-2">
+                      <div className="mb-3 flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto scrollbar-hide">
                         <button
                           onClick={() => setActiveSubcategory(null)}
-                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                             activeSubcategory === null
                               ? 'bg-foreground text-background'
                               : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -1738,7 +1738,7 @@ export function SitesView() {
                           <button
                             key={sub}
                             onClick={() => setActiveSubcategory(sub)}
-                            className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
+                            className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                               activeSubcategory === sub
                                 ? 'bg-foreground text-background'
                                 : 'text-muted-foreground hover:bg-foreground hover:text-background'
