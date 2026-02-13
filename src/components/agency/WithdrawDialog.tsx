@@ -320,7 +320,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col gap-0 md:gap-2">
+            <div className="flex flex-col gap-2">
               <Button
                 onClick={handleConfirmWithdraw}
                 disabled={!isValidAmount() || submitting}
