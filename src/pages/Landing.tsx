@@ -820,6 +820,34 @@ const Landing = () => {
             <LatestPublishedCarousel />
             {renderSection('Self Publishing Local Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
+
+            {/* Media Buying Marketplace Section */}
+            <section className="relative overflow-hidden rounded-3xl my-10 bg-[#1d1d1f]">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1a2744] via-[#1d1d1f] to-[#1d1d1f]" />
+              <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
+                <img 
+                  src={amblack} 
+                  alt="Arcana Mace" 
+                  className="h-16 w-16 md:h-20 md:w-20 mb-6 invert"
+                />
+                <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-5">
+                  Media Buying Marketplace
+                </h2>
+                <p className="text-[#a1a1a6] text-sm md:text-base leading-relaxed max-w-2xl mb-8">
+                  Arcana Mace connects brands with premium media outlets worldwide.
+                  Purchase placements across top-tier publications, from business and finance
+                  to tech and lifestyle. Secure escrow payments, verified agencies,
+                  and transparent pricing — all in one marketplace.
+                </p>
+                <button
+                  onClick={() => navigate('/media-buying')}
+                  className="text-[#2997ff] hover:text-[#6cb6ff] text-base md:text-lg font-normal transition-colors inline-flex items-center gap-1"
+                >
+                  Learn more <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </section>
+
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
         )}
