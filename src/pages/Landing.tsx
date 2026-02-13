@@ -17,6 +17,7 @@ import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCarousel';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
+import bugReportBg from '@/assets/bug-report-bg.mp4';
 
 interface SiteTag {
   id: string;
@@ -822,6 +823,31 @@ const Landing = () => {
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
         )}
+
+        {/* Bug Report CTA Section */}
+        <section className="relative overflow-hidden my-12" style={{ minHeight: '320px' }}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src={bugReportBg} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-6">
+              Found a bug? Report it and get free credits.
+            </h2>
+            <Button
+              onClick={() => navigate('/report-bug')}
+              className="bg-accent hover:bg-accent/90 text-white px-8 py-3 text-base"
+            >
+              Report a Bug
+            </Button>
+          </div>
+        </section>
       </main>
 
 
