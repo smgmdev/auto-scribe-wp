@@ -727,7 +727,7 @@ export function OrdersView() {
     <Card 
       key={order.id} 
       className={cn(
-        "border border-border hover:border-foreground/30 transition-colors cursor-pointer relative [box-shadow:none]",
+        "border border-border rounded-none -mt-px hover:bg-muted transition-colors cursor-pointer relative [box-shadow:none]",
         isUnread && !isAdmin && order.status !== 'cancelled' && "bg-blue-500/10 !border-l-4 !border-l-blue-500",
         isUnread && !isAdmin && order.status === 'cancelled' && "bg-blue-500/10"
       )}
@@ -987,7 +987,7 @@ export function OrdersView() {
                     ? 'No active orders at the moment'
                     : 'You have no active orders waiting for delivery')
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {filteredActiveOrders.map(renderOrderCard)}
                 </div>
               )}
@@ -999,7 +999,7 @@ export function OrdersView() {
                   ? 'No matching disputed orders found'
                   : 'You have no open disputes')
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {filteredDisputeOrders.map(renderOrderCard)}
                 </div>
               )}
@@ -1013,7 +1013,7 @@ export function OrdersView() {
                     ? 'No completed orders yet'
                     : 'Your completed orders will appear here')
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {filteredCompletedOrders.map(renderOrderCard)}
                 </div>
               )}
@@ -1027,7 +1027,7 @@ export function OrdersView() {
                     ? 'No cancelled orders'
                     : 'Cancelled orders will appear here')
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {filteredHistoryOrders.map(renderOrderCard)}
                 </div>
               )}
