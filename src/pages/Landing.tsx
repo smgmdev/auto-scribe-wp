@@ -821,7 +821,7 @@ const Landing = () => {
             {renderSection('Self Publishing Local Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
 
             {/* Media Buying Marketplace Section */}
-            <section className="relative overflow-hidden rounded-3xl my-10 bg-[#1d1d1f]">
+            <section className="relative overflow-hidden my-10 bg-[#1d1d1f]">
               <div className="absolute inset-0 bg-gradient-to-b from-[#1a2744] via-[#1d1d1f] to-[#1d1d1f]" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
                 <img 
