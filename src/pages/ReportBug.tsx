@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Footer } from '@/components/layout/Footer';
-import { Search, User, Paperclip, X, Gift } from 'lucide-react';
+import { Search, User, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -198,14 +198,9 @@ export default function ReportBug() {
               ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
-          {submitted && (
-            <div className="flex justify-end mb-6">
-              <Gift className="h-6 w-6 text-muted-foreground" />
-            </div>
-          )}
 
           {submitted ? (
-            <div className="flex flex-col items-center text-center py-16">
+            <div className="flex justify-end mt-4">
               <Button 
                 className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300"
                 onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
