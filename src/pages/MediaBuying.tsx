@@ -1,14 +1,34 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
+
+function LoadingFavicon({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white">
+          <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+        </div>
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`${className || ''} ${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
 
 interface MediaSite {
   id: string;
@@ -290,14 +310,11 @@ export default function MediaBuying() {
               className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
             >
               {site?.favicon ? (
-                <img 
-                  src={site.favicon} 
-                  alt={site.name} 
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gray-200 animate-pulse" />
+                <div className="w-full h-full flex items-center justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+                </div>
               )}
             </div>
           ))}
@@ -314,14 +331,11 @@ export default function MediaBuying() {
               className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
             >
               {site?.favicon ? (
-                <img 
-                  src={site.favicon} 
-                  alt={site.name} 
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full bg-gray-200 animate-pulse" />
+                <div className="w-full h-full flex items-center justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+                </div>
               )}
             </div>
           ))}
@@ -367,9 +381,11 @@ export default function MediaBuying() {
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
-                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                    <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gray-200" />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+                    </div>
                   )}
                 </div>
               ))}
@@ -383,9 +399,11 @@ export default function MediaBuying() {
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
-                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                    <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gray-200" />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+                    </div>
                   )}
                 </div>
               ))}
@@ -399,9 +417,11 @@ export default function MediaBuying() {
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
-                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
+                    <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gray-200" />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-black/20" />
+                    </div>
                   )}
                 </div>
               ))}
@@ -625,12 +645,7 @@ export default function MediaBuying() {
                 className="aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 border border-[#d2d2d7]"
               >
                 {site.favicon ? (
-                  <img 
-                    src={site.favicon} 
-                    alt={site.name} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center">
                     <Globe className="w-6 h-6 text-muted-foreground" />
