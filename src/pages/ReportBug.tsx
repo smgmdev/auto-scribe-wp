@@ -241,7 +241,7 @@ export default function ReportBug() {
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
                     <p>Credits earned through bug reporting are gifted directly to your account by the Arcana Mace team. Please ensure that you provide the email address associated with your account in the submission form so we can deliver the credits to the correct user.</p>
-                    <p>These credits can be used exclusively for <strong className="text-foreground">media publishing</strong> on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
+                    <p>These credits can be used exclusively for media publishing on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
