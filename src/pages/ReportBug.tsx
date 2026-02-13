@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Bug } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -202,10 +202,10 @@ export default function ReportBug() {
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
 
-          {/* Hero image */}
+          {/* Report icon */}
           {!submitted && (
-            <div className="mb-14">
-              <img src={bugReportHero} alt="Developer working on bug fixes" className="w-full h-[300px] md:h-[400px] object-cover" />
+            <div className="mb-14 flex items-center justify-center">
+              <Bug className="h-16 w-16 text-foreground" />
             </div>
           )}
 
