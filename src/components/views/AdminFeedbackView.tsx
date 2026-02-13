@@ -196,13 +196,13 @@ export function AdminFeedbackView() {
                   const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <Card key={report.id} className="border-b last:border-b-0 border-x-0 border-t-0 shadow-none">
+                    <Card key={report.id} className="border-b last:border-b-0 border-x-0 border-t-0 shadow-none hover:bg-muted/50 transition-colors">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between gap-2 mb-1.5">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-0.5">
                               <p className="text-sm font-semibold truncate">{report.subject}</p>
-                              <Badge className={cn("text-[10px] px-1.5 py-0 h-4 text-white", statusConfig.color)}>
+                              <Badge className={cn("text-xs px-2 py-0.5 h-5 text-white", statusConfig.color)}>
                                 {statusConfig.label}
                               </Badge>
                             </div>
@@ -221,7 +221,6 @@ export function AdminFeedbackView() {
                                   setPreviewUrl(report.attachment_url);
                                 }}
                               >
-                                <Paperclip className="h-3 w-3 mr-1" />
                                 File
                               </Button>
                             )}
@@ -233,7 +232,6 @@ export function AdminFeedbackView() {
                                 disabled={updatingStatus.has(report.id)}
                                 onClick={() => updateStatus(report.id, 'resolved')}
                               >
-                                <CheckCircle className="h-3 w-3 mr-1" />
                                 Resolve
                               </Button>
                             )}
