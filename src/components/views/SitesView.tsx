@@ -1523,12 +1523,7 @@ export function SitesView() {
                   <Input
                     placeholder="Search global media library..."
                     value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSearchDropdown(e.target.value.length > 0);
-                    }}
-                    onFocus={() => searchQuery.length > 0 && setShowSearchDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 h-9 text-sm rounded-none bg-foreground text-background placeholder:text-background/50 border-foreground"
                   />
                   {searchQuery && (
@@ -1536,163 +1531,12 @@ export function SitesView() {
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                      onClick={() => {
-                        setSearchQuery('');
-                        setShowSearchDropdown(false);
-                      }}
+                      onClick={() => setSearchQuery('')}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
-                
-                {/* Search Results Dropdown */}
-                {showSearchDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-none shadow-lg z-50 max-h-[300px] overflow-y-auto">
-                    {(() => {
-                      const mediaSiteResults = mediaSites
-                        .filter(site => site.category !== 'Agencies/People') // Exclude agencies from mediaSites
-                        .filter(site => 
-                          site.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          site.link.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (site.agency && site.agency.toLowerCase().includes(searchQuery.toLowerCase()))
-                        );
-                      
-                      // Search through activeAgencies for Agencies/People
-                      const agencyResults = activeAgencies.filter(agency =>
-                        agency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        agency.link.toLowerCase().includes(searchQuery.toLowerCase())
-                      );
-                      
-                      const hasResults = mediaSiteResults.length > 0 || agencyResults.length > 0;
-                      
-                      if (!hasResults) {
-                        return (
-                          <div className="p-4 text-center text-muted-foreground text-sm">
-                            No media sites found for "{searchQuery}"
-                          </div>
-                        );
-                      }
-                      
-                      return (
-                        <>
-                          {mediaSiteResults.map((site) => (
-                            <div
-                              key={site.id}
-                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
-                              onClick={() => {
-                                handleOpenMediaSiteDialog(site);
-                                setSearchQuery('');
-                                setShowSearchDropdown(false);
-                              }}
-                            >
-                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
-                                {site.favicon ? (
-                                  <img 
-                                    src={site.favicon} 
-                                    alt={`${site.name} logo`} 
-                                    className="h-6 w-6 object-contain"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <Globe className="h-4 w-4 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-sm font-medium truncate">{site.name}</p>
-                                  {/* Price on mobile - right side of name */}
-                                  {site.price > 0 && (
-                                    <span className="md:hidden text-xs text-muted-foreground flex-shrink-0">{site.price.toLocaleString()} USD</span>
-                                  )}
-                                </div>
-                                {/* URL on desktop */}
-                                <p className="hidden md:block text-xs text-muted-foreground truncate">
-                                  {site.link.replace(/^https?:\/\//, '')}
-                                </p>
-                                {/* Format and agency on mobile - under name */}
-                                <div className="md:hidden flex items-center gap-1 text-xs text-muted-foreground">
-                                  <span>{site.publication_format}</span>
-                                  {site.agency && (
-                                    <span className="hidden md:inline-flex items-center gap-1">
-                                      <span>via {site.agency}</span>
-                                      {agencyLogos[site.agency] && (
-                                        <img 
-                                          src={agencyLogos[site.agency]} 
-                                          alt={site.agency} 
-                                          className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                        />
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="hidden md:flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
-                                {site.price > 0 && (
-                                  <span>{site.price.toLocaleString()} USD</span>
-                                )}
-                                <span>{site.publication_format}</span>
-                                {site.agency && (
-                                  <div className="flex items-center gap-1.5">
-                                    <span>via</span>
-                                    <span className="text-foreground">{site.agency}</span>
-                                    {agencyLogos[site.agency] && (
-                                      <img 
-                                        src={agencyLogos[site.agency]} 
-                                        alt={site.agency} 
-                                        className="h-4 w-4 object-contain rounded-full"
-                                      />
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                          {/* Active agencies search results */}
-                          {agencyResults.map((agency) => (
-                            <div
-                              key={agency.id}
-                              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-b-0"
-                              onClick={() => {
-                                setSelectedAgencyName(agency.name);
-                                setAgencyDetailsOpen(true);
-                                setSearchQuery('');
-                                setShowSearchDropdown(false);
-                              }}
-                            >
-                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded">
-                                {agency.favicon ? (
-                                  <img 
-                                    src={agency.favicon} 
-                                    alt={`${agency.name} logo`} 
-                                    className="h-6 w-6 object-contain"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <Globe className="h-4 w-4 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{agency.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {agency.link.replace(/^https?:\/\//, '')}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3 flex-shrink-0 text-xs text-muted-foreground">
-                                {agency.country && <span>{agency.country}</span>}
-                                <Badge variant="outline" className="text-xs">Agency</Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </>
-                      );
-                    })()}
-                  </div>
-                )}
               </div>
 
               {/* Category Tabs */}
@@ -1762,14 +1606,20 @@ export function SitesView() {
                             </div>
                           );
                         }
-                        if (activeAgencies.length === 0) {
+                        const filteredAgencies = searchQuery
+                          ? activeAgencies.filter(a => 
+                              a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              a.link.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                          : activeAgencies;
+                        if (filteredAgencies.length === 0) {
                           return (
                             <Card className="border-dashed border-2">
                               <CardContent className="flex flex-col items-center justify-center py-16">
                                 <Globe className="h-12 w-12 text-muted-foreground/50" />
                                 <h3 className="mt-4 text-xl font-semibold">No agencies or people</h3>
                                 <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
-                                  No agencies or people available.
+                                  {searchQuery ? `No results for "${searchQuery}"` : 'No agencies or people available.'}
                                 </p>
                               </CardContent>
                             </Card>
@@ -1777,7 +1627,7 @@ export function SitesView() {
                         }
                         return (
                           <div className="space-y-2">
-                            {activeAgencies.map((agency, index) => (
+                            {filteredAgencies.map((agency, index) => (
                               <Card 
                                 key={agency.id} 
                                 className="group hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden" 
@@ -1882,7 +1732,15 @@ export function SitesView() {
                         if (category === 'Global' && activeSubcategory) {
                           if (!site.subcategory) return false;
                           const subcats = site.subcategory.split(',').map(s => s.trim());
-                          return subcats.includes(activeSubcategory);
+                          if (!subcats.includes(activeSubcategory)) return false;
+                        }
+                        if (searchQuery) {
+                          const q = searchQuery.toLowerCase();
+                          return (
+                            site.name.toLowerCase().includes(q) ||
+                            site.link.toLowerCase().includes(q) ||
+                            (site.agency && site.agency.toLowerCase().includes(q))
+                          );
                         }
                         return true;
                       });
