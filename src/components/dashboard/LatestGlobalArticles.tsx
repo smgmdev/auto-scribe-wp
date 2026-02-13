@@ -88,11 +88,11 @@ export function LatestGlobalArticles() {
                   href={article.wp_link} 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group cursor-pointer"
+                  className="flex items-center justify-between rounded-lg bg-[#2a2a2a] p-3 hover:bg-white transition-colors group cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <p className="font-medium text-sm line-clamp-1 text-white group-hover:text-black">{article.title}</p>
+                    <div className="flex items-center gap-1 text-xs text-white/50 group-hover:text-black/50">
                       {siteName && (
                         <>
                           {siteFavicon && (
@@ -105,13 +105,13 @@ export function LatestGlobalArticles() {
                       <span>{formatRelativeTime(article.created_at)}</span>
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                  <ExternalLink className="h-4 w-4 ml-2 text-white/50 group-hover:text-black/50 transition-colors" />
                 </a>
               ) : (
-                <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                <div className="flex items-center justify-between rounded-lg bg-[#2a2a2a] p-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <p className="font-medium text-sm line-clamp-1 text-white">{article.title}</p>
+                    <div className="flex items-center gap-1 text-xs text-white/50">
                       {siteName && (
                         <>
                           {siteFavicon && (
