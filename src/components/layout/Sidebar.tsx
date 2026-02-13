@@ -198,7 +198,10 @@ export function Sidebar({
     userApplicationStatus,
     setUserApplicationStatus,
     userCustomVerificationStatus,
-    setUserCustomVerificationStatus
+    setUserCustomVerificationStatus,
+    unreadFlaggedMessagesCount,
+    setUnreadFlaggedMessagesCount,
+    incrementUnreadFlaggedMessagesCount,
   } = useAppStore();
   const navigate = useNavigate();
   const {
@@ -396,6 +399,12 @@ export function Sidebar({
           .eq('read', false)
           .eq('status', 'cancelled');
         
+        // Fetch unreviewed flagged messages count
+        const { count: flaggedCount } = await supabase
+          .from('flagged_chat_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('reviewed', false);
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
@@ -405,6 +414,7 @@ export function Sidebar({
           setAdminUnreadEngagementsCount(activeUnreadCount);
           setAdminUnreadDeliveredCount(deliveredUnreadCount);
           setAdminUnreadCancelledEngagementsCount(cancelledEngagementsCountResult || 0);
+          setUnreadFlaggedMessagesCount(flaggedCount || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -722,6 +732,30 @@ export function Sidebar({
           if (old?.read === false && updated.read === true) {
             decrementUnreadDisputesCount();
           }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for admin flagged messages notifications
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-flagged-messages-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'flagged_chat_messages'
+        },
+        () => {
+          incrementUnreadFlaggedMessagesCount();
         }
       )
       .subscribe();
@@ -1270,7 +1304,11 @@ export function Sidebar({
                 const b2bMediaBuyingCount = item.id === 'b2b-media-buying'
                   ? (isAdmin ? (unreadOrdersCount + unreadDisputesCount + adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount) : (userUnreadEngagementsCount + userUnreadDeliveredCount + userUnreadCancelledCount + userUnreadOrdersCount + userUnreadDisputesCount + userUnreadHistoryCount))
                   : 0;
-                const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount;
+                // Calculate notification count for Users group dropdown (admin)
+                const usersGroupCount = item.id === 'admin-users-group'
+                  ? unreadFlaggedMessagesCount
+                  : 0;
+                const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount + usersGroupCount;
                 return (
                   <div key={item.id} className="relative">
                     <Button
@@ -1322,6 +1360,8 @@ export function Sidebar({
                           // Admin Global Engagements shows unread engagement notifications (active + delivered + cancelled)
                           const adminEngagementsTotalCount = adminUnreadEngagementsCount + adminUnreadDeliveredCount + adminUnreadCancelledEngagementsCount;
                           const showAdminEngagementsBadge = subItem.id === 'admin-engagements' && adminEngagementsTotalCount > 0;
+                          // Admin Security Supervision shows unreviewed flagged messages
+                          const showSecurityBadge = subItem.id === 'admin-security-supervision' && unreadFlaggedMessagesCount > 0;
                           
                           // Determine notification count for this submenu item
                           let notificationCount = 0;
@@ -1333,6 +1373,7 @@ export function Sidebar({
                           else if (showUserOrdersBadge) notificationCount = userOrdersBadgeCount;
                           else if (showOrdersBadge) notificationCount = ordersBadgeCount;
                           else if (showAdminEngagementsBadge) notificationCount = adminEngagementsTotalCount;
+                          else if (showSecurityBadge) notificationCount = unreadFlaggedMessagesCount;
                           
                           // Handle nested submenu (e.g., Press Releases under More)
                           if (hasNestedSubmenu) {
