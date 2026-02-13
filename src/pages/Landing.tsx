@@ -836,10 +836,10 @@ const Landing = () => {
               />
               <div className="absolute inset-0 bg-black/30" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
-                <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-2">
+                <h2 className="text-xl md:text-5xl font-bold text-white tracking-tight mb-2">
                   Control the Narrative.
                 </h2>
-                <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-8">
+                <h2 className="text-xl md:text-5xl font-bold text-white tracking-tight mb-8">
                   Media Buying Marketplace.
                 </h2>
                 <Button
