@@ -257,7 +257,7 @@ export default function ReportBug() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <h2 className="text-lg md:text-xl font-semibold text-foreground">Start the Report</h2>
               <div>
-                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Subject *</label>
+                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Subject*</label>
                 <Input
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
@@ -279,7 +279,7 @@ export default function ReportBug() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Category *</label>
+                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Category*</label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger className="h-8 md:h-9 text-sm">
                     <SelectValue placeholder="Select a category" />
@@ -298,7 +298,7 @@ export default function ReportBug() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Description *</label>
+                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Description*</label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
