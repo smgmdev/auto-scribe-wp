@@ -2331,17 +2331,19 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              <TabsTrigger 
-                value="service-requests" 
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
-              >
-                Service Requests
-                {agencyUnreadServiceRequestsCount > 0 && (
-                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                    {agencyUnreadServiceRequestsCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
+              {(isAgency || isAdmin) && (
+                <TabsTrigger 
+                  value="service-requests" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
+                >
+                  Service Requests
+                  {agencyUnreadServiceRequestsCount > 0 && (
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
+                      {agencyUnreadServiceRequestsCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )}
               <TabsTrigger 
                 value="my-engagements" 
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
@@ -2460,11 +2462,13 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            <TabsContent value="service-requests" className="m-0">
-              <ScrollArea className="h-[300px]">
-                {renderChatList(filteredServiceRequests, 'agency-request')}
-              </ScrollArea>
-            </TabsContent>
+            {(isAgency || isAdmin) && (
+              <TabsContent value="service-requests" className="m-0">
+                <ScrollArea className="h-[300px]">
+                  {renderChatList(filteredServiceRequests, 'agency-request')}
+                </ScrollArea>
+              </TabsContent>
+            )}
 
             <TabsContent value="my-engagements" className="m-0">
               <ScrollArea className="h-[300px]">
