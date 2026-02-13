@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 
 interface BugReport {
   id: string;
@@ -48,6 +49,8 @@ export function AdminFeedbackView() {
   const [activeTab, setActiveTab] = useState<'open' | 'all' | 'resolved'>('open');
   const [updatingStatus, setUpdatingStatus] = useState<Set<string>>(new Set());
   const { setUnreadBugReportsCount } = useAppStore();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewTitle, setPreviewTitle] = useState('');
 
   // Reset unread count when viewing this page
   useEffect(() => {
@@ -212,12 +215,18 @@ export function AdminFeedbackView() {
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {report.attachment_url && (
-                              <a href={report.attachment_url} target="_blank" rel="noopener noreferrer">
-                                <Button size="sm" variant="outline" className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background">
-                                  <Paperclip className="h-3 w-3 mr-1" />
-                                  File
-                                </Button>
-                              </a>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                                onClick={() => {
+                                  setPreviewTitle(report.subject);
+                                  setPreviewUrl(report.attachment_url);
+                                }}
+                              >
+                                <Paperclip className="h-3 w-3 mr-1" />
+                                File
+                              </Button>
                             )}
                             {report.status === 'open' && (
                               <Button
@@ -260,6 +269,13 @@ export function AdminFeedbackView() {
             )}
           </TabsContent>
         </Tabs>
+
+        <WebViewDialog
+          open={!!previewUrl}
+          onOpenChange={(open) => { if (!open) setPreviewUrl(null); }}
+          url={previewUrl || ''}
+          title={previewTitle}
+        />
       </div>
     </div>
   );
