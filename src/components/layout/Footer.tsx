@@ -162,7 +162,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
           <p className={`text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             © {new Date().getFullYear()} Arcana Mace. All rights reserved.
           </p>
-          <div className={`flex flex-wrap items-start lg:items-center gap-2 lg:gap-4 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
+          <div className={`flex flex-wrap items-start lg:items-center gap-x-4 gap-y-0 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             <button onClick={() => navigate('/terms')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</button>
             <button onClick={() => navigate('/privacy')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
             <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Do not sell or share my personal information</button>
