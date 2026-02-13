@@ -427,11 +427,11 @@ export function ChatListPanel() {
     checkAgency();
   }, [user, isAdmin]);
 
-  // Set default tab to disputes for admins, service-requests for agencies
+  // Set default tab to disputes for admins, service-requests for everyone else
   useEffect(() => {
     if (isAdmin) {
       setActiveTab('disputes');
-    } else if (isAgency) {
+    } else {
       setActiveTab('service-requests');
     }
   }, [isAgency, isAdmin]);
@@ -2329,33 +2329,28 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              {isAgency && !isAdmin && (
-                <TabsTrigger 
-                  value="service-requests" 
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
-                >
-                  Service Requests
-                  {agencyUnreadServiceRequestsCount > 0 && (
-                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                      {agencyUnreadServiceRequestsCount}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              )}
-              {/* Only show My Engagements tab for non-admin users who are NOT agencies, or agencies who have personal engagements */}
-              {!isAdmin && (!isAgency || myEngagements.length > 0) && (
-                <TabsTrigger 
-                  value="my-engagements" 
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
-                >
-                  My Engagements
-                  {userUnreadEngagementsCount > 0 && (
-                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                      {userUnreadEngagementsCount}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              )}
+              <TabsTrigger 
+                value="service-requests" 
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+              >
+                Service Requests
+                {agencyUnreadServiceRequestsCount > 0 && (
+                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
+                    {agencyUnreadServiceRequestsCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="my-engagements" 
+                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-2.5 text-sm font-medium"
+              >
+                My Engagements
+                {userUnreadEngagementsCount > 0 && (
+                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
+                    {userUnreadEngagementsCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             {isAdmin && (
@@ -2463,22 +2458,17 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            {isAgency && !isAdmin && (
-              <TabsContent value="service-requests" className="m-0">
-                <ScrollArea className="h-[300px]">
-                  {renderChatList(filteredServiceRequests, 'agency-request')}
-                </ScrollArea>
-              </TabsContent>
-            )}
+            <TabsContent value="service-requests" className="m-0">
+              <ScrollArea className="h-[300px]">
+                {renderChatList(filteredServiceRequests, 'agency-request')}
+              </ScrollArea>
+            </TabsContent>
 
-            {/* Only show My Engagements content for non-admin users who are NOT agencies, or agencies who have personal engagements */}
-            {!isAdmin && (!isAgency || myEngagements.length > 0) && (
-              <TabsContent value="my-engagements" className="m-0">
-                <ScrollArea className="h-[300px]">
-                  {renderChatList(filteredEngagements, 'my-request')}
-                </ScrollArea>
-              </TabsContent>
-            )}
+            <TabsContent value="my-engagements" className="m-0">
+              <ScrollArea className="h-[300px]">
+                {renderChatList(filteredEngagements, 'my-request')}
+              </ScrollArea>
+            </TabsContent>
           </Tabs>
         </div>
       )}
