@@ -1554,7 +1554,7 @@ export function SitesView() {
                       }}
                       className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                         activeMediaCategory === cat
-                          ? 'bg-orange-500 text-black'
+                          ? 'bg-[#f2a547] text-black'
                           : 'text-background/70 hover:text-background'
                       }`}
                     >
