@@ -272,9 +272,9 @@ export default function ReportBug() {
                 <h2 className="text-lg md:text-xl font-semibold text-foreground">Start the Report</h2>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => setShowForm(false)}
-                  className="rounded-none text-muted-foreground hover:text-foreground"
+                  className="rounded-none bg-black text-white border-black hover:bg-transparent hover:text-black transition-all duration-200"
                 >
                   Cancel Report
                 </Button>
