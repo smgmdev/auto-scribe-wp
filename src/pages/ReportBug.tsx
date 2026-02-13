@@ -193,13 +193,52 @@ export default function ReportBug() {
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
           <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">
-            {submitted ? 'Thank you for your report' : 'Send us your feedback and report bugs'}
+            {submitted ? 'Thank you for your report' : 'Send us your feedback and get rewards'}
           </h1>
           <p className="text-sm text-muted-foreground mb-10">
             {submitted
               ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
+
+          {/* FAQ - above form */}
+          {!submitted && (
+            <div className="mb-14">
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
+              <Accordion type="multiple" className="w-full">
+                <AccordionItem value="credits" className="border-t border-border">
+                  <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                    <span className="flex items-center justify-between w-full gap-3 text-left">
+                      <span className="text-left">How many credits can I earn for reporting bugs?</span>
+                      <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                    <p>Credit rewards are determined by the severity and impact of the reported issue. Below is a general guideline for how credits are allocated:</p>
+                    <p><strong className="text-foreground">1–5 credits</strong> — Minor visual or user interface issues, such as layout inconsistencies, typos, or styling problems.</p>
+                    <p><strong className="text-foreground">5–10 credits</strong> — Functional or performance-related bugs, including broken features, unexpected behavior, or slow loading times.</p>
+                    <p><strong className="text-foreground">10–15 credits</strong> — Issues affecting credits, payments, WordPress publishing, or site connectivity.</p>
+                    <p><strong className="text-foreground">15–20 credits</strong> — Critical security vulnerabilities that could compromise user data or system integrity.</p>
+                    <p className="text-sm mt-4 border-t border-border pt-4">
+                      <strong className="text-foreground">Please note:</strong> The final credit amount is determined based on all submissions received for a given issue. If multiple users report the same bug, later submissions may receive fewer credits than the original reporter. Unique discoveries that have not been previously reported are rewarded at the full rate.
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="usage" className="border-t border-border">
+                  <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                    <span className="flex items-center justify-between w-full gap-3 text-left">
+                      <span className="text-left">How can I use the credits earned from bug reporting?</span>
+                      <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                    <p>Credits earned through bug reporting are gifted directly to your account by the Arcana Mace team. Please ensure that you provide the email address associated with your account in the submission form so we can deliver the credits to the correct user.</p>
+                    <p>These credits can be used exclusively for <strong className="text-foreground">media publishing</strong> on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          )}
 
           {submitted ? (
             <div className="flex justify-end mt-4">
@@ -317,43 +356,6 @@ export default function ReportBug() {
                   <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
                 </span>
               </Button>
-
-              {/* FAQ */}
-              <div className="mt-14">
-                <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
-                <Accordion type="multiple" className="w-full">
-                  <AccordionItem value="credits" className="border-t border-border">
-                    <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
-                      <span className="flex items-center justify-between w-full gap-3 text-left">
-                        <span className="text-left">How many credits can I earn for reporting bugs?</span>
-                        <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
-                      <p>Credit rewards are determined by the severity and impact of the reported issue. Below is a general guideline for how credits are allocated:</p>
-                      <p><strong className="text-foreground">1–5 credits</strong> — Minor visual or user interface issues, such as layout inconsistencies, typos, or styling problems.</p>
-                      <p><strong className="text-foreground">5–10 credits</strong> — Functional or performance-related bugs, including broken features, unexpected behavior, or slow loading times.</p>
-                      <p><strong className="text-foreground">10–15 credits</strong> — Issues affecting credits, payments, WordPress publishing, or site connectivity.</p>
-                      <p><strong className="text-foreground">15–20 credits</strong> — Critical security vulnerabilities that could compromise user data or system integrity.</p>
-                      <p className="text-sm mt-4 border-t border-border pt-4">
-                        <strong className="text-foreground">Please note:</strong> The final credit amount is determined based on all submissions received for a given issue. If multiple users report the same bug, later submissions may receive fewer credits than the original reporter. Unique discoveries that have not been previously reported are rewarded at the full rate.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="usage" className="border-t border-border">
-                    <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
-                      <span className="flex items-center justify-between w-full gap-3 text-left">
-                        <span className="text-left">How can I use the credits earned from bug reporting?</span>
-                        <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
-                      <p>Credits earned through bug reporting are gifted directly to your account by the Arcana Mace team. Please ensure that you provide the email address associated with your account in the submission form so we can deliver the credits to the correct user.</p>
-                      <p>These credits can be used exclusively for <strong className="text-foreground">media publishing</strong> on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
             </form>
           )}
         </div>
