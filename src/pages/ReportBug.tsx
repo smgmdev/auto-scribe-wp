@@ -190,18 +190,17 @@ export default function ReportBug() {
 
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
-          <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">Send us your feedback and report bugs</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">
+            {submitted ? 'Thank you for your report' : 'Send us your feedback and report bugs'}
+          </h1>
           <p className="text-sm text-muted-foreground mb-10">
-            Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.
+            {submitted
+              ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
+              : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
 
           {submitted ? (
             <div className="flex flex-col items-center text-center py-16">
-              <Gift className="h-8 w-8 text-[#1d1d1f] mb-4 animate-bounce" />
-              <h2 className="text-xl font-semibold text-[#1d1d1f] mb-2">Thank you for your report</h2>
-              <p className="text-sm text-muted-foreground mb-6 max-w-md">
-                We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help.
-              </p>
               <Button 
                 className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300"
                 onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
