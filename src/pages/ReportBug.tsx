@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Footer } from '@/components/layout/Footer';
 import { Search, User, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -315,6 +316,24 @@ export default function ReportBug() {
                   <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
                 </span>
               </Button>
+
+              {/* FAQ */}
+              <div className="mt-10">
+                <h2 className="text-sm font-semibold text-foreground mb-2">FAQ</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="credits" className="border-b border-border">
+                    <AccordionTrigger className="text-sm py-3 hover:no-underline">
+                      How many credits can I get for finding bugs?
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground space-y-2">
+                      <p><span className="font-medium text-foreground">1–5 credits</span> — Minor bugs related to UI/UX</p>
+                      <p><span className="font-medium text-foreground">5–10 credits</span> — Bugs related to functionality or performance</p>
+                      <p><span className="font-medium text-foreground">10–15 credits</span> — Credit/payments related bugs, WordPress site publishing and connecting bugs</p>
+                      <p><span className="font-medium text-foreground">15–20 credits</span> — Critical security bugs</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
             </form>
           )}
         </div>
