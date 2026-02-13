@@ -383,7 +383,7 @@ export default function UpdateLog() {
         </Accordion>
       </main>
 
-      <Footer narrow showTopBorder />
+      <Footer narrow />
     </div>
   );
 }
