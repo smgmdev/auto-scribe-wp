@@ -1554,7 +1554,7 @@ export function SitesView() {
                       }}
                       className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                         activeMediaCategory === cat
-                          ? 'bg-[#f2a547] text-black'
+                          ? 'bg-background text-foreground'
                           : 'text-background/70 hover:text-background'
                       }`}
                     >
@@ -1572,7 +1572,7 @@ export function SitesView() {
                           onClick={() => setActiveSubcategory(null)}
                           className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                             activeSubcategory === null
-                              ? 'bg-background text-foreground'
+                              ? 'bg-[#f2a547] text-black'
                               : 'text-background/70 hover:text-background'
                           }`}
                         >
@@ -1584,7 +1584,7 @@ export function SitesView() {
                             onClick={() => setActiveSubcategory(sub)}
                             className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                               activeSubcategory === sub
-                                ? 'bg-background text-foreground'
+                                ? 'bg-[#f2a547] text-black'
                                 : 'text-background/70 hover:text-background'
                             }`}
                           >
