@@ -211,11 +211,11 @@ export function HeadlinesView() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex w-full mb-4 p-0 h-auto bg-white/10 overflow-x-auto scrollbar-hide md:grid md:grid-cols-4">
-              <TabsTrigger value="political" className="flex-shrink-0 flex-1 py-2 px-4 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Political</TabsTrigger>
-              <TabsTrigger value="business" className="flex-shrink-0 flex-1 py-2 px-4 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Business</TabsTrigger>
-              <TabsTrigger value="middleeast" className="flex-shrink-0 flex-1 py-2 px-4 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Middle East</TabsTrigger>
-              <TabsTrigger value="asia" className="flex-shrink-0 flex-1 py-2 px-4 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Asia</TabsTrigger>
+            <TabsList className="grid grid-cols-4 w-full mb-4 p-0 h-auto bg-white/10">
+              <TabsTrigger value="political" className="py-2 text-xs md:text-sm data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Political</TabsTrigger>
+              <TabsTrigger value="business" className="py-2 text-xs md:text-sm data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Business</TabsTrigger>
+              <TabsTrigger value="middleeast" className="py-2 text-xs md:text-sm data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Mid East</TabsTrigger>
+              <TabsTrigger value="asia" className="py-2 text-xs md:text-sm data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Asia</TabsTrigger>
             </TabsList>
 
             <TabsContent value="political" className="space-y-3">
