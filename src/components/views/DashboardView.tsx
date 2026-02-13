@@ -916,20 +916,20 @@ export function DashboardView() {
       {/* Instant Publishing & B2B Media Buying */}
       <div className="grid gap-2 md:grid-cols-2">
         {/* Instant Publishing */}
-        <Card className="border-border/50 bg-card">
+        <Card className="border-border/50 bg-black">
           <CardHeader>
-            <CardTitle className="text-xl">Instant Publishing</CardTitle>
+            <CardTitle className="text-xl text-white">Instant Publishing</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('headlines')}>
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('headlines')}>
               <Newspaper className="mr-2 h-4 w-4" />
               Scan Headlines
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('compose')}>
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('compose')}>
               <Plus className="mr-2 h-4 w-4" />
               Write New Article
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('sites')}>
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('sites')}>
               <Library className="mr-2 h-4 w-4" />
               Instant Publishing Library
             </Button>
@@ -937,23 +937,23 @@ export function DashboardView() {
         </Card>
 
         {/* B2B Media Buying */}
-        <Card className="border-border/50 bg-card">
+        <Card className="border-border/50 bg-black">
           <CardHeader>
-            <CardTitle className="text-xl">B2B Media Buying</CardTitle>
+            <CardTitle className="text-xl text-white">B2B Media Buying</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" onClick={() => {
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => {
               setTargetTab('custom');
               setCurrentView('sites');
             }}>
               <Library className="mr-2 h-4 w-4" />
               Global Library
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView(isAdmin ? 'admin-orders' : 'orders')}>
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-orders' : 'orders')}>
               <Package className="mr-2 h-4 w-4" />
               {isAdmin ? 'Order Management' : 'My Orders'}
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
+            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
               <MessageSquare className="mr-2 h-4 w-4" />
               {isAdmin ? 'Global Engagements' : 'My Engagements'}
             </Button>
