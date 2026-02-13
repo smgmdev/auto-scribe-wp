@@ -1544,7 +1544,7 @@ export function SitesView() {
                 setActiveMediaCategory(val);
                 setActiveSubcategory(null);
               }}>
-                <div className="flex gap-0 bg-foreground">
+                <div className="flex gap-0 bg-foreground overflow-x-auto scrollbar-hide">
                   {MEDIA_CATEGORIES.map(cat => (
                     <button
                       key={cat}
