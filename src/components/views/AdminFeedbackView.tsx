@@ -201,12 +201,12 @@ export function AdminFeedbackView() {
                         <div className="flex items-start justify-between gap-2 mb-1.5">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <p className="text-xs font-semibold truncate">{report.subject}</p>
-                              <Badge className={cn("text-[9px] px-1.5 py-0 h-4 text-white", statusConfig.color)}>
+                              <p className="text-sm font-semibold truncate">{report.subject}</p>
+                              <Badge className={cn("text-[10px] px-1.5 py-0 h-4 text-white", statusConfig.color)}>
                                 {statusConfig.label}
                               </Badge>
                             </div>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                               {report.reporter_email} · {CATEGORY_LABELS[report.category] || report.category} · {format(new Date(report.created_at), 'MMM d, yyyy HH:mm')}
                             </p>
                           </div>
@@ -215,7 +215,7 @@ export function AdminFeedbackView() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                                className="text-sm h-7 px-3 hover:bg-foreground hover:text-background"
                                 onClick={() => {
                                   setPreviewTitle(report.subject);
                                   setPreviewUrl(report.attachment_url);
@@ -229,7 +229,7 @@ export function AdminFeedbackView() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                                className="text-sm h-7 px-3 hover:bg-foreground hover:text-background"
                                 disabled={updatingStatus.has(report.id)}
                                 onClick={() => updateStatus(report.id, 'resolved')}
                               >
@@ -241,7 +241,7 @@ export function AdminFeedbackView() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                                className="text-sm h-7 px-3 hover:bg-foreground hover:text-background"
                                 disabled={updatingStatus.has(report.id)}
                                 onClick={() => updateStatus(report.id, 'open')}
                               >
@@ -251,10 +251,10 @@ export function AdminFeedbackView() {
                           </div>
                         </div>
 
-                        <p className="text-xs text-foreground mt-1 line-clamp-2">{report.description}</p>
+                        <p className="text-sm text-foreground mt-1 line-clamp-2">{report.description}</p>
                         
                         {report.steps_to_reproduce && (
-                          <p className="text-xs text-foreground mt-1 line-clamp-1">
+                          <p className="text-sm text-foreground mt-1 line-clamp-1">
                             Steps: {report.steps_to_reproduce}
                           </p>
                         )}
