@@ -581,9 +581,9 @@ export function AgencyMediaView() {
         <div className="w-full md:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all">
+              <Button className="group w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all">
                 Add Media
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" sideOffset={0} className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto bg-popover border-border z-50">
