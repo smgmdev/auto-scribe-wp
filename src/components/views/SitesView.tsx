@@ -1465,12 +1465,12 @@ export function SitesView() {
             <div className="space-y-4">
               {/* Search bar for WP sites */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-background/50" />
                 <Input
                   placeholder="Search local media library..."
                   value={wpSearchQuery}
                   onChange={(e) => setWpSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 h-9 text-sm rounded-none"
+                  className="pl-10 pr-10 h-9 text-sm rounded-none bg-foreground text-background placeholder:text-background/50 border-foreground"
                 />
                 {wpSearchQuery && (
                   <Button
@@ -1519,7 +1519,7 @@ export function SitesView() {
               {/* Search Bar */}
               <div ref={searchRef} className="relative w-full">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-background/50" />
                   <Input
                     placeholder="Search global media library..."
                     value={searchQuery}
@@ -1529,7 +1529,7 @@ export function SitesView() {
                     }}
                     onFocus={() => searchQuery.length > 0 && setShowSearchDropdown(true)}
                     onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-                    className="w-full pl-10 h-9 text-sm rounded-none"
+                    className="w-full pl-10 h-9 text-sm rounded-none bg-foreground text-background placeholder:text-background/50 border-foreground"
                   />
                   {searchQuery && (
                     <Button
