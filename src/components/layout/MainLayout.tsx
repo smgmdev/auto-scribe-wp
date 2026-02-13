@@ -29,15 +29,15 @@ export function MainLayout({
       <QuickNavBanner inDashboard />
 
       {/* Promo Banner */}
-      <div className="fixed top-[28px] left-0 lg:left-64 right-0 z-40 bg-[#1d1d1f] border-b border-white/10 flex items-center h-8 px-4 md:px-6">
-        <p className="text-white/80 text-xs">
-          Get free credits by finding bugs on Arcana Mace{' '}
-          <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
+      <div className="fixed top-[28px] left-0 lg:left-64 right-0 z-40 bg-[#1d1d1f] border-b border-white/10 flex items-center h-auto min-h-8 py-1.5 lg:py-0 lg:h-8 px-4 md:px-6">
+        <p className="text-white/80 text-xs flex flex-wrap items-center gap-1 lg:gap-0">
+          <span>Get free credits by finding bugs on Arcana Mace</span>
+          <Link to="/report-bug" className="ml-0 lg:ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
         </p>
       </div>
 
       {/* Mobile Header with Burger Menu */}
-      <header className="lg:hidden fixed top-[60px] left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-center px-4">
+      <header className="lg:hidden fixed top-[72px] left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-center px-4">
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="absolute left-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
           <Menu className="h-6 w-6" />
         </Button>
@@ -63,7 +63,7 @@ export function MainLayout({
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className={`lg:pl-64 pt-[116px] lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
+      <main className={`lg:pl-64 pt-[128px] lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
         <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
