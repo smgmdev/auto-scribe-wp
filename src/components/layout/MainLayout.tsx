@@ -63,7 +63,7 @@ export function MainLayout({
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className={`lg:pl-64 pt-[116px] lg:pt-[60px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
+      <main className={`lg:pl-64 pt-[116px] lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
         <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
