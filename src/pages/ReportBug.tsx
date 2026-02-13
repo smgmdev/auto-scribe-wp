@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -318,18 +319,25 @@ export default function ReportBug() {
               </Button>
 
               {/* FAQ */}
-              <div className="mt-10">
-                <h2 className="text-sm font-semibold text-foreground mb-2">FAQ</h2>
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="credits" className="border-b border-border">
-                    <AccordionTrigger className="text-sm py-3 hover:no-underline">
-                      How many credits can I get for finding bugs?
+              <div className="mt-14">
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
+                <Accordion type="multiple" className="w-full">
+                  <AccordionItem value="credits" className="border-t border-border">
+                    <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                      <span className="flex items-center justify-between w-full gap-3 text-left">
+                        <span className="text-left">How many credits can I earn for reporting bugs?</span>
+                        <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                      </span>
                     </AccordionTrigger>
-                    <AccordionContent className="text-sm text-muted-foreground space-y-2">
-                      <p><span className="font-medium text-foreground">1–5 credits</span> — Minor bugs related to UI/UX</p>
-                      <p><span className="font-medium text-foreground">5–10 credits</span> — Bugs related to functionality or performance</p>
-                      <p><span className="font-medium text-foreground">10–15 credits</span> — Credit/payments related bugs, WordPress site publishing and connecting bugs</p>
-                      <p><span className="font-medium text-foreground">15–20 credits</span> — Critical security bugs</p>
+                    <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                      <p>Credit rewards are determined by the severity and impact of the reported issue. Below is a general guideline for how credits are allocated:</p>
+                      <p><strong className="text-foreground">1–5 credits</strong> — Minor visual or user interface issues, such as layout inconsistencies, typos, or styling problems.</p>
+                      <p><strong className="text-foreground">5–10 credits</strong> — Functional or performance-related bugs, including broken features, unexpected behavior, or slow loading times.</p>
+                      <p><strong className="text-foreground">10–15 credits</strong> — Issues affecting credits, payments, WordPress publishing, or site connectivity.</p>
+                      <p><strong className="text-foreground">15–20 credits</strong> — Critical security vulnerabilities that could compromise user data or system integrity.</p>
+                      <p className="text-sm mt-4 border-t border-border pt-4">
+                        <strong className="text-foreground">Please note:</strong> The final credit amount is determined based on all submissions received for a given issue. If multiple users report the same bug, later submissions may receive fewer credits than the original reporter. Unique discoveries that have not been previously reported are rewarded at the full rate.
+                      </p>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
