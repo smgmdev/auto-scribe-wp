@@ -190,12 +190,7 @@ export default function ReportBug() {
 
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
-          <div className="flex items-end justify-center gap-3 mt-[100px] md:mt-[100px] mb-3">
-            <span className="text-2xl animate-bounce" style={{ animationDuration: '2s', animationDelay: '0s' }}>👾</span>
-            <span className="text-4xl animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}>👾</span>
-            <span className="text-3xl animate-bounce" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }}>🤖</span>
-            <span className="text-xl animate-bounce" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }}>👾</span>
-          </div>
+          <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">Send us your feedback and report bugs</h1>
           <p className="text-sm text-muted-foreground mb-10">
             Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.
           </p>
