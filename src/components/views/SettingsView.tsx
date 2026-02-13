@@ -105,8 +105,8 @@ export function SettingsView() {
       />
       <span className={`text-sm font-medium transition-colors ${
         localSettings.selectedSources.includes(source) 
-          ? 'text-foreground' 
-          : 'text-muted-foreground'
+          ? 'text-white' 
+          : 'text-white/60'
       }`}>
         {sourceLabels[source]}
       </span>
@@ -152,15 +152,15 @@ export function SettingsView() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* News Sources */}
-        <Card>
+        <Card className="bg-foreground text-white border-foreground">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center justify-between text-white">
               <span>News Sources</span>
               <Badge variant="secondary" className="text-xs">
                 {localSettings.selectedSources.length} selected
               </Badge>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/60">
               Select which sources to scan for daily headlines
             </CardDescription>
           </CardHeader>
@@ -174,28 +174,28 @@ export function SettingsView() {
               </TabsList>
 
               <TabsContent value="political" className="space-y-3">
-                <p className="text-xs text-muted-foreground mb-3">Political & Current Affairs</p>
+                <p className="text-xs text-white/50 mb-3">Political & Current Affairs</p>
                 <div className="flex flex-wrap gap-6">
                   {categorySourcesMap.political.map(renderSourceCheckbox)}
                 </div>
               </TabsContent>
 
               <TabsContent value="business" className="space-y-3">
-                <p className="text-xs text-muted-foreground mb-3">Business & Finance</p>
+                <p className="text-xs text-white/50 mb-3">Business & Finance</p>
                 <div className="flex flex-wrap gap-6">
                   {categorySourcesMap.business.map(renderSourceCheckbox)}
                 </div>
               </TabsContent>
 
               <TabsContent value="middleeast" className="space-y-3">
-                <p className="text-xs text-muted-foreground mb-3">Middle East News</p>
+                <p className="text-xs text-white/50 mb-3">Middle East News</p>
                 <div className="flex flex-wrap gap-6">
                   {categorySourcesMap.middleeast.map(renderSourceCheckbox)}
                 </div>
               </TabsContent>
 
               <TabsContent value="asia" className="space-y-3">
-                <p className="text-xs text-muted-foreground mb-3">Asia & Pacific</p>
+                <p className="text-xs text-white/50 mb-3">Asia & Pacific</p>
                 <div className="flex flex-wrap gap-6">
                   {categorySourcesMap.asia.map(renderSourceCheckbox)}
                 </div>
