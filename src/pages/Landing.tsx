@@ -833,11 +833,6 @@ const Landing = () => {
               />
               <div className="absolute inset-0 bg-black/30" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
-                <img 
-                  src={amblack} 
-                  alt="Arcana Mace" 
-                  className="h-16 w-16 md:h-20 md:w-20 mb-6 invert"
-                />
                 <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-2">
                   Control the Narrative.
                 </h2>
