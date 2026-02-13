@@ -838,15 +838,9 @@ const Landing = () => {
                   alt="Arcana Mace" 
                   className="h-16 w-16 md:h-20 md:w-20 mb-6 invert"
                 />
-                <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-5">
-                  Media Buying Marketplace
+                <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-8">
+                  Media Buying Marketplace. Control the Narrative.
                 </h2>
-                <p className="text-white text-sm md:text-base leading-relaxed max-w-2xl mb-8">
-                  Arcana Mace connects brands with PR agencies worldwide.
-                  Purchase placements across media publications globally, from business and finance
-                  to tech and lifestyle. Secure escrow payments, verified agencies,
-                  and transparent pricing — all in one marketplace.
-                </p>
                 <button
                   onClick={() => navigate('/about')}
                   className="text-[#2997ff] hover:text-[#6cb6ff] text-base md:text-lg font-normal transition-colors inline-flex items-center gap-1"
