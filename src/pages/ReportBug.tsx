@@ -70,13 +70,9 @@ export default function ReportBug() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!subject.trim() || !category || !description.trim()) {
+    const reporterEmail = email.trim() || user?.email || '';
+    if (!subject.trim() || !category || !description.trim() || !reporterEmail) {
       toast.error('Please fill in all required fields.');
-      return;
-    }
-
-    if (!user && !email.trim()) {
-      toast.error('Please provide your email address.');
       return;
     }
 
@@ -272,7 +268,7 @@ export default function ReportBug() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Email {!user && '*'}</label>
+                <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Email *</label>
                 <Input
                   type="email"
                   value={email}
