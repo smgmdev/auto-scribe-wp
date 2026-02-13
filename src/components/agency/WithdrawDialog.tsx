@@ -191,7 +191,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md [&_input]:h-8 [&_input]:text-sm" onEscapeKeyDown={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto [&_input]:h-8 [&_input]:text-sm" onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader className="text-left">
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
