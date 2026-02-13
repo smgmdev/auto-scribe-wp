@@ -211,7 +211,7 @@ export function HeadlinesView() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex w-full mb-4 p-0 h-auto bg-transparent">
+            <TabsList className="flex w-full mb-4 p-0 h-auto bg-white/10">
               <TabsTrigger value="political" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Political</TabsTrigger>
               <TabsTrigger value="business" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Business</TabsTrigger>
               <TabsTrigger value="middleeast" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Middle East</TabsTrigger>
