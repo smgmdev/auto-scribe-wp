@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquareText, Search, Loader2, CheckCircle, Clock, AlertCircle, Paperclip, ExternalLink } from 'lucide-react';
+import { MessageSquareText, Search, Loader2, CheckCircle, Clock, AlertCircle, Paperclip, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -118,6 +118,15 @@ export function AdminFeedbackView() {
               <span className="min-w-[24px] h-[24px] px-1.5 text-xs font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">{openCount}</span>
             )}
           </div>
+          <Button
+            onClick={fetchReports}
+            disabled={loading}
+            size="sm"
+            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto"
+          >
+            {loading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </Button>
         </div>
 
         {/* Tabs */}
