@@ -4,7 +4,7 @@ export function QuickNavBanner() {
   const location = useLocation();
   
   // Hide on dashboard and auth pages
-  const hiddenPaths = ['/dashboard', '/auth'];
+  const hiddenPaths = ['/auth'];
   const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path));
   
   if (shouldHide) return null;
