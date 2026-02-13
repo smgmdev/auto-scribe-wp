@@ -891,19 +891,19 @@ export function DashboardView() {
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-white/80 hover:text-black" onClick={() => setCurrentView('my-agency')}>
+              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-white/80 hover:text-black" onClick={() => setCurrentView('agency-media')}>
+              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-media')}>
                 <Library className="mr-2 h-4 w-4" />
                 My Media
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-white/80 hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
+              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
                 <Wallet className="mr-2 h-4 w-4" />
                 My Earnings
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-white/80 hover:text-black" onClick={() => setCurrentView('agency-requests')}>
+              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-requests')}>
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Client Requests
               </Button>
