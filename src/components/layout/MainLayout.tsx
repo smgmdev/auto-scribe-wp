@@ -32,7 +32,7 @@ export function MainLayout({
       <div className="fixed top-[28px] left-0 lg:left-64 right-0 z-40 bg-[#1d1d1f] border-b border-white/10 flex items-center h-8 px-4 lg:px-8">
         <p className="text-white/80 text-xs">
           Get free credits by finding bugs on Arcana Mace{' '}
-          <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-semibold bg-white text-black hover:bg-white/90 transition-colors">Get Credits</Link>
+          <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
         </p>
       </div>
 
