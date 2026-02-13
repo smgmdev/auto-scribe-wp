@@ -206,6 +206,9 @@ export function Sidebar({
     unreadFlaggedMessagesCount,
     setUnreadFlaggedMessagesCount,
     incrementUnreadFlaggedMessagesCount,
+    unreadBugReportsCount,
+    setUnreadBugReportsCount,
+    incrementUnreadBugReportsCount,
   } = useAppStore();
   const navigate = useNavigate();
   const {
@@ -409,6 +412,12 @@ export function Sidebar({
           .select('*', { count: 'exact', head: true })
           .eq('reviewed', false);
         
+        // Fetch unread bug reports count (open status)
+        const { count: bugReportsCount } = await supabase
+          .from('bug_reports')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'open');
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
@@ -419,6 +428,7 @@ export function Sidebar({
           setAdminUnreadDeliveredCount(deliveredUnreadCount);
           setAdminUnreadCancelledEngagementsCount(cancelledEngagementsCountResult || 0);
           setUnreadFlaggedMessagesCount(flaggedCount || 0);
+          setUnreadBugReportsCount(bugReportsCount || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -760,6 +770,30 @@ export function Sidebar({
         },
         () => {
           incrementUnreadFlaggedMessagesCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for admin bug reports notifications
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-bug-reports-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bug_reports'
+        },
+        () => {
+          incrementUnreadBugReportsCount();
         }
       )
       .subscribe();
@@ -1454,19 +1488,27 @@ export function Sidebar({
                 );
               }
 
+              const feedbackBadgeCount = item.id === 'admin-feedback' ? unreadBugReportsCount : 0;
+              
               return (
-                <Button
-                  key={item.id}
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                    isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                <div key={item.id} className="relative">
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                      isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                    )}
+                    onClick={() => handleNavClick(item.id)}
+                  >
+                    <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
+                    <span className="truncate">{item.label}</span>
+                  </Button>
+                  {feedbackBadgeCount > 0 && (
+                    <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                      {feedbackBadgeCount}
+                    </span>
                   )}
-                  onClick={() => handleNavClick(item.id)}
-                >
-                  <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
-                  <span className="truncate">{item.label}</span>
-                </Button>
+                </div>
               );
             })}
             </div>

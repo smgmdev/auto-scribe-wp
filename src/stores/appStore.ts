@@ -133,6 +133,11 @@ interface AppState {
   setUnreadFlaggedMessagesCount: (count: number) => void;
   incrementUnreadFlaggedMessagesCount: () => void;
   
+  // Admin feedback (bug reports) notifications
+  unreadBugReportsCount: number;
+  setUnreadBugReportsCount: (count: number) => void;
+  incrementUnreadBugReportsCount: () => void;
+  
   // Admin closed engagements notifications (Delivered + Cancelled tabs)
   adminUnreadDeliveredCount: number;
   setAdminUnreadDeliveredCount: (count: number) => void;
@@ -360,6 +365,13 @@ export const useAppStore = create<AppState>()((set) => ({
   setUnreadFlaggedMessagesCount: (count) => set({ unreadFlaggedMessagesCount: count }),
   incrementUnreadFlaggedMessagesCount: () => set((state) => ({
     unreadFlaggedMessagesCount: state.unreadFlaggedMessagesCount + 1
+  })),
+  
+  // Admin feedback (bug reports) notifications
+  unreadBugReportsCount: 0,
+  setUnreadBugReportsCount: (count) => set({ unreadBugReportsCount: count }),
+  incrementUnreadBugReportsCount: () => set((state) => ({
+    unreadBugReportsCount: state.unreadBugReportsCount + 1
   })),
   
   // Admin closed engagements notifications
@@ -680,6 +692,7 @@ export const useAppStore = create<AppState>()((set) => ({
     unreadAgencyApplicationsCount: 0,
     unreadCustomVerificationsCount: 0,
     unreadFlaggedMessagesCount: 0,
+    unreadBugReportsCount: 0,
     unreadMediaSubmissionsCount: 0,
     unreadOrdersCount: 0,
     unreadDisputesCount: 0,
