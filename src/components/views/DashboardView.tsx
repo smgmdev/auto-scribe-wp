@@ -559,7 +559,7 @@ export function DashboardView() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-4">
         <div className="order-2 md:order-1">
-          <h1 className="text-4xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-white">
             Dashboard
           </h1>
           {/* Badge on mobile - shown above description */}
@@ -579,7 +579,7 @@ export function DashboardView() {
               </Badge>
             )}
           </div>
-          <p className="mt-2 text-muted-foreground">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
+          <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:block order-1 md:order-2">
