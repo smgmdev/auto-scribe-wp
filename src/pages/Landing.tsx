@@ -537,7 +537,7 @@ const Landing = () => {
 
     return (
       <section className="mb-10">
-        <div className="flex items-end justify-between mb-4">
+        <div className="flex items-baseline justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">
             {title}
           </h2>
