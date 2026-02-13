@@ -841,9 +841,10 @@ const Landing = () => {
                 </h2>
                 <Button
                   onClick={() => navigate('/about')}
-                  className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
+                  className="group bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
                 >
                   Learn more
+                  <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
                 </Button>
               </div>
             </section>
