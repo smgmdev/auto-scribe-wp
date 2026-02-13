@@ -586,7 +586,7 @@ export function AgencyMediaView() {
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto bg-popover border-border z-50">
+            <DropdownMenuContent align="start" sideOffset={0} className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto bg-popover border-border z-50">
               <DropdownMenuItem 
                 onClick={() => handleAddMedia('wordpress')}
                 className="hover:!bg-black hover:!text-white cursor-pointer transition-colors"
