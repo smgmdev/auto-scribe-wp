@@ -194,6 +194,7 @@ export default function ReportBug() {
             <span className="text-2xl animate-bounce" style={{ animationDuration: '2s', animationDelay: '0s' }}>👾</span>
             <span className="text-4xl animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}>👾</span>
             <span className="text-xl animate-bounce" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }}>👾</span>
+            <span className="text-3xl animate-bounce" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }}>🤖</span>
           </div>
           <p className="text-sm text-muted-foreground mb-10">
             Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.
