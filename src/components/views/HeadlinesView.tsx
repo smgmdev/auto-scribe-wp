@@ -157,8 +157,8 @@ export function HeadlinesView() {
       />
       <span className={`text-sm font-medium transition-colors ${
         settings.selectedSources.includes(source) 
-          ? 'text-foreground' 
-          : 'text-muted-foreground'
+          ? 'text-white' 
+          : 'text-white/60'
       }`}>
         {sourceLabels[source]}
       </span>
@@ -200,11 +200,11 @@ export function HeadlinesView() {
       </div>
 
       {/* Source Filters with Tabs */}
-      <Card>
+      <Card className="bg-foreground text-white border-foreground">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
+          <CardTitle className="text-sm font-medium text-white/60 flex items-center justify-between">
             <span>Active Sources</span>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
               {settings.selectedSources.length} selected
             </Badge>
           </CardTitle>
@@ -219,28 +219,28 @@ export function HeadlinesView() {
             </TabsList>
 
             <TabsContent value="political" className="space-y-3">
-              <p className="text-xs text-muted-foreground mb-3">Political & Current Affairs</p>
+              <p className="text-xs text-white/50 mb-3">Political & Current Affairs</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.political.map(renderSourceCheckbox)}
               </div>
             </TabsContent>
 
             <TabsContent value="business" className="space-y-3">
-              <p className="text-xs text-muted-foreground mb-3">Business & Finance</p>
+              <p className="text-xs text-white/50 mb-3">Business & Finance</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.business.map(renderSourceCheckbox)}
               </div>
             </TabsContent>
 
             <TabsContent value="middleeast" className="space-y-3">
-              <p className="text-xs text-muted-foreground mb-3">Middle East News</p>
+              <p className="text-xs text-white/50 mb-3">Middle East News</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.middleeast.map(renderSourceCheckbox)}
               </div>
             </TabsContent>
 
             <TabsContent value="asia" className="space-y-3">
-              <p className="text-xs text-muted-foreground mb-3">Asia Pacific</p>
+              <p className="text-xs text-white/50 mb-3">Asia Pacific</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.asia.map(renderSourceCheckbox)}
               </div>
