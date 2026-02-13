@@ -1,7 +1,17 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { Search, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
+import { useAuth } from '@/hooks/useAuth';
+import { SearchModal } from '@/components/search/SearchModal';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
@@ -54,45 +64,103 @@ const updates = [
 
 export default function UpdateLog() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="max-w-[980px] mx-auto px-4 md:px-6 py-12">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mb-6 -ml-2 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back
-        </Button>
-
-        <h1 className="text-4xl font-bold text-foreground mb-2">Changelog</h1>
-        <p className="text-muted-foreground mb-10">
-          A chronological list of platform updates, improvements, and new features.
-        </p>
-
-        <div className="space-y-0">
-          {updates.map((update, i) => (
-            <div
-              key={i}
-              className="border-t border-border py-6"
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          </div>
+          
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
             >
-              <p className="text-xs text-muted-foreground mb-1">{update.date}</p>
-              <h2 className="text-lg font-semibold text-foreground mb-3">{update.title}</h2>
-              <ul className="space-y-1.5">
-                {update.changes.map((change, j) => (
-                  <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-foreground/30 flex-shrink-0" />
-                    {change}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
+
+      {/* Search Modal */}
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
+
+      {/* Content */}
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-[140px]">
+        {/* Title Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
+            Changelog
+          </h1>
+          <p className="text-muted-foreground border-b border-border pb-8">
+            A chronological list of platform updates, improvements, and new features.
+          </p>
+        </div>
+
+        {/* Updates as Accordion */}
+        <Accordion type="multiple" className="w-full">
+          {updates.map((update, i) => (
+            <AccordionItem key={i} value={`item-${i}`} className="border-t border-border">
+              <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                <span className="flex items-center justify-between w-full gap-3 text-left">
+                  <span className="text-left">
+                    {update.title}
+                    <span className="block text-xs font-normal text-muted-foreground mt-1">{update.date}</span>
+                  </span>
+                  <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+                <ul className="list-none space-y-3">
+                  {update.changes.map((change, j) => (
+                    <li key={j} className="pl-4 border-l-2 border-border">
+                      {change}
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </main>
+
       <Footer narrow showTopBorder />
     </div>
   );
