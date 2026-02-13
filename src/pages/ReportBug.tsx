@@ -206,7 +206,7 @@ export default function ReportBug() {
               </p>
               <div className="flex justify-center">
                 <Button 
-                  className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300"
+                  className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300 justify-center text-center"
                   onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
                 >
                   Submit Another
