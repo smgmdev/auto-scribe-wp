@@ -1390,12 +1390,12 @@ export function AgencyRequestsView() {
       </div>
 
       <div className="relative -mb-px">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
         <Input
           placeholder="Search requests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 w-full h-9 text-sm rounded-none"
+          className="pl-9 w-full h-9 text-sm rounded-none bg-foreground text-background placeholder:text-white/50 border-foreground"
         />
       </div>
 
