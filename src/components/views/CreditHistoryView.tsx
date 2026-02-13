@@ -935,9 +935,9 @@ export function CreditHistoryView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-4">
+      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4">
       {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between mb-0">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Credit Management
@@ -946,7 +946,7 @@ export function CreditHistoryView() {
             Manage your credits and view transaction history
           </p>
         </div>
-        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-2 w-full md:w-auto">
           <Button 
             onClick={() => setBuyCreditsOpen(true)}
             className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
