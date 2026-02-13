@@ -129,9 +129,7 @@ export function AdminSecuritySupervisionView() {
 
   useEffect(() => {
     fetchFlags();
-    // Clear sidebar notification when view is opened
-    setUnreadFlaggedMessagesCount(0);
-  }, [fetchFlags, setUnreadFlaggedMessagesCount]);
+  }, [fetchFlags]);
 
   // Real-time subscription for new flags
   useEffect(() => {
@@ -267,6 +265,7 @@ export function AdminSecuritySupervisionView() {
 
       if (error) throw error;
       setFlags(prev => prev.map(f => f.id === flagId ? { ...f, reviewed: true, reviewed_at: new Date().toISOString() } : f));
+      setUnreadFlaggedMessagesCount(Math.max(0, useAppStore.getState().unreadFlaggedMessagesCount - 1));
     } catch (err) {
       console.error('Error marking reviewed:', err);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to mark as reviewed' });
@@ -288,6 +287,7 @@ export function AdminSecuritySupervisionView() {
 
       if (error) throw error;
       setFlags(prev => prev.map(f => ids.includes(f.id) ? { ...f, reviewed: true, reviewed_at: new Date().toISOString() } : f));
+      setUnreadFlaggedMessagesCount(Math.max(0, useAppStore.getState().unreadFlaggedMessagesCount - ids.length));
       toast({ title: 'Marked as reviewed', description: `${ids.length} flags marked as reviewed` });
     } catch (err) {
       console.error('Error:', err);
