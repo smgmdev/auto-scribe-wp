@@ -60,7 +60,7 @@ export function MainLayout({
         <footer className={`border-t py-4 px-4 lg:px-8 mb-[50px] ${isDarkFooter ? 'bg-[#1d1d1f] border-white/20' : 'border-border/50'}`}>
           <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
             <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
-            <div className={`flex flex-wrap items-center gap-x-4 gap-y-0 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
+            <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
               <Link to="/terms" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
               <Link to="/privacy" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
               <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</Link>
