@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -88,7 +88,7 @@ export function AdminSecuritySupervisionView() {
   const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
   
   const { setCurrentView, setUnreadFlaggedMessagesCount } = useAppStore();
-  const { toast } = useToast();
+  
 
   const fetchFlags = useCallback(async () => {
     setLoading(true);
@@ -121,7 +121,7 @@ export function AdminSecuritySupervisionView() {
       }
     } catch (err) {
       console.error('Error fetching flags:', err);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to load flagged messages' });
+      toast.error('Failed to load flagged messages');
     } finally {
       setLoading(false);
     }
@@ -240,16 +240,13 @@ export function AdminSecuritySupervisionView() {
       }
 
       const result = await response.json();
-      toast({
-        title: 'Scan Complete',
-        description: `Scanned ${result.scanned} messages. Found ${result.regexFlags} pattern matches and ${result.aiFlags} AI detections. ${result.inserted} new flags added.`,
-      });
+      toast.success(`Scanned ${result.scanned} messages. Found ${result.regexFlags} pattern matches and ${result.aiFlags} AI detections. ${result.inserted} new flags added.`);
 
       // Refresh data
       await fetchFlags();
     } catch (err: any) {
       console.error('Scan error:', err);
-      toast({ variant: 'destructive', title: 'Scan Failed', description: err.message });
+      toast.error(err.message);
     } finally {
       setScanning(false);
     }
@@ -268,7 +265,7 @@ export function AdminSecuritySupervisionView() {
       setUnreadFlaggedMessagesCount(Math.max(0, useAppStore.getState().unreadFlaggedMessagesCount - 1));
     } catch (err) {
       console.error('Error marking reviewed:', err);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to mark as reviewed' });
+      toast.error('Failed to mark as reviewed');
     } finally {
       setMarkingReviewed(prev => { const next = new Set(prev); next.delete(flagId); return next; });
     }
@@ -288,7 +285,7 @@ export function AdminSecuritySupervisionView() {
       if (error) throw error;
       setFlags(prev => prev.map(f => ids.includes(f.id) ? { ...f, reviewed: true, reviewed_at: new Date().toISOString() } : f));
       setUnreadFlaggedMessagesCount(Math.max(0, useAppStore.getState().unreadFlaggedMessagesCount - ids.length));
-      toast({ title: 'Marked as reviewed', description: `${ids.length} flags marked as reviewed` });
+      toast.success(`${ids.length} flags marked as reviewed`);
     } catch (err) {
       console.error('Error:', err);
     }
