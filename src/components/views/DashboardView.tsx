@@ -675,7 +675,7 @@ export function DashboardView() {
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
-           <Card className="border-border/50 bg-[#1d1d1f]">
+           <Card className="border-border/50 bg-black">
             <CardHeader>
               <CardTitle className="text-xl text-white">Agency Summary</CardTitle>
             </CardHeader>
