@@ -362,7 +362,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
       onOpenChange(isOpen);
     }}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle className="text-xl">Add WordPress Site</DialogTitle>
           <DialogDescription>
             Submit your WordPress site details for approval. You'll need an application password for authentication.
