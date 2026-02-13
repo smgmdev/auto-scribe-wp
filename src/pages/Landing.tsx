@@ -544,7 +544,7 @@ const Landing = () => {
           {seeAllConfig && (
             <button
               onClick={handleSeeAll}
-              className="text-sm text-accent hover:text-accent/80 transition-colors"
+              className="text-sm text-accent hover:text-accent/80 transition-colors whitespace-nowrap shrink-0"
             >
               See All →
             </button>
