@@ -252,7 +252,7 @@ export function HeadlinesView() {
       </Card>
 
       {/* Headlines List */}
-      <div className="space-y-4">
+      <div className="space-y-4 mt-4 md:mt-0">
         {filteredHeadlines.length === 0 ? (
           <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-16">
