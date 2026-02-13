@@ -831,7 +831,7 @@ const Landing = () => {
                 className="absolute inset-0 w-full h-full object-cover"
                 src={mediaBuyingBg}
               />
-              <div className="absolute inset-0 bg-black/60" />
+              <div className="absolute inset-0 bg-black/30" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
                 <img 
                   src={amblack} 
