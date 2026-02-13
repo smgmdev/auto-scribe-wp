@@ -128,7 +128,7 @@ export function AdminAIArticlesView() {
   });
 
   // Fetch total count for pagination
-  const { data: totalCount, refetch: refetchCount } = useQuery({
+  const { data: totalCount, refetch: refetchCount, isLoading: isLoadingCount } = useQuery({
     queryKey: ['ai-published-sources-count', selectedSource, selectedSite, debouncedSearch],
     queryFn: async () => {
       let query = supabase
@@ -610,8 +610,12 @@ export function AdminAIArticlesView() {
       <Card>
         <CardHeader>
           <CardTitle>Published Articles</CardTitle>
-          <CardDescription>
-            {totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published
+          <CardDescription className="flex items-center gap-2">
+            {isLoadingCount ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <>{totalCount ?? 0} article{totalCount !== 1 ? 's' : ''} published</>
+            )}
           </CardDescription>
           <div className="relative w-full pt-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 mt-1 h-4 w-4 text-muted-foreground" />
