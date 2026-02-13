@@ -833,7 +833,7 @@ const Landing = () => {
                   Media Buying Marketplace
                 </h2>
                 <p className="text-white text-sm md:text-base leading-relaxed max-w-2xl mb-8">
-                  Arcana Mace connects brands with PR and marketing agencies worldwide.
+                  Arcana Mace connects brands with PR agencies worldwide.
                   Purchase placements across media publications globally, from business and finance
                   to tech and lifestyle. Secure escrow payments, verified agencies,
                   and transparent pricing — all in one marketplace.
