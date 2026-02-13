@@ -946,7 +946,7 @@ export function CreditHistoryView() {
             Manage your credits and view transaction history
           </p>
         </div>
-        <div className="flex flex-col md:flex-row gap-0 md:gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row gap-0 w-full md:w-auto">
           <Button 
             onClick={() => setBuyCreditsOpen(true)}
             className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
