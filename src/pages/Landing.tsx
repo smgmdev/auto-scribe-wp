@@ -18,6 +18,7 @@ import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCar
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 import bugReportBg from '@/assets/bug-report-bg.mp4';
+import mediaBuyingBg from '@/assets/media-buying-bg.mp4';
 
 interface SiteTag {
   id: string;
@@ -822,7 +823,15 @@ const Landing = () => {
 
             {/* Media Buying Marketplace Section */}
             <section className="relative overflow-hidden my-10 bg-[#1d1d1f]">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#1a2744] via-[#1d1d1f] to-[#1d1d1f]" />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+                src={mediaBuyingBg}
+              />
+              <div className="absolute inset-0 bg-black/60" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
                 <img 
                   src={amblack} 
