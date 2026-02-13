@@ -190,7 +190,7 @@ export default function ReportBug() {
 
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
-          <p className="text-sm text-muted-foreground mb-10 mt-[100px]">
+          <p className="text-sm text-muted-foreground mb-10 mt-[100px] md:mt-[100px]">
             Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.
           </p>
 
@@ -220,7 +220,7 @@ export default function ReportBug() {
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Brief summary of the issue"
-                  className="h-9"
+                  className="h-8 md:h-9 text-sm"
                 />
               </div>
 
@@ -231,7 +231,7 @@ export default function ReportBug() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={user?.email || 'your@email.com'}
-                  className="h-9"
+                  className="h-8 md:h-9 text-sm"
                 />
                 <p className="text-xs text-muted-foreground mt-1.5">Please enter the email address associated with your account to receive bug-reporting gift credits.</p>
               </div>
@@ -239,7 +239,7 @@ export default function ReportBug() {
               <div>
                 <label className="text-xs font-medium text-[#1d1d1f] mb-1.5 block">Category *</label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-8 md:h-9 text-sm">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -261,7 +261,7 @@ export default function ReportBug() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the bug in detail. What happened? What did you expect to happen?"
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[100px] md:min-h-[120px] resize-none text-sm"
                 />
               </div>
 
@@ -271,7 +271,7 @@ export default function ReportBug() {
                   value={stepsToReproduce}
                   onChange={(e) => setStepsToReproduce(e.target.value)}
                   placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..."
-                  className="min-h-[100px] resize-none"
+                  className="min-h-[80px] md:min-h-[100px] resize-none text-sm"
                 />
               </div>
 
