@@ -204,7 +204,7 @@ export default function ReportBug() {
           {/* FAQ - above form */}
           {!submitted && (
             <div className="mb-14">
-              <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
+              
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="credits" className="border-t border-border">
                   <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
