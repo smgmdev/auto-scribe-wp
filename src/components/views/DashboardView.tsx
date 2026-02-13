@@ -886,24 +886,24 @@ export function DashboardView() {
           </Card>
 
           {/* Agency Management */}
-          <Card className="border-border/50 bg-card">
+          <Card className="border-border/50 bg-[#1d1d1f]">
             <CardHeader>
-              <CardTitle className="text-xl">Agency Management</CardTitle>
+              <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('my-agency')}>
+              <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-media')}>
+              <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => setCurrentView('agency-media')}>
                 <Library className="mr-2 h-4 w-4" />
                 My Media
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-payouts')}>
+              <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => setCurrentView('agency-payouts')}>
                 <Wallet className="mr-2 h-4 w-4" />
                 My Earnings
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => setCurrentView('agency-requests')}>
+              <Button variant="outline" className="w-full justify-start border-white/20 text-white hover:bg-white/10 hover:text-white" onClick={() => setCurrentView('agency-requests')}>
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Client Requests
               </Button>
