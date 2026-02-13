@@ -197,8 +197,8 @@ export default function ReportBug() {
 
           {submitted ? (
             <div className="text-center py-16">
-              <div className="w-12 h-12 bg-[#1d1d1f] flex items-center justify-center mx-auto mb-4">
-                <Gift className="h-5 w-5 text-white" />
+              <div className="mx-auto mb-4">
+                <Gift className="h-8 w-8 text-[#1d1d1f]" />
               </div>
               <h2 className="text-xl font-semibold text-[#1d1d1f] mb-2">Thank you for your report</h2>
               <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
@@ -210,7 +210,7 @@ export default function ReportBug() {
                   onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
                 >
                   Submit Another
-                  <ArrowRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 ml-1 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
                 </Button>
               </div>
             </div>
