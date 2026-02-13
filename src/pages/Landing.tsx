@@ -841,7 +841,7 @@ const Landing = () => {
                 </h2>
                 <Button
                   onClick={() => navigate('/about')}
-                  className="bg-accent hover:bg-accent/90 text-white px-8 py-3 text-base"
+                  className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
                 >
                   Learn more
                 </Button>
