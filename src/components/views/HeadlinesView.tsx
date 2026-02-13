@@ -211,11 +211,11 @@ export function HeadlinesView() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 mb-4 scrollbar-hide justify-start">
-              <TabsTrigger value="political">Political</TabsTrigger>
-              <TabsTrigger value="business">Business</TabsTrigger>
-              <TabsTrigger value="middleeast">Middle East</TabsTrigger>
-              <TabsTrigger value="asia">Asia</TabsTrigger>
+            <TabsList className="flex w-full mb-4 p-0 h-auto bg-transparent">
+              <TabsTrigger value="political" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Political</TabsTrigger>
+              <TabsTrigger value="business" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Business</TabsTrigger>
+              <TabsTrigger value="middleeast" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Middle East</TabsTrigger>
+              <TabsTrigger value="asia" className="flex-1 py-2 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent">Asia</TabsTrigger>
             </TabsList>
 
             <TabsContent value="political" className="space-y-3">
