@@ -1009,7 +1009,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md hover:bg-[#f1a239] hover:text-white transition-all duration-300 relative cursor-pointer overflow-hidden" 
+        className="group hover:shadow-md hover:bg-muted transition-all duration-300 relative cursor-pointer overflow-hidden" 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
@@ -1139,7 +1139,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md hover:bg-[#f1a239] hover:text-white transition-all duration-300 cursor-pointer overflow-hidden" 
+        className="group hover:shadow-md hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden" 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
@@ -1301,7 +1301,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md hover:bg-[#f1a239] hover:text-white transition-all duration-300 cursor-pointer overflow-hidden" 
+        className="group hover:shadow-md hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden" 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
@@ -1630,7 +1630,7 @@ export function SitesView() {
                             {filteredAgencies.map((agency, index) => (
                               <Card 
                                 key={agency.id} 
-                                className="group hover:shadow-md hover:bg-[#f1a239] hover:text-white transition-all duration-300 cursor-pointer overflow-hidden" 
+                                className="group hover:shadow-md hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden" 
                                 style={{ animationDelay: `${index * 50}ms` }}
                                 onClick={() => toggleExpand(agency.id)}
                               >
