@@ -198,6 +198,11 @@ export default function ReportBug() {
               ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
+          {submitted && (
+            <div className="flex justify-end mb-6">
+              <Gift className="h-6 w-6 text-muted-foreground" />
+            </div>
+          )}
 
           {submitted ? (
             <div className="flex flex-col items-center text-center py-16">
