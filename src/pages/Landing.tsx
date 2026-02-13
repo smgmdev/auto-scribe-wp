@@ -19,6 +19,7 @@ import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 import bugReportBg from '@/assets/bug-report-bg.mp4';
 import mediaBuyingBg from '@/assets/media-buying-bg.mp4';
+import mediaBuyingPoster from '@/assets/media-buying-poster.png';
 
 interface SiteTag {
   id: string;
@@ -822,12 +823,13 @@ const Landing = () => {
             {renderSection('Self Publishing Local Media Library', randomizedWpSites, 'wp', { tab: 'instant' })}
 
             {/* Media Buying Marketplace Section */}
-            <section className="relative overflow-hidden my-10 bg-[#1d1d1f]">
+            <section className="relative overflow-hidden my-10 bg-[#1d1d1f]" style={{ backgroundImage: `url(${mediaBuyingPoster})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
               <video
                 autoPlay
                 muted
                 loop
                 playsInline
+                poster={mediaBuyingPoster}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
                 src={mediaBuyingBg}
                 onCanPlayThrough={(e) => (e.currentTarget.style.opacity = '1')}
