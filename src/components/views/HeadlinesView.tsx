@@ -350,7 +350,6 @@ export function HeadlinesView() {
                         className="flex-1 h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
                         onClick={() => handleSelectHeadline(headline)}
                       >
-                        <ArrowRight className="h-4 w-4 mr-1" />
                         Use Source
                       </Button>
                     </div>
