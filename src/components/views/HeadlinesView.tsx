@@ -306,22 +306,25 @@ export function HeadlinesView() {
                           {formatTimeAgo(headline.publishedAt)}
                         </span>
                       </div>
-                      <div className="hidden md:flex items-center gap-1 flex-shrink-0">
+                      <div className="hidden md:flex items-center gap-2 flex-shrink-0">
                         <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-7 w-7 hover:bg-muted"
+                          variant="default"
+                          size="sm"
+                          className="h-7 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-xs"
                           onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
                           title={headline.url}
                         >
-                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                          View
+                          <ExternalLink className="h-3.5 w-3.5 ml-1" />
                         </Button>
                         <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                          variant="default"
+                          size="sm"
+                          className="group/btn h-7 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-xs"
+                          onClick={(e) => { e.stopPropagation(); handleSelectHeadline(headline); }}
                         >
-                          <ArrowRight className="h-4 w-4" />
+                          Use Source
+                          <ArrowRight className="h-3.5 w-3.5 ml-0 max-w-0 opacity-0 group-hover/btn:ml-1 group-hover/btn:max-w-[14px] group-hover/btn:opacity-100 transition-all duration-300" />
                         </Button>
                       </div>
                     </div>
