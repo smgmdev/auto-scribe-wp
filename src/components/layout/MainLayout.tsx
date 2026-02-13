@@ -24,6 +24,7 @@ export function MainLayout({
   const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   
   const isDarkFooter = currentView === 'agency-application' && agencyDarkFooter;
+  const isDashboardFooter = currentView === 'dashboard';
 
   useEffect(() => {
     const measure = () => {
@@ -100,7 +101,7 @@ export function MainLayout({
         </div>
         
         {/* Global Footer */}
-        <footer className={`border-t py-4 px-4 lg:px-8 mb-[50px] ${isDarkFooter ? 'bg-[#1d1d1f] border-white/20' : 'border-border/50'}`}>
+        <footer className={`border-t py-4 px-4 lg:px-8 mb-[50px] ${isDarkFooter ? 'bg-[#1d1d1f] border-white/20' : isDashboardFooter ? 'bg-white border-white' : 'border-border/50'}`}>
           <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
             <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
             <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${isDarkFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
