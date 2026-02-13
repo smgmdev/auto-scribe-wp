@@ -163,10 +163,10 @@ export default function PressReleaseDetail() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
+      <div className="h-[120px]" />
 
       {/* Newsroom Sub-header - Sticky */}
-      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-[top] duration-300 ease-out ${isHeaderHidden ? 'top-0' : 'top-16'}`}>
+      <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 w-full">
           <button 
             onClick={() => navigate('/press')}
