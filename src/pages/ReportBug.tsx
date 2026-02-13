@@ -254,7 +254,7 @@ export default function ReportBug() {
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <h2 className="text-lg md:text-xl font-semibold text-foreground">Start the Report</h2>
               <div>
                 <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Subject*</label>
