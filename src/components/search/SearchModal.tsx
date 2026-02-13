@@ -344,7 +344,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                         className={`py-3 px-4 text-sm font-medium transition-colors flex-shrink-0 ${
                           activeTab === tab
                             ? 'bg-background text-foreground'
-                            : 'text-background/60 hover:text-background'
+                            : 'text-background/60'
                         }`}
                       >
                         {tab}
