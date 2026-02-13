@@ -297,14 +297,14 @@ export function ArticlesView() {
         </div>
         <Button 
           onClick={() => setCurrentView('compose')} 
-          className="md:hidden w-full mt-4 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          className="md:hidden w-full mt-2 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           New Article
         </Button>
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full -mt-2 md:mt-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full -mt-4 md:mt-0">
         <TabsList className="grid w-full max-w-xs md:max-w-xs max-md:max-w-full grid-cols-2">
           <TabsTrigger value="published">
             Published ({publishedCount})
