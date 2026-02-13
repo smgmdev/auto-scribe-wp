@@ -128,6 +128,11 @@ interface AppState {
   incrementAdminUnreadEngagementsCount: () => void;
   decrementAdminUnreadEngagementsCount: () => void;
   
+  // Admin security supervision notifications
+  unreadFlaggedMessagesCount: number;
+  setUnreadFlaggedMessagesCount: (count: number) => void;
+  incrementUnreadFlaggedMessagesCount: () => void;
+  
   // Admin closed engagements notifications (Delivered + Cancelled tabs)
   adminUnreadDeliveredCount: number;
   setAdminUnreadDeliveredCount: (count: number) => void;
@@ -348,6 +353,13 @@ export const useAppStore = create<AppState>()((set) => ({
   })),
   decrementAdminUnreadEngagementsCount: () => set((state) => ({ 
     adminUnreadEngagementsCount: Math.max(0, state.adminUnreadEngagementsCount - 1) 
+  })),
+  
+  // Admin security supervision notifications
+  unreadFlaggedMessagesCount: 0,
+  setUnreadFlaggedMessagesCount: (count) => set({ unreadFlaggedMessagesCount: count }),
+  incrementUnreadFlaggedMessagesCount: () => set((state) => ({
+    unreadFlaggedMessagesCount: state.unreadFlaggedMessagesCount + 1
   })),
   
   // Admin closed engagements notifications
@@ -667,6 +679,7 @@ export const useAppStore = create<AppState>()((set) => ({
   resetAllNotifications: () => set({
     unreadAgencyApplicationsCount: 0,
     unreadCustomVerificationsCount: 0,
+    unreadFlaggedMessagesCount: 0,
     unreadMediaSubmissionsCount: 0,
     unreadOrdersCount: 0,
     unreadDisputesCount: 0,

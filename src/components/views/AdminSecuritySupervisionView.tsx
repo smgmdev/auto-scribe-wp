@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Shield, Search, Loader2, RefreshCw, CheckCircle, AlertTriangle, MessageSquare, ExternalLink, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,7 +87,7 @@ export function AdminSecuritySupervisionView() {
   const [engagementData, setEngagementData] = useState<Record<string, { title: string; media_site_name: string; media_site_favicon: string | null }>>({});
   const [markingReviewed, setMarkingReviewed] = useState<Set<string>>(new Set());
   
-  const { setCurrentView } = useAppStore();
+  const { setCurrentView, setUnreadFlaggedMessagesCount } = useAppStore();
   const { toast } = useToast();
 
   const fetchFlags = useCallback(async () => {
@@ -128,7 +129,9 @@ export function AdminSecuritySupervisionView() {
 
   useEffect(() => {
     fetchFlags();
-  }, [fetchFlags]);
+    // Clear sidebar notification when view is opened
+    setUnreadFlaggedMessagesCount(0);
+  }, [fetchFlags, setUnreadFlaggedMessagesCount]);
 
   // Real-time subscription for new flags
   useEffect(() => {
@@ -402,7 +405,10 @@ export function AdminSecuritySupervisionView() {
             ) : (
               <div className="space-y-0">
                 {grouped.map((group) => (
-                  <Card key={group.request_id} className="border-b last:border-b-0 border-x-0 border-t-0 shadow-none">
+                  <Card key={group.request_id} className={cn(
+                    "border-b last:border-b-0 border-x-0 border-t-0 shadow-none",
+                    group.hasUnreviewed && "border-l-2 border-l-blue-500"
+                  )}>
                     <CardContent className="p-3">
                       {/* Engagement Header */}
                       <div className="flex items-center justify-between mb-2">
