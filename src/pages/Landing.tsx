@@ -846,7 +846,7 @@ const Landing = () => {
                 </h2>
                 <button
                   onClick={() => navigate('/about')}
-                  className="text-[#2997ff] hover:text-[#6cb6ff] text-base md:text-lg font-normal transition-colors inline-flex items-center gap-1"
+                  className="bg-white text-black font-medium px-8 py-3 rounded-full hover:bg-transparent hover:text-white border border-white transition-all inline-flex items-center gap-2"
                 >
                   Learn more <ArrowRight className="h-4 w-4" />
                 </button>
