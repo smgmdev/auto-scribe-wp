@@ -1168,7 +1168,7 @@ export function MyRequestsView() {
 
       <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
+        <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-black rounded-none">
           <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
