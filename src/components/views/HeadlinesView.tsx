@@ -342,15 +342,16 @@ export function HeadlinesView() {
                         className="flex-1 h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
                         onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
                       >
-                        <ExternalLink className="h-4 w-4 mr-1" />
                         View
+                        <ExternalLink className="h-4 w-4 ml-1" />
                       </Button>
                       <Button 
                         variant="default"
-                        className="flex-1 h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
+                        className="group/btn flex-1 h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300"
                         onClick={() => handleSelectHeadline(headline)}
                       >
                         Use Source
+                        <ArrowRight className="h-4 w-4 ml-0 max-w-0 opacity-0 group-hover/btn:ml-1 group-hover/btn:max-w-[16px] group-hover/btn:opacity-100 transition-all duration-300" />
                       </Button>
                     </div>
                   </div>
