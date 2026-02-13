@@ -28,6 +28,7 @@ export default function ReportBug() {
   const [submitted, setSubmitted] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [attachment, setAttachment] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -243,19 +244,41 @@ export default function ReportBug() {
             </div>
           )}
 
+          {/* Start / Cancel Report button */}
+          {!submitted && !showForm && (
+            <div className="mb-10">
+              <Button
+                onClick={() => setShowForm(true)}
+                className="w-full rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200"
+              >
+                Start Report
+              </Button>
+            </div>
+          )}
+
           {submitted ? (
             <div className="flex justify-end mt-4">
               <Button 
                 className="group rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200"
-                onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
+                onClick={() => { setSubmitted(false); setShowForm(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
               >
                 Submit Another
                 <ArrowRight className="h-4 w-4 max-w-0 opacity-0 transition-all duration-200 group-hover:max-w-[16px] group-hover:ml-1 group-hover:opacity-100" />
               </Button>
             </div>
-          ) : (
+          ) : showForm ? (
             <form onSubmit={handleSubmit} className="space-y-3">
-              <h2 className="text-lg md:text-xl font-semibold text-foreground">Start the Report</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg md:text-xl font-semibold text-foreground">Start the Report</h2>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowForm(false)}
+                  className="rounded-none text-muted-foreground hover:text-foreground"
+                >
+                  Cancel Report
+                </Button>
+              </div>
               <div>
                 <label className="text-sm font-medium text-[#1d1d1f] mb-1.5 block">Subject*</label>
                 <Input
@@ -361,7 +384,7 @@ export default function ReportBug() {
                 </span>
               </Button>
             </form>
-          )}
+          ) : null}
         </div>
       </main>
 
