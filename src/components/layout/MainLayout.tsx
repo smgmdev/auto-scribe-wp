@@ -26,7 +26,7 @@ export function MainLayout({
 
   return <div className="min-h-screen bg-background">
       {/* Quick Nav Banner */}
-      <QuickNavBanner />
+      <QuickNavBanner inDashboard />
 
       {/* Promo Banner */}
       <div className="fixed top-[28px] left-0 lg:left-64 right-0 z-40 bg-[#1d1d1f] border-b border-white/10 flex items-center justify-center h-8">
