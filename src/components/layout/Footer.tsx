@@ -167,6 +167,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
             <button onClick={() => navigate('/privacy')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
             <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Do not sell or share my personal information</button>
             <button onClick={() => navigate('/guidelines')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</button>
+            <button onClick={() => navigate('/update-log')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Update Log</button>
             <button onClick={() => navigate('/report-bug')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</button>
             <button onClick={() => navigate('/sitemap')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</button>
           </div>
