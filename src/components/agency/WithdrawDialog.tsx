@@ -324,7 +324,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
               <Button
                 onClick={handleConfirmWithdraw}
                 disabled={!isValidAmount() || submitting}
-                className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+                className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border border-foreground"
               >
                 {submitting ? (
                   <>
