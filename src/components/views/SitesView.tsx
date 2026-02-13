@@ -1009,7 +1009,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md hover:bg-muted transition-all duration-300 relative cursor-pointer overflow-hidden" 
+        className={`group hover:shadow-md hover:bg-muted transition-all duration-300 relative cursor-pointer overflow-hidden rounded-none ${index > 0 ? '-mt-px' : ''}`} 
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
@@ -1485,7 +1485,7 @@ export function SitesView() {
               </div>
               
               {/* Filtered sites list */}
-              <div className="space-y-2">
+              <div className="space-y-0">
                 {sites
                   .filter(site => 
                     site.name.toLowerCase().includes(wpSearchQuery.toLowerCase()) ||
