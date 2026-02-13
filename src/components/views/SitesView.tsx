@@ -1515,7 +1515,7 @@ export function SitesView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-0">
               {/* Search Bar */}
               <div ref={searchRef} className="relative w-full">
                 <div className="relative">
