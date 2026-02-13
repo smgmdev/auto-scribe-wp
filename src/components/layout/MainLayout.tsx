@@ -37,7 +37,7 @@ export function MainLayout({
       </div>
 
       {/* Mobile Header with Burger Menu */}
-      <header className="lg:hidden fixed top-[72px] left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-center px-4">
+      <header className="lg:hidden fixed top-[76px] left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-center px-4">
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="absolute left-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
           <Menu className="h-6 w-6" />
         </Button>
@@ -63,7 +63,7 @@ export function MainLayout({
       <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
 
       {/* Main Content */}
-      <main className={`lg:pl-64 pt-[128px] lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
+      <main className={`lg:pl-64 pt-[132px] lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : ''}`}>
         <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
