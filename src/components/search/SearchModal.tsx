@@ -362,7 +362,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                         className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                           !activeSubcategory
                             ? 'bg-[#f2a547] text-foreground'
-                            : 'text-muted-foreground hover:bg-[#f2a547] hover:text-white'
+                            : 'text-muted-foreground'
                         }`}
                       >
                         All
@@ -374,7 +374,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                           className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                             activeSubcategory === subcat
                               ? 'bg-[#f2a547] text-foreground'
-                              : 'text-muted-foreground hover:bg-[#f2a547] hover:text-white'
+                              : 'text-muted-foreground'
                           }`}
                         >
                           {subcat}
