@@ -1127,7 +1127,7 @@ export function MyRequestsView() {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto">
-      <div className="mb-6">
+      <div className="mb-0 md:mb-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
