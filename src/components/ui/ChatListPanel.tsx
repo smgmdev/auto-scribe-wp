@@ -431,8 +431,10 @@ export function ChatListPanel() {
   useEffect(() => {
     if (isAdmin) {
       setActiveTab('disputes');
-    } else {
+    } else if (isAgency) {
       setActiveTab('service-requests');
+    } else {
+      setActiveTab('my-engagements');
     }
   }, [isAgency, isAdmin]);
 
