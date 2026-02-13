@@ -1720,7 +1720,7 @@ export function SitesView() {
                 </div>
 
                 {MEDIA_CATEGORIES.map(category => (
-                  <TabsContent key={category} value={category} className="mt-3">
+                  <TabsContent key={category} value={category} className="mt-0">
                     {/* Subcategories for Global */}
                     {category === 'Global' && (
                       <div className="mb-3 flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto scrollbar-hide">
