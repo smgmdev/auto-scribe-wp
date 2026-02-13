@@ -1626,7 +1626,7 @@ export function SitesView() {
                           );
                         }
                         return (
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                             {filteredAgencies.map((agency, index) => (
                               <Card 
                                 key={agency.id} 
@@ -1778,7 +1778,7 @@ export function SitesView() {
                       }
 
                       return (
-                        <div className="space-y-2">
+                        <div className="space-y-0">
                           {filtered.map((site, index) => 
                             category === 'Agencies/People' 
                               ? renderAgencyCard(site, index)
