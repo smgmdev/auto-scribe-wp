@@ -30,6 +30,7 @@ import { AdminAISettingsView } from '@/components/views/AdminAISettingsView';
 import { AdminAIArticlesView } from '@/components/views/AdminAIArticlesView';
 import { AdminAgencyWithdrawalsView } from '@/components/views/AdminAgencyWithdrawalsView';
 import { AdminSecuritySupervisionView } from '@/components/views/AdminSecuritySupervisionView';
+import { AdminFeedbackView } from '@/components/views/AdminFeedbackView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -85,6 +86,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-ai-articles': AdminAIArticlesView,
   'admin-agency-withdrawals': AdminAgencyWithdrawalsView,
   'admin-security-supervision': AdminSecuritySupervisionView,
+  'admin-feedback': AdminFeedbackView,
 };
 
 const Index = () => {
