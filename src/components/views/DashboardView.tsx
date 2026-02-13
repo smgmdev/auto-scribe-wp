@@ -891,19 +891,19 @@ export function DashboardView() {
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-0">
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
+              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-media')}>
+              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-media')}>
                 <Library className="mr-2 h-4 w-4" />
                 My Media
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
+              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
                 <Wallet className="mr-2 h-4 w-4" />
                 My Earnings
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-requests')}>
+              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-requests')}>
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Client Requests
               </Button>
@@ -921,15 +921,15 @@ export function DashboardView() {
             <CardTitle className="text-xl text-white">Instant Publishing</CardTitle>
           </CardHeader>
           <CardContent className="space-y-0">
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('headlines')}>
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('headlines')}>
               <Newspaper className="mr-2 h-4 w-4" />
               Scan Headlines
             </Button>
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('compose')}>
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('compose')}>
               <Plus className="mr-2 h-4 w-4" />
               Write New Article
             </Button>
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('sites')}>
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('sites')}>
               <Library className="mr-2 h-4 w-4" />
               Instant Publishing Library
             </Button>
@@ -942,18 +942,18 @@ export function DashboardView() {
             <CardTitle className="text-xl text-white">B2B Media Buying</CardTitle>
           </CardHeader>
           <CardContent className="space-y-0">
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => {
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => {
               setTargetTab('custom');
               setCurrentView('sites');
             }}>
               <Library className="mr-2 h-4 w-4" />
               Global Library
             </Button>
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-orders' : 'orders')}>
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-orders' : 'orders')}>
               <Package className="mr-2 h-4 w-4" />
               {isAdmin ? 'Order Management' : 'My Orders'}
             </Button>
-            <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
+            <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView(isAdmin ? 'admin-engagements' : 'my-requests')}>
               <MessageSquare className="mr-2 h-4 w-4" />
               {isAdmin ? 'Global Engagements' : 'My Engagements'}
             </Button>
