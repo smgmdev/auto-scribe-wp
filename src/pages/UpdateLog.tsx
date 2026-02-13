@@ -129,8 +129,18 @@ export default function UpdateLog() {
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
             Changelog
           </h1>
-          <p className="text-muted-foreground pb-8">
-            A chronological list of platform updates, improvements, and new features.
+          <p className="text-muted-foreground border-b border-border pb-8">
+            Last update: February 13, 2026
+          </p>
+        </div>
+
+        {/* Introduction */}
+        <div className="mb-10">
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            A chronological list of platform updates, improvements, and new features shipped to Arcana Mace.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            We regularly release updates to improve performance, introduce new capabilities, and refine the user experience across publishing, media buying, and agency management. Each entry below details the changes included in that release.
           </p>
         </div>
 
