@@ -77,7 +77,7 @@ export function LatestGlobalArticles() {
 
   return (
     <>
-      <ul className="space-y-3">
+      <ul className="space-y-0">
         {articles.map(article => {
           const siteName = article.published_to_name;
           const siteFavicon = article.published_to_favicon;
