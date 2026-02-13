@@ -28,7 +28,7 @@ interface BugReport {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; color: string }> = {
-  open: { label: 'Open', icon: AlertCircle, color: 'bg-orange-600' },
+  open: { label: 'Open', icon: AlertCircle, color: 'bg-destructive' },
   in_progress: { label: 'In Progress', icon: Clock, color: 'bg-blue-600' },
   resolved: { label: 'Resolved', icon: CheckCircle, color: 'bg-green-600' },
   closed: { label: 'Closed', icon: CheckCircle, color: 'bg-muted-foreground' },
@@ -196,10 +196,7 @@ export function AdminFeedbackView() {
                   const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <Card key={report.id} className={cn(
-                      "border-b last:border-b-0 border-x-0 border-t-0 shadow-none",
-                      (report.status === 'open') && "border-l-2 border-l-orange-500"
-                    )}>
+                    <Card key={report.id} className="border-b last:border-b-0 border-x-0 border-t-0 shadow-none">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between gap-2 mb-1.5">
                           <div className="min-w-0 flex-1">
@@ -254,10 +251,10 @@ export function AdminFeedbackView() {
                           </div>
                         </div>
 
-                        <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{report.description}</p>
+                        <p className="text-xs text-foreground mt-1 line-clamp-2">{report.description}</p>
                         
                         {report.steps_to_reproduce && (
-                          <p className="text-[10px] text-muted-foreground/70 mt-1 italic line-clamp-1">
+                          <p className="text-xs text-foreground mt-1 line-clamp-1">
                             Steps: {report.steps_to_reproduce}
                           </p>
                         )}
