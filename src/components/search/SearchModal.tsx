@@ -344,7 +344,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 {/* Subcategory Pills */}
                 {subcategories.length > 0 && (
                   <div className="border-b border-border px-4 py-3 flex-shrink-0">
-                    <div className="flex flex-wrap gap-1 md:gap-2">
+                    <div className="flex overflow-x-auto scrollbar-hide gap-1 md:gap-2 md:flex-wrap">
                       <button
                         onClick={() => setActiveSubcategory(null)}
                         className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
