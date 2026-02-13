@@ -426,7 +426,7 @@ export function AdminSecuritySupervisionView() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-[10px] h-6 px-2"
+                              className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
                               onClick={() => markGroupReviewed(group.request_id)}
                             >
                               <Eye className="h-3 w-3 mr-1" />
@@ -436,7 +436,7 @@ export function AdminSecuritySupervisionView() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-[10px] h-6 px-2"
+                            className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
                             onClick={() => openEngagement(group.request_id)}
                           >
                             <ExternalLink className="h-3 w-3 mr-1" />
@@ -478,7 +478,7 @@ export function AdminSecuritySupervisionView() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-6 px-1.5 text-[10px] flex-shrink-0"
+                                    className="h-6 px-1.5 text-[10px] flex-shrink-0 hover:bg-foreground hover:text-background"
                                     disabled={markingReviewed.has(flag.id)}
                                     onClick={() => markAsReviewed(flag.id)}
                                   >
