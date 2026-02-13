@@ -361,8 +361,8 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                         onClick={() => setActiveSubcategory(null)}
                         className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                           !activeSubcategory
-                            ? 'bg-foreground text-background'
-                            : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                            ? 'bg-[#f2a547] text-white'
+                            : 'text-muted-foreground hover:bg-[#f2a547] hover:text-white'
                         }`}
                       >
                         All
@@ -373,8 +373,8 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                           onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
                           className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                             activeSubcategory === subcat
-                              ? 'bg-foreground text-background'
-                              : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                              ? 'bg-[#f2a547] text-white'
+                              : 'text-muted-foreground hover:bg-[#f2a547] hover:text-white'
                           }`}
                         >
                           {subcat}
