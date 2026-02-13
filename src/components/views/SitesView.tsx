@@ -1700,7 +1700,7 @@ export function SitesView() {
                 setActiveMediaCategory(val);
                 setActiveSubcategory(null);
               }}>
-                <div className="flex gap-6 border-b border-border">
+                <div className="flex gap-0 bg-foreground">
                   {MEDIA_CATEGORIES.map(cat => (
                     <button
                       key={cat}
@@ -1708,10 +1708,10 @@ export function SitesView() {
                         setActiveMediaCategory(cat);
                         setActiveSubcategory(null);
                       }}
-                      className={`pb-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                      className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                         activeMediaCategory === cat
-                          ? 'text-foreground border-foreground'
-                          : 'text-muted-foreground border-transparent hover:text-foreground'
+                          ? 'bg-orange-500 text-white'
+                          : 'text-background/70 hover:text-background'
                       }`}
                     >
                       {cat}
