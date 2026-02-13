@@ -368,7 +368,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
             Submit your WordPress site details for approval. You'll need an application password for authentication.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4 [&_input]:h-8 [&_input]:text-sm">
           {/* Logo Upload */}
           <div className="space-y-2">
             <Label>Site Logo</Label>
