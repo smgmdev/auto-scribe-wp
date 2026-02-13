@@ -828,8 +828,9 @@ const Landing = () => {
                 muted
                 loop
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
                 src={mediaBuyingBg}
+                onCanPlayThrough={(e) => (e.currentTarget.style.opacity = '1')}
               />
               <div className="absolute inset-0 bg-black/30" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
