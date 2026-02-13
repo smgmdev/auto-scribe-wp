@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useAppStore } from '@/stores/appStore';
 
 interface BugReport {
   id: string;
@@ -46,6 +47,12 @@ export function AdminFeedbackView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'all' | 'resolved'>('open');
   const [updatingStatus, setUpdatingStatus] = useState<Set<string>>(new Set());
+  const { setUnreadBugReportsCount } = useAppStore();
+
+  // Reset unread count when viewing this page
+  useEffect(() => {
+    setUnreadBugReportsCount(0);
+  }, [setUnreadBugReportsCount]);
 
   const [isManualRefresh, setIsManualRefresh] = useState(false);
 
