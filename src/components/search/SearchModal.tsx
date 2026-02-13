@@ -347,7 +347,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <div className="flex overflow-x-auto scrollbar-hide gap-1 md:gap-2 md:flex-wrap">
                       <button
                         onClick={() => setActiveSubcategory(null)}
-                        className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                           !activeSubcategory
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:bg-foreground hover:text-background'
@@ -359,7 +359,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         <button
                           key={subcat}
                           onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
+                          className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap flex-shrink-0 ${
                             activeSubcategory === subcat
                               ? 'bg-foreground text-background'
                               : 'text-muted-foreground hover:bg-foreground hover:text-background'
