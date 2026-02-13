@@ -152,7 +152,7 @@ export function HeadlinesView() {
       <Checkbox 
         checked={settings.selectedSources.includes(source)}
         onCheckedChange={() => handleToggleSource(source)}
-        className="data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+        className="border-white/40 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
         disabled={settingsLoading}
       />
       <span className={`text-sm font-medium transition-colors ${
