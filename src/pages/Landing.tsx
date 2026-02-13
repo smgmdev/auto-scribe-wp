@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -15,6 +14,7 @@ import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCarousel';
+import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
 import bugReportBg from '@/assets/bug-report-bg.mp4';
@@ -61,9 +61,6 @@ interface ActiveAgency {
 
 type SelectedSite = WPSite | MediaSite | null;
 
-const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
-const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
-
 const Landing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -73,14 +70,11 @@ const Landing = () => {
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [siteTags, setSiteTags] = useState<Record<string, SiteTag[]>>({});
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('Global');
-  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   
   // Media site dialog state (unified with brief submission)
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
@@ -251,123 +245,12 @@ const Landing = () => {
     setAgencyDetailsOpen(true);
   };
 
-  // Register search modal on popup stack for layered Esc & Ctrl+K shortcut
-  useEffect(() => {
-    if (showSearchModal) {
-      pushPopup('landing-search', () => handleCloseSearchModal());
-    } else {
-      removePopup('landing-search');
-    }
-    return () => removePopup('landing-search');
-  }, [showSearchModal]);
-
-  // Ctrl+K / Cmd+K shortcut
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowSearchModal(prev => !prev);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // WP sites for landing page sections - not affected by search
   const landingWpSites = useMemo(() => {
     return wpSites;
   }, [wpSites]);
 
-  // Filtered WP sites for search dropdown only
-  const filteredWpSites = useMemo(() => {
-    if (!searchQuery.trim()) return wpSites;
-    const query = searchQuery.toLowerCase();
-    return wpSites.filter(site => 
-      site.name.toLowerCase().includes(query) ||
-      site.url.toLowerCase().includes(query)
-    );
-  }, [wpSites, searchQuery]);
-
-  const subcategories = useMemo(() => {
-    // For Global tab, use fixed order from GLOBAL_SUBCATEGORIES
-    if (activeTab === 'Global') {
-      const availableSubcats = new Set<string>();
-      mediaSites
-        .filter(site => site.category === 'Global')
-        .forEach(site => {
-          if (site.subcategory) {
-            site.subcategory.split(',').map(s => s.trim()).forEach(subcat => {
-              if (subcat) availableSubcats.add(subcat);
-            });
-          }
-        });
-      // Return only subcategories that exist in data, in the fixed order
-      return GLOBAL_SUBCATEGORIES.filter(sub => availableSubcats.has(sub));
-    }
-    
-    // For other tabs, dynamically generate from data
-    const subcats = new Set<string>();
-    mediaSites
-      .filter(site => site.category === activeTab)
-      .forEach(site => {
-        if (site.subcategory) {
-          site.subcategory.split(',').map(s => s.trim()).forEach(subcat => {
-            if (subcat) subcats.add(subcat);
-          });
-        }
-      });
-    return Array.from(subcats);
-  }, [mediaSites, activeTab]);
-
-  const modalMediaSites = useMemo(() => {
-    // For Agencies/People tab, use activeAgencies directly
-    if (activeTab === 'Agencies/People') {
-      let filtered = activeAgencies.map(agency => ({
-        id: agency.id,
-        name: agency.name,
-        link: agency.link,
-        favicon: agency.favicon,
-        price: 0,
-        publication_format: '',
-        category: 'Agencies/People' as string,
-        subcategory: null,
-        agency: null,
-        about: agency.about,
-        country: agency.country
-      } as MediaSite & { country?: string | null }));
-      
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(site => 
-          site.name.toLowerCase().includes(query) ||
-          site.link.toLowerCase().includes(query)
-        );
-      }
-      
-      return filtered;
-    }
-    
-    let filtered = mediaSites.filter(site => site.category === activeTab);
-    
-    if (activeSubcategory) {
-      filtered = filtered.filter(site => {
-        if (!site.subcategory) return false;
-        const subcats = site.subcategory.split(',').map(s => s.trim());
-        return subcats.includes(activeSubcategory);
-      });
-    }
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(site => 
-        site.name.toLowerCase().includes(query) ||
-        site.link.toLowerCase().includes(query) ||
-        (site.agency && site.agency.toLowerCase().includes(query))
-      );
-    }
-    
-    return filtered;
-  }, [mediaSites, activeTab, activeSubcategory, searchQuery, activeAgencies]);
 
   // Helper function to shuffle array randomly
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -419,30 +302,15 @@ const Landing = () => {
     setShowSearchModal(false);
   };
 
-  const handleDropdownSiteClick = (site: WPSite | MediaSite, type: 'wp' | 'media') => {
-    if (type === 'media') {
-      setSelectedMediaSite(site as MediaSite);
-    } else {
-      setSelectedSite(site);
-      setSelectedSiteType(type);
-    }
-    // Keep dropdown open
+  const handleSearchSiteClick = (site: any) => {
+    setSelectedMediaSite(site as MediaSite);
+    // Keep search modal open
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setActiveSubcategory(null);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery('');
-  };
-
-  const handleCloseSearchModal = () => {
-    setShowSearchModal(false);
-    setSearchQuery('');
-    setActiveTab('Global');
-    setActiveSubcategory(null);
+  const handleSearchAgencyClick = (agencyName: string) => {
+    setSelectedAgencyName(agencyName);
+    setAgencyDetailsOpen(true);
+    // Keep search modal open
   };
 
   const renderWPSiteCard = (site: WPSite) => (
@@ -619,174 +487,13 @@ const Landing = () => {
       </header>
 
 
-      {/* TradingView-style Search Overlay */}
-      {showSearchModal && (
-        <>
-          {/* Backdrop with blur */}
-          <div 
-            className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm"
-            onClick={handleCloseSearchModal}
-          />
-          
-          {/* Search Container */}
-          <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-4 px-4 pointer-events-none">
-            <div className="w-full max-w-3xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-              {/* Search Input Bar */}
-              <div className="flex items-center gap-4 px-4 py-3 bg-card border border-border rounded-none shadow-xl">
-                <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="Search media outlets..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent text-base md:text-lg text-foreground placeholder:text-base md:placeholder:text-lg placeholder:text-muted-foreground outline-none"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={handleClearSearch}
-                    className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                  >
-                    Clear
-                  </button>
-                )}
-                <button
-                  onClick={handleCloseSearchModal}
-                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border rounded-none shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col">
-                {/* Category Tabs */}
-                <div className="border-b border-border flex-shrink-0">
-                  <div className="flex gap-6 px-4">
-                    {CATEGORY_TABS.map(tab => (
-                      <button
-                        key={tab}
-                        onClick={() => handleTabChange(tab)}
-                        className={`py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                          activeTab === tab
-                            ? 'text-foreground border-foreground'
-                            : 'text-muted-foreground border-transparent hover:text-foreground'
-                        }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subcategory Pills */}
-                {subcategories.length > 0 && (
-                  <div className="border-b border-border px-4 py-3 flex-shrink-0">
-                    <div className="flex flex-wrap gap-1 md:gap-2">
-                      <button
-                        onClick={() => setActiveSubcategory(null)}
-                        className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
-                          !activeSubcategory
-                            ? 'bg-foreground text-background'
-                            : 'text-muted-foreground hover:bg-foreground hover:text-background'
-                        }`}
-                      >
-                        All
-                      </button>
-                      {subcategories.map(subcat => (
-                        <button
-                          key={subcat}
-                          onClick={() => setActiveSubcategory(activeSubcategory === subcat ? null : subcat)}
-                          className={`px-3 py-1.5 text-sm rounded-none transition-colors ${
-                            activeSubcategory === subcat
-                              ? 'bg-foreground text-background'
-                              : 'text-muted-foreground hover:bg-foreground hover:text-background'
-                          }`}
-                        >
-                          {subcat}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Results List */}
-                <div className="flex-1 overflow-y-auto overscroll-contain">
-                  <div>
-                    {modalMediaSites.length === 0 ? (
-                      <div className="px-4 py-12 text-center text-muted-foreground">
-                        {!user && activeTab === 'Agencies/People' ? 'Sign in to view' : 'No media outlets found'}
-                      </div>
-                    ) : (
-                      modalMediaSites.map(site => (
-                        <button
-                          key={site.id}
-                          onClick={() => {
-                            // Check if this is an agency item and open the correct dialog
-                            if (site.category === 'Agencies/People') {
-                              handleAgencyClick(site.name);
-                            } else {
-                              handleDropdownSiteClick(site, 'media');
-                            }
-                          }}
-                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
-                        >
-                          {/* Media logo */}
-                          <img
-                            src={site.favicon || getFaviconUrl(site.link)}
-                            alt={site.name}
-                            className="h-10 w-10 rounded-none bg-muted object-cover flex-shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          
-                          {/* Content container */}
-                          <div className="flex-1 min-w-0">
-                            {/* Row 1: Name + Price */}
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-foreground truncate">{site.name}</span>
-                              {site.price > 0 && site.category !== 'Agencies/People' && (
-                                <span className="text-sm text-muted-foreground flex-shrink-0">{site.price.toLocaleString()} USD</span>
-                              )}
-                            </div>
-                            
-                            {/* Row 2: Format + Agency (mobile) / Right side info (desktop) */}
-                            {site.category === 'Agencies/People' ? (
-                              (site as any).country && (
-                                <span className="text-xs text-muted-foreground">{(site as any).country}</span>
-                              )
-                            ) : (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <span>{site.publication_format}</span>
-                                {site.agency && (
-                                  <span className="hidden md:inline-flex items-center gap-1">
-                                    <span>via {site.agency}</span>
-                                    {agencyLogos[site.agency] && (
-                                      <img
-                                        src={agencyLogos[site.agency]}
-                                        alt={site.agency}
-                                        className="h-4 w-4 rounded-full object-cover flex-shrink-0"
-                                        onError={(e) => {
-                                          e.currentTarget.style.display = 'none';
-                                        }}
-                                      />
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Search Modal - shared component */}
+      <SearchModal
+        open={showSearchModal}
+        onOpenChange={setShowSearchModal}
+        onSiteClick={handleSearchSiteClick}
+        onAgencyClick={handleSearchAgencyClick}
+      />
 
       {/* Main content */}
       <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-[7.5rem]">
