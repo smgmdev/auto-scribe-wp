@@ -129,7 +129,7 @@ export default function UpdateLog() {
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
             Changelog
           </h1>
-          <p className="text-muted-foreground border-b border-border pb-8">
+          <p className="text-muted-foreground pb-8">
             A chronological list of platform updates, improvements, and new features.
           </p>
         </div>
