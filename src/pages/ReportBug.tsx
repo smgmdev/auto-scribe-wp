@@ -194,7 +194,7 @@ export default function ReportBug() {
       <main className="flex-1">
         <div className="max-w-[680px] mx-auto px-4 md:px-6 pt-6 pb-16">
           <h1 className="text-2xl md:text-3xl font-semibold mt-[100px] md:mt-[100px] mb-3">
-            {submitted ? 'Thank you for your report' : 'Send us your feedback and get rewards'}
+            {submitted ? 'Thank you for your report' : 'Send us Your Feedback and Get Rewards'}
           </h1>
           <p className="text-base text-muted-foreground mb-10">
             {submitted
