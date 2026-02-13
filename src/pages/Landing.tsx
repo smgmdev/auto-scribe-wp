@@ -839,10 +839,10 @@ const Landing = () => {
                   className="h-16 w-16 md:h-20 md:w-20 mb-6 invert"
                 />
                 <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-2">
-                  Media Buying Marketplace.
+                  Control the Narrative.
                 </h2>
                 <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-8">
-                  Control the Narrative.
+                  Media Buying Marketplace.
                 </h2>
                 <button
                   onClick={() => navigate('/about')}
