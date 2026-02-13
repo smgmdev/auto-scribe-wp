@@ -221,7 +221,7 @@ export default function ReportBug() {
                       <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
                     </span>
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                  <AccordionContent className="text-foreground leading-relaxed pb-6 space-y-3">
                     <p>Credit rewards are determined by the severity and impact of the reported issue. Below is a general guideline for how credits are allocated:</p>
                     <p><strong className="text-foreground">1–5 credits</strong> — Minor visual or user interface issues, such as layout inconsistencies, typos, or styling problems.</p>
                     <p><strong className="text-foreground">5–10 credits</strong> — Functional or performance-related bugs, including broken features, unexpected behavior, or slow loading times.</p>
@@ -239,7 +239,7 @@ export default function ReportBug() {
                       <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
                     </span>
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                  <AccordionContent className="text-foreground leading-relaxed pb-6 space-y-3">
                     <p>Credits earned through bug reporting are gifted directly to your account by the Arcana Mace team. Please ensure that you provide the email address associated with your account in the submission form so we can deliver the credits to the correct user.</p>
                     <p>These credits can be used exclusively for media publishing on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
                   </AccordionContent>
