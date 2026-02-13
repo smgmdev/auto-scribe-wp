@@ -335,16 +335,16 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
               {/* Dropdown Panel */}
               <div className="bg-card border border-t-0 border-border shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
                 {/* Category Tabs */}
-                <div className="border-b border-border flex-shrink-0">
-                  <div className="flex gap-6 px-4">
+                <div className="bg-foreground flex-shrink-0">
+                  <div className="flex">
                     {CATEGORY_TABS.map(tab => (
                       <button
                         key={tab}
                         onClick={() => handleTabChange(tab)}
-                        className={`py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                        className={`py-3 px-4 text-sm font-medium transition-colors ${
                           activeTab === tab
-                            ? 'text-foreground border-foreground'
-                            : 'text-muted-foreground border-transparent hover:text-foreground'
+                            ? 'bg-background text-foreground'
+                            : 'text-background/60 hover:text-background'
                         }`}
                       >
                         {tab}
