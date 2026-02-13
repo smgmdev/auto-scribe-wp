@@ -610,7 +610,7 @@ export function DashboardView() {
           const cardContent = (
             <Card 
               key={stat.key} 
-              className={`border-border/30 bg-black shadow-sm hover:shadow-md transition-all py-2 md:py-3 rounded-none -mt-px -ml-px ${stat.clickable ? 'cursor-pointer hover:border-primary' : 'hover:border-border/50'}`}
+              className={`border-border/30 bg-black shadow-sm hover:shadow-md hover:bg-[#f2a547] transition-all py-2 md:py-3 rounded-none -mt-px -ml-px ${stat.clickable ? 'cursor-pointer hover:border-[#f2a547]' : 'hover:border-[#f2a547]'}`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => stat.clickable && handleStatClick(stat.key)}
             >
