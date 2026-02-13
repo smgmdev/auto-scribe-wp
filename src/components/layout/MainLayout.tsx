@@ -108,6 +108,7 @@ export function MainLayout({
               <Link to="/terms" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
               <Link to="/privacy" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
               <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</Link>
+              <Link to="/update-log" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Update Log</Link>
               <Link to="/help" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
               <Link to="/system-status" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
               <Link to="/report-bug" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
