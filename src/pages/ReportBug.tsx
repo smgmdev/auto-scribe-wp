@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
+import bugReportHero from '@/assets/bug-report-hero.jpg';
 
 export default function ReportBug() {
   const navigate = useNavigate();
@@ -200,6 +201,13 @@ export default function ReportBug() {
               ? "We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help."
               : 'Help us improve Arcana Mace by reporting any issues you encounter. Every report is reviewed, and we reward eligible reports with free credits that can be used for article publishing.'}
           </p>
+
+          {/* Hero image */}
+          {!submitted && (
+            <div className="mb-14">
+              <img src={bugReportHero} alt="Developer working on bug fixes" className="w-full h-[300px] md:h-[400px] object-cover" />
+            </div>
+          )}
 
           {/* FAQ - above form */}
           {!submitted && (
