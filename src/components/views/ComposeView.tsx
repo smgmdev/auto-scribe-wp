@@ -1479,7 +1479,7 @@ export function ComposeView() {
         <div className="lg:col-span-1">
           <div className="sticky top-4 space-y-4">
           {/* Actions - At Top */}
-          <div className="space-y-3">
+          <div className="space-y-0">
             <Button 
               className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
