@@ -1723,13 +1723,13 @@ export function SitesView() {
                   <TabsContent key={category} value={category} className="mt-0">
                     {/* Subcategories for Global */}
                     {category === 'Global' && (
-                      <div className="mb-3 flex flex-nowrap md:flex-wrap gap-0 overflow-x-auto scrollbar-hide">
+                      <div className="mb-3 flex flex-nowrap md:flex-wrap gap-0 overflow-x-auto scrollbar-hide bg-foreground">
                         <button
                           onClick={() => setActiveSubcategory(null)}
                           className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                             activeSubcategory === null
-                              ? 'bg-foreground text-background'
-                              : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                              ? 'bg-background text-foreground'
+                              : 'text-background/70 hover:text-background'
                           }`}
                         >
                           All
@@ -1740,8 +1740,8 @@ export function SitesView() {
                             onClick={() => setActiveSubcategory(sub)}
                             className={`px-3 py-1.5 text-sm rounded-none transition-colors whitespace-nowrap ${
                               activeSubcategory === sub
-                                ? 'bg-foreground text-background'
-                                : 'text-muted-foreground hover:bg-foreground hover:text-background'
+                                ? 'bg-background text-foreground'
+                                : 'text-background/70 hover:text-background'
                             }`}
                           >
                             {sub}
