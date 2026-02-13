@@ -57,6 +57,7 @@ export function AgencyPayoutsView() {
     completedPayouts: 0
   });
   const [lockedInOrders, setLockedInOrders] = useState(0);
+  const [lockedInOrderRequests, setLockedInOrderRequests] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [openingChat, setOpeningChat] = useState<string | null>(null);
@@ -107,7 +108,7 @@ export function AgencyPayoutsView() {
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
   // Wallet balance = total earnings minus completed withdrawals (rejected ones stay in wallet)
-  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal;
+  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal - pendingWithdrawalsTotal - lockedInOrders - lockedInOrderRequests;
 
   // Available balance = wallet balance minus pending withdrawals
   const availableBalance = walletBalance - pendingWithdrawalsTotal;
@@ -262,6 +263,17 @@ export function AgencyPayoutsView() {
     const lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.agency_payout_cents || 0) / 100), 0);
     setLockedInOrders(lockedAmount);
 
+    // Fetch pending order requests (service_requests without orders yet)
+    const { data: pendingRequests } = await supabase
+      .from('service_requests')
+      .select('media_site_id, media_sites!inner(price)')
+      .eq('agency_payout_id', agencyData.id)
+      .is('order_id', null)
+      .not('status', 'in', '("cancelled","completed")');
+
+    const lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + ((req.media_sites?.price || 0) / 100), 0);
+    setLockedInOrderRequests(lockedRequestsAmount);
+
     // Fetch payout transactions for pending/completed payouts
     const { data: payoutData } = await supabase
       .from('payout_transactions')
@@ -388,6 +400,10 @@ export function AgencyPayoutsView() {
                   <span className="text-white/50">None</span>
                 </div>
               )}
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Locked in Order Requests:</span>
+                <span className="font-semibold text-amber-400">${lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Locked in Orders:</span>
                 <span className="font-semibold text-amber-400">${lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
