@@ -825,7 +825,7 @@ const Landing = () => {
         )}
 
         {/* Bug Report CTA Section */}
-        <section className="relative overflow-hidden my-12" style={{ minHeight: '320px' }}>
+        <section className="relative overflow-hidden my-12">
           <video
             autoPlay
             loop
@@ -836,7 +836,7 @@ const Landing = () => {
             <source src={bugReportBg} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/60" />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20">
+          <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 min-h-[320px]">
             <h2 className="text-3xl md:text-4xl font-semibold text-white mb-6">
               Found a bug? Report it and get free credits.
             </h2>
