@@ -34,12 +34,16 @@ interface ActiveAgency {
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When provided, called instead of opening the internal MediaSiteDialog */
+  onSiteClick?: (site: MediaSite) => void;
+  /** When provided, called instead of opening the internal AgencyDetailsDialog */
+  onAgencyClick?: (agencyName: string) => void;
 }
 
 const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
 const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
 
-export function SearchModal({ open, onOpenChange }: SearchModalProps) {
+export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: SearchModalProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
@@ -178,8 +182,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   // Handle agency click - open the universal dialog
   const handleAgencyClick = (agencyName: string) => {
-    setSelectedAgencyName(agencyName);
-    setAgencyDetailsOpen(true);
+    if (onAgencyClick) {
+      onAgencyClick(agencyName);
+    } else {
+      setSelectedAgencyName(agencyName);
+      setAgencyDetailsOpen(true);
+    }
   };
 
   // (Esc handled via popup-stack registered above)
@@ -277,7 +285,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   };
 
   const handleSiteClick = (site: MediaSite) => {
-    setSelectedMediaSite(site);
+    if (onSiteClick) {
+      onSiteClick(site);
+    } else {
+      setSelectedMediaSite(site);
+    }
   };
 
   return (
