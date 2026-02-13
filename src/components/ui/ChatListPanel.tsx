@@ -2331,7 +2331,7 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              {(isAgency || isAdmin) && (
+              {(isAgency && !isAdmin) && (
                 <TabsTrigger 
                   value="service-requests" 
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
@@ -2344,17 +2344,19 @@ export function ChatListPanel() {
                   )}
                 </TabsTrigger>
               )}
-              <TabsTrigger 
-                value="my-engagements" 
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
-              >
-                My Engagements
-                {userUnreadEngagementsCount > 0 && (
-                  <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                    {userUnreadEngagementsCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
+              {!isAdmin && (
+                <TabsTrigger 
+                  value="my-engagements" 
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
+                >
+                  My Engagements
+                  {userUnreadEngagementsCount > 0 && (
+                    <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
+                      {userUnreadEngagementsCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {isAdmin && (
