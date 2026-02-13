@@ -202,13 +202,11 @@ export default function ReportBug() {
           {submitted ? (
             <div className="flex justify-end mt-4">
               <Button 
-                className="group rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200"
+                className="group relative overflow-hidden rounded-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black transition-all duration-200 px-6"
                 onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
               >
-                <span className="flex items-center justify-center gap-2">
-                  <span className="transition-transform duration-200 group-hover:-translate-x-1">Submit Another</span>
-                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-                </span>
+                Submit Another
+                <ArrowRight className="w-4 h-4 absolute right-2 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
               </Button>
             </div>
           ) : (
