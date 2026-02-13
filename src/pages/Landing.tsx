@@ -844,12 +844,12 @@ const Landing = () => {
                 <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-8">
                   Media Buying Marketplace.
                 </h2>
-                <button
+                <Button
                   onClick={() => navigate('/about')}
-                  className="group bg-[#2997ff] text-white font-medium px-8 py-3 rounded-none hover:bg-white hover:text-black border border-[#2997ff] hover:border-white transition-all inline-flex items-center gap-2"
+                  className="bg-accent hover:bg-accent/90 text-white px-8 py-3 text-base"
                 >
-                  Learn more <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </button>
+                  Learn more
+                </Button>
               </div>
             </section>
 
