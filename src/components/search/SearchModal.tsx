@@ -355,7 +355,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
 
                 {/* Subcategory Pills */}
                 {subcategories.length > 0 && (
-                  <div className="border-b border-border px-4 py-3 flex-shrink-0">
+                  <div className="border-b border-border px-4 py-1 flex-shrink-0">
                     <div className="flex overflow-x-auto scrollbar-hide gap-1 md:gap-2 md:flex-wrap">
                       <button
                         onClick={() => setActiveSubcategory(null)}
