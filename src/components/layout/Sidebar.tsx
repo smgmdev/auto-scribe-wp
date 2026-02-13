@@ -1294,7 +1294,7 @@ export function Sidebar({
   };
 
   return <>
-      <aside className={cn("fixed left-0 top-0 lg:top-[28px] z-[60] lg:z-50 h-screen lg:h-[calc(100vh-28px)] w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
+      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-screen lg:h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
     // Desktop: always visible
     "lg:translate-x-0",
     // Mobile: slide in/out
