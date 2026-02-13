@@ -192,7 +192,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" onEscapeKeyDown={(e) => e.preventDefault()}>
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
             Available balance: <span className="text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -319,29 +319,31 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
               </button>
             </div>
 
-            {/* Confirm Button */}
-            <Button
-              onClick={handleConfirmWithdraw}
-              disabled={!isValidAmount() || submitting}
-              className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                'Confirm Withdrawal'
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="w-full border-foreground text-foreground hover:bg-foreground hover:text-background"
-            >
-              Cancel
-            </Button>
+            {/* Buttons */}
+            <div className="flex flex-col gap-0 md:gap-2">
+              <Button
+                onClick={handleConfirmWithdraw}
+                disabled={!isValidAmount() || submitting}
+                className="w-full bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  'Confirm Withdrawal'
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="w-full border-foreground text-foreground hover:bg-foreground hover:text-background"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
