@@ -668,7 +668,7 @@ export function DashboardView() {
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1e3a5f]">
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1d1d1f]">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                         <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                           Wallet
