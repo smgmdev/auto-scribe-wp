@@ -306,25 +306,23 @@ export function HeadlinesView() {
                           {formatTimeAgo(headline.publishedAt)}
                         </span>
                       </div>
-                      <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                      <div className="hidden md:flex items-center flex-shrink-0">
                         <Button 
                           variant="default"
-                          size="sm"
-                          className="h-7 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-xs"
+                          className="h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-sm"
                           onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
                           title={headline.url}
                         >
                           View
-                          <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                          <ExternalLink className="h-4 w-4 ml-1" />
                         </Button>
                         <Button 
                           variant="default"
-                          size="sm"
-                          className="group/btn h-7 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-xs"
+                          className="group/btn h-9 bg-foreground text-white border border-foreground hover:bg-transparent hover:text-foreground transition-all duration-300 text-sm -ml-px"
                           onClick={(e) => { e.stopPropagation(); handleSelectHeadline(headline); }}
                         >
                           Use Source
-                          <ArrowRight className="h-3.5 w-3.5 ml-0 max-w-0 opacity-0 group-hover/btn:ml-1 group-hover/btn:max-w-[14px] group-hover/btn:opacity-100 transition-all duration-300" />
+                          <ArrowRight className="h-4 w-4 ml-0 max-w-0 opacity-0 group-hover/btn:ml-1 group-hover/btn:max-w-[16px] group-hover/btn:opacity-100 transition-all duration-300" />
                         </Button>
                       </div>
                     </div>
