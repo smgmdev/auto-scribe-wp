@@ -340,6 +340,18 @@ export default function ReportBug() {
                       </p>
                     </AccordionContent>
                   </AccordionItem>
+                  <AccordionItem value="usage" className="border-t border-border">
+                    <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                      <span className="flex items-center justify-between w-full gap-3 text-left">
+                        <span className="text-left">How can I use the credits earned from bug reporting?</span>
+                        <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed pb-6 space-y-3">
+                      <p>Credits earned through bug reporting are gifted directly to your account by the Arcana Mace team. Please ensure that you provide the email address associated with your account in the submission form so we can deliver the credits to the correct user.</p>
+                      <p>These credits can be used exclusively for <strong className="text-foreground">media publishing</strong> on the Arcana Mace platform. They cannot be withdrawn or converted into cash.</p>
+                    </AccordionContent>
+                  </AccordionItem>
                 </Accordion>
               </div>
             </form>
