@@ -336,6 +336,24 @@ export function HeadlinesView() {
                     <p className="text-xs text-muted-foreground/70 truncate">
                       {headline.url}
                     </p>
+                    <div className="flex md:hidden items-center gap-2 pt-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-7 w-7 hover:bg-muted"
+                        onClick={(e) => { e.stopPropagation(); setWebViewUrl(headline.url); setWebViewTitle(headline.title); }}
+                        title={headline.url}
+                      >
+                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-7 w-7 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
