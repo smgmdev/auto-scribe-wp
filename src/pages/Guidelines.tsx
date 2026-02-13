@@ -74,7 +74,7 @@ const Guidelines = () => {
       <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-[140px]">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
-            Arcana Mace Guidelines
+            User Guidelines
           </h1>
           <p className="text-muted-foreground border-b border-border pb-8">
             Updated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
