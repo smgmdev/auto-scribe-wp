@@ -204,7 +204,7 @@ export function HeadlinesView() {
         <CardHeader>
           <CardTitle className="text-sm font-medium text-white/60 flex items-center justify-between">
             <span>Active Sources</span>
-            <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+            <Badge variant="secondary" className="text-xs bg-[#f1a239] text-black border-[#f1a239]">
               {settings.selectedSources.length} selected
             </Badge>
           </CardTitle>
