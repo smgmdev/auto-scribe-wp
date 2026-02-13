@@ -610,7 +610,7 @@ export function DashboardView() {
           const cardContent = (
             <Card 
               key={stat.key} 
-              className={`border-border/30 bg-black shadow-sm hover:shadow-md transition-all py-2 md:py-3 ${stat.clickable ? 'cursor-pointer hover:border-primary' : 'hover:border-border/50'}`}
+              className={`border-border/30 bg-black shadow-sm hover:shadow-md transition-all py-2 md:py-3 rounded-none -mt-px -ml-px ${stat.clickable ? 'cursor-pointer hover:border-primary' : 'hover:border-border/50'}`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => stat.clickable && handleStatClick(stat.key)}
             >
@@ -675,7 +675,7 @@ export function DashboardView() {
       {isAgency && (
         <div className="grid gap-0 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
-           <Card className="border-border/50 bg-black">
+           <Card className="border-border/50 bg-black rounded-none -mt-px -ml-px">
             <CardHeader>
               <CardTitle className="text-xl text-white">Agency Summary</CardTitle>
             </CardHeader>
@@ -886,7 +886,7 @@ export function DashboardView() {
           </Card>
 
           {/* Agency Management */}
-          <Card className="border-border/50 bg-black">
+          <Card className="border-border/50 bg-black rounded-none -mt-px -ml-px">
             <CardHeader>
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
@@ -916,7 +916,7 @@ export function DashboardView() {
       {/* Instant Publishing & B2B Media Buying */}
       <div className="grid gap-0 md:grid-cols-2">
         {/* Instant Publishing */}
-        <Card className="border-border/50 bg-black">
+        <Card className="border-border/50 bg-black rounded-none -mt-px -ml-px">
           <CardHeader>
             <CardTitle className="text-xl text-white">Instant Publishing</CardTitle>
           </CardHeader>
@@ -937,7 +937,7 @@ export function DashboardView() {
         </Card>
 
         {/* B2B Media Buying */}
-        <Card className="border-border/50 bg-black">
+        <Card className="border-border/50 bg-black rounded-none -mt-px -ml-px">
           <CardHeader>
             <CardTitle className="text-xl text-white">B2B Media Buying</CardTitle>
           </CardHeader>
