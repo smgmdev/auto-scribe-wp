@@ -203,11 +203,11 @@ export default function ReportBug() {
                 We'll investigate this issue and work on a fix. If the bugs are confirmed and eligible, you'll receive free credits from the Arcana Mace team as a thank-you for your help.
               </p>
               <Button 
-                className="group bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300"
+                className="group relative bg-[#1d1d1f] text-white border border-[#1d1d1f] hover:bg-transparent hover:text-[#1d1d1f] transition-all duration-300 px-6"
                 onClick={() => { setSubmitted(false); setSubject(''); setCategory(''); setDescription(''); setStepsToReproduce(''); setEmail(''); setAttachment(null); }}
               >
                 Submit Another
-                <ArrowRight className="h-4 w-4 ml-1 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
+                <ArrowRight className="h-4 w-4 absolute right-2 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:right-1.5" />
               </Button>
             </div>
           ) : (
