@@ -601,7 +601,7 @@ export function DashboardView() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           const isAvailableCredits = stat.key === 'availableCredits';
