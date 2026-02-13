@@ -658,9 +658,9 @@ export function DashboardView() {
       {isAgency && (
         <div className="grid gap-2 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
-          <Card className="border-border/50 bg-card">
+           <Card className="border-border/50 bg-[#1d1d1f]">
             <CardHeader>
-              <CardTitle className="text-xl">Agency Summary</CardTitle>
+              <CardTitle className="text-xl text-white">Agency Summary</CardTitle>
             </CardHeader>
             <CardContent>
               {/* Financial Stats - Modern Cards */}
@@ -668,7 +668,7 @@ export function DashboardView() {
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1d1d1f]">
+                    <Card className="transition-colors py-3 cursor-help border-0 bg-[#1e3a5f]">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-4">
                         <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                           Wallet
