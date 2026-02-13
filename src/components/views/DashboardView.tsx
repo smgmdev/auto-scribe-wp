@@ -993,16 +993,16 @@ export function DashboardView() {
               </Button>
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-0">
               {articles.slice(0, 3).map(article => {
                 const siteInfo = getSiteInfo(article);
                 return (
                   <li key={article.id}>
                     {article.status === 'published' && article.wpLink ? (
-                      <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors group cursor-pointer">
+                      <a href={article.wpLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-lg bg-[#2a2a2a] p-3 hover:bg-white transition-colors group cursor-pointer">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <p className="font-medium text-sm line-clamp-1 text-white group-hover:text-black">{article.title}</p>
+                          <div className="flex items-center gap-1 text-xs text-white/50 group-hover:text-black/50">
                             {siteInfo && (
                               <>
                                 {siteInfo.favicon && (
@@ -1015,19 +1015,19 @@ export function DashboardView() {
                             <span>{formatRelativeTime(article.createdAt)}</span>
                           </div>
                         </div>
-                        <ExternalLink className="h-4 w-4 ml-2 text-muted-foreground group-hover:text-accent transition-colors" />
+                        <ExternalLink className="h-4 w-4 ml-2 text-white/50 group-hover:text-black/50 transition-colors" />
                       </a>
                     ) : (
                       <div 
-                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3 hover:bg-muted transition-colors cursor-pointer" 
+                        className="flex items-center justify-between rounded-lg bg-[#2a2a2a] p-3 hover:bg-white transition-colors cursor-pointer group" 
                         onClick={() => {
                           setEditingArticle(article);
                           setCurrentView('compose');
                         }}
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm line-clamp-1">{article.title}</p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <p className="font-medium text-sm line-clamp-1 text-white group-hover:text-black">{article.title}</p>
+                          <div className="flex items-center gap-1 text-xs text-white/50 group-hover:text-black/50">
                             {siteInfo && (
                               <>
                                 {siteInfo.favicon && (
@@ -1040,7 +1040,7 @@ export function DashboardView() {
                             <span>{formatRelativeTime(article.createdAt)}</span>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-xs">Draft</Badge>
+                        <Badge variant="outline" className="text-xs text-white/50 group-hover:text-black/50 border-white/30 group-hover:border-black/30">Draft</Badge>
                       </div>
                     )}
                   </li>
