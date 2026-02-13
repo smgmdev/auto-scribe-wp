@@ -160,7 +160,8 @@ export default function UpdateLog() {
               <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
                 <ul className="list-none space-y-3">
                   {update.changes.map((change, j) => (
-                    <li key={j} className="pl-4 border-l-2 border-border">
+                    <li key={j} className="flex items-start gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                       {change}
                     </li>
                   ))}
