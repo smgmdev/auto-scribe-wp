@@ -1037,7 +1037,7 @@ export function SitesView() {
                       e.stopPropagation();
                       handleOpenLogoDialog(site.id, site.favicon, 'wp');
                     }}
-                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded"
+                    className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 group-hover/logo:opacity-100 transition-opacity"
                   >
                     <Edit2 className="h-3 w-3 text-foreground" />
                   </button>
