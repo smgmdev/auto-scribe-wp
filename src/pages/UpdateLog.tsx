@@ -148,11 +148,11 @@ export default function UpdateLog() {
         <Accordion type="multiple" className="w-full">
           {updates.map((update, i) => (
             <AccordionItem key={i} value={`item-${i}`} className="border-t border-border">
-              <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
                 <span className="flex items-center justify-between w-full gap-3 text-left">
                   <span className="text-left">
                     {update.title}
-                    <span className="block text-xs font-normal text-muted-foreground mt-1">{update.date}</span>
+                    <span className="block text-sm font-normal text-muted-foreground mt-1">{update.date}</span>
                   </span>
                   <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
                 </span>
