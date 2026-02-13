@@ -890,7 +890,7 @@ export function DashboardView() {
             <CardHeader>
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-0">
               <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
@@ -920,7 +920,7 @@ export function DashboardView() {
           <CardHeader>
             <CardTitle className="text-xl text-white">Instant Publishing</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-0">
             <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('headlines')}>
               <Newspaper className="mr-2 h-4 w-4" />
               Scan Headlines
@@ -941,7 +941,7 @@ export function DashboardView() {
           <CardHeader>
             <CardTitle className="text-xl text-white">B2B Media Buying</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-0">
             <Button variant="outline" className="w-full justify-start bg-white text-black border-white hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => {
               setTargetTab('custom');
               setCurrentView('sites');
