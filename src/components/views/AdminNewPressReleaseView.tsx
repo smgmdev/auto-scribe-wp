@@ -31,8 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -121,7 +120,7 @@ export function AdminNewPressReleaseView() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      toast({ title: 'Error', description: 'Please enter a category name', variant: 'destructive' });
+      toast.error('Please enter a category name');
       return;
     }
     if (!user) return;
@@ -136,7 +135,7 @@ export function AdminNewPressReleaseView() {
 
       if (error) {
         if (error.code === '23505') {
-          toast({ title: 'Error', description: 'This category already exists', variant: 'destructive' });
+          toast.error('This category already exists');
         } else {
           throw error;
         }
@@ -147,10 +146,10 @@ export function AdminNewPressReleaseView() {
       setCategory(data.name);
       setNewCategoryName('');
       setNewCategoryDialogOpen(false);
-      toast({ title: 'Success', description: 'Category added successfully' });
+      toast.success('Category added successfully');
     } catch (error: any) {
       console.error('Error adding category:', error);
-      toast({ title: 'Error', description: error.message || 'Failed to add category', variant: 'destructive' });
+      toast.error(error.message || 'Failed to add category');
     } finally {
       setIsAddingCategory(false);
     }
@@ -176,7 +175,7 @@ export function AdminNewPressReleaseView() {
 
       if (error) {
         if (error.code === '23505') {
-          toast({ title: 'Error', description: 'This category name already exists', variant: 'destructive' });
+          toast.error('This category name already exists');
         } else {
           throw error;
         }
@@ -203,10 +202,10 @@ export function AdminNewPressReleaseView() {
 
       setEditingCategoryId(null);
       setEditingCategoryName('');
-      toast({ title: 'Success', description: 'Category updated successfully' });
+      toast.success('Category updated successfully');
     } catch (error: any) {
       console.error('Error updating category:', error);
-      toast({ title: 'Error', description: error.message || 'Failed to update category', variant: 'destructive' });
+      toast.error(error.message || 'Failed to update category');
     } finally {
       setIsSavingCategory(false);
     }
@@ -234,11 +233,11 @@ export function AdminNewPressReleaseView() {
         }
       }
 
-      toast({ title: 'Success', description: 'Category deleted successfully' });
+      toast.success('Category deleted successfully');
       setDeleteCategoryConfirm(null);
     } catch (error: any) {
       console.error('Error deleting category:', error);
-      toast({ title: 'Error', description: error.message || 'Failed to delete category', variant: 'destructive' });
+      toast.error(error.message || 'Failed to delete category');
     } finally {
       setIsDeletingCategory(false);
     }
@@ -267,10 +266,10 @@ export function AdminNewPressReleaseView() {
       );
 
       setEditingContact(null);
-      toast({ title: 'Success', description: 'Contact updated successfully' });
+      toast.success('Contact updated successfully');
     } catch (error: any) {
       console.error('Error updating contact:', error);
-      toast({ title: 'Error', description: error.message || 'Failed to update contact', variant: 'destructive' });
+      toast.error(error.message || 'Failed to update contact');
     } finally {
       setIsSavingContact(false);
     }
@@ -282,11 +281,7 @@ export function AdminNewPressReleaseView() {
       // Check file size - max 2MB
       const maxSizeBytes = 2 * 1024 * 1024; // 2MB in bytes
       if (file.size > maxSizeBytes) {
-        toast({
-          title: "File too large",
-          description: "Image size must be under 2MB",
-          variant: "destructive"
-        });
+        toast.error("Image size must be under 2MB");
         return;
       }
       
@@ -321,11 +316,7 @@ export function AdminNewPressReleaseView() {
       // Check file size - max 2MB
       const maxSizeBytes = 2 * 1024 * 1024;
       if (file.size > maxSizeBytes) {
-        toast({
-          title: "File too large",
-          description: "Image size must be under 2MB",
-          variant: "destructive"
-        });
+        toast.error("Image size must be under 2MB");
         return;
       }
 
@@ -336,11 +327,7 @@ export function AdminNewPressReleaseView() {
       };
       reader.readAsDataURL(file);
     } else if (file) {
-      toast({
-        title: "Invalid file type",
-        description: "Please drop an image file (PNG, JPG, GIF)",
-        variant: "destructive"
-      });
+      toast.error("Please drop an image file (PNG, JPG, GIF)");
     }
   };
 
@@ -351,15 +338,15 @@ export function AdminNewPressReleaseView() {
 
   const handlePublish = async () => {
     if (!title.trim()) {
-      toast({ title: 'Error', description: 'Please enter a title', variant: 'destructive' });
+      toast.error('Please enter a title');
       return;
     }
     if (!content.trim()) {
-      toast({ title: 'Error', description: 'Please enter content', variant: 'destructive' });
+      toast.error('Please enter content');
       return;
     }
     if (!user) {
-      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
+      toast.error('You must be logged in');
       return;
     }
 
@@ -402,17 +389,13 @@ export function AdminNewPressReleaseView() {
 
       if (insertError) throw insertError;
 
-      toast({ title: 'Success', description: 'Press release published successfully' });
+      toast.success('Press release published successfully');
       
       // Navigate to Press & News page
       navigate('/press');
     } catch (error: any) {
       console.error('Error publishing press release:', error);
-      toast({ 
-        title: 'Error', 
-        description: error.message || 'Failed to publish press release', 
-        variant: 'destructive' 
-      });
+      toast.error(error.message || 'Failed to publish press release');
     } finally {
       setIsSubmitting(false);
     }
@@ -420,11 +403,11 @@ export function AdminNewPressReleaseView() {
 
   const handleSaveDraft = async () => {
     if (!title.trim()) {
-      toast({ title: 'Error', description: 'Please enter a title', variant: 'destructive' });
+      toast.error('Please enter a title');
       return;
     }
     if (!user) {
-      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
+      toast.error('You must be logged in');
       return;
     }
 
@@ -463,14 +446,10 @@ export function AdminNewPressReleaseView() {
 
       if (insertError) throw insertError;
 
-      toast({ title: 'Success', description: 'Draft saved successfully' });
+      toast.success('Draft saved successfully');
     } catch (error: any) {
       console.error('Error saving draft:', error);
-      toast({ 
-        title: 'Error', 
-        description: error.message || 'Failed to save draft', 
-        variant: 'destructive' 
-      });
+      toast.error(error.message || 'Failed to save draft');
     } finally {
       setIsSubmitting(false);
     }

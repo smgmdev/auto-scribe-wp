@@ -13,7 +13,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchCategories, fetchTags, createTag, publishArticle, updateArticle as updateWPArticle, uploadMedia, updateMediaMetadata, fetchPostSEOData } from '@/lib/wordpress-api';
 import { getFaviconUrl } from '@/lib/favicon';
@@ -69,9 +69,7 @@ export function ComposeView() {
   const { sites, loading: sitesLoading } = useSites();
   const { addArticle, updateArticle } = useArticles();
   const { user, credits, isAdmin, refreshCredits } = useAuth();
-  const {
-    toast
-  } = useToast();
+  
   
   // Site credits state
   const [siteCredits, setSiteCredits] = useState<SiteCredit[]>([]);
@@ -382,22 +380,14 @@ export function ComposeView() {
   };
   const processImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
-        variant: "destructive"
-      });
+      toast.error("Please upload an image file");
       return;
     }
     
     // Check file size - max 2MB
     const maxSizeBytes = 2 * 1024 * 1024; // 2MB in bytes
     if (file.size > maxSizeBytes) {
-      toast({
-        title: "File too large",
-        description: "Image size must be under 2MB",
-        variant: "destructive"
-      });
+      toast.error("Image size must be under 2MB");
       return;
     }
     
@@ -495,16 +485,9 @@ export function ComposeView() {
       // Also update editingTagNames for fallback display
       setEditingTagNames(prev => ({ ...prev, [newTag.id]: newTag.name }));
       setNewTagInput('');
-      toast({
-        title: "Tag created",
-        description: `"${newTag.name}" has been added to your WordPress site`
-      });
+      toast.success(`"${newTag.name}" has been added to your WordPress site`);
     } catch (error) {
-      toast({
-        title: "Failed to create tag",
-        description: "Could not create the tag on WordPress",
-        variant: "destructive"
-      });
+      toast.error("Could not create the tag on WordPress");
     } finally {
       setIsAddingTag(false);
     }
@@ -512,11 +495,7 @@ export function ComposeView() {
   const handleGenerate = async () => {
     const headlineToUse = title || selectedHeadline?.title;
     if (!headlineToUse) {
-      toast({
-        title: "Title required",
-        description: "Please enter or select a headline first",
-        variant: "destructive"
-      });
+      toast.error("Please enter or select a headline first");
       return;
     }
     setIsGenerating(true);
@@ -550,98 +529,55 @@ export function ComposeView() {
         setTitle(data.title);
         setContent(data.content);
         const sourceNote = data.usedSource ? ' (based on source article)' : '';
-        toast({
-          title: "Article generated",
-          description: `${data.content.split(/\s+/).length} words generated with AI${sourceNote}`
-        });
+        toast.success(`${data.content.split(/\s+/).length} words generated with AI${sourceNote}`);
       } else {
         throw new Error(data?.error || 'Failed to generate article');
       }
     } catch (error) {
       console.error('Generation error:', error);
-      toast({
-        title: "Generation failed",
-        description: error instanceof Error ? error.message : "Could not generate article",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Could not generate article");
     } finally {
       setIsGenerating(false);
     }
   };
   const handlePublish = async () => {
     if (!title) {
-      toast({
-        title: "Title required",
-        description: "Please enter an article title",
-        variant: "destructive"
-      });
+      toast.error("Please enter an article title");
       return;
     }
     if (!content) {
-      toast({
-        title: "Content required",
-        description: "Please generate or write article content",
-        variant: "destructive"
-      });
+      toast.error("Please generate or write article content");
       return;
     }
     if (!currentSite) {
-      toast({
-        title: "No site selected",
-        description: "Please select a media site to publish to",
-        variant: "destructive"
-      });
+      toast.error("Please select a media site to publish to");
       return;
     }
     if (selectedCategories.length === 0) {
-      toast({
-        title: "Category required",
-        description: "Please select at least 1 category",
-        variant: "destructive"
-      });
+      toast.error("Please select at least 1 category");
       return;
     }
     if (selectedTagIds.length === 0) {
-      toast({
-        title: "Tag required",
-        description: "Please add at least 1 tag",
-        variant: "destructive"
-      });
+      toast.error("Please add at least 1 tag");
       return;
     }
     if (!focusKeyword) {
-      toast({
-        title: "Focus keyword required",
-        description: "Please enter a focus keyword for SEO",
-        variant: "destructive"
-      });
+      toast.error("Please enter a focus keyword for SEO");
       return;
     }
     if (currentSite.seoPlugin === 'aioseo' && !metaDescription) {
-      toast({
-        title: "Meta description required",
-        description: "Please enter a meta description for SEO",
-        variant: "destructive"
-      });
+      toast.error("Please enter a meta description for SEO");
       return;
     }
     if (!imagePreview) {
-      toast({
-        title: "Featured image required",
-        description: "Please upload a featured image",
-        variant: "destructive"
-      });
+      toast.error("Please upload a featured image");
       return;
     }
     // Check if user can afford total cost (only for new articles, non-admins)
     if (!isAdmin && !editingArticle) {
       const totalCost = getTotalCreditCost();
       if (credits < totalCost) {
-        toast({
-          title: "Insufficient credits",
-          description: `You need ${totalCost} credits to publish this article`,
-          variant: "destructive"
-        });
+        toast.error(`You need ${totalCost} credits to publish this article`);
         return;
       }
     }
@@ -659,10 +595,7 @@ export function ComposeView() {
       // Case 1: New file from file picker
       // Case 2: Image from saved draft (data URL in imagePreview but no file) - also applies to edits with new image
       if (featuredImage.file) {
-        toast({
-          title: "Uploading image...",
-          description: "Please wait while we upload your featured image"
-        });
+        toast.info("Uploading featured image...");
         const mediaResult = await uploadMedia(currentSite, featuredImage.file, {
           title: featuredImage.title,
           alt_text: featuredImage.altText,
@@ -673,10 +606,7 @@ export function ComposeView() {
         featuredImageUrl = mediaResult.source_url;
       } else if (imagePreview && (!featuredMediaId || imageChanged) && imagePreview.startsWith('data:')) {
         // Convert data URL to File and upload (for drafts with saved images or new images in edit mode)
-        toast({
-          title: "Uploading image...",
-          description: "Please wait while we upload your featured image"
-        });
+        toast.info("Uploading featured image...");
         
         try {
           const response = await fetch(imagePreview);
@@ -694,11 +624,7 @@ export function ComposeView() {
           featuredImageUrl = mediaResult.source_url;
         } catch (imgError) {
           console.error('Failed to upload image from URL:', imgError);
-          toast({
-            title: "Image upload failed",
-            description: "Could not upload the featured image, publishing without it",
-            variant: "destructive"
-          });
+          toast.error("Could not upload the featured image, publishing without it");
         }
       }
       let result: {
@@ -812,19 +738,11 @@ export function ComposeView() {
 
           if (creditError) {
             console.error('Failed to deduct credits:', creditError);
-            toast({
-              title: "Credit deduction failed",
-              description: "Article published but credits could not be deducted. Please contact support.",
-              variant: "destructive"
-            });
+            toast.error("Article published but credits could not be deducted. Please contact support.");
           } else if (creditResult?.error) {
             // Backend returned an error (e.g., insufficient credits)
             console.error('Backend credit error:', creditResult.error);
-            toast({
-              title: "Publishing failed",
-              description: creditResult.error,
-              variant: "destructive"
-            });
+            toast.error(creditResult.error);
             setIsPublishing(false);
             return;
           } else {
@@ -861,21 +779,13 @@ export function ComposeView() {
       }, 2500);
     } catch (error) {
       console.error('Publish error:', error);
-      toast({
-        title: "Failed to publish",
-        description: error instanceof Error ? error.message : "Could not publish to WordPress",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Could not publish to WordPress");
       setIsPublishing(false);
     }
   };
   const handleSaveChanges = async () => {
     if (!title) {
-      toast({
-        title: "Title required",
-        description: "Please enter a title",
-        variant: "destructive"
-      });
+      toast.error("Please enter a title");
       return;
     }
     if (!editingArticle) return;
@@ -993,21 +903,13 @@ export function ComposeView() {
       }, 2000);
     } catch (error) {
       console.error('Save error:', error);
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Could not save changes",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Could not save changes");
       setIsSavingDraft(false);
     }
   };
   const handleSaveDraft = async () => {
     if (!title) {
-      toast({
-        title: "Title required",
-        description: "Please enter a title for your draft",
-        variant: "destructive"
-      });
+      toast.error("Please enter a title for your draft");
       return;
     }
 
@@ -1148,11 +1050,7 @@ export function ComposeView() {
       }
     } catch (error) {
       console.error('Draft save error:', error);
-      toast({
-        title: "Failed to save draft",
-        description: error instanceof Error ? error.message : "Could not save draft",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Could not save draft");
       setIsSavingDraft(false);
     }
   };
@@ -1347,11 +1245,7 @@ export function ComposeView() {
                    className="hover:bg-black hover:text-white rounded-none"
                   onClick={async () => {
                     if (!title) {
-                      toast({
-                        title: "Title required",
-                        description: "Please enter a title first",
-                        variant: "destructive"
-                      });
+                      toast.error("Please enter a title first");
                       return;
                     }
                     setIsRefreshingTitle(true);
@@ -1362,18 +1256,11 @@ export function ComposeView() {
                       if (error) throw error;
                       if (data?.title) {
                         setTitle(data.title);
-                        toast({
-                          title: "Title refreshed",
-                          description: "New title generated successfully"
-                        });
+                        toast.success("New title generated successfully");
                       }
                     } catch (error) {
                       console.error('Error refreshing title:', error);
-                      toast({
-                        title: "Failed to refresh title",
-                        description: error instanceof Error ? error.message : "Could not generate new title",
-                        variant: "destructive"
-                      });
+                      toast.error(error instanceof Error ? error.message : "Could not generate new title");
                     } finally {
                       setIsRefreshingTitle(false);
                     }
