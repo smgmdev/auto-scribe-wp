@@ -163,7 +163,7 @@ export default function PressReleaseDetail() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-[120px]" />
+      <div className="h-[92px]" />
 
       {/* Newsroom Sub-header - Sticky */}
       <div className={`sticky z-40 bg-[#f5f5f7] border-b border-border/50 h-12 flex items-center transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
