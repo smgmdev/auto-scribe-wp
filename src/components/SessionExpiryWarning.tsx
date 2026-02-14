@@ -12,8 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Shield, LogOut } from 'lucide-react';
 
-const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 60 seconds before expiry
-const CHECK_INTERVAL_MS = 10 * 1000; // Check every 10 seconds
+const WARNING_BEFORE_EXPIRY_MS = 60 * 1000;
+const CHECK_INTERVAL_MS = 10 * 1000;
+const TEST_MODE = false;
 
 export function SessionExpiryWarning() {
   const { session, signOut } = useAuth();
@@ -56,6 +57,26 @@ export function SessionExpiryWarning() {
 
   // Check session expiry periodically
   useEffect(() => {
+    // TEST MODE: Show popup immediately
+    if (TEST_MODE && session) {
+      setSecondsLeft(60);
+      setShowWarning(true);
+      clearCountdown();
+      countdownRef.current = setInterval(() => {
+        setSecondsLeft(prev => {
+          if (prev <= 1) {
+            clearCountdown();
+            setShowWarning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => {
+        clearCountdown();
+      };
+    }
+
     if (!session) {
       setShowWarning(false);
       clearCountdown();
