@@ -11,17 +11,22 @@ const corsHeaders = {
 const PATTERNS: { type: string; regex: RegExp }[] = [
   { type: "email", regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/gi },
   { type: "phone", regex: /\+\d{1,4}[\s\-.]?\(?\d{2,4}\)?[\s\-.]?\d{3,4}[\s\-.]?\d{3,4}/g },
-  { type: "whatsapp", regex: /\b(?:whatsapp|whats\s?app|wa\.me|wa\s+number|wa\s*:)\b/gi },
-  { type: "telegram", regex: /\b(?:telegram|tele\.?gram|t\.me\/?\w*|@\w{5,})\b/gi },
-  { type: "discord", regex: /\b(?:discord(?:\.gg)?|disc(?:ord)?[\s:#]+\w+)\b/gi },
-  { type: "skype", regex: /\b(?:skype[\s:]+\w+|skype\.com|live:\w+)\b/gi },
-  { type: "instagram", regex: /\b(?:instagram|insta[\s:@]+\w+|ig[\s:@]+\w+)\b/gi },
-  { type: "twitter", regex: /\b(?:twitter|x\.com\/?\w*|tweet[\s:]+\w+)\b/gi },
-  { type: "facebook", regex: /\b(?:facebook|fb\.com|fb[\s:]+\w+|messenger)\b/gi },
-  { type: "linkedin", regex: /\b(?:linkedin|linked[\s\-]?in)\b/gi },
-  { type: "snapchat", regex: /\b(?:snapchat|snap[\s:@]+\w+)\b/gi },
-  { type: "signal", regex: /\b(?:signal[\s:]+\w+|signal\s+app)\b/gi },
+  { type: "whatsapp", regex: /\b(?:whatsapp|whats\s?app|whtsapp|watsapp|whtsp|whatapp|wa\.me|wa\s+number|wa\s*:)\b/gi },
+  { type: "telegram", regex: /\b(?:telegram|tele\.?gram|telgram|telegr|t\.me\/?\w*|@\w{5,})\b/gi },
+  { type: "discord", regex: /\b(?:discord(?:\.gg)?|discrd|disc(?:ord)?[\s:#]+\w+)\b/gi },
+  { type: "skype", regex: /\b(?:skype[\s:]+\w+|skype\.com|skyp|live:\w+)\b/gi },
+  { type: "instagram", regex: /\b(?:instagram|insta|instgrm|instagr|ig)\b/gi },
+  { type: "twitter", regex: /\b(?:twitter|x\.com\/?\w*|tw|tweet[\s:]+\w+)\b/gi },
+  { type: "facebook", regex: /\b(?:facebook|fb|fbook|fb\.com|messenger|msgr)\b/gi },
+  { type: "linkedin", regex: /\b(?:linkedin|linked[\s\-]?in|linkdin)\b/gi },
+  { type: "snapchat", regex: /\b(?:snapchat|snap|snpchat|sc)\b/gi },
+  { type: "signal", regex: /\b(?:signal[\s:]+\w+|signal\s+app|signl)\b/gi },
   { type: "wechat", regex: /\b(?:wechat|weixin|微信)\b/gi },
+  { type: "tiktok", regex: /\b(?:tiktok|tktok|tt)\b/gi },
+  { type: "social_media", regex: /\b(?:social\s*media|social\s*account|social\s*profile|social\s*handle|socials|social\s*network)\b/gi },
+  { type: "contact_exchange", regex: /\b(?:my\s+(?:handle|username|account|id|tag|profile|socials?)\s*(?:is|:|=))/gi },
+  { type: "contact_exchange", regex: /\b(?:the\s+(?:bird\s+app|gram|tok)|green\s+app|blue\s+app|messaging\s+app|chat\s+app)\b/gi },
+  { type: "contact_exchange", regex: /\b\w+\s+at\s+\w+\s+dot\s+\w+\b/gi },
 ];
 
 const SYSTEM_MESSAGE_PREFIXES = [
@@ -106,10 +111,30 @@ serve(async (req) => {
       }
     }
 
-    // 2. AI contextual scan
+    // 2. AI contextual scan with conversation history
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (LOVABLE_API_KEY) {
       try {
+        // Fetch recent conversation history for context
+        let conversationContext = "";
+        if (request_id) {
+          const { data: recentMessages } = await supabase
+            .from("service_messages")
+            .select("message, sender_type, created_at")
+            .eq("request_id", request_id)
+            .order("created_at", { ascending: false })
+            .limit(10);
+          
+          if (recentMessages && recentMessages.length > 0) {
+            const contextMsgs = recentMessages
+              .reverse()
+              .filter(m => !isSystemMessage(m.message))
+              .map(m => `[${m.sender_type}]: ${m.message}`)
+              .join("\n");
+            conversationContext = `\n\nRECENT CONVERSATION HISTORY (for context):\n${contextMsgs}`;
+          }
+        }
+
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -121,19 +146,33 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: `Analyze this single chat message for contact-sharing intent on a media services marketplace. Flag if the user is:
-- Asking for phone/email/social media details ("what's your number?", "send me your email")
-- Offering contact info ("here's my email", "reach me at", "my telegram is")  
-- Sharing obfuscated contacts ("john at gmail dot com")
-- Suggesting moving off-platform ("let's talk on Discord", "message me on WhatsApp")
+                content: `You are a security AI monitoring a media services marketplace chat. Your job is to detect ANY attempt to exchange contact information or move communication off-platform.
 
-DO NOT flag: random numbers, order IDs, dates, prices, or general conversation without contact-sharing intent.
+ANALYZE the current message AND the conversation context to detect:
 
-Return JSON: [{"type": "<type>", "value": "<what was detected and brief context>"}]
-Types: email, phone, whatsapp, telegram, discord, skype, instagram, twitter, facebook, linkedin, snapchat, signal, social_media, contact_exchange
-Return [] if nothing suspicious. ONLY return the JSON array.`,
+1. **Direct contact sharing**: emails, phone numbers, social media handles, usernames
+2. **Platform mentions**: ANY mention of WhatsApp, Telegram, Discord, Instagram, Facebook, Twitter/X, Snapchat, TikTok, LinkedIn, Signal, Viber, Skype, WeChat, or any other messaging/social platform - even casually
+3. **Obfuscated contacts**: "john at gmail dot com", spaced-out names like "w h a t s a p p", coded references like "the bird app" (Twitter), "the gram" (Instagram), "green app" (WhatsApp)
+4. **Bypass attempts**: Asking to move conversations elsewhere, mentioning "other apps", "different platform", "talk privately", "outside here"
+5. **Probing questions**: "do you have socials?", "how can I reach you?", "where else are you?", "any other way to contact?"
+6. **Indirect/coded language**: References to "DMs", "PMs", usernames, handles, IDs, profiles, account names
+7. **Building up to contact exchange**: Look at conversation flow - if earlier messages were probing and this message continues that pattern, flag it
+8. **Generic social references**: "social media", "social account", "your socials", "my social", etc.
+9. **Sharing account identifiers**: Any string that looks like a username, handle, or account ID being shared
+
+IMPORTANT CONTEXT RULES:
+- If the conversation shows a pattern of one user gradually steering toward contact exchange, flag the current message even if it seems innocent in isolation
+- Flag ANY mention of social platforms or messaging apps, even casual ones - the policy is zero tolerance
+- "Do you have..." + any contact/platform word = always flag
+- Coded/slang references to platforms count (e.g., "IG", "TG", "the tok", "bird app")
+
+DO NOT flag: order-related numbers, prices, delivery dates, word counts, or purely business discussion about the media service
+
+Return JSON: [{"type": "<type>", "value": "<brief explanation of what was detected>"}]
+Types: email, phone, whatsapp, telegram, discord, instagram, twitter, facebook, snapchat, tiktok, linkedin, signal, skype, social_media, contact_exchange
+Return [] if nothing suspicious. ONLY return the JSON array, nothing else.${conversationContext}`,
               },
-              { role: "user", content: message },
+              { role: "user", content: `CURRENT MESSAGE TO ANALYZE:\n${message}` },
             ],
           }),
         });
