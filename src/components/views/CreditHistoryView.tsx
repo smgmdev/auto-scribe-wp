@@ -874,7 +874,7 @@ export function CreditHistoryView() {
         <div className="flex flex-col md:flex-row gap-0 w-full md:w-auto">
           <Button 
             onClick={() => setBuyCreditsOpen(true)}
-            className="w-full md:w-auto bg-[#f2a547] text-black hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
+            className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none border border-transparent transition-all"
           >
             Buy Credits
           </Button>
@@ -882,7 +882,7 @@ export function CreditHistoryView() {
             onClick={handleRefresh}
             disabled={refreshing}
             variant="outline"
-            className="w-full md:w-auto bg-[#f2a547] text-black hover:bg-transparent hover:text-black border border-transparent hover:border-black gap-2 transition-all"
+            className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black gap-2 transition-all"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
