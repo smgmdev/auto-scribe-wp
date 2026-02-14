@@ -119,7 +119,7 @@ export function LatestPublishedCarousel() {
         <h2 className="text-xl font-semibold text-foreground mb-4">Latest Published News</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl bg-card border border-border p-6 animate-pulse">
+            <div key={i} className="rounded-none bg-card border border-border p-6 animate-pulse">
               <div className="h-5 w-3/4 bg-muted rounded mb-4" />
               <div className="h-4 w-full bg-muted rounded mb-2" />
               <div className="h-4 w-2/3 bg-muted rounded" />
@@ -155,7 +155,7 @@ export function LatestPublishedCarousel() {
                 rel="noopener noreferrer"
                 className="block h-full group"
               >
-                <div className="rounded-xl bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
+                <div className="rounded-none bg-card border border-border overflow-hidden h-full hover:border-foreground transition-all duration-200 flex flex-col">
                   {/* Featured Image */}
                   {article.featured_image?.url && (
                     <ImageWithLoader
