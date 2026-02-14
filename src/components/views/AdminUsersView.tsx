@@ -1346,7 +1346,7 @@ export function AdminUsersView() {
 
                   {/* Expanded Details with Tabs */}
                   {isExpanded && (
-                    <div className="mt-3 pt-3 border-t border-border">
+                    <div className="-mx-4 -mb-4 mt-3 pt-3 px-4 pb-4 border-t border-border">
                       <Tabs 
                         value={userCardTabs[user.id] || 'logs'} 
                         onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
