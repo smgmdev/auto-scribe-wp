@@ -1170,7 +1170,7 @@ export function MyRequestsView() {
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
         <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
         <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
-          <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+          <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
             {unreadActiveCount > 0 && (
@@ -1179,7 +1179,7 @@ export function MyRequestsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+          <TabsTrigger value="closed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
             <History className="h-4 w-4" />
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {unreadClosedCount > 0 && (
@@ -1331,7 +1331,7 @@ export function MyRequestsView() {
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
               <div className="relative md:overflow-visible">
               <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
-                <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
                   {unreadDeliveredCount > 0 && (
@@ -1340,7 +1340,7 @@ export function MyRequestsView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <XCircle className="h-4 w-4" />
                   Cancelled ({cancelledRequests.length})
                   {unreadCancelledCount > 0 && (
