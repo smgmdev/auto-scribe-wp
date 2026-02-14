@@ -1485,7 +1485,7 @@ export function SitesView() {
               </div>
               
               {/* Filtered sites list */}
-                <div className="space-y-0 [&>*:first-child]:border-t-0">
+                <div className="[&>*:first-child]:border-t-0">
                 {sites
                   .filter(site => 
                     site.name.toLowerCase().includes(wpSearchQuery.toLowerCase()) ||
