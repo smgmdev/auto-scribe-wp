@@ -1045,8 +1045,8 @@ export function Sidebar({
       let historyUnread = 0;
       
       allUnreadOrders?.forEach(order => {
-        // Skip pending_payment orders - they're user-created and not "new events"
-        if (order.status === 'pending_payment') {
+        // Skip pending_payment orders unless they have a delivery event
+        if (order.status === 'pending_payment' && order.delivery_status === 'pending') {
           return;
         }
         
@@ -1055,8 +1055,8 @@ export function Sidebar({
           historyUnread++;
         } else if (disputeOrderIds.has(order.id)) {
           disputeUnread++;
-        } else if (order.status === 'paid' && order.delivery_status !== 'accepted') {
-          // Active orders: paid, not yet accepted by buyer (includes 'delivered' = pending approval)
+        } else if (order.delivery_status !== 'accepted') {
+          // Active orders: paid or delivered pending approval
           activeUnread++;
         } else if (order.delivery_status === 'accepted') {
           // Completed orders (buyer approved) that are unread
