@@ -1317,9 +1317,9 @@ export function SitesView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 rounded-none p-0 h-auto">
-          <TabsTrigger value="instant">Local Library ({sites.length})</TabsTrigger>
-          <TabsTrigger value="custom">Global Library ({mediaSites.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-black rounded-none p-0 h-auto">
+          <TabsTrigger value="instant" className="text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">Local Library ({sites.length})</TabsTrigger>
+          <TabsTrigger value="custom" className="text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">Global Library ({mediaSites.length})</TabsTrigger>
         </TabsList>
 
         {/* Instant Publishing Tab - WordPress Sites */}
