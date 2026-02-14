@@ -23,7 +23,7 @@ export function MainLayout({
   const currentView = useAppStore((state) => state.currentView);
   const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   
-  const isDarkFooter = currentView === 'agency-application' && agencyDarkFooter;
+  const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
 
   useEffect(() => {
