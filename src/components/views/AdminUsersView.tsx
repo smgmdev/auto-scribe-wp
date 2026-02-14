@@ -1374,7 +1374,7 @@ export function AdminUsersView() {
                           </div>
                         ) : (
                           <>
-                            <TabsContent value="logs" className="mt-0 px-4 pb-4">
+                            <TabsContent value="logs" className="mt-0 px-4 pt-4 pb-4">
                               <div className="grid gap-1 text-xs">
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Account created:</span>
