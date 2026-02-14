@@ -36,7 +36,9 @@ interface UserCredit {
   email: string | null;
   isAgency: boolean;
   dbCredits: number; // Raw DB value for validation
+  rawTxSum: number; // Sum of all non-withdrawal transaction amounts (source of truth)
   validationStatus: 'valid' | 'mismatch' | 'unchecked';
+  validationDetail?: string; // Extra detail for mismatch
 }
 
 export const AdminCreditManagementView = () => {
@@ -95,6 +97,7 @@ export const AdminCreditManagementView = () => {
       let incoming = 0;
       let outgoing = 0;
       let withdrawn = 0;
+      let rawTxSum = 0; // Sum of all non-withdrawal tx amounts
 
       txs?.forEach(tx => {
         if (tx.type === 'withdrawal_completed') {
@@ -102,6 +105,10 @@ export const AdminCreditManagementView = () => {
           return;
         }
         if (withdrawalTypes.includes(tx.type)) return;
+        
+        // Raw sum includes ALL non-withdrawal amounts (locked, unlocked, everything)
+        rawTxSum += tx.amount;
+        
         if (tx.amount > 0 && tx.type !== 'unlocked') incoming += tx.amount;
         if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
           outgoing += Math.abs(tx.amount);
@@ -115,6 +122,12 @@ export const AdminCreditManagementView = () => {
       const calculatedAvailable = calculatedBalance - totalLocked - withdrawn;
       const dbValue = dbCredits?.credits ?? 0;
 
+      // Validation: compare raw transaction sum to DB credits
+      // user_credits.credits is NOT updated by locks/unlocks/order completions for clients
+      // so we compare the raw sum of all non-withdrawal transactions
+      const isValid = rawTxSum === dbValue;
+      const detail = isValid ? undefined : `DB: ${dbValue}, Tx Sum: ${rawTxSum}, Diff: ${dbValue - rawTxSum}`;
+
       // Update the user in state
       setUserCredits(prev => prev.map(u => {
         if (u.user_id !== userId) return u;
@@ -127,11 +140,13 @@ export const AdminCreditManagementView = () => {
           lockedFromWithdrawals: 0,
           available: calculatedAvailable,
           dbCredits: dbValue,
-          validationStatus: (calculatedAvailable === dbValue) ? 'valid' : 'mismatch',
+          rawTxSum,
+          validationStatus: isValid ? 'valid' : 'mismatch',
+          validationDetail: detail,
         };
       }));
 
-      const status = calculatedAvailable === dbValue ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbValue}, Calculated: ${calculatedAvailable})`;
+      const status = isValid ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbValue}, Tx Sum: ${rawTxSum})`;
       toast.success(`Recalculated: ${status}`);
     } catch (err) {
       console.error('Recalculate error:', err);
@@ -149,7 +164,7 @@ export const AdminCreditManagementView = () => {
   const handleValidateAll = async () => {
     setRefreshing(true);
     await fetchUserCredits();
-    // After refresh, validate each user's DB value
+    // After refresh, validate each user's rawTxSum against DB value
     const { data: allDbCredits } = await supabase
       .from('user_credits')
       .select('user_id, credits');
@@ -157,18 +172,30 @@ export const AdminCreditManagementView = () => {
     const dbMap = new Map<string, number>();
     allDbCredits?.forEach(c => dbMap.set(c.user_id, c.credits));
     
-    setUserCredits(prev => prev.map(u => ({
-      ...u,
-      dbCredits: dbMap.get(u.user_id) ?? 0,
-      validationStatus: (u.available === (dbMap.get(u.user_id) ?? 0)) ? 'valid' : 'mismatch',
-    })));
+    let mismatchCount = 0;
+    setUserCredits(prev => {
+      const updated = prev.map(u => {
+        const dbVal = dbMap.get(u.user_id) ?? 0;
+        const isValid = u.rawTxSum === dbVal;
+        if (!isValid) mismatchCount++;
+        return {
+          ...u,
+          dbCredits: dbVal,
+          validationStatus: isValid ? 'valid' as const : 'mismatch' as const,
+          validationDetail: isValid ? undefined : `DB: ${dbVal}, Tx Sum: ${u.rawTxSum}, Diff: ${dbVal - u.rawTxSum}`,
+        };
+      });
+      return updated;
+    });
     
-    const mismatches = userCredits.filter(u => u.available !== (dbMap.get(u.user_id) ?? 0));
-    if (mismatches.length > 0) {
-      toast.warning(`${mismatches.length} user(s) have mismatched credit values`);
-    } else {
-      toast.success('All users validated successfully');
-    }
+    // Use setTimeout to read the updated mismatchCount after state update
+    setTimeout(() => {
+      if (mismatchCount > 0) {
+        toast.warning(`${mismatchCount} user(s) have mismatched credit values`);
+      } else {
+        toast.success('All users validated successfully');
+      }
+    }, 100);
     setRefreshing(false);
   };
 
@@ -245,6 +272,8 @@ export const AdminCreditManagementView = () => {
       const incomingMap = new Map<string, number>();
       // Calculate outgoing credits per user (negative amounts, excluding locked types)
       const outgoingMap = new Map<string, number>();
+      // Raw transaction sum per user (all non-withdrawal amounts, for validation)
+      const rawTxSumMap = new Map<string, number>();
       // Track purchased (online), purchased (invoice/gifted), earned, refunded separately for display
       const purchasedOnlineMap = new Map<string, number>();
       const purchasedInvoiceMap = new Map<string, number>();
@@ -267,6 +296,9 @@ export const AdminCreditManagementView = () => {
         
         // Skip other withdrawal transactions - they don't affect credit balance
         if (withdrawalTypes.includes(tx.type)) return;
+        
+        // Raw sum of ALL non-withdrawal transaction amounts (for DB validation)
+        rawTxSumMap.set(tx.user_id, (rawTxSumMap.get(tx.user_id) || 0) + tx.amount);
         
         // Calculate incoming (all positive amounts, excluding 'unlocked' which is a reversal of 'locked')
         if (tx.amount > 0 && tx.type !== 'unlocked') {
@@ -389,6 +421,7 @@ export const AdminCreditManagementView = () => {
           email: emailMap.get(credit.user_id) || null,
           isAgency: agencyUserIds.has(credit.user_id),
           dbCredits: credit.credits,
+          rawTxSum: rawTxSumMap.get(credit.user_id) || 0,
           validationStatus: 'unchecked' as const,
         };
       });
