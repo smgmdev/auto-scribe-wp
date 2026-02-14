@@ -126,7 +126,7 @@ export function AdminFeedbackView() {
     <div className="bg-white -m-4 lg:-m-8 min-h-[calc(100vh-56px)] lg:min-h-screen">
       <div className="max-w-[980px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-0">
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-bold text-foreground">Feedback</h1>
             {openCount > 0 && (
@@ -165,12 +165,12 @@ export function AdminFeedbackView() {
           {/* Search */}
           <div className="mt-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-background/50" />
               <Input
                 placeholder="Search reports by subject, email, category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-foreground text-background border-foreground placeholder:text-white/50 h-9 text-xs"
+                className="pl-10 bg-black text-white border-black placeholder:text-white/50 h-9 text-sm rounded-none"
               />
             </div>
           </div>
