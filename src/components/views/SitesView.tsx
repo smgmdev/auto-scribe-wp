@@ -1301,7 +1301,7 @@ export function SitesView() {
     return (
       <Card 
         key={site.id} 
-        className="group hover:shadow-md hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden" 
+        className={`group hover:shadow-md hover:bg-muted transition-all duration-300 cursor-pointer overflow-hidden rounded-none ${index > 0 ? '-mt-px' : 'border-t-0'}`}
         style={{ animationDelay: `${index * 50}ms` }}
         onClick={() => toggleExpand(site.id)}
       >
@@ -1778,7 +1778,7 @@ export function SitesView() {
                       }
 
                       return (
-                        <div className="space-y-0">
+                        <div className="[&>*:first-child]:border-t-0">
                           {filtered.map((site, index) => 
                             category === 'Agencies/People' 
                               ? renderAgencyCard(site, index)
