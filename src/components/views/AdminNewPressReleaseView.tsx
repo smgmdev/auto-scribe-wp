@@ -518,7 +518,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Add Category Dialog */}
           <Dialog open={newCategoryDialogOpen} onOpenChange={setNewCategoryDialogOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-md overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Category</DialogTitle>
               </DialogHeader>
@@ -560,7 +560,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Manage Categories Dialog */}
           <Dialog open={manageCategoriesOpen} onOpenChange={setManageCategoriesOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-md overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Manage Categories</DialogTitle>
               </DialogHeader>
@@ -647,7 +647,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Delete Category Confirmation */}
           <AlertDialog open={!!deleteCategoryConfirm} onOpenChange={(open) => !open && setDeleteCategoryConfirm(null)}>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-auto max-md:w-[calc(100%-2rem)] max-md:max-w-full max-md:rounded-none max-md:border-0">
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Category</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -785,7 +785,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Manage Contacts Dialog */}
           <Dialog open={manageContactsOpen} onOpenChange={setManageContactsOpen}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-lg overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Manage Press Contacts</DialogTitle>
               </DialogHeader>
