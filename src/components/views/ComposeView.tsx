@@ -1240,7 +1240,7 @@ export function ComposeView() {
               </div>
             ) : (
               <div className="flex gap-2">
-                <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-sm flex-1 h-9 rounded-none" />
+                <Input id="title" placeholder="Enter your article title..." value={title} onChange={e => setTitle(e.target.value)} className="text-sm flex-1 h-9 rounded-none bg-background text-foreground border-input placeholder:text-muted-foreground" />
                 <Button
                   variant="outline"
                   size="icon"
