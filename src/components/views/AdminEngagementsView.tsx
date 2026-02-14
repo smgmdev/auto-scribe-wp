@@ -560,7 +560,7 @@ export function AdminEngagementsView() {
         <Button
           onClick={() => fetchRequests(true)}
           disabled={isRefreshing}
-          className="w-full md:w-auto border border-foreground shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:shadow-none gap-2"
+          className="w-full md:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground hover:shadow-none gap-2"
         >
           {isRefreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
