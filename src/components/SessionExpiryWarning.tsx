@@ -166,18 +166,18 @@ export function SessionExpiryWarning() {
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-row gap-2 mt-2">
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-2">
           <Button
             variant="outline"
             onClick={handleLogOut}
-            className="flex-1 gap-1.5 h-9 text-xs"
+            className="w-full sm:flex-1 gap-1.5 h-9 text-xs hover:bg-black hover:text-black hover:border-black"
           >
             <LogOut className="h-3.5 w-3.5" />
             Log Out
           </Button>
           <Button
             onClick={handleStayLogged}
-            className="flex-1 h-9 text-xs"
+            className="w-full sm:flex-1 h-9 text-xs hover:bg-transparent hover:text-black hover:border hover:border-foreground"
           >
             Stay Logged In
           </Button>
