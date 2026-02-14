@@ -65,7 +65,7 @@ export function MainLayout({
             <Link to="/report-bug" className="inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
           </p>
         </div>
-        <header className="h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-center px-4 relative">
+        <header className="h-14 bg-black border-b border-white/10 flex items-center justify-center px-4 relative">
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="absolute left-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
             <Menu className="h-6 w-6" />
           </Button>
