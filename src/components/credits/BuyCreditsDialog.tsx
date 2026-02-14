@@ -237,8 +237,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           <Button
             onClick={handlePurchase}
             disabled={purchasing || !isValidAmount}
-            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
-            size="lg"
+            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-8 text-sm md:text-xs"
           >
             {purchasing ? (
               <>
