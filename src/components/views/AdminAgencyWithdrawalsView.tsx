@@ -328,7 +328,7 @@ export function AdminAgencyWithdrawalsView() {
         <Button
           onClick={() => fetchWithdrawals(true)}
           disabled={refreshing}
-          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
+          className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
