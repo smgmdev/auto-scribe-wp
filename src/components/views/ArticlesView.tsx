@@ -122,22 +122,22 @@ export function ArticlesView() {
               >
                 {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
               </Badge>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                  variant="default" 
+                  size="sm"
+                  className="bg-black text-white rounded-none hover:bg-transparent hover:text-black border border-black text-xs px-3 h-8"
                   onClick={() => handleEdit(article)}
                 >
-                  <Edit className="h-4 w-4" />
+                  Edit
                 </Button>
                 <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+                  variant="default" 
+                  size="sm"
+                  className="bg-black text-white rounded-none hover:bg-transparent hover:text-black border border-black text-xs px-3 h-8 -ml-px"
                   onClick={() => handleDeleteClick(article)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  Delete
                 </Button>
               </div>
             </div>
