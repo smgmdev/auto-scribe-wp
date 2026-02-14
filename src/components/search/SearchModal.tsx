@@ -333,9 +333,9 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
               </div>
 
               {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
+              <div className="bg-card border border-t-0 border-border border-b-0 shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
                 {/* Category Tabs */}
-                <div className="bg-foreground flex-shrink-0 overflow-x-auto scrollbar-hide">
+                <div className="bg-black flex-shrink-0 overflow-x-auto scrollbar-hide">
                   <div className="flex whitespace-nowrap">
                     {CATEGORY_TABS.map(tab => (
                       <button
@@ -355,7 +355,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
 
                 {/* Subcategory Pills */}
                 {subcategories.length > 0 && (
-                  <div className="bg-foreground px-0 py-0 flex-shrink-0">
+                  <div className="bg-black px-0 py-0 flex-shrink-0">
                     <div className="flex overflow-x-auto scrollbar-hide gap-0 md:flex-wrap">
                       <button
                         onClick={() => setActiveSubcategory(null)}
