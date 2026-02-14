@@ -54,6 +54,8 @@ export function AdminSystemView() {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -247,14 +249,13 @@ export function AdminSystemView() {
           {expandedUsers.has(user.id) && (
             <div className="pl-6 border-l border-white/10 ml-2 mb-2 text-[11px] font-mono">
               <div className="text-white/30 py-0.5">ID: {user.id}</div>
-              <div className="text-white/30 py-0.5">Username: {user.username || '—'}</div>
               <div className="text-white/30 py-0.5">Last online: {user.last_online_at ? format(new Date(user.last_online_at), 'yyyy-MM-dd HH:mm') : '—'}</div>
               <div className="text-green-400 py-0.5">Available credits: {user.credits.toLocaleString()}</div>
 
               {user.orders.length > 0 && (
                 <div className="mt-1">
                   <div className="text-white/50 py-0.5">── Orders ({user.orders.length}) ──</div>
-                  {user.orders.slice(0, 10).map(o => (
+                  {user.orders.slice(0, expandedOrders.has(user.id) ? undefined : 10).map(o => (
                     <div key={o.id} className="flex gap-2 py-0.5 text-white/40">
                       <span className="text-white/20">{o.order_number || o.id.slice(0, 8)}</span>
                       <span className="text-white/50">{o.media_site_name}</span>
@@ -266,14 +267,19 @@ export function AdminSystemView() {
                       }>{o.status}</span>
                     </div>
                   ))}
-                  {user.orders.length > 10 && <div className="text-white/20 py-0.5">... +{user.orders.length - 10} more</div>}
+                  {user.orders.length > 10 && !expandedOrders.has(user.id) && (
+                    <button
+                      onClick={() => setExpandedOrders(prev => { const next = new Set(prev); next.add(user.id); return next; })}
+                      className="text-cyan-400 hover:text-cyan-300 py-0.5 cursor-pointer"
+                    >... +{user.orders.length - 10} more</button>
+                  )}
                 </div>
               )}
 
               {user.transactions.length > 0 && (
                 <div className="mt-1">
                   <div className="text-white/50 py-0.5">── Transactions ({user.transactions.length}) ──</div>
-                  {user.transactions.slice(0, 10).map(tx => (
+                  {user.transactions.slice(0, expandedTransactions.has(user.id) ? undefined : 10).map(tx => (
                     <div key={tx.id} className="flex gap-2 py-0.5 text-white/40">
                       <span className="text-white/20">{format(new Date(tx.created_at), 'MM-dd')}</span>
                       <span className="text-white/50 min-w-[120px]">{tx.type}</span>
@@ -283,7 +289,12 @@ export function AdminSystemView() {
                       <span className="text-white/20 truncate max-w-[200px]">{tx.description || ''}</span>
                     </div>
                   ))}
-                  {user.transactions.length > 10 && <div className="text-white/20 py-0.5">... +{user.transactions.length - 10} more</div>}
+                  {user.transactions.length > 10 && !expandedTransactions.has(user.id) && (
+                    <button
+                      onClick={() => setExpandedTransactions(prev => { const next = new Set(prev); next.add(user.id); return next; })}
+                      className="text-cyan-400 hover:text-cyan-300 py-0.5 cursor-pointer"
+                    >... +{user.transactions.length - 10} more</button>
+                  )}
                 </div>
               )}
             </div>
