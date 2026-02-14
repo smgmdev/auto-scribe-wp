@@ -1151,12 +1151,12 @@ export function AdminUsersView() {
         </Tabs>
         
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
           <Input
             placeholder="Search users by email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm placeholder:text-sm rounded-none"
+            className="pl-10 h-9 text-sm placeholder:text-sm rounded-none bg-black text-white border-black placeholder:text-white/50"
           />
         </div>
 
