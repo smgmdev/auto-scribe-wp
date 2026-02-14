@@ -183,6 +183,7 @@ export function Sidebar({
     setUserUnreadCancelledCount,
     userUnreadOrdersCount,
     setUserUnreadOrdersCount,
+    incrementUserUnreadOrdersCount,
     userUnreadDisputesCount,
     setUserUnreadDisputesCount,
     userUnreadCompletedCount,
@@ -1175,6 +1176,23 @@ export function Sidebar({
 
     const channel = supabase
       .channel('user-orders-realtime-sidebar')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const newOrder = payload.new as any;
+          console.log('[Sidebar] New user order detected:', newOrder.id, newOrder.status);
+          // If a new paid order appears (e.g. admin created it or payment completed), increment count
+          if (newOrder.status === 'paid' && !newOrder.read) {
+            incrementUserUnreadOrdersCount();
+          }
+        }
+      )
       .on(
         'postgres_changes',
         {
