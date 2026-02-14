@@ -1168,26 +1168,28 @@ export function MyRequestsView() {
 
       <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:max-w-md bg-black rounded-none">
-          <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+        <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+        <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-2 md:max-w-md md:overflow-visible bg-black rounded-none">
+          <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
             {unreadActiveCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadActiveCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+          <TabsTrigger value="closed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <History className="h-4 w-4" />
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {unreadClosedCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadClosedCount}
               </span>
             )}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <div className="relative mt-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -1327,26 +1329,28 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-0">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 lg:max-w-md bg-black rounded-none">
-                <TabsTrigger value="delivered" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+              <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-2 lg:max-w-md md:overflow-visible bg-black rounded-none">
+                <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
                   {unreadDeliveredCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {unreadDeliveredCount}
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="cancelled" className="gap-2 relative flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <XCircle className="h-4 w-4" />
                   Cancelled ({cancelledRequests.length})
                   {unreadCancelledCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {unreadCancelledCount}
                     </span>
                   )}
                 </TabsTrigger>
               </TabsList>
+              </div>
 
               <TabsContent value="delivered" className="mt-0">
                 {sortedDeliveredRequests.length === 0 ? (
