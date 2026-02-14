@@ -249,6 +249,7 @@ export function AdminUsersView() {
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   const [validating, setValidating] = useState(false);
   const [validationResults, setValidationResults] = useState<Map<string, { status: 'valid' | 'mismatch'; detail?: string }>>(new Map());
+  const [recalculatingUser, setRecalculatingUser] = useState<Set<string>>(new Set());
   
   const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
   
@@ -311,6 +312,58 @@ export function AdminUsersView() {
     await fetchUsers();
     setValidating(false);
     sonnerToast.success('All user credits recalculated');
+  };
+
+  // Per-user recalculate
+  const handleRecalculateUser = async (userId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRecalculatingUser(prev => new Set(prev).add(userId));
+    try {
+      const [txsRes, activeOrdersRes, dbCreditsRes] = await Promise.all([
+        supabase.from('credit_transactions').select('user_id, amount, type, description').eq('user_id', userId),
+        supabase.from('orders').select('user_id, media_sites(price)')
+          .eq('user_id', userId).neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
+        supabase.from('user_credits').select('credits').eq('user_id', userId).single(),
+      ]);
+
+      const userTxs = (txsRes.data || []).map(tx => ({ ...tx, description: tx.description || undefined }));
+      const txSum = userTxs.reduce((sum, tx) => sum + tx.amount, 0);
+      const dbVal = dbCreditsRes.data?.credits ?? 0;
+
+      // Calculate available using shared formulas
+      const calculatedBalance = calculateTotalBalance(userTxs);
+      const withdrawalData = calculateWithdrawals(userTxs);
+      const creditsInWithdrawals = withdrawalData.lockedCents / 100;
+      const creditsWithdrawn = withdrawalData.completedCents / 100;
+      const lockedFromOrders = (activeOrdersRes.data || []).reduce((sum, o) => sum + ((o.media_sites as any)?.price || 0), 0);
+      const availableCredits = calculateAvailableCredits(calculatedBalance, lockedFromOrders, 0, creditsInWithdrawals, creditsWithdrawn);
+
+      // Update user in state
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: availableCredits } : u));
+
+      // Update validation result
+      const isValid = txSum === dbVal;
+      setValidationResults(prev => {
+        const next = new Map(prev);
+        next.set(userId, {
+          status: isValid ? 'valid' : 'mismatch',
+          detail: isValid ? undefined : `DB: ${dbVal}, Tx Sum: ${txSum}, Diff: ${dbVal - txSum}`,
+        });
+        return next;
+      });
+
+      const status = isValid ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbVal}, Tx: ${txSum})`;
+      sonnerToast.success(`Recalculated: ${status}`);
+    } catch (err) {
+      console.error('Recalculate error:', err);
+      sonnerToast.error('Failed to recalculate');
+    } finally {
+      setRecalculatingUser(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
   };
 
   const tabCounts = useMemo(() => ({
@@ -1133,10 +1186,23 @@ export function AdminUsersView() {
                             </Badge>
                           )}
                           {user.role !== 'admin' && (
-                            <Badge variant="secondary" className="min-w-[90px] justify-start">
-                              <Coins className="h-3 w-3 mr-1" />
-                              {user.credits.toLocaleString()} credits
-                            </Badge>
+                            <>
+                              <Badge variant="secondary" className="min-w-[90px] justify-start">
+                                <Coins className="h-3 w-3 mr-1" />
+                                {user.credits.toLocaleString()} credits
+                                {validationResults.get(user.id)?.status === 'valid' && <CheckCircle2 className="h-3 w-3 ml-1 text-green-500" />}
+                                {validationResults.get(user.id)?.status === 'mismatch' && <AlertTriangle className="h-3 w-3 ml-1 text-orange-500" />}
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 hover:bg-muted"
+                                onClick={(e) => handleRecalculateUser(user.id, e)}
+                                disabled={recalculatingUser.has(user.id)}
+                              >
+                                <RotateCw className={`h-3 w-3 ${recalculatingUser.has(user.id) ? 'animate-spin' : ''}`} />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -1250,10 +1316,23 @@ export function AdminUsersView() {
                           </Badge>
                         )}
                         {user.role !== 'admin' && (
-                          <Badge variant="secondary" className="min-w-[90px] justify-start">
-                            <Coins className="h-3 w-3 mr-1" />
-                            {user.credits.toLocaleString()} credits
-                          </Badge>
+                          <>
+                            <Badge variant="secondary" className="min-w-[90px] justify-start">
+                              <Coins className="h-3 w-3 mr-1" />
+                              {user.credits.toLocaleString()} credits
+                              {validationResults.get(user.id)?.status === 'valid' && <CheckCircle2 className="h-3 w-3 ml-1 text-green-500" />}
+                              {validationResults.get(user.id)?.status === 'mismatch' && <AlertTriangle className="h-3 w-3 ml-1 text-orange-500" />}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 hover:bg-muted"
+                              onClick={(e) => handleRecalculateUser(user.id, e)}
+                              disabled={recalculatingUser.has(user.id)}
+                            >
+                              <RotateCw className={`h-3 w-3 ${recalculatingUser.has(user.id) ? 'animate-spin' : ''}`} />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
