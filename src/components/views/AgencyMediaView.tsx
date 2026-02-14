@@ -609,8 +609,8 @@ export function AgencyMediaView() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
-          <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+        <TabsList className="w-full p-0 h-auto bg-black rounded-none">
+          <TabsTrigger value="media" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -618,7 +618,7 @@ export function AgencyMediaView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+          <TabsTrigger value="wordpress" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             WordPress Sites
             {(unreadConnectedWpCount + unreadRejectedWpCount) > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -634,8 +634,8 @@ export function AgencyMediaView() {
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
             <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
-              <TabsTrigger value="connected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <TabsList className="!w-full p-0 h-auto md:overflow-visible rounded-none bg-black">
+              <TabsTrigger value="connected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -643,10 +643,10 @@ export function AgencyMediaView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="pending" className="flex-1 py-2.5 shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="rejected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({rejectedSubmissions.length})
                 {unreadRejectedWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -977,8 +977,8 @@ export function AgencyMediaView() {
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
             <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
-              <TabsTrigger value="added" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <TabsList className="!w-full p-0 h-auto md:overflow-visible rounded-none bg-black">
+              <TabsTrigger value="added" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -986,10 +986,10 @@ export function AgencyMediaView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="pending" className="flex-1 py-2.5 shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingMediaSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="rejected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({totalRejectedCount})
                 {unreadRejectedMediaCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
