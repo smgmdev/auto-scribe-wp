@@ -20,6 +20,7 @@ import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAvailableCredits } from '@/hooks/useAvailableCredits';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
@@ -41,7 +42,8 @@ interface FloatingChatWindowProps {
 }
 
 export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
-  const { user, isAdmin, credits, refreshCredits } = useAuth();
+  const { user, isAdmin, refreshCredits } = useAuth();
+  const { availableCredits: credits, loading: availableCreditsLoading, refresh: refreshAvailableCredits } = useAvailableCredits();
   const isMobile = useIsMobile();
   const { 
     closeGlobalChat,
@@ -323,8 +325,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const acceptingOrderRef = useRef(false);
   const [confirmOrderPos, setConfirmOrderPos] = useState({ x: 0, y: 0 });
   const [confirmOrderDragging, setConfirmOrderDragging] = useState(false);
-  const [confirmOrderCredits, setConfirmOrderCredits] = useState<number | null>(null);
-  const [confirmOrderCreditsLoading, setConfirmOrderCreditsLoading] = useState(false);
+  // confirmOrderCredits now comes from useAvailableCredits hook (aliased as 'credits')
+  const confirmOrderCredits = credits;
+  const confirmOrderCreditsLoading = availableCreditsLoading;
   const confirmOrderDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const [pendingOrderRequest, setPendingOrderRequest] = useState<{
     media_site_id: string;
@@ -571,58 +574,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return () => removePopup('confirm-order-dialog');
   }, [acceptOrderDialogOpen]);
 
-  // Fetch transaction-based credit balance when Confirm Order dialog opens
+  // Credit balance now comes from the centralized useAvailableCredits hook
+  // Refresh when the confirm order dialog opens
   useEffect(() => {
-    const fetchTransactionBasedBalance = async () => {
-      if (!acceptOrderDialogOpen || !user) return;
-      setConfirmOrderCreditsLoading(true);
-      try {
-        const { data: allTransactions } = await supabase
-          .from('credit_transactions')
-          .select('amount, type, description')
-          .eq('user_id', user.id);
-
-        const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-        
-        const incomingCredits = (allTransactions || [])
-          .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
-          .reduce((sum, t) => sum + t.amount, 0);
-        
-        const outgoingCredits = (allTransactions || [])
-          .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-        
-        const totalBalance = incomingCredits - outgoingCredits;
-
-        // Calculate withdrawal amounts
-        let withdrawalLockedCents = 0;
-        let withdrawalCompletedCents = 0;
-        const withdrawalTxs = (allTransactions || []).filter(t => withdrawalTypes.includes(t.type));
-        for (const tx of withdrawalTxs) {
-          if (tx.type === 'withdrawal_locked') {
-            withdrawalLockedCents += Math.abs(tx.amount);
-          } else if (tx.type === 'withdrawal_unlocked') {
-            withdrawalLockedCents -= Math.abs(tx.amount);
-          } else if (tx.type === 'withdrawal_completed') {
-            withdrawalLockedCents -= Math.abs(tx.amount);
-            withdrawalCompletedCents += Math.abs(tx.amount);
-          }
-        }
-        withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
-        const withdrawalLockedDollars = withdrawalLockedCents / 100;
-        const withdrawalCompletedDollars = withdrawalCompletedCents / 100;
-
-        const available = totalBalance - withdrawalLockedDollars - withdrawalCompletedDollars;
-        setConfirmOrderCredits(available);
-      } catch (err) {
-        console.error('[ConfirmOrder] Error fetching transaction-based balance:', err);
-        setConfirmOrderCredits(credits || 0);
-      } finally {
-        setConfirmOrderCreditsLoading(false);
-      }
-    };
-    fetchTransactionBasedBalance();
-  }, [acceptOrderDialogOpen, user]);
+    if (acceptOrderDialogOpen) refreshAvailableCredits();
+  }, [acceptOrderDialogOpen]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -7679,7 +7635,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       {confirmOrderCreditsLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin inline" />
                       ) : (
-                        `${(confirmOrderCredits !== null ? confirmOrderCredits : credits || 0).toLocaleString()} credits`
+                        `${(credits || 0).toLocaleString()} credits`
                       )}
                     </span>
                   </div>
@@ -7690,24 +7646,24 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   <div className="border-t border-border my-3" />
                   <div className="flex items-center justify-between">
                     <span className="font-medium">After Order</span>
-                    <span className={`font-bold ${(confirmOrderCredits !== null ? confirmOrderCredits : credits || 0) < pendingOrderRequest.price ? 'text-destructive' : 'text-primary'}`}>
-                      {Math.max(0, (confirmOrderCredits !== null ? confirmOrderCredits : credits || 0) - pendingOrderRequest.price).toLocaleString()} credits
+                    <span className={`font-bold ${(credits || 0) < pendingOrderRequest.price ? 'text-destructive' : 'text-primary'}`}>
+                      {Math.max(0, (credits || 0) - pendingOrderRequest.price).toLocaleString()} credits
                     </span>
                   </div>
                 </div>
 
                 {/* Insufficient Credits Warning */}
-                {(confirmOrderCredits !== null ? confirmOrderCredits : credits || 0) < pendingOrderRequest.price && (
+                {(credits || 0) < pendingOrderRequest.price && (
                   <div className="p-4 rounded-none bg-destructive/10 border border-destructive/20">
                     <p className="font-medium text-destructive">Insufficient Credits</p>
                     <p className="text-sm text-muted-foreground">
-                      You need {(pendingOrderRequest.price - (confirmOrderCredits !== null ? confirmOrderCredits : credits || 0)).toLocaleString()} more credits to accept this order.
+                      You need {(pendingOrderRequest.price - (credits || 0)).toLocaleString()} more credits to accept this order.
                     </p>
                   </div>
                 )}
 
                 {/* Buy Credits Button when insufficient */}
-                {(confirmOrderCredits !== null ? confirmOrderCredits : credits || 0) < pendingOrderRequest.price && (
+                {(credits || 0) < pendingOrderRequest.price && (
                   <Button
                     onClick={() => setConfirmBuyCreditsOpen(true)}
                     variant="default"
@@ -7733,7 +7689,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   </Button>
                   <Button
                     className="flex-1 rounded-none bg-foreground text-background hover:bg-green-600 transition-all duration-200 text-sm"
-                    disabled={(confirmOrderCredits !== null ? confirmOrderCredits : credits || 0) < pendingOrderRequest.price || acceptingOrder || confirmOrderCreditsLoading}
+                    disabled={(credits || 0) < pendingOrderRequest.price || acceptingOrder || confirmOrderCreditsLoading}
                     onClick={async () => {
                       if (!pendingOrderRequest || !globalChatRequest) return;
                       
