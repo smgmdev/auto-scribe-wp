@@ -1402,7 +1402,7 @@ export function AgencyRequestsView() {
 
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
+        <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none">
           <TabsTrigger value="requests" className="shrink-0 whitespace-nowrap relative overflow-visible">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
@@ -1920,7 +1920,7 @@ export function AgencyRequestsView() {
         <TabsContent value="orders" className="mt-0">
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
             <div className="relative overflow-x-auto scrollbar-hide">
-            <TabsList className="!flex !w-max !min-w-full lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none">
+            <TabsList className="!flex !w-max !min-w-full lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none [&>*]:flex-1">
               <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
