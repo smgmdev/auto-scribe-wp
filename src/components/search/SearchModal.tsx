@@ -333,7 +333,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
               </div>
 
               {/* Dropdown Panel */}
-              <div className="bg-card border border-t-0 border-border border-b-0 shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
+              <div className="bg-card shadow-xl overflow-hidden max-h-[calc(100vh-120px)] flex flex-col rounded-none">
                 {/* Category Tabs */}
                 <div className="bg-black flex-shrink-0 overflow-x-auto scrollbar-hide">
                   <div className="flex whitespace-nowrap">
