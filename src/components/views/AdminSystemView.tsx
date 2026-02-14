@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
 
 interface UserRecord {
   id: string;
@@ -57,13 +58,38 @@ export function AdminSystemView() {
 
       if (profilesError) throw profilesError;
 
-      // Fetch roles, credits, orders, transactions in parallel
-      const [rolesRes, creditsRes, ordersRes, transactionsRes] = await Promise.all([
+      // Fetch roles, credits, orders, transactions, active orders, pending requests, service messages in parallel
+      const [rolesRes, creditsRes, ordersRes, transactionsRes, activeOrdersRes, pendingRequestsRes, serviceMessagesRes] = await Promise.all([
         supabase.from('user_roles').select('user_id, role'),
         supabase.from('user_credits').select('user_id, credits'),
         supabase.from('orders').select('id, user_id, order_number, status, amount_cents, created_at, media_site_id').order('created_at', { ascending: false }),
         supabase.from('credit_transactions').select('id, user_id, amount, type, description, created_at').order('created_at', { ascending: false }),
+        supabase.from('orders').select('user_id, media_site_id, media_sites(price)').in('status', ['pending_payment', 'paid', 'accepted']),
+        supabase.from('service_requests').select('id, user_id, media_site_id, media_sites(price)').in('status', ['pending', 'active']),
+        supabase.from('service_messages').select('request_id, message'),
       ]);
+
+      // Build set of request IDs that have CLIENT_ORDER_REQUEST
+      const requestsWithOrderMsg = new Set<string>();
+      (serviceMessagesRes.data || []).forEach((m: any) => {
+        if (m.message === 'CLIENT_ORDER_REQUEST') requestsWithOrderMsg.add(m.request_id);
+      });
+
+      // Locked from active orders per user
+      const lockedFromOrdersMap = new Map<string, number>();
+      (activeOrdersRes.data || []).forEach((o: any) => {
+        const price = o.media_sites?.price || 0;
+        lockedFromOrdersMap.set(o.user_id, (lockedFromOrdersMap.get(o.user_id) || 0) + price);
+      });
+
+      // Locked from pending requests per user (only those with CLIENT_ORDER_REQUEST)
+      const lockedFromRequestsMap = new Map<string, number>();
+      (pendingRequestsRes.data || []).forEach((r: any) => {
+        if (requestsWithOrderMsg.has(r.id)) {
+          const price = r.media_sites?.price || 0;
+          lockedFromRequestsMap.set(r.user_id, (lockedFromRequestsMap.get(r.user_id) || 0) + price);
+        }
+      });
 
       // Fetch media site names for orders
       const mediaSiteIds = [...new Set((ordersRes.data || []).map(o => o.media_site_id))];
@@ -80,9 +106,6 @@ export function AdminSystemView() {
 
       const rolesMap = new Map<string, string>();
       (rolesRes.data || []).forEach(r => rolesMap.set(r.user_id, r.role));
-
-      const creditsMap = new Map<string, number>();
-      (creditsRes.data || []).forEach(c => creditsMap.set(c.user_id, c.credits));
 
       const ordersMap = new Map<string, OrderRecord[]>();
       (ordersRes.data || []).forEach(o => {
@@ -111,19 +134,30 @@ export function AdminSystemView() {
         txMap.set(t.user_id, list);
       });
 
-      const userRecords: UserRecord[] = (profiles || []).map(p => ({
-        id: p.id,
-        email: p.email,
-        username: p.username,
-        email_verified: p.email_verified,
-        suspended: p.suspended,
-        created_at: p.created_at,
-        last_online_at: p.last_online_at,
-        role: rolesMap.get(p.id) || 'user',
-        credits: creditsMap.get(p.id) || 0,
-        orders: ordersMap.get(p.id) || [],
-        transactions: txMap.get(p.id) || [],
-      }));
+      const userRecords: UserRecord[] = (profiles || []).map(p => {
+        const userTxs = txMap.get(p.id) || [];
+        const totalBalance = calculateTotalBalance(userTxs);
+        const withdrawalInfo = calculateWithdrawals(userTxs);
+        const creditsWithdrawn = withdrawalInfo.completedCents / 100;
+        const creditsInWithdrawals = withdrawalInfo.lockedCents / 100;
+        const lockedFromOrders = lockedFromOrdersMap.get(p.id) || 0;
+        const lockedFromRequests = lockedFromRequestsMap.get(p.id) || 0;
+        const available = calculateAvailableCredits(totalBalance, lockedFromOrders, lockedFromRequests, creditsInWithdrawals, creditsWithdrawn);
+
+        return {
+          id: p.id,
+          email: p.email,
+          username: p.username,
+          email_verified: p.email_verified,
+          suspended: p.suspended,
+          created_at: p.created_at,
+          last_online_at: p.last_online_at,
+          role: rolesMap.get(p.id) || 'user',
+          credits: available,
+          orders: ordersMap.get(p.id) || [],
+          transactions: userTxs,
+        };
+      });
 
       setUsers(userRecords);
       toast.success(`Fetched ${userRecords.length} users`);
