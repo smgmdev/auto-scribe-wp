@@ -619,11 +619,11 @@ export function AdminEngagementsView() {
           {activeRequests.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No active engagements</CardContent></Card>
           ) : (
-            <div className="grid gap-2">
-              {activeRequests.map((r) => (
+            <div className="grid gap-0">
+              {activeRequests.map((r, index) => (
                 <Card 
                   key={r.id} 
-                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`} 
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative rounded-none ${index > 0 ? '-mt-px' : ''} ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`} 
                   onClick={() => handleOpenChat(r)}
                 >
                   {!r.read && (
@@ -762,11 +762,11 @@ export function AdminEngagementsView() {
               {deliveredRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No delivered engagements</CardContent></Card>
               ) : (
-                <div className="grid gap-2">
-                  {deliveredRequests.map((r) => (
+                <div className="grid gap-0">
+                  {deliveredRequests.map((r, index) => (
                     <Card 
                       key={r.id} 
-                      className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
+                      className={`cursor-pointer hover:bg-muted/30 transition-colors relative rounded-none ${index > 0 ? '-mt-px' : ''} ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                       onClick={() => handleOpenChat(r)}
                     >
                       {!r.read && (
@@ -883,13 +883,13 @@ export function AdminEngagementsView() {
               {cancelledRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No cancelled engagements</CardContent></Card>
               ) : (
-                <div className="grid gap-2">
-                  {cancelledRequests.map((r) => {
+                <div className="grid gap-0">
+                  {cancelledRequests.map((r, index) => {
                     const requestMessages = messages[r.id] || [];
                     return (
                       <Card 
                         key={r.id} 
-                        className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
+                        className={`cursor-pointer hover:bg-muted/30 transition-colors relative rounded-none ${index > 0 ? '-mt-px' : ''} ${!r.read ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                         onClick={() => handleOpenChat(r)}
                       >
                         {!r.read && (
