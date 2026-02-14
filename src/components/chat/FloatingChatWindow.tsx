@@ -2631,6 +2631,60 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return { originalId: null, quoteText: quotePart, replyText };
   };
 
+  // Detect contact exchange attempts in messages
+  const containsContactExchange = (message: string): boolean => {
+    // Skip system/tagged messages
+    if (message.startsWith('[') && (
+      message.includes('[ORDER_REQUEST]') || message.includes('[ORDER_PLACED]') ||
+      message.includes('[ORDER_DELIVERED]') || message.includes('[REVISION_REQUESTED]') ||
+      message.includes('[ADMIN_JOINED]') || message.includes('[ADMIN_LEFT]') ||
+      message.includes('[CLIENT_ORDER_REQUEST]') || message.includes('[ORDER_REQUEST_ACCEPTED]') ||
+      message.includes('[ORDER_REQUEST_REJECTED]') || message.includes('[DISPUTE_OPENED]') ||
+      message.includes('[ATTACHMENT]')
+    )) return false;
+
+    const lowerMsg = message.toLowerCase();
+    
+    // Email patterns
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    if (emailRegex.test(message)) return true;
+    
+    // Phone number patterns (with + prefix or common formats)
+    const phoneRegex = /(\+\d{1,4}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{2,}[\s.-]?\d{2,})/;
+    if (phoneRegex.test(message)) return true;
+    
+    // Social media / messaging platform mentions with intent
+    const platforms = ['whatsapp', 'telegram', 'discord', 'signal', 'viber', 'wechat', 'skype', 'instagram', 'facebook', 'twitter', 'snapchat', 'tiktok', 'linkedin'];
+    const intentWords = ['add me', 'message me', 'reach me', 'contact me', 'hit me up', 'dm me', 'text me', 'call me', 'find me', 'connect on', 'let\'s talk on', 'move to', 'switch to', 'my handle', 'my username', 'my number', 'my email', 'send me your', 'what\'s your', 'whats your', 'give me your', 'share your', 'can i get your', 'drop your'];
+    
+    for (const platform of platforms) {
+      if (lowerMsg.includes(platform)) {
+        // Platform mentioned with any intent word
+        for (const intent of intentWords) {
+          if (lowerMsg.includes(intent)) return true;
+        }
+        // Platform mentioned with @ handle pattern
+        if (/@[\w.]+/.test(message) && lowerMsg.includes(platform)) return true;
+        // Direct mention like "my whatsapp is..." or "on telegram:"
+        if (new RegExp(`(my|on|via|through|over)\\s+${platform}`, 'i').test(message)) return true;
+        if (new RegExp(`${platform}\\s*(:|is|-)`, 'i').test(message)) return true;
+      }
+    }
+    
+    // Direct contact exchange phrases without platform
+    const directExchangePhrases = [
+      'here\'s my number', 'here is my number', 'my phone number', 'my cell',
+      'email me at', 'mail me at', 'send email to', 'my email is', 'here\'s my email',
+      'let\'s talk outside', 'talk off platform', 'outside the platform', 'off-platform',
+      'personal email', 'work email', 'business email'
+    ];
+    for (const phrase of directExchangePhrases) {
+      if (lowerMsg.includes(phrase)) return true;
+    }
+    
+    return false;
+  };
+
   const scrollToMessage = (messageId: string) => {
     const element = document.getElementById(`floating-msg-${globalChatRequest.id}-${messageId}`);
     if (element) {
@@ -6083,173 +6137,185 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   ? (msg.sender_type === 'agency' || msg.sender_type === 'admin')
                   : isOwnMessage;
                 
+                const showContactWarning = containsContactExchange(msg.message);
+                
                 return (
-                  <div
-                    key={msg.id}
-                    id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
-                    className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
-                  >
+                  <div key={msg.id} className="w-full min-w-0">
                     <div
-                      className={`relative group ${msg.message.startsWith('[ORDER_REQUEST]') ? 'max-w-full sm:max-w-[80%]' : 'max-w-[85%] sm:max-w-[80%]'} min-w-0 rounded-none px-2.5 py-2 sm:px-3 sm:py-2.5 transition-all duration-300 break-words ${
-                        msg.sender_type === 'admin'
-                          ? 'bg-blue-500 text-white'
-                          : isRightAligned
-                          ? 'bg-black text-white'
-                          : 'bg-muted'
-                      } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                      id={`floating-msg-${globalChatRequest.id}-${msg.id}`}
+                      className={`flex ${isRightAligned ? 'justify-end' : 'justify-start'} w-full min-w-0`}
                     >
-                      <div className="flex items-center justify-between gap-1.5 text-xs font-medium mb-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                        {/* Show loading spinner while fetching agency info for client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in client view */}
-                        {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
-                          <img 
-                            src={counterpartyLogo} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        {/* Show loading spinner while fetching agency info for admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        )}
-                        {/* Show agency logo next to name for agency messages in admin view */}
-                        {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
-                          <img 
-                            src={adminAgencyInfo.logo_url} 
-                            alt="" 
-                            className="w-4 h-4 rounded-full object-cover"
-                          />
-                        )}
-                        <span className="opacity-70 truncate">
-                          {msg.sender_type === 'admin' 
-                            ? 'Arcana Mace Staff' 
-                            : isOwnMessage 
-                              ? 'You' 
-                              : isAdmin 
-                                ? (msg.sender_type === 'agency' 
-                                    ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
-                                    : 'Client')
-                                : loadingCounterpartyAgency && msg.sender_type === 'agency'
-                                  ? 'Loading...'
-                                  : counterpartyLabel}
-                        </span>
-                        </div>
-                        <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className={`h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent shrink-0 ${
-                              isRightAligned 
-                                ? 'text-primary-foreground/70' 
-                                : 'text-muted-foreground'
-                            }`}
+                      <div
+                        className={`relative group ${msg.message.startsWith('[ORDER_REQUEST]') ? 'max-w-full sm:max-w-[80%]' : 'max-w-[85%] sm:max-w-[80%]'} min-w-0 rounded-none px-2.5 py-2 sm:px-3 sm:py-2.5 transition-all duration-300 break-words ${
+                          msg.sender_type === 'admin'
+                            ? 'bg-blue-500 text-white'
+                            : isRightAligned
+                            ? 'bg-black text-white'
+                            : 'bg-muted'
+                        } ${highlightedMessageId === msg.id ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                      >
+                        <div className="flex items-center justify-between gap-1.5 text-xs font-medium mb-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                          {/* Show loading spinner while fetching agency info for client view */}
+                          {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && loadingCounterpartyAgency && (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          )}
+                          {/* Show agency logo next to name for agency messages in client view */}
+                          {!isOwnMessage && msg.sender_type === 'agency' && !isAdmin && !loadingCounterpartyAgency && counterpartyLogo && (
+                            <img 
+                              src={counterpartyLogo} 
+                              alt="" 
+                              className="w-4 h-4 rounded-full object-cover"
+                            />
+                          )}
+                          {/* Show loading spinner while fetching agency info for admin view */}
+                          {msg.sender_type === 'agency' && isAdmin && loadingAdminAgency && (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          )}
+                          {/* Show agency logo next to name for agency messages in admin view */}
+                          {msg.sender_type === 'agency' && isAdmin && !loadingAdminAgency && adminAgencyInfo?.logo_url && (
+                            <img 
+                              src={adminAgencyInfo.logo_url} 
+                              alt="" 
+                              className="w-4 h-4 rounded-full object-cover"
+                            />
+                          )}
+                          <span className="opacity-70 truncate">
+                            {msg.sender_type === 'admin' 
+                              ? 'Arcana Mace Staff' 
+                              : isOwnMessage 
+                                ? 'You' 
+                                : isAdmin 
+                                  ? (msg.sender_type === 'agency' 
+                                      ? (loadingAdminAgency ? 'Loading...' : (adminAgencyInfo?.name || 'Agency'))
+                                      : 'Client')
+                                  : loadingCounterpartyAgency && msg.sender_type === 'agency'
+                                    ? 'Loading...'
+                                    : counterpartyLabel}
+                          </span>
+                          </div>
+                          <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              className={`h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent shrink-0 ${
+                                isRightAligned 
+                                  ? 'text-primary-foreground/70' 
+                                  : 'text-muted-foreground'
+                              }`}
+                            >
+                              <ChevronDown className="h-3 w-3 pointer-events-none" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            align={isRightAligned ? "end" : "start"}
+                            side="bottom"
+                            sideOffset={5}
+                            collisionPadding={16}
+                            className="bg-popover border shadow-lg z-[99999]"
                           >
-                            <ChevronDown className="h-3 w-3 pointer-events-none" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent 
-                          align={isRightAligned ? "end" : "start"}
-                          side="bottom"
-                          sideOffset={5}
-                          collisionPadding={16}
-                          className="bg-popover border shadow-lg z-[99999]"
-                        >
-                          <DropdownMenuItem 
-                            onSelect={() => {
-                              setReplyToMessage(msg);
-                              // Use longer timeout to ensure dropdown fully closes before focusing
-                              setTimeout(() => {
-                                if (inputRef.current) {
-                                  inputRef.current.focus();
-                                }
-                              }, 150);
-                            }}
-                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
-                          >
-                            <Reply className="h-4 w-4 mr-2" />
-                            Reply
-                          </DropdownMenuItem>
-                          {isAdmin && msg.sender_type !== 'admin' && (
                             <DropdownMenuItem 
-                              onSelect={async () => {
-                                setUserDetailsLoading(true);
-                                setUserDetailsLogoLoading(true);
-                                setUserDetailsDialogOpen(true);
-                                setUserDetails(null);
-                                
-                                try {
-                                  if (msg.sender_type === 'client') {
-                                    // Fetch client profile including whatsapp_phone
-                                    const { data: profile } = await supabase
-                                      .from('profiles')
-                                      .select('email, whatsapp_phone')
-                                      .eq('id', msg.sender_id)
-                                      .maybeSingle();
-                                    
-                                    setUserDetails({
-                                      email: profile?.email || null,
-                                      phone: profile?.whatsapp_phone || null,
-                                      type: 'client'
-                                    });
-                                  } else if (msg.sender_type === 'agency') {
-                                    // Fetch agency details from agency_payouts
-                                    const { data: agency } = await supabase
-                                      .from('agency_payouts')
-                                      .select('agency_name, email, user_id')
-                                      .eq('id', msg.sender_id)
-                                      .maybeSingle();
-                                    
-                                    let whatsappPhone: string | null = null;
-                                    
-                                    // Fetch whatsapp_phone and logo_url from agency_applications using the user_id
-                                    let logoUrl: string | null = null;
-                                    if (agency?.user_id) {
-                                      const { data: application } = await supabase
-                                        .from('agency_applications')
-                                        .select('whatsapp_phone, logo_url')
-                                        .eq('user_id', agency.user_id)
-                                        .eq('status', 'approved')
-                                        .maybeSingle();
-                                      
-                                      whatsappPhone = application?.whatsapp_phone || null;
-                                      // Get public URL from agency-logos bucket
-                                      if (application?.logo_url) {
-                                        const { data: publicUrl } = supabase.storage
-                                          .from('agency-logos')
-                                          .getPublicUrl(application.logo_url);
-                                        logoUrl = publicUrl?.publicUrl || null;
-                                      }
-                                    }
-                                    
-                                    setUserDetails({
-                                      email: agency?.email || null,
-                                      phone: whatsappPhone,
-                                      type: 'agency',
-                                      name: agency?.agency_name || null,
-                                      logo_url: logoUrl
-                                    });
+                              onSelect={() => {
+                                setReplyToMessage(msg);
+                                // Use longer timeout to ensure dropdown fully closes before focusing
+                                setTimeout(() => {
+                                  if (inputRef.current) {
+                                    inputRef.current.focus();
                                   }
-                                } catch (error) {
-                                  console.error('Error fetching user details:', error);
-                                } finally {
-                                  setUserDetailsLoading(false);
-                                }
+                                }, 150);
                               }}
                               className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
                             >
-                              <Eye className="h-4 w-4 mr-2" />
-                              User Details
+                              <Reply className="h-4 w-4 mr-2" />
+                              Reply
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            {isAdmin && msg.sender_type !== 'admin' && (
+                              <DropdownMenuItem 
+                                onSelect={async () => {
+                                  setUserDetailsLoading(true);
+                                  setUserDetailsLogoLoading(true);
+                                  setUserDetailsDialogOpen(true);
+                                  setUserDetails(null);
+                                  
+                                  try {
+                                    if (msg.sender_type === 'client') {
+                                      // Fetch client profile including whatsapp_phone
+                                      const { data: profile } = await supabase
+                                        .from('profiles')
+                                        .select('email, whatsapp_phone')
+                                        .eq('id', msg.sender_id)
+                                        .maybeSingle();
+                                      
+                                      setUserDetails({
+                                        email: profile?.email || null,
+                                        phone: profile?.whatsapp_phone || null,
+                                        type: 'client'
+                                      });
+                                    } else if (msg.sender_type === 'agency') {
+                                      // Fetch agency details from agency_payouts
+                                      const { data: agency } = await supabase
+                                        .from('agency_payouts')
+                                        .select('agency_name, email, user_id')
+                                        .eq('id', msg.sender_id)
+                                        .maybeSingle();
+                                      
+                                      let whatsappPhone: string | null = null;
+                                      
+                                      // Fetch whatsapp_phone and logo_url from agency_applications using the user_id
+                                      let logoUrl: string | null = null;
+                                      if (agency?.user_id) {
+                                        const { data: application } = await supabase
+                                          .from('agency_applications')
+                                          .select('whatsapp_phone, logo_url')
+                                          .eq('user_id', agency.user_id)
+                                          .eq('status', 'approved')
+                                          .maybeSingle();
+                                        
+                                        whatsappPhone = application?.whatsapp_phone || null;
+                                        // Get public URL from agency-logos bucket
+                                        if (application?.logo_url) {
+                                          const { data: publicUrl } = supabase.storage
+                                            .from('agency-logos')
+                                            .getPublicUrl(application.logo_url);
+                                          logoUrl = publicUrl?.publicUrl || null;
+                                        }
+                                      }
+                                      
+                                      setUserDetails({
+                                        email: agency?.email || null,
+                                        phone: whatsappPhone,
+                                        type: 'agency',
+                                        name: agency?.agency_name || null,
+                                        logo_url: logoUrl
+                                      });
+                                    }
+                                  } catch (error) {
+                                    console.error('Error fetching user details:', error);
+                                  } finally {
+                                    setUserDetailsLoading(false);
+                                  }
+                                }}
+                                className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                User Details
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        </div>
+                        {renderMessageContent(msg, isRightAligned, quote)}
                       </div>
-                      {renderMessageContent(msg, isRightAligned, quote)}
                     </div>
+                    {showContactWarning && (
+                      <div className="flex justify-center py-2">
+                        <p className="text-[11px] text-muted-foreground text-center max-w-[90%] leading-relaxed">
+                          <span className="font-semibold">Supervision Security:</span> Communication outside Arcana Mace is prohibited and monitored by Arcana Mace AI. Violations of the{' '}
+                          <a href="/guidelines" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">User Guidelines</a>
+                          {' '}may result in account penalties. Please keep all communications within the platform to ensure safety and compliance.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
