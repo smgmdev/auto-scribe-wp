@@ -656,11 +656,21 @@ export function AdminUsersView() {
     }
   };
 
-  const handleDeliveryClick = (delivery: AgencyDelivery) => {
-    // Navigate to admin-orders and open the chat for this delivery
-    if (delivery.service_request_id) {
-      localStorage.setItem('selectedEngagementId', delivery.service_request_id);
-      setCurrentView('admin-orders');
+  const handleDeliveryClick = async (delivery: AgencyDelivery) => {
+    if (!delivery.service_request_id) return;
+    try {
+      const { data: sr } = await supabase
+        .from('service_requests')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
+        .eq('id', delivery.service_request_id)
+        .single();
+      
+      if (sr) {
+        const { openGlobalChat } = useAppStore.getState();
+        openGlobalChat(sr as any, 'agency-request');
+      }
+    } catch (err) {
+      console.error('Failed to open delivery chat:', err);
     }
   };
 
