@@ -1780,14 +1780,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       // Remove from local state
       setMessages(prev => prev.filter(m => m.id !== messageId));
       
-      // Update service request status to cancelled so it's no longer counted as locked
+      // Reset service request status back to pending so the engagement stays open
+      // (rejecting an offer is NOT the same as cancelling the engagement)
       await supabase
         .from('service_requests')
         .update({ 
-          status: 'cancelled', 
-          cancelled_at: new Date().toISOString(),
-          cancelled_by: 'agency',
-          cancellation_reason: 'Order request rejected by agency'
+          status: 'pending'
         })
         .eq('id', globalChatRequest.id);
 
