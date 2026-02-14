@@ -467,7 +467,7 @@ export const AdminCreditManagementView = () => {
           <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
           <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex gap-0 w-full md:w-auto">
           <Button 
             onClick={handleValidateAll}
             disabled={refreshing}
