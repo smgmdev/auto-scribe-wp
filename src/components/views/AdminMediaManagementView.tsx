@@ -1576,10 +1576,10 @@ export function AdminMediaManagementView() {
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <div className="relative md:pt-2 overflow-hidden md:overflow-visible scrollbar-hide">
             <TabsList className="flex w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
-              <TabsTrigger value="approved" className="flex-1 min-w-0 truncate rounded-none py-2.5 text-xs md:text-sm data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
+              <TabsTrigger value="approved" className="flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Approved ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative overflow-visible flex-1 min-w-0 truncate rounded-none py-2.5 text-xs md:text-sm data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
+              <TabsTrigger value="pending" className="relative overflow-visible flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending ({pendingSubmissions.length})
                 {unreadWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1587,7 +1587,7 @@ export function AdminMediaManagementView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex-1 min-w-0 truncate rounded-none py-2.5 text-xs md:text-sm data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
+              <TabsTrigger value="rejected" className="flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
