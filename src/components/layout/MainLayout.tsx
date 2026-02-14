@@ -93,7 +93,7 @@ export function MainLayout({
 
       {/* Main Content */}
       <main 
-        className={`lg:pl-64 lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter ? 'bg-[#1d1d1f]' : isDashboardFooter ? 'bg-black' : ''}`}
+        className={`lg:pl-64 lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
         style={{ paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined }}
       >
         <div className="flex-1 p-4 lg:p-8">
