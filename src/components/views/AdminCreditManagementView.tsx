@@ -129,6 +129,10 @@ export const AdminCreditManagementView = () => {
       const deductionsMap = new Map<string, number>();
       // Track offer_accepted (credits locked for pending orders)
       const offerLockedMap = new Map<string, number>();
+      // Track offer_accepted details per user with site names for matching
+      const offerDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
+      // Track order_completed site names per user to match against offer_accepted
+      const orderCompletedSites = new Map<string, string[]>();
       // Track locked (credits reserved for pending order requests, not yet cancelled)
       const lockedRequestsMap = new Map<string, number>();
       // Track locked transactions per user with site names for matching
@@ -170,6 +174,22 @@ export const AdminCreditManagementView = () => {
         // Track offer_accepted for locked credits calculation
         if (tx.type === 'offer_accepted' && tx.amount < 0) {
           offerLockedMap.set(tx.user_id, (offerLockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+          const siteMatch = tx.description?.match(/Offer accepted:\s*(.+?)(?:\s*\(|$)/);
+          if (siteMatch) {
+            const details = offerDetailsByUser.get(tx.user_id) || [];
+            details.push({ siteName: siteMatch[1].trim(), amount: Math.abs(tx.amount) });
+            offerDetailsByUser.set(tx.user_id, details);
+          }
+        }
+        
+        // Track order_completed site names to match against offer_accepted
+        if (tx.type === 'order_completed' && tx.amount < 0 && tx.description) {
+          const siteMatch = tx.description.match(/Order completed:\s*(.+?)$/);
+          if (siteMatch) {
+            const sites = orderCompletedSites.get(tx.user_id) || [];
+            sites.push(siteMatch[1].trim());
+            orderCompletedSites.set(tx.user_id, sites);
+          }
         }
         
         // Track locked (order request sent) and unlocked (request cancelled)
@@ -269,11 +289,34 @@ export const AdminCreditManagementView = () => {
         const incoming = incomingMap.get(credit.user_id) || 0;
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
-        const lockedFromOffers = offerLockedMap.get(credit.user_id) || 0;
+        
+        // Calculate still-locked offer_accepted credits using per-entry matching
+        const offerDetails = [...(offerDetailsByUser.get(credit.user_id) || [])];
+        const unlockedDetailsForOffers = [...(unlockedDetailsByUser.get(credit.user_id) || [])];
+        const completedSites = [...(orderCompletedSites.get(credit.user_id) || [])];
+        
+        let lockedFromOffers = 0;
+        for (const offer of offerDetails) {
+          // Check if cancelled (unlocked with "Order cancelled")
+          const unlockedIdx = unlockedDetailsForOffers.findIndex(d => d.siteName === offer.siteName && d.amount === offer.amount);
+          if (unlockedIdx >= 0) {
+            unlockedDetailsForOffers.splice(unlockedIdx, 1);
+            continue;
+          }
+          // Check if completed (order_completed)
+          const completedIdx = completedSites.findIndex(site => site === offer.siteName);
+          if (completedIdx >= 0) {
+            completedSites.splice(completedIdx, 1);
+            continue;
+          }
+          // Still locked
+          lockedFromOffers += offer.amount;
+        }
+        
         // Calculate still-locked request credits using per-entry matching
-        // For each locked entry, check if it was consumed by an unlocked or order_accepted
+        // Use remaining unlockedDetailsForOffers (those not consumed by offer matching)
         const lockedDetails = [...(lockedDetailsByUser.get(credit.user_id) || [])];
-        const unlockedDetails = [...(unlockedDetailsByUser.get(credit.user_id) || [])];
+        const unlockedDetails = [...unlockedDetailsForOffers];
         const acceptedSites = [...(orderAcceptedSites.get(credit.user_id) || [])];
         
         let lockedFromRequests = 0;
