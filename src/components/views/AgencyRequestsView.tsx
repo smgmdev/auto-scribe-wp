@@ -704,6 +704,11 @@ export function AgencyRequestsView() {
             incrementAgencyUnreadCompletedCount();
             // Refresh to get updated data
             fetchRequests();
+          } else if (updatedOrder.delivery_status === 'pending_revision' && oldOrder.delivery_status !== 'pending_revision') {
+            // Client requested a revision - refresh to update badges
+            toast('Revision Requested: A client has requested a revision on a delivery.');
+            playMessageSound();
+            fetchRequests();
           } else if (updatedOrder.delivery_status === 'delivered' && oldOrder.delivery_status !== 'delivered') {
             // Delivery submitted - stays in active, just refresh
             fetchRequests();
