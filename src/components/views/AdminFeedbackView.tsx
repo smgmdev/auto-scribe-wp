@@ -126,7 +126,7 @@ export function AdminFeedbackView() {
     <div className="bg-white -m-4 lg:-m-8 min-h-[calc(100vh-56px)] lg:min-h-screen">
       <div className="max-w-[980px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-0 md:mb-4">
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-bold text-foreground">Feedback</h1>
             {openCount > 0 && (
@@ -149,7 +149,7 @@ export function AdminFeedbackView() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-0 md:mt-4">
           <TabsList className="w-full md:grid md:grid-cols-3 justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0 bg-black text-white rounded-none">
             <TabsTrigger value="open" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
               Open ({openCount})
