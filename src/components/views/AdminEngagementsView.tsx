@@ -572,8 +572,8 @@ export function AdminEngagementsView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none">
-          <TabsTrigger value="active" className="relative">
+        <TabsList className="grid w-full grid-cols-2 p-0 h-auto rounded-none">
+          <TabsTrigger value="active" className="relative py-2.5 flex-1">
             Active ({activeRequests.length})
             {activeRequests.filter(r => !r.read).length > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -581,7 +581,7 @@ export function AdminEngagementsView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="closed" className="relative">
+          <TabsTrigger value="closed" className="relative py-2.5 flex-1">
             Closed ({deliveredRequests.length + cancelledRequests.length})
             {(deliveredRequests.filter(r => !r.read).length + cancelledRequests.filter(r => !r.read).length) > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -715,8 +715,8 @@ export function AdminEngagementsView() {
 
         <TabsContent value="closed" className="mt-0">
           <Tabs value={closedSubTab} onValueChange={setClosedSubTab}>
-            <TabsList className="grid w-full grid-cols-2 lg:max-w-md rounded-none">
-              <TabsTrigger value="delivered" className="relative">
+            <TabsList className="grid w-full grid-cols-2 p-0 h-auto rounded-none">
+              <TabsTrigger value="delivered" className="relative py-2.5 flex-1">
                 Delivered ({deliveredRequests.length})
                 {deliveredRequests.filter(r => !r.read).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
@@ -724,7 +724,7 @@ export function AdminEngagementsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="relative">
+              <TabsTrigger value="cancelled" className="relative py-2.5 flex-1">
                 Cancelled ({cancelledRequests.length})
                 {cancelledRequests.filter(r => !r.read).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
