@@ -1205,6 +1205,12 @@ export function Sidebar({
           const updated = payload.new as any;
           const old = payload.old as any;
           
+          // If status changed from pending_payment to paid, this is a newly confirmed order
+          if (old?.status === 'pending_payment' && updated.status === 'paid' && !updated.read) {
+            console.log('[Sidebar] User order confirmed (paid), incrementing notification');
+            incrementUserUnreadOrdersCount();
+          }
+          
           // If delivery_status changed, recalculate engagement counts
           if (old?.delivery_status !== updated.delivery_status) {
             console.log('[Sidebar] Order delivery status changed, recalculating engagement counts');
