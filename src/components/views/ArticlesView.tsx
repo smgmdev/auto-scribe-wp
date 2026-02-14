@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
@@ -39,13 +39,17 @@ export function ArticlesView() {
     publishedCount,
     draftsCount,
     deleteArticle,
-    loadMoreArticles 
+    loadMoreArticles,
+    searchArticles,
   } = useArticles();
   
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Article[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [deletingTitle, setDeletingTitle] = useState<string>('');
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
@@ -101,13 +105,27 @@ export function ArticlesView() {
   const publishedArticles = articles.filter(a => a.status === 'published');
   const draftArticles = articles.filter(a => a.status === 'draft');
 
-  const filterBySearch = (list: Article[]) => {
-    if (!searchQuery.trim()) return list;
-    const q = searchQuery.toLowerCase();
-    return list.filter(a => a.title.toLowerCase().includes(q));
-  };
-  
-  const displayedArticles = filterBySearch(activeTab === 'published' ? publishedArticles : draftArticles);
+  // Debounced DB search when query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    setSearching(true);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(async () => {
+      const results = await searchArticles(searchQuery, activeTab === 'published' ? 'published' : 'draft');
+      setSearchResults(results);
+      setSearching(false);
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, activeTab, searchArticles]);
+
+  const displayedArticles = searchResults !== null
+    ? searchResults
+    : (activeTab === 'published' ? publishedArticles : draftArticles);
   const hasMore = activeTab === 'published' ? hasMorePublished : hasMoreDrafts;
 
   const handleLoadMore = () => {
@@ -346,7 +364,7 @@ export function ArticlesView() {
             />
           </div>
 
-        {loading ? (
+        {loading || searching ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -354,11 +372,11 @@ export function ArticlesView() {
           <>
             <TabsContent value="published" className="mt-0">
               {displayedArticles.length === 0 ? (
-                renderEmptyState('No published articles yet. Publish your first article to see it here.')
+                renderEmptyState(searchQuery ? 'No articles match your search.' : 'No published articles yet. Publish your first article to see it here.')
               ) : (
                 <div className="space-y-0">
                   {displayedArticles.map((article, index) => renderArticleCard(article, index))}
-                  {hasMore && (
+                  {hasMore && !searchQuery && (
                     <div className="flex justify-center pt-4">
                       <Button variant="outline" onClick={handleLoadMore} disabled={loadingMore}>
                         {loadingMore ? (
@@ -377,12 +395,12 @@ export function ArticlesView() {
             </TabsContent>
 
             <TabsContent value="drafts" className="mt-0">
-              {filterBySearch(draftArticles).length === 0 ? (
-                renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
+              {displayedArticles.length === 0 ? (
+                renderEmptyState(searchQuery ? 'No articles match your search.' : 'No draft articles. Start writing a new article to save it as a draft.')
               ) : (
                 <div className="space-y-0">
-                  {filterBySearch(draftArticles).map((article, index) => renderArticleCard(article, index))}
-                  {hasMoreDrafts && (
+                  {displayedArticles.map((article, index) => renderArticleCard(article, index))}
+                  {hasMoreDrafts && !searchQuery && (
                     <div className="flex justify-center pt-4">
                       <Button variant="outline" onClick={handleLoadMore} disabled={loadingMore}>
                         {loadingMore ? (
