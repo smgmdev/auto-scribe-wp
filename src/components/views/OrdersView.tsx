@@ -147,8 +147,8 @@ export function OrdersView() {
               
               toast.success(`${siteName} has been marked as delivered. Please review and accept the delivery.`);
               
-              // Increment the completed count for the notification badge
-              incrementUserUnreadCompletedCount();
+              // Increment the active orders count for the notification badge (delivered = pending approval = still active)
+              // Note: sidebar handles its own incrementing, so only do this if sidebar didn't already
             }
             
             fetchOrders();
@@ -250,8 +250,7 @@ export function OrdersView() {
             fetchUserDisputes();
           } else if (data.action === 'order-delivered') {
             toast.success(data.message || `Your order for ${data.mediaSiteName || 'a media site'} has been delivered.`);
-            // Increment the completed count for the notification badge
-            incrementUserUnreadCompletedCount();
+            // Note: sidebar handles active orders count incrementing via realtime
             fetchOrders();
           }
         })
