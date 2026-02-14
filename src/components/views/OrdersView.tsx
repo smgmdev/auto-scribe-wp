@@ -919,12 +919,12 @@ export function OrdersView() {
       ) : (
         <div className="space-y-0">
           <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none">
+            <TabsList className="flex w-full overflow-x-auto overflow-y-visible md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {userUnreadOrdersCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 z-10 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadOrdersCount}
                   </span>
                 )}
@@ -933,7 +933,7 @@ export function OrdersView() {
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputeOrders.length})
                 {userUnreadDisputesCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 z-10 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadDisputesCount}
                   </span>
                 )}
@@ -942,7 +942,7 @@ export function OrdersView() {
                 <CheckCircle2 className="h-4 w-4" />
                 Completed ({completedOrders.length})
                 {userUnreadCompletedCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 z-10 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadCompletedCount}
                   </span>
                 )}
@@ -951,7 +951,7 @@ export function OrdersView() {
                 <X className="h-4 w-4" />
                 Cancelled Orders ({historyOrders.length})
                 {userUnreadHistoryCount > 0 && !isAdmin && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 z-10 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
                     {userUnreadHistoryCount}
                   </span>
                 )}
