@@ -11,6 +11,7 @@ import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
+import { SessionExpiryWarning } from "@/components/SessionExpiryWarning";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -127,6 +128,7 @@ const App = () => {
             <QuickNavBanner />
             <Toaster />
             <Sonner />
+            <SessionExpiryWarning />
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
