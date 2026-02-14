@@ -625,7 +625,18 @@ export function AdminUsersView() {
       
       if (sr) {
         const { openGlobalChat } = useAppStore.getState();
-        openGlobalChat(sr as any, 'agency-request');
+        // Map media_sites (Supabase join key) to media_site (GlobalChatRequest key)
+        const chatRequest = {
+          ...sr,
+          media_site: (sr as any).media_sites || null,
+          order: (sr as any).orders ? {
+            id: (sr as any).orders.id,
+            status: (sr as any).orders.status,
+            delivery_status: (sr as any).orders.delivery_status,
+            delivery_deadline: (sr as any).orders.delivery_deadline || null,
+          } : null,
+        };
+        openGlobalChat(chatRequest as any, 'agency-request');
       }
     } catch (err) {
       console.error('Failed to open engagement chat:', err);
@@ -658,6 +669,7 @@ export function AdminUsersView() {
       if (sr) {
         const chatRequest = {
           ...sr,
+          media_site: (sr as any).media_sites || null,
           order: order,
         };
         const { openGlobalChat } = useAppStore.getState();
@@ -679,7 +691,17 @@ export function AdminUsersView() {
       
       if (sr) {
         const { openGlobalChat } = useAppStore.getState();
-        openGlobalChat(sr as any, 'agency-request');
+        const chatRequest = {
+          ...sr,
+          media_site: (sr as any).media_sites || null,
+          order: (sr as any).orders ? {
+            id: (sr as any).orders.id,
+            status: (sr as any).orders.status,
+            delivery_status: (sr as any).orders.delivery_status,
+            delivery_deadline: (sr as any).orders.delivery_deadline || null,
+          } : null,
+        };
+        openGlobalChat(chatRequest as any, 'agency-request');
       }
     } catch (err) {
       console.error('Failed to open delivery chat:', err);
