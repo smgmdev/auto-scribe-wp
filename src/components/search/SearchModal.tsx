@@ -306,7 +306,7 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
           <div className="fixed top-0 left-0 right-0 z-[101] flex justify-center pt-4 px-4 pointer-events-none">
             <div className="w-full max-w-3xl pointer-events-auto rounded-none" onClick={(e) => e.stopPropagation()}>
               {/* Search Input Bar */}
-              <div className="flex items-center gap-3 px-3 py-2 bg-card border border-border shadow-xl rounded-none">
+              <div className="flex items-center gap-3 px-3 py-2 bg-card shadow-xl rounded-none">
                 <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <input
                   type="text"
