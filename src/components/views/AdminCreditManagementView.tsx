@@ -769,10 +769,6 @@ export const AdminCreditManagementView = () => {
                                             <span className="font-semibold text-red-400">{user.totalSpent > 0 ? `-${user.totalSpent.toLocaleString()}` : '0'}</span>
                                           </div>
                                           <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                                            <span className="text-white/70">Total Balance:</span>
-                                            <span className="font-semibold text-green-400">{user.totalCredits.toLocaleString()}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Available:</span>
                                             <span className="font-semibold text-green-400">{user.available.toLocaleString()}</span>
                                           </div>
