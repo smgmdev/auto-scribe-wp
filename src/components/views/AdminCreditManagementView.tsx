@@ -11,35 +11,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Search, CreditCard, Users, RefreshCw, X, AlertTriangle, CheckCircle2, RotateCw } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 import { toast } from 'sonner';
+import {
+  type AdminUserCredit,
+  calculateAdminUserCredits,
+  recalculateSingleUser,
+} from '@/lib/credit-calculations';
 
-interface UserCredit {
-  user_id: string;
-  purchased: number;
-  purchasedOnline: number;
-  purchasedInvoice: number;
-  earned: number;
-  deductions: number;
-  totalCredits: number;
-  locked: number;
-  lockedFromOrders: number;
-  lockedFromRequests: number;
-  lockedFromWithdrawals: number;
-  available: number;
-  orders: number;
-  purchaseOrders: number;
-  deliveryOrders: number;
-  totalSpent: number;
-  refunded: number;
-  withdrawn: number;
-  pendingBankWithdrawals: number;
-  pendingCryptoWithdrawals: number;
-  email: string | null;
-  isAgency: boolean;
-  dbCredits: number; // Raw DB value for validation
-  rawTxSum: number; // Sum of all non-withdrawal transaction amounts (source of truth)
-  validationStatus: 'valid' | 'mismatch' | 'unchecked';
-  validationDetail?: string; // Extra detail for mismatch
-}
+type UserCredit = AdminUserCredit;
 
 export const AdminCreditManagementView = () => {
   // Balances state
@@ -59,99 +37,85 @@ export const AdminCreditManagementView = () => {
     toast.success('Credits refreshed');
   };
 
-  // Per-user recalculate: re-fetches that user's transactions and validates
+  // Helper: fetch pending requests with CLIENT_ORDER_REQUEST check
+  const fetchPendingRequestsWithCheck = async () => {
+    const { data: pendingRequests } = await supabase
+      .from('service_requests')
+      .select('id, user_id, media_sites(price)')
+      .is('order_id', null)
+      .neq('status', 'cancelled');
+
+    const results: { id: string; user_id: string; media_sites: { price: number } | null; hasOrderRequest: boolean }[] = [];
+    if (pendingRequests) {
+      for (const req of pendingRequests) {
+        const { data: orderRequestMessages } = await supabase
+          .from('service_messages')
+          .select('id')
+          .eq('request_id', req.id)
+          .like('message', '%CLIENT_ORDER_REQUEST%')
+          .limit(1);
+        results.push({
+          id: req.id,
+          user_id: req.user_id,
+          media_sites: req.media_sites as { price: number } | null,
+          hasOrderRequest: !!(orderRequestMessages && orderRequestMessages.length > 0),
+        });
+      }
+    }
+    return results;
+  };
+
+  // Per-user recalculate using shared utility
   const handleRecalculate = async (userId: string) => {
     setRecalculating(prev => new Set(prev).add(userId));
     try {
-      // Fetch this user's transactions
-      const { data: txs } = await supabase
-        .from('credit_transactions')
-        .select('amount, type')
-        .eq('user_id', userId);
+      const [txsRes, activeOrdersRes, dbCreditsRes] = await Promise.all([
+        supabase.from('credit_transactions').select('amount, type, description').eq('user_id', userId),
+        supabase.from('orders').select('user_id, media_sites(price)')
+          .eq('user_id', userId).neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
+        supabase.from('user_credits').select('credits').eq('user_id', userId).single(),
+      ]);
 
-      // Locked from requests is now calculated from transactions, not DB state
-
-      // Fetch active orders for this user
-      const { data: activeOrders } = await supabase
-        .from('orders')
-        .select('media_sites(price)')
+      // Fetch pending requests for this user with CLIENT_ORDER_REQUEST check
+      const { data: pendingReqs } = await supabase
+        .from('service_requests')
+        .select('id, user_id, media_sites(price)')
         .eq('user_id', userId)
-        .neq('status', 'cancelled')
-        .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
+        .is('order_id', null)
+        .neq('status', 'cancelled');
 
-      // Fetch DB credits
-      const { data: dbCredits } = await supabase
-        .from('user_credits')
-        .select('credits')
-        .eq('user_id', userId)
-        .single();
-
-      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-      let incoming = 0;
-      let outgoing = 0;
-      let withdrawn = 0;
-      let rawTxSum = 0;
-      let netLockedFromTx = 0; // Track net locked from transactions
-
-      txs?.forEach(tx => {
-        if (tx.type === 'withdrawal_completed') {
-          withdrawn += Math.abs(tx.amount) / 100;
-          return;
+      const pendingWithCheck: { id: string; user_id: string; media_sites: { price: number } | null; hasOrderRequest: boolean }[] = [];
+      if (pendingReqs) {
+        for (const req of pendingReqs) {
+          const { data: msgs } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', req.id)
+            .like('message', '%CLIENT_ORDER_REQUEST%')
+            .limit(1);
+          pendingWithCheck.push({
+            id: req.id,
+            user_id: req.user_id,
+            media_sites: req.media_sites as { price: number } | null,
+            hasOrderRequest: !!(msgs && msgs.length > 0),
+          });
         }
-        if (withdrawalTypes.includes(tx.type)) return;
-        
-        rawTxSum += tx.amount;
-        
-        if (tx.amount > 0 && tx.type !== 'unlocked') incoming += tx.amount;
-        if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
-          outgoing += Math.abs(tx.amount);
-        }
-        
-        // Track lock/unlock net for locked calculation
-        if (tx.type === 'locked' || tx.type === 'offer_accepted' || tx.type === 'unlocked') {
-          netLockedFromTx += tx.amount;
-        }
-        // order_completed consumes a lock - offset it
-        if (tx.type === 'order_completed') {
-          netLockedFromTx += Math.abs(tx.amount);
-        }
-      });
+      }
 
-      const lockedFromOrders = activeOrders?.reduce((sum, o) => sum + ((o.media_sites as any)?.price || 0), 0) || 0;
-      // Locked from requests: derived from unmatched lock transactions, minus what's already in active orders
-      const lockedFromRequestsRaw = Math.max(0, -netLockedFromTx);
-      const lockedFromRequests = Math.max(0, lockedFromRequestsRaw - lockedFromOrders);
-      const totalLocked = lockedFromOrders + lockedFromRequests;
-      const calculatedBalance = incoming - outgoing;
-      const calculatedAvailable = calculatedBalance - totalLocked - withdrawn;
-      const dbValue = dbCredits?.credits ?? 0;
-
-      // Validation: compare raw transaction sum to DB credits
-      // user_credits.credits is NOT updated by locks/unlocks/order completions for clients
-      // so we compare the raw sum of all non-withdrawal transactions
-      const isValid = rawTxSum === dbValue;
-      const detail = isValid ? undefined : `DB: ${dbValue}, Tx Sum: ${rawTxSum}, Diff: ${dbValue - rawTxSum}`;
-
-      // Update the user in state
-      setUserCredits(prev => prev.map(u => {
-        if (u.user_id !== userId) return u;
-        return {
-          ...u,
-          totalCredits: calculatedBalance,
-          locked: totalLocked,
-          lockedFromOrders,
-          lockedFromRequests,
-          lockedFromWithdrawals: 0,
-          available: calculatedAvailable,
-          dbCredits: dbValue,
-          rawTxSum,
-          validationStatus: isValid ? 'valid' : 'mismatch',
-          validationDetail: detail,
-        };
+      const userTxs = (txsRes.data || []).map(tx => ({ ...tx, description: tx.description || undefined }));
+      const orders = (activeOrdersRes.data || []).map(o => ({
+        user_id: userId,
+        media_sites: o.media_sites as { price: number } | null,
       }));
+      const dbValue = dbCreditsRes.data?.credits ?? 0;
 
-      const status = isValid ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbValue}, Tx Sum: ${rawTxSum})`;
+      const updated = recalculateSingleUser(userTxs, orders, pendingWithCheck, dbValue);
+
+      setUserCredits(prev => prev.map(u => u.user_id !== userId ? u : { ...u, ...updated }));
+
+      const status = updated.validationStatus === 'valid' 
+        ? '✅ Valid' 
+        : `⚠️ Mismatch (${updated.validationDetail})`;
       toast.success(`Recalculated: ${status}`);
     } catch (err) {
       console.error('Recalculate error:', err);
@@ -169,7 +133,6 @@ export const AdminCreditManagementView = () => {
   const handleValidateAll = async () => {
     setRefreshing(true);
     await fetchUserCredits();
-    // After refresh, validate each user's rawTxSum against DB value
     const { data: allDbCredits } = await supabase
       .from('user_credits')
       .select('user_id, credits');
@@ -193,7 +156,6 @@ export const AdminCreditManagementView = () => {
       return updated;
     });
     
-    // Use setTimeout to read the updated mismatchCount after state update
     setTimeout(() => {
       if (mismatchCount > 0) {
         toast.warning(`${mismatchCount} user(s) have mismatched credit values`);
@@ -216,7 +178,6 @@ export const AdminCreditManagementView = () => {
     });
   };
 
-
   useEffect(() => {
     fetchUserCredits();
   }, []);
@@ -224,222 +185,45 @@ export const AdminCreditManagementView = () => {
   const fetchUserCredits = async () => {
     setBalancesLoading(true);
     try {
-      const { data: creditsData, error: creditsError } = await supabase
-        .from('user_credits')
-        .select('user_id, credits')
-        .order('credits', { ascending: false });
+      // Fetch all required data in parallel
+      const [creditsRes, profilesRes, agencyRes, transactionsRes, activeOrdersRes, completedOrdersRes, withdrawalsRes] = await Promise.all([
+        supabase.from('user_credits').select('user_id, credits').order('credits', { ascending: false }),
+        supabase.from('profiles').select('id, email'),
+        supabase.from('agency_payouts').select('user_id').eq('onboarding_complete', true).eq('downgraded', false),
+        supabase.from('credit_transactions').select('user_id, amount, type, description'),
+        supabase.from('orders').select('user_id, media_sites(price)')
+          .neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
+        supabase.from('orders').select('user_id, media_sites(price)').eq('delivery_status', 'accepted'),
+        supabase.from('agency_withdrawals').select('user_id, amount_cents, withdrawal_method').eq('status', 'pending'),
+      ]);
 
-      if (creditsError) throw creditsError;
+      if (creditsRes.error) throw creditsRes.error;
+      if (profilesRes.error) throw profilesRes.error;
+      if (transactionsRes.error) throw transactionsRes.error;
 
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email');
+      // Fetch pending requests with CLIENT_ORDER_REQUEST check
+      const pendingRequests = await fetchPendingRequestsWithCheck();
 
-      if (profilesError) throw profilesError;
+      const agencyUserIds = new Set(agencyRes.data?.map(a => a.user_id).filter(Boolean) || []);
 
-      // Fetch active agency payouts to determine user type
-      const { data: agencyPayoutsData } = await supabase
-        .from('agency_payouts')
-        .select('user_id')
-        .eq('onboarding_complete', true)
-        .eq('downgraded', false);
-
-      const agencyUserIds = new Set(agencyPayoutsData?.map(a => a.user_id).filter(Boolean) || []);
-
-      // Fetch transactions to calculate credits per user
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('credit_transactions')
-        .select('user_id, amount, type, description');
-
-      if (transactionsError) throw transactionsError;
-
-      // Fetch active orders to calculate locked credits per user
-      const { data: activeOrdersData } = await supabase
-        .from('orders')
-        .select('user_id, media_site_id, media_sites(price)')
-        .neq('status', 'cancelled')
-        .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
-
-      // No longer fetching pending requests from DB for locked calculation
-      // Locked credits are now derived from transaction history (locked/unlocked/offer_accepted)
-
-      const emailMap = new Map<string, string | null>();
-      profilesData?.forEach(profile => {
-        emailMap.set(profile.id, profile.email);
-      });
-
-      // Calculate incoming credits per user (positive amounts)
-      const incomingMap = new Map<string, number>();
-      // Calculate outgoing credits per user (negative amounts, excluding locked types)
-      const outgoingMap = new Map<string, number>();
-      // Raw transaction sum per user (all non-withdrawal amounts, for validation)
-      const rawTxSumMap = new Map<string, number>();
-      // Track purchased (online), purchased (invoice/gifted), earned, refunded separately for display
-      const purchasedOnlineMap = new Map<string, number>();
-      const purchasedInvoiceMap = new Map<string, number>();
-      const earnedMap = new Map<string, number>();
-      const refundedMap = new Map<string, number>();
-      const deductionsMap = new Map<string, number>();
-      // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
-      const withdrawnMap = new Map<string, number>();
-      // Track net locked from transactions (locked + offer_accepted are negative, unlocked is positive)
-      const lockedNetTxMap = new Map<string, number>();
-      
-      // Define withdrawal types (stored in cents, not credits) - must be excluded from regular credit calculations
-      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-      
-      transactionsData?.forEach(tx => {
-        // Handle withdrawal_completed separately - these reduce available balance
-        if (tx.type === 'withdrawal_completed') {
-          const amountInDollars = Math.abs(tx.amount) / 100;
-          withdrawnMap.set(tx.user_id, (withdrawnMap.get(tx.user_id) || 0) + amountInDollars);
-          return;
-        }
-        
-        // Skip other withdrawal transactions - they don't affect credit balance
-        if (withdrawalTypes.includes(tx.type)) return;
-        
-        // Raw sum of ALL non-withdrawal transaction amounts (for DB validation)
-        rawTxSumMap.set(tx.user_id, (rawTxSumMap.get(tx.user_id) || 0) + tx.amount);
-        
-        // Calculate incoming (all positive amounts, excluding 'unlocked' which is a reversal of 'locked')
-        if (tx.amount > 0 && tx.type !== 'unlocked') {
-          incomingMap.set(tx.user_id, (incomingMap.get(tx.user_id) || 0) + tx.amount);
-        }
-        
-        // Calculate outgoing (negative amounts, excluding locked/offer_accepted/order types)
-        if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
-          outgoingMap.set(tx.user_id, (outgoingMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-        }
-        
-        // Track specific types for display columns
-        if (tx.type === 'refund' && tx.amount > 0) {
-          refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + tx.amount);
-        } else if (tx.type === 'gifted' || tx.type === 'admin_credit') {
-          purchasedInvoiceMap.set(tx.user_id, (purchasedInvoiceMap.get(tx.user_id) || 0) + tx.amount);
-        } else if (tx.type === 'purchase') {
-          purchasedOnlineMap.set(tx.user_id, (purchasedOnlineMap.get(tx.user_id) || 0) + tx.amount);
-        } else if (tx.type === 'order_payout') {
-          earnedMap.set(tx.user_id, (earnedMap.get(tx.user_id) || 0) + tx.amount);
-        } else if (tx.type === 'admin_deduct') {
-          deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-        }
-        
-        // Track lock/unlock transactions for locked calculation
-        if (tx.type === 'locked' || tx.type === 'offer_accepted' || tx.type === 'unlocked') {
-          lockedNetTxMap.set(tx.user_id, (lockedNetTxMap.get(tx.user_id) || 0) + tx.amount);
-        }
-        // order_completed consumes a lock, so offset it (add abs value to cancel the negative lock)
-        if (tx.type === 'order_completed') {
-          lockedNetTxMap.set(tx.user_id, (lockedNetTxMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-        }
-      });
-
-      // Calculate locked credits from ACTIVE ORDERS (DB state, not transactions)
-      const lockedFromOrdersMap = new Map<string, number>();
-      activeOrdersData?.forEach(order => {
-        const price = (order.media_sites as any)?.price || 0;
-        lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
-      });
-
-      // Calculate locked credits from TRANSACTIONS (net of locked/offer_accepted/unlocked, offset by order_completed)
-      // If net is negative, that many credits are locked; subtract lockedFromOrders to avoid double-counting
-      const lockedFromRequestsTxMap = new Map<string, number>();
-      for (const [userId, netLocked] of lockedNetTxMap.entries()) {
-        // netLocked: negative means credits locked, positive means all resolved
-        const lockedFromTx = Math.max(0, -netLocked);
-        const ordersLocked = lockedFromOrdersMap.get(userId) || 0;
-        // Subtract what's already tracked via active orders to avoid double-counting
-        lockedFromRequestsTxMap.set(userId, Math.max(0, lockedFromTx - ordersLocked));
-      }
-
-      // Fetch pending withdrawals for Bank/USDT split
-      const { data: pendingWithdrawalsData } = await supabase
-        .from('agency_withdrawals')
-        .select('user_id, amount_cents, withdrawal_method')
-        .eq('status', 'pending');
-
-      const pendingBankWithdrawalsMap = new Map<string, number>();
-      const pendingCryptoWithdrawalsMap = new Map<string, number>();
-      pendingWithdrawalsData?.forEach(w => {
-        const amountInDollars = (w.amount_cents || 0) / 100;
-        if (w.withdrawal_method === 'bank') {
-          pendingBankWithdrawalsMap.set(w.user_id, (pendingBankWithdrawalsMap.get(w.user_id) || 0) + amountInDollars);
-        } else if (w.withdrawal_method === 'usdt') {
-          pendingCryptoWithdrawalsMap.set(w.user_id, (pendingCryptoWithdrawalsMap.get(w.user_id) || 0) + amountInDollars);
-        }
-      });
-
-      // Fetch completed orders to calculate total spent per user (purchase orders)
-      const { data: completedOrdersData } = await supabase
-        .from('orders')
-        .select('user_id, media_sites(price)')
-        .eq('delivery_status', 'accepted');
-
-      const totalSpentMap = new Map<string, number>();
-      const purchaseOrdersMap = new Map<string, number>();
-      completedOrdersData?.forEach(order => {
-        const price = (order.media_sites as any)?.price || 0;
-        totalSpentMap.set(order.user_id, (totalSpentMap.get(order.user_id) || 0) + price);
-        purchaseOrdersMap.set(order.user_id, (purchaseOrdersMap.get(order.user_id) || 0) + 1);
-      });
-
-      // Calculate delivery orders per agency user from order_payout transactions
-      const deliveryOrdersMap = new Map<string, number>();
-      transactionsData?.forEach(tx => {
-        if (tx.type === 'order_payout') {
-          deliveryOrdersMap.set(tx.user_id, (deliveryOrdersMap.get(tx.user_id) || 0) + 1);
-        }
-      });
-
-      const combined: UserCredit[] = (creditsData || []).map(credit => {
-        const incoming = incomingMap.get(credit.user_id) || 0;
-        const outgoing = outgoingMap.get(credit.user_id) || 0;
-        const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
-        const lockedFromRequests = lockedFromRequestsTxMap.get(credit.user_id) || 0;
-        const withdrawn = withdrawnMap.get(credit.user_id) || 0;
-        
-        // Total locked = from active orders + from pending requests (both from DB state)
-        const totalLocked = lockedFromOrders + lockedFromRequests;
-        
-        // Calculate total balance from transactions (incoming - outgoing)
-        const calculatedTotalBalance = incoming - outgoing;
-        // Available = Total Balance - Total Locked Credits - Completed Withdrawals
-        const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
-        
-        const purchasedOnline = purchasedOnlineMap.get(credit.user_id) || 0;
-        const purchasedInvoice = purchasedInvoiceMap.get(credit.user_id) || 0;
-        const purchaseOrders = purchaseOrdersMap.get(credit.user_id) || 0;
-        const deliveryOrders = deliveryOrdersMap.get(credit.user_id) || 0;
-        
-        return {
-          user_id: credit.user_id,
-          purchased: purchasedOnline + purchasedInvoice,
-          purchasedOnline,
-          purchasedInvoice,
-          earned: earnedMap.get(credit.user_id) || 0,
-          deductions: deductionsMap.get(credit.user_id) || 0,
-          totalCredits: calculatedTotalBalance,
-          locked: totalLocked,
-          lockedFromOrders,
-          lockedFromRequests,
-          lockedFromWithdrawals: 0,
-          available: calculatedAvailable,
-          orders: purchaseOrders + deliveryOrders,
-          purchaseOrders,
-          deliveryOrders,
-          totalSpent: totalSpentMap.get(credit.user_id) || 0,
-          refunded: refundedMap.get(credit.user_id) || 0,
-          withdrawn,
-          pendingBankWithdrawals: pendingBankWithdrawalsMap.get(credit.user_id) || 0,
-          pendingCryptoWithdrawals: pendingCryptoWithdrawalsMap.get(credit.user_id) || 0,
-          email: emailMap.get(credit.user_id) || null,
-          isAgency: agencyUserIds.has(credit.user_id),
-          dbCredits: credit.credits,
-          rawTxSum: rawTxSumMap.get(credit.user_id) || 0,
-          validationStatus: 'unchecked' as const,
-        };
+      const combined = calculateAdminUserCredits({
+        creditsData: creditsRes.data || [],
+        profilesData: profilesRes.data || [],
+        agencyUserIds,
+        transactionsData: (transactionsRes.data || []).map(tx => ({
+          ...tx,
+          description: tx.description || undefined,
+        })),
+        activeOrders: (activeOrdersRes.data || []).map(o => ({
+          user_id: o.user_id,
+          media_sites: o.media_sites as { price: number } | null,
+        })),
+        pendingRequests,
+        completedOrders: (completedOrdersRes.data || []).map(o => ({
+          user_id: o.user_id,
+          media_sites: o.media_sites as { price: number } | null,
+        })),
+        pendingWithdrawals: withdrawalsRes.data || [],
       });
 
       setUserCredits(combined);
