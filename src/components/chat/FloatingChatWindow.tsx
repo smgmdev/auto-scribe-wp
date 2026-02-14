@@ -2709,6 +2709,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       'can i have your', 'can i get your', 'can i have ur', 'can i get ur',
       'how can i reach you', 'how to contact you', 'how to reach you',
       'contact details', 'contact info',
+      // Social media / social account generic phrases
+      'social media', 'social account', 'social profile', 'social handle',
+      'socials', 'your socials', 'ur socials', 'my socials',
+      'social network', 'social platform',
+      'on socials', 'my social', 'your social', 'ur social',
+      'social media account', 'social media handle', 'social media profile',
+      'any socials', 'got socials', 'have socials',
+      'what are your socials', 'what r ur socials', 'drop socials',
+      'share socials', 'send socials', 'give socials',
       // Bypass attempts - suggesting external communication
       'talk somewhere else', 'chat somewhere else', 'speak somewhere else',
       'continue elsewhere', 'move this elsewhere', 'take this elsewhere',
@@ -2734,6 +2743,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       'handle is', 'username is', 'user name is',
       'i\'m on', 'im on', 'i am on',
       'follow me', 'look me up',
+      // Indirect bypass - coded language
+      'the bird app', 'the gram', 'the tok',
+      'green app', 'blue app', 'purple app',
+      'messaging app', 'chat app', 'video call app',
+      'that other app', 'you know which app',
+      'privately message', 'private message me',
+      'direct message', 'voice call', 'video chat outside',
+      // Asking for ways to connect
+      'where else are you', 'where r u at', 'where else can we',
+      'how do i find you', 'how do i reach you outside',
+      'can we move this', 'can we take this',
+      'let me know your', 'lmk your', 'lmk ur',
+      'shoot me your', 'shoot me ur',
     ];
     for (const phrase of directExchangePhrases) {
       if (lowerMsg.includes(phrase)) return true;
@@ -2741,7 +2763,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
     // === REGEX PATTERNS for subtle bypass attempts ===
     
-    // "what/whats/what's + ur/your + account/handle/username/contact-word"
+    // "what/whats/what's + ur/your + account/handle/username/contact-word/social"
     if (/\b(?:what(?:'?s)?|wht|wats?|where(?:'?s)?)\s+(?:ur|your|u|yo)\s+(?:email|mail|number|phone|cell|contact|handle|username|user\s*name|account|id|tag|profile|socials?|@)\b/i.test(message)) return true;
     
     // "@username" style handles
@@ -2751,16 +2773,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     if (/\b(?:do\s+(?:you|u|ya)\s+(?:have|use|got)|(?:you|u|ya)\s+(?:have|use|got|on))\s+(?:any|a|an)?\s*(?:email|phone|number|contact|account|handle|socials?|other\s+(?:app|platform|channel|way))\b/i.test(message)) return true;
     
     // "send/give/share/drop + me + your/ur + [anything]" with contact intent
-    if (/\b(?:send|give|share|drop|pass|throw)\s+(?:me|us)\s+(?:ur|your|u|yo)\b/i.test(message)) return true;
+    if (/\b(?:send|give|share|drop|pass|throw|shoot)\s+(?:me|us)\s+(?:ur|your|u|yo)\b/i.test(message)) return true;
     
     // "can we talk/chat/communicate + outside/elsewhere/privately"
     if (/\b(?:can|could|shall|should|let'?s?|wanna|want\s+to)\s+(?:we\s+)?(?:talk|chat|speak|communicate|connect|meet)\s+(?:outside|elsewhere|privately|somewhere|off|on\s+(?:a|another))\b/i.test(message)) return true;
     
     // Catch "my [platform-ish word] is/:" pattern for sharing handles
-    if (/\bmy\s+(?:handle|username|user\s*name|account|id|tag|profile|@)\s*(?:is|:|=|-)/i.test(message)) return true;
+    if (/\bmy\s+(?:handle|username|user\s*name|account|id|tag|profile|socials?|@)\s*(?:is|:|=|-)/i.test(message)) return true;
     
     // Detect URL patterns (potential profile links)
     if (/(?:https?:\/\/)?(?:www\.)?(?:instagram|facebook|twitter|tiktok|snapchat|linkedin|discord|telegram|t\.me|wa\.me|x)\.(?:com|co|gg|me)\/?[\w./-]*/i.test(message)) return true;
+    
+    // Catch "at" used as "@" substitute: "john at gmail dot com" or "find me at [platform]"
+    if (/\b\w+\s+at\s+\w+\s+dot\s+\w+\b/i.test(message)) return true;
+    
+    // Numbered/coded contact sharing: "my digits are", "here are my digits"
+    if (/\b(?:my\s+digits|here(?:'s| are| r)\s+my\s+digits|my\s+info)\b/i.test(message)) return true;
     
     return false;
   };
