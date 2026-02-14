@@ -1390,16 +1390,6 @@ export function AgencyRequestsView() {
         </Button>
       </div>
 
-      <div className="relative -mb-px">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
-        <Input
-          placeholder="Search requests..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 w-full h-9 text-sm rounded-none bg-foreground text-background placeholder:text-white/50 border-foreground"
-        />
-      </div>
-
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
         <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
@@ -1421,6 +1411,16 @@ export function AgencyRequestsView() {
           </TabsTrigger>
         </TabsList>
         </div>
+
+      <div className="relative -mb-px">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+        <Input
+          placeholder="Search requests..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 w-full h-9 text-sm rounded-none bg-foreground text-background placeholder:text-white/50 border-foreground"
+        />
+      </div>
 
         <TabsContent value="requests" className="mt-0">
           <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
