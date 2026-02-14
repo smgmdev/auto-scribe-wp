@@ -262,7 +262,7 @@ export function AdminUsersView() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
-  // Validate All: compare transaction sums vs user_credits table
+  // Validate All: compare transaction sums vs user_credits table (same logic as Credit Management)
   const handleValidateAll = async () => {
     setValidating(true);
     await fetchUsers();
@@ -271,11 +271,16 @@ export function AdminUsersView() {
       .select('user_id, credits');
     const { data: allTxs } = await supabase
       .from('credit_transactions')
-      .select('user_id, amount');
+      .select('user_id, amount, type');
+
+    const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
     
+    // Calculate rawTxSum excluding withdrawal types (same as Credit Management)
     const txSumMap = new Map<string, number>();
     allTxs?.forEach(tx => {
-      txSumMap.set(tx.user_id, (txSumMap.get(tx.user_id) || 0) + tx.amount);
+      if (!WITHDRAWAL_TYPES.includes(tx.type)) {
+        txSumMap.set(tx.user_id, (txSumMap.get(tx.user_id) || 0) + tx.amount);
+      }
     });
     
     const dbMap = new Map<string, number>();
