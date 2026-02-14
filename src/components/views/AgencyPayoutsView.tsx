@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -675,9 +675,10 @@ export function AgencyPayoutsView() {
                                     e.stopPropagation();
                                     navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
                                   }}
-                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
                                   See transaction details
+                                  <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             </div>
@@ -759,21 +760,23 @@ export function AgencyPayoutsView() {
                                     handleViewOrderDetails(order.id);
                                   }}
                                   disabled={openingChat === order.id}
-                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
+                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50 w-fit"
                                 >
                                   {openingChat === order.id ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                   ) : null}
                                   View order details
+                                  <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
                                   }}
-                                  className="text-xs text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
                                   See transaction details
+                                  <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             </div>
