@@ -155,11 +155,11 @@ export function AdminAISourcesView() {
           <h1 className="text-3xl font-bold">AI Sources</h1>
           <p className="text-muted-foreground">Manage available sources for AI publishing</p>
         </div>
-        <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex flex-col md:flex-row gap-0">
           {!isAdding && (
             <Button 
               onClick={() => setIsAdding(true)}
-              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+              className="bg-black text-white border border-black hover:bg-transparent hover:text-black rounded-none"
             >
               Add Source
             </Button>
@@ -172,7 +172,7 @@ export function AdminAISourcesView() {
               sonnerToast.success('Sources refreshed');
             }}
             disabled={isLoading || isRefreshing}
-            className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground"
+            className="bg-black text-white border border-black hover:bg-transparent hover:text-black rounded-none -mt-px md:-mt-0 md:-ml-px"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
