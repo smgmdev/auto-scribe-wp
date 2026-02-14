@@ -704,8 +704,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
-                                          <p className="text-xs text-white/70">Credit Balance</p>
-                                          <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Total Balance</p>
+                                          <p className="font-semibold text-green-400">{user.totalCredits.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
@@ -753,7 +753,11 @@ export const AdminCreditManagementView = () => {
                                             <span className="font-semibold text-red-400">{user.totalSpent > 0 ? `-${user.totalSpent.toLocaleString()}` : '0'}</span>
                                           </div>
                                           <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                                            <span className="text-white/70">Available Credit Balance:</span>
+                                            <span className="text-white/70">Total Balance:</span>
+                                            <span className="font-semibold text-green-400">{user.totalCredits.toLocaleString()}</span>
+                                          </div>
+                                          <div className="flex justify-between gap-4">
+                                            <span className="text-white/70">Available:</span>
                                             <span className="font-semibold text-green-400">{user.available.toLocaleString()}</span>
                                           </div>
                                         </div>
