@@ -1346,7 +1346,7 @@ export function AdminUsersView() {
 
                   {/* Expanded Details with Tabs */}
                   {isExpanded && (
-                    <div className="-mx-4 -mb-4 mt-3 pt-3 px-4 pb-4 border-t border-border">
+                    <div className="-mx-4 -mb-4 mt-3 pt-0 border-t border-border">
                       <Tabs 
                         value={userCardTabs[user.id] || 'logs'} 
                         onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
@@ -1374,7 +1374,7 @@ export function AdminUsersView() {
                           </div>
                         ) : (
                           <>
-                            <TabsContent value="logs" className="mt-0">
+                            <TabsContent value="logs" className="mt-0 px-4 pb-4">
                               <div className="grid gap-1 text-xs">
                                 <div className="flex gap-2">
                                   <span className="text-muted-foreground">Account created:</span>
@@ -1405,11 +1405,11 @@ export function AdminUsersView() {
                               </div>
                             </TabsContent>
                             
-                            <TabsContent value="credits" className="mt-0">
+                            <TabsContent value="credits" className="mt-0 px-4 pb-4">
                               <UserTransactionsExpanded userId={user.id} />
                             </TabsContent>
                             
-                            <TabsContent value="orders" className="mt-0">
+                            <TabsContent value="orders" className="mt-0 px-4 pb-4">
                               {(userOrders[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders</p>
                               ) : (
@@ -1436,7 +1436,7 @@ export function AdminUsersView() {
                               )}
                             </TabsContent>
                             
-                            <TabsContent value="engagements" className="mt-0">
+                            <TabsContent value="engagements" className="mt-0 px-4 pb-4">
                               {(userEngagements[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No engagements</p>
                               ) : (
@@ -1462,7 +1462,7 @@ export function AdminUsersView() {
                               )}
                             </TabsContent>
                             
-                            <TabsContent value="deliveries" className="mt-0">
+                            <TabsContent value="deliveries" className="mt-0 px-4 pb-4">
                               {!user.isAgency ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders completed</p>
                               ) : (userDeliveries[user.id] || []).length === 0 ? (
