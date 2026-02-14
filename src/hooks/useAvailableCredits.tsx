@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  calculateTotalBalance,
+  calculateWithdrawals,
+  calculateAvailableCredits,
+  categoriseTransactions,
+  type CreditTransaction,
+} from '@/lib/credit-calculations';
 
 export interface AvailableCreditsData {
   availableCredits: number;
@@ -38,8 +45,6 @@ const initialData: AvailableCreditsData = {
   loading: true,
 };
 
-const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-
 export function useAvailableCredits(enabled = true) {
   const { user } = useAuth();
   const [data, setData] = useState<AvailableCreditsData>(initialData);
@@ -54,31 +59,13 @@ export function useAvailableCredits(enabled = true) {
       .select('amount, type, description')
       .eq('user_id', user.id);
 
-    const txs = transactions || [];
+    const txs: CreditTransaction[] = transactions || [];
 
-    // 2. Categorise transactions
-    let earnedCredits = 0;
-    let purchasedOnline = 0;
-    let purchasedOffline = 0;
+    // 2. Categorise transactions (shared formula)
+    const { earnedCredits, purchasedOnline, purchasedOffline, totalPurchased } = categoriseTransactions(txs);
 
-    for (const t of txs) {
-      if (t.type === 'order_payout') earnedCredits += t.amount;
-      if (t.type === 'purchase') purchasedOnline += t.amount;
-      if (t.type === 'gifted' || t.type === 'admin_credit') purchasedOffline += t.amount;
-    }
-
-    const totalPurchased = purchasedOnline + purchasedOffline;
-
-    // 3. Calculate total balance (incoming minus outgoing, excluding locked/unlocked pairs and withdrawals)
-    const incomingCredits = txs
-      .filter(t => t.amount > 0 && !WITHDRAWAL_TYPES.includes(t.type) && t.type !== 'unlocked')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const outgoingCredits = txs
-      .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !WITHDRAWAL_TYPES.includes(t.type))
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-    const totalBalance = incomingCredits - outgoingCredits;
+    // 3. Calculate total balance (shared formula)
+    const totalBalance = calculateTotalBalance(txs);
 
     // 4. Locked credits from active orders
     const { data: activeOrders } = await supabase
@@ -122,42 +109,10 @@ export function useAvailableCredits(enabled = true) {
       }
     }
 
-    // 6. Withdrawal amounts
-    let withdrawalLockedCents = 0;
-    let withdrawalCompletedCents = 0;
-    let bankLockedCents = 0;
-    let cryptoLockedCents = 0;
-
-    const withdrawalTxs = txs.filter(t => WITHDRAWAL_TYPES.includes(t.type));
-    for (const tx of withdrawalTxs) {
-      const isBank = tx.description?.includes('Bank Transfer');
-      const isCrypto = tx.description?.includes('USDT');
-
-      if (tx.type === 'withdrawal_locked') {
-        const amount = Math.abs(tx.amount);
-        withdrawalLockedCents += amount;
-        if (isBank) bankLockedCents += amount;
-        if (isCrypto) cryptoLockedCents += amount;
-      } else if (tx.type === 'withdrawal_unlocked') {
-        const amount = Math.abs(tx.amount);
-        withdrawalLockedCents -= amount;
-        if (isBank) bankLockedCents -= amount;
-        if (isCrypto) cryptoLockedCents -= amount;
-      } else if (tx.type === 'withdrawal_completed') {
-        const amount = Math.abs(tx.amount);
-        withdrawalLockedCents -= amount;
-        withdrawalCompletedCents += amount;
-        if (isBank) bankLockedCents -= amount;
-        if (isCrypto) cryptoLockedCents -= amount;
-      }
-    }
-
-    withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
-    bankLockedCents = Math.max(0, bankLockedCents);
-    cryptoLockedCents = Math.max(0, cryptoLockedCents);
-
-    const creditsInWithdrawals = withdrawalLockedCents / 100;
-    const creditsWithdrawn = withdrawalCompletedCents / 100;
+    // 6. Withdrawal amounts (shared formula)
+    const withdrawals = calculateWithdrawals(txs);
+    const creditsInWithdrawals = withdrawals.lockedCents / 100;
+    const creditsWithdrawn = withdrawals.completedCents / 100;
 
     // 7. Completed orders count and total spent
     const { data: completedOrders } = await supabase
@@ -176,13 +131,13 @@ export function useAvailableCredits(enabled = true) {
       }
     }
 
-    // Also count agency delivery orders
     const deliveryOrdersCount = txs.filter(t => t.type === 'order_payout').length;
     totalOrders += deliveryOrdersCount;
 
-    // 8. Final available credits
-    const creditsInUse = creditsInOrders + creditsInPendingRequests + creditsInWithdrawals;
-    const availableCredits = totalBalance - creditsInUse - creditsWithdrawn;
+    // 8. Final available credits (shared formula)
+    const availableCredits = calculateAvailableCredits(
+      totalBalance, creditsInOrders, creditsInPendingRequests, creditsInWithdrawals, creditsWithdrawn
+    );
 
     setData({
       availableCredits,
@@ -195,8 +150,8 @@ export function useAvailableCredits(enabled = true) {
       creditsInPendingRequests,
       creditsWithdrawn,
       creditsInWithdrawals,
-      withdrawalsByBank: bankLockedCents / 100,
-      withdrawalsByCrypto: cryptoLockedCents / 100,
+      withdrawalsByBank: withdrawals.bankLockedCents / 100,
+      withdrawalsByCrypto: withdrawals.cryptoLockedCents / 100,
       totalOrders,
       totalSpent,
       loading: false,
