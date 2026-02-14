@@ -15,6 +15,15 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 14, 2026',
+    title: 'Client Requests & Footer Improvements',
+    changes: [
+      'Updated Refresh button and search input in Client Requests with black background styling',
+      'Enabled search by media site name across all order tabs (Active, Disputed, Completed, Cancelled)',
+      'Aligned global footer links to the left on tablet viewports for improved readability',
+    ],
+  },
+  {
     date: 'February 13, 2026',
     title: 'Dashboard Dark Theme & Visual Overhaul',
     changes: [
@@ -322,7 +331,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 13, 2026
+            Last update: February 14, 2026
           </p>
         </div>
 
