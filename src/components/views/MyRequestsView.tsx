@@ -1311,7 +1311,6 @@ export function MyRequestsView() {
               <div className="relative md:overflow-visible">
               <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
                 <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">
-                  <CheckCircle className="h-4 w-4" />
                   Delivered ({deliveredRequests.length})
                   {unreadDeliveredCount > 0 && (
                     <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1320,7 +1319,6 @@ export function MyRequestsView() {
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">
-                  <XCircle className="h-4 w-4" />
                   Cancelled ({cancelledRequests.length})
                   {unreadCancelledCount > 0 && (
                     <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
