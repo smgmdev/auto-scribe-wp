@@ -1329,7 +1329,7 @@ export function MyRequestsView() {
 
           <TabsContent value="closed" className="mt-0">
             <Tabs defaultValue="delivered" value={closedSubTab} onValueChange={(value) => setClosedSubTab(value as 'delivered' | 'cancelled')} className="w-full">
-              <div className="relative md:pt-2 md:overflow-visible">
+              <div className="relative md:overflow-visible">
               <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
                 <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <CheckCircle className="h-4 w-4" />
