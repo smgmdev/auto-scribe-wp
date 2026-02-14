@@ -250,9 +250,22 @@ export function AdminSecuritySupervisionView() {
     }
   };
 
-  const openEngagement = (requestId: string) => {
-    localStorage.setItem('selectedEngagementId', requestId);
-    setCurrentView('admin-engagements');
+  const openEngagement = async (requestId: string) => {
+    try {
+      const { data: sr } = await supabase
+        .from('service_requests')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
+        .eq('id', requestId)
+        .single();
+
+      if (sr) {
+        const { openGlobalChat } = useAppStore.getState();
+        openGlobalChat(sr as any, 'agency-request');
+      }
+    } catch (err) {
+      console.error('Error opening engagement:', err);
+      toast.error('Failed to open engagement chat');
+    }
   };
 
   // Filter and group
