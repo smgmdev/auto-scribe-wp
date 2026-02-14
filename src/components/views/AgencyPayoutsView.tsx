@@ -332,7 +332,7 @@ export function AgencyPayoutsView() {
           <h1 className="text-3xl font-bold text-foreground">
             My Earnings
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 mb-4 text-muted-foreground">
             Track your earnings from completed orders
           </p>
         </div>
