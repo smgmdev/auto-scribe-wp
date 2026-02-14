@@ -633,7 +633,19 @@ export function AdminUsersView() {
   };
 
   const handleOrderClick = async (order: Order) => {
-    const serviceRequestId = order.service_requests?.[0]?.id;
+    let serviceRequestId = order.service_requests?.[0]?.id;
+    
+    // Fallback: look up service_request by order_id if not joined
+    if (!serviceRequestId) {
+      const { data: srLookup } = await supabase
+        .from('service_requests')
+        .select('id')
+        .eq('order_id', order.id)
+        .limit(1)
+        .maybeSingle();
+      serviceRequestId = srLookup?.id;
+    }
+    
     if (!serviceRequestId) return;
     
     try {
