@@ -1351,18 +1351,18 @@ export function AdminUsersView() {
                         value={userCardTabs[user.id] || 'logs'} 
                         onValueChange={(v) => setUserCardTabs(prev => ({ ...prev, [user.id]: v as UserCardTab }))}
                       >
-                        <TabsList className="w-full flex md:grid md:grid-cols-5 mb-0 overflow-x-auto scrollbar-hide justify-start">
-                          <TabsTrigger value="logs" className="text-xs whitespace-nowrap flex-shrink-0">Account Logs</TabsTrigger>
-                          <TabsTrigger value="credits" className="text-xs whitespace-nowrap flex-shrink-0">
+                        <TabsList className="w-full flex md:grid md:grid-cols-5 mb-0 overflow-x-auto scrollbar-hide justify-start p-0 h-auto">
+                          <TabsTrigger value="logs" className="text-xs whitespace-nowrap flex-shrink-0 py-2.5">Account Logs</TabsTrigger>
+                          <TabsTrigger value="credits" className="text-xs whitespace-nowrap flex-shrink-0 py-2.5">
                             Credit History ({(userCreditTransactions[user.id] || []).length})
                           </TabsTrigger>
-                          <TabsTrigger value="orders" className="text-xs whitespace-nowrap flex-shrink-0">
+                          <TabsTrigger value="orders" className="text-xs whitespace-nowrap flex-shrink-0 py-2.5">
                             Orders ({(userOrders[user.id] || []).length})
                           </TabsTrigger>
-                          <TabsTrigger value="engagements" className="text-xs whitespace-nowrap flex-shrink-0">
+                          <TabsTrigger value="engagements" className="text-xs whitespace-nowrap flex-shrink-0 py-2.5">
                             Engagements ({(userEngagements[user.id] || []).length})
                           </TabsTrigger>
-                          <TabsTrigger value="deliveries" className="text-xs whitespace-nowrap flex-shrink-0">
+                          <TabsTrigger value="deliveries" className="text-xs whitespace-nowrap flex-shrink-0 py-2.5">
                             Deliveries ({user.isAgency ? (userDeliveries[user.id] || []).length : 0})
                           </TabsTrigger>
                         </TabsList>
