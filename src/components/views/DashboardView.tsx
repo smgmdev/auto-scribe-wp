@@ -610,18 +610,18 @@ export function DashboardView() {
           const cardContent = (
             <Card 
               key={stat.key} 
-              className={`border-0 bg-black shadow-sm hover:shadow-md hover:bg-[#f2a547] transition-all py-2 md:py-3 rounded-none ${stat.clickable ? 'cursor-pointer' : ''}`}
+              className={`border-0 bg-black shadow-sm hover:shadow-md hover:bg-[#f2a547] hover:text-black transition-all py-2 md:py-3 rounded-none group ${stat.clickable ? 'cursor-pointer' : ''}`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => stat.clickable && handleStatClick(stat.key)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
-                <CardTitle className="text-xs font-medium text-white/70 uppercase tracking-wide">
+                <CardTitle className="text-xs font-medium text-white/70 uppercase tracking-wide group-hover:text-black">
                   {stat.label}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-white/50" />
+                <Icon className="h-4 w-4 text-white/50 group-hover:text-black" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-white">
+                <div className="text-xl md:text-2xl font-semibold text-white group-hover:text-black">
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-white/60" />
                   ) : (
