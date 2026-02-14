@@ -919,9 +919,9 @@ export function OrdersView() {
       ) : (
         <div className="space-y-0">
           <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-              <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-4 md:overflow-visible bg-black rounded-none">
-                <TabsTrigger value="active" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
+              <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-4 md:overflow-visible bg-black rounded-none p-0 h-auto">
+                <TabsTrigger value="active" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <ShoppingBag className="h-4 w-4" />
                   Active Orders ({activeOrders.length})
                   {userUnreadOrdersCount > 0 && !isAdmin && (
@@ -930,7 +930,7 @@ export function OrdersView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="disputes" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="disputes" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <AlertTriangle className="h-4 w-4" />
                   Open Disputes ({disputeOrders.length})
                   {userUnreadDisputesCount > 0 && !isAdmin && (
@@ -939,7 +939,7 @@ export function OrdersView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="completed" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="completed" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <CheckCircle2 className="h-4 w-4" />
                   Completed ({completedOrders.length})
                   {userUnreadCompletedCount > 0 && !isAdmin && (
@@ -948,7 +948,7 @@ export function OrdersView() {
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="history" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="history" className="gap-1.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none py-2.5">
                   <X className="h-4 w-4" />
                   Cancelled Orders ({historyOrders.length})
                   {userUnreadHistoryCount > 0 && !isAdmin && (
