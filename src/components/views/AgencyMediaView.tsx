@@ -608,50 +608,54 @@ export function AgencyMediaView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 overflow-visible rounded-none bg-black">
-          <TabsTrigger value="media" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+        <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+        <TabsList className="!inline-flex !w-auto md:!grid md:!w-full max-w-md md:grid-cols-2 md:overflow-visible bg-black rounded-none">
+          <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
-              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadAddedCount + unreadRejectedMediaCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+          <TabsTrigger value="wordpress" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             WordPress Sites
             {(unreadConnectedWpCount + unreadRejectedWpCount) > 0 && (
-              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadConnectedWpCount + unreadRejectedWpCount}
               </span>
             )}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         {/* WordPress Sites Tab */}
         <TabsContent value="wordpress" className="mt-0 space-y-4">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none bg-black">
-              <TabsTrigger value="connected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
+              <TabsTrigger value="connected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
-                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                  <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                     {unreadConnectedWpCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending" className="text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({rejectedSubmissions.length})
                 {unreadRejectedWpCount > 0 && (
-                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                  <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                     {unreadRejectedWpCount}
                   </span>
                 )}
               </TabsTrigger>
             </TabsList>
+            </div>
 
             {/* Connected Sites */}
             <TabsContent value="connected">
@@ -972,27 +976,29 @@ export function AgencyMediaView() {
         <TabsContent value="media" className="mt-0 space-y-4">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="overflow-visible overflow-x-auto w-full justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] rounded-none bg-black">
-              <TabsTrigger value="added" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
+              <TabsTrigger value="added" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Added ({totalAddedSites})
                 {unreadAddedCount > 0 && (
-                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                  <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                     {unreadAddedCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending" className="text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Pending Review ({pendingMediaSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Rejected ({totalRejectedCount})
                 {unreadRejectedMediaCount > 0 && (
-                  <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                  <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                     {unreadRejectedMediaCount}
                   </span>
                 )}
               </TabsTrigger>
             </TabsList>
+            </div>
 
             {/* Added Media Sites */}
             <TabsContent value="added">

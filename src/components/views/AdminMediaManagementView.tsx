@@ -1549,45 +1549,49 @@ export function AdminMediaManagementView() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start overflow-visible rounded-none gap-0">
-          <TabsTrigger value="media" className="relative overflow-visible flex-1 rounded-none">
+        <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+        <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0">
+          <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
             Media Sites ({mediaSites.length})
             {unreadMediaCount > 0 && (
-              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadMediaCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="relative overflow-visible flex-1 rounded-none">
+          <TabsTrigger value="wordpress" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
             WordPress Sites ({approvedSites.length})
             {unreadWpCount > 0 && (
-              <span className="absolute -top-3 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadWpCount}
               </span>
             )}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         {/* WordPress Sites Tab */}
         <TabsContent value="wordpress" className="mt-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
-            <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
-              <TabsTrigger value="approved" className="flex-1 rounded-none">
+            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0">
+              <TabsTrigger value="approved" className="shrink-0 whitespace-nowrap flex-1 rounded-none">
                 Approved ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative flex-1 rounded-none">
+              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
                 Pending Review ({pendingSubmissions.length})
                 {unreadWpCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
+                  <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                     {unreadWpCount}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex-1 rounded-none">
+              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap flex-1 rounded-none">
                 Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
+            </div>
 
             {/* Approved */}
             <TabsContent value="approved">
