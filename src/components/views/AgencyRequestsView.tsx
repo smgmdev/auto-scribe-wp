@@ -1926,7 +1926,7 @@ export function AgencyRequestsView() {
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
             <div className="relative overflow-x-auto overflow-y-visible scrollbar-hide z-10 pt-2 -mt-2">
             <TabsList className="!flex !w-max sm:!w-full !min-w-full sm:[&>*]:flex-1 xl:!grid xl:grid-cols-4 xl:overflow-visible bg-black rounded-none p-0 h-auto overflow-visible">
-              <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
+              <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
                 {unreadActiveOrdersCount > 0 && (
@@ -1935,7 +1935,7 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="disputes" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
+              <TabsTrigger value="disputes" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <AlertTriangle className="h-4 w-4" />
                 Open Disputes ({disputedOrders.length})
                 {unreadDisputesCount > 0 && (
@@ -1944,7 +1944,7 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
+              <TabsTrigger value="completed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <CheckCircle className="h-4 w-4" />
                 Completed ({completedOrders.length})
                 {unreadCompletedOrdersCount > 0 && (
@@ -1953,7 +1953,7 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap rounded-none py-2.5">
+              <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <XCircle className="h-4 w-4" />
                 Cancelled Orders ({cancelledOrders.length})
               </TabsTrigger>
