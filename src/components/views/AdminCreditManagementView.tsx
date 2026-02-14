@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, CreditCard, Users, RefreshCw, X } from 'lucide-react';
+import { Search, CreditCard, Users, RefreshCw, X, AlertTriangle, CheckCircle2, RotateCw } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 import { toast } from 'sonner';
 
@@ -35,6 +35,8 @@ interface UserCredit {
   pendingCryptoWithdrawals: number;
   email: string | null;
   isAgency: boolean;
+  dbCredits: number; // Raw DB value for validation
+  validationStatus: 'valid' | 'mismatch' | 'unchecked';
 }
 
 export const AdminCreditManagementView = () => {
@@ -45,6 +47,7 @@ export const AdminCreditManagementView = () => {
   // Expanded user rows state
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
+  const [recalculating, setRecalculating] = useState<Set<string>>(new Set());
 
   // Refresh handler
   const handleRefresh = async () => {
@@ -52,6 +55,121 @@ export const AdminCreditManagementView = () => {
     await fetchUserCredits();
     setRefreshing(false);
     toast.success('Credits refreshed');
+  };
+
+  // Per-user recalculate: re-fetches that user's transactions and validates
+  const handleRecalculate = async (userId: string) => {
+    setRecalculating(prev => new Set(prev).add(userId));
+    try {
+      // Fetch this user's transactions
+      const { data: txs } = await supabase
+        .from('credit_transactions')
+        .select('amount, type')
+        .eq('user_id', userId);
+
+      // Fetch pending requests for this user
+      const { data: pendingReqs } = await supabase
+        .from('service_requests')
+        .select('media_sites(price)')
+        .eq('user_id', userId)
+        .eq('status', 'pending_review')
+        .is('order_id', null);
+
+      // Fetch active orders for this user
+      const { data: activeOrders } = await supabase
+        .from('orders')
+        .select('media_sites(price)')
+        .eq('user_id', userId)
+        .neq('status', 'cancelled')
+        .neq('status', 'completed')
+        .neq('delivery_status', 'accepted');
+
+      // Fetch DB credits
+      const { data: dbCredits } = await supabase
+        .from('user_credits')
+        .select('credits')
+        .eq('user_id', userId)
+        .single();
+
+      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+      let incoming = 0;
+      let outgoing = 0;
+      let withdrawn = 0;
+
+      txs?.forEach(tx => {
+        if (tx.type === 'withdrawal_completed') {
+          withdrawn += Math.abs(tx.amount) / 100;
+          return;
+        }
+        if (withdrawalTypes.includes(tx.type)) return;
+        if (tx.amount > 0 && tx.type !== 'unlocked') incoming += tx.amount;
+        if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
+          outgoing += Math.abs(tx.amount);
+        }
+      });
+
+      const lockedFromRequests = pendingReqs?.reduce((sum, r) => sum + ((r.media_sites as any)?.price || 0), 0) || 0;
+      const lockedFromOrders = activeOrders?.reduce((sum, o) => sum + ((o.media_sites as any)?.price || 0), 0) || 0;
+      const totalLocked = lockedFromOrders + lockedFromRequests;
+      const calculatedBalance = incoming - outgoing;
+      const calculatedAvailable = calculatedBalance - totalLocked - withdrawn;
+      const dbValue = dbCredits?.credits ?? 0;
+
+      // Update the user in state
+      setUserCredits(prev => prev.map(u => {
+        if (u.user_id !== userId) return u;
+        return {
+          ...u,
+          totalCredits: calculatedBalance,
+          locked: totalLocked,
+          lockedFromOrders,
+          lockedFromRequests,
+          lockedFromWithdrawals: 0,
+          available: calculatedAvailable,
+          dbCredits: dbValue,
+          validationStatus: (calculatedAvailable === dbValue) ? 'valid' : 'mismatch',
+        };
+      }));
+
+      const status = calculatedAvailable === dbValue ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbValue}, Calculated: ${calculatedAvailable})`;
+      toast.success(`Recalculated: ${status}`);
+    } catch (err) {
+      console.error('Recalculate error:', err);
+      toast.error('Failed to recalculate');
+    } finally {
+      setRecalculating(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
+  };
+
+  // Validate all users at once
+  const handleValidateAll = async () => {
+    setRefreshing(true);
+    await fetchUserCredits();
+    // After refresh, validate each user's DB value
+    const { data: allDbCredits } = await supabase
+      .from('user_credits')
+      .select('user_id, credits');
+    
+    const dbMap = new Map<string, number>();
+    allDbCredits?.forEach(c => dbMap.set(c.user_id, c.credits));
+    
+    setUserCredits(prev => prev.map(u => ({
+      ...u,
+      dbCredits: dbMap.get(u.user_id) ?? 0,
+      validationStatus: (u.available === (dbMap.get(u.user_id) ?? 0)) ? 'valid' : 'mismatch',
+    })));
+    
+    const mismatches = userCredits.filter(u => u.available !== (dbMap.get(u.user_id) ?? 0));
+    if (mismatches.length > 0) {
+      toast.warning(`${mismatches.length} user(s) have mismatched credit values`);
+    } else {
+      toast.success('All users validated successfully');
+    }
+    setRefreshing(false);
   };
 
   const toggleUserExpanded = (userId: string) => {
@@ -104,13 +222,19 @@ export const AdminCreditManagementView = () => {
       if (transactionsError) throw transactionsError;
 
       // Fetch active orders to calculate locked credits per user
-      // Active = not cancelled, not completed, and delivery not accepted
       const { data: activeOrdersData } = await supabase
         .from('orders')
         .select('user_id, media_site_id, media_sites(price)')
         .neq('status', 'cancelled')
         .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
+
+      // Fetch pending service requests (not yet accepted/cancelled) to calculate locked-in-requests
+      const { data: pendingRequestsData } = await supabase
+        .from('service_requests')
+        .select('user_id, media_site_id, media_sites(price), status, order_id')
+        .eq('status', 'pending_review')
+        .is('order_id', null);
 
       const emailMap = new Map<string, string | null>();
       profilesData?.forEach(profile => {
@@ -127,22 +251,6 @@ export const AdminCreditManagementView = () => {
       const earnedMap = new Map<string, number>();
       const refundedMap = new Map<string, number>();
       const deductionsMap = new Map<string, number>();
-      // Track offer_accepted (credits locked for pending orders)
-      const offerLockedMap = new Map<string, number>();
-      // Track offer_accepted details per user with site names for matching
-      const offerDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
-      // Track order_completed site names per user to match against offer_accepted
-      const orderCompletedSites = new Map<string, string[]>();
-      // Track locked (credits reserved for pending order requests, not yet cancelled)
-      const lockedRequestsMap = new Map<string, number>();
-      // Track locked transactions per user with site names for matching
-      const lockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
-      // Track unlocked amounts per user to net against locked
-      const unlockedRequestsMap = new Map<string, number>();
-      // Track unlocked details per user with site names for matching
-      const unlockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
-      // Track order_accepted media site names per user to match against locked
-      const orderAcceptedSites = new Map<string, string[]>();
       // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
       const withdrawnMap = new Map<string, number>();
       
@@ -152,7 +260,6 @@ export const AdminCreditManagementView = () => {
       transactionsData?.forEach(tx => {
         // Handle withdrawal_completed separately - these reduce available balance
         if (tx.type === 'withdrawal_completed') {
-          // Amount is stored in cents (negative), convert to dollars
           const amountInDollars = Math.abs(tx.amount) / 100;
           withdrawnMap.set(tx.user_id, (withdrawnMap.get(tx.user_id) || 0) + amountInDollars);
           return;
@@ -171,79 +278,32 @@ export const AdminCreditManagementView = () => {
           outgoingMap.set(tx.user_id, (outgoingMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
         
-        // Track offer_accepted for locked credits calculation
-        if (tx.type === 'offer_accepted' && tx.amount < 0) {
-          offerLockedMap.set(tx.user_id, (offerLockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-          const siteMatch = tx.description?.match(/Offer accepted:\s*(.+?)(?:\s*\(|$)/);
-          if (siteMatch) {
-            const details = offerDetailsByUser.get(tx.user_id) || [];
-            details.push({ siteName: siteMatch[1].trim(), amount: Math.abs(tx.amount) });
-            offerDetailsByUser.set(tx.user_id, details);
-          }
-        }
-        
-        // Track order_completed site names to match against offer_accepted
-        if (tx.type === 'order_completed' && tx.amount < 0 && tx.description) {
-          const siteMatch = tx.description.match(/Order completed:\s*(.+?)$/);
-          if (siteMatch) {
-            const sites = orderCompletedSites.get(tx.user_id) || [];
-            sites.push(siteMatch[1].trim());
-            orderCompletedSites.set(tx.user_id, sites);
-          }
-        }
-        
-        // Track locked (order request sent) and unlocked (request cancelled)
-        if (tx.type === 'locked' && tx.amount < 0) {
-          lockedRequestsMap.set(tx.user_id, (lockedRequestsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
-          const siteMatch = tx.description?.match(/Order request sent:\s*(.+?)(?:\s*\(|$)/);
-          if (siteMatch) {
-            const details = lockedDetailsByUser.get(tx.user_id) || [];
-            details.push({ siteName: siteMatch[1].trim(), amount: Math.abs(tx.amount) });
-            lockedDetailsByUser.set(tx.user_id, details);
-          }
-        }
-        if (tx.type === 'unlocked' && tx.amount > 0) {
-          unlockedRequestsMap.set(tx.user_id, (unlockedRequestsMap.get(tx.user_id) || 0) + tx.amount);
-          // Track unlocked site names for matching against order_accepted
-          const siteMatch = tx.description?.match(/(?:Order cancelled|Request cancelled):\s*(.+?)(?:\s*\(|$)/);
-          if (siteMatch) {
-            const details = unlockedDetailsByUser.get(tx.user_id) || [];
-            details.push({ siteName: siteMatch[1].trim(), amount: tx.amount });
-            unlockedDetailsByUser.set(tx.user_id, details);
-          }
-        }
-        // Track order_accepted site names for matching against locked
-        if (tx.type === 'order_accepted' && tx.description) {
-          const siteMatch = tx.description.match(/:\s*(.+)$/);
-          if (siteMatch) {
-            const sites = orderAcceptedSites.get(tx.user_id) || [];
-            sites.push(siteMatch[1].trim());
-            orderAcceptedSites.set(tx.user_id, sites);
-          }
-        }
-        
         // Track specific types for display columns
         if (tx.type === 'refund' && tx.amount > 0) {
           refundedMap.set(tx.user_id, (refundedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'gifted' || tx.type === 'admin_credit') {
-          // Gifted/admin_credit = "Purchased via invoice" (gift from admin)
           purchasedInvoiceMap.set(tx.user_id, (purchasedInvoiceMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'purchase') {
-          // Purchase = "Purchased via online" (paid online via buy credits popup)
           purchasedOnlineMap.set(tx.user_id, (purchasedOnlineMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'order_payout') {
-          // Order payout = "Earned" (agency earnings from orders)
           earnedMap.set(tx.user_id, (earnedMap.get(tx.user_id) || 0) + tx.amount);
         } else if (tx.type === 'admin_deduct') {
           deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
       });
 
-      // Calculate locked credits per user from active orders
+      // Calculate locked credits from ACTIVE ORDERS (DB state, not transactions)
       const lockedFromOrdersMap = new Map<string, number>();
       activeOrdersData?.forEach(order => {
         const price = (order.media_sites as any)?.price || 0;
         lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
+      });
+
+      // Calculate locked credits from PENDING REQUESTS (DB state, not regex)
+      const lockedFromRequestsMap = new Map<string, number>();
+      pendingRequestsData?.forEach(req => {
+        const price = (req.media_sites as any)?.price || 0;
+        lockedFromRequestsMap.set(req.user_id, (lockedFromRequestsMap.get(req.user_id) || 0) + price);
       });
 
       // Fetch pending withdrawals for Bank/USDT split
@@ -289,60 +349,13 @@ export const AdminCreditManagementView = () => {
         const incoming = incomingMap.get(credit.user_id) || 0;
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
-        
-        // Calculate still-locked offer_accepted credits using per-entry matching
-        const offerDetails = [...(offerDetailsByUser.get(credit.user_id) || [])];
-        const unlockedDetailsForOffers = [...(unlockedDetailsByUser.get(credit.user_id) || [])];
-        const completedSites = [...(orderCompletedSites.get(credit.user_id) || [])];
-        
-        let lockedFromOffers = 0;
-        for (const offer of offerDetails) {
-          // Check if cancelled (unlocked with "Order cancelled")
-          const unlockedIdx = unlockedDetailsForOffers.findIndex(d => d.siteName === offer.siteName && d.amount === offer.amount);
-          if (unlockedIdx >= 0) {
-            unlockedDetailsForOffers.splice(unlockedIdx, 1);
-            continue;
-          }
-          // Check if completed (order_completed)
-          const completedIdx = completedSites.findIndex(site => site === offer.siteName);
-          if (completedIdx >= 0) {
-            completedSites.splice(completedIdx, 1);
-            continue;
-          }
-          // Still locked
-          lockedFromOffers += offer.amount;
-        }
-        
-        // Calculate still-locked request credits using per-entry matching
-        // Use remaining unlockedDetailsForOffers (those not consumed by offer matching)
-        const lockedDetails = [...(lockedDetailsByUser.get(credit.user_id) || [])];
-        const unlockedDetails = [...unlockedDetailsForOffers];
-        const acceptedSites = [...(orderAcceptedSites.get(credit.user_id) || [])];
-        
-        let lockedFromRequests = 0;
-        for (const locked of lockedDetails) {
-          // First check if there's a matching unlocked entry (request was cancelled)
-          const unlockedIdx = unlockedDetails.findIndex(d => d.siteName === locked.siteName && d.amount === locked.amount);
-          if (unlockedIdx >= 0) {
-            unlockedDetails.splice(unlockedIdx, 1);
-            continue;
-          }
-          // Then check if there's a matching order_accepted (request transitioned to order)
-          const acceptedIdx = acceptedSites.findIndex(site => site === locked.siteName);
-          if (acceptedIdx >= 0) {
-            acceptedSites.splice(acceptedIdx, 1);
-            continue;
-          }
-          // Neither unlocked nor accepted - still locked
-          lockedFromRequests += locked.amount;
-        }
+        const lockedFromRequests = lockedFromRequestsMap.get(credit.user_id) || 0;
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
-        // Total locked = credits locked in active orders + credits locked in offer requests + credits locked in pending requests
-        const totalLocked = lockedFromOrders + lockedFromOffers + lockedFromRequests;
+        // Total locked = from active orders + from pending requests (both from DB state)
+        const totalLocked = lockedFromOrders + lockedFromRequests;
         
         // Calculate total balance from transactions (incoming - outgoing)
-        // This is more accurate than user_credits.credits which may be stale
         const calculatedTotalBalance = incoming - outgoing;
         // Available = Total Balance - Total Locked Credits - Completed Withdrawals
         const calculatedAvailable = calculatedTotalBalance - totalLocked - withdrawn;
@@ -363,7 +376,7 @@ export const AdminCreditManagementView = () => {
           locked: totalLocked,
           lockedFromOrders,
           lockedFromRequests,
-          lockedFromWithdrawals: lockedFromOffers,
+          lockedFromWithdrawals: 0,
           available: calculatedAvailable,
           orders: purchaseOrders + deliveryOrders,
           purchaseOrders,
@@ -374,7 +387,9 @@ export const AdminCreditManagementView = () => {
           pendingBankWithdrawals: pendingBankWithdrawalsMap.get(credit.user_id) || 0,
           pendingCryptoWithdrawals: pendingCryptoWithdrawalsMap.get(credit.user_id) || 0,
           email: emailMap.get(credit.user_id) || null,
-          isAgency: agencyUserIds.has(credit.user_id)
+          isAgency: agencyUserIds.has(credit.user_id),
+          dbCredits: credit.credits,
+          validationStatus: 'unchecked' as const,
         };
       });
 
@@ -403,15 +418,26 @@ export const AdminCreditManagementView = () => {
           <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
           <p className="text-muted-foreground mt-2">Manage credits and view transactions</p>
         </div>
-        <Button 
-          onClick={handleRefresh}
-          disabled={refreshing}
-          variant="outline"
-          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button 
+            onClick={handleValidateAll}
+            disabled={refreshing}
+            variant="outline"
+            className="flex-1 md:flex-none bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground gap-2"
+          >
+            <CheckCircle2 className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Validate All
+          </Button>
+          <Button 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="outline"
+            className="flex-1 md:flex-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-0">
@@ -593,7 +619,22 @@ export const AdminCreditManagementView = () => {
                             onClick={() => toggleUserExpanded(user.user_id)}
                           >
                             <TableCell className="font-medium">
-                              {user.email || <span className="text-muted-foreground italic">No email</span>}
+                              <div className="flex items-center gap-2">
+                                {user.email || <span className="text-muted-foreground italic">No email</span>}
+                                {user.validationStatus === 'valid' && (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                                )}
+                                {user.validationStatus === 'mismatch' && (
+                                  <Tooltip delayDuration={100}>
+                                    <TooltipTrigger asChild>
+                                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
+                                      DB: {user.dbCredits} | Calculated: {user.available}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <Badge className={user.isAgency ? 'bg-foreground text-background hover:bg-foreground' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
@@ -606,7 +647,26 @@ export const AdminCreditManagementView = () => {
                             <TableRow key={`${user.user_id}-expanded`}>
                               <TableCell colSpan={3} className="p-0">
                                 <div className="bg-foreground py-1">
-                                  {/* Stats row above tabs */}
+                                  {/* Recalculate button + Stats row */}
+                                  <div className="flex items-center justify-between px-3 pt-2 pb-0">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 text-xs text-white/70 hover:text-white hover:bg-white/10 gap-1.5"
+                                      disabled={recalculating.has(user.user_id)}
+                                      onClick={(e) => { e.stopPropagation(); handleRecalculate(user.user_id); }}
+                                    >
+                                      <RotateCw className={`h-3 w-3 ${recalculating.has(user.user_id) ? 'animate-spin' : ''}`} />
+                                      Recalculate
+                                      {user.validationStatus === 'valid' && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                                      {user.validationStatus === 'mismatch' && <AlertTriangle className="h-3 w-3 text-amber-500" />}
+                                    </Button>
+                                    {user.validationStatus === 'mismatch' && (
+                                      <span className="text-xs text-amber-400">
+                                        DB: {user.dbCredits} | Calc: {user.available}
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className="grid grid-cols-6 gap-4 px-3 py-2">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
