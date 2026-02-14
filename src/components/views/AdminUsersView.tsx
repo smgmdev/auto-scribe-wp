@@ -1056,15 +1056,6 @@ export function AdminUsersView() {
           </Button>
           <Button
             size="sm"
-            onClick={handleRecalculateAll}
-            disabled={loading || validating}
-            className="flex-1 md:flex-none bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground gap-2 shadow-none transition-all duration-300"
-          >
-            <RotateCw className={`h-4 w-4 ${validating ? 'animate-spin' : ''}`} />
-            Recalculate
-          </Button>
-          <Button
-            size="sm"
             onClick={() => fetchUsers()}
             disabled={loading}
             className="flex-1 md:flex-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black shadow-none transition-all duration-300"
