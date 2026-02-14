@@ -168,14 +168,14 @@ export function SessionExpiryWarning() {
           <Button
             variant="outline"
             onClick={handleLogOut}
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 h-9 text-xs sm:text-sm sm:h-10"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Log Out
           </Button>
           <Button
             onClick={handleStayLogged}
-            className="flex-1"
+            className="flex-1 h-9 text-xs sm:text-sm sm:h-10"
           >
             Stay Logged In
           </Button>
