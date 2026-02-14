@@ -148,34 +148,36 @@ export function SessionExpiryWarning() {
 
   return (
     <AlertDialog open={showWarning}>
-      <AlertDialogContent className="max-w-sm">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-amber-500" />
+      <AlertDialogContent className="max-w-[320px] w-[90vw] rounded-lg p-4 sm:p-6 !h-auto !inset-auto fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <AlertDialogHeader className="space-y-1">
+          <AlertDialogTitle className="flex items-center gap-2 text-base">
+            <Shield className="h-4 w-4 text-amber-500" />
             Session Expiring
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <p>Your session will expire in:</p>
-            <div className="flex justify-center">
-              <span className="text-3xl font-bold font-mono text-foreground tabular-nums">
-                {formatTime(secondsLeft)}
-              </span>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2">
+              <p className="text-sm">Your session will expire in:</p>
+              <div className="flex justify-center">
+                <span className="text-2xl font-bold font-mono text-foreground tabular-nums">
+                  {formatTime(secondsLeft)}
+                </span>
+              </div>
+              <p className="text-sm">Do you wish to stay logged in or log out?</p>
             </div>
-            <p>Do you wish to stay logged in or log out?</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex gap-2 sm:gap-2">
+        <AlertDialogFooter className="flex flex-row gap-2 mt-2">
           <Button
             variant="outline"
             onClick={handleLogOut}
-            className="flex-1 gap-2 h-9 text-xs sm:text-sm sm:h-10"
+            className="flex-1 gap-1.5 h-9 text-xs"
           >
-            <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <LogOut className="h-3.5 w-3.5" />
             Log Out
           </Button>
           <Button
             onClick={handleStayLogged}
-            className="flex-1 h-9 text-xs sm:text-sm sm:h-10"
+            className="flex-1 h-9 text-xs"
           >
             Stay Logged In
           </Button>
