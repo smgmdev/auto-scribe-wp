@@ -1688,7 +1688,7 @@ export function AgencyRequestsView() {
                         return (
                           <Card 
                             key={request.id} 
-                            className={`relative rounded-none border-border/50 hover:bg-[#2a2a2a] transition-colors cursor-pointer ${
+                            className={`relative rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
                               hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
                             }`}
                             onClick={() => handleCardClick(request)}
@@ -1807,7 +1807,7 @@ export function AgencyRequestsView() {
                         return (
                           <Card 
                             key={request.id} 
-                            className={`relative rounded-none border-border/50 hover:bg-[#2a2a2a] transition-colors cursor-pointer ${
+                            className={`relative rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
                               hasUnread ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''
                             }`}
                             onClick={() => handleCardClick(request)}
