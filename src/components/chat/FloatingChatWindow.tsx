@@ -6950,13 +6950,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {/* Request Revision Dialog */}
       <AlertDialog open={revisionDialogOpen} onOpenChange={setRevisionDialogOpen}>
         <AlertDialogContent className="z-[250]">
-           <AlertDialogHeader className="text-left">
+           <AlertDialogHeader className="text-left space-y-1 mb-0">
             <AlertDialogTitle>Request Revision</AlertDialogTitle>
             <AlertDialogDescription>
               Please describe what changes you need for this delivery.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="pt-1 pb-4">
+          <div className="pb-4">
             <Textarea
               placeholder="Describe the revisions needed..."
               value={revisionReason}
