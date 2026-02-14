@@ -1359,7 +1359,7 @@ export function SitesView() {
                   placeholder="Search local media library..."
                   value={wpSearchQuery}
                   onChange={(e) => setWpSearchQuery(e.target.value)}
-                  className="pl-10 pr-10 h-9 text-sm rounded-none bg-foreground text-background placeholder:text-background/50 border-foreground border-b-0"
+                  className="pl-10 pr-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black border-b-0"
                 />
                 {wpSearchQuery && (
                   <Button
@@ -1413,7 +1413,7 @@ export function SitesView() {
                     placeholder="Search global media library..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 h-9 text-sm rounded-none bg-foreground text-background placeholder:text-background/50 border-foreground"
+                    className="w-full pl-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black"
                   />
                   {searchQuery && (
                     <Button
