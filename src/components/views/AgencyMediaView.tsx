@@ -630,10 +630,10 @@ export function AgencyMediaView() {
         </div>
 
         {/* WordPress Sites Tab */}
-        <TabsContent value="wordpress" className="mt-0 space-y-4">
+        <TabsContent value="wordpress" className="mt-0 space-y-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
             <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
               <TabsTrigger value="connected" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Approved ({wordpressSites.length})
@@ -973,10 +973,10 @@ export function AgencyMediaView() {
         </TabsContent>
 
         {/* Media Sites Tab */}
-        <TabsContent value="media" className="mt-0 space-y-4">
+        <TabsContent value="media" className="mt-0 space-y-0">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
             <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none bg-black">
               <TabsTrigger value="added" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 Added ({totalAddedSites})
