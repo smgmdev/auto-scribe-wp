@@ -1190,7 +1190,7 @@ export function AdminUsersView() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0 hover:bg-muted"
+                                className="h-[22px] w-[22px] p-0 hover:bg-black hover:text-white rounded-none"
                                 onClick={(e) => handleRecalculateUser(user.id, e)}
                                 disabled={recalculatingUser.has(user.id)}
                               >
@@ -1320,7 +1320,7 @@ export function AdminUsersView() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0 hover:bg-muted"
+                              className="h-[22px] w-[22px] p-0 hover:bg-black hover:text-white rounded-none"
                               onClick={(e) => handleRecalculateUser(user.id, e)}
                               disabled={recalculatingUser.has(user.id)}
                             >
