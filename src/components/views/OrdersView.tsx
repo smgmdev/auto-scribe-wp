@@ -919,40 +919,40 @@ export function OrdersView() {
       ) : (
         <div className="space-y-0">
           <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="relative pt-2">
-              <TabsList className="flex w-full overflow-x-auto overflow-y-visible md:overflow-visible md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none" style={{ clipPath: 'none' }}>
-                <TabsTrigger value="active" className="gap-2 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+            <div className="relative md:pt-2">
+              <TabsList className="flex w-full overflow-x-auto md:overflow-visible md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none">
+                <TabsTrigger value="active" className="gap-1.5 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <ShoppingBag className="h-4 w-4" />
                   Active Orders ({activeOrders.length})
                   {userUnreadOrdersCount > 0 && !isAdmin && (
-                    <span className="absolute -top-2 -right-1 z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center pointer-events-none">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {userUnreadOrdersCount}
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="disputes" className="gap-2 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="disputes" className="gap-1.5 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <AlertTriangle className="h-4 w-4" />
                   Open Disputes ({disputeOrders.length})
                   {userUnreadDisputesCount > 0 && !isAdmin && (
-                    <span className="absolute -top-2 -right-1 z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center pointer-events-none">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {userUnreadDisputesCount}
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="completed" className="gap-2 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="completed" className="gap-1.5 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <CheckCircle2 className="h-4 w-4" />
                   Completed ({completedOrders.length})
                   {userUnreadCompletedCount > 0 && !isAdmin && (
-                    <span className="absolute -top-2 -right-1 z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center pointer-events-none">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {userUnreadCompletedCount}
                     </span>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="history" className="gap-2 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
+                <TabsTrigger value="history" className="gap-1.5 relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                   <X className="h-4 w-4" />
                   Cancelled Orders ({historyOrders.length})
                   {userUnreadHistoryCount > 0 && !isAdmin && (
-                    <span className="absolute -top-2 -right-1 z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center pointer-events-none">
+                    <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                       {userUnreadHistoryCount}
                     </span>
                   )}
