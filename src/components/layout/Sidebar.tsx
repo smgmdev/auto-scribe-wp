@@ -1623,7 +1623,7 @@ export function Sidebar({
               {isAdmin && (
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
                   <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
-                  System Terminal
+                  Terminal
                 </Button>
               )}
               <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={() => {
