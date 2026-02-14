@@ -1396,7 +1396,7 @@ export function AgencyRequestsView() {
           <TabsTrigger value="requests" className="shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
-              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
+              <span className="ml-1 md:ml-0 md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount}
               </span>
             )}
@@ -1404,7 +1404,7 @@ export function AgencyRequestsView() {
           <TabsTrigger value="orders" className="shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
             Orders ({orders.length})
             {(unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount) > 0 && (
-              <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
+              <span className="ml-1 md:ml-0 md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadActiveOrdersCount + unreadDisputesCount + unreadCompletedOrdersCount}
               </span>
             )}
