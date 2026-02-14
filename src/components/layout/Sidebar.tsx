@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
@@ -839,10 +839,7 @@ export function Sidebar({
           if (newOrder.status === 'paid' || newOrder.status === 'pending_payment') {
             console.log('[Sidebar] New active order detected, refetching count and showing toast');
             refetchUnreadOrdersCount();
-            toast({
-              title: "New Order Received 🛒",
-              description: `Order ${newOrder.order_number || 'New'} has been placed`,
-            });
+            toast.success(`New Order Received 🛒 — Order ${newOrder.order_number || 'New'} has been placed`);
           }
         }
       )

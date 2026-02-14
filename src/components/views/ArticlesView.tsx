@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +40,7 @@ export function ArticlesView() {
     deleteArticle,
     loadMoreArticles 
   } = useArticles();
-  const { toast } = useToast();
+  
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -92,11 +92,7 @@ export function ArticlesView() {
       }, 2000);
     } else {
       setDeletingTitle('');
-      toast({
-        title: "Delete failed",
-        description: "Could not delete the article. Please try again.",
-        variant: "destructive"
-      });
+      toast.error('Could not delete the article. Please try again.');
     }
   };
 

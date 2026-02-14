@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 
@@ -208,11 +207,7 @@ export function MyRequestsView() {
         setMessages(messagesByRequest);
       }
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to load requests',
-        description: error.message,
-      });
+      toast.error(error.message || 'Failed to load requests');
     } finally {
       setLoading(false);
       // Mark initial load as complete after a delay to allow render
@@ -433,24 +428,13 @@ export function MyRequestsView() {
             const currentRequest = requestsRef.current.find(r => r.id === updated.id);
             if (currentRequest && currentRequest.status !== updated.status) {
               if (updated.status === 'accepted') {
-                toast({
-                  title: 'Request Accepted!',
-                  description: 'Your request has been accepted. You can now proceed to payment.',
-                  className: 'bg-green-600 text-white border-green-600',
-                });
+                toast.success('Request Accepted! You can now proceed to payment.');
               } else if (updated.status === 'rejected') {
-                toast({
-                  variant: 'destructive',
-                  title: 'Request Rejected',
-                  description: 'Your request has been rejected by the agency.',
-                });
+                toast.error('Your request has been rejected by the agency.');
               } else if (updated.status === 'changes_requested') {
-                toast({
-                  title: 'Changes Requested',
-                  description: 'The agency has requested changes to your brief.',
-                });
+                toast.info('The agency has requested changes to your brief.');
               } else if (updated.status === 'cancelled') {
-                sonnerToast.error(`Engagement Cancelled: ${currentRequest.media_site?.name || 'this media site'}`);
+                toast.error(`Engagement Cancelled: ${currentRequest.media_site?.name || 'this media site'}`);
               }
             }
             
@@ -688,12 +672,7 @@ export function MyRequestsView() {
               setDisputeOrderIds(prev => new Set([...prev, updated.order_id]));
               incrementUserUnreadDisputesCount();
               
-              // Show toast notification
-              toast({
-                title: "Dispute Opened",
-                description: "A dispute has been opened for one of your engagements.",
-                variant: "destructive",
-              });
+              toast.error('A dispute has been opened for one of your engagements.');
             }
           }
         }
@@ -1121,7 +1100,7 @@ export function MyRequestsView() {
     setRefreshing(true);
     await fetchRequests();
     setRefreshing(false);
-    sonnerToast.success('Engagements refreshed');
+    toast.success('Engagements refreshed');
   };
 
   return (
@@ -1456,9 +1435,9 @@ export function MyRequestsView() {
                           if (error) throw error;
                           setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
                           setUserUnreadDeliveredCount(0);
-                          sonnerToast.success(`Marked ${unreadIds.length} delivered engagements as read`);
+                          toast.success(`Marked ${unreadIds.length} delivered engagements as read`);
                         } catch (error: any) {
-                          sonnerToast.error(error.message || 'Failed to mark all as read');
+                          toast.error(error.message || 'Failed to mark all as read');
                         } finally {
                           setMarkingAllRead(false);
                         }
@@ -1575,9 +1554,9 @@ export function MyRequestsView() {
                           if (error) throw error;
                           setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
                           setUserUnreadCancelledCount(0);
-                          sonnerToast.success(`Marked ${unreadIds.length} cancelled engagements as read`);
+                          toast.success(`Marked ${unreadIds.length} cancelled engagements as read`);
                         } catch (error: any) {
-                          sonnerToast.error(error.message || 'Failed to mark all as read');
+                          toast.error(error.message || 'Failed to mark all as read');
                         } finally {
                           setMarkingAllRead(false);
                         }

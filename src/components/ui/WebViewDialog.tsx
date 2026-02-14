@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, X, Loader2, AlertCircle, Download, ExternalLink } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface WebViewDialogProps {
   open: boolean;
@@ -97,7 +97,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(blobUrl);
-      toast({ title: 'Download started', description: fileName });
+      toast.success(`Download started: ${fileName}`);
     } catch (error) {
       // Fallback: open in new tab
       window.open(urlToDownload, '_blank');

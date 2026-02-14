@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Send, Upload, X, FileText, Image, GripHorizontal, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { useMinimizedChats } from '@/hooks/useMinimizedChats';
 
 interface MediaSite {
@@ -74,12 +73,12 @@ export function BriefSubmissionDialog({
     for (const file of selectedFiles) {
       const ext = file.name.toLowerCase().split('.').pop();
       if (!ALLOWED_EXTENSIONS.includes(ext || '')) {
-        toast({ variant: 'destructive', title: 'Invalid file type', description: `${file.name} must be PDF, Word, or image file.` });
+        toast.error(`${file.name} must be PDF, Word, or image file.`);
         continue;
       }
       const newTotal = currentTotal + getTotalSize(validFiles) + file.size;
       if (newTotal > MAX_TOTAL_SIZE) {
-        toast({ variant: 'destructive', title: 'Size limit exceeded', description: 'Total file size cannot exceed 10MB.' });
+        toast.error('Total file size cannot exceed 10MB.');
         break;
       }
       validFiles.push(file);
@@ -136,7 +135,7 @@ export function BriefSubmissionDialog({
   const handleSubmit = async () => {
     if (!user || !mediaSite) return;
     if (!description.trim()) {
-      toast({ variant: 'destructive', title: 'Missing information', description: 'Please describe what you are looking for.' });
+      toast.error('Please describe what you are looking for.');
       return;
     }
     setIsSubmitting(true);
@@ -146,7 +145,7 @@ export function BriefSubmissionDialog({
         .eq('user_id', user.id).eq('media_site_id', mediaSite.id)
         .not('status', 'in', '("cancelled","completed")').maybeSingle();
       if (existingRequest) {
-        toast({ variant: 'destructive', title: 'Engagement already exists', description: 'You already have an open engagement for this media site. Please use the existing chat.' });
+        toast.error('You already have an open engagement for this media site. Please use the existing chat.');
         setIsSubmitting(false);
         return;
       }
@@ -198,13 +197,13 @@ export function BriefSubmissionDialog({
       addMinimizedChat({ id: request.id, title: mediaSite.name, favicon: mediaSite.favicon, type: 'my-request', unreadCount: 0 });
       window.dispatchEvent(new CustomEvent('engagement-added', { detail: { id: request.id, title: request.title, description: request.description, favicon: mediaSite.favicon, media_site: mediaSite } }));
 
-      sonnerToast.success('Brief sent to agency for review');
+      toast.success('Brief sent to agency for review');
       setDescription('');
       setFiles([]);
       onOpenChange(false);
       onSuccess({ id: request.id, media_site_id: mediaSite.id, title: request.title, description: request.description, status: request.status, client_read: true, created_at: request.created_at, updated_at: request.updated_at, media_site: mediaSite, order: null });
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Submission failed', description: error.message });
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
