@@ -618,12 +618,12 @@ export function AdminAIArticlesView() {
             )}
           </CardDescription>
           <div className="relative w-full pt-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 mt-1 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 mt-1 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search articles by title, keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 md:pl-9 h-8 md:h-9 text-xs md:text-sm rounded-none w-full"
+              className="pl-10 h-9 text-sm rounded-none w-full"
             />
           </div>
         </CardHeader>
