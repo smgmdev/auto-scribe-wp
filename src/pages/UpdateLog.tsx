@@ -18,9 +18,12 @@ const updates = [
     date: 'February 14, 2026',
     title: 'Client Requests & Footer Improvements',
     changes: [
-      'Updated Refresh button and search input in Client Requests with black background styling',
-      'Enabled search by media site name across all order tabs (Active, Disputed, Completed, Cancelled)',
-      'Aligned global footer links to the left on tablet viewports for improved readability',
+      'Redesigned Refresh button in Client Requests with black background, white text, and transparent hover state',
+      'Updated search input field with black background, white text, and translucent placeholder styling',
+      'Enabled real-time search filtering by media site name across Active Orders, Open Disputes, Completed, and Cancelled tabs',
+      'Search results update instantly as you type with case-insensitive matching',
+      'Aligned global footer links to the left under the copyright text on tablet-sized viewports',
+      'Footer links now stack vertically on mobile and tablet, switching to horizontal layout only on desktop',
     ],
   },
   {
