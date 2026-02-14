@@ -323,9 +323,9 @@ export function AdminSecuritySupervisionView() {
             onClick={handleScan}
             disabled={scanning}
             size="sm"
-            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto text-sm"
+            className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground w-full md:w-auto text-sm gap-2 transition-all"
           >
-            {scanning ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
+            <RefreshCw className={`h-4 w-4 ${scanning ? 'animate-spin' : ''}`} />
             {scanning ? 'Scanning...' : 'Scan All Chats'}
           </Button>
         </div>
