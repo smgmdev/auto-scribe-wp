@@ -612,20 +612,31 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       return !hasCompletedOrReturned;
     }
 
-    // Hide offer_accepted if a matching order_completed exists for same order_id
+    // Hide offer_accepted if a matching order_completed OR order cancelled (unlocked) exists for same order_id
     if (tx.type === 'offer_accepted' && tx.order_id) {
       const hasOrderCompleted = transactions.some(other =>
         other.type === 'order_completed' && other.order_id === tx.order_id
       );
-      return !hasOrderCompleted;
+      if (hasOrderCompleted) return false;
+      // Also hide if order was cancelled (matching unlocked transaction with same order_id)
+      const hasOrderCancelled = transactions.some(other =>
+        other.type === 'unlocked' && other.order_id === tx.order_id &&
+        other.description?.includes('Order cancelled')
+      );
+      if (hasOrderCancelled) return false;
     }
 
-    // Hide order_accepted if a matching order_completed exists for same order_id
+    // Hide order_accepted if a matching order_completed OR order cancelled exists for same order_id
     if (tx.type === 'order_accepted' && tx.order_id) {
       const hasOrderCompleted = transactions.some(other =>
         other.type === 'order_completed' && other.order_id === tx.order_id
       );
-      return !hasOrderCompleted;
+      if (hasOrderCompleted) return false;
+      const hasOrderCancelled = transactions.some(other =>
+        other.type === 'unlocked' && other.order_id === tx.order_id &&
+        other.description?.includes('Order cancelled')
+      );
+      if (hasOrderCancelled) return false;
     }
 
     // Hide locked if a matching unlocked exists (cancelled order requests)
