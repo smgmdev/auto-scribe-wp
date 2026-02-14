@@ -1243,12 +1243,15 @@ export function AgencyRequestsView() {
   
   // Sort active orders by last event time (most recent first)
   const sortedActiveOrders = useMemo(() => {
-    return [...activeOrders].sort((a, b) => {
-      // Get the related request for each order to use getLastEventInfo
+    const filtered = activeOrders.filter(o => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return o.media_site?.name?.toLowerCase().includes(query) || false;
+    });
+    return [...filtered].sort((a, b) => {
       const aRequest = requests.find(r => r.order?.id === a.id);
       const bRequest = requests.find(r => r.order?.id === b.id);
       
-      // Use getLastEventInfo if request is available, otherwise fall back to order timestamps
       const aEventTime = aRequest 
         ? getLastEventInfo(aRequest).eventTime.getTime()
         : (a.delivered_at ? new Date(a.delivered_at).getTime() :
@@ -1262,33 +1265,37 @@ export function AgencyRequestsView() {
       
       return bEventTime - aEventTime;
     });
-  }, [activeOrders, requests, messages, disputes]);
+  }, [activeOrders, requests, messages, disputes, searchQuery]);
   
   // Only orders with 'accepted' delivery_status are truly completed (client approved)
   // 'delivered' means awaiting client approval - stays in active orders
   const completedOrders = useMemo(() => 
     orders
-      .filter(o => 
-        o.delivery_status === 'accepted' && 
-        !disputedOrderIds.has(o.id)
-      )
+      .filter(o => {
+        if (o.delivery_status !== 'accepted' || disputedOrderIds.has(o.id)) return false;
+        if (!searchQuery.trim()) return true;
+        const query = searchQuery.toLowerCase();
+        return o.media_site?.name?.toLowerCase().includes(query) || false;
+      })
       .sort((a, b) => {
-        // Sort by completion date (accepted_at) - most recent first
         const aDate = a.accepted_at ? new Date(a.accepted_at).getTime() : 0;
         const bDate = b.accepted_at ? new Date(b.accepted_at).getTime() : 0;
         return bDate - aDate;
       }), 
-    [orders, disputedOrderIds]
+    [orders, disputedOrderIds, searchQuery]
   );
   
   const cancelledOrders = useMemo(() => {
     const filtered = orders.filter(o => {
-      // Check if related request is cancelled
       const relatedRequest = requests.find(r => r.order?.id === o.id);
       const isRequestCancelled = relatedRequest?.status === 'cancelled';
       
-      return (o.status === 'cancelled' || o.delivery_status === 'cancelled' || isRequestCancelled) && 
+      const isCancelled = (o.status === 'cancelled' || o.delivery_status === 'cancelled' || isRequestCancelled) && 
         !disputedOrderIds.has(o.id);
+      if (!isCancelled) return false;
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return o.media_site?.name?.toLowerCase().includes(query) || false;
     });
     
     // Sort by cancelled_at date from related request (most recent first)
@@ -1299,7 +1306,7 @@ export function AgencyRequestsView() {
       const bCancelledAt = bRequest?.cancelled_at ? new Date(bRequest.cancelled_at).getTime() : 0;
       return bCancelledAt - aCancelledAt;
     });
-  }, [orders, disputedOrderIds, requests]);
+  }, [orders, disputedOrderIds, requests, searchQuery]);
 
   // Compute unread counts based on actual displayed items (matching the filtered lists above)
   const unreadActiveOrdersCount = useMemo(() => 
