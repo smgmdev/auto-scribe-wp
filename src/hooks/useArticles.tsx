@@ -348,6 +348,29 @@ export function useArticles() {
     setLoadingMore(false);
   };
 
+  const searchArticles = useCallback(async (query: string, status: 'published' | 'draft'): Promise<Article[]> => {
+    if (!user || !query.trim()) return [];
+
+    let q = supabase
+      .from('articles')
+      .select('*')
+      .ilike('title', `%${query}%`)
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!isAdmin) {
+      q = q.eq('user_id', user.id);
+    }
+
+    const { data, error } = await q;
+    if (error) {
+      console.error('Error searching articles:', error);
+      return [];
+    }
+    return (data || []).map(mapDBToArticle);
+  }, [user, isAdmin]);
+
   return {
     articles,
     loading,
@@ -360,6 +383,7 @@ export function useArticles() {
     updateArticle,
     deleteArticle,
     loadMoreArticles,
+    searchArticles,
     refreshArticles: fetchArticles,
   };
 }
