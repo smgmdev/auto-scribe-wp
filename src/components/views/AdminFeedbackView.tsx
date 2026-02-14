@@ -209,8 +209,7 @@ export function AdminFeedbackView() {
                                 {statusConfig.label}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">{report.reporter_email}</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(report.created_at), 'MMM d, yyyy HH:mm')}</p>
+                            <p className="text-sm text-muted-foreground">{report.reporter_email} · {format(new Date(report.created_at), 'MMM d, yyyy HH:mm')}</p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {report.attachment_url && (
