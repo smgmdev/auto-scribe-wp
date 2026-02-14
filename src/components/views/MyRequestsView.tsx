@@ -1169,7 +1169,7 @@ export function MyRequestsView() {
       <div className="space-y-0">
         <Tabs defaultValue="active" value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'closed')} className="w-full">
         <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="grid grid-cols-2 w-full md:max-w-md md:overflow-visible bg-black rounded-none">
+        <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
           <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             <ClipboardList className="h-4 w-4" />
             Active ({activeRequests.length})
