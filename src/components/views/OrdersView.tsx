@@ -917,8 +917,8 @@ export function OrdersView() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <div className="space-y-0">
-          <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="space-y-0 pt-5">
+          <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full overflow-visible">
             <TabsList className="flex w-full overflow-x-auto overflow-y-visible md:grid md:grid-cols-4 scrollbar-hide bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 relative text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
                 <ShoppingBag className="h-4 w-4" />
