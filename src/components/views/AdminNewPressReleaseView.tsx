@@ -475,7 +475,7 @@ export function AdminNewPressReleaseView() {
               placeholder="Enter press release title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-sm"
+              className="text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
           </div>
 
@@ -530,6 +530,7 @@ export function AdminNewPressReleaseView() {
                     placeholder="Enter category name..."
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="bg-background text-foreground border-input placeholder:text-muted-foreground"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -574,7 +575,7 @@ export function AdminNewPressReleaseView() {
                           <Input
                             value={editingCategoryName}
                             onChange={(e) => setEditingCategoryName(e.target.value)}
-                            className="flex-1 h-8"
+                            className="flex-1 h-8 bg-background text-foreground border-input placeholder:text-muted-foreground"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -799,7 +800,7 @@ export function AdminNewPressReleaseView() {
                             value={editingContact.title}
                             onChange={(e) => setEditingContact({ ...editingContact, title: e.target.value })}
                             placeholder="e.g. Press Contact"
-                            className="h-9"
+                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="space-y-1">
@@ -808,7 +809,7 @@ export function AdminNewPressReleaseView() {
                             value={editingContact.name}
                             onChange={(e) => setEditingContact({ ...editingContact, name: e.target.value })}
                             placeholder="e.g. John Smith"
-                            className="h-9"
+                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="space-y-1">
@@ -817,7 +818,7 @@ export function AdminNewPressReleaseView() {
                             value={editingContact.company}
                             onChange={(e) => setEditingContact({ ...editingContact, company: e.target.value })}
                             placeholder="e.g. Arcana Mace"
-                            className="h-9"
+                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="space-y-1">
@@ -827,7 +828,7 @@ export function AdminNewPressReleaseView() {
                             value={editingContact.email}
                             onChange={(e) => setEditingContact({ ...editingContact, email: e.target.value })}
                             placeholder="e.g. press@arcanamace.com"
-                            className="h-9"
+                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="space-y-1">
@@ -836,7 +837,7 @@ export function AdminNewPressReleaseView() {
                             value={editingContact.phone || ''}
                             onChange={(e) => setEditingContact({ ...editingContact, phone: e.target.value })}
                             placeholder="e.g. (408) 862-1142"
-                            className="h-9"
+                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
                           />
                         </div>
                         <div className="flex gap-2 pt-2">
