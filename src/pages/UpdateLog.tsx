@@ -260,20 +260,20 @@ export default function UpdateLog() {
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
+      <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-black/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
-            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+            <img src={amblack} alt="Arcana Mace" className="h-10 w-10 invert" />
+            <span className="text-lg font-semibold text-white">Arcana Mace</span>
           </div>
           
           {/* Search Trigger - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-white/10 border border-white/20 text-white/60 hover:bg-white/15 transition-colors text-left"
             >
               <Search className="h-4 w-4" />
               <span>Search media outlets...</span>
@@ -285,7 +285,7 @@ export default function UpdateLog() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden hover:bg-black hover:text-white"
+              className="md:hidden hover:bg-white/10 text-white hover:text-white"
               onClick={() => setShowSearchModal(true)}
             >
               <Search className="h-5 w-5" />
@@ -294,7 +294,7 @@ export default function UpdateLog() {
             {user ? (
               <Button 
                 onClick={() => navigate('/dashboard')}
-                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                className="rounded-none bg-white text-black hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -302,7 +302,7 @@ export default function UpdateLog() {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                className="rounded-none bg-white text-black hover:bg-transparent hover:text-white border border-white transition-all duration-300"
               >
                 Sign In
               </Button>
@@ -318,20 +318,20 @@ export default function UpdateLog() {
       <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 pt-[140px]">
         {/* Title Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
+          <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4">
             Changelog
           </h1>
-          <p className="text-muted-foreground border-b border-border pb-8">
+          <p className="text-white/50 border-b border-white/10 pb-8">
             Last update: February 13, 2026
           </p>
         </div>
 
         {/* Introduction */}
         <div className="mb-10">
-          <p className="text-muted-foreground leading-relaxed mb-4">
+          <p className="text-white/50 leading-relaxed mb-4">
             A chronological list of platform updates, improvements, and new features shipped to Arcana Mace.
           </p>
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="text-white/50 leading-relaxed">
             We regularly release updates to improve performance, introduce new capabilities, and refine the user experience across publishing, media buying, and agency management. Each entry below details the changes included in that release.
           </p>
         </div>
@@ -339,21 +339,21 @@ export default function UpdateLog() {
         {/* Updates as Accordion */}
         <Accordion type="multiple" className="w-full">
           {updates.map((update, i) => (
-            <AccordionItem key={i} value={`item-${i}`} className="border-t border-border">
-              <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionItem key={i} value={`item-${i}`} className="border-t border-white/10">
+              <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
                 <span className="flex items-center justify-between w-full gap-3 text-left">
                   <span className="text-left">
                     {update.title}
-                    <span className="block text-sm font-normal text-muted-foreground mt-1">{update.date}</span>
+                    <span className="block text-sm font-normal text-white/40 mt-1">{update.date}</span>
                   </span>
-                  <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  <Plus className="h-5 w-5 flex-shrink-0 text-white/40 transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
                 </span>
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
+              <AccordionContent className="text-white/50 leading-relaxed pb-6">
                 <ul className="list-none space-y-3">
                   {update.changes.map((change, j) => (
                     <li key={j} className="flex items-start gap-2">
-                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 flex-shrink-0" />
+                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-white/30 flex-shrink-0" />
                       {change}
                     </li>
                   ))}
@@ -364,7 +364,7 @@ export default function UpdateLog() {
         </Accordion>
       </main>
 
-      <Footer narrow />
+      <Footer narrow dark />
     </div>
   );
 }
