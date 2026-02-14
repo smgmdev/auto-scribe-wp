@@ -850,7 +850,7 @@ export function CreditHistoryView() {
           <h1 className="text-3xl font-bold text-foreground">
             Credit Management
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 mb-4 text-muted-foreground">
             Manage your credits and view transaction history
           </p>
         </div>
@@ -876,7 +876,7 @@ export function CreditHistoryView() {
       <BuyCreditsDialog open={buyCreditsOpen} onOpenChange={setBuyCreditsOpen} />
 
       {/* Summary Cards */}
-      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5 mt-4">
+      <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-5">
         {/* Available Credits */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
