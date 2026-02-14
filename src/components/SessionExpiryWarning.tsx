@@ -156,27 +156,27 @@ export function SessionExpiryWarning() {
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-2">
-              <p className="text-base">Your session will expire in:</p>
+              <p className="text-sm">Your session will expire in:</p>
               <div className="flex justify-center">
                 <span className="text-2xl font-bold font-mono text-foreground tabular-nums">
                   {formatTime(secondsLeft)}
                 </span>
               </div>
-              <p className="text-base">Do you wish to stay logged in or log out?</p>
+              <p className="text-sm">Do you wish to stay logged in or log out?</p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col sm:flex-row gap-1.5 mt-2">
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-2">
           <Button
             variant="outline"
             onClick={handleLogOut}
-            className="w-full sm:flex-1 h-11 text-sm hover:bg-black hover:text-[#f2a547] hover:border-black"
+            className="w-full sm:flex-1 h-9 text-xs hover:bg-black hover:text-[#f2a547] hover:border-black"
           >
             Log Out
           </Button>
           <Button
             onClick={handleStayLogged}
-            className="w-full sm:flex-1 h-11 text-sm bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]"
+            className="w-full sm:flex-1 h-9 text-xs bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]"
           >
             Stay Logged In
           </Button>
