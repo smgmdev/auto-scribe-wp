@@ -395,20 +395,20 @@ export function AdminSecuritySupervisionView() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-xs h-7 px-2.5 hover:bg-foreground hover:text-background"
+                              className="text-sm h-9 px-3 hover:bg-foreground hover:text-background"
                               onClick={() => markGroupReviewed(group.request_id)}
                             >
-                              <Eye className="h-3.5 w-3.5 mr-1" />
+                              <Eye className="h-4 w-4 mr-1.5" />
                               Mark All Reviewed
                             </Button>
                           )}
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-xs h-7 px-2.5 hover:bg-foreground hover:text-background"
+                            className="text-sm h-9 px-3 hover:bg-foreground hover:text-background"
                             onClick={() => openEngagement(group.request_id)}
                           >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                            <ExternalLink className="h-4 w-4 mr-1.5" />
                             Open Chat
                           </Button>
                         </div>
