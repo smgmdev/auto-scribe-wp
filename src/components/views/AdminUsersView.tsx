@@ -619,7 +619,7 @@ export function AdminUsersView() {
     try {
       const { data: sr } = await supabase
         .from('service_requests')
-        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(id, name, favicon, price, link, publication_format, category, subcategory, about, agency), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
         .eq('id', engagementId)
         .single();
       
@@ -662,7 +662,7 @@ export function AdminUsersView() {
     try {
       const { data: sr } = await supabase
         .from('service_requests')
-        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link)')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(id, name, favicon, price, link, publication_format, category, subcategory, about, agency)')
         .eq('id', serviceRequestId)
         .single();
       
@@ -685,7 +685,7 @@ export function AdminUsersView() {
     try {
       const { data: sr } = await supabase
         .from('service_requests')
-        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(id, name, favicon, price, link, publication_format, category, subcategory, about, agency), orders:order_id(id, amount_cents, status, delivery_status, delivery_url, delivered_at, platform_fee_cents, agency_payout_cents)')
         .eq('id', delivery.service_request_id)
         .single();
       
