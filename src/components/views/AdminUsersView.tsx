@@ -405,6 +405,9 @@ export function AdminUsersView() {
       );
     }
     
+    // Sort alphabetically by email (A-Z)
+    filtered.sort((a, b) => a.email.localeCompare(b.email));
+    
     return filtered;
   }, [users, searchQuery, activeTab]);
 
