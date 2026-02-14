@@ -13,8 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useToast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { getFaviconUrl, extractDomain, ensureHttps } from '@/lib/favicon';
 import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
@@ -86,7 +85,7 @@ const PUBLISHING_TIME_OPTIONS = ['24h', 'within 3 days', 'within 7 days', 'withi
 export function SitesView() {
   const { sites, loading: sitesLoading, addSite, removeSite, refetchSites } = useSites();
   const { user, isAdmin } = useAuth();
-  const { toast } = useToast();
+  
   const { targetTab, setTargetTab, targetSubcategory, setTargetSubcategory } = useAppStore();
   const [activeTab, setActiveTab] = useState('instant');
   const [activeMediaCategory, setActiveMediaCategory] = useState('Global');
@@ -145,7 +144,7 @@ export function SitesView() {
     setRefreshing(true);
     await Promise.all([refetchSites(), fetchMediaSites(), fetchOpenEngagements()]);
     setRefreshing(false);
-    sonnerToast.success('Media network refreshed');
+    toast.success('Media network refreshed');
   };
 
   // WebView state removed - now using direct _blank links
@@ -439,11 +438,7 @@ export function SitesView() {
 
   const handleAddTag = async (siteId: string) => {
     if (!newTagLabel.trim()) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid tag',
-        description: 'Please enter a tag label.'
-      });
+      toast.error('Please enter a tag label.');
       return;
     }
 
@@ -458,11 +453,7 @@ export function SitesView() {
       .single();
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error adding tag',
-        description: error.message
-      });
+      toast.error(error.message);
     } else if (data) {
       setSiteTags(prev => ({
         ...prev,
@@ -471,10 +462,7 @@ export function SitesView() {
       setNewTagLabel('');
       setNewTagColor('#22c55e');
       setAddingTagForSite(null);
-      toast({
-        title: 'Tag added',
-        description: `"${newTagLabel}" has been added.`
-      });
+      toast.success(`"${newTagLabel}" has been added.`);
     }
   };
 
@@ -485,11 +473,7 @@ export function SitesView() {
       .eq('id', tagId);
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error removing tag',
-        description: error.message
-      });
+      toast.error(error.message);
     } else {
       setSiteTags(prev => ({
         ...prev,
@@ -501,11 +485,7 @@ export function SitesView() {
   const handleWPSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wpFormData.name || !wpFormData.url || !wpFormData.username || !wpFormData.applicationPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -528,16 +508,9 @@ export function SitesView() {
         seoPlugin: 'aioseo'
       });
       setIsWPDialogOpen(false);
-      toast({
-        title: "Site connected",
-        description: `${wpFormData.name} has been added successfully`
-      });
+      toast.success(`${wpFormData.name} has been added successfully`);
     } catch (error) {
-      toast({
-        title: "Failed to add site",
-        description: error instanceof Error ? error.message : "Could not add the site",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "Could not add the site");
     } finally {
       setIsSubmitting(false);
     }
@@ -601,21 +574,13 @@ export function SitesView() {
 
   const handleFetchSheet = async () => {
     if (!sheetUrl) {
-      toast({
-        title: "Missing URL",
-        description: "Please enter a Google Sheet URL",
-        variant: "destructive"
-      });
+      toast.error('Please enter a Google Sheet URL');
       return;
     }
 
     const sheetId = extractSheetId(sheetUrl);
     if (!sheetId) {
-      toast({
-        title: "Invalid URL",
-        description: "Could not extract Sheet ID from the URL",
-        variant: "destructive"
-      });
+      toast.error('Could not extract Sheet ID from the URL');
       return;
     }
 
@@ -632,11 +597,7 @@ export function SitesView() {
       const parsed = parseCSV(csv);
       
       if (parsed.length === 0) {
-        toast({
-          title: "No data found",
-          description: "The sheet appears to be empty or incorrectly formatted",
-          variant: "destructive"
-        });
+        toast.error('The sheet appears to be empty or incorrectly formatted');
         return;
       }
 
@@ -646,34 +607,19 @@ export function SitesView() {
       const extraColumns = sheetColumns.filter(col => !REQUIRED_COLUMNS.includes(col));
 
       if (missingColumns.length > 0) {
-        toast({
-          title: "Missing required columns",
-          description: `Sheet is missing: ${missingColumns.join(', ')}`,
-          variant: "destructive"
-        });
+        toast.error(`Sheet is missing: ${missingColumns.join(', ')}`);
         return;
       }
 
       if (extraColumns.length > 0) {
-        toast({
-          title: "Invalid columns detected",
-          description: `Remove these columns: ${extraColumns.join(', ')}`,
-          variant: "destructive"
-        });
+        toast.error(`Remove these columns: ${extraColumns.join(', ')}`);
         return;
       }
       
       setImportPreview(parsed);
-      toast({
-        title: "Sheet loaded",
-        description: `Found ${parsed.length} media sites to import`
-      });
+      toast.success(`Found ${parsed.length} media sites to import`);
     } catch (error) {
-      toast({
-        title: "Failed to fetch sheet",
-        description: error instanceof Error ? error.message : "Could not load the Google Sheet",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not load the Google Sheet');
     } finally {
       setIsImporting(false);
     }
@@ -710,11 +656,7 @@ export function SitesView() {
       }).filter(site => site.name && site.link);
 
       if (sitesToInsert.length === 0) {
-        toast({
-          title: "No valid sites",
-          description: "No sites with valid name and URL found",
-          variant: "destructive"
-        });
+        toast.error('No sites with valid name and URL found');
         return;
       }
 
@@ -728,16 +670,9 @@ export function SitesView() {
       setImportPreview([]);
       setIsMediaDialogOpen(false);
       fetchMediaSites();
-      toast({
-        title: "Import successful",
-        description: `${sitesToInsert.length} media sites have been added`
-      });
+      toast.success(`${sitesToInsert.length} media sites have been added`);
     } catch (error) {
-      toast({
-        title: "Failed to import sites",
-        description: error instanceof Error ? error.message : "Could not import media sites",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not import media sites');
     } finally {
       setIsSubmitting(false);
     }
@@ -756,18 +691,11 @@ export function SitesView() {
       await supabase.from('site_credits').delete().eq('site_id', siteToDelete.id);
       await supabase.from('site_tags').delete().eq('site_id', siteToDelete.id);
       
-      toast({
-        title: "Site removed",
-        description: `${siteToDelete.name} has been disconnected`
-      });
+      toast.success(`${siteToDelete.name} has been disconnected`);
       setDeleteWPDialogOpen(false);
       setSiteToDelete(null);
     } catch (error) {
-      toast({
-        title: "Failed to remove site",
-        description: error instanceof Error ? error.message : "Could not remove the site",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not remove the site');
     } finally {
       setIsDeleting(false);
     }
@@ -783,27 +711,16 @@ export function SitesView() {
       if (error) throw error;
 
       setMediaSites(prev => prev.filter(s => s.id !== id));
-      toast({
-        title: "Media site removed",
-        description: `${name} has been removed`
-      });
+      toast.success(`${name} has been removed`);
     } catch (error) {
-      toast({
-        title: "Failed to remove media site",
-        description: error instanceof Error ? error.message : "Could not remove the media site",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not remove the media site');
     }
   };
 
   const handleAddAgency = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agencyFormData.name.trim() || !agencyFormData.link.trim()) {
-      toast({
-        title: "Missing fields",
-        description: "Name and Link are required",
-        variant: "destructive"
-      });
+      toast.error('Name and Link are required');
       return;
     }
 
@@ -829,10 +746,7 @@ export function SitesView() {
         if (error) throw error;
 
         setMediaSites(prev => prev.map(s => s.id === editingAgencyId ? data : s));
-        toast({
-          title: "Agency updated",
-          description: `${agencyFormData.name} has been updated`
-        });
+        toast.success(`${agencyFormData.name} has been updated`);
       } else {
         // Create new agency
         const { data, error } = await supabase
@@ -856,21 +770,14 @@ export function SitesView() {
         if (error) throw error;
 
         setMediaSites(prev => [...prev, data]);
-        toast({
-          title: "Agency added",
-          description: `${agencyFormData.name} has been added`
-        });
+        toast.success(`${agencyFormData.name} has been added`);
       }
       
       setAgencyFormData({ name: '', logo: '', link: '', country: '', about: '' });
       setEditingAgencyId(null);
       setIsAgencyDialogOpen(false);
     } catch (error) {
-      toast({
-        title: editingAgencyId ? "Failed to update agency" : "Failed to add agency",
-        description: error instanceof Error ? error.message : "Could not save the agency",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not save the agency');
     } finally {
       setIsSubmitting(false);
     }
@@ -891,11 +798,7 @@ export function SitesView() {
   const handleSaveCredits = async (siteId: string) => {
     const credits = parseInt(creditInput);
     if (isNaN(credits) || credits < 1) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid credits',
-        description: 'Please enter a valid number (minimum 1).'
-      });
+      toast.error('Please enter a valid number (minimum 1).');
       return;
     }
 
@@ -911,18 +814,11 @@ export function SitesView() {
       );
 
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error saving credits',
-        description: error.message
-      });
+      toast.error(error.message);
     } else {
       setSiteCredits({ ...siteCredits, [siteId]: credits });
       setEditingCredits(null);
-      toast({
-        title: 'Credits updated',
-        description: `Site now requires ${credits} credits to publish.`
-      });
+      toast.success(`Site now requires ${credits} credits to publish.`);
     }
   };
 
@@ -983,21 +879,14 @@ export function SitesView() {
         ));
       }
 
-      toast({
-        title: 'Logo updated',
-        description: 'The site logo has been updated successfully.'
-      });
+      toast.success('The site logo has been updated successfully.');
       setIsLogoDialogOpen(false);
       setEditingLogoSiteId(null);
       setLogoUrl('');
       setLogoFile(null);
       setLogoPreview(null);
     } catch (error) {
-      toast({
-        title: 'Failed to update logo',
-        description: error instanceof Error ? error.message : 'Could not update the logo',
-        variant: 'destructive'
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not update the logo');
     } finally {
       setIsSubmitting(false);
     }

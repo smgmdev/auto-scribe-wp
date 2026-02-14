@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { Headline } from '@/types';
 
@@ -64,7 +63,7 @@ export function HeadlinesView() {
     headlines,
   } = useAppStore();
   const { settings, toggleSource, isLoading: settingsLoading } = useUserSettings();
-  const { toast } = useToast();
+  
   const [isScanning, setIsScanning] = useState(false);
   const [displayedHeadlines, setDisplayedHeadlines] = useState<Headline[]>(headlines);
   const [activeTab, setActiveTab] = useState('political');
@@ -73,11 +72,7 @@ export function HeadlinesView() {
 
   const handleScan = async () => {
     if (settings.selectedSources.length === 0) {
-      toast({
-        title: "No sources selected",
-        description: "Please select at least one news source to scan",
-        variant: "destructive",
-      });
+      toast.error('Please select at least one news source to scan');
       return;
     }
 
@@ -99,17 +94,13 @@ export function HeadlinesView() {
         }));
         setDisplayedHeadlines(parsedHeadlines);
         setHeadlines(parsedHeadlines);
-        sonnerToast.success(`Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`);
+        toast.success(`Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`);
       } else {
         throw new Error(data?.error || 'Failed to scan headlines');
       }
     } catch (error) {
       console.error('Error scanning headlines:', error);
-      toast({
-        title: "Scan failed",
-        description: error instanceof Error ? error.message : "Failed to scan headlines",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to scan headlines');
     } finally {
       setIsScanning(false);
     }

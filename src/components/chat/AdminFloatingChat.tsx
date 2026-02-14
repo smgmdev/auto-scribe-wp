@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore } from '@/stores/appStore';
 
@@ -734,9 +734,9 @@ export function AdminFloatingChat({
       }
 
       setHasJoined(true);
-      toast({ title: 'Joined chat', description: 'You can now participate in this engagement.' });
+      toast.success('Joined chat');
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(error.message);
     } finally {
       setJoiningChat(false);
     }
@@ -797,9 +797,9 @@ export function AdminFloatingChat({
       }
 
       setHasJoined(false);
-      toast({ title: 'Left chat', description: 'You have left the conversation.' });
+      toast.success('Left chat');
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(error.message);
     } finally {
       setLeavingChat(false);
     }
@@ -843,7 +843,7 @@ export function AdminFloatingChat({
       setNewMessage('');
       setReplyToMessage(null);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+      toast.error(error.message);
     } finally {
       setSending(false);
     }
@@ -2161,7 +2161,7 @@ export function AdminFloatingChat({
                     className="h-3 w-3 cursor-pointer hover:text-foreground transition-colors" 
                     onClick={() => {
                       navigator.clipboard.writeText(orderDetails.order_number || orderDetails.id);
-                      toast({ title: "Copied", description: "Order ID copied to clipboard" });
+                      toast.success('Order ID copied to clipboard');
                     }}
                   />
                 </p>
