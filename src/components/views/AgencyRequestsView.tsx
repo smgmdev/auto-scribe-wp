@@ -1388,7 +1388,7 @@ export function AgencyRequestsView() {
           onClick={handleRefresh}
           disabled={refreshing}
           variant="outline"
-          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
+          className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black border border-black gap-2 transition-all"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -1423,7 +1423,7 @@ export function AgencyRequestsView() {
           placeholder="Search requests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 w-full h-9 text-sm rounded-none bg-foreground text-background placeholder:text-white/50 border-foreground"
+          className="pl-9 w-full h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black"
         />
       </div>
 
