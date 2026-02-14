@@ -1083,8 +1083,8 @@ export function AdminOrdersView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-2">
-              {filteredOrders.map(order => {
+            <div className="space-y-0">
+              {filteredOrders.map((order, index) => {
                 // Determine if this order has unread notification
                 const isDisputedOrder = disputedOrderIds.has(order.id);
                 const dispute = disputes.find(d => d.order_id === order.id);
@@ -1095,7 +1095,7 @@ export function AdminOrdersView() {
                 return (
                 <Card 
                   key={order.id} 
-                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative ${hasUnreadNotification ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
+                  className={`cursor-pointer hover:bg-muted/30 transition-colors relative rounded-none ${index > 0 ? '-mt-px' : ''} ${hasUnreadNotification ? 'border-l-4 border-l-blue-500 bg-blue-500/10' : ''}`}
                   onClick={() => handleInvestigate(order)}
                 >
                   {/* Unread notification badge */}
