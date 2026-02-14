@@ -170,7 +170,7 @@ export function SessionExpiryWarning() {
           <Button
             variant="outline"
             onClick={handleLogOut}
-            className="w-full sm:flex-1 h-9 text-xs hover:bg-[#f2a547] hover:text-black hover:border-[#f2a547]"
+            className="w-full sm:flex-1 h-9 text-xs hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]"
           >
             Log Out
           </Button>
