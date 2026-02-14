@@ -5838,7 +5838,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </div>
               {/* Mobile: Action buttons full-width below */}
               {!isAdmin && (
-                <div className="md:hidden mt-1 pl-9 flex flex-col gap-2">
+                <div className="md:hidden mt-1 flex flex-col gap-2">
                   <div className="flex gap-2">
                   {isClient ? (
                     <>
