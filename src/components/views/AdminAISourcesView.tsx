@@ -218,21 +218,21 @@ export function AdminAISourcesView() {
                 className="text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
               />
             </div>
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-col md:flex-row gap-0 md:justify-end">
               <Button
                 variant="outline"
                 onClick={() => {
                   setIsAdding(false);
                   setNewSource({ name: '', url: '', description: '' });
                 }}
-                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                className="bg-black text-white border-black rounded-none hover:bg-transparent hover:text-black hover:border-black w-full md:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 onClick={() => addMutation.mutate(newSource)}
                 disabled={addMutation.isPending || !newSource.name || !newSource.url}
-                className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+                className="bg-black text-white border border-black rounded-none hover:bg-transparent hover:text-black hover:border-black w-full md:w-auto -mt-px md:-mt-0 md:-ml-px"
               >
                 Add Source
               </Button>
@@ -275,11 +275,11 @@ export function AdminAISourcesView() {
                 className="text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
               />
             </div>
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-col md:flex-row gap-0 md:justify-end">
               <Button
                 variant="outline"
                 onClick={() => setEditingSource(null)}
-                className="hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                className="bg-black text-white border-black rounded-none hover:bg-transparent hover:text-black hover:border-black w-full md:w-auto"
               >
                 Cancel
               </Button>
@@ -293,7 +293,7 @@ export function AdminAISourcesView() {
                   },
                 })}
                 disabled={updateMutation.isPending}
-                className="border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+                className="bg-black text-white border border-black rounded-none hover:bg-transparent hover:text-black hover:border-black w-full md:w-auto -mt-px md:-mt-0 md:-ml-px"
               >
                 Save Changes
               </Button>
