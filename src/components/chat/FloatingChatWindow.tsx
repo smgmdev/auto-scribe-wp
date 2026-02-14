@@ -2676,11 +2676,26 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       'here\'s my number', 'here is my number', 'my phone number', 'my cell',
       'email me at', 'mail me at', 'send email to', 'my email is', 'here\'s my email',
       'let\'s talk outside', 'talk off platform', 'outside the platform', 'off-platform',
-      'personal email', 'work email', 'business email'
+      'personal email', 'work email', 'business email',
+      'your number', 'ur number', 'your email', 'ur email', 'your phone',
+      'ur phone', 'your contact', 'ur contact', 'your whatsapp', 'ur whatsapp',
+      'have your number', 'have ur number', 'get your number', 'get ur number',
+      'have your email', 'have ur email', 'get your email', 'get ur email',
+      'send me your', 'send me ur', 'give me your', 'give me ur',
+      'drop your', 'drop ur', 'share your', 'share ur',
+      'what\'s your number', 'whats your number', 'what ur number',
+      'what\'s your email', 'whats your email', 'what ur email',
+      'what is your email', 'what is ur email', 'what is your number', 'what is ur number',
+      'can i have your', 'can i get your', 'can i have ur', 'can i get ur',
+      'how can i reach you', 'how to contact you', 'how to reach you',
+      'contact details', 'contact info'
     ];
     for (const phrase of directExchangePhrases) {
       if (lowerMsg.includes(phrase)) return true;
     }
+
+    // Catch asking patterns: "what/whats/what's + ur/your + contact-related word"
+    if (/\b(?:what(?:'?s)?|wht|wats?)\s+(?:ur|your|u)\s+(?:email|mail|number|phone|cell|contact|whatsapp|telegram|discord|insta(?:gram)?|snap(?:chat)?|tiktok|twitter|fb|facebook)\b/i.test(message)) return true;
     
     return false;
   };
