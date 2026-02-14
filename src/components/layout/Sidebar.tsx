@@ -184,6 +184,7 @@ export function Sidebar({
     userUnreadOrdersCount,
     setUserUnreadOrdersCount,
     incrementUserUnreadOrdersCount,
+    decrementUserUnreadOrdersCount,
     userUnreadDisputesCount,
     setUserUnreadDisputesCount,
     userUnreadCompletedCount,
@@ -1054,11 +1055,11 @@ export function Sidebar({
           historyUnread++;
         } else if (disputeOrderIds.has(order.id)) {
           disputeUnread++;
-        } else if (order.status === 'paid' && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted') {
-          // Active orders: paid, not delivered/accepted, not in dispute
+        } else if (order.status === 'paid' && order.delivery_status !== 'accepted') {
+          // Active orders: paid, not yet accepted by buyer (includes 'delivered' = pending approval)
           activeUnread++;
-        } else if (order.delivery_status === 'delivered' || order.delivery_status === 'accepted') {
-          // Completed orders (delivered/accepted) that are unread
+        } else if (order.delivery_status === 'accepted') {
+          // Completed orders (buyer approved) that are unread
           completedUnread++;
         }
       });
@@ -1275,6 +1276,11 @@ export function Sidebar({
             }
           }
           
+          // If delivery_status changed to 'delivered' (pending approval), increment active orders count
+          if (old?.delivery_status !== 'delivered' && updated.delivery_status === 'delivered' && !updated.read) {
+            incrementUserUnreadOrdersCount();
+          }
+          
           // If delivery_status changed to accepted, increment completed orders count
           if (old?.delivery_status !== 'accepted' && updated.delivery_status === 'accepted') {
             incrementUserUnreadCompletedCount();
@@ -1286,9 +1292,13 @@ export function Sidebar({
           }
           
           // If order was marked as read and is a completed order, decrement count
-          if (old?.read === false && updated.read === true && 
-              (updated.delivery_status === 'accepted' || updated.delivery_status === 'delivered')) {
+          if (old?.read === false && updated.read === true && updated.delivery_status === 'accepted') {
             decrementUserUnreadCompletedCount();
+          }
+          
+          // If order was marked as read and is an active order (including delivered/pending approval), decrement active count
+          if (old?.read === false && updated.read === true && updated.status === 'paid' && updated.delivery_status !== 'accepted') {
+            decrementUserUnreadOrdersCount();
           }
           
           // If order was marked as read and is a cancelled order, decrement history count
