@@ -177,7 +177,7 @@ export function SessionExpiryWarning() {
           </Button>
           <Button
             onClick={handleStayLogged}
-            className="w-full sm:flex-1 h-9 text-xs bg-black text-white hover:bg-transparent hover:text-black hover:border hover:border-foreground"
+            className="w-full sm:flex-1 h-9 text-xs bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]"
           >
             Stay Logged In
           </Button>
