@@ -149,7 +149,7 @@ export function AdminFeedbackView() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-4">
           <TabsList className="w-full md:grid md:grid-cols-3 justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0 bg-black text-white rounded-none">
             <TabsTrigger value="open" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
               Open ({openCount})
