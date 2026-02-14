@@ -321,7 +321,7 @@ export function AdminAgencyWithdrawalsView() {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Agency Withdrawals</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-1 mb-4 text-muted-foreground">
             Manage agency withdrawal requests
           </p>
         </div>
