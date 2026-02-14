@@ -135,7 +135,7 @@ export function SettingsView() {
           </p>
         </div>
         <Button 
-          className="w-full lg:w-auto border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
+          className="w-full lg:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
           onClick={handleSave} 
           disabled={isSaving}
         >
