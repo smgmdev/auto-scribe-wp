@@ -294,8 +294,8 @@ export function MyAgencyView() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {agency.email && (
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-4 w-4 text-[#f2a547]" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Email</p>
@@ -319,8 +319,8 @@ export function MyAgencyView() {
               
               {agency.whatsapp_phone && (
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-4 w-4 text-[#f2a547]" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">WhatsApp</p>
@@ -331,8 +331,8 @@ export function MyAgencyView() {
               
               {agency.country && (
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                    <MapPin className="h-4 w-4 text-[#f2a547]" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">Country</p>
@@ -343,8 +343,8 @@ export function MyAgencyView() {
               
               {agency.agency_website && (
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                    <Globe className="h-4 w-4 text-[#f2a547]" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Website</p>
@@ -362,8 +362,8 @@ export function MyAgencyView() {
               )}
               
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                  <Calendar className="h-4 w-4 text-[#f2a547]" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Member Since</p>
@@ -374,8 +374,8 @@ export function MyAgencyView() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                  <Percent className="h-4 w-4 text-muted-foreground" />
+                <div className="h-9 w-9 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
+                  <Percent className="h-4 w-4 text-[#f2a547]" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Commission Rate</p>
