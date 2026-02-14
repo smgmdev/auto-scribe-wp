@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2 } from 'lucide-react';
+import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ export function ArticlesView() {
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [deletingTitle, setDeletingTitle] = useState<string>('');
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
@@ -98,8 +100,14 @@ export function ArticlesView() {
 
   const publishedArticles = articles.filter(a => a.status === 'published');
   const draftArticles = articles.filter(a => a.status === 'draft');
+
+  const filterBySearch = (list: Article[]) => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(a => a.title.toLowerCase().includes(q));
+  };
   
-  const displayedArticles = activeTab === 'published' ? publishedArticles : draftArticles;
+  const displayedArticles = filterBySearch(activeTab === 'published' ? publishedArticles : draftArticles);
   const hasMore = activeTab === 'published' ? hasMorePublished : hasMoreDrafts;
 
   const handleLoadMore = () => {
@@ -327,6 +335,17 @@ export function ArticlesView() {
           </TabsTrigger>
         </TabsList>
 
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Search articles by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-black text-white border-black placeholder:text-white/50 h-9 text-sm rounded-none"
+            />
+          </div>
+
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -358,11 +377,11 @@ export function ArticlesView() {
             </TabsContent>
 
             <TabsContent value="drafts" className="mt-0">
-              {draftArticles.length === 0 ? (
+              {filterBySearch(draftArticles).length === 0 ? (
                 renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
               ) : (
                 <div className="space-y-0">
-                  {draftArticles.map((article, index) => renderArticleCard(article, index))}
+                  {filterBySearch(draftArticles).map((article, index) => renderArticleCard(article, index))}
                   {hasMoreDrafts && (
                     <div className="flex justify-center pt-4">
                       <Button variant="outline" onClick={handleLoadMore} disabled={loadingMore}>
