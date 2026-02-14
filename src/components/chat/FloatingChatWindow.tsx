@@ -6743,8 +6743,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex flex-col-reverse md:flex-row gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="flex-1 rounded-none hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200"
+                  className="flex-1 rounded-none hover:bg-foreground hover:text-background hover:border-foreground transition-all duration-200 md:h-8 md:text-xs md:px-3"
                   onClick={() => {
                     setSendOrderDialogOpen(false);
                     setSpecialTerms('');
@@ -6757,8 +6756,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   Cancel
                 </Button>
                 <Button
-                  size="sm"
-                  className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200"
+                  className="flex-1 rounded-none bg-primary text-primary-foreground hover:bg-transparent hover:text-primary border border-primary transition-all duration-200 md:h-8 md:text-xs md:px-3"
                   onClick={async () => {
                     if (!senderId || !globalChatRequest) return;
                     
