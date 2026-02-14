@@ -1575,7 +1575,7 @@ export function AdminMediaManagementView() {
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="flex w-max md:w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
+            <TabsList className="flex w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
               <TabsTrigger value="approved" className="flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Approved ({approvedSites.length})
               </TabsTrigger>
