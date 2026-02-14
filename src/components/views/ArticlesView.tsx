@@ -301,11 +301,11 @@ export function ArticlesView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full -mt-4 md:mt-0">
-        <TabsList className="grid w-full max-w-xs md:max-w-xs max-md:max-w-full grid-cols-2">
-          <TabsTrigger value="published">
+        <TabsList className="grid w-full grid-cols-2 bg-black rounded-none p-0 h-auto">
+          <TabsTrigger value="published" className="text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">
             Published ({publishedCount})
           </TabsTrigger>
-          <TabsTrigger value="drafts">
+          <TabsTrigger value="drafts" className="text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none py-2.5">
             Drafts ({draftsCount})
           </TabsTrigger>
         </TabsList>
