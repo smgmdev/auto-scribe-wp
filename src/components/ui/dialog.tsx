@@ -50,13 +50,12 @@ const DialogContent = React.forwardRef<
       ref={ref}
       onOpenAutoFocus={(e) => e.preventDefault()}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg rounded-none sm:rounded-lg max-h-[100dvh] overflow-y-auto data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out",
+        "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg overflow-y-auto data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out",
+        "left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 max-w-lg max-h-[100dvh] sm:rounded-lg",
+        "max-sm:inset-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:max-w-none max-sm:max-h-none max-sm:h-[100dvh] max-sm:rounded-none max-sm:border-0",
         className,
       )}
-      style={{ 
-        transform: 'translate(-50%, -50%)',
-        ...style, 
-      }}
+      style={style}
       {...props}
     >
       {children}
