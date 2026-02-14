@@ -245,7 +245,7 @@ export function MyAgencyView() {
             View your agency profile and account details
           </p>
         </div>
-        <Badge variant="secondary" className="bg-foreground text-background border-foreground">
+        <Badge variant="secondary" className="bg-[#f2a547] text-black border-[#f2a547]">
           <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
           Valid
         </Badge>
@@ -399,7 +399,7 @@ export function MyAgencyView() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Payout Method</span>
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="bg-[#f2a547] text-black border-[#f2a547]">
                 {getPayoutMethodLabel(agency.payout_method)}
               </Badge>
             </div>
