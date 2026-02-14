@@ -161,7 +161,7 @@ const getOrderStatusBadge = (order: Order) => {
   // Fallback to order status
   return (
     <Badge variant="outline" className="text-[10px] py-0">
-      {order.status}
+      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
     </Badge>
   );
 };
