@@ -609,7 +609,7 @@ export function AgencyMediaView() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="!inline-flex !w-auto md:!grid md:!w-full max-w-md md:grid-cols-2 md:overflow-visible bg-black rounded-none">
+        <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
           <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
             Media Sites
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
