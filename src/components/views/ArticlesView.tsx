@@ -109,7 +109,7 @@ export function ArticlesView() {
   const renderArticleCard = (article: Article, index: number) => (
     <Card 
       key={article.id}
-      className="group hover:shadow-md transition-all duration-300"
+      className="group hover:bg-muted/50 transition-all duration-300 rounded-none border-x-0 border-t-0 border-b last:border-b-0 shadow-none hover:shadow-none -mt-px first:mt-0"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <CardContent className="p-6">
@@ -337,7 +337,7 @@ export function ArticlesView() {
               {displayedArticles.length === 0 ? (
                 renderEmptyState('No published articles yet. Publish your first article to see it here.')
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-0">
                   {displayedArticles.map((article, index) => renderArticleCard(article, index))}
                   {hasMore && (
                     <div className="flex justify-center pt-4">
@@ -361,7 +361,7 @@ export function ArticlesView() {
               {draftArticles.length === 0 ? (
                 renderEmptyState('No draft articles. Start writing a new article to save it as a draft.')
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-0">
                   {draftArticles.map((article, index) => renderArticleCard(article, index))}
                   {hasMoreDrafts && (
                     <div className="flex justify-center pt-4">
