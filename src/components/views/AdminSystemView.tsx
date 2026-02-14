@@ -1,12 +1,5 @@
-import { useState } from 'react';
-import { Database, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
 
@@ -41,16 +34,46 @@ interface TransactionRecord {
   created_at: string;
 }
 
-export function AdminSystemView() {
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<UserRecord[] | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+interface TerminalLine {
+  id: number;
+  type: 'input' | 'output' | 'error' | 'info' | 'table';
+  content: string;
+  data?: UserRecord[];
+}
 
-  const fetchAllUsers = async () => {
-    setLoading(true);
+let lineId = 0;
+
+export function AdminSystemView() {
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
+    { id: lineId++, type: 'info', content: 'Type /help for available commands.' },
+    { id: lineId++, type: 'info', content: '' },
+  ]);
+  const [input, setInput] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [lines, scrollToBottom]);
+
+  const addLine = (type: TerminalLine['type'], content: string, data?: UserRecord[]) => {
+    setLines(prev => [...prev, { id: lineId++, type, content, data }]);
+  };
+
+  const fetchUsers = async () => {
+    addLine('info', 'Fetching user database...');
+    setProcessing(true);
+
     try {
-      // Fetch profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -58,7 +81,6 @@ export function AdminSystemView() {
 
       if (profilesError) throw profilesError;
 
-      // Fetch roles, credits, orders, transactions, active orders, pending requests, service messages in parallel
       const [rolesRes, creditsRes, ordersRes, transactionsRes, activeOrdersRes, pendingRequestsRes, serviceMessagesRes] = await Promise.all([
         supabase.from('user_roles').select('user_id, role'),
         supabase.from('user_credits').select('user_id, credits'),
@@ -69,20 +91,17 @@ export function AdminSystemView() {
         supabase.from('service_messages').select('request_id, message'),
       ]);
 
-      // Build set of request IDs that have CLIENT_ORDER_REQUEST
       const requestsWithOrderMsg = new Set<string>();
       (serviceMessagesRes.data || []).forEach((m: any) => {
         if (m.message === 'CLIENT_ORDER_REQUEST') requestsWithOrderMsg.add(m.request_id);
       });
 
-      // Locked from active orders per user
       const lockedFromOrdersMap = new Map<string, number>();
       (activeOrdersRes.data || []).forEach((o: any) => {
         const price = o.media_sites?.price || 0;
         lockedFromOrdersMap.set(o.user_id, (lockedFromOrdersMap.get(o.user_id) || 0) + price);
       });
 
-      // Locked from pending requests per user (only those with CLIENT_ORDER_REQUEST)
       const lockedFromRequestsMap = new Map<string, number>();
       (pendingRequestsRes.data || []).forEach((r: any) => {
         if (requestsWithOrderMsg.has(r.id)) {
@@ -91,17 +110,11 @@ export function AdminSystemView() {
         }
       });
 
-      // Fetch media site names for orders
       const mediaSiteIds = [...new Set((ordersRes.data || []).map(o => o.media_site_id))];
       let mediaSiteMap: Record<string, string> = {};
       if (mediaSiteIds.length > 0) {
-        const { data: sites } = await supabase
-          .from('media_sites')
-          .select('id, name')
-          .in('id', mediaSiteIds);
-        if (sites) {
-          mediaSiteMap = Object.fromEntries(sites.map(s => [s.id, s.name]));
-        }
+        const { data: sites } = await supabase.from('media_sites').select('id, name').in('id', mediaSiteIds);
+        if (sites) mediaSiteMap = Object.fromEntries(sites.map(s => [s.id, s.name]));
       }
 
       const rolesMap = new Map<string, string>();
@@ -110,27 +123,14 @@ export function AdminSystemView() {
       const ordersMap = new Map<string, OrderRecord[]>();
       (ordersRes.data || []).forEach(o => {
         const list = ordersMap.get(o.user_id) || [];
-        list.push({
-          id: o.id,
-          order_number: o.order_number,
-          status: o.status,
-          amount_cents: o.amount_cents,
-          created_at: o.created_at,
-          media_site_name: mediaSiteMap[o.media_site_id] || 'Unknown',
-        });
+        list.push({ id: o.id, order_number: o.order_number, status: o.status, amount_cents: o.amount_cents, created_at: o.created_at, media_site_name: mediaSiteMap[o.media_site_id] || 'Unknown' });
         ordersMap.set(o.user_id, list);
       });
 
       const txMap = new Map<string, TransactionRecord[]>();
       (transactionsRes.data || []).forEach(t => {
         const list = txMap.get(t.user_id) || [];
-        list.push({
-          id: t.id,
-          amount: t.amount,
-          type: t.type,
-          description: t.description,
-          created_at: t.created_at,
-        });
+        list.push({ id: t.id, amount: t.amount, type: t.type, description: t.description, created_at: t.created_at });
         txMap.set(t.user_id, list);
       });
 
@@ -145,27 +145,75 @@ export function AdminSystemView() {
         const available = calculateAvailableCredits(totalBalance, lockedFromOrders, lockedFromRequests, creditsInWithdrawals, creditsWithdrawn);
 
         return {
-          id: p.id,
-          email: p.email,
-          username: p.username,
-          email_verified: p.email_verified,
-          suspended: p.suspended,
-          created_at: p.created_at,
-          last_online_at: p.last_online_at,
-          role: rolesMap.get(p.id) || 'user',
-          credits: available,
-          orders: ordersMap.get(p.id) || [],
-          transactions: userTxs,
+          id: p.id, email: p.email, username: p.username, email_verified: p.email_verified,
+          suspended: p.suspended, created_at: p.created_at, last_online_at: p.last_online_at,
+          role: rolesMap.get(p.id) || 'user', credits: available,
+          orders: ordersMap.get(p.id) || [], transactions: userTxs,
         };
       });
 
-      setUsers(userRecords);
-      toast.success(`Fetched ${userRecords.length} users`);
+      addLine('output', `✓ Fetched ${userRecords.length} users from database`);
+      addLine('table', '', userRecords);
     } catch (error: any) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to fetch users: ' + error.message);
+      addLine('error', `✗ Error: ${error.message}`);
     } finally {
-      setLoading(false);
+      setProcessing(false);
+    }
+  };
+
+  const handleCommand = async (cmd: string) => {
+    const trimmed = cmd.trim();
+    if (!trimmed) return;
+
+    addLine('input', trimmed);
+    setCommandHistory(prev => [trimmed, ...prev]);
+    setHistoryIndex(-1);
+    setInput('');
+
+    switch (trimmed.toLowerCase()) {
+      case '/db':
+        await fetchUsers();
+        break;
+      case '/clear':
+        setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.' }]);
+        setExpandedUsers(new Set());
+        break;
+      case '/help':
+        addLine('info', '┌─────────────────────────────────────┐');
+        addLine('info', '│  Available Commands                 │');
+        addLine('info', '├─────────────────────────────────────┤');
+        addLine('info', '│  /db       Fetch all users + data   │');
+        addLine('info', '│  /clear    Clear terminal            │');
+        addLine('info', '│  /help     Show this help            │');
+        addLine('info', '└─────────────────────────────────────┘');
+        break;
+      default:
+        addLine('error', `Unknown command: ${trimmed}`);
+        addLine('info', 'Type /help for available commands.');
+        break;
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !processing) {
+      handleCommand(input);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistory.length > 0) {
+        const newIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
+        setHistoryIndex(newIndex);
+        setInput(commandHistory[newIndex]);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        setHistoryIndex(newIndex);
+        setInput(commandHistory[newIndex]);
+      } else {
+        setHistoryIndex(-1);
+        setInput('');
+      }
     }
   };
 
@@ -178,191 +226,117 @@ export function AdminSystemView() {
     });
   };
 
-  const filteredUsers = users?.filter(u => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      u.email?.toLowerCase().includes(q) ||
-      u.username?.toLowerCase().includes(q) ||
-      u.id.toLowerCase().includes(q)
-    );
-  });
+  const renderUserTable = (users: UserRecord[]) => (
+    <div className="mt-1 mb-2">
+      {users.map(user => (
+        <div key={user.id}>
+          <button
+            onClick={() => toggleExpand(user.id)}
+            className="w-full text-left font-mono text-xs py-1 px-2 hover:bg-white/5 transition-colors flex items-center gap-0"
+          >
+            <span className="text-green-400 w-4 shrink-0">{expandedUsers.has(user.id) ? '▼' : '▶'}</span>
+            <span className="text-cyan-400 min-w-[220px] truncate">{user.email || 'no-email'}</span>
+            <span className={`min-w-[60px] ${user.role === 'admin' ? 'text-yellow-400' : 'text-white/40'}`}>{user.role}</span>
+            <span className="text-green-400 min-w-[100px]">{user.credits.toLocaleString()} cr</span>
+            <span className="text-white/40 min-w-[80px]">{user.orders.length} orders</span>
+            <span className="text-white/30">{format(new Date(user.created_at), 'yyyy-MM-dd')}</span>
+            {user.suspended && <span className="text-red-400 ml-2">[SUSPENDED]</span>}
+            {!user.email_verified && <span className="text-yellow-500 ml-2">[UNVERIFIED]</span>}
+          </button>
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': case 'released': return 'bg-green-600 text-white';
-      case 'pending': case 'pending_payment': return 'bg-yellow-600 text-white';
-      case 'cancelled': case 'refunded': return 'bg-red-600 text-white';
-      default: return 'bg-foreground/20 text-foreground';
-    }
-  };
+          {expandedUsers.has(user.id) && (
+            <div className="pl-6 border-l border-white/10 ml-2 mb-2 text-[11px] font-mono">
+              <div className="text-white/30 py-0.5">ID: {user.id}</div>
+              <div className="text-white/30 py-0.5">Username: {user.username || '—'}</div>
+              <div className="text-white/30 py-0.5">Last online: {user.last_online_at ? format(new Date(user.last_online_at), 'yyyy-MM-dd HH:mm') : '—'}</div>
+              <div className="text-green-400 py-0.5">Available credits: {user.credits.toLocaleString()}</div>
+
+              {user.orders.length > 0 && (
+                <div className="mt-1">
+                  <div className="text-white/50 py-0.5">── Orders ({user.orders.length}) ──</div>
+                  {user.orders.slice(0, 10).map(o => (
+                    <div key={o.id} className="flex gap-2 py-0.5 text-white/40">
+                      <span className="text-white/20">{o.order_number || o.id.slice(0, 8)}</span>
+                      <span className="text-white/50">{o.media_site_name}</span>
+                      <span className="text-cyan-400">${(o.amount_cents / 100).toFixed(2)}</span>
+                      <span className={
+                        o.status === 'completed' || o.status === 'released' ? 'text-green-400' :
+                        o.status === 'cancelled' || o.status === 'refunded' ? 'text-red-400' :
+                        'text-yellow-400'
+                      }>{o.status}</span>
+                    </div>
+                  ))}
+                  {user.orders.length > 10 && <div className="text-white/20 py-0.5">... +{user.orders.length - 10} more</div>}
+                </div>
+              )}
+
+              {user.transactions.length > 0 && (
+                <div className="mt-1">
+                  <div className="text-white/50 py-0.5">── Transactions ({user.transactions.length}) ──</div>
+                  {user.transactions.slice(0, 10).map(tx => (
+                    <div key={tx.id} className="flex gap-2 py-0.5 text-white/40">
+                      <span className="text-white/20">{format(new Date(tx.created_at), 'MM-dd')}</span>
+                      <span className="text-white/50 min-w-[120px]">{tx.type}</span>
+                      <span className={tx.amount >= 0 ? 'text-green-400' : 'text-red-400'}>
+                        {tx.amount >= 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                      </span>
+                      <span className="text-white/20 truncate max-w-[200px]">{tx.description || ''}</span>
+                    </div>
+                  ))}
+                  {user.transactions.length > 10 && <div className="text-white/20 py-0.5">... +{user.transactions.length - 10} more</div>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-0">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4 mb-0">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">System</h1>
-            <p className="mt-1 mb-4 text-muted-foreground">Admin system tools and database overview</p>
-          </div>
-        </div>
+    <div
+      className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 flex flex-col cursor-text"
+      onClick={() => inputRef.current?.focus()}
+    >
+      {/* Terminal Output */}
+      <div className="flex-1 overflow-auto p-4 pb-0 font-mono text-sm">
+        {lines.map(line => {
+          if (line.type === 'table' && line.data) {
+            return <div key={line.id}>{renderUserTable(line.data)}</div>;
+          }
 
-        {/* Fetch Button */}
-        <Button
-          onClick={fetchAllUsers}
-          disabled={loading}
-          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2 mb-0"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />}
-          Fetch User DB
-        </Button>
+          let colorClass = 'text-white/60';
+          let prefix = '';
+          if (line.type === 'input') { colorClass = 'text-white'; prefix = '$ '; }
+          else if (line.type === 'output') { colorClass = 'text-green-400'; }
+          else if (line.type === 'error') { colorClass = 'text-red-400'; }
+          else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
-        {/* Search */}
-        {users && (
-          <div className="relative mt-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
-            <Input
-              placeholder="Search by email, username, or ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-9 text-sm rounded-none bg-black text-white border-black placeholder:text-white/50"
-            />
-          </div>
-        )}
+          return (
+            <div key={line.id} className={`${colorClass} leading-6 whitespace-pre`}>
+              {prefix}{line.content}
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
 
-        {/* User List */}
-        {users && (
-          <div className="space-y-0">
-            <p className="text-sm text-muted-foreground py-2">
-              Showing {filteredUsers?.length || 0} of {users.length} users
-            </p>
-            {filteredUsers?.map(user => (
-              <div key={user.id} className="border border-foreground/10 -mt-px first:mt-0">
-                {/* User Header Row */}
-                <button
-                  onClick={() => toggleExpand(user.id)}
-                  className="w-full flex items-center justify-between p-3 hover:bg-foreground/5 transition-colors text-left"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm truncate">{user.email || 'No email'}</span>
-                      <Badge className={`text-[10px] px-1.5 py-0 rounded-none ${user.role === 'admin' ? 'bg-foreground text-background' : 'bg-foreground/10 text-foreground'}`}>
-                        {user.role}
-                      </Badge>
-                      {user.suspended && (
-                        <Badge className="text-[10px] px-1.5 py-0 rounded-none bg-red-600 text-white">Suspended</Badge>
-                      )}
-                      {!user.email_verified && (
-                        <Badge className="text-[10px] px-1.5 py-0 rounded-none bg-yellow-600 text-white">Unverified</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span>Credits: <strong className="text-foreground">{user.credits.toLocaleString()}</strong></span>
-                      <span>Orders: <strong className="text-foreground">{user.orders.length}</strong></span>
-                      <span>Joined: {format(new Date(user.created_at), 'MMM d, yyyy')}</span>
-                    </div>
-                  </div>
-                  {expandedUsers.has(user.id) ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                  )}
-                </button>
-
-                {/* Expanded Details */}
-                {expandedUsers.has(user.id) && (
-                  <div className="border-t border-foreground/10 bg-foreground/[0.02] p-3 space-y-4">
-                    {/* User Info */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">User ID</span>
-                        <p className="font-mono text-[10px] break-all">{user.id}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Username</span>
-                        <p>{user.username || '—'}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Last Online</span>
-                        <p>{user.last_online_at ? format(new Date(user.last_online_at), 'MMM d, yyyy HH:mm') : '—'}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Credits Balance</span>
-                        <p className="font-bold">{user.credits.toLocaleString()}</p>
-                      </div>
-                    </div>
-
-                    {/* Orders */}
-                    <div>
-                      <h4 className="text-xs font-semibold mb-1">Orders ({user.orders.length})</h4>
-                      {user.orders.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No orders</p>
-                      ) : (
-                        <div className="space-y-0">
-                          {user.orders.slice(0, 10).map(order => (
-                            <div key={order.id} className="flex items-center justify-between py-1.5 border-b border-foreground/5 last:border-0 text-xs">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-[10px]">{order.order_number || order.id.slice(0, 8)}</span>
-                                <span className="text-muted-foreground">{order.media_site_name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span>${(order.amount_cents / 100).toFixed(2)}</span>
-                                <Badge className={`text-[10px] px-1.5 py-0 rounded-none ${getStatusColor(order.status)}`}>
-                                  {order.status}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                          {user.orders.length > 10 && (
-                            <p className="text-[10px] text-muted-foreground pt-1">+ {user.orders.length - 10} more orders</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Recent Transactions */}
-                    <div>
-                      <h4 className="text-xs font-semibold mb-1">Recent Transactions ({user.transactions.length})</h4>
-                      {user.transactions.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No transactions</p>
-                      ) : (
-                        <div className="space-y-0">
-                          {user.transactions.slice(0, 10).map(tx => (
-                            <div key={tx.id} className="flex items-center justify-between py-1.5 border-b border-foreground/5 last:border-0 text-xs">
-                              <div className="flex items-center gap-2">
-                                <Badge className="text-[10px] px-1.5 py-0 rounded-none bg-foreground/10 text-foreground">
-                                  {tx.type}
-                                </Badge>
-                                <span className="text-muted-foreground truncate max-w-[200px]">{tx.description || '—'}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className={tx.amount >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                  {tx.amount >= 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                                </span>
-                                <span className="text-muted-foreground text-[10px]">{format(new Date(tx.created_at), 'MMM d')}</span>
-                              </div>
-                            </div>
-                          ))}
-                          {user.transactions.length > 10 && (
-                            <p className="text-[10px] text-muted-foreground pt-1">+ {user.transactions.length - 10} more transactions</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!users && !loading && (
-          <div className="text-center py-16 text-muted-foreground">
-            <Database className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p>Click "Fetch User DB" to load all user data</p>
-          </div>
+      {/* Input Line */}
+      <div className="flex items-center px-4 py-3 font-mono text-sm border-t border-white/10">
+        <span className="text-green-400 mr-2 select-none">$</span>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={processing}
+          placeholder={processing ? 'Processing...' : 'Enter command...'}
+          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/20 caret-green-400"
+          autoFocus
+          spellCheck={false}
+        />
+        {processing && (
+          <span className="text-green-400 animate-pulse ml-2">●</span>
         )}
       </div>
     </div>
