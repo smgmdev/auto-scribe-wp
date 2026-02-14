@@ -510,11 +510,11 @@ export function MyAgencyView() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="media-sites" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4 rounded-none">
-                <TabsTrigger value="media-sites">
+              <TabsList className="w-full p-0 h-auto rounded-none mb-4">
+                <TabsTrigger value="media-sites" className="flex-1 py-2.5">
                   Media Sites ({mediaSites.length})
                 </TabsTrigger>
-                <TabsTrigger value="wordpress">
+                <TabsTrigger value="wordpress" className="flex-1 py-2.5">
                   WordPress ({wordpressSites.length})
                 </TabsTrigger>
               </TabsList>
