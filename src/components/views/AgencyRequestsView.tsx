@@ -1431,7 +1431,7 @@ export function AgencyRequestsView() {
           <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
             <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide z-10">
             <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
-              <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
+              <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
                 {unreadActiveCount > 0 && (
@@ -1440,7 +1440,7 @@ export function AgencyRequestsView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="closed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
+              <TabsTrigger value="closed" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 <CheckCircle className="h-4 w-4" />
                 Closed ({completedRequests.length + cancelledRequests.length})
                 {(unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
@@ -1661,7 +1661,7 @@ export function AgencyRequestsView() {
               <Tabs value={closedSubTab} onValueChange={(v) => setClosedSubTab(v as 'delivered' | 'cancelled')} className="w-full">
                 <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
                 <TabsList className="grid grid-cols-2 w-full md:overflow-visible bg-black rounded-none p-0 h-auto">
-                  <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5">
+                  <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                     <CheckCircle className="h-4 w-4" />
                     Completed ({completedRequests.length})
                     {unreadCompletedRequestsCount > 0 && (
@@ -1670,7 +1670,7 @@ export function AgencyRequestsView() {
                       </span>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5">
+                  <TabsTrigger value="cancelled" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5 text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                     <XCircle className="h-4 w-4" />
                     Cancelled ({cancelledRequests.length})
                     {unreadCancelledCount > 0 && (
