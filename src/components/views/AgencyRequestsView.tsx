@@ -1443,7 +1443,7 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-2 space-y-2">
+            <TabsContent value="active" className="mt-0">
               {activeRequests.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1454,7 +1454,7 @@ export function AgencyRequestsView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {sortedRequests.map((request) => {
                     const requestMessages = messages[request.id] || [];
                     const hasUnread = !request.read;
@@ -1492,7 +1492,7 @@ export function AgencyRequestsView() {
                     return (
                       <Card 
                         key={request.id} 
-                        className={`relative border-border/50 hover:border-border transition-colors cursor-pointer ${
+                        className={`relative rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
                           hasUnread ? 'bg-blue-500/10 border-l-4 border-l-blue-500' : ''
                         }`}
                         onClick={() => handleCardClick(request)}
@@ -1947,7 +1947,7 @@ export function AgencyRequestsView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-2 space-y-1">
+            <TabsContent value="active" className="mt-0">
               {activeOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1984,7 +1984,7 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
+                      className={`rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
                         isNew ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
                       }`}
                       onClick={() => handleOrderCardClick(order, relatedRequest)}
@@ -2105,7 +2105,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="disputes" className="mt-2 space-y-1">
+            <TabsContent value="disputes" className="mt-0">
               {disputedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -2123,9 +2123,9 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
-                        isUnread ? 'bg-red-500/10' : ''
-                      }`}
+                    className={`rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
+                      isUnread ? 'bg-red-500/10' : ''
+                    }`}
                       onClick={() => handleDisputedOrderCardClick(order, relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
@@ -2196,7 +2196,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="completed" className="mt-2 space-y-1">
+            <TabsContent value="completed" className="mt-0">
               {completedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -2214,9 +2214,9 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className={`border-border/50 hover:border-border transition-colors cursor-pointer ${
-                        isUnread ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
-                      }`}
+                    className={`rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer ${
+                      isUnread ? 'bg-green-500/10 border-l-4 border-l-green-500' : ''
+                    }`}
                       onClick={() => handleCompletedOrderClick(order, relatedRequest)}
                     >
                       <CardHeader className="pb-2 px-4 pt-3">
@@ -2283,7 +2283,7 @@ export function AgencyRequestsView() {
               )}
             </TabsContent>
 
-            <TabsContent value="cancelled" className="mt-2 space-y-1">
+            <TabsContent value="cancelled" className="mt-0">
               {cancelledOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -2299,7 +2299,7 @@ export function AgencyRequestsView() {
                   return (
                     <Card 
                       key={order.id}
-                      className="border-border/50 hover:border-border transition-colors cursor-pointer"
+                      className="rounded-none border-border/50 hover:bg-muted transition-colors cursor-pointer"
                       onClick={() => relatedRequest && handleCardClick(relatedRequest)}
                     >
                       <CardHeader className="py-3 px-4">
