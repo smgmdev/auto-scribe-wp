@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
+import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits, recalculateSingleUser } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -314,45 +314,69 @@ export function AdminUsersView() {
     sonnerToast.success('All user credits recalculated');
   };
 
-  // Per-user recalculate
+  // Per-user recalculate (same logic as Credit Management view)
   const handleRecalculateUser = async (userId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setRecalculatingUser(prev => new Set(prev).add(userId));
     try {
       const [txsRes, activeOrdersRes, dbCreditsRes] = await Promise.all([
-        supabase.from('credit_transactions').select('user_id, amount, type, description').eq('user_id', userId),
+        supabase.from('credit_transactions').select('amount, type, description').eq('user_id', userId),
         supabase.from('orders').select('user_id, media_sites(price)')
           .eq('user_id', userId).neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
         supabase.from('user_credits').select('credits').eq('user_id', userId).single(),
       ]);
 
+      // Fetch pending requests for this user with CLIENT_ORDER_REQUEST check
+      const { data: pendingReqs } = await supabase
+        .from('service_requests')
+        .select('id, user_id, media_sites(price)')
+        .eq('user_id', userId)
+        .is('order_id', null)
+        .neq('status', 'cancelled');
+
+      const pendingWithCheck: { id: string; user_id: string; media_sites: { price: number } | null; hasOrderRequest: boolean }[] = [];
+      if (pendingReqs) {
+        for (const req of pendingReqs) {
+          const { data: msgs } = await supabase
+            .from('service_messages')
+            .select('id')
+            .eq('request_id', req.id)
+            .like('message', '%CLIENT_ORDER_REQUEST%')
+            .limit(1);
+          pendingWithCheck.push({
+            id: req.id,
+            user_id: req.user_id,
+            media_sites: req.media_sites as { price: number } | null,
+            hasOrderRequest: !!(msgs && msgs.length > 0),
+          });
+        }
+      }
+
       const userTxs = (txsRes.data || []).map(tx => ({ ...tx, description: tx.description || undefined }));
-      const txSum = userTxs.reduce((sum, tx) => sum + tx.amount, 0);
+      const orders = (activeOrdersRes.data || []).map(o => ({
+        user_id: userId,
+        media_sites: o.media_sites as { price: number } | null,
+      }));
       const dbVal = dbCreditsRes.data?.credits ?? 0;
 
-      // Calculate available using shared formulas
-      const calculatedBalance = calculateTotalBalance(userTxs);
-      const withdrawalData = calculateWithdrawals(userTxs);
-      const creditsInWithdrawals = withdrawalData.lockedCents / 100;
-      const creditsWithdrawn = withdrawalData.completedCents / 100;
-      const lockedFromOrders = (activeOrdersRes.data || []).reduce((sum, o) => sum + ((o.media_sites as any)?.price || 0), 0);
-      const availableCredits = calculateAvailableCredits(calculatedBalance, lockedFromOrders, 0, creditsInWithdrawals, creditsWithdrawn);
+      const updated = recalculateSingleUser(userTxs, orders, pendingWithCheck, dbVal);
 
       // Update user in state
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: availableCredits } : u));
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, credits: updated.available ?? u.credits } : u));
 
       // Update validation result
-      const isValid = txSum === dbVal;
       setValidationResults(prev => {
         const next = new Map(prev);
         next.set(userId, {
-          status: isValid ? 'valid' : 'mismatch',
-          detail: isValid ? undefined : `DB: ${dbVal}, Tx Sum: ${txSum}, Diff: ${dbVal - txSum}`,
+          status: (updated.validationStatus === 'valid' ? 'valid' : 'mismatch') as 'valid' | 'mismatch',
+          detail: updated.validationDetail,
         });
         return next;
       });
 
-      const status = isValid ? '✅ Valid' : `⚠️ Mismatch (DB: ${dbVal}, Tx: ${txSum})`;
+      const status = updated.validationStatus === 'valid'
+        ? '✅ Valid'
+        : `⚠️ Mismatch (${updated.validationDetail})`;
       sonnerToast.success(`Recalculated: ${status}`);
     } catch (err) {
       console.error('Recalculate error:', err);
