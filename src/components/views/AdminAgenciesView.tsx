@@ -759,14 +759,14 @@ export function AdminAgenciesView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-0 md:mb-6">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Agency Management</h1>
           <p className="mt-2 text-muted-foreground">Manage agency applications and approvals</p>
         </div>
         <Button
-          className="w-full md:w-auto border border-foreground shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:shadow-none gap-2"
+          className="w-full md:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground hover:shadow-none gap-2"
           onClick={() => fetchData(true)}
           disabled={isRefreshing}
         >
@@ -779,9 +779,9 @@ export function AdminAgenciesView() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-3">
-        <TabsList className="flex w-full overflow-x-auto md:overflow-visible md:grid md:grid-cols-4 scrollbar-hide justify-start rounded-none">
-          <TabsTrigger value="pending" className="relative">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="pt-0 md:pt-3">
+        <TabsList className="flex w-full overflow-x-auto md:overflow-visible md:grid md:grid-cols-4 scrollbar-hide justify-start rounded-none p-0 h-auto">
+          <TabsTrigger value="pending" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             New ({pendingApplications.length})
             {unreadPendingCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-500 text-xs flex items-center justify-center text-black font-medium">
@@ -789,7 +789,7 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="verification" className="relative">
+          <TabsTrigger value="verification" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Under Verification ({agenciesUnderVerification.length})
             {unreadPendingApprovalCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
@@ -797,8 +797,8 @@ export function AdminAgenciesView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="onboarded">Onboarded ({agencies.filter(a => a.onboarding_complete || a.downgraded).length})</TabsTrigger>
-          <TabsTrigger value="void" className="relative">
+          <TabsTrigger value="onboarded" className="py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white">Onboarded ({agencies.filter(a => a.onboarding_complete || a.downgraded).length})</TabsTrigger>
+          <TabsTrigger value="void" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Void ({cancelledApplications.length + rejectedApplications.length})
             {unreadCancelledCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
@@ -898,8 +898,8 @@ export function AdminAgenciesView() {
         <TabsContent value="void" className="mt-0">
           {/* Sub-tabs for void stages */}
           <Tabs value={voidSubTab} onValueChange={setVoidSubTab}>
-             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none">
-               <TabsTrigger value="cancelled" className="relative">
+             <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none p-0 h-auto">
+               <TabsTrigger value="cancelled" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                  Cancelled ({cancelledApplications.length})
                  {unreadCancelledCount > 0 && (
                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white font-medium">
@@ -907,7 +907,7 @@ export function AdminAgenciesView() {
                    </span>
                  )}
                </TabsTrigger>
-               <TabsTrigger value="rejected">
+               <TabsTrigger value="rejected" className="py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                  Rejected ({rejectedApplications.length})
                </TabsTrigger>
              </TabsList>
@@ -1187,11 +1187,11 @@ export function AdminAgenciesView() {
         <TabsContent value="verification" className="mt-0">
           {/* Sub-tabs for verification stages */}
           <Tabs value={verificationSubTab} onValueChange={setVerificationSubTab}>
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none">
-              <TabsTrigger value="pending-verification" className="relative">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none p-0 h-auto">
+              <TabsTrigger value="pending-verification" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending Verification ({agenciesPendingVerification.length})
               </TabsTrigger>
-              <TabsTrigger value="pending-approval" className="relative">
+              <TabsTrigger value="pending-approval" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending Approval ({agenciesPendingApprovalReview.length})
                 {unreadPendingApprovalCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center text-white font-medium">
@@ -1410,11 +1410,11 @@ export function AdminAgenciesView() {
         <TabsContent value="onboarded" className="mt-0">
           {/* Sub-tabs for Active and Downgraded */}
           <Tabs value={onboardedSubTab} onValueChange={setOnboardedSubTab}>
-            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none">
-              <TabsTrigger value="active" className="relative">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-2 scrollbar-hide justify-start rounded-none p-0 h-auto">
+              <TabsTrigger value="active" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Active ({agencies.filter(a => a.onboarding_complete && !a.downgraded).length})
               </TabsTrigger>
-              <TabsTrigger value="downgraded" className="relative">
+              <TabsTrigger value="downgraded" className="relative py-2.5 flex-1 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Downgraded ({agencies.filter(a => a.downgraded).length})
               </TabsTrigger>
             </TabsList>
