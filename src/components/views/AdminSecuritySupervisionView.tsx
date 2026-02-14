@@ -172,49 +172,8 @@ export function AdminSecuritySupervisionView() {
     return () => { supabase.removeChannel(channel); };
   }, [engagementData]);
 
-  // Real-time listener for new service messages — triggers immediate single-message scan
-  useEffect(() => {
-    const scanSingleMessage = async (message: any) => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-single-message`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              message_id: message.id,
-              request_id: message.request_id,
-              sender_id: message.sender_id,
-              sender_type: message.sender_type,
-              message: message.message,
-            }),
-          }
-        );
-        // Results will appear via the flagged_chat_messages realtime subscription above
-      } catch (err) {
-        console.error('Real-time scan error:', err);
-      }
-    };
-
-    const channel = supabase
-      .channel('service-messages-realtime-scan')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'service_messages',
-      }, (payload) => {
-        scanSingleMessage(payload.new);
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+  // Note: Real-time service_messages scanning is handled globally in Sidebar.tsx
+  // Results appear via the flagged_chat_messages realtime subscription above
 
   const handleScan = async () => {
     setScanning(true);
