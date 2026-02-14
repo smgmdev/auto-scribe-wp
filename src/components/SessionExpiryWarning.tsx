@@ -58,7 +58,7 @@ export function SessionExpiryWarning() {
   // Check session expiry periodically
   useEffect(() => {
     // TEST MODE: Show popup immediately
-    if (TEST_MODE && session) {
+    if (TEST_MODE) {
       setSecondsLeft(60);
       setShowWarning(true);
       clearCountdown();
