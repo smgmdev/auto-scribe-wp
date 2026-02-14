@@ -6849,7 +6849,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         if (!open) setDisputeReason('');
       }}>
         <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader className="text-left">
+          <AlertDialogHeader className="text-left space-y-1 mb-0">
             <AlertDialogTitle>Open Dispute</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>
@@ -6860,7 +6860,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="py-4">
+          <div className="pb-4">
             <Textarea
               placeholder="Please describe your reason for opening this dispute..."
               value={disputeReason}
