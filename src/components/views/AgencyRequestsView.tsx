@@ -1919,8 +1919,8 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-0">
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
-            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none">
+            <div className="relative overflow-x-auto scrollbar-hide">
+            <TabsList className="!flex !w-max !min-w-full lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
