@@ -2644,6 +2644,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     )) return false;
 
     const lowerMsg = message.toLowerCase();
+    // Normalize obfuscation: remove spaces/dots/dashes between letters for bypass detection
+    const normalizedMsg = lowerMsg.replace(/[\s.\-_*|]+/g, '');
     
     // Email patterns
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
@@ -2653,33 +2655,43 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const phoneRegex = /(\+\d{1,4}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{2,}[\s.-]?\d{2,})/;
     if (phoneRegex.test(message)) return true;
     
-    // Social media / messaging platform mentions - trigger on ANY mention
+    // === PLATFORM DETECTION (exact + obfuscated) ===
     const platformsAlwaysTrigger = [
-      'whatsapp', 'whtsapp', 'watsapp', 'whtsp', 'wa\\.me',
-      'telegram', 'tg', 't\\.me',
-      'discord', 'dc',
-      'signal',
-      'viber',
-      'wechat',
-      'skype',
-      'instagram', 'insta', 'ig',
-      'facebook', 'fb', 'messenger',
-      'twitter', 'tw', 'x\\.com',
-      'snapchat', 'snap', 'sc',
-      'tiktok', 'tt',
-      'linkedin',
-      'line app', 'kakaotalk', 'kakao',
+      'whatsapp', 'whtsapp', 'watsapp', 'whtsp', 'whatapp', 'watsap', 'whatsap',
+      'wa\\.me', 'wame',
+      'telegram', 'tg', 't\\.me', 'telgram', 'telegr',
+      'discord', 'dc', 'discrd',
+      'signal', 'signl',
+      'viber', 'vber',
+      'wechat', 'weixin',
+      'skype', 'skyp',
+      'instagram', 'insta', 'ig', 'instgrm', 'instagr',
+      'facebook', 'fb', 'fbook', 'messenger', 'msgr',
+      'twitter', 'tw', 'x\\.com', 'xdotcom',
+      'snapchat', 'snap', 'sc', 'snpchat',
+      'tiktok', 'tt', 'tktok',
+      'linkedin', 'linkdin',
+      'line app', 'lineapp', 'kakaotalk', 'kakao',
       'imessage', 'facetime',
       'zalo', 'kik', 'wickr', 'threema'
     ];
     
-    // Check if any platform name is mentioned (word boundary match)
     for (const platform of platformsAlwaysTrigger) {
       const regex = new RegExp(`\\b${platform}\\b`, 'i');
       if (regex.test(message)) return true;
     }
+
+    // Catch obfuscated platform names (w.h.a.t.s.a.p.p, t-e-l-e-g-r-a-m, etc.)
+    const obfuscatedPlatforms = [
+      'whatsapp', 'telegram', 'discord', 'instagram', 'facebook',
+      'twitter', 'snapchat', 'tiktok', 'linkedin', 'messenger',
+      'signal', 'viber', 'skype', 'wechat'
+    ];
+    for (const platform of obfuscatedPlatforms) {
+      if (normalizedMsg.includes(platform)) return true;
+    }
     
-    // Direct contact exchange phrases without platform
+    // === SUSPICIOUS COMMUNICATION EXCHANGE PATTERNS ===
     const directExchangePhrases = [
       'here\'s my number', 'here is my number', 'my phone number', 'my cell',
       'email me at', 'mail me at', 'send email to', 'my email is', 'here\'s my email',
@@ -2696,14 +2708,59 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       'what is your email', 'what is ur email', 'what is your number', 'what is ur number',
       'can i have your', 'can i get your', 'can i have ur', 'can i get ur',
       'how can i reach you', 'how to contact you', 'how to reach you',
-      'contact details', 'contact info'
+      'contact details', 'contact info',
+      // Bypass attempts - suggesting external communication
+      'talk somewhere else', 'chat somewhere else', 'speak somewhere else',
+      'continue elsewhere', 'move this elsewhere', 'take this elsewhere',
+      'talk privately', 'chat privately', 'speak privately',
+      'other platform', 'another platform', 'different platform',
+      'outside this', 'outside here', 'not here', 'not on here',
+      'other app', 'another app', 'different app',
+      'other channel', 'another channel',
+      'more private', 'more secure', 'more convenient',
+      'better way to talk', 'better way to chat', 'better way to communicate',
+      'easier to talk', 'easier to chat', 'easier to reach',
+      'prefer to talk', 'prefer to chat', 'prefer to communicate',
+      'do you have', 'do u have', 'u got', 'you got',
+      'where can i find you', 'where can i reach you', 'where can i contact you',
+      'how else can i', 'any other way',
+      'add me on', 'add me at', 'find me on', 'find me at',
+      'hit me up on', 'hmu on', 'dm me on', 'pm me on',
+      'reach out on', 'reach out to me',
+      'send me a dm', 'send me a pm', 'send me a message on',
+      'message me on', 'text me on', 'call me on',
+      'connect with me', 'connect outside',
+      'my handle is', 'my username is', 'my user is', 'my id is', 'my account is',
+      'handle is', 'username is', 'user name is',
+      'i\'m on', 'im on', 'i am on',
+      'follow me', 'look me up',
     ];
     for (const phrase of directExchangePhrases) {
       if (lowerMsg.includes(phrase)) return true;
     }
 
-    // Catch asking patterns: "what/whats/what's + ur/your + contact-related word"
-    if (/\b(?:what(?:'?s)?|wht|wats?)\s+(?:ur|your|u)\s+(?:email|mail|number|phone|cell|contact|whatsapp|whtsapp|telegram|tg|discord|dc|insta(?:gram)?|ig|snap(?:chat)?|sc|tiktok|tt|twitter|tw|fb|facebook|linkedin|signal|viber|skype|wechat|messenger)\b/i.test(message)) return true;
+    // === REGEX PATTERNS for subtle bypass attempts ===
+    
+    // "what/whats/what's + ur/your + account/handle/username/contact-word"
+    if (/\b(?:what(?:'?s)?|wht|wats?|where(?:'?s)?)\s+(?:ur|your|u|yo)\s+(?:email|mail|number|phone|cell|contact|handle|username|user\s*name|account|id|tag|profile|socials?|@)\b/i.test(message)) return true;
+    
+    // "@username" style handles
+    if (/(?:^|\s)@[a-zA-Z][\w.]{2,}\b/.test(message)) return true;
+    
+    // "do you have [platform/contact word]" pattern
+    if (/\b(?:do\s+(?:you|u|ya)\s+(?:have|use|got)|(?:you|u|ya)\s+(?:have|use|got|on))\s+(?:any|a|an)?\s*(?:email|phone|number|contact|account|handle|socials?|other\s+(?:app|platform|channel|way))\b/i.test(message)) return true;
+    
+    // "send/give/share/drop + me + your/ur + [anything]" with contact intent
+    if (/\b(?:send|give|share|drop|pass|throw)\s+(?:me|us)\s+(?:ur|your|u|yo)\b/i.test(message)) return true;
+    
+    // "can we talk/chat/communicate + outside/elsewhere/privately"
+    if (/\b(?:can|could|shall|should|let'?s?|wanna|want\s+to)\s+(?:we\s+)?(?:talk|chat|speak|communicate|connect|meet)\s+(?:outside|elsewhere|privately|somewhere|off|on\s+(?:a|another))\b/i.test(message)) return true;
+    
+    // Catch "my [platform-ish word] is/:" pattern for sharing handles
+    if (/\bmy\s+(?:handle|username|user\s*name|account|id|tag|profile|@)\s*(?:is|:|=|-)/i.test(message)) return true;
+    
+    // Detect URL patterns (potential profile links)
+    if (/(?:https?:\/\/)?(?:www\.)?(?:instagram|facebook|twitter|tiktok|snapchat|linkedin|discord|telegram|t\.me|wa\.me|x)\.(?:com|co|gg|me)\/?[\w./-]*/i.test(message)) return true;
     
     return false;
   };
