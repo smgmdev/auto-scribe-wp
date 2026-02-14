@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
@@ -247,6 +247,8 @@ export function AdminUsersView() {
   const [userWithdrawals, setUserWithdrawals] = useState<Record<string, WithdrawalDetails[]>>({});
   const [loadingUserData, setLoadingUserData] = useState<Record<string, boolean>>({});
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
+  const [validating, setValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState<Map<string, { status: 'valid' | 'mismatch'; detail?: string }>>(new Map());
   
   const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
   
@@ -259,7 +261,58 @@ export function AdminUsersView() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
-  // Calculate counts for each tab
+  // Validate All: compare transaction sums vs user_credits table
+  const handleValidateAll = async () => {
+    setValidating(true);
+    await fetchUsers();
+    const { data: allDbCredits } = await supabase
+      .from('user_credits')
+      .select('user_id, credits');
+    const { data: allTxs } = await supabase
+      .from('credit_transactions')
+      .select('user_id, amount');
+    
+    const txSumMap = new Map<string, number>();
+    allTxs?.forEach(tx => {
+      txSumMap.set(tx.user_id, (txSumMap.get(tx.user_id) || 0) + tx.amount);
+    });
+    
+    const dbMap = new Map<string, number>();
+    allDbCredits?.forEach(c => dbMap.set(c.user_id, c.credits));
+    
+    let mismatchCount = 0;
+    const results = new Map<string, { status: 'valid' | 'mismatch'; detail?: string }>();
+    
+    const allUserIds = new Set([...txSumMap.keys(), ...dbMap.keys()]);
+    allUserIds.forEach(userId => {
+      const txSum = txSumMap.get(userId) ?? 0;
+      const dbVal = dbMap.get(userId) ?? 0;
+      const isValid = txSum === dbVal;
+      if (!isValid) mismatchCount++;
+      results.set(userId, {
+        status: isValid ? 'valid' : 'mismatch',
+        detail: isValid ? undefined : `DB: ${dbVal}, Tx Sum: ${txSum}, Diff: ${dbVal - txSum}`,
+      });
+    });
+    
+    setValidationResults(results);
+    setValidating(false);
+    
+    if (mismatchCount > 0) {
+      sonnerToast.warning(`${mismatchCount} user(s) have mismatched credit values`);
+    } else {
+      sonnerToast.success('All users validated successfully');
+    }
+  };
+
+  // Recalculate: refresh all user data
+  const handleRecalculateAll = async () => {
+    setValidating(true);
+    await fetchUsers();
+    setValidating(false);
+    sonnerToast.success('All user credits recalculated');
+  };
+
   const tabCounts = useMemo(() => ({
     all: users.length,
     users_confirmed: users.filter(u => u.emailConfirmed && !u.isAgency && !u.suspended).length,
@@ -938,19 +991,39 @@ export function AdminUsersView() {
             Manage user accounts and their credits
           </p>
         </div>
-        <Button
-          size="sm"
-          onClick={() => fetchUsers()}
-          disabled={loading}
-          className="w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black shadow-none transition-all duration-300"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          Refresh
-        </Button>
+        <div className="flex gap-0 w-full md:w-auto">
+          <Button
+            size="sm"
+            onClick={handleValidateAll}
+            disabled={loading || validating}
+            className="flex-1 md:flex-none bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground gap-2 shadow-none transition-all duration-300"
+          >
+            <CheckCircle2 className={`h-4 w-4 ${validating ? 'animate-spin' : ''}`} />
+            Validate All
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleRecalculateAll}
+            disabled={loading || validating}
+            className="flex-1 md:flex-none bg-transparent text-foreground hover:bg-foreground hover:text-background border border-foreground gap-2 shadow-none transition-all duration-300"
+          >
+            <RotateCw className={`h-4 w-4 ${validating ? 'animate-spin' : ''}`} />
+            Recalculate
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => fetchUsers()}
+            disabled={loading}
+            className="flex-1 md:flex-none bg-black text-white hover:bg-transparent hover:text-black border border-transparent hover:border-black shadow-none transition-all duration-300"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-0">
