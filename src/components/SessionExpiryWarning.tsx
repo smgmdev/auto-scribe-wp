@@ -12,9 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Shield, LogOut } from 'lucide-react';
 
-const WARNING_BEFORE_EXPIRY_MS = 60 * 1000;
+const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
 const CHECK_INTERVAL_MS = 10 * 1000;
-const TEST_MODE = true;
 
 export function SessionExpiryWarning() {
   const { session, signOut } = useAuth();
@@ -22,7 +22,8 @@ export function SessionExpiryWarning() {
   const [secondsLeft, setSecondsLeft] = useState(60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const checkRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const warningShownForRef = useRef<number | null>(null);
+  const warningShownForRef = useRef<string | null>(null);
+  const sessionStartRef = useRef<number | null>(null);
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -35,6 +36,7 @@ export function SessionExpiryWarning() {
     clearCountdown();
     setShowWarning(false);
     warningShownForRef.current = null;
+    sessionStartRef.current = Date.now(); // Reset session timer
 
     // Refresh the session
     try {
@@ -55,40 +57,26 @@ export function SessionExpiryWarning() {
     await signOut();
   }, [signOut, clearCountdown]);
 
-  // Check session expiry periodically
+  // Track session start and check expiry
   useEffect(() => {
-    // TEST MODE: Show popup immediately
-    if (TEST_MODE) {
-      setSecondsLeft(60);
-      setShowWarning(true);
-      clearCountdown();
-      countdownRef.current = setInterval(() => {
-        setSecondsLeft(prev => {
-          if (prev <= 1) {
-            clearCountdown();
-            setShowWarning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => {
-        clearCountdown();
-      };
-    }
-
     if (!session) {
       setShowWarning(false);
       clearCountdown();
+      sessionStartRef.current = null;
+      warningShownForRef.current = null;
       return;
     }
 
-    const checkExpiry = () => {
-      if (!session.expires_at) return;
+    // Set session start time when session changes
+    if (!sessionStartRef.current || warningShownForRef.current !== session.access_token) {
+      sessionStartRef.current = Date.now();
+    }
 
-      const expiresAtMs = session.expires_at * 1000;
-      const now = Date.now();
-      const timeUntilExpiry = expiresAtMs - now;
+    const checkExpiry = () => {
+      if (!sessionStartRef.current) return;
+
+      const elapsed = Date.now() - sessionStartRef.current;
+      const timeUntilExpiry = SESSION_DURATION_MS - elapsed;
 
       // If already expired, sign out immediately
       if (timeUntilExpiry <= 0) {
@@ -98,9 +86,9 @@ export function SessionExpiryWarning() {
         return;
       }
 
-      // If within warning window and haven't shown for this expiry
-      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && warningShownForRef.current !== session.expires_at) {
-        warningShownForRef.current = session.expires_at;
+      // If within warning window and haven't shown for this session
+      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && warningShownForRef.current !== session.access_token) {
+        warningShownForRef.current = session.access_token;
         const secs = Math.ceil(timeUntilExpiry / 1000);
         setSecondsLeft(secs);
         setShowWarning(true);
@@ -128,7 +116,7 @@ export function SessionExpiryWarning() {
       if (checkRef.current) clearInterval(checkRef.current);
       clearCountdown();
     };
-  }, [session?.expires_at, signOut, clearCountdown]);
+  }, [session?.access_token, signOut, clearCountdown]);
 
   // Cleanup on unmount
   useEffect(() => {
