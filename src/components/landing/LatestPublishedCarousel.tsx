@@ -148,7 +148,7 @@ export function LatestPublishedCarousel() {
       >
         <CarouselContent className="-ml-2">
           {articles.map((article) => (
-            <CarouselItem key={article.id} className="pl-2 md:basis-1/3">
+            <CarouselItem key={article.id} className="pl-2 sm:basis-1/3">
               <a
                 href={article.wp_link || '#'}
                 target="_blank"
