@@ -367,7 +367,7 @@ export function OrderWithCreditsDialog({
             <Button
               onClick={() => setBuyCreditsOpen(true)}
               variant="default"
-              className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-8 text-sm md:text-xs"
+              className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
             >
               <CreditCard className="h-4 w-4 mr-2" />
               Buy Credits
@@ -377,7 +377,7 @@ export function OrderWithCreditsDialog({
           <Button
             onClick={handleSendRequest}
             disabled={sending || loadingCredits || !hasEnoughCredits || !hasValidDuration}
-            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-8 text-sm md:text-xs"
+            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
           >
             {sending ? (
               <>
