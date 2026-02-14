@@ -621,12 +621,27 @@ export function AdminUsersView() {
     setCurrentView('admin-engagements');
   };
 
-  const handleOrderClick = (order: Order) => {
-    // Find the service request associated with this order and open the engagement
+  const handleOrderClick = async (order: Order) => {
     const serviceRequestId = order.service_requests?.[0]?.id;
-    if (serviceRequestId) {
-      localStorage.setItem('selectedEngagementId', serviceRequestId);
-      setCurrentView('admin-orders');
+    if (!serviceRequestId) return;
+    
+    try {
+      const { data: sr } = await supabase
+        .from('service_requests')
+        .select('id, title, status, description, user_id, media_site_id, order_id, agency_payout_id, created_at, media_sites:media_site_id(name, favicon, price, link)')
+        .eq('id', serviceRequestId)
+        .single();
+      
+      if (sr) {
+        const chatRequest = {
+          ...sr,
+          order: order,
+        };
+        const { openGlobalChat } = useAppStore.getState();
+        openGlobalChat(chatRequest as any, 'agency-request');
+      }
+    } catch (err) {
+      console.error('Failed to open engagement chat:', err);
     }
   };
 
