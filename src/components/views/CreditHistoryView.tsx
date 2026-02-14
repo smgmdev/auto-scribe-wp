@@ -174,18 +174,35 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'purchase' && t.amount > 0)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Navigate to the correct engagement chat for a specific order
-  const handleOrderCompletedClick = (orderId: string, transactionType?: string) => {
-    // If transaction is an earnings/payout type, navigate to agency's Client Requests
-    // Otherwise navigate to buyer's My Orders
+  // Open engagement chat directly for a specific order
+  const handleOrderCompletedClick = async (orderId: string, transactionType?: string) => {
+    if (!user) return;
+    
     const isSellerTransaction = transactionType === 'order_payout' || transactionType === 'earnings';
-    if (isSellerTransaction) {
-      setAgencyRequestsTargetOrderId(orderId);
-      setCurrentView('agency-requests');
+    
+    // Find the service request associated with this order
+    const { data: serviceRequest } = await supabase
+      .from('service_requests')
+      .select('*, media_sites!inner(*), orders(*)')
+      .eq('order_id', orderId)
+      .maybeSingle();
+    
+    if (serviceRequest) {
+      const chatRequest = {
+        id: serviceRequest.id,
+        title: serviceRequest.title,
+        description: serviceRequest.description,
+        status: serviceRequest.status,
+        read: serviceRequest.read,
+        created_at: serviceRequest.created_at,
+        updated_at: serviceRequest.updated_at,
+        cancellation_reason: serviceRequest.cancellation_reason,
+        media_site: serviceRequest.media_sites,
+        order: serviceRequest.orders?.[0] || null,
+      };
+      openGlobalChat(chatRequest as any, isSellerTransaction ? 'agency-request' : 'my-request');
     } else {
-      setOrdersTargetTab('completed');
-      setOrdersTargetOrderId(orderId);
-      setCurrentView('orders');
+      toast.error('Could not find the engagement for this order');
     }
   };
 
