@@ -1428,7 +1428,7 @@ export function SitesView() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full lg:max-w-md grid-cols-2 rounded-none">
+        <TabsList className="grid w-full grid-cols-2 rounded-none">
           <TabsTrigger value="instant">Local Library ({sites.length})</TabsTrigger>
           <TabsTrigger value="custom">Global Library ({mediaSites.length})</TabsTrigger>
         </TabsList>
