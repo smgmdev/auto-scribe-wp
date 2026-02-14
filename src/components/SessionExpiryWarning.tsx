@@ -148,7 +148,7 @@ export function SessionExpiryWarning() {
 
   return (
     <AlertDialog open={showWarning}>
-      <AlertDialogContent className="max-w-[320px] w-[90vw] rounded-lg p-4 sm:p-6 !h-auto !inset-auto fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <AlertDialogContent className="max-w-[320px] w-[90vw] rounded-lg p-4 sm:p-6 !h-auto !inset-auto fixed top-4 left-1/2 -translate-x-1/2 translate-y-0">
         <AlertDialogHeader className="space-y-1">
           <AlertDialogTitle className="flex items-center gap-2 text-base">
             <Shield className="h-4 w-4 text-amber-500" />
