@@ -1412,7 +1412,7 @@ export function AgencyRequestsView() {
         </TabsList>
         </div>
 
-      <div className="relative -mb-px" style={{ isolation: 'auto' }}>
+      <div className="relative -mb-px overflow-visible">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
         <Input
           placeholder="Search requests..."
@@ -1919,8 +1919,8 @@ export function AgencyRequestsView() {
 
         <TabsContent value="orders" className="mt-0">
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
-            <div className="relative overflow-x-auto overflow-y-visible scrollbar-hide z-10">
-            <TabsList className="!flex !w-max !min-w-full lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none p-0 h-auto [&>*]:flex-1">
+            <div className="relative overflow-x-auto overflow-y-visible scrollbar-hide z-10 pt-2 -mt-2">
+            <TabsList className="!flex !w-max !min-w-full lg:!grid lg:!w-full lg:grid-cols-4 lg:overflow-visible bg-black rounded-none p-0 h-auto [&>*]:flex-1 overflow-visible">
               <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible rounded-none py-2.5">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
