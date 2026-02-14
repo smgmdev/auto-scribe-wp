@@ -1402,7 +1402,7 @@ export function AgencyRequestsView() {
 
       <Tabs defaultValue="requests" value={activeTab === 'orders' ? 'orders' : 'requests'} onValueChange={(value) => setActiveTab(value === 'orders' ? 'orders' : 'active')} className="w-full">
         <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-2 lg:max-w-md md:overflow-visible">
+        <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
           <TabsTrigger value="requests" className="shrink-0 whitespace-nowrap relative overflow-visible">
             Requests ({activeRequests.length + completedRequests.length + cancelledRequests.length})
             {(unreadActiveCount + unreadCompletedRequestsCount + unreadCancelledCount) > 0 && (
@@ -1425,7 +1425,7 @@ export function AgencyRequestsView() {
         <TabsContent value="requests" className="mt-0">
           <Tabs value={requestsSubTab} onValueChange={(v) => setRequestsSubTab(v as 'active' | 'closed')} className="w-full">
             <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-2 lg:max-w-md md:overflow-visible">
+            <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible">
                 <MessageSquare className="h-4 w-4" />
                 Active ({activeRequests.length})
@@ -1655,7 +1655,7 @@ export function AgencyRequestsView() {
             <TabsContent value="closed" className="mt-0">
               <Tabs value={closedSubTab} onValueChange={(v) => setClosedSubTab(v as 'delivered' | 'cancelled')} className="w-full">
                 <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-                <TabsList className="!inline-flex !w-auto md:!grid md:!w-full md:grid-cols-2 lg:max-w-md md:overflow-visible">
+                <TabsList className="grid grid-cols-2 w-full lg:max-w-md md:overflow-visible bg-black rounded-none">
                   <TabsTrigger value="delivered" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible flex-1">
                     <CheckCircle className="h-4 w-4" />
                     Completed ({completedRequests.length})
@@ -1920,7 +1920,7 @@ export function AgencyRequestsView() {
         <TabsContent value="orders" className="mt-0">
           <Tabs value={ordersSubTab} onValueChange={(v) => setOrdersSubTab(v as 'active' | 'disputes' | 'completed' | 'cancelled')} className="w-full">
             <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto md:!grid md:!w-full lg:grid-cols-4 lg:max-w-2xl md:overflow-visible">
+            <TabsList className="grid grid-cols-4 w-full lg:max-w-2xl md:overflow-visible bg-black rounded-none">
               <TabsTrigger value="active" className="gap-2 shrink-0 whitespace-nowrap relative overflow-visible">
                 <ShoppingBag className="h-4 w-4" />
                 Active Orders ({activeOrders.length})
