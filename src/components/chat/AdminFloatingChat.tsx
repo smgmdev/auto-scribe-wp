@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2, Send, UserPlus, X, GripHorizontal, Info, ChevronDown, LogOut, ExternalLink, Building2, Clock, CheckCircle, ShoppingCart, Copy, Reply, User, MoreVertical, Mail, Calendar, Truck, RefreshCw, Phone, XCircle, Package, Scale } from 'lucide-react';
 import amblackLogo from '@/assets/amblack-2.png';
 import { Badge } from '@/components/ui/badge';
@@ -105,6 +106,7 @@ export function AdminFloatingChat({
   zIndex = 1000
 }: AdminFloatingChatProps) {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { incrementUnreadMessageCount } = useAppStore();
   
   const [messages, setMessages] = useState<ServiceMessage[]>(initialMessages);
@@ -149,6 +151,25 @@ export function AdminFloatingChat({
 
   const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
   
+  // On mobile, lock body scroll completely
+  useEffect(() => {
+    if (!isMobile) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobile]);
+
   // Auto-focus input when chat opens
   useEffect(() => {
     // Small delay to ensure the input is rendered
@@ -1379,26 +1400,30 @@ export function AdminFloatingChat({
     <>
       {/* Floating Chat Window - No backdrop, allows interaction with the rest of the app */}
       <div
-        className="fixed bg-background border rounded-t-lg shadow-2xl shadow-black/25 flex flex-col overflow-hidden"
+        className={`fixed bg-background shadow-2xl shadow-black/25 flex flex-col ${
+          isMobile ? 'inset-0 rounded-none border-0' : 'border rounded-t-lg overflow-hidden'
+        }`}
         style={{
-          width: '600px',
-          maxWidth: 'calc(100vw - 32px)',
-          height: '550px',
-          maxHeight: 'calc(100vh - 100px)',
-          left: `calc(50% + ${localPosition.x}px)`,
-          top: `calc(50% + ${localPosition.y}px)`,
-          transform: 'translate(-50%, -50%)',
+          width: isMobile ? '100vw' : '600px',
+          maxWidth: isMobile ? '100vw' : 'calc(100vw - 32px)',
+          height: isMobile ? '100dvh' : '550px',
+          maxHeight: isMobile ? '100dvh' : 'calc(100vh - 100px)',
+          left: isMobile ? '0' : `calc(50% + ${localPosition.x}px)`,
+          top: isMobile ? '0' : `calc(50% + ${localPosition.y}px)`,
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           zIndex
         }}
       >
         {/* Header */}
         <div 
-          className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-          onMouseDown={handleDragStart}
+          className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${!isMobile ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none`}
+          onMouseDown={isMobile ? undefined : handleDragStart}
         >
-          <div className="flex justify-center mb-1">
-            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          </div>
+          {!isMobile && (
+            <div className="flex justify-center mb-1">
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {request.media_sites?.favicon && (
