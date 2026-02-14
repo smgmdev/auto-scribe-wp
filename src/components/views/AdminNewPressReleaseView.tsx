@@ -518,7 +518,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Add Category Dialog */}
           <Dialog open={newCategoryDialogOpen} onOpenChange={setNewCategoryDialogOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-md overflow-y-auto">
+            <DialogContent className="fixed inset-0 translate-x-0 translate-y-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none border-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:h-auto md:max-h-[85vh] md:w-full md:max-w-md md:rounded-lg md:border overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Category</DialogTitle>
               </DialogHeader>
@@ -560,7 +560,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Manage Categories Dialog */}
           <Dialog open={manageCategoriesOpen} onOpenChange={setManageCategoriesOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-md overflow-y-auto">
+            <DialogContent className="fixed inset-0 translate-x-0 translate-y-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none border-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:h-auto md:max-h-[85vh] md:w-full md:max-w-md md:rounded-lg md:border overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Manage Categories</DialogTitle>
               </DialogHeader>
@@ -647,7 +647,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Delete Category Confirmation */}
           <AlertDialog open={!!deleteCategoryConfirm} onOpenChange={(open) => !open && setDeleteCategoryConfirm(null)}>
-            <AlertDialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-auto max-md:w-[calc(100%-2rem)] max-md:max-w-full max-md:rounded-none max-md:border-0">
+            <AlertDialogContent className="fixed inset-auto translate-x-0 translate-y-0 w-[calc(100%-2rem)] max-w-full rounded-none border-0 left-4 top-1/2 -translate-y-1/2 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg md:rounded-lg md:border">
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Category</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -785,7 +785,7 @@ export function AdminNewPressReleaseView() {
 
           {/* Manage Contacts Dialog */}
           <Dialog open={manageContactsOpen} onOpenChange={setManageContactsOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:w-full max-md:max-w-full max-md:rounded-none max-md:border-0 sm:max-w-lg overflow-y-auto">
+            <DialogContent className="fixed inset-0 translate-x-0 translate-y-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none border-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:h-auto md:max-h-[85vh] md:w-full md:max-w-lg md:rounded-lg md:border overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Manage Press Contacts</DialogTitle>
               </DialogHeader>
