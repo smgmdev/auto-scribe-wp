@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAvailableCredits } from '@/hooks/useAvailableCredits';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,12 +61,13 @@ export function OrderWithCreditsDialog({
   const [deliveryHours, setDeliveryHours] = useState<number>(initialData?.deliveryHours || 0);
   const [deliveryMinutes, setDeliveryMinutes] = useState<number>(initialData?.deliveryMinutes || 0);
   const [specialTerms, setSpecialTerms] = useState(initialData?.specialTerms || '');
-  const [lockedCredits, setLockedCredits] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
-  const [calculatedAvailable, setCalculatedAvailable] = useState<number | null>(null);
-  const [loadingCredits, setLoadingCredits] = useState(false);
-  const { credits, user } = useAuth();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
+
+  // Use centralized available credits hook
+  const { availableCredits, loading: loadingCredits, creditsInOrders, creditsInPendingRequests, refresh: refreshCredits } = useAvailableCredits(open);
+  const lockedCredits = creditsInOrders + creditsInPendingRequests;
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -86,101 +88,6 @@ export function OrderWithCreditsDialog({
     return () => removePopup('order-with-credits-dialog');
   }, [open, onOpenChange]);
 
-  // Fetch locked credits when dialog opens
-  React.useEffect(() => {
-    const fetchAvailableCredits = async () => {
-      if (!open || !user) return;
-      setLoadingCredits(true);
-      // Fetch all credit transactions to calculate available balance the same way as Credit Management
-      const { data: allTransactions } = await supabase
-        .from('credit_transactions')
-        .select('amount, type, description')
-        .eq('user_id', user.id);
-
-      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-      
-      const incomingCredits = (allTransactions || [])
-        .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      const outgoingCredits = (allTransactions || [])
-        .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
-      const totalBalance = incomingCredits - outgoingCredits;
-
-      // Calculate locked credits from active orders
-      let totalLocked = 0;
-
-      const { data: activeOrders } = await supabase
-        .from('orders')
-        .select('id, media_sites(price)')
-        .eq('user_id', user.id)
-        .neq('status', 'cancelled')
-        .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
-
-      if (activeOrders) {
-        for (const order of activeOrders) {
-          const ms = order.media_sites as { price: number } | null;
-          if (ms?.price) totalLocked += ms.price;
-        }
-      }
-
-      // Locked credits from pending requests with order requests
-      const { data: pendingRequests } = await supabase
-        .from('service_requests')
-        .select('id, media_site_id, media_sites(price)')
-        .eq('user_id', user.id)
-        .is('order_id', null)
-        .neq('status', 'cancelled');
-
-      if (pendingRequests && pendingRequests.length > 0) {
-        for (const request of pendingRequests) {
-          const { data: orderRequestMessages } = await supabase
-            .from('service_messages')
-            .select('id')
-            .eq('request_id', request.id)
-            .like('message', '%CLIENT_ORDER_REQUEST%')
-            .limit(1);
-
-          if (orderRequestMessages && orderRequestMessages.length > 0) {
-            const ms = request.media_sites as { price: number } | null;
-            if (ms?.price) totalLocked += ms.price;
-          }
-        }
-      }
-
-      // Calculate withdrawal amounts (locked + completed)
-      let withdrawalLockedCents = 0;
-      let withdrawalCompletedCents = 0;
-      
-      const withdrawalTxs = (allTransactions || []).filter(t => withdrawalTypes.includes(t.type));
-      for (const tx of withdrawalTxs) {
-        if (tx.type === 'withdrawal_locked') {
-          withdrawalLockedCents += Math.abs(tx.amount);
-        } else if (tx.type === 'withdrawal_unlocked') {
-          withdrawalLockedCents -= Math.abs(tx.amount);
-        } else if (tx.type === 'withdrawal_completed') {
-          withdrawalLockedCents -= Math.abs(tx.amount);
-          withdrawalCompletedCents += Math.abs(tx.amount);
-        }
-      }
-      withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
-      const withdrawalLockedDollars = withdrawalLockedCents / 100;
-      const withdrawalCompletedDollars = withdrawalCompletedCents / 100;
-
-      // Available = Total Balance - Locked Credits - Pending Withdrawals - Completed Withdrawals
-      const available = totalBalance - totalLocked - withdrawalLockedDollars - withdrawalCompletedDollars;
-      
-      setLockedCredits(totalLocked);
-      setCalculatedAvailable(available);
-      setLoadingCredits(false);
-    };
-
-    fetchAvailableCredits();
-  }, [open, user]);
-
   // Update state when initialData changes (for resend mode)
   React.useEffect(() => {
     if (open && initialData) {
@@ -192,7 +99,6 @@ export function OrderWithCreditsDialog({
   }, [open, initialData]);
 
   const creditCost = mediaSite?.price || 0;
-  const availableCredits = calculatedAvailable !== null ? calculatedAvailable : (credits || 0) - lockedCredits;
   const hasEnoughCredits = availableCredits >= creditCost;
   const totalDurationMinutes = (deliveryDays * 24 * 60) + (deliveryHours * 60) + deliveryMinutes;
   const hasValidDuration = totalDurationMinutes > 0;

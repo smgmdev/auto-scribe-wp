@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
+import { useAvailableCredits } from '@/hooks/useAvailableCredits';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -94,22 +95,8 @@ export function DashboardView() {
     loading: true
   });
   
-  // Available credits calculation state
-  const [availableCreditsData, setAvailableCreditsData] = useState({
-    availableCredits: 0,
-    totalBalance: 0,
-    earnedCredits: 0,
-    purchasedOnline: 0,
-    purchasedOffline: 0,
-    totalPurchased: 0,
-    creditsInOrders: 0,
-    creditsInPendingRequests: 0,
-    creditsWithdrawn: 0,
-    creditsInWithdrawals: 0,
-    totalOrders: 0,
-    totalSpent: 0,
-    loading: true
-  });
+  // Use centralized available credits hook
+  const availableCreditsData = useAvailableCredits();
 
   const agencyStatusLoading = isAgency === null && !isAdmin;
   const isDataLoading = articlesLoading || sitesLoading || globalLibraryLoading;
@@ -118,7 +105,6 @@ export function DashboardView() {
     const fetchAgencyStatus = async () => {
       if (!user || isAdmin) return;
       
-      // Check if user has completed agency onboarding (not just application approved)
       const { data } = await supabase
         .from('agency_payouts')
         .select('id, onboarding_complete')
@@ -131,171 +117,6 @@ export function DashboardView() {
 
     fetchAgencyStatus();
   }, [user, isAdmin]);
-
-  // Fetch available credits with full calculation
-  useEffect(() => {
-    const fetchAvailableCredits = async () => {
-      if (!user) return;
-      setAvailableCreditsData(prev => ({ ...prev, loading: true }));
-      
-      // Fetch all credit transactions for this user
-      const { data: transactions } = await supabase
-        .from('credit_transactions')
-        .select('amount, type')
-        .eq('user_id', user.id);
-
-      // Calculate totals from transactions
-      let earnedCredits = 0;
-      let purchasedOnline = 0;
-      let purchasedOffline = 0;
-      
-      // Withdrawal types should be excluded from balance calculation (handled separately via agency_withdrawals)
-      const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-      
-      if (transactions) {
-        transactions.forEach(t => {
-          // Earned credits (order payouts)
-          if (t.type === 'order_payout') {
-            earnedCredits += t.amount;
-          }
-          // Purchased online (via platform)
-          if (t.type === 'purchase') {
-            purchasedOnline += t.amount;
-          }
-          // Purchased offline (gifted/admin_credit)
-          if (t.type === 'gifted' || t.type === 'admin_credit') {
-            purchasedOffline += t.amount;
-          }
-        });
-      }
-      
-      const totalPurchased = purchasedOnline + purchasedOffline;
-
-      // Calculate incoming/outgoing matching CreditHistoryView logic
-      const incomingCredits = transactions
-        ? transactions
-            .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
-            .reduce((sum, t) => sum + t.amount, 0)
-        : 0;
-      
-      const outgoingCredits = transactions
-        ? transactions
-            .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
-            .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-        : 0;
-
-      const actualTotalBalance = incomingCredits - outgoingCredits;
-
-      // Fetch locked credits from active orders
-      const { data: activeOrders } = await supabase
-        .from('orders')
-        .select('media_sites(price)')
-        .eq('user_id', user.id)
-        .neq('status', 'cancelled')
-        .neq('status', 'completed')
-        .neq('delivery_status', 'accepted');
-
-      let creditsInOrders = 0;
-      if (activeOrders) {
-        activeOrders.forEach((order: any) => {
-          if (order.media_sites?.price) {
-            creditsInOrders += order.media_sites.price;
-          }
-        });
-      }
-
-      // Fetch pending service requests with locked credits
-      const { data: pendingRequests } = await supabase
-        .from('service_requests')
-        .select('id, media_sites(price)')
-        .eq('user_id', user.id)
-        .is('order_id', null)
-        .neq('status', 'cancelled');
-
-      let creditsInPendingRequests = 0;
-      if (pendingRequests) {
-        for (const request of pendingRequests) {
-          const { data: orderRequestMessages } = await supabase
-            .from('service_messages')
-            .select('id')
-            .eq('request_id', request.id)
-            .like('message', '%CLIENT_ORDER_REQUEST%')
-            .limit(1);
-
-          if (orderRequestMessages && orderRequestMessages.length > 0) {
-            const mediaSite = request.media_sites as { price: number } | null;
-            if (mediaSite?.price) {
-              creditsInPendingRequests += mediaSite.price;
-            }
-          }
-        }
-      }
-
-      // Fetch withdrawal data
-      const { data: withdrawals } = await supabase
-        .from('agency_withdrawals')
-        .select('amount_cents, status')
-        .eq('user_id', user.id);
-
-      let creditsInWithdrawals = 0;
-      let creditsWithdrawn = 0;
-      if (withdrawals) {
-        withdrawals.forEach(w => {
-          if (w.status === 'pending') {
-            creditsInWithdrawals += (w.amount_cents || 0) / 100;
-          }
-          if (w.status === 'completed' || w.status === 'approved') {
-            creditsWithdrawn += (w.amount_cents || 0) / 100;
-          }
-        });
-      }
-
-      // Fetch completed orders for total orders count and total spent
-      const { data: completedOrders } = await supabase
-        .from('orders')
-        .select('media_sites(price)')
-        .eq('user_id', user.id)
-        .eq('delivery_status', 'accepted');
-
-      let totalOrders = 0;
-      let totalSpent = 0;
-      if (completedOrders) {
-        totalOrders = completedOrders.length;
-        completedOrders.forEach((order: any) => {
-          if (order.media_sites?.price) {
-            totalSpent += order.media_sites.price;
-          }
-        });
-      }
-
-      // Also count agency delivery orders (order_payout transactions)
-      const deliveryOrdersCount = transactions
-        ? transactions.filter(t => t.type === 'order_payout').length
-        : 0;
-      totalOrders += deliveryOrdersCount;
-
-      const creditsInUse = creditsInOrders + creditsInPendingRequests;
-      const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
-
-      setAvailableCreditsData({
-        availableCredits,
-        totalBalance: actualTotalBalance,
-        earnedCredits,
-        purchasedOnline,
-        purchasedOffline,
-        totalPurchased,
-        creditsInOrders,
-        creditsInPendingRequests,
-        creditsWithdrawn,
-        creditsInWithdrawals,
-        totalOrders,
-        totalSpent,
-        loading: false
-      });
-    };
-
-    fetchAvailableCredits();
-  }, [user]);
 
   // Fetch agency summary data (wallet balance and total sales)
   useEffect(() => {
