@@ -419,11 +419,11 @@ export function AdminAISettingsView() {
           <h1 className="text-3xl font-bold">AI Config</h1>
           <p className="text-muted-foreground">Configure automatic AI-based publishing</p>
         </div>
-        <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex flex-col md:flex-row gap-0">
           {!isAdding && (
             <Button 
               onClick={() => setIsAdding(true)}
-              className="bg-primary text-primary-foreground border border-transparent hover:bg-transparent hover:text-primary hover:border-primary"
+              className="bg-black text-white border border-black rounded-none hover:bg-transparent hover:text-black"
             >
               New Config
             </Button>
@@ -431,7 +431,7 @@ export function AdminAISettingsView() {
           <Button 
             onClick={handleRefresh}
             disabled={settingsLoading || isRefreshing}
-            className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground"
+            className="bg-black text-white border border-black rounded-none hover:bg-transparent hover:text-black -mt-px md:-mt-0 md:-ml-px"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
