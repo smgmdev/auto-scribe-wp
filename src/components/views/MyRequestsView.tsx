@@ -1120,10 +1120,10 @@ export function MyRequestsView() {
             size="sm"
             onClick={handleRefresh}
             disabled={refreshing}
-            className={`hidden md:inline-flex gap-2 border border-foreground transition-all duration-200 ${
+            className={`hidden md:inline-flex gap-2 border transition-all duration-200 ${
               refreshing 
-                ? 'bg-transparent text-foreground' 
-                : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+                ? 'bg-transparent text-black border-black' 
+                : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -1134,10 +1134,10 @@ export function MyRequestsView() {
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className={`md:hidden w-full mt-4 gap-2 border border-foreground transition-all duration-200 ${
+          className={`md:hidden w-full mt-4 gap-2 border transition-all duration-200 ${
             refreshing 
-              ? 'bg-transparent text-foreground' 
-              : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+              ? 'bg-transparent text-black border-black' 
+              : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
           }`}
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
