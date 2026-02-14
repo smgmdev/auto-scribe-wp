@@ -787,6 +787,40 @@ export function CreditHistoryView() {
     }
   }
 
+  // Hide order_accepted when a matching unlocked "Order cancelled" transaction exists (order accepted then cancelled)
+  const orderAcceptedToHideForCancel = new Set<string>();
+  for (const accepted of orderAcceptedTransactions) {
+    const acceptedMediaMatch = accepted.description?.match(/:\s*(.+)$/);
+    const acceptedMediaName = acceptedMediaMatch ? acceptedMediaMatch[1].trim() : null;
+    if (!acceptedMediaName) continue;
+    // Skip if already hidden by order_completed
+    if (accepted.order_id && completedOrderIds.has(accepted.order_id)) continue;
+
+    const acceptedTime = new Date(accepted.created_at).getTime();
+    let bestMatch: typeof filteredTransactions[0] | null = null;
+    let bestTimeDiff = Infinity;
+
+    for (const unlock of unlockedTransactions) {
+      if (usedUnlockIds.has(unlock.id)) continue;
+      // Match "Order cancelled: SiteName (credits unlocked)"
+      const unlockMediaMatch = unlock.description?.match(/:\s*(.+?)\s*\(/);
+      const unlockMediaName = unlockMediaMatch ? unlockMediaMatch[1].trim() : null;
+      if (unlockMediaName !== acceptedMediaName) continue;
+      if (!unlock.description?.includes('Order cancelled')) continue;
+
+      const unlockTime = new Date(unlock.created_at).getTime();
+      const timeDiff = unlockTime - acceptedTime;
+      if (timeDiff > 0 && timeDiff < bestTimeDiff) {
+        bestTimeDiff = timeDiff;
+        bestMatch = unlock;
+      }
+    }
+
+    if (bestMatch) {
+      orderAcceptedToHideForCancel.add(accepted.id);
+    }
+  }
+
   // Also hide offer_accepted transactions when a matching unlocked (cancelled) transaction exists
   const offerAcceptedToHide = new Set<string>();
   const offerAcceptedTransactions = filteredTransactions.filter(t => t.type === 'offer_accepted');
@@ -833,6 +867,10 @@ export function CreditHistoryView() {
     }
     // Hide locked transactions that have been matched with an order_accepted transaction
     if (t.type === 'locked' && lockedToHideForAccepted.has(t.id)) {
+      return false;
+    }
+    // Hide order_accepted if the order was later cancelled (matching unlocked transaction)
+    if (t.type === 'order_accepted' && orderAcceptedToHideForCancel.has(t.id)) {
       return false;
     }
     // Hide order_accepted if there's a corresponding order_completed for the same order
