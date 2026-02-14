@@ -42,7 +42,7 @@ interface TerminalLine {
   data?: UserRecord[];
 }
 
-let lineId = 0;
+let lineId = Date.now();
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
@@ -82,6 +82,7 @@ export function AdminSystemView() {
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('Profiles query result:', { profiles, profilesError });
       if (profilesError) throw profilesError;
 
       const [rolesRes, creditsRes, ordersRes, transactionsRes, activeOrdersRes, pendingRequestsRes, serviceMessagesRes] = await Promise.all([
