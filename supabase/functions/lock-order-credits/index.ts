@@ -86,11 +86,10 @@ serve(async (req) => {
     const creditCost = mediaSite.price;
     logStep("Media site found", { name: mediaSite.name, price: creditCost });
 
-    // Calculate available credits using the authoritative ledger sum
-    // Total balance = sum of ALL non-withdrawal transactions
+    // Calculate available credits from transaction history
     const { data: transactions, error: txError } = await supabaseAdmin
       .from("credit_transactions")
-      .select("amount, type")
+      .select("amount, type, order_id")
       .eq("user_id", user.id);
 
     if (txError) {
@@ -103,7 +102,8 @@ serve(async (req) => {
 
     const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
     
-    let totalBalance = 0;
+    let incoming = 0;
+    let outgoing = 0;
     let withdrawn = 0;
     
     for (const tx of (transactions || [])) {
@@ -112,10 +112,18 @@ serve(async (req) => {
         continue;
       }
       if (withdrawalTypes.includes(tx.type)) continue;
-      totalBalance += tx.amount;
+      
+      if (tx.amount > 0 && tx.type !== 'unlocked') {
+        incoming += tx.amount;
+      }
+      if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
+        outgoing += Math.abs(tx.amount);
+      }
     }
 
-    // Calculate locked from active orders
+    const totalBalance = incoming - outgoing;
+
+    // Calculate locked from active orders (not cancelled/completed)
     const { data: activeOrders } = await supabaseAdmin
       .from("orders")
       .select("id, media_sites(price)")
@@ -134,27 +142,19 @@ serve(async (req) => {
       }
     }
 
-    // Calculate locked from pending offer_accepted (service requests with accepted offers but no order yet)
+    // Calculate locked from offer_accepted - but only if the linked order is NOT cancelled/completed
+    const activeOrderIds = new Set((activeOrders || []).map(o => o.id));
     let offerLocked = 0;
     for (const tx of (transactions || [])) {
-      if (tx.type === 'offer_accepted' && tx.amount < 0) {
-        offerLocked += Math.abs(tx.amount);
+      if (tx.type === 'offer_accepted' && tx.amount < 0 && tx.order_id) {
+        // Only count as locked if the associated order is still active
+        if (activeOrderIds.has(tx.order_id)) {
+          offerLocked += Math.abs(tx.amount);
+        }
       }
     }
 
-    // Calculate locked from pending order requests (locked type without matching unlocked/completed)
-    let pendingLocked = 0;
-    const lockedTxs = (transactions || []).filter(tx => tx.type === 'locked' && tx.amount < 0);
-    const unlockedTotal = (transactions || [])
-      .filter(tx => tx.type === 'unlocked' && tx.amount > 0)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    const lockedTotal = lockedTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-    // If there are more locked than unlocked, the difference is still pending
-    if (lockedTotal > unlockedTotal) {
-      pendingLocked = lockedTotal - unlockedTotal;
-    }
-
-    const totalLocked = lockedInOrders + offerLocked + pendingLocked;
+    const totalLocked = lockedInOrders + offerLocked;
     const availableCredits = totalBalance - totalLocked - withdrawn;
     
     // Check if user has enough AVAILABLE credits
