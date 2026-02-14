@@ -1549,7 +1549,7 @@ export function AdminMediaManagementView() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="relative md:pt-2 overflow-visible scrollbar-hide">
+        <div className="relative overflow-visible scrollbar-hide">
         <TabsList className="flex w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
           <TabsTrigger value="media" className="relative overflow-visible flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Media Sites ({mediaSites.length})
@@ -1574,7 +1574,7 @@ export function AdminMediaManagementView() {
         <TabsContent value="wordpress" className="mt-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
-            <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
+            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
             <TabsList className="flex w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
               <TabsTrigger value="approved" className="flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Approved ({approvedSites.length})
