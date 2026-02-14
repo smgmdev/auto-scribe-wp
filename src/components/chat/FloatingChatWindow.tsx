@@ -2653,22 +2653,30 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     const phoneRegex = /(\+\d{1,4}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{2,}[\s.-]?\d{2,})/;
     if (phoneRegex.test(message)) return true;
     
-    // Social media / messaging platform mentions with intent
-    const platforms = ['whatsapp', 'telegram', 'discord', 'signal', 'viber', 'wechat', 'skype', 'instagram', 'facebook', 'twitter', 'snapchat', 'tiktok', 'linkedin'];
-    const intentWords = ['add me', 'message me', 'reach me', 'contact me', 'hit me up', 'dm me', 'text me', 'call me', 'find me', 'connect on', 'let\'s talk on', 'move to', 'switch to', 'my handle', 'my username', 'my number', 'my email', 'send me your', 'what\'s your', 'whats your', 'give me your', 'share your', 'can i get your', 'drop your'];
+    // Social media / messaging platform mentions - trigger on ANY mention
+    const platformsAlwaysTrigger = [
+      'whatsapp', 'whtsapp', 'watsapp', 'whtsp', 'wa\\.me',
+      'telegram', 'tg', 't\\.me',
+      'discord', 'dc',
+      'signal',
+      'viber',
+      'wechat',
+      'skype',
+      'instagram', 'insta', 'ig',
+      'facebook', 'fb', 'messenger',
+      'twitter', 'tw', 'x\\.com',
+      'snapchat', 'snap', 'sc',
+      'tiktok', 'tt',
+      'linkedin',
+      'line app', 'kakaotalk', 'kakao',
+      'imessage', 'facetime',
+      'zalo', 'kik', 'wickr', 'threema'
+    ];
     
-    for (const platform of platforms) {
-      if (lowerMsg.includes(platform)) {
-        // Platform mentioned with any intent word
-        for (const intent of intentWords) {
-          if (lowerMsg.includes(intent)) return true;
-        }
-        // Platform mentioned with @ handle pattern
-        if (/@[\w.]+/.test(message) && lowerMsg.includes(platform)) return true;
-        // Direct mention like "my whatsapp is..." or "on telegram:"
-        if (new RegExp(`(my|on|via|through|over)\\s+${platform}`, 'i').test(message)) return true;
-        if (new RegExp(`${platform}\\s*(:|is|-)`, 'i').test(message)) return true;
-      }
+    // Check if any platform name is mentioned (word boundary match)
+    for (const platform of platformsAlwaysTrigger) {
+      const regex = new RegExp(`\\b${platform}\\b`, 'i');
+      if (regex.test(message)) return true;
     }
     
     // Direct contact exchange phrases without platform
@@ -2695,7 +2703,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     }
 
     // Catch asking patterns: "what/whats/what's + ur/your + contact-related word"
-    if (/\b(?:what(?:'?s)?|wht|wats?)\s+(?:ur|your|u)\s+(?:email|mail|number|phone|cell|contact|whatsapp|telegram|discord|insta(?:gram)?|snap(?:chat)?|tiktok|twitter|fb|facebook)\b/i.test(message)) return true;
+    if (/\b(?:what(?:'?s)?|wht|wats?)\s+(?:ur|your|u)\s+(?:email|mail|number|phone|cell|contact|whatsapp|whtsapp|telegram|tg|discord|dc|insta(?:gram)?|ig|snap(?:chat)?|sc|tiktok|tt|twitter|tw|fb|facebook|linkedin|signal|viber|skype|wechat|messenger)\b/i.test(message)) return true;
     
     return false;
   };
