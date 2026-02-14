@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
+import { Terminal } from 'lucide-react';
 
 interface UserRecord {
   id: string;
@@ -311,7 +312,7 @@ export function AdminSystemView() {
     >
       {/* Input Line */}
       <div className="flex items-center px-4 py-3 font-mono text-sm border-b border-white/10">
-        <span className="text-green-400 mr-2 select-none">$</span>
+        <Terminal className="h-4 w-4 text-green-400 mr-2 shrink-0" />
         <input
           ref={inputRef}
           value={input}
