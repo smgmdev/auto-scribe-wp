@@ -11,6 +11,7 @@ import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAvailableCredits } from '@/hooks/useAvailableCredits';
 import { useAppStore } from '@/stores/appStore';
 import { format } from 'date-fns';
 
@@ -41,13 +42,6 @@ export function CreditHistoryView() {
   const hasScrolledToTransaction = useRef(false);
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
-  const [creditsInUse, setCreditsInUse] = useState<number>(0);
-  const [creditsInOrders, setCreditsInOrders] = useState<number>(0);
-  const [creditsInPendingRequests, setCreditsInPendingRequests] = useState<number>(0);
-  const [creditsInWithdrawals, setCreditsInWithdrawals] = useState<number>(0);
-  const [creditsWithdrawn, setCreditsWithdrawn] = useState<number>(0);
-  const [withdrawalsByBank, setWithdrawalsByBank] = useState<number>(0);
-  const [withdrawalsByCrypto, setWithdrawalsByCrypto] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
   const [completedOrdersSpent, setCompletedOrdersSpent] = useState<number>(0);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
@@ -58,6 +52,16 @@ export function CreditHistoryView() {
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Use centralized available credits hook
+  const creditData = useAvailableCredits();
+  const { 
+    availableCredits, totalBalance: actualTotalBalance, 
+    creditsInOrders, creditsInPendingRequests, creditsWithdrawn, 
+    creditsInWithdrawals, withdrawalsByBank, withdrawalsByCrypto,
+    refresh: refreshCredits
+  } = creditData;
+  const creditsInUse = creditsInOrders + creditsInPendingRequests + creditsInWithdrawals;
 
   // Handle transaction query param for deep linking
   useEffect(() => {
@@ -259,30 +263,10 @@ export function CreditHistoryView() {
     }
   };
 
-  // Total credit balance = Sum of all incoming credits - outgoing credits (excluding locked)
-  // Incoming: purchase, gifted, admin_credit, refund, unlocked (positive amounts)
-  // Outgoing: spent, order_completed, order_delivered, admin_deduct (negative amounts, but NOT locked/offer_accepted)
-  // Note: withdrawal transactions are in cents and handled separately
-  const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-  
-  const incomingCredits = transactions
-    .filter(t => t.amount > 0 && !withdrawalTypes.includes(t.type) && t.type !== 'unlocked')
-    .reduce((sum, t) => sum + t.amount, 0);
-  
-  const outgoingCredits = transactions
-    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !withdrawalTypes.includes(t.type))
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  
-  const actualTotalBalance = incomingCredits - outgoingCredits;
-  
-  // Available = Total Balance - Locked Credits - Completed Withdrawals
-  // creditsInWithdrawals is already in dollars (converted from cents)
-  const availableCredits = actualTotalBalance - creditsInUse - creditsWithdrawn;
-
   // Refresh handler
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchData(false);
+    await Promise.all([fetchData(false), refreshCredits()]);
     setRefreshing(false);
     toast.success('Credits refreshed');
   };
@@ -308,8 +292,7 @@ export function CreditHistoryView() {
       .rpc('get_user_credits', { _user_id: user.id });
     setTotalCredits(creditsData || 0);
 
-    // Fetch only pending/active orders to calculate locked credits
-    // Exclude: cancelled orders, completed orders, and accepted deliveries
+    // Fetch locked orders list for UI display
     const { data: activeOrders } = await supabase
       .from('orders')
       .select('id, amount_cents, media_site_id, media_sites(name, price)')
@@ -318,8 +301,6 @@ export function CreditHistoryView() {
       .neq('status', 'completed')
       .neq('delivery_status', 'accepted');
 
-    // Also fetch pending service requests that have order requests sent but no order created yet
-    // These are requests where credits have been locked via CLIENT_ORDER_REQUEST
     const { data: pendingRequests } = await supabase
       .from('service_requests')
       .select('id, media_site_id, media_sites(name, price)')
@@ -327,11 +308,19 @@ export function CreditHistoryView() {
       .is('order_id', null)
       .neq('status', 'cancelled');
 
-    // Check which pending requests have CLIENT_ORDER_REQUEST messages (credits locked)
-    const pendingWithLockedCredits: LockedOrder[] = [];
-    if (pendingRequests && pendingRequests.length > 0) {
+    const orders: LockedOrder[] = [];
+
+    if (activeOrders) {
+      for (const order of activeOrders) {
+        const mediaSite = order.media_sites as { name: string; price: number } | null;
+        if (mediaSite?.price) {
+          orders.push({ id: order.id, mediaName: mediaSite.name || 'Unknown', credits: mediaSite.price, type: 'order' });
+        }
+      }
+    }
+
+    if (pendingRequests) {
       for (const request of pendingRequests) {
-        // Check if this request has a CLIENT_ORDER_REQUEST message
         const { data: orderRequestMessages } = await supabase
           .from('service_messages')
           .select('id')
@@ -342,98 +331,12 @@ export function CreditHistoryView() {
         if (orderRequestMessages && orderRequestMessages.length > 0) {
           const mediaSite = request.media_sites as { name: string; price: number } | null;
           if (mediaSite?.price) {
-            pendingWithLockedCredits.push({
-              id: request.id,
-              mediaName: mediaSite.name || 'Unknown',
-              credits: mediaSite.price,
-              type: 'pending_request'
-            });
+            orders.push({ id: request.id, mediaName: mediaSite.name || 'Unknown', credits: mediaSite.price, type: 'pending_request' });
           }
         }
       }
     }
 
-    let totalInUse = 0;
-    let ordersTotal = 0;
-    let pendingTotal = 0;
-    const orders: LockedOrder[] = [];
-
-    // Add active orders
-    if (activeOrders && activeOrders.length > 0) {
-      for (const order of activeOrders) {
-        const mediaSite = order.media_sites as { name: string; price: number } | null;
-        if (mediaSite?.price) {
-          totalInUse += mediaSite.price;
-          ordersTotal += mediaSite.price;
-          orders.push({
-            id: order.id,
-            mediaName: mediaSite.name || 'Unknown',
-            credits: mediaSite.price,
-            type: 'order'
-          });
-        }
-      }
-    }
-
-    // Add pending requests with locked credits
-    for (const pendingOrder of pendingWithLockedCredits) {
-      totalInUse += pendingOrder.credits;
-      pendingTotal += pendingOrder.credits;
-      orders.push(pendingOrder);
-    }
-
-    // Calculate pending withdrawal amounts from transactions
-    // withdrawal_locked creates negative amounts, so we need to find the net locked amount
-    const { data: withdrawalTransactions } = await supabase
-      .from('credit_transactions')
-      .select('amount, type, description')
-      .eq('user_id', user.id)
-      .in('type', ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed']);
-
-    let withdrawalLockedCents = 0;
-    let withdrawalCompletedCents = 0;
-    let bankLockedCents = 0;
-    let cryptoLockedCents = 0;
-    
-    if (withdrawalTransactions) {
-      for (const tx of withdrawalTransactions) {
-        const isBank = tx.description?.includes('Bank Transfer');
-        const isCrypto = tx.description?.includes('USDT');
-        
-        if (tx.type === 'withdrawal_locked') {
-          const amount = Math.abs(tx.amount);
-          withdrawalLockedCents += amount;
-          if (isBank) bankLockedCents += amount;
-          if (isCrypto) cryptoLockedCents += amount;
-        } else if (tx.type === 'withdrawal_unlocked') {
-          const amount = Math.abs(tx.amount);
-          withdrawalLockedCents -= amount;
-          if (isBank) bankLockedCents -= amount;
-          if (isCrypto) cryptoLockedCents -= amount;
-        } else if (tx.type === 'withdrawal_completed') {
-          const amount = Math.abs(tx.amount);
-          withdrawalLockedCents -= amount;
-          withdrawalCompletedCents += amount;
-          if (isBank) bankLockedCents -= amount;
-          if (isCrypto) cryptoLockedCents -= amount;
-        }
-      }
-    }
-    // Ensure we don't go negative and convert cents to dollars
-    withdrawalLockedCents = Math.max(0, withdrawalLockedCents);
-    bankLockedCents = Math.max(0, bankLockedCents);
-    cryptoLockedCents = Math.max(0, cryptoLockedCents);
-    
-    const withdrawalLockedDollars = withdrawalLockedCents / 100;
-    setCreditsInWithdrawals(withdrawalLockedDollars);
-    setCreditsWithdrawn(withdrawalCompletedCents / 100);
-    setWithdrawalsByBank(bankLockedCents / 100);
-    setWithdrawalsByCrypto(cryptoLockedCents / 100);
-    totalInUse += withdrawalLockedDollars;
-
-    setCreditsInUse(totalInUse);
-    setCreditsInOrders(ordersTotal);
-    setCreditsInPendingRequests(pendingTotal);
     setLockedOrders(orders);
 
     // Fetch completed orders to calculate total spent
@@ -567,6 +470,7 @@ export function CreditHistoryView() {
         () => {
           console.log('Credits updated, refreshing...');
           fetchData(false);
+          refreshCredits();
         }
       )
       .subscribe();
@@ -585,6 +489,7 @@ export function CreditHistoryView() {
         (payload) => {
           console.log('Transaction updated:', payload.eventType, payload);
           fetchData(false);
+          refreshCredits();
         }
       )
       .subscribe();
@@ -603,6 +508,7 @@ export function CreditHistoryView() {
         () => {
           console.log('Orders updated, refreshing...');
           fetchData(false);
+          refreshCredits();
         }
       )
       .subscribe();
@@ -621,6 +527,7 @@ export function CreditHistoryView() {
         () => {
           console.log('Service requests updated, refreshing...');
           fetchData(false);
+          refreshCredits();
         }
       )
       .subscribe();
@@ -641,6 +548,7 @@ export function CreditHistoryView() {
           if (message.includes('CLIENT_ORDER_REQUEST')) {
             console.log('Order request message detected, refreshing...');
             fetchData(false);
+            refreshCredits();
           }
         }
       )
