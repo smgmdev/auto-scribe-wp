@@ -182,18 +182,9 @@ export function AdminSystemView() {
         setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.' }]);
         setExpandedUsers(new Set());
         break;
-      case '/help':
-        addLine('info', '┌─────────────────────────────────────┐');
-        addLine('info', '│  Available Commands                 │');
-        addLine('info', '├─────────────────────────────────────┤');
-        addLine('info', '│  /db       Fetch all users + data   │');
-        addLine('info', '│  /clear    Clear terminal            │');
-        addLine('info', '│  /help     Show this help            │');
-        addLine('info', '└─────────────────────────────────────┘');
-        break;
       default:
         addLine('error', `Unknown command: ${trimmed}`);
-        addLine('info', 'Type /help for available commands.');
+        addLine('info', 'Available commands: /db, /clear');
         break;
     }
   };
