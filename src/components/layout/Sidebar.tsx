@@ -594,22 +594,22 @@ export function Sidebar({
                   }
                 }
                 
-                // Count unread orders for agency - only if the request wasn't already counted for unread messages
+                // Count unread orders for agency - independently of message-based counts
+                // Orders tab badges should count regardless of whether the request also has unread messages
                 for (const request of requestsData) {
-                  if (countedRequests.has(request.id)) continue; // Already counted
                   if (!request.order_id) continue;
+                  if (request.status === 'cancelled') continue;
                   
                   const order = ordersMap[request.order_id];
-                  if (!order || request.status === 'cancelled') continue;
+                  if (!order) continue;
                   
-                  // Active orders that haven't been read
-                  if (!order.read && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted' && order.status !== 'cancelled') {
-                    countedRequests.add(request.id);
+                  // Active orders that haven't been read by agency
+                  if (!order.agency_read && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted' && order.status !== 'cancelled') {
                     unreadOrdersCount++;
                   }
                   // Completed orders (only 'accepted' = client approved) that agency hasn't seen
-                  else if (!order.agency_read && order.delivery_status === 'accepted') {
-                    countedRequests.add(request.id);
+                  // Only count if not already counted from unread messages
+                  else if (!countedRequests.has(request.id) && !order.agency_read && order.delivery_status === 'accepted') {
                     unreadCompletedCount++;
                   }
                 }
