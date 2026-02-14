@@ -199,16 +199,18 @@ export function AdminFeedbackView() {
                     <Card key={report.id} className="border-b last:border-b-0 border-x-0 border-t-0 shadow-none hover:bg-muted/50 transition-colors">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between gap-2 mb-1.5">
-                          <div className="min-w-0 flex-1">
+                            <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-0.5">
                               <p className="text-sm font-semibold truncate">{report.subject}</p>
-                              <Badge className={cn("text-xs px-2 py-0.5 h-5 text-white", statusConfig.color)}>
+                              <Badge className="text-xs px-2 py-0 h-5 shrink-0" variant="outline">
+                                {CATEGORY_LABELS[report.category] || report.category}
+                              </Badge>
+                              <Badge className={cn("text-xs px-2 py-0.5 h-5 text-white shrink-0", statusConfig.color)}>
                                 {statusConfig.label}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {report.reporter_email} · {CATEGORY_LABELS[report.category] || report.category} · {format(new Date(report.created_at), 'MMM d, yyyy HH:mm')}
-                            </p>
+                            <p className="text-sm text-muted-foreground">{report.reporter_email}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(report.created_at), 'MMM d, yyyy HH:mm')}</p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {report.attachment_url && (
