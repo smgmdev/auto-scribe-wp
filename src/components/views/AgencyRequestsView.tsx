@@ -1671,7 +1671,7 @@ export function AgencyRequestsView() {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="delivered" className="mt-2">
+                <TabsContent value="delivered" className="mt-0">
                   {sortedCompletedRequests.length === 0 ? (
                     <Card className="border-border/50">
                       <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1790,7 +1790,7 @@ export function AgencyRequestsView() {
                   )}
                 </TabsContent>
 
-                <TabsContent value="cancelled" className="mt-2">
+                <TabsContent value="cancelled" className="mt-0">
                   {sortedCancelledRequests.length === 0 ? (
                     <Card className="border-border/50">
                       <CardContent className="flex flex-col items-center justify-center py-12">
