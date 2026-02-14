@@ -195,6 +195,7 @@ export function AdminAISourcesView() {
                   value={newSource.name}
                   onChange={(e) => setNewSource(s => ({ ...s, name: e.target.value }))}
                   placeholder="e.g., Yahoo Finance"
+                  className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
                 />
               </div>
               <div className="space-y-2">
@@ -203,6 +204,7 @@ export function AdminAISourcesView() {
                   value={newSource.url}
                   onChange={(e) => setNewSource(s => ({ ...s, url: e.target.value }))}
                   placeholder="https://finance.yahoo.com/"
+                  className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -213,6 +215,7 @@ export function AdminAISourcesView() {
                 onChange={(e) => setNewSource(s => ({ ...s, description: e.target.value }))}
                 placeholder="Brief description of this source..."
                 rows={2}
+                className="text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
               />
             </div>
             <div className="flex gap-2 justify-end">
@@ -251,6 +254,7 @@ export function AdminAISourcesView() {
                 <Input
                   value={editingSource.name}
                   onChange={(e) => setEditingSource(s => s ? { ...s, name: e.target.value } : null)}
+                  className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
                 />
               </div>
               <div className="space-y-2">
@@ -258,6 +262,7 @@ export function AdminAISourcesView() {
                 <Input
                   value={editingSource.url}
                   onChange={(e) => setEditingSource(s => s ? { ...s, url: e.target.value } : null)}
+                  className="h-9 text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -267,6 +272,7 @@ export function AdminAISourcesView() {
                 value={editingSource.description || ''}
                 onChange={(e) => setEditingSource(s => s ? { ...s, description: e.target.value } : null)}
                 rows={2}
+                className="text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
               />
             </div>
             <div className="flex gap-2 justify-end">
