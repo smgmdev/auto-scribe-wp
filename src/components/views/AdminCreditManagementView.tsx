@@ -69,13 +69,7 @@ export const AdminCreditManagementView = () => {
         .select('amount, type')
         .eq('user_id', userId);
 
-      // Fetch pending requests for this user
-      const { data: pendingReqs } = await supabase
-        .from('service_requests')
-        .select('media_sites(price)')
-        .eq('user_id', userId)
-        .eq('status', 'pending_review')
-        .is('order_id', null);
+      // Locked from requests is now calculated from transactions, not DB state
 
       // Fetch active orders for this user
       const { data: activeOrders } = await supabase
@@ -97,7 +91,8 @@ export const AdminCreditManagementView = () => {
       let incoming = 0;
       let outgoing = 0;
       let withdrawn = 0;
-      let rawTxSum = 0; // Sum of all non-withdrawal tx amounts
+      let rawTxSum = 0;
+      let netLockedFromTx = 0; // Track net locked from transactions
 
       txs?.forEach(tx => {
         if (tx.type === 'withdrawal_completed') {
@@ -106,17 +101,27 @@ export const AdminCreditManagementView = () => {
         }
         if (withdrawalTypes.includes(tx.type)) return;
         
-        // Raw sum includes ALL non-withdrawal amounts (locked, unlocked, everything)
         rawTxSum += tx.amount;
         
         if (tx.amount > 0 && tx.type !== 'unlocked') incoming += tx.amount;
         if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
           outgoing += Math.abs(tx.amount);
         }
+        
+        // Track lock/unlock net for locked calculation
+        if (tx.type === 'locked' || tx.type === 'offer_accepted' || tx.type === 'unlocked') {
+          netLockedFromTx += tx.amount;
+        }
+        // order_completed consumes a lock - offset it
+        if (tx.type === 'order_completed') {
+          netLockedFromTx += Math.abs(tx.amount);
+        }
       });
 
-      const lockedFromRequests = pendingReqs?.reduce((sum, r) => sum + ((r.media_sites as any)?.price || 0), 0) || 0;
       const lockedFromOrders = activeOrders?.reduce((sum, o) => sum + ((o.media_sites as any)?.price || 0), 0) || 0;
+      // Locked from requests: derived from unmatched lock transactions, minus what's already in active orders
+      const lockedFromRequestsRaw = Math.max(0, -netLockedFromTx);
+      const lockedFromRequests = Math.max(0, lockedFromRequestsRaw - lockedFromOrders);
       const totalLocked = lockedFromOrders + lockedFromRequests;
       const calculatedBalance = incoming - outgoing;
       const calculatedAvailable = calculatedBalance - totalLocked - withdrawn;
@@ -256,12 +261,8 @@ export const AdminCreditManagementView = () => {
         .neq('status', 'completed')
         .neq('delivery_status', 'accepted');
 
-      // Fetch pending service requests (not yet accepted/cancelled) to calculate locked-in-requests
-      const { data: pendingRequestsData } = await supabase
-        .from('service_requests')
-        .select('user_id, media_site_id, media_sites(price), status, order_id')
-        .eq('status', 'pending_review')
-        .is('order_id', null);
+      // No longer fetching pending requests from DB for locked calculation
+      // Locked credits are now derived from transaction history (locked/unlocked/offer_accepted)
 
       const emailMap = new Map<string, string | null>();
       profilesData?.forEach(profile => {
@@ -282,6 +283,8 @@ export const AdminCreditManagementView = () => {
       const deductionsMap = new Map<string, number>();
       // Track completed withdrawals (stored in cents - must be converted to credits/dollars)
       const withdrawnMap = new Map<string, number>();
+      // Track net locked from transactions (locked + offer_accepted are negative, unlocked is positive)
+      const lockedNetTxMap = new Map<string, number>();
       
       // Define withdrawal types (stored in cents, not credits) - must be excluded from regular credit calculations
       const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
@@ -322,6 +325,15 @@ export const AdminCreditManagementView = () => {
         } else if (tx.type === 'admin_deduct') {
           deductionsMap.set(tx.user_id, (deductionsMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
         }
+        
+        // Track lock/unlock transactions for locked calculation
+        if (tx.type === 'locked' || tx.type === 'offer_accepted' || tx.type === 'unlocked') {
+          lockedNetTxMap.set(tx.user_id, (lockedNetTxMap.get(tx.user_id) || 0) + tx.amount);
+        }
+        // order_completed consumes a lock, so offset it (add abs value to cancel the negative lock)
+        if (tx.type === 'order_completed') {
+          lockedNetTxMap.set(tx.user_id, (lockedNetTxMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+        }
       });
 
       // Calculate locked credits from ACTIVE ORDERS (DB state, not transactions)
@@ -331,12 +343,16 @@ export const AdminCreditManagementView = () => {
         lockedFromOrdersMap.set(order.user_id, (lockedFromOrdersMap.get(order.user_id) || 0) + price);
       });
 
-      // Calculate locked credits from PENDING REQUESTS (DB state, not regex)
-      const lockedFromRequestsMap = new Map<string, number>();
-      pendingRequestsData?.forEach(req => {
-        const price = (req.media_sites as any)?.price || 0;
-        lockedFromRequestsMap.set(req.user_id, (lockedFromRequestsMap.get(req.user_id) || 0) + price);
-      });
+      // Calculate locked credits from TRANSACTIONS (net of locked/offer_accepted/unlocked, offset by order_completed)
+      // If net is negative, that many credits are locked; subtract lockedFromOrders to avoid double-counting
+      const lockedFromRequestsTxMap = new Map<string, number>();
+      for (const [userId, netLocked] of lockedNetTxMap.entries()) {
+        // netLocked: negative means credits locked, positive means all resolved
+        const lockedFromTx = Math.max(0, -netLocked);
+        const ordersLocked = lockedFromOrdersMap.get(userId) || 0;
+        // Subtract what's already tracked via active orders to avoid double-counting
+        lockedFromRequestsTxMap.set(userId, Math.max(0, lockedFromTx - ordersLocked));
+      }
 
       // Fetch pending withdrawals for Bank/USDT split
       const { data: pendingWithdrawalsData } = await supabase
@@ -381,7 +397,7 @@ export const AdminCreditManagementView = () => {
         const incoming = incomingMap.get(credit.user_id) || 0;
         const outgoing = outgoingMap.get(credit.user_id) || 0;
         const lockedFromOrders = lockedFromOrdersMap.get(credit.user_id) || 0;
-        const lockedFromRequests = lockedFromRequestsMap.get(credit.user_id) || 0;
+        const lockedFromRequests = lockedFromRequestsTxMap.get(credit.user_id) || 0;
         const withdrawn = withdrawnMap.get(credit.user_id) || 0;
         
         // Total locked = from active orders + from pending requests (both from DB state)
