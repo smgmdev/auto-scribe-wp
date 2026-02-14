@@ -14,7 +14,7 @@ import { Shield, LogOut } from 'lucide-react';
 
 const WARNING_BEFORE_EXPIRY_MS = 60 * 1000;
 const CHECK_INTERVAL_MS = 10 * 1000;
-const TEST_MODE = false;
+const TEST_MODE = true;
 
 export function SessionExpiryWarning() {
   const { session, signOut } = useAuth();
