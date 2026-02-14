@@ -122,7 +122,7 @@ export function ArticlesView() {
               >
                 {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
               </Badge>
-              <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="hidden md:flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button 
                   variant="default" 
                   size="sm"
@@ -222,6 +222,23 @@ export function ArticlesView() {
                   </div>
                 );
               })()}
+            </div>
+            {/* Mobile buttons */}
+            <div className="flex md:hidden mt-4 -mx-6 -mb-6">
+              <Button 
+                variant="default" 
+                className="flex-1 bg-black text-white rounded-none hover:bg-transparent hover:text-black border border-black text-sm h-10"
+                onClick={() => handleEdit(article)}
+              >
+                Edit
+              </Button>
+              <Button 
+                variant="default" 
+                className="flex-1 bg-black text-white rounded-none hover:bg-transparent hover:text-black border border-black text-sm h-10 -ml-px"
+                onClick={() => handleDeleteClick(article)}
+              >
+                Delete
+              </Button>
             </div>
           </div>
         </div>
