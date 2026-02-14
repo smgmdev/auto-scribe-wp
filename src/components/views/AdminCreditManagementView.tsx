@@ -720,8 +720,8 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
-                                          <p className="text-xs text-white/70">Total Balance</p>
-                                          <p className="font-semibold text-green-400">{user.totalCredits.toLocaleString()}</p>
+                                          <p className="text-xs text-white/70">Available Balance</p>
+                                          <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
