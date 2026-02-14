@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -541,8 +542,8 @@ export function AdminUsersView() {
       .neq('status', 'completed')
       .neq('delivery_status', 'accepted');
 
-    // Calculate credits from transactions for each user
-    const calculatedCreditsMap = new Map<string, number>();
+    // Calculate credits from transactions for each user using shared formula
+    const userTransactionsMap = new Map<string, { amount: number; type: string; description?: string | null }[]>();
     const lockedFromOrdersMap = new Map<string, number>();
     const lockedFromOffersMap = new Map<string, number>();
     const lockedFromRequestsMap = new Map<string, number>();
@@ -550,37 +551,24 @@ export function AdminUsersView() {
     const unlockedRequestsMap = new Map<string, number>();
     const unlockedDetailsByUser = new Map<string, { siteName: string; amount: number }[]>();
     const orderAcceptedSites = new Map<string, string[]>();
-    const withdrawnMap = new Map<string, number>();
     
     // Build a map of user_credits.credits for authoritative balance
     const dbCreditsMap = new Map<string, number>();
     credits?.forEach(c => dbCreditsMap.set(c.user_id, c.credits));
 
-    // Calculate incoming and outgoing from transactions
-    // Withdrawal transactions are stored in cents, not credits - handle separately
-    const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
-    
+    // Group transactions by user and track locked/unlocked details for admin display
     allTransactions?.forEach(tx => {
       const userId = tx.user_id;
-      const currentTotal = calculatedCreditsMap.get(userId) || 0;
-      
-      // Handle withdrawal_completed separately - these reduce available balance
-      if (tx.type === 'withdrawal_completed') {
-        // Amount is stored in cents (negative), convert to dollars
-        const amountInDollars = Math.abs(tx.amount) / 100;
-        withdrawnMap.set(userId, (withdrawnMap.get(userId) || 0) + amountInDollars);
-        return;
-      }
-      
-      // Skip other withdrawal transactions - they don't affect credit balance
-      if (withdrawalTypes.includes(tx.type)) return;
+      const userTxs = userTransactionsMap.get(userId) || [];
+      userTxs.push(tx);
+      userTransactionsMap.set(userId, userTxs);
       
       // Track offer_accepted for locked credits calculation
       if (tx.type === 'offer_accepted' && tx.amount < 0) {
         lockedFromOffersMap.set(userId, (lockedFromOffersMap.get(userId) || 0) + Math.abs(tx.amount));
       }
       
-      // Track locked (order requests) and unlocked (cancelled requests)
+      // Track locked (order requests) and unlocked (cancelled requests) for admin detail display
       if (tx.type === 'locked' && tx.amount < 0) {
         lockedFromRequestsMap.set(userId, (lockedFromRequestsMap.get(userId) || 0) + Math.abs(tx.amount));
         const siteMatch = tx.description?.match(/Order request sent:\s*(.+?)(?:\s*\(|$)/);
@@ -599,7 +587,6 @@ export function AdminUsersView() {
           unlockedDetailsByUser.set(userId, details);
         }
       }
-      // Track order_accepted site names for matching against locked
       if (tx.type === 'order_accepted' && tx.description) {
         const siteMatch = tx.description.match(/:\s*(.+)$/);
         if (siteMatch) {
@@ -608,18 +595,7 @@ export function AdminUsersView() {
           orderAcceptedSites.set(userId, sites);
         }
       }
-      
-      if (tx.amount > 0) {
-        // Incoming credits - exclude 'unlocked' to prevent inflating balance
-        if (tx.type !== 'unlocked') {
-          calculatedCreditsMap.set(userId, currentTotal + tx.amount);
-        }
-      } else if (tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') {
-        // Outgoing credits (excluding locked types)
-        calculatedCreditsMap.set(userId, currentTotal + tx.amount);
-      }
     });
-
     // Calculate locked credits from active orders
     activeOrdersData?.forEach(order => {
       const price = (order.media_sites as any)?.price || 0;
@@ -660,11 +636,16 @@ export function AdminUsersView() {
       const userAgency = agencies?.find((a) => a.user_id === profile.id);
       const authInfo = authUsersMap[profile.id];
       
-      // Calculate available credits from transactions (more accurate than stale user_credits.credits)
-      const calculatedBalance = calculatedCreditsMap.get(profile.id) || 0;
+      // Calculate available credits using shared formulas
+      const userTxs = userTransactionsMap.get(profile.id) || [];
+      const calculatedBalance = calculateTotalBalance(userTxs);
+      const withdrawalData = calculateWithdrawals(userTxs);
+      const creditsInWithdrawals = withdrawalData.lockedCents / 100;
+      const creditsWithdrawn = withdrawalData.completedCents / 100;
+
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromOffers = lockedFromOffersMap.get(profile.id) || 0;
-      // Per-entry matching for locked requests
+      // Per-entry matching for locked requests (admin-specific detail)
       const lockedDetails = [...(lockedDetailsByUser.get(profile.id) || [])];
       const unlockedDetails = [...(unlockedDetailsByUser.get(profile.id) || [])];
       const acceptedSites = [...(orderAcceptedSites.get(profile.id) || [])];
@@ -677,9 +658,9 @@ export function AdminUsersView() {
         if (acceptedIdx >= 0) { acceptedSites.splice(acceptedIdx, 1); continue; }
         lockedFromRequests += locked.amount;
       }
-      const withdrawn = withdrawnMap.get(profile.id) || 0;
-      const totalLocked = lockedFromOrders + lockedFromRequests;
-      const availableCredits = calculatedBalance - totalLocked - withdrawn;
+      const availableCredits = calculateAvailableCredits(
+        calculatedBalance, lockedFromOrders, lockedFromRequests, creditsInWithdrawals, creditsWithdrawn
+      );
 
       return {
         id: profile.id,
