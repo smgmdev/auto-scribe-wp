@@ -301,18 +301,18 @@ export function AdminSecuritySupervisionView() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-4xl font-bold text-foreground">Security Supervision</h1>
+            <h1 className="text-2xl font-bold text-foreground">Security Supervision</h1>
             {unreviewedCount > 0 && (
-              <span className="min-w-[24px] h-[24px] px-1.5 text-xs font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">{unreviewedCount}</span>
+              <span className="min-w-[22px] h-[22px] px-1.5 text-xs font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">{unreviewedCount}</span>
             )}
           </div>
           <Button
             onClick={handleScan}
             disabled={scanning}
             size="sm"
-            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto"
+            className="bg-foreground text-background hover:bg-foreground/90 border border-foreground w-full md:w-auto text-sm"
           >
-            {scanning ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
+            {scanning ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
             {scanning ? 'Scanning...' : 'Scan All Chats'}
           </Button>
         </div>
@@ -320,13 +320,13 @@ export function AdminSecuritySupervisionView() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
           <TabsList className="w-full md:grid md:grid-cols-3 justify-start overflow-x-auto scrollbar-hide flex-nowrap h-auto gap-0 bg-foreground text-background">
-            <TabsTrigger value="unreviewed" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
+            <TabsTrigger value="unreviewed" className="whitespace-nowrap flex-shrink-0 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground">
               Unreviewed ({flags.filter(f => !f.reviewed).length})
             </TabsTrigger>
-            <TabsTrigger value="all" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
+            <TabsTrigger value="all" className="whitespace-nowrap flex-shrink-0 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground">
               All ({flags.length})
             </TabsTrigger>
-            <TabsTrigger value="reviewed" className="whitespace-nowrap flex-shrink-0 data-[state=active]:bg-background data-[state=active]:text-foreground">
+            <TabsTrigger value="reviewed" className="whitespace-nowrap flex-shrink-0 text-sm data-[state=active]:bg-background data-[state=active]:text-foreground">
               Reviewed ({flags.filter(f => f.reviewed).length})
             </TabsTrigger>
           </TabsList>
@@ -334,12 +334,12 @@ export function AdminSecuritySupervisionView() {
           {/* Search */}
           <div className="mt-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
               <Input
                 placeholder="Search messages, contacts, engagements..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-foreground text-background border-foreground placeholder:text-white/50 h-9 text-xs"
+                className="pl-9 bg-foreground text-background border-foreground placeholder:text-white/50 h-10 text-sm"
               />
             </div>
           </div>
@@ -365,16 +365,16 @@ export function AdminSecuritySupervisionView() {
                     "border-b last:border-b-0 border-x-0 border-t-0 shadow-none",
                     group.hasUnreviewed && "border-l-2 border-l-blue-500"
                   )}>
-                    <CardContent className="p-3">
+                    <CardContent className="p-4">
                       {/* Engagement Header */}
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {group.media_site_favicon && (
-                            <img src={group.media_site_favicon} alt="" className="h-4 w-4 flex-shrink-0" />
+                            <img src={group.media_site_favicon} alt="" className="h-5 w-5 flex-shrink-0" />
                           )}
                           <div className="min-w-0">
-                            <p className="text-xs font-semibold truncate">{group.engagement_title}</p>
-                            <p className="text-[10px] text-muted-foreground">{group.media_site_name} · {group.flags.length} flag{group.flags.length !== 1 ? 's' : ''}</p>
+                            <p className="text-sm font-semibold truncate">{group.engagement_title}</p>
+                            <p className="text-xs text-muted-foreground">{group.media_site_name} · {group.flags.length} flag{group.flags.length !== 1 ? 's' : ''}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -382,51 +382,51 @@ export function AdminSecuritySupervisionView() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                              className="text-xs h-7 px-2.5 hover:bg-foreground hover:text-background"
                               onClick={() => markGroupReviewed(group.request_id)}
                             >
-                              <Eye className="h-3 w-3 mr-1" />
+                              <Eye className="h-3.5 w-3.5 mr-1" />
                               Mark All Reviewed
                             </Button>
                           )}
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-[10px] h-6 px-2 hover:bg-foreground hover:text-background"
+                            className="text-xs h-7 px-2.5 hover:bg-foreground hover:text-background"
                             onClick={() => openEngagement(group.request_id)}
                           >
-                            <ExternalLink className="h-3 w-3 mr-1" />
+                            <ExternalLink className="h-3.5 w-3.5 mr-1" />
                             Open Chat
                           </Button>
                         </div>
                       </div>
 
                       {/* Flagged Messages */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {group.flags.map((flag) => {
                           const detection = DETECTION_LABELS[flag.detected_type] || DETECTION_LABELS.other;
                           return (
                             <div
                               key={flag.id}
-                              className={`p-2 border text-xs ${flag.reviewed ? 'bg-muted/30 opacity-60' : 'bg-red-50 border-red-200'}`}
+                              className={`p-3 border text-sm ${flag.reviewed ? 'bg-muted/30 opacity-60' : 'bg-red-50 border-red-200'}`}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                                    <Badge className={`${detection.color} text-white text-[9px] py-0 px-1.5`}>
+                                    <Badge className={`${detection.color} text-white text-[10px] py-0 px-1.5`}>
                                       {detection.label}
                                     </Badge>
-                                    <span className="text-[10px] text-muted-foreground">
+                                    <span className="text-xs text-muted-foreground">
                                       {flag.sender_type === 'client' ? 'Client' : 'Agency'} · {format(new Date(flag.flagged_at), 'MMM d, HH:mm')}
                                     </span>
                                     {flag.reviewed && (
-                                      <CheckCircle className="h-3 w-3 text-green-600" />
+                                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
                                     )}
                                   </div>
-                                  <p className="text-xs leading-relaxed break-words">
+                                  <p className="text-sm leading-relaxed break-words">
                                     {highlightDetectedValue(flag.message_text, flag.detected_value)}
                                   </p>
-                                  <p className="text-[10px] text-red-600 mt-1 font-medium">
+                                  <p className="text-xs text-red-600 mt-1 font-medium">
                                     Detected: <span className="bg-yellow-200 px-1">{flag.detected_value}</span>
                                   </p>
                                 </div>
@@ -434,14 +434,14 @@ export function AdminSecuritySupervisionView() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-6 px-1.5 text-[10px] flex-shrink-0 hover:bg-foreground hover:text-background"
+                                    className="h-7 px-2 text-xs flex-shrink-0 hover:bg-foreground hover:text-background"
                                     disabled={markingReviewed.has(flag.id)}
                                     onClick={() => markAsReviewed(flag.id)}
                                   >
                                     {markingReviewed.has(flag.id) ? (
-                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                      <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
-                                      <CheckCircle className="h-3 w-3" />
+                                      <CheckCircle className="h-4 w-4" />
                                     )}
                                   </Button>
                                 )}
