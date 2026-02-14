@@ -6956,7 +6956,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               Please describe what changes you need for this delivery.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="py-4">
+          <div className="pt-1 pb-4">
             <Textarea
               placeholder="Describe the revisions needed..."
               value={revisionReason}
