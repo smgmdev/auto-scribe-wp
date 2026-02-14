@@ -246,7 +246,7 @@ export const AdminCreditManagementView = () => {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-2 md:mb-0">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4 mb-0">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Credit Management</h1>
           <p className="text-muted-foreground mt-1 mb-0">Manage credits and view transactions</p>
