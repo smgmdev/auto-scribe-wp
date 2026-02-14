@@ -1522,9 +1522,9 @@ export function AdminMediaManagementView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-6">
+      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-0 md:mb-6">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Media Management
@@ -1534,7 +1534,7 @@ export function AdminMediaManagementView() {
           </p>
         </div>
         <Button
-          className="w-full md:w-auto border border-foreground shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:shadow-none gap-2"
+          className="w-full md:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground hover:shadow-none gap-2"
           onClick={() => fetchData(true)}
           disabled={isRefreshing}
         >
@@ -1550,8 +1550,8 @@ export function AdminMediaManagementView() {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-        <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0">
-          <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
+        <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0 p-0 h-auto">
+          <TabsTrigger value="media" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Media Sites ({mediaSites.length})
             {unreadMediaCount > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1559,7 +1559,7 @@ export function AdminMediaManagementView() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="wordpress" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
+          <TabsTrigger value="wordpress" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             WordPress Sites ({approvedSites.length})
             {unreadWpCount > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1575,11 +1575,11 @@ export function AdminMediaManagementView() {
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={setWpSubTab} className="w-full">
             <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0">
-              <TabsTrigger value="approved" className="shrink-0 whitespace-nowrap flex-1 rounded-none">
+            <TabsList className="!inline-flex !w-auto md:!flex md:!w-full justify-start md:overflow-visible rounded-none gap-0 p-0 h-auto">
+              <TabsTrigger value="approved" className="shrink-0 whitespace-nowrap flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Approved ({approvedSites.length})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none">
+              <TabsTrigger value="pending" className="shrink-0 whitespace-nowrap relative overflow-visible flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending Review ({pendingSubmissions.length})
                 {unreadWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1587,7 +1587,7 @@ export function AdminMediaManagementView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap flex-1 rounded-none">
+              <TabsTrigger value="rejected" className="shrink-0 whitespace-nowrap flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Rejected ({rejectedSubmissions.length})
               </TabsTrigger>
             </TabsList>
@@ -1974,11 +1974,11 @@ export function AdminMediaManagementView() {
         <TabsContent value="media" className="mt-0">
           {/* Media Sub-tabs */}
           <Tabs value={mediaSubTab} onValueChange={setMediaSubTab} className="w-full">
-            <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0">
-              <TabsTrigger value="added" className="flex-1 rounded-none">
+            <TabsList className="w-full flex overflow-x-auto scrollbar-hide justify-start rounded-none gap-0 p-0 h-auto">
+              <TabsTrigger value="added" className="flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Added Media Sites ({approvedMediaSubmissions.reduce((total, sub) => total + (sub.imported_sites?.length || 0), 0)})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="relative overflow-visible flex-1 rounded-none">
+              <TabsTrigger value="pending" className="relative overflow-visible flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending Review ({pendingMediaSubmissions.length})
                 {unreadMediaCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -1986,7 +1986,7 @@ export function AdminMediaManagementView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex-1 rounded-none">
+              <TabsTrigger value="rejected" className="flex-1 rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Rejected ({rejectedMediaSubmissions.length + approvedMediaSubmissions.filter(s => s.rejected_media && s.rejected_media.length > 0).length})
               </TabsTrigger>
             </TabsList>
