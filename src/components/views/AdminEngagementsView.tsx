@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag, Mail, CheckCheck } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, XCircle, AlertCircle, AlertTriangle, RefreshCw, CheckCircle, Tag, Mail, CheckCheck, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
@@ -92,6 +93,7 @@ export function AdminEngagementsView() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
+  const [searchQuery, setSearchQuery] = useState('');
   const [closedSubTab, setClosedSubTab] = useState('delivered');
   const [, setTick] = useState(0);
 
@@ -537,15 +539,26 @@ export function AdminEngagementsView() {
     return timeB - timeA; // Descending order (most recent first)
   };
 
-  const activeRequests = requests
+  const filterBySearch = (list: ServiceRequest[]) => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.profiles?.email?.toLowerCase().includes(q) ||
+      r.media_sites?.name?.toLowerCase().includes(q) ||
+      r.agency_payouts?.agency_name?.toLowerCase().includes(q)
+    );
+  };
+
+  const activeRequests = filterBySearch(requests
     .filter(r => r.status !== 'cancelled' && r.orders?.delivery_status !== 'accepted')
-    .sort(sortByLastEvent);
-  const deliveredRequests = requests
+    .sort(sortByLastEvent));
+  const deliveredRequests = filterBySearch(requests
     .filter(r => r.orders?.delivery_status === 'accepted')
-    .sort(sortByLastEvent);
-  const cancelledRequests = requests
+    .sort(sortByLastEvent));
+  const cancelledRequests = filterBySearch(requests
     .filter(r => r.status === 'cancelled')
-    .sort(sortByLastEvent);
+    .sort(sortByLastEvent));
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
@@ -590,6 +603,17 @@ export function AdminEngagementsView() {
             )}
           </TabsTrigger>
         </TabsList>
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Search by title, email, site, agency..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-black text-white border-black placeholder:text-white/50 h-9 text-sm rounded-none"
+            />
+          </div>
 
         <TabsContent value="active" className="mt-0">
           {activeRequests.length === 0 ? (
