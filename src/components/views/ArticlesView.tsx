@@ -286,14 +286,14 @@ export function ArticlesView() {
           </div>
           <Button 
             onClick={() => setCurrentView('compose')} 
-            className="hidden md:inline-flex border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+            className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
           >
             New Article
           </Button>
         </div>
         <Button 
           onClick={() => setCurrentView('compose')} 
-          className="md:hidden w-full mt-2 border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          className="md:hidden w-full mt-2 bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
           New Article
         </Button>
