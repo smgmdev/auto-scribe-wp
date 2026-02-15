@@ -1,10 +1,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
+// Sound enabled state - shared reference updated by appStore
+let _soundEnabled = true;
+
+export const setSoundEnabled = (enabled: boolean) => {
+  _soundEnabled = enabled;
+};
+
+export const isSoundEnabled = () => _soundEnabled;
+
 // Sound player singleton
 let audioInstance: HTMLAudioElement | null = null;
 
 export const playMessageSound = () => {
+  if (!_soundEnabled) return;
   try {
     if (!audioInstance) {
       // Add cache-busting parameter to ensure latest sound file is loaded

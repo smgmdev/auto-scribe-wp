@@ -1,7 +1,10 @@
 import { useLocation } from 'react-router-dom';
+import { Volume2, VolumeOff } from 'lucide-react';
+import { useAppStore } from '@/stores/appStore';
 
 export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean }) {
   const location = useLocation();
+  const { soundEnabled, toggleSound } = useAppStore();
   
   const hiddenPaths = ['/auth'];
   const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path));
@@ -17,6 +20,14 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
         <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
         <span><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
         <span><span className="font-bold">Close</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
+        <button
+          onClick={toggleSound}
+          className="ml-auto flex items-center gap-1 hover:text-[#f2a547] transition-colors"
+          title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
+        >
+          {soundEnabled ? <Volume2 size={14} /> : <VolumeOff size={14} />}
+          <span className="hidden md:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
+        </button>
       </div>
     </div>
   );
