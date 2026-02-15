@@ -10,14 +10,18 @@ export const setSoundEnabled = (enabled: boolean) => {
 
 export const isSoundEnabled = () => _soundEnabled;
 
-// Sound player singleton
+// Sound player singleton with debounce to prevent double plays
 let audioInstance: HTMLAudioElement | null = null;
+let lastPlayedAt = 0;
 
 export const playMessageSound = () => {
   if (!_soundEnabled) return;
+  // Debounce: ignore if played within last 500ms
+  const now = Date.now();
+  if (now - lastPlayedAt < 500) return;
+  lastPlayedAt = now;
   try {
     if (!audioInstance) {
-      // Add cache-busting parameter to ensure latest sound file is loaded
       audioInstance = new Audio('/sounds/new-message.mp3?v=2');
       audioInstance.volume = 0.5;
     }
