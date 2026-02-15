@@ -2,7 +2,26 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2 } from 'lucide-react';
+
+function SliderImage({ src, alt }: { src: string; alt: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+  return (
+    <>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      <img 
+        src={src} 
+        alt={alt}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        onLoad={() => setIsLoading(false)}
+      />
+    </>
+  );
+}
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
@@ -522,11 +541,7 @@ export default function AIArticleGeneration() {
                   >
                     {/* Background Image */}
                     {featuredImageUrl && (
-                      <img 
-                        src={featuredImageUrl} 
-                        alt={article.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
+                      <SliderImage src={featuredImageUrl} alt={article.title} />
                     )}
                     {/* Dark Overlay */}
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
