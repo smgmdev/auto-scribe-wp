@@ -1014,7 +1014,7 @@ export function ChatListPanel() {
         });
       }
       
-      
+      playMessageSound();
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -1595,6 +1595,7 @@ export function ChatListPanel() {
           // Note: isOwnMessage was already checked and returned early above, so we know this is from counterparty
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, updating unread count');
+            playMessageSound();
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
