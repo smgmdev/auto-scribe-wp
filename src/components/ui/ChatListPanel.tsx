@@ -1014,7 +1014,7 @@ export function ChatListPanel() {
         });
       }
       
-      playMessageSound();
+      // Sound is handled by the postgres_changes listener to avoid double sounds
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -1036,7 +1036,7 @@ export function ChatListPanel() {
           .update({ client_read: false })
           .eq('id', request_id);
         
-        playMessageSound();
+        // Sound is handled by the postgres_changes listener to avoid double sounds
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
@@ -1059,7 +1059,7 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         
-        playMessageSound();
+        // Sound is handled by the postgres_changes listener to avoid double sounds
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
