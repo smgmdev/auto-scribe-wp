@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { Loader2, ExternalLink, ArrowRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +34,7 @@ export function AgencyDetailsDialog({
   isAuthenticated = true
 }: AgencyDetailsDialogProps) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetailsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoLoading, setLogoLoading] = useState(true);
@@ -118,7 +120,12 @@ export function AgencyDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`sm:max-w-md z-[${zIndex}]`} style={{ zIndex }} overlayClassName="bg-transparent" onEscapeKeyDown={(e) => e.preventDefault()}>
+      <DialogContent 
+        className={`${isMobile ? 'fixed inset-0 w-full h-[100dvh] max-w-none max-h-none rounded-none border-0 translate-x-0 translate-y-0 top-0 left-0' : 'sm:max-w-md'}`} 
+        style={{ zIndex }} 
+        overlayClassName="bg-transparent" 
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
         <DialogTitle className="flex items-center gap-3">
             {loading ? (
