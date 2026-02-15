@@ -2408,6 +2408,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Skip messages from same sender type (they're already added to local state)
           if (newMsg.sender_type === senderType) return;
           
+          // Play notification sound for incoming counterparty messages
+          playMessageSound();
+          
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
             // Also deduplicate by content+timestamp for system messages to prevent double cards
