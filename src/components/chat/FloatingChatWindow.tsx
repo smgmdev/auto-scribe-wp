@@ -2438,11 +2438,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                   newMsg.message.includes('[ORDER_REQUEST_ACCEPTED]') ||
                                   newMsg.message.includes('[ORDER_REQUEST_REJECTED]');
           
+          // Check if this is an admin join/leave status message (no sound needed)
+          const isStatusMessage = newMsg.message.includes('[ADMIN_JOINED]') || 
+                                  newMsg.message.includes('[ADMIN_LEFT]') ||
+                                  newMsg.message.includes('[DISPUTE_OPENED]');
+          
           // Skip messages from same sender type (they're already added to local state)
           if (newMsg.sender_type === senderType) return;
           
-          // Play notification sound for incoming counterparty messages
-          playMessageSound();
+          // Play notification sound for incoming counterparty messages (skip status messages)
+          if (!isStatusMessage) {
+            playMessageSound();
+          }
           
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
