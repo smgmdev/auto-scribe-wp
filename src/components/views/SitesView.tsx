@@ -234,6 +234,49 @@ export function SitesView() {
     fetchUserAgency();
   }, [user]);
 
+  // Real-time subscription: update engagement buttons when service_requests change
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('sites-view-engagements')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          // Only process if it belongs to the current user
+          if (updated.user_id !== user.id) return;
+          
+          if (updated.status === 'cancelled' || updated.status === 'completed') {
+            // Remove from openEngagements
+            setOpenEngagements(prev => {
+              const next = { ...prev };
+              // Find and remove by media_site_id
+              Object.keys(next).forEach(key => {
+                if (next[key]?.id === updated.id) {
+                  delete next[key];
+                }
+              });
+              return next;
+            });
+          } else {
+            // Re-fetch to get full joined data
+            fetchOpenEngagements();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   // Fetch user's agency name if they are an agency
   const fetchUserAgency = async () => {
     if (!user) {
