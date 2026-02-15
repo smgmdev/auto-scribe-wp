@@ -1810,7 +1810,7 @@ export function AgencyRequestsView() {
 
                 <TabsContent value="cancelled" className="mt-0">
                   {sortedCancelledRequests.some(r => !r.read) && (
-                    <div className="flex justify-start mt-3 mb-2">
+                    <div className="flex justify-start mt-2 mb-2">
                       <Button
                         variant="outline"
                         onClick={async () => {
