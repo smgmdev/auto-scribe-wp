@@ -108,11 +108,11 @@ export default function About() {
 
   useEffect(() => {
     async function fetchChannelCount() {
-      const [{ count: mediaCount }, { count: wpCount }] = await Promise.all([
+      const [{ count: mediaCount }, { data: wpSites }] = await Promise.all([
         supabase.from('media_sites').select('*', { count: 'exact', head: true }),
-        supabase.from('wordpress_sites').select('*', { count: 'exact', head: true }).eq('connected', true),
+        supabase.rpc('get_public_sites'),
       ]);
-      setTotalChannels((mediaCount ?? 0) + (wpCount ?? 0));
+      setTotalChannels((mediaCount ?? 0) + (wpSites?.length ?? 0));
       setChannelsLoading(false);
     }
     fetchChannelCount();
