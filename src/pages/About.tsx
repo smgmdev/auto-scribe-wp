@@ -413,7 +413,7 @@ export default function About() {
               </div>
               <div className="bg-[#f5f5f7] p-12 md:p-16 flex flex-col justify-center">
                 <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
-                  <span className="font-semibold">Set up in seconds.</span> Right on your browser. Arcana Mace is built for brands, agencies, and PR professionals. To get started, simply create an account and browse our curated network of premium publishers. When you want to publish, just submit, pay, and you're set.
+                  <span className="font-semibold">Set up in seconds.</span> Right on your browser. Arcana Mace is built for brands, agencies, and PR professionals. To get started, simply create an account and browse our media network of global media channels. When you want to publish, just submit your request, pay, and you're set.
                 </p>
                 <button 
                   onClick={() => navigate('/auth')}
