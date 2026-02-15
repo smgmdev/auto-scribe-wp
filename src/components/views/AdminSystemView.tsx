@@ -183,7 +183,6 @@ export function AdminSystemView() {
         break;
       default:
         addLine('error', `Unknown command: ${trimmed}`);
-        addLine('info', 'Available commands: /db, /clear');
         break;
     }
   };
