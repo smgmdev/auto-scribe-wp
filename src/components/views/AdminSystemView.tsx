@@ -302,25 +302,6 @@ export function AdminSystemView() {
       className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 flex flex-col cursor-text"
       onClick={() => inputRef.current?.focus()}
     >
-      {/* Input Line */}
-      <div className="flex items-center px-4 py-3 font-mono text-sm border-b border-white/10">
-        <Terminal className="h-4 w-4 text-green-400 mr-2 shrink-0" />
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={processing}
-          placeholder={processing ? 'Processing...' : 'Enter command...'}
-          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/20 caret-green-400"
-          autoFocus
-          spellCheck={false}
-        />
-        {processing && (
-          <span className="text-green-400 animate-pulse ml-2">●</span>
-        )}
-      </div>
-
       {/* Terminal Output */}
       <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm">
         {lines.map(line => {
@@ -342,6 +323,25 @@ export function AdminSystemView() {
           );
         })}
         <div ref={bottomRef} />
+      </div>
+
+      {/* Input Line - at bottom */}
+      <div className="flex items-center px-4 py-3 font-mono text-sm border-t border-white/10">
+        <Terminal className="h-4 w-4 text-green-400 mr-2 shrink-0" />
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={processing}
+          placeholder={processing ? 'Processing...' : 'Enter command...'}
+          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/20 caret-green-400"
+          autoFocus
+          spellCheck={false}
+        />
+        {processing && (
+          <span className="text-green-400 animate-pulse ml-2">●</span>
+        )}
       </div>
     </div>
   );
