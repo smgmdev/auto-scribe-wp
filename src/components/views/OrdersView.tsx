@@ -1021,19 +1021,8 @@ export function OrdersView() {
             </TabsContent>
 
             <TabsContent value="history" className="mt-0">
-              {filteredHistoryOrders.length === 0 ? (
-                renderEmptyState(searchQuery 
-                  ? 'No matching cancelled orders found'
-                  : isAdmin 
-                    ? 'No cancelled orders'
-                    : 'Cancelled orders will appear here')
-              ) : (
-                <div className="space-y-0">
-                  {filteredHistoryOrders.map(renderOrderCard)}
-                </div>
-              )}
               {historyOrders.some(o => !o.read) && !isAdmin && (
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-end mt-2 mb-2">
                   <Button
                     variant="outline"
                     onClick={async () => {
@@ -1051,10 +1040,21 @@ export function OrdersView() {
                         sonnerToast.error(error.message || 'Failed to mark all as read');
                       }
                     }}
-                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
+                    className="rounded-none bg-white text-black border-black hover:bg-black hover:text-white"
                   >
                     Mark All Read
                   </Button>
+                </div>
+              )}
+              {filteredHistoryOrders.length === 0 ? (
+                renderEmptyState(searchQuery 
+                  ? 'No matching cancelled orders found'
+                  : isAdmin 
+                    ? 'No cancelled orders'
+                    : 'Cancelled orders will appear here')
+              ) : (
+                <div className="space-y-0">
+                  {filteredHistoryOrders.map(renderOrderCard)}
                 </div>
               )}
             </TabsContent>

@@ -759,6 +759,36 @@ export function AdminEngagementsView() {
             </TabsList>
 
             <TabsContent value="delivered" className="mt-0">
+              {deliveredRequests.some(r => !r.read) && (
+                <div className="flex justify-end mt-2 mb-2">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      setMarkingAllRead(true);
+                      try {
+                        const unreadIds = deliveredRequests.filter(r => !r.read).map(r => r.id);
+                        const { error } = await supabase
+                          .from('service_requests')
+                          .update({ read: true })
+                          .in('id', unreadIds);
+                        if (error) throw error;
+                        setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
+                        unreadIds.forEach(() => decrementAdminUnreadDeliveredCount());
+                        sonnerToast.success(`Marked ${unreadIds.length} delivered engagements as read`);
+                      } catch (error: any) {
+                        sonnerToast.error(error.message || 'Failed to mark all as read');
+                      } finally {
+                        setMarkingAllRead(false);
+                      }
+                    }}
+                    disabled={markingAllRead}
+                    className="rounded-none bg-white text-black border-black hover:bg-black hover:text-white"
+                  >
+                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Mark All Read
+                  </Button>
+                </div>
+              )}
               {deliveredRequests.length === 0 ? (
                 <Card><CardContent className="py-12 text-center text-muted-foreground">No delivered engagements</CardContent></Card>
               ) : (
@@ -845,36 +875,6 @@ export function AdminEngagementsView() {
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-              )}
-              {deliveredRequests.some(r => !r.read) && (
-                <div className="flex justify-end mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      setMarkingAllRead(true);
-                      try {
-                        const unreadIds = deliveredRequests.filter(r => !r.read).map(r => r.id);
-                        const { error } = await supabase
-                          .from('service_requests')
-                          .update({ read: true })
-                          .in('id', unreadIds);
-                        if (error) throw error;
-                        setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
-                        unreadIds.forEach(() => decrementAdminUnreadDeliveredCount());
-                        sonnerToast.success(`Marked ${unreadIds.length} delivered engagements as read`);
-                      } catch (error: any) {
-                        sonnerToast.error(error.message || 'Failed to mark all as read');
-                      } finally {
-                        setMarkingAllRead(false);
-                      }
-                    }}
-                    disabled={markingAllRead}
-                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
-                  >
-                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Mark All Read
-                  </Button>
                 </div>
               )}
             </TabsContent>

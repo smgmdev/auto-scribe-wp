@@ -1690,6 +1690,36 @@ export function AgencyRequestsView() {
                 </div>
 
                 <TabsContent value="delivered" className="mt-0">
+                  {sortedCompletedRequests.some(r => !r.read) && (
+                    <div className="flex justify-end mt-2 mb-2">
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          setMarkingAllRead(true);
+                          try {
+                            const unreadIds = sortedCompletedRequests.filter(r => !r.read).map(r => r.id);
+                            const { error } = await supabase
+                              .from('service_requests')
+                              .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
+                              .in('id', unreadIds);
+                            if (error) throw error;
+                            setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
+                            setAgencyUnreadCompletedCount(0);
+                            toast.success(`Marked ${unreadIds.length} completed requests as read`);
+                          } catch (error: any) {
+                            toast.error(error.message || 'Failed to mark all as read');
+                          } finally {
+                            setMarkingAllRead(false);
+                          }
+                        }}
+                        disabled={markingAllRead}
+                        className="rounded-none bg-white text-black border-black hover:bg-black hover:text-white"
+                      >
+                        {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Mark All Read
+                      </Button>
+                    </div>
+                  )}
                   {sortedCompletedRequests.length === 0 ? (
                     <Card className="border-border/50">
                       <CardContent className="flex flex-col items-center justify-center py-12">
@@ -1774,36 +1804,6 @@ export function AgencyRequestsView() {
                           </Card>
                         );
                       })}
-                    </div>
-                  )}
-                  {sortedCompletedRequests.some(r => !r.read) && (
-                    <div className="flex justify-end mt-4">
-                      <Button
-                        variant="outline"
-                        onClick={async () => {
-                          setMarkingAllRead(true);
-                          try {
-                            const unreadIds = sortedCompletedRequests.filter(r => !r.read).map(r => r.id);
-                            const { error } = await supabase
-                              .from('service_requests')
-                              .update({ agency_read: true, agency_last_read_at: new Date().toISOString() })
-                              .in('id', unreadIds);
-                            if (error) throw error;
-                            setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
-                            setAgencyUnreadCompletedCount(0);
-                            toast.success(`Marked ${unreadIds.length} completed requests as read`);
-                          } catch (error: any) {
-                            toast.error(error.message || 'Failed to mark all as read');
-                          } finally {
-                            setMarkingAllRead(false);
-                          }
-                        }}
-                        disabled={markingAllRead}
-                        className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
-                      >
-                        {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        Mark All Read
-                      </Button>
                     </div>
                   )}
                 </TabsContent>
@@ -2217,6 +2217,36 @@ export function AgencyRequestsView() {
             </TabsContent>
 
             <TabsContent value="completed" className="mt-0">
+              {completedOrders.some(o => !(o as any).agency_read) && (
+                <div className="flex justify-end mt-2 mb-2">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      setMarkingAllRead(true);
+                      try {
+                        const unreadIds = completedOrders.filter(o => !(o as any).agency_read).map(o => o.id);
+                        const { error } = await supabase
+                          .from('orders')
+                          .update({ agency_read: true })
+                          .in('id', unreadIds);
+                        if (error) throw error;
+                        setOrders(prev => prev.map(o => unreadIds.includes(o.id) ? { ...o, agency_read: true } : o));
+                        setAgencyUnreadCompletedCount(0);
+                        toast.success(`Marked ${unreadIds.length} completed orders as read`);
+                      } catch (error: any) {
+                        toast.error(error.message || 'Failed to mark all as read');
+                      } finally {
+                        setMarkingAllRead(false);
+                      }
+                    }}
+                    disabled={markingAllRead}
+                    className="rounded-none bg-white text-black border-black hover:bg-black hover:text-white"
+                  >
+                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Mark All Read
+                  </Button>
+                </div>
+              )}
               {completedOrders.length === 0 ? (
                 <Card className="border-border/50">
                   <CardContent className="flex flex-col items-center justify-center py-12">
@@ -2300,36 +2330,6 @@ export function AgencyRequestsView() {
                     </Card>
                   );
                 })
-              )}
-              {completedOrders.some(o => !(o as any).agency_read) && (
-                <div className="flex justify-end mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      setMarkingAllRead(true);
-                      try {
-                        const unreadIds = completedOrders.filter(o => !(o as any).agency_read).map(o => o.id);
-                        const { error } = await supabase
-                          .from('orders')
-                          .update({ agency_read: true })
-                          .in('id', unreadIds);
-                        if (error) throw error;
-                        setOrders(prev => prev.map(o => unreadIds.includes(o.id) ? { ...o, agency_read: true } : o));
-                        setAgencyUnreadCompletedCount(0);
-                        toast.success(`Marked ${unreadIds.length} completed orders as read`);
-                      } catch (error: any) {
-                        toast.error(error.message || 'Failed to mark all as read');
-                      } finally {
-                        setMarkingAllRead(false);
-                      }
-                    }}
-                    disabled={markingAllRead}
-                    className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
-                  >
-                    {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Mark All Read
-                  </Button>
-                </div>
               )}
             </TabsContent>
 
