@@ -18,6 +18,7 @@ function BlueCheckIcon({ className = '' }: { className?: string }) {
 }
 import amlogo from '@/assets/amlogo.png';
 import aboutDistributionBg from '@/assets/about-distribution-bg.jpg';
+import aboutGlobalCoverageBg from '@/assets/about-global-coverage-bg.jpg';
 
 // Intersection Observer hook for scroll animations
 function useInView(options?: IntersectionObserverInit) {
@@ -477,15 +478,21 @@ export default function About() {
       {/* Global Coverage Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="bg-[#1d1d1f] rounded-none p-12 md:p-20 text-center text-white">
-            <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
+          <AnimatedSection className="relative rounded-none p-12 md:p-20 text-center text-white overflow-hidden">
+            <img 
+              src={aboutGlobalCoverageBg} 
+              alt="Global coverage" 
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/60" />
+            <h2 className="relative z-10 text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
               Global coverage.<br />
-              <span className="text-[#86868b]">Local access.</span>
+              <span className="text-white/50">Local access.</span>
             </h2>
-            <p className="text-xl text-[#86868b] max-w-2xl mx-auto mb-8">
+            <p className="relative z-10 text-xl text-white/60 max-w-2xl mx-auto mb-8">
               From Business & Finance to Crypto, Tech to Politics — our network spans every major market. MENA, China, and beyond.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="relative z-10 flex flex-wrap justify-center gap-3">
               {['Business & Finance', 'Crypto', 'Tech', 'Campaign', 'Politics', 'MENA', 'China'].map((category) => (
                 <span 
                   key={category}
