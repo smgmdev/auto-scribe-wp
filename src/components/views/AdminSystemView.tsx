@@ -47,7 +47,6 @@ let lineId = Date.now();
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
     { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
-    { id: lineId++, type: 'info', content: 'Type /help for available commands.' },
     { id: lineId++, type: 'info', content: '' },
   ]);
   const [input, setInput] = useState('');
