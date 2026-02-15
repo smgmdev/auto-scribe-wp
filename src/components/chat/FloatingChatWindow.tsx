@@ -2205,6 +2205,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     checkDispute();
   }, [localOrder?.id]);
 
+  // Realtime subscription for dispute changes so buyer sees it instantly when agency opens one
+  useEffect(() => {
+    if (!localOrder?.id) return;
+
+    const channel = supabase
+      .channel(`dispute-watch-${localOrder.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'disputes',
+        },
+        async (payload) => {
+          const row = (payload.new || payload.old) as any;
+          if (row?.order_id !== localOrder.id) return;
+          // Re-check dispute status
+          const { data } = await supabase
+            .from('disputes')
+            .select('id')
+            .eq('order_id', localOrder.id)
+            .eq('status', 'open')
+            .maybeSingle();
+          setHasOpenDispute(!!data);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [localOrder?.id]);
+
   // Clear unread when chat opens - use actualSenderType for correct field
   // Also clear minimized chat unread to sync between widget and minimized chats
   const clearMinimizedChatUnread = useAppStore((state) => state.clearMinimizedChatUnread);
