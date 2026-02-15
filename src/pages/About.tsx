@@ -465,16 +465,10 @@ export default function About() {
                   <span>›</span>
                 </button>
               </div>
-              <div className="relative p-12 md:p-16 flex flex-col justify-center order-1 md:order-2 overflow-hidden">
-                <img 
-                  src={aboutPaymentBg} 
-                  alt="Payment options" 
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50" />
-                <h2 className="relative z-10 text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight">
+              <div className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2">
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
                   Choose how<br />you top up.<br />
-                  <span className="text-white/60">Card payments. Offline invoice.</span>
+                  <span className="text-[#86868b]">Card payments. Offline invoice.</span>
                 </h2>
               </div>
             </div>
@@ -487,7 +481,7 @@ export default function About() {
         <div className="max-w-[980px] mx-auto">
           <AnimatedSection className="relative rounded-none p-12 md:p-20 text-center text-white overflow-hidden">
             <img 
-              src={aboutGlobalCoverageBg} 
+              src={aboutPaymentBg} 
               alt="Global coverage" 
               className="absolute inset-0 w-full h-full object-cover"
             />
