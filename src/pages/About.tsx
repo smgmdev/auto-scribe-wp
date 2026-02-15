@@ -551,20 +551,20 @@ export default function About() {
               Ready to get started?
             </h2>
             <p className="text-xl text-[#86868b] mb-8">
-              Join thousands of brands distributing with Arcana Mace.
+              Join global brands publishing with Arcana Mace.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={() => navigate('/auth')}
                 className="px-8 py-4 bg-[#0071e3] text-white rounded-full text-lg font-medium hover:bg-[#0077ed] transition-colors"
               >
-                Get Started
+                Create an Account
               </button>
               <button 
                 onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
                 className="px-8 py-4 bg-transparent text-[#0066cc] rounded-full text-lg font-medium hover:bg-[#0066cc]/10 transition-colors"
               >
-                Browse Publishers ›
+                Browse Media Network ›
               </button>
             </div>
           </AnimatedSection>
