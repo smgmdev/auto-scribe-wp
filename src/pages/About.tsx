@@ -525,17 +525,19 @@ export default function About() {
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
           <AnimatedSection className="bg-white rounded-3xl p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">24h</p>
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">72h</p>
             <p className="text-lg text-[#86868b]">Average publishing time</p>
           </AnimatedSection>
           
           <AnimatedSection delay={100} className="bg-white rounded-3xl p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">500+</p>
-            <p className="text-lg text-[#86868b]">Premium publishers</p>
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">
+              {channelsLoading ? <Loader2 className="inline h-8 w-8 animate-spin text-[#1d1d1f]" /> : `${totalChannels}+`}
+            </p>
+            <p className="text-lg text-[#86868b]">Global media channels</p>
           </AnimatedSection>
           
           <AnimatedSection delay={200} className="bg-white rounded-3xl p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">50M+</p>
+            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">100M+</p>
             <p className="text-lg text-[#86868b]">Monthly readers</p>
           </AnimatedSection>
         </div>
