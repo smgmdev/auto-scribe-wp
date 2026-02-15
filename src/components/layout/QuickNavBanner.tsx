@@ -26,7 +26,6 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
           title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
         >
           {soundEnabled ? <Volume2 size={14} /> : <VolumeOff size={14} />}
-          <span className="hidden md:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
         </button>
       </div>
     </div>
