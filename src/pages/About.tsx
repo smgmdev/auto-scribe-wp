@@ -19,6 +19,7 @@ function BlueCheckIcon({ className = '' }: { className?: string }) {
 import amlogo from '@/assets/amlogo.png';
 import aboutDistributionBg from '@/assets/about-distribution-bg.jpg';
 import aboutGlobalCoverageBg from '@/assets/about-global-coverage-bg.jpg';
+import aboutPaymentBg from '@/assets/about-payment-bg.jpg';
 
 // Intersection Observer hook for scroll animations
 function useInView(options?: IntersectionObserverInit) {
@@ -464,10 +465,16 @@ export default function About() {
                   <span>›</span>
                 </button>
               </div>
-              <div className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2">
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
+              <div className="relative p-12 md:p-16 flex flex-col justify-center order-1 md:order-2 overflow-hidden">
+                <img 
+                  src={aboutPaymentBg} 
+                  alt="Payment options" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50" />
+                <h2 className="relative z-10 text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight">
                   Choose how<br />you top up.<br />
-                  <span className="text-[#86868b]">Card payments. Offline invoice.</span>
+                  <span className="text-white/60">Card payments. Offline invoice.</span>
                 </h2>
               </div>
             </div>
