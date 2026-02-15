@@ -1038,7 +1038,7 @@ export function ChatListPanel() {
         
         // Sound is handled by the postgres_changes listener to avoid double sounds
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
-          description: `Message for "${title}" (${media_site_name})`,
+          description: `Message for "${media_site_name || title}"`,
         });
       } else if (isServiceRequest && (isFromClient || isFromAdmin)) {
         // Update local state immediately - sync effect will update minimized chat
@@ -1059,7 +1059,7 @@ export function ChatListPanel() {
         
         // Sound is handled by the postgres_changes listener to avoid double sounds
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
-          description: `Message for "${title}" (${media_site_name})`,
+          description: `Message for "${media_site_name || title}"`,
         });
       }
     }
