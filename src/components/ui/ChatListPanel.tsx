@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 
 
@@ -1036,8 +1035,7 @@ export function ChatListPanel() {
           .update({ client_read: false })
           .eq('id', request_id);
         
-        toast({
-          title: isFromAdmin ? 'New Staff Message' : 'New Message',
+        sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
       }
@@ -1059,8 +1057,7 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         
-        toast({
-          title: isFromAdmin ? 'New Staff Message' : 'New Client Message',
+        sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
       }
@@ -1609,8 +1606,7 @@ export function ChatListPanel() {
               
               // Get request info for toast
               const request = myEngagementsRef.current.find(e => e.id === requestId);
-              toast({
-                title: 'New Message from Agency',
+              sonnerToast('New Message from Agency', {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
             }
@@ -1623,8 +1619,7 @@ export function ChatListPanel() {
               
               // Get request info for toast
               const request = serviceRequestsRef.current.find(r => r.id === requestId);
-              toast({
-                title: 'New Client Message',
+              sonnerToast('New Client Message', {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
             }
@@ -1673,8 +1668,7 @@ export function ChatListPanel() {
         
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
-          toast({
-            title: "Staff Joined",
+          sonnerToast("Staff Joined", {
             description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
           });
         }
@@ -1698,8 +1692,7 @@ export function ChatListPanel() {
         
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
-          toast({
-            title: "Staff Left",
+          sonnerToast("Staff Left", {
             description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
           });
         }
@@ -1720,8 +1713,7 @@ export function ChatListPanel() {
         } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
           // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
-          toast({
-            title: "Staff Action",
+          sonnerToast("Staff Action", {
             description: message || "Staff has taken an action on this engagement.",
           });
         }
@@ -1767,8 +1759,7 @@ export function ChatListPanel() {
         
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
-          toast({
-            title: "Staff Joined",
+          sonnerToast("Staff Joined", {
             description: payload.payload?.message || "Arcana Mace Staff has entered the chat.",
           });
         }
@@ -1792,8 +1783,7 @@ export function ChatListPanel() {
         
         // Don't show notification to admins about admin actions
         if (!isAdmin) {
-          toast({
-            title: "Staff Left",
+          sonnerToast("Staff Left", {
             description: payload.payload?.message || "Arcana Mace Staff has left the chat.",
           });
         }
@@ -1814,8 +1804,7 @@ export function ChatListPanel() {
         } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
           // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
-          toast({
-            title: "Staff Action",
+          sonnerToast("Staff Action", {
             description: message || "Staff has taken an action on this engagement.",
           });
         }
