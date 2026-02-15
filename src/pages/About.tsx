@@ -20,6 +20,7 @@ import amlogo from '@/assets/amlogo.png';
 import aboutDistributionBg from '@/assets/about-distribution-bg.jpg';
 import aboutGlobalCoverageBg from '@/assets/about-global-coverage-bg.jpg';
 import aboutPaymentBg from '@/assets/about-payment-bg.jpg';
+import aboutGlobalCoverageBgVideo from '@/assets/about-global-coverage-bg.mp4';
 
 // Intersection Observer hook for scroll animations
 function useInView(options?: IntersectionObserverInit) {
@@ -480,9 +481,12 @@ export default function About() {
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
           <AnimatedSection className="relative rounded-none p-12 md:p-20 text-center text-white overflow-hidden">
-            <img 
-              src={aboutPaymentBg} 
-              alt="Global coverage" 
+            <video 
+              src={aboutGlobalCoverageBgVideo} 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/60" />
