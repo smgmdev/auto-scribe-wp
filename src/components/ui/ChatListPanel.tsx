@@ -1595,7 +1595,10 @@ export function ChatListPanel() {
           // Note: isOwnMessage was already checked and returned early above, so we know this is from counterparty
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, updating unread count');
-            playMessageSound();
+            // Only play sound if the chat window is NOT also open (FloatingChatWindow handles its own sound)
+            if (!isDialogOpen) {
+              playMessageSound();
+            }
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, showing notification');
             
