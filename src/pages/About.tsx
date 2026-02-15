@@ -347,7 +347,7 @@ export default function About() {
             </AnimatedSection>
             <AnimatedSection delay={100}>
               <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
-                {channelsLoading ? <Loader2 className="inline h-10 w-10 animate-spin text-white" /> : totalChannels} global channels<br />
+                {channelsLoading ? <Loader2 className="inline h-10 w-10 animate-spin text-white" /> : totalChannels} global media channels<br />
                 available worldwide.
               </h2>
             </AnimatedSection>
