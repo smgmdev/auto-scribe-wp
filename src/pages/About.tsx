@@ -270,7 +270,7 @@ export default function About() {
             <span className="text-sm text-white/90">
               Publish with Arcana Mace in seconds.{' '}
               <button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/self-publishing')}
                 className="text-[#2997ff] hover:underline"
               >
                 Learn how ›
