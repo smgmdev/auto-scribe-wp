@@ -15,6 +15,19 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 15, 2026',
+    title: 'About Page, Popups & Slider Enhancements',
+    changes: [
+      'Redesigned the About page "Choose how you top up" section with updated copy covering card payments and offline invoice options',
+      'Updated the "Global coverage. Local access." section with a dynamic video background for a more immersive visual experience',
+      'Added new background image to the "Control your distribution" section on the About page',
+      'Agency Details popup is now fully draggable on desktop with a grip handle, matching the behavior of other popups in the platform',
+      'Agency Details popup transitions to fullscreen on mobile devices with proper scroll locking and touch-friendly layout',
+      'Added spinning loader indicator on the AI Article Generation slider while featured images are loading',
+      'Images in the slider now fade in smoothly once loaded instead of appearing abruptly',
+    ],
+  },
+  {
     date: 'February 14, 2026',
     title: 'Client Requests & Footer Improvements',
     changes: [
@@ -334,7 +347,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 14, 2026
+            Last update: February 15, 2026
           </p>
         </div>
 
