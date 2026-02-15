@@ -394,10 +394,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
-                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    width: `${85 + (headerLineWidth / 100) * 25}px`,
+                    height: `${85 + (headerLineWidth / 100) * 25}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: `${isMobile ? '1.5px' : '2px'} solid #007AFF`,
+                    border: '1.5px solid #007AFF',
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)',
                   }}
@@ -433,10 +433,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
-                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    width: `${85 + (headerLineWidth / 100) * 25}px`,
+                    height: `${85 + (headerLineWidth / 100) * 25}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: `${isMobile ? '1.5px' : '2px'} solid #5856D6`,
+                    border: '1.5px solid #5856D6',
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)',
                   }}
@@ -472,10 +472,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
-                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    width: `${85 + (headerLineWidth / 100) * 25}px`,
+                    height: `${85 + (headerLineWidth / 100) * 25}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: `${isMobile ? '1.5px' : '2px'} solid #32ADE6`,
+                    border: '1.5px solid #32ADE6',
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)',
                   }}
@@ -511,10 +511,10 @@ export default function Auth() {
                 <div 
                   className="absolute rounded-full"
                   style={{
-                    width: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
-                    height: `${(isMobile ? 85 : 130) + (headerLineWidth / 100) * (isMobile ? 25 : 40)}px`,
+                    width: `${85 + (headerLineWidth / 100) * 25}px`,
+                    height: `${85 + (headerLineWidth / 100) * 25}px`,
                     transition: 'width 0.15s ease-out, height 0.15s ease-out',
-                    border: `${isMobile ? '1.5px' : '2px'} solid #FF9500`,
+                    border: '1.5px solid #FF9500',
                     backgroundColor: 'transparent',
                     boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)',
                   }}
