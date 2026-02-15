@@ -1832,7 +1832,7 @@ export function AgencyRequestsView() {
                           }
                         }}
                         disabled={markingAllRead}
-                        className="rounded-none bg-[#f2a547] text-black border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-black"
+                        className="rounded-none bg-white text-black border-black hover:bg-black hover:text-white"
                       >
                         {markingAllRead && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                         Mark All Read
