@@ -1600,38 +1600,11 @@ export function ChatListPanel() {
               playMessageSound();
             }
           } else if (!isDialogOpen && isFromCounterparty) {
-            console.log('[ChatListPanel] Chat is not open, showing notification');
+            console.log('[ChatListPanel] Chat is not open, playing sound (toast handled by broadcast)');
             
-            // Mark request as unread for the appropriate party in database
-            // The postgres_changes subscription will sync the read state to local state
-            
-            if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
-              await supabase
-                .from('service_requests')
-                .update({ client_read: false })
-                .eq('id', requestId);
-              
-              // Get request info for toast
-              const request = myEngagementsRef.current.find(e => e.id === requestId);
-              playMessageSound();
-              sonnerToast('New Message from Agency', {
-                description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
-              });
-            }
-            
-            if (isServiceRequest && senderType === 'client') {
-              await supabase
-                .from('service_requests')
-                .update({ agency_read: false })
-                .eq('id', requestId);
-              
-              // Get request info for toast
-              const request = serviceRequestsRef.current.find(r => r.id === requestId);
-              playMessageSound();
-              sonnerToast('New Client Message', {
-                description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
-              });
-            }
+            // Only play sound here - toast notifications are handled by the broadcast handler
+            // to avoid double toasts (broadcast + postgres_changes both fire for each message)
+            playMessageSound();
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
           }
