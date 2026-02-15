@@ -543,7 +543,7 @@ export default function Auth() {
 
           {/* Title */}
           <h1 className="text-[32px] font-semibold text-center text-foreground mb-1">
-            {mode === 'signin' ? 'Arcana Mace Account' : 'Create Account'}
+            {mode === 'signin' ? 'Arcana Mace Account' : 'Create an Account'}
           </h1>
           <p className="text-center text-muted-foreground text-[15px] mb-8">
             {mode === 'signin' 
@@ -610,7 +610,7 @@ export default function Auth() {
               ) : (
                 <span className="relative flex items-center justify-center w-full">
                   <span className="transition-transform duration-200 ease-out group-hover:-translate-x-3">
-                    {mode === 'signin' ? 'Sign In' : 'Create Account'}
+                    {mode === 'signin' ? 'Sign In' : 'Create an Account'}
                   </span>
                   <ArrowRight 
                     size={18} 
