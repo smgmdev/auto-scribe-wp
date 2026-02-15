@@ -386,8 +386,8 @@ export function DashboardView() {
           {/* Badge on mobile - shown above description */}
           <div className="md:hidden mt-2">
             {agencyStatusLoading ? (
-              <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
-                <Loader2 className="h-3 w-3 animate-spin" />
+              <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
+                <Loader2 className="h-3 w-3 animate-spin text-white/40" />
               </Badge>
             ) : isAgency ? (
               <Badge className="bg-[#f2a547] text-black border-[#f2a547] flex items-center gap-1 px-3 py-1 hover:bg-[#f2a547] w-fit whitespace-nowrap">
@@ -405,8 +405,8 @@ export function DashboardView() {
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:block order-1 md:order-2">
           {agencyStatusLoading ? (
-            <Badge className="bg-muted text-muted-foreground border-border hover:bg-muted">
-              <Loader2 className="h-3 w-3 animate-spin" />
+            <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
+              <Loader2 className="h-3 w-3 animate-spin text-white/40" />
             </Badge>
           ) : isAgency ? (
             <Badge className="bg-[#f2a547] text-black border-[#f2a547] flex items-center gap-1 px-3 py-1 hover:bg-[#f2a547] whitespace-nowrap">
