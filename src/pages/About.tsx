@@ -306,7 +306,7 @@ export default function About() {
             </AnimatedSection>
             <AnimatedSection delay={100}>
               <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
-                No agency fees.<br />
+                No agency commitments.<br />
                 No contracts. Just publish.
               </h2>
             </AnimatedSection>
