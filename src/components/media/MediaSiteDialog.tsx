@@ -185,16 +185,17 @@ export function MediaSiteDialog({
   // Real-time subscription: clear engagement data when request is cancelled/completed
   useEffect(() => {
     if (!openEngagementData?.id) return;
+    const engagementId = openEngagementData.id;
 
     const channel = supabase
-      .channel(`media-site-engagement-${openEngagementData.id}`)
+      .channel(`media-site-engagement-${engagementId}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'service_requests',
-          filter: `id=eq.${openEngagementData.id}`,
+          filter: `id=eq.${engagementId}`,
         },
         (payload) => {
           const newStatus = (payload.new as any).status;
@@ -205,8 +206,24 @@ export function MediaSiteDialog({
       )
       .subscribe();
 
+    // Also re-check on window focus in case realtime was missed
+    const handleFocus = () => {
+      supabase
+        .from('service_requests')
+        .select('status')
+        .eq('id', engagementId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!data || data.status === 'cancelled' || data.status === 'completed') {
+            setOpenEngagementData(null);
+          }
+        });
+    };
+    window.addEventListener('focus', handleFocus);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [openEngagementData?.id]);
 
