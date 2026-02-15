@@ -409,6 +409,7 @@ export default function About() {
               alt="Control your distribution" 
               className="absolute inset-0 w-full h-full object-cover"
             />
+            <div className="absolute inset-0 bg-black/30" />
             <h2 className="relative z-10 text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tight text-center">
               Control your distribution.
             </h2>
