@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Check, Hand, Lock, Smartphone, ChevronDown } from 'lucide-react';
+import { Search, User, Check, Hand, Lock, Smartphone, ChevronDown, Loader2 } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -104,6 +104,7 @@ export default function About() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const [totalChannels, setTotalChannels] = useState(0);
+  const [channelsLoading, setChannelsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchChannelCount() {
@@ -112,6 +113,7 @@ export default function About() {
         supabase.from('wordpress_sites').select('*', { count: 'exact', head: true }).eq('connected', true),
       ]);
       setTotalChannels((mediaCount ?? 0) + (wpCount ?? 0));
+      setChannelsLoading(false);
     }
     fetchChannelCount();
   }, []);
@@ -345,7 +347,7 @@ export default function About() {
             </AnimatedSection>
             <AnimatedSection delay={100}>
               <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
-                {totalChannels > 0 ? `${totalChannels} global channels` : 'Global channels'}<br />
+                {channelsLoading ? <Loader2 className="inline h-10 w-10 animate-spin text-white" /> : totalChannels} global channels<br />
                 available worldwide.
               </h2>
             </AnimatedSection>
