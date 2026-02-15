@@ -182,6 +182,34 @@ export function MediaSiteDialog({
     }
   }, [open, mediaSite?.id, user]);
 
+  // Real-time subscription: clear engagement data when request is cancelled/completed
+  useEffect(() => {
+    if (!openEngagementData?.id) return;
+
+    const channel = supabase
+      .channel(`media-site-engagement-${openEngagementData.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `id=eq.${openEngagementData.id}`,
+        },
+        (payload) => {
+          const newStatus = (payload.new as any).status;
+          if (newStatus === 'cancelled' || newStatus === 'completed') {
+            setOpenEngagementData(null);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [openEngagementData?.id]);
+
   // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
