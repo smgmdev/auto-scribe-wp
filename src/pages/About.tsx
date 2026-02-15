@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Check, Hand, Lock, Smartphone, ChevronDown } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
@@ -102,6 +103,18 @@ export default function About() {
   const [activeSection, setActiveSection] = useState('overview');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  const [totalChannels, setTotalChannels] = useState(0);
+
+  useEffect(() => {
+    async function fetchChannelCount() {
+      const [{ count: mediaCount }, { count: wpCount }] = await Promise.all([
+        supabase.from('media_sites').select('*', { count: 'exact', head: true }),
+        supabase.from('wordpress_sites').select('*', { count: 'exact', head: true }).eq('connected', true),
+      ]);
+      setTotalChannels((mediaCount ?? 0) + (wpCount ?? 0));
+    }
+    fetchChannelCount();
+  }, []);
 
   // Scroll spy effect to track active section
   useEffect(() => {
@@ -332,8 +345,8 @@ export default function About() {
             </AnimatedSection>
             <AnimatedSection delay={100}>
               <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
-                500+ premium publishers<br />
-                across 50+ countries.
+                {totalChannels > 0 ? `${totalChannels} global channels` : 'Global channels'}<br />
+                available worldwide.
               </h2>
             </AnimatedSection>
           </div>
@@ -567,7 +580,7 @@ export default function About() {
             <div className="divide-y divide-[#d2d2d7]">
               <FAQItem 
                 question="How do I use Arcana Mace?"
-                answer="Simply create an account, browse our curated network of 500+ premium publishers, select your target outlet, submit your content, and pay. Your article will be published within 24-48 hours on average."
+                answer={`Simply create an account, browse our curated network of ${totalChannels > 0 ? totalChannels + '+' : ''} global channels, select your target outlet, submit your content, and pay. Your article will be published within 24-48 hours on average.`}
               />
               <FAQItem 
                 question="How secure is Arcana Mace?"
