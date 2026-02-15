@@ -371,14 +371,14 @@ export default function Auth() {
               }
             `}</style>
             <div 
-              className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center rings-container"
+              className="relative w-32 h-32 flex items-center justify-center rings-container"
               style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
             >
               {/* Logo - centered as the nucleus */}
               <img 
                 src={amblack} 
                 alt="Arcana Mace" 
-                className="absolute z-10 h-12 w-12 sm:h-20 sm:w-20 object-contain cursor-pointer hover:opacity-70 transition-opacity logo-entrance"
+                className="absolute z-10 h-12 w-12 object-contain cursor-pointer hover:opacity-70 transition-opacity logo-entrance"
                 onClick={() => navigate('/')}
                 style={{ transform: 'translateZ(0px)' }}
               />
