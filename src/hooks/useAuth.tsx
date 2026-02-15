@@ -428,10 +428,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Safe default for when context is not yet available (e.g., during HMR)
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  session: null,
+  loading: true,
+  role: null,
+  credits: 0,
+  isAdmin: false,
+  emailVerified: false,
+  pinRequired: false,
+  pinVerified: false,
+  signUp: async () => ({ error: new Error('Auth not ready'), data: null }),
+  signIn: async () => ({ error: new Error('Auth not ready') }),
+  signOut: async () => {},
+  refreshCredits: async () => {},
+  verifyPin: async () => false,
+  setPinVerified: () => {},
+};
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    console.warn('useAuth called outside AuthProvider — returning safe defaults');
+    return defaultAuthContext;
   }
   return context;
 }
