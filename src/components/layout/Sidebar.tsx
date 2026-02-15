@@ -227,6 +227,7 @@ export function Sidebar({
   const [agencyDataLoaded, setAgencyDataLoaded] = useState(false);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [rejectionSeen, setRejectionSeen] = useState(false);
+  const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
 
   const navigation = getNavigation(isAdmin, isAgencyOnboarded);
 
@@ -287,12 +288,12 @@ export function Sidebar({
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
+      setAgencyPayoutId(null);
       setUserApplicationStatus(null);
       setUserCustomVerificationStatus(null);
       setExpandedMenus({});
       setHasUserNavigated(false);
     } else if (prevId !== null && prevId !== user.id) {
-      // Account switch - reset all agency-related state for new user
       console.log('[Sidebar] User switched from', prevId, 'to', user.id, ', resetting agency state');
       setAgencyDataLoaded(false);
       setIsAgencyOnboarded(false);
@@ -300,6 +301,7 @@ export function Sidebar({
       setPayoutMethod(null);
       setApplicationId(null);
       setRejectionSeen(false);
+      setAgencyPayoutId(null);
       setUserApplicationStatus(null);
       setUserCustomVerificationStatus(null);
       setExpandedMenus({});
@@ -521,6 +523,7 @@ export function Sidebar({
             let unreadOrdersCount = 0;
             let unreadCompletedCount = 0;
             if (agencyPayoutData) {
+              if (isMounted) setAgencyPayoutId(agencyPayoutData.id);
               // Fetch all service requests with their agency_last_read_at timestamp and order_id
               const { data: requestsData } = await supabase
                 .from('service_requests')
@@ -1358,6 +1361,147 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
+  // Real-time subscription for agency-side Client Requests notifications
+  useEffect(() => {
+    if (!user || isAdmin || !isAgencyOnboarded || !agencyPayoutId) return;
+
+    const refetchAgencyNotificationCounts = async () => {
+      console.log('[Sidebar] Refetching agency notification counts for', agencyPayoutId);
+      
+      // Fetch all service requests with their agency_last_read_at timestamp and order_id
+      const { data: requestsData } = await supabase
+        .from('service_requests')
+        .select('id, status, agency_last_read_at, order_id')
+        .eq('agency_payout_id', agencyPayoutId);
+      
+      if (!requestsData || requestsData.length === 0) {
+        setAgencyUnreadServiceRequestsCount(0);
+        setAgencyUnreadCancelledCount(0);
+        setAgencyUnreadOrdersCount(0);
+        setAgencyUnreadCompletedCount(0);
+        return;
+      }
+
+      const requestIds = requestsData.map(r => r.id);
+      
+      // Fetch all messages for these requests
+      const { data: messagesData } = await supabase
+        .from('service_messages')
+        .select('request_id, sender_type, created_at')
+        .in('request_id', requestIds);
+      
+      // Fetch order data
+      const orderIds = requestsData.filter(r => r.order_id).map(r => r.order_id as string);
+      let ordersMap: Record<string, { read: boolean; agency_read: boolean; delivery_status: string; status: string }> = {};
+      if (orderIds.length > 0) {
+        const { data: ordersForAgency } = await supabase
+          .from('orders')
+          .select('id, read, agency_read, delivery_status, status')
+          .in('id', orderIds);
+        
+        if (ordersForAgency) {
+          ordersMap = Object.fromEntries(ordersForAgency.map(o => [o.id, o]));
+        }
+      }
+      
+      const countedRequests = new Set<string>();
+      let serviceRequestsCount = 0;
+      let cancelledRequestsCount = 0;
+      let unreadOrdersCount = 0;
+      let unreadCompletedCount = 0;
+      
+      for (const request of requestsData) {
+        const requestMessages = messagesData?.filter(m => m.request_id === request.id) || [];
+        const lastReadAt = request.agency_last_read_at;
+        
+        const hasUnreadMessages = requestMessages.some(msg => {
+          if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
+            if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+              return true;
+            }
+          }
+          return false;
+        });
+        
+        if (hasUnreadMessages) {
+          countedRequests.add(request.id);
+          const order = request.order_id ? ordersMap[request.order_id] : null;
+          
+          if (request.status === 'cancelled') {
+            cancelledRequestsCount++;
+          } else if (order && order.delivery_status === 'accepted') {
+            unreadCompletedCount++;
+          } else {
+            serviceRequestsCount++;
+          }
+        }
+      }
+      
+      // Count unread orders independently
+      for (const request of requestsData) {
+        if (!request.order_id) continue;
+        if (request.status === 'cancelled') continue;
+        
+        const order = ordersMap[request.order_id];
+        if (!order) continue;
+        
+        if (!order.agency_read && order.delivery_status !== 'delivered' && order.delivery_status !== 'accepted' && order.status !== 'cancelled') {
+          unreadOrdersCount++;
+        } else if (!countedRequests.has(request.id) && !order.agency_read && order.delivery_status === 'accepted') {
+          unreadCompletedCount++;
+        }
+      }
+      
+      // Count unread disputes
+      const { count: disputesCnt } = await supabase
+        .from('disputes')
+        .select(`id, read, service_requests!inner(agency_payout_id)`, { count: 'exact', head: true })
+        .eq('status', 'open')
+        .eq('read', false)
+        .eq('service_requests.agency_payout_id', agencyPayoutId);
+      
+      setAgencyUnreadServiceRequestsCount(serviceRequestsCount);
+      setAgencyUnreadCancelledCount(cancelledRequestsCount);
+      setAgencyUnreadOrdersCount(unreadOrdersCount);
+      setAgencyUnreadCompletedCount(unreadCompletedCount);
+      setAgencyUnreadDisputesCount(disputesCnt || 0);
+    };
+
+    const channel = supabase
+      .channel('agency-sidebar-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, (payload) => {
+        const row = (payload.new || payload.old) as any;
+        if (row?.agency_payout_id === agencyPayoutId) {
+          console.log('[Sidebar] Agency service request changed, refetching counts');
+          refetchAgencyNotificationCounts();
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_messages' }, (payload) => {
+        const msg = payload.new as any;
+        // Check if this message belongs to one of our requests
+        if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
+          console.log('[Sidebar] New client/admin message, refetching agency counts');
+          refetchAgencyNotificationCounts();
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
+        const updated = payload.new as any;
+        const old = payload.old as any;
+        if (updated.agency_read !== old?.agency_read || updated.delivery_status !== old?.delivery_status || updated.status !== old?.status) {
+          console.log('[Sidebar] Order changed, refetching agency counts');
+          refetchAgencyNotificationCounts();
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'disputes' }, () => {
+        console.log('[Sidebar] Dispute changed, refetching agency counts');
+        refetchAgencyNotificationCounts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin, isAgencyOnboarded, agencyPayoutId]);
   const handleNavClick = (viewId: string) => {
     // Mark that user has navigated (enables auto-expand for submenus)
     setHasUserNavigated(true);
