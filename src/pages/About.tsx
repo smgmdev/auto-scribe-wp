@@ -399,45 +399,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Feature Tiles - Apple style grid */}
-      <section className="bg-[#f5f5f7] py-4 px-4">
-        <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Tile 1 - Speed */}
-          <AnimatedSection className="bg-white rounded-3xl p-12 md:p-16 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
-              Faster and easier<br />
-              <span className="text-[#86868b]">than traditional</span><br />
-              <span className="text-[#86868b]">media buying.</span>
-            </h2>
-          </AnimatedSection>
-
-          {/* Tile 2 - Payment Options */}
-          <AnimatedSection delay={100} className="bg-white rounded-3xl p-12 md:p-16 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
-              Pay in full, with<br />
-              <span className="text-[#86868b]">credits, or</span><br />
-              <span className="text-[#86868b]">crypto.</span>
-            </h2>
-          </AnimatedSection>
-
-          {/* Tile 3 - Privacy */}
-          <AnimatedSection delay={150} className="bg-white rounded-3xl p-12 md:p-16 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
-              Privacy and security<br />
-              <span className="text-[#86868b]">built in.</span>
-            </h2>
-          </AnimatedSection>
-
-          {/* Tile 4 - Global */}
-          <AnimatedSection delay={200} className="bg-white rounded-3xl p-12 md:p-16 text-center">
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-4">
-              Accepted by 500+<br />
-              <span className="text-[#86868b]">premium publishers</span><br />
-              <span className="text-[#86868b]">worldwide.</span>
-            </h2>
-          </AnimatedSection>
-        </div>
-      </section>
 
       {/* Setup Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
