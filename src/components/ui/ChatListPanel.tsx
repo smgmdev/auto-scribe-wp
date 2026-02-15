@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast as sonnerToast } from 'sonner';
+import { playMessageSound } from '@/lib/chat-presence';
 
 
 interface ChatItem {
@@ -1035,6 +1036,7 @@ export function ChatListPanel() {
           .update({ client_read: false })
           .eq('id', request_id);
         
+        playMessageSound();
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
@@ -1057,6 +1059,7 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         
+        playMessageSound();
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
@@ -1606,6 +1609,7 @@ export function ChatListPanel() {
               
               // Get request info for toast
               const request = myEngagementsRef.current.find(e => e.id === requestId);
+              playMessageSound();
               sonnerToast('New Message from Agency', {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
@@ -1619,6 +1623,7 @@ export function ChatListPanel() {
               
               // Get request info for toast
               const request = serviceRequestsRef.current.find(r => r.id === requestId);
+              playMessageSound();
               sonnerToast('New Client Message', {
                 description: request ? `Message for "${request.media_site?.name || request.title}"` : 'New message received',
               });
