@@ -187,6 +187,8 @@ export function Sidebar({
     decrementUserUnreadOrdersCount,
     userUnreadDisputesCount,
     setUserUnreadDisputesCount,
+    incrementUserUnreadDisputesCount,
+    decrementUserUnreadDisputesCount,
     userUnreadCompletedCount,
     setUserUnreadCompletedCount,
     incrementUserUnreadCompletedCount,
@@ -1075,12 +1077,16 @@ export function Sidebar({
         .eq('user_id', user.id)
         .eq('read', false);
       
-      // Get orders that have open disputes
-      const { data: userDisputes } = await supabase
-        .from('disputes')
-        .select('order_id')
-        .eq('user_id', user.id)
-        .eq('status', 'open');
+      // Get orders that have open disputes (check by order_id, not user_id,
+      // since the dispute may have been opened by the agency)
+      const orderIds = allUnreadOrders?.map(o => o.id) || [];
+      const { data: userDisputes } = orderIds.length > 0
+        ? await supabase
+            .from('disputes')
+            .select('order_id')
+            .in('order_id', orderIds)
+            .eq('status', 'open')
+        : { data: [] };
       
       const disputeOrderIds = new Set(userDisputes?.map(d => d.order_id) || []);
       
@@ -1351,6 +1357,73 @@ export function Sidebar({
           // If order was marked as read and is a cancelled order, decrement history count
           if (old?.read === false && updated.read === true && updated.status === 'cancelled') {
             // Count will be decremented when user clicks on the order
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for user-side disputes (buyer)
+  // When a dispute is opened (by agency or buyer), move notification from active to disputes
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const channel = supabase
+      .channel('user-disputes-realtime-sidebar')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'disputes'
+        },
+        async (payload) => {
+          const dispute = payload.new as any;
+          // Check if this dispute belongs to one of the user's orders
+          const { data: order } = await supabase
+            .from('orders')
+            .select('id, read')
+            .eq('id', dispute.order_id)
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (order) {
+            console.log('[Sidebar] Dispute opened for user order, moving notification');
+            // If the order was unread in active, move the count to disputes
+            if (!order.read) {
+              decrementUserUnreadOrdersCount();
+            }
+            incrementUserUnreadDisputesCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'disputes'
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          // If dispute was resolved, the order may move back or to completed
+          if (old?.status === 'open' && updated.status !== 'open') {
+            const { data: order } = await supabase
+              .from('orders')
+              .select('id')
+              .eq('id', updated.order_id)
+              .eq('user_id', user.id)
+              .maybeSingle();
+            
+            if (order) {
+              console.log('[Sidebar] Dispute resolved for user order');
+              decrementUserUnreadDisputesCount();
+            }
           }
         }
       )
