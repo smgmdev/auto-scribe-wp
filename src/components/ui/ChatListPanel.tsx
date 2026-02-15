@@ -1040,9 +1040,7 @@ export function ChatListPanel() {
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${title}" (${media_site_name})`,
         });
-      }
-      
-      if (isServiceRequest && (isFromClient || isFromAdmin)) {
+      } else if (isServiceRequest && (isFromClient || isFromAdmin)) {
         // Update local state immediately - sync effect will update minimized chat
         setServiceRequests(prev => {
           const updated = prev.map(r => 
