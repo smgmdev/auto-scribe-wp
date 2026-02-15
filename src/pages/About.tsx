@@ -420,7 +420,7 @@ export default function About() {
       {/* Setup Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="bg-white rounded-3xl overflow-hidden">
+           <AnimatedSection className="bg-white rounded-none overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="p-12 md:p-16 flex flex-col justify-center">
                 <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
@@ -448,7 +448,7 @@ export default function About() {
       {/* Flexibility Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="bg-white rounded-3xl overflow-hidden">
+          <AnimatedSection className="bg-white rounded-none overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="p-12 md:p-16 flex flex-col justify-center order-2 md:order-1">
                 <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
@@ -477,7 +477,7 @@ export default function About() {
       {/* Global Coverage Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="bg-[#1d1d1f] rounded-3xl p-12 md:p-20 text-center text-white">
+          <AnimatedSection className="bg-[#1d1d1f] rounded-none p-12 md:p-20 text-center text-white">
             <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
               Global coverage.<br />
               <span className="text-[#86868b]">Local access.</span>
@@ -502,19 +502,19 @@ export default function About() {
       {/* Trust Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AnimatedSection className="bg-white rounded-3xl p-10 text-center">
+          <AnimatedSection className="bg-white rounded-none p-10 text-center">
             <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">72h</p>
             <p className="text-lg text-[#86868b]">Average publishing time</p>
           </AnimatedSection>
           
-          <AnimatedSection delay={100} className="bg-white rounded-3xl p-10 text-center">
+          <AnimatedSection delay={100} className="bg-white rounded-none p-10 text-center">
             <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">
               {channelsLoading ? <Loader2 className="inline h-8 w-8 animate-spin text-[#1d1d1f]" /> : `${totalChannels}+`}
             </p>
             <p className="text-lg text-[#86868b]">Global media channels</p>
           </AnimatedSection>
           
-          <AnimatedSection delay={200} className="bg-white rounded-3xl p-10 text-center">
+          <AnimatedSection delay={200} className="bg-white rounded-none p-10 text-center">
             <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">100M+</p>
             <p className="text-lg text-[#86868b]">Monthly readers</p>
           </AnimatedSection>
