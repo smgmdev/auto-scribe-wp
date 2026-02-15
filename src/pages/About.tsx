@@ -555,7 +555,7 @@ export default function About() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?mode=signup')}
                 className="px-8 py-4 bg-[#0071e3] text-white rounded-full text-lg font-medium hover:bg-[#0077ed] transition-colors"
               >
                 Create an Account

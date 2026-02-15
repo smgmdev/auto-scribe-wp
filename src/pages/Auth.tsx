@@ -35,7 +35,9 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const searchParams = new URLSearchParams(window.location.search);
+  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
