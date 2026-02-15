@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Headline, Article } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { setSoundEnabled } from '@/lib/chat-presence';
 
 export interface MinimizedChat {
   id: string;
@@ -257,6 +258,10 @@ interface AppState {
   focusChat: (requestId: string) => void;
   updateChatPosition: (requestId: string, position: { x: number; y: number }) => void;
   updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>, requestId?: string) => void;
+  
+  // Sound toggle
+  soundEnabled: boolean;
+  toggleSound: () => void;
   
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
@@ -685,6 +690,20 @@ export const useAppStore = create<AppState>()((set) => ({
       openChats: updated,
       globalChatRequest: updatedRequest
     };
+  }),
+  
+  // Sound toggle
+  soundEnabled: (() => {
+    const stored = localStorage.getItem('notification-sound-enabled');
+    const val = stored !== 'false';
+    setSoundEnabled(val);
+    return val;
+  })(),
+  toggleSound: () => set((state) => {
+    const newVal = !state.soundEnabled;
+    localStorage.setItem('notification-sound-enabled', String(newVal));
+    setSoundEnabled(newVal);
+    return { soundEnabled: newVal };
   }),
   
   // Reset all notification counts
