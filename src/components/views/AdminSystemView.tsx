@@ -303,26 +303,28 @@ export function AdminSystemView() {
       onClick={() => inputRef.current?.focus()}
     >
       {/* Terminal Output */}
-      <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm">
-        {lines.map(line => {
-          if (line.type === 'table' && line.data) {
-            return <div key={line.id}>{renderUserTable(line.data)}</div>;
-          }
+      <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm flex flex-col justify-end">
+        <div>
+          {lines.map(line => {
+            if (line.type === 'table' && line.data) {
+              return <div key={line.id}>{renderUserTable(line.data)}</div>;
+            }
 
-          let colorClass = 'text-white/60';
-          let prefix = '';
-          if (line.type === 'input') { colorClass = 'text-white'; prefix = '$ '; }
-          else if (line.type === 'output') { colorClass = 'text-green-400'; }
-          else if (line.type === 'error') { colorClass = 'text-red-400'; }
-          else if (line.type === 'info') { colorClass = 'text-white/40'; }
+            let colorClass = 'text-white/60';
+            let prefix = '';
+            if (line.type === 'input') { colorClass = 'text-white'; prefix = '$ '; }
+            else if (line.type === 'output') { colorClass = 'text-green-400'; }
+            else if (line.type === 'error') { colorClass = 'text-red-400'; }
+            else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
-          return (
-            <div key={line.id} className={`${colorClass} leading-6 whitespace-pre`}>
-              {prefix}{line.content}
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
+            return (
+              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre`}>
+                {prefix}{line.content}
+              </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input Line - at bottom */}
