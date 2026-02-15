@@ -463,7 +463,7 @@ export default function About() {
           <AnimatedSection className="bg-[#1d1d1f] rounded-3xl p-12 md:p-20 text-center text-white">
             <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
               Global coverage.<br />
-              <span className="text-[#86868b]">Local expertise.</span>
+              <span className="text-[#86868b]">Local access.</span>
             </h2>
             <p className="text-xl text-[#86868b] max-w-2xl mx-auto mb-8">
               From Business & Finance to Crypto, Tech to Politics — our network spans every major market. MENA, China, and beyond.
