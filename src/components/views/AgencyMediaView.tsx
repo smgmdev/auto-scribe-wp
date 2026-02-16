@@ -1785,7 +1785,7 @@ export function AgencyMediaView() {
               />
             </div>
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <div className="flex-1 overflow-y-auto pb-0">
               {manageMediaSubmission?.imported_sites
                 ?.filter(site => {
                   if (!manageMediaSearch) return true;
