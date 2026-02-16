@@ -2064,7 +2064,7 @@ export function AgencyMediaView() {
                     <SelectTrigger className="h-9 text-sm">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[10002]">
                       {availableCategories.map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
@@ -2077,7 +2077,7 @@ export function AgencyMediaView() {
                     <SelectTrigger className="h-9 text-sm">
                       <SelectValue placeholder="Select subcategory" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[10002]">
                       {availableSubcategories.map(sub => (
                         <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                       ))}
