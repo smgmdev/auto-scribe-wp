@@ -2446,10 +2446,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           // Skip messages from same sender type (they're already added to local state)
           if (newMsg.sender_type === senderType) return;
           
-          // Play notification sound for incoming counterparty messages (skip status messages)
-          if (!isStatusMessage) {
-            playMessageSound(globalChatRequest?.id);
-          }
+          // Sound is handled by ChatListPanel's broadcast handler (single source of truth)
+          // Do NOT play sound here to prevent double sounds
           
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;

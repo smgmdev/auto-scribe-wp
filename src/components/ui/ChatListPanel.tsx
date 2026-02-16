@@ -985,10 +985,16 @@ export function ChatListPanel() {
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
     
+    // SINGLE SOURCE OF TRUTH for sound: broadcast handler is the ONLY place that plays sound.
+    // FloatingChatWindow and postgres_changes listeners do NOT play sound.
+    if (shouldNotify) {
+      // Always play sound for counterparty messages regardless of chat open/minimized state
+      playMessageSound(request_id);
+    }
+    
     // For minimized chats: update the engagement/request state which will sync to minimized chat
-    // Also play sound for immediate feedback
     if (isMinimized && shouldNotify) {
-      console.log('[ChatListPanel] Broadcast: Chat is minimized, updating engagement/request and playing sound');
+      console.log('[ChatListPanel] Broadcast: Chat is minimized, updating engagement/request');
       
       // Update the underlying engagement/request - the sync effect will update minimized chat
       if (isMinimizedMyRequest || isMyEngagement) {
@@ -1013,16 +1019,9 @@ export function ChatListPanel() {
           return updated;
         });
       }
-      
-      // Play sound here too - debounce in playMessageSound prevents double sounds
-      // This is needed because postgres_changes may not fire due to RLS on buyer side
-      playMessageSound(request_id);
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
-      // The postgres_changes subscription will sync the read state to local state
-      
       if (isMyEngagement && (isFromAgency || isFromAdmin)) {
-        // Update local state immediately
         setMyEngagements(prev => {
           const updated = prev.map(e => 
             e.id === request_id 
@@ -1038,13 +1037,10 @@ export function ChatListPanel() {
           .update({ client_read: false })
           .eq('id', request_id);
         
-        // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
-        playMessageSound(request_id);
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${media_site_name || title}"`,
         });
       } else if (isServiceRequest && (isFromClient || isFromAdmin)) {
-        // Update local state immediately - sync effect will update minimized chat
         setServiceRequests(prev => {
           const updated = prev.map(r => 
             r.id === request_id 
@@ -1060,14 +1056,11 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         
-        // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
-        playMessageSound(request_id);
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${media_site_name || title}"`,
         });
       }
     }
-    
     // Refresh the lists to get latest data (non-blocking)
     if (!isMyEngagement && !isServiceRequest) {
       // Only refresh if we didn't already have this in our local state
