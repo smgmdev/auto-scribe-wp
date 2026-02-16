@@ -2448,7 +2448,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           
           // Play notification sound for incoming counterparty messages (skip status messages)
           if (!isStatusMessage) {
-            playMessageSound();
+            playMessageSound(globalChatRequest?.id);
           }
           
           setMessages(prev => {
