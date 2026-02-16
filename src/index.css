@@ -292,14 +292,19 @@ button:focus-visible,
   background-color: hsl(220 10% 50%);
 }
 
-/* Disable hover effects on toast notifications globally */
-[data-sonner-toast]:hover {
-  background-color: inherit !important;
+/* Disable ALL hover effects on toast notifications globally */
+[data-sonner-toast],
+[data-sonner-toast]:hover,
+[data-sonner-toast][data-expanded]:hover {
   opacity: 1 !important;
 }
-[data-sonner-toaster] [data-sonner-toast]:hover ~ [data-sonner-toast] {
+[data-sonner-toaster] [data-sonner-toast]:hover ~ [data-sonner-toast],
+[data-sonner-toaster] [data-sonner-toast][data-front="false"] {
   opacity: 1 !important;
-  transform: none !important;
+}
+/* Ensure toast background is always solid */
+[data-sonner-toast] {
+  background: hsl(var(--background)) !important;
 }
 
 /* Disable hover effect on notification badges - keep red on hover */
