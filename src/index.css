@@ -292,9 +292,14 @@ button:focus-visible,
   background-color: hsl(220 10% 50%);
 }
 
-/* Disable hover background on toast notifications globally */
+/* Disable hover effects on toast notifications globally */
 [data-sonner-toast]:hover {
   background-color: inherit !important;
+  opacity: 1 !important;
+}
+[data-sonner-toaster] [data-sonner-toast]:hover ~ [data-sonner-toast] {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 /* Disable hover effect on notification badges - keep red on hover */
