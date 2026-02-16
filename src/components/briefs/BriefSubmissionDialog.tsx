@@ -151,8 +151,8 @@ export function BriefSubmissionDialog({
       }
       let agencyPayoutId = null;
       if (mediaSite.agency) {
-        const { data: agencyData } = await supabase.from('agency_payouts').select('id').eq('agency_name', mediaSite.agency).single();
-        if (agencyData) agencyPayoutId = agencyData.id;
+        const { data: payoutId } = await supabase.rpc('get_agency_payout_id_by_name', { _agency_name: mediaSite.agency });
+        if (payoutId) agencyPayoutId = payoutId;
       }
       const { data: request, error } = await supabase
         .from('service_requests')

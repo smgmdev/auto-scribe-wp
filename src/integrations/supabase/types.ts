@@ -1647,6 +1647,18 @@ export type Database = {
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
       check_user_status: { Args: { check_email: string }; Returns: string }
       check_user_suspended: { Args: { check_email: string }; Returns: boolean }
+      get_active_agency_payouts: {
+        Args: never
+        Returns: {
+          agency_name: string
+          id: string
+          user_id: string
+        }[]
+      }
+      get_agency_payout_id_by_name: {
+        Args: { _agency_name: string }
+        Returns: string
+      }
       get_public_agencies: {
         Args: never
         Returns: {
