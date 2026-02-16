@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -140,6 +142,53 @@ export function AgencyMediaView() {
   // Manage approved media dialog state
   const [manageMediaSubmission, setManageMediaSubmission] = useState<ApprovedMediaSubmission | null>(null);
   const [manageMediaSearch, setManageMediaSearch] = useState('');
+  const [manageExpandedSites, setManageExpandedSites] = useState<Set<string>>(new Set());
+  const isMobile = useIsMobile();
+  
+  // Draggable popup state
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  // Reset drag position when opening
+  useEffect(() => {
+    if (manageMediaSubmission) {
+      setDragPos({ x: 0, y: 0 });
+      setManageExpandedSites(new Set());
+      if (!isMobile) {
+        document.body.style.overflow = '';
+      } else {
+        document.body.style.overflow = 'hidden';
+      }
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [manageMediaSubmission, isMobile]);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY, posX: dragPos.x, posY: dragPos.y };
+  }, [isMobile, dragPos]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setDragPos({
+        x: dragStartRef.current.posX + (e.clientX - dragStartRef.current.x),
+        y: dragStartRef.current.posY + (e.clientY - dragStartRef.current.y),
+      });
+    };
+    const handleUp = () => setIsDragging(false);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isDragging]);
 
   // Handle target tab navigation from redirects
   useEffect(() => {
@@ -1672,73 +1721,150 @@ export function AgencyMediaView() {
         </DialogContent>
       </Dialog>
 
-      {/* Manage Approved Media Dialog */}
-      <Dialog open={!!manageMediaSubmission} onOpenChange={(open) => !open && setManageMediaSubmission(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Manage Approved Media</DialogTitle>
-            <DialogDescription>
-              {manageMediaSubmission?.imported_sites?.length || 0} imported media sites
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden flex flex-col gap-0">
-            <Input
-              placeholder="Search media sites..."
-              value={manageMediaSearch}
-              onChange={(e) => setManageMediaSearch(e.target.value)}
-              className="h-9 bg-black text-white border-transparent placeholder:text-white/40 text-sm flex-shrink-0"
-            />
-            <div className="flex-1 overflow-y-auto">
+      {/* Manage Approved Media - Draggable Portal Popup */}
+      {manageMediaSubmission && createPortal(
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-[9998]"
+            onClick={() => setManageMediaSubmission(null)}
+          />
+          {/* Popup */}
+          <div
+            ref={popupRef}
+            className={`fixed z-[9999] bg-background border border-border shadow-2xl flex flex-col ${
+              isMobile 
+                ? 'inset-0 h-[100dvh] rounded-none border-0' 
+                : 'rounded-none w-[680px] max-h-[80vh]'
+            }`}
+            style={isMobile ? {} : {
+              top: `calc(50% + ${dragPos.y}px)`,
+              left: `calc(50% + ${dragPos.x}px)`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {/* Drag handle / Header */}
+            <div 
+              className={`flex items-center justify-between p-4 border-b border-border flex-shrink-0 ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
+              onMouseDown={handleDragStart}
+            >
+              <div>
+                <h2 className="text-lg font-semibold">Manage Approved Media</h2>
+                <p className="text-sm text-muted-foreground">{manageMediaSubmission?.imported_sites?.length || 0} imported media sites</p>
+              </div>
+              <button 
+                onClick={() => setManageMediaSubmission(null)}
+                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {/* Search */}
+            <div className="px-4 pt-3 pb-0 flex-shrink-0">
+              <Input
+                placeholder="Search media sites..."
+                value={manageMediaSearch}
+                onChange={(e) => setManageMediaSearch(e.target.value)}
+                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 text-sm"
+              />
+            </div>
+            {/* List */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
               {manageMediaSubmission?.imported_sites
                 ?.filter(site => {
                   if (!manageMediaSearch) return true;
                   return site.name.toLowerCase().includes(manageMediaSearch.toLowerCase());
                 })
-                .map((site) => (
-                  <div
-                    key={site.id}
-                    className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 border-b border-border hover:bg-muted/50 transition-colors -mt-px first:mt-0"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 md:w-[280px] flex-shrink-0">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden">
-                        {site.favicon ? (
-                          <img
-                            src={site.favicon}
-                            alt={`${site.name} favicon`}
-                            className="h-5 w-5 object-contain"
-                            onError={e => { e.currentTarget.style.display = 'none'; }}
-                          />
-                        ) : (
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      <span className="text-sm truncate">{site.name}</span>
-                    </div>
-                    <div className="flex items-center gap-3 flex-1 justify-end">
-                      <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                        {site.price > 0 ? `${site.price} USD` : 'Free'}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground w-[100px]">{site.publication_format}</span>
-                      {agencyName && (
-                        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <span>via</span>
-                          <span className="text-foreground">{agencyName}</span>
-                          {agencyLogo && (
-                            <img src={agencyLogo} alt={agencyName} className="h-4 w-4 object-contain rounded-full" />
+                .map((site) => {
+                  const isRowExpanded = manageExpandedSites.has(site.id);
+                  return (
+                    <div
+                      key={site.id}
+                      className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setManageExpandedSites(prev => {
+                          const next = new Set(prev);
+                          if (next.has(site.id)) next.delete(site.id);
+                          else next.add(site.id);
+                          return next;
+                        });
+                      }}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3">
+                        <div className="flex items-center gap-3 min-w-0 md:w-[240px] flex-shrink-0">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden">
+                            {site.favicon ? (
+                              <img
+                                src={site.favicon}
+                                alt={`${site.name} favicon`}
+                                className="h-5 w-5 object-contain"
+                                onError={e => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              <Globe className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className="text-sm truncate">{site.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1 justify-end">
+                          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                            {site.price > 0 ? `${site.price} USD` : 'Free'}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground w-[100px]">{site.publication_format}</span>
+                          {agencyName && (
+                            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <span>via</span>
+                              <span className="text-foreground">{agencyName}</span>
+                              {agencyLogo && (
+                                <img src={agencyLogo} alt={agencyName} className="h-4 w-4 object-contain rounded-full" />
+                              )}
+                            </div>
                           )}
+                          <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                            {isRowExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Expanded details */}
+                      {isRowExpanded && (
+                        <div className="px-3 pb-3 pt-0 space-y-2 animate-fade-in border-t border-border">
+                          {agencyName && (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 md:hidden">
+                              <span>via</span>
+                              <span className="text-foreground">{agencyName}</span>
+                              {agencyLogo && (
+                                <img src={agencyLogo} alt={agencyName} className="h-4 w-4 object-contain rounded-full" />
+                              )}
+                            </div>
+                          )}
+                          {site.about && (
+                            <div className="pt-2">
+                              <p className="text-xs font-medium text-muted-foreground mb-0.5">Good to know</p>
+                              <p className="text-xs text-foreground">{site.about}</p>
+                            </div>
+                          )}
+                          {(site.category || site.subcategory) && (
+                            <p className="text-xs text-muted-foreground">
+                              {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={ensureHttps(site.link)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            </a>
+                          </div>
                         </div>
                       )}
-                      <a
-                        href={ensureHttps(site.link)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               {manageMediaSubmission?.imported_sites?.filter(site => {
                 if (!manageMediaSearch) return true;
                 return site.name.toLowerCase().includes(manageMediaSearch.toLowerCase());
@@ -1747,8 +1873,9 @@ export function AgencyMediaView() {
               )}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </>,
+        document.body
+      )}
       </div>
     </div>
   );
