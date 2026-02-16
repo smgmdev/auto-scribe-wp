@@ -154,6 +154,7 @@ export function AgencyMediaView() {
   const [editingSite, setEditingSite] = useState<MediaSite | null>(null);
   const [editForm, setEditForm] = useState<Partial<MediaSite>>({});
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editHasActiveEngagements, setEditHasActiveEngagements] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
   const [availableFormats, setAvailableFormats] = useState<string[]>([]);
@@ -235,12 +236,25 @@ export function AgencyMediaView() {
     setEditingSite(site);
     setEditForm({ ...site });
     setEditDragPos({ x: 0, y: 0 });
-    // Fetch distinct categories and subcategories
-    const [catRes, subRes, fmtRes] = await Promise.all([
+    setEditHasActiveEngagements(false);
+    
+    // Check for active engagements/orders for this media site
+    const [engagementsRes, catRes, subRes, fmtRes] = await Promise.all([
+      supabase
+        .from('service_requests')
+        .select('id, status, order_id')
+        .eq('media_site_id', site.id)
+        .not('status', 'in', '(cancelled,completed)')
+        .limit(1),
       supabase.from('media_sites').select('category').then(r => r.data),
       supabase.from('media_sites').select('subcategory').then(r => r.data),
       supabase.from('media_sites').select('publication_format').then(r => r.data),
     ]);
+    
+    if (engagementsRes.data && engagementsRes.data.length > 0) {
+      setEditHasActiveEngagements(true);
+    }
+    
     const cats = [...new Set((catRes || []).map((r: any) => r.category).filter(Boolean))].sort();
     const subs = [...new Set((subRes || []).map((r: any) => r.subcategory).filter(Boolean))].sort();
     const fmts = [...new Set((fmtRes || []).map((r: any) => r.publication_format).filter(Boolean))].sort();
@@ -2081,18 +2095,25 @@ export function AgencyMediaView() {
               </div>
             </div>
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-border flex flex-col md:flex-row md:items-center md:justify-end gap-2 flex-shrink-0">
-              <Button variant="outline" onClick={() => setEditingSite(null)} className="h-10 text-sm w-full md:w-auto hover:bg-black hover:text-white transition-all">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveEdit}
-                disabled={isSavingEdit}
-                className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
-              >
-                {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                Update Media Listing
-              </Button>
+            <div className="px-4 py-3 border-t border-border flex flex-col gap-2 flex-shrink-0">
+              {editHasActiveEngagements && (
+                <p className="text-xs text-destructive">
+                  To update this media listing, you must not have any active engagements or orders associated with it.
+                </p>
+              )}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditingSite(null)} className="h-10 text-sm w-full md:w-auto hover:bg-black hover:text-white transition-all">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEdit}
+                  disabled={isSavingEdit || editHasActiveEngagements}
+                  className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
+                >
+                  {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                  Update Media Listing
+                </Button>
+              </div>
             </div>
           </div>
         </>,
