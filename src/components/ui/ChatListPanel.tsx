@@ -1014,7 +1014,9 @@ export function ChatListPanel() {
         });
       }
       
-      // Sound is handled by the postgres_changes listener to avoid double sounds
+      // Play sound here too - debounce in playMessageSound prevents double sounds
+      // This is needed because postgres_changes may not fire due to RLS on buyer side
+      playMessageSound();
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -1036,7 +1038,8 @@ export function ChatListPanel() {
           .update({ client_read: false })
           .eq('id', request_id);
         
-        // Sound is handled by the postgres_changes listener to avoid double sounds
+        // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
+        playMessageSound();
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${media_site_name || title}"`,
         });
@@ -1057,7 +1060,8 @@ export function ChatListPanel() {
           .update({ agency_read: false })
           .eq('id', request_id);
         
-        // Sound is handled by the postgres_changes listener to avoid double sounds
+        // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
+        playMessageSound();
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${media_site_name || title}"`,
         });
