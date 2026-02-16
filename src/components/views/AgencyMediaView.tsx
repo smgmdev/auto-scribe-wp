@@ -154,6 +154,8 @@ export function AgencyMediaView() {
   const [editingSite, setEditingSite] = useState<MediaSite | null>(null);
   const [editForm, setEditForm] = useState<Partial<MediaSite>>({});
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
   const [editDragPos, setEditDragPos] = useState({ x: 0, y: 0 });
   const [isEditDragging, setIsEditDragging] = useState(false);
   const editDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
@@ -228,10 +230,19 @@ export function AgencyMediaView() {
   }, [isEditDragging]);
 
   // Open edit popup
-  const openEditSite = useCallback((site: MediaSite) => {
+  const openEditSite = useCallback(async (site: MediaSite) => {
     setEditingSite(site);
     setEditForm({ ...site });
     setEditDragPos({ x: 0, y: 0 });
+    // Fetch distinct categories and subcategories
+    const [catRes, subRes] = await Promise.all([
+      supabase.from('media_sites').select('category').then(r => r.data),
+      supabase.from('media_sites').select('subcategory').then(r => r.data),
+    ]);
+    const cats = [...new Set((catRes || []).map((r: any) => r.category).filter(Boolean))].sort();
+    const subs = [...new Set((subRes || []).map((r: any) => r.subcategory).filter(Boolean))].sort();
+    setAvailableCategories(cats as string[]);
+    setAvailableSubcategories(subs as string[]);
   }, []);
 
   // Save edit
@@ -2054,7 +2065,7 @@ export function AgencyMediaView() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {['Global', 'Regional', 'Local'].map(cat => (
+                      {availableCategories.map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>
@@ -2067,7 +2078,7 @@ export function AgencyMediaView() {
                       <SelectValue placeholder="Select subcategory" />
                     </SelectTrigger>
                     <SelectContent>
-                      {['Business and Finance', 'Business and Finance,China', 'Business and Finance,MENA', 'Business and Finance,Politics and Economy', 'Campaign', 'Campaign,Tech', 'China', 'Crypto', 'MENA', 'Tech'].map(sub => (
+                      {availableSubcategories.map(sub => (
                         <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                       ))}
                     </SelectContent>
