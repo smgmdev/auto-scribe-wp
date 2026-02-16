@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X, GripHorizontal } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X, GripHorizontal, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +44,10 @@ interface MediaSite {
   publishing_time: string;
   about: string | null;
   agency: string | null;
+  marks: string;
+  max_words: number | null;
+  max_images: number | null;
+  country: string | null;
 }
 
 interface WordPressSite {
@@ -145,6 +149,14 @@ export function AgencyMediaView() {
   const [manageExpandedSites, setManageExpandedSites] = useState<Set<string>>(new Set());
   const isMobile = useIsMobile();
   
+  // Edit media site popup state
+  const [editingSite, setEditingSite] = useState<MediaSite | null>(null);
+  const [editForm, setEditForm] = useState<Partial<MediaSite>>({});
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editDragPos, setEditDragPos] = useState({ x: 0, y: 0 });
+  const [isEditDragging, setIsEditDragging] = useState(false);
+  const editDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  
   // Draggable popup state
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -190,7 +202,80 @@ export function AgencyMediaView() {
     };
   }, [isDragging]);
 
-  // Handle target tab navigation from redirects
+  // Edit popup drag handlers
+  const handleEditDragStart = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    setIsEditDragging(true);
+    editDragStartRef.current = { x: e.clientX, y: e.clientY, posX: editDragPos.x, posY: editDragPos.y };
+  }, [isMobile, editDragPos]);
+
+  useEffect(() => {
+    if (!isEditDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setEditDragPos({
+        x: editDragStartRef.current.posX + (e.clientX - editDragStartRef.current.x),
+        y: editDragStartRef.current.posY + (e.clientY - editDragStartRef.current.y),
+      });
+    };
+    const handleUp = () => setIsEditDragging(false);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isEditDragging]);
+
+  // Open edit popup
+  const openEditSite = useCallback((site: MediaSite) => {
+    setEditingSite(site);
+    setEditForm({ ...site });
+    setEditDragPos({ x: 0, y: 0 });
+  }, []);
+
+  // Save edit
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingSite || !editForm) return;
+    setIsSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from('media_sites')
+        .update({
+          name: editForm.name,
+          link: editForm.link,
+          price: editForm.price,
+          publication_format: editForm.publication_format,
+          google_index: editForm.google_index,
+          publishing_time: editForm.publishing_time,
+          category: editForm.category,
+          subcategory: editForm.subcategory,
+          about: editForm.about,
+          marks: editForm.marks,
+          max_words: editForm.max_words,
+          max_images: editForm.max_images,
+          country: editForm.country,
+        })
+        .eq('id', editingSite.id);
+      if (error) throw error;
+      
+      // Update local state
+      if (manageMediaSubmission) {
+        const updatedSites = manageMediaSubmission.imported_sites.map(s => 
+          s.id === editingSite.id ? { ...s, ...editForm } as MediaSite : s
+        );
+        setManageMediaSubmission({ ...manageMediaSubmission, imported_sites: updatedSites });
+      }
+      
+      toast.success('Media site updated');
+      setEditingSite(null);
+    } catch (err: any) {
+      toast.error('Failed to update: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsSavingEdit(false);
+    }
+  }, [editingSite, editForm, manageMediaSubmission]);
+
+
   useEffect(() => {
     if (agencyMediaTargetTab) {
       setActiveTab(agencyMediaTargetTab);
@@ -1866,7 +1951,7 @@ export function AgencyMediaView() {
                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                             </p>
                           )}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-2">
                             <a
                               href={ensureHttps(site.link)}
                               target="_blank"
@@ -1877,6 +1962,18 @@ export function AgencyMediaView() {
                               <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
                               <ExternalLink className="h-3 w-3 flex-shrink-0" />
                             </a>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditSite(site);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Edit Details
+                            </Button>
                           </div>
                         </div>
                       )}
@@ -1889,6 +1986,138 @@ export function AgencyMediaView() {
               }).length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-8">No sites found.</p>
               )}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* Edit Details Popup */}
+      {editingSite && createPortal(
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black/50 z-[10000]" onClick={() => setEditingSite(null)} />
+          <div
+            className={`fixed z-[10001] bg-background border border-border shadow-xl flex flex-col ${
+              isMobile ? 'inset-0 h-[100dvh] rounded-none border-0' : 'w-[520px] max-h-[85vh] rounded-none'
+            }`}
+            style={isMobile ? {} : {
+              top: `calc(50% + ${editDragPos.y}px)`,
+              left: `calc(50% + ${editDragPos.x}px)`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {/* Drag bar - Desktop Only */}
+            {!isMobile && (
+              <div
+                className="px-4 py-1 border-b border-border bg-muted/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none flex-shrink-0"
+                onMouseDown={handleEditDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <button onClick={() => setEditingSite(null)} className="h-6 w-6 flex items-center justify-center hover:bg-muted rounded-sm">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            {/* Header */}
+            <div className="px-4 py-3 flex-shrink-0 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold font-display">Edit Details</h3>
+                <p className="text-sm text-muted-foreground">{editingSite.name}</p>
+              </div>
+              {isMobile && (
+                <button onClick={() => setEditingSite(null)} className="h-8 w-8 flex items-center justify-center hover:bg-muted rounded-sm">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            {/* Form */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Name</Label>
+                <Input value={editForm.name || ''} onChange={(e) => setEditForm(f => ({ ...f, name: e.target.value }))} className="h-9 text-sm" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Link</Label>
+                <Input value={editForm.link || ''} onChange={(e) => setEditForm(f => ({ ...f, link: e.target.value }))} className="h-9 text-sm" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Price (USD)</Label>
+                  <Input type="number" value={editForm.price ?? 0} onChange={(e) => setEditForm(f => ({ ...f, price: parseInt(e.target.value) || 0 }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Publication Format</Label>
+                  <Input value={editForm.publication_format || ''} onChange={(e) => setEditForm(f => ({ ...f, publication_format: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Google Index</Label>
+                  <Input value={editForm.google_index || ''} onChange={(e) => setEditForm(f => ({ ...f, google_index: e.target.value }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Publishing Time</Label>
+                  <Input value={editForm.publishing_time || ''} onChange={(e) => setEditForm(f => ({ ...f, publishing_time: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Category</Label>
+                  <Input value={editForm.category || ''} onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Subcategory</Label>
+                  <Input value={editForm.subcategory || ''} onChange={(e) => setEditForm(f => ({ ...f, subcategory: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Marks</Label>
+                  <Input value={editForm.marks || ''} onChange={(e) => setEditForm(f => ({ ...f, marks: e.target.value }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Country</Label>
+                  <Input value={editForm.country || ''} onChange={(e) => setEditForm(f => ({ ...f, country: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Max Words</Label>
+                  <Input type="number" value={editForm.max_words ?? ''} onChange={(e) => setEditForm(f => ({ ...f, max_words: e.target.value ? parseInt(e.target.value) : null }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Max Images</Label>
+                  <Input type="number" value={editForm.max_images ?? ''} onChange={(e) => setEditForm(f => ({ ...f, max_images: e.target.value ? parseInt(e.target.value) : null }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">About / Good to know</Label>
+                <textarea
+                  value={editForm.about || ''}
+                  onChange={(e) => setEditForm(f => ({ ...f, about: e.target.value }))}
+                  className="w-full min-h-[80px] text-sm px-3 py-2 border border-input bg-background text-foreground rounded-none resize-y focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Favicon URL</Label>
+                <Input value={editForm.favicon || ''} onChange={(e) => setEditForm(f => ({ ...f, favicon: e.target.value }))} className="h-9 text-sm" />
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-border flex items-center justify-end gap-2 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={() => setEditingSite(null)} className="h-8 text-xs">
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveEdit}
+                disabled={isSavingEdit}
+                className="h-8 text-xs bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
+              >
+                {isSavingEdit ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                Save Changes
+              </Button>
             </div>
           </div>
         </>,
