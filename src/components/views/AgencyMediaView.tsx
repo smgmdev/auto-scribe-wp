@@ -1822,20 +1822,22 @@ export function AgencyMediaView() {
                           </div>
                           <span className="text-sm truncate">{site.name}</span>
                         </div>
-                        <div className="flex items-center gap-3 flex-1 md:justify-end">
-                          <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                            {site.price > 0 ? `${site.price} USD` : 'Free'}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground w-[100px]">{site.publication_format}</span>
-                          {agencyName && (
-                            <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <span>via</span>
-                              <span className="text-foreground">{agencyName}</span>
-                              {agencyLogo && (
-                                <img src={agencyLogo} alt={agencyName} className="h-4 w-4 object-contain rounded-full" />
-                              )}
-                            </div>
-                          )}
+                        <div className="flex items-center gap-3 flex-1 justify-between md:justify-end">
+                          <div className="flex items-center gap-3">
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              {site.price > 0 ? `${site.price} USD` : 'Free'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground w-[100px]">{site.publication_format}</span>
+                            {agencyName && (
+                              <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span>via</span>
+                                <span className="text-foreground">{agencyName}</span>
+                                {agencyLogo && (
+                                  <img src={agencyLogo} alt={agencyName} className="h-4 w-4 object-contain rounded-full" />
+                                )}
+                              </div>
+                            )}
+                          </div>
                           <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
                             {isRowExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                           </div>
