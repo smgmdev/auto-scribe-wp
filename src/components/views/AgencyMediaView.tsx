@@ -373,6 +373,31 @@ export function AgencyMediaView() {
     return () => { supabase.removeChannel(channel); };
   }, [manageMediaSubmission?.imported_sites]);
 
+  // Subscribe to media_sites changes for real-time updates when admin edits listings
+  useEffect(() => {
+    const channel = supabase
+      .channel('agency-media-sites-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'media_sites',
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          setManageMediaSubmission(prev => prev ? {
+            ...prev,
+            imported_sites: prev.imported_sites?.map(s => 
+              s.id === updated.id ? { ...s, ...updated } : s
+            ),
+          } : null);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   useEffect(() => {
     if (agencyMediaTargetTab) {

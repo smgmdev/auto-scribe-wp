@@ -228,6 +228,50 @@ export function SitesView() {
     };
   }, []);
 
+  // Subscribe to media_sites changes for real-time updates when admin/agency edits listings
+  useEffect(() => {
+    const channel = supabase
+      .channel('media_sites_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'media_sites',
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          setMediaSites(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'media_sites',
+        },
+        () => { fetchMediaSites(); }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'media_sites',
+        },
+        (payload) => {
+          const deleted = payload.old as any;
+          setMediaSites(prev => prev.filter(s => s.id !== deleted.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     fetchMediaSites();
     fetchOpenEngagements();
