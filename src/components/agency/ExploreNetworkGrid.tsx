@@ -43,6 +43,30 @@ export function ExploreNetworkGrid({ dark = false }: { dark?: boolean }) {
     fetchMediaSites();
   }, []);
 
+  // Real-time media_sites sync
+  useEffect(() => {
+    const channel = supabase
+      .channel('explore-media-sites-rt')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_sites' }, (payload) => {
+        const updated = payload.new as any;
+        setMediaSites(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s));
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'media_sites' }, () => {
+        // Refetch to respect the limit(24) and favicon filter
+        const refetch = async () => {
+          const { data } = await supabase.from('media_sites').select('*').not('favicon', 'is', null).limit(24);
+          if (data) setMediaSites(data);
+        };
+        refetch();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'media_sites' }, (payload) => {
+        const deleted = payload.old as any;
+        setMediaSites(prev => prev.filter(s => s.id !== deleted.id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   if (loading) {
     return (
       <section className="py-8">
