@@ -2451,17 +2451,6 @@ export function AdminMediaManagementView() {
                                                 </div>
                                               )}
                                             </div>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all flex-shrink-0"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                openAdminEditSite(site);
-                                              }}
-                                            >
-                                              Edit Details
-                                            </Button>
                                           </div>
                                         </div>
                                       )}
