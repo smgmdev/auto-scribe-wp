@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -2048,11 +2049,29 @@ export function AgencyMediaView() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Category</Label>
-                  <Input value={editForm.category || ''} onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))} className="h-9 text-sm" />
+                  <Select value={editForm.category || ''} onValueChange={(v) => setEditForm(f => ({ ...f, category: v }))}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['Global', 'Regional', 'Local'].map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Subcategory</Label>
-                  <Input value={editForm.subcategory || ''} onChange={(e) => setEditForm(f => ({ ...f, subcategory: e.target.value }))} className="h-9 text-sm" />
+                  <Select value={editForm.subcategory || ''} onValueChange={(v) => setEditForm(f => ({ ...f, subcategory: v }))}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Select subcategory" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['Business and Finance', 'Business and Finance,China', 'Business and Finance,MENA', 'Business and Finance,Politics and Economy', 'Campaign', 'Campaign,Tech', 'China', 'Crypto', 'MENA', 'Tech'].map(sub => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-1">
