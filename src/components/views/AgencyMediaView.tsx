@@ -2075,7 +2075,7 @@ export function AgencyMediaView() {
                             </Button>
                           </div>
                           {sitesWithActiveEngagements.has(site.id) && (
-                            <p className="text-xs text-destructive mt-1">
+                            <p className="text-xs text-destructive mt-1 text-right">
                               Editing is disabled while there are active engagements or orders for this media listing.
                             </p>
                           )}
