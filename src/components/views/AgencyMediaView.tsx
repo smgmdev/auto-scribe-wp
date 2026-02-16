@@ -245,15 +245,9 @@ export function AgencyMediaView() {
           link: editForm.link,
           price: editForm.price,
           publication_format: editForm.publication_format,
-          google_index: editForm.google_index,
-          publishing_time: editForm.publishing_time,
           category: editForm.category,
           subcategory: editForm.subcategory,
           about: editForm.about,
-          marks: editForm.marks,
-          max_words: editForm.max_words,
-          max_images: editForm.max_images,
-          country: editForm.country,
         })
         .eq('id', editingSite.id);
       if (error) throw error;
@@ -2053,42 +2047,12 @@ export function AgencyMediaView() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Google Index</Label>
-                  <Input value={editForm.google_index || ''} onChange={(e) => setEditForm(f => ({ ...f, google_index: e.target.value }))} className="h-9 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Publishing Time</Label>
-                  <Input value={editForm.publishing_time || ''} onChange={(e) => setEditForm(f => ({ ...f, publishing_time: e.target.value }))} className="h-9 text-sm" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
                   <Label className="text-xs">Category</Label>
                   <Input value={editForm.category || ''} onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))} className="h-9 text-sm" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Subcategory</Label>
                   <Input value={editForm.subcategory || ''} onChange={(e) => setEditForm(f => ({ ...f, subcategory: e.target.value }))} className="h-9 text-sm" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">Marks</Label>
-                  <Input value={editForm.marks || ''} onChange={(e) => setEditForm(f => ({ ...f, marks: e.target.value }))} className="h-9 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Country</Label>
-                  <Input value={editForm.country || ''} onChange={(e) => setEditForm(f => ({ ...f, country: e.target.value }))} className="h-9 text-sm" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">Max Words</Label>
-                  <Input type="number" value={editForm.max_words ?? ''} onChange={(e) => setEditForm(f => ({ ...f, max_words: e.target.value ? parseInt(e.target.value) : null }))} className="h-9 text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Max Images</Label>
-                  <Input type="number" value={editForm.max_images ?? ''} onChange={(e) => setEditForm(f => ({ ...f, max_images: e.target.value ? parseInt(e.target.value) : null }))} className="h-9 text-sm" />
                 </div>
               </div>
               <div className="space-y-1">
