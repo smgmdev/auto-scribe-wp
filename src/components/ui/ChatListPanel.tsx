@@ -1615,15 +1615,19 @@ export function ChatListPanel() {
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, updating unread count');
             // Only play sound if the chat window is NOT also open (FloatingChatWindow handles its own sound)
-            if (!isDialogOpen) {
+            // For agency users, skip sound here - the broadcast handler will play it
+            // This prevents double sounds when postgres_changes and broadcast arrive >1500ms apart
+            if (!isDialogOpen && !isAgencyUser) {
               playMessageSound();
             }
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, playing sound (toast handled by broadcast)');
             
-            // Only play sound here - toast notifications are handled by the broadcast handler
-            // to avoid double toasts (broadcast + postgres_changes both fire for each message)
-            playMessageSound();
+            // Only play sound here for non-agency users - agency users get sound from broadcast handler
+            // to avoid double sounds when the two listeners fire with >1500ms gap
+            if (!isAgencyUser) {
+              playMessageSound();
+            }
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
           }
