@@ -239,6 +239,26 @@ const Landing = () => {
     fetchSites();
   }, []);
 
+  // Real-time media_sites sync
+  useEffect(() => {
+    const channel = supabase
+      .channel('landing-media-sites-rt')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_sites' }, (payload) => {
+        const updated = payload.new as any;
+        setMediaSites(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s));
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'media_sites' }, (payload) => {
+        const inserted = payload.new as any;
+        setMediaSites(prev => [...prev, inserted]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'media_sites' }, (payload) => {
+        const deleted = payload.old as any;
+        setMediaSites(prev => prev.filter(s => s.id !== deleted.id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   // Handle agency click - open the universal dialog
   const handleAgencyClick = (agencyName: string) => {
     setSelectedAgencyName(agencyName);
