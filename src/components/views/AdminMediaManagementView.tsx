@@ -220,6 +220,8 @@ export function AdminMediaManagementView() {
   const [adminEditingSite, setAdminEditingSite] = useState<MediaSite | null>(null);
   const [adminEditForm, setAdminEditForm] = useState<Partial<MediaSite>>({});
   const [isAdminSavingEdit, setIsAdminSavingEdit] = useState(false);
+  const [adminEditHasActiveEngagements, setAdminEditHasActiveEngagements] = useState(false);
+  const [adminSitesWithActiveEngagements, setAdminSitesWithActiveEngagements] = useState<Set<string>>(new Set());
   const [adminEditDragPos, setAdminEditDragPos] = useState({ x: 0, y: 0 });
   const [isAdminEditDragging, setIsAdminEditDragging] = useState(false);
   const adminEditDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
@@ -489,10 +491,23 @@ export function AdminMediaManagementView() {
   }, [isAdminManageDragging]);
 
   // Open admin edit popup
-  const openAdminEditSite = useCallback((site: MediaSite) => {
+  const openAdminEditSite = useCallback(async (site: MediaSite) => {
     setAdminEditingSite(site);
     setAdminEditForm({ ...site });
     setAdminEditDragPos({ x: 0, y: 0 });
+    setAdminEditHasActiveEngagements(false);
+
+    // Check for active engagements/orders for this media site
+    const { data } = await supabase
+      .from('service_requests')
+      .select('id, status, order_id')
+      .eq('media_site_id', site.id)
+      .not('status', 'in', '(cancelled,completed)')
+      .limit(1);
+
+    if (data && data.length > 0) {
+      setAdminEditHasActiveEngagements(true);
+    }
   }, []);
 
   // Save admin edit (all fields)
@@ -546,6 +561,83 @@ export function AdminMediaManagementView() {
     }
   }, [adminEditingSite, adminEditForm]);
 
+  // Real-time monitoring of active engagements while admin edit popup is open
+  useEffect(() => {
+    if (!adminEditingSite) return;
+
+    const channel = supabase
+      .channel(`admin-edit-media-engagements-${adminEditingSite.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `media_site_id=eq.${adminEditingSite.id}`
+        },
+        async () => {
+          const { data } = await supabase
+            .from('service_requests')
+            .select('id')
+            .eq('media_site_id', adminEditingSite.id)
+            .not('status', 'in', '(cancelled,completed)')
+            .limit(1);
+          
+          setAdminEditHasActiveEngagements(!!(data && data.length > 0));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [adminEditingSite?.id]);
+
+  // Fetch and real-time monitor active engagements for all imported sites in admin manage popup
+  useEffect(() => {
+    if (!adminManageSubmission?.imported_sites?.length) {
+      setAdminSitesWithActiveEngagements(new Set());
+      return;
+    }
+
+    const siteIds = adminManageSubmission.imported_sites.map(s => s.id);
+
+    const checkActiveEngagements = async () => {
+      const { data } = await supabase
+        .from('service_requests')
+        .select('media_site_id')
+        .in('media_site_id', siteIds)
+        .not('status', 'in', '(cancelled,completed)');
+      
+      const activeSet = new Set((data || []).map((r: any) => r.media_site_id));
+      setAdminSitesWithActiveEngagements(activeSet);
+    };
+
+    checkActiveEngagements();
+
+    const channel = supabase
+      .channel('admin-manage-media-active-engagements')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'service_requests' },
+        (payload: any) => {
+          const mediaId = payload.new?.media_site_id || payload.old?.media_site_id;
+          if (mediaId && siteIds.includes(mediaId)) {
+            checkActiveEngagements();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => { checkActiveEngagements(); }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [adminManageSubmission?.imported_sites]);
 
 
   const fetchData = async (isRefresh = false) => {
@@ -3809,6 +3901,7 @@ export function AdminMediaManagementView() {
                             <Button
                               variant="outline"
                               size="sm"
+                              disabled={adminSitesWithActiveEngagements.has(site.id)}
                               className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3818,6 +3911,11 @@ export function AdminMediaManagementView() {
                               Edit Details
                             </Button>
                           </div>
+                          {adminSitesWithActiveEngagements.has(site.id) && (
+                            <p className="text-xs text-destructive mt-1 text-right">
+                              Editing is disabled while there are active engagements or orders for this media listing.
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
@@ -3929,13 +4027,18 @@ export function AdminMediaManagementView() {
             </div>
             {/* Footer */}
             <div className="px-4 py-3 border-t border-border flex flex-col gap-2 flex-shrink-0">
+              {adminEditHasActiveEngagements && (
+                <p className="text-xs text-destructive">
+                  To update this media listing, you must not have any active engagements or orders associated with it.
+                </p>
+              )}
               <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
                 <Button variant="outline" onClick={() => setAdminEditingSite(null)} className="h-10 text-sm w-full md:w-auto hover:bg-black hover:text-white transition-all">
                   Cancel
                 </Button>
                 <Button
                   onClick={handleAdminSaveEdit}
-                  disabled={isAdminSavingEdit}
+                  disabled={isAdminSavingEdit || adminEditHasActiveEngagements}
                   className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
                 >
                   {isAdminSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
