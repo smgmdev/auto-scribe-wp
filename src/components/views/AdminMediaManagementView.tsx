@@ -225,6 +225,15 @@ export function AdminMediaManagementView() {
   const adminEditDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const isMobile = useIsMobile();
 
+  // Manage approved media popup state
+  const [adminManageSubmission, setAdminManageSubmission] = useState<ApprovedMediaSubmission | null>(null);
+  const [adminManageSearch, setAdminManageSearch] = useState('');
+  const [adminManageExpandedSites, setAdminManageExpandedSites] = useState<Set<string>>(new Set());
+  const [adminManageDragPos, setAdminManageDragPos] = useState({ x: 0, y: 0 });
+  const [isAdminManageDragging, setIsAdminManageDragging] = useState(false);
+  const adminManageDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const adminManagePopupRef = useRef<HTMLDivElement>(null);
+
   const toneOptions: { value: ArticleTone; label: string }[] = [
     { value: 'neutral', label: 'Neutral' },
     { value: 'professional', label: 'Professional Corporate' },
@@ -439,6 +448,43 @@ export function AdminMediaManagementView() {
     };
   }, [isAdminEditDragging]);
 
+  // Manage approved media popup drag handlers
+  useEffect(() => {
+    if (adminManageSubmission) {
+      setAdminManageDragPos({ x: 0, y: 0 });
+      setAdminManageExpandedSites(new Set());
+      if (isMobile) {
+        document.body.style.overflow = 'hidden';
+      }
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [adminManageSubmission, isMobile]);
+
+  const handleAdminManageDragStart = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    setIsAdminManageDragging(true);
+    adminManageDragStartRef.current = { x: e.clientX, y: e.clientY, posX: adminManageDragPos.x, posY: adminManageDragPos.y };
+  }, [isMobile, adminManageDragPos]);
+
+  useEffect(() => {
+    if (!isAdminManageDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setAdminManageDragPos({
+        x: adminManageDragStartRef.current.posX + (e.clientX - adminManageDragStartRef.current.x),
+        y: adminManageDragStartRef.current.posY + (e.clientY - adminManageDragStartRef.current.y),
+      });
+    };
+    const handleUp = () => setIsAdminManageDragging(false);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isAdminManageDragging]);
+
   // Open admin edit popup
   const openAdminEditSite = useCallback((site: MediaSite) => {
     setAdminEditingSite(site);
@@ -478,6 +524,15 @@ export function AdminMediaManagementView() {
           s.id === adminEditingSite.id ? { ...s, ...updatePayload } as MediaSite : s
         ),
       })));
+      // Also update in manage popup if open
+      if (adminManageSubmission) {
+        setAdminManageSubmission(prev => prev ? {
+          ...prev,
+          imported_sites: prev.imported_sites?.map(s => 
+            s.id === adminEditingSite.id ? { ...s, ...updatePayload } as MediaSite : s
+          ),
+        } : null);
+      }
       
       toast({ title: 'Success', description: 'Media listing updated' });
       setAdminEditingSite(null);
@@ -2208,7 +2263,35 @@ export function AdminMediaManagementView() {
                               </Badge>
                               </div>
                             </div>
+                          {/* Mobile manage button */}
+                          <div className="mt-2 md:hidden">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-7 w-full border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAdminManageSubmission(submission);
+                                setAdminManageSearch('');
+                              }}
+                            >
+                              Manage Approved Media
+                            </Button>
+                          </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
+                              {/* Manage button - hidden on mobile */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs h-6 px-2 hidden md:inline-flex border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAdminManageSubmission(submission);
+                                  setAdminManageSearch('');
+                                }}
+                              >
+                                Manage Approved Media
+                              </Button>
                               {/* Sites added badge - hidden on mobile */}
                               <Badge variant="secondary" className="text-xs whitespace-nowrap hidden md:inline-flex">
                                 {submission.imported_sites?.length || 0} sites added
@@ -3562,6 +3645,190 @@ export function AdminMediaManagementView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Admin Manage Approved Media - Draggable Portal Popup */}
+      {adminManageSubmission && createPortal(
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-[9998]"
+            onClick={() => setAdminManageSubmission(null)}
+          />
+          {/* Popup */}
+          <div
+            ref={adminManagePopupRef}
+            className={`fixed z-[9999] bg-background border border-border shadow-2xl flex flex-col ${
+              isMobile 
+                ? 'inset-0 h-[100dvh] rounded-none border-0' 
+                : 'rounded-none w-[680px] max-h-[80vh]'
+            }`}
+            style={isMobile ? {} : {
+              top: `calc(50% + ${adminManageDragPos.y}px)`,
+              left: `calc(50% + ${adminManageDragPos.x}px)`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {/* Drag bar */}
+            {!isMobile && (
+              <div 
+                className="px-4 py-1 border-b border-border bg-muted/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none flex-shrink-0"
+                onMouseDown={handleAdminManageDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <button 
+                  onClick={() => setAdminManageSubmission(null)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="h-7 w-7 flex items-center justify-center text-muted-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
+              <div>
+                <h2 className="text-lg font-semibold">Manage Approved Media</h2>
+                <p className="text-sm text-muted-foreground">{adminManageSubmission?.imported_sites?.length || 0} imported media sites • {adminManageSubmission?.agency_name}</p>
+              </div>
+              {isMobile && (
+                <button 
+                  onClick={() => setAdminManageSubmission(null)}
+                  className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            {/* Search */}
+            <div className="flex-shrink-0">
+              <Input
+                placeholder="Search media sites..."
+                value={adminManageSearch}
+                onChange={(e) => setAdminManageSearch(e.target.value)}
+                className="h-9 bg-black text-white border-0 placeholder:text-white/40 text-sm rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+            {/* List */}
+            <div className="flex-1 overflow-y-auto pb-0">
+              {adminManageSubmission?.imported_sites
+                ?.filter(site => {
+                  if (!adminManageSearch) return true;
+                  return site.name.toLowerCase().includes(adminManageSearch.toLowerCase());
+                })
+                .map((site) => {
+                  const isRowExpanded = adminManageExpandedSites.has(site.id);
+                  return (
+                    <div
+                      key={site.id}
+                      className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setAdminManageExpandedSites(prev => {
+                          const next = new Set(prev);
+                          if (next.has(site.id)) next.delete(site.id);
+                          else next.add(site.id);
+                          return next;
+                        });
+                      }}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-4 p-3">
+                        <div className="flex items-center gap-3 min-w-0 md:w-[240px] flex-shrink-0">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden">
+                            {site.favicon ? (
+                              <img
+                                src={site.favicon}
+                                alt={`${site.name} favicon`}
+                                className="h-5 w-5 object-contain"
+                                onError={e => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              <Globe className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className="text-sm truncate">{site.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1 justify-between md:justify-end">
+                          <div className="flex items-center gap-3">
+                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                              {site.price > 0 ? `${site.price} USD` : 'Free'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground w-[100px]">{site.publication_format}</span>
+                            {site.agency && (
+                              <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span>via</span>
+                                <span className="text-foreground">{site.agency}</span>
+                                {agencyLogos[site.agency] && (
+                                  <img src={agencyLogos[site.agency]} alt={site.agency} className="h-4 w-4 object-contain rounded-full" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="h-6 w-6 flex items-center justify-center text-muted-foreground">
+                            {isRowExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Expanded details */}
+                      {isRowExpanded && (
+                        <div className="px-3 pb-3 pt-0 space-y-2 animate-fade-in border-t border-border">
+                          {site.agency && (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 md:hidden">
+                              <span>via</span>
+                              <span className="text-foreground">{site.agency}</span>
+                              {agencyLogos[site.agency] && (
+                                <img src={agencyLogos[site.agency]} alt={site.agency} className="h-4 w-4 object-contain rounded-full" />
+                              )}
+                            </div>
+                          )}
+                          {site.about && (
+                            <div className="pt-2">
+                              <p className="text-xs font-medium text-muted-foreground mb-0.5">Good to know</p>
+                              <p className="text-xs text-foreground">{site.about}</p>
+                            </div>
+                          )}
+                          {(site.category || site.subcategory) && (
+                            <p className="text-xs text-muted-foreground">
+                              {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <a
+                              href={ensureHttps(site.link)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            </a>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openAdminEditSite(site);
+                              }}
+                            >
+                              Edit Details
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              {adminManageSubmission?.imported_sites?.filter(site => {
+                if (!adminManageSearch) return true;
+                return site.name.toLowerCase().includes(adminManageSearch.toLowerCase());
+              }).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">No sites found.</p>
+              )}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
 
       {/* Admin Edit Media Site Popup */}
       {adminEditingSite && createPortal(
