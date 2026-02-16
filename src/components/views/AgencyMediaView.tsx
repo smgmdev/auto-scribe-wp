@@ -254,29 +254,25 @@ export function AgencyMediaView() {
     if (!editingSite || !editForm) return;
     setIsSavingEdit(true);
     try {
+      const updatePayload = {
+        price: editForm.price,
+        about: editForm.about,
+      };
       const { error } = await supabase
         .from('media_sites')
-        .update({
-          name: editForm.name,
-          link: editForm.link,
-          price: editForm.price,
-          publication_format: editForm.publication_format,
-          category: editForm.category,
-          subcategory: editForm.subcategory,
-          about: editForm.about,
-        })
+        .update(updatePayload)
         .eq('id', editingSite.id);
       if (error) throw error;
       
-      // Update local state
+      // Update local state in manage popup
       if (manageMediaSubmission) {
         const updatedSites = manageMediaSubmission.imported_sites.map(s => 
-          s.id === editingSite.id ? { ...s, ...editForm } as MediaSite : s
+          s.id === editingSite.id ? { ...s, ...updatePayload } as MediaSite : s
         );
         setManageMediaSubmission({ ...manageMediaSubmission, imported_sites: updatedSites });
       }
       
-      toast.success('Media site updated');
+      toast.success('Media listing updated');
       setEditingSite(null);
     } catch (err: any) {
       toast.error('Failed to update: ' + (err.message || 'Unknown error'));
