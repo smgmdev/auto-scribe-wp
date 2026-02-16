@@ -1236,6 +1236,23 @@ export function ChatListPanel() {
           fetchDisputes();
         }
       )
+      // Listen for new service requests (seller receives a new engagement)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_requests'
+        },
+        (payload) => {
+          const newRequest = payload.new as any;
+          // Only refetch if this is for our agency
+          if (agencyPayoutIdRef.current && newRequest.agency_payout_id === agencyPayoutIdRef.current) {
+            console.log('[ChatListPanel] New service request INSERT detected for our agency, refetching');
+            fetchServiceRequests();
+          }
+        }
+      )
       // Listen for order completion to remove completed orders from messaging widget
       .on(
         'postgres_changes',
