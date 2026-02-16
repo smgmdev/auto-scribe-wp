@@ -155,6 +155,7 @@ export function AgencyMediaView() {
   const [editForm, setEditForm] = useState<Partial<MediaSite>>({});
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [editHasActiveEngagements, setEditHasActiveEngagements] = useState(false);
+  const [sitesWithActiveEngagements, setSitesWithActiveEngagements] = useState<Set<string>>(new Set());
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
   const [availableFormats, setAvailableFormats] = useState<string[]>([]);
@@ -327,6 +328,50 @@ export function AgencyMediaView() {
       supabase.removeChannel(channel);
     };
   }, [editingSite?.id]);
+
+  // Fetch and real-time monitor active engagements for all imported sites in manage popup
+  useEffect(() => {
+    if (!manageMediaSubmission?.imported_sites?.length) {
+      setSitesWithActiveEngagements(new Set());
+      return;
+    }
+
+    const siteIds = manageMediaSubmission.imported_sites.map(s => s.id);
+
+    const checkActiveEngagements = async () => {
+      const { data } = await supabase
+        .from('service_requests')
+        .select('media_site_id')
+        .in('media_site_id', siteIds)
+        .not('status', 'in', '(cancelled,completed)');
+      
+      const activeSet = new Set((data || []).map((r: any) => r.media_site_id));
+      setSitesWithActiveEngagements(activeSet);
+    };
+
+    checkActiveEngagements();
+
+    const channel = supabase
+      .channel('manage-media-active-engagements')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'service_requests' },
+        (payload: any) => {
+          const mediaId = payload.new?.media_site_id || payload.old?.media_site_id;
+          if (mediaId && siteIds.includes(mediaId)) {
+            checkActiveEngagements();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => { checkActiveEngagements(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [manageMediaSubmission?.imported_sites]);
 
 
   useEffect(() => {
@@ -2004,6 +2049,11 @@ export function AgencyMediaView() {
                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                             </p>
                           )}
+                          {sitesWithActiveEngagements.has(site.id) && (
+                            <p className="text-xs text-destructive">
+                              Editing is disabled while there are active engagements or orders for this media listing.
+                            </p>
+                          )}
                           <div className="flex items-center justify-between gap-2">
                             <a
                               href={ensureHttps(site.link)}
@@ -2019,6 +2069,7 @@ export function AgencyMediaView() {
                               variant="outline"
                               size="sm"
                               className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                              disabled={sitesWithActiveEngagements.has(site.id)}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 openEditSite(site);
