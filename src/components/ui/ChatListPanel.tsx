@@ -989,7 +989,8 @@ export function ChatListPanel() {
     // FloatingChatWindow and postgres_changes listeners do NOT play sound.
     if (shouldNotify) {
       // Always play sound for counterparty messages regardless of chat open/minimized state
-      playMessageSound(request_id);
+      // Pass message snippet for per-message dedup (allows rapid messages to same request)
+      playMessageSound(request_id, message);
     }
     
     // For minimized chats: update the engagement/request state which will sync to minimized chat
