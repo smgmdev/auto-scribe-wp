@@ -1016,7 +1016,7 @@ export function ChatListPanel() {
       
       // Play sound here too - debounce in playMessageSound prevents double sounds
       // This is needed because postgres_changes may not fire due to RLS on buyer side
-      playMessageSound();
+      playMessageSound(request_id);
     } else if (!isDialogOpen && shouldNotify) {
       // Mark request as unread for the appropriate party in database
       // The postgres_changes subscription will sync the read state to local state
@@ -1039,7 +1039,7 @@ export function ChatListPanel() {
           .eq('id', request_id);
         
         // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
-        playMessageSound();
+        playMessageSound(request_id);
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${media_site_name || title}"`,
         });
@@ -1061,7 +1061,7 @@ export function ChatListPanel() {
           .eq('id', request_id);
         
         // Play sound via broadcast - debounce prevents double sounds if postgres_changes also fires
-        playMessageSound();
+        playMessageSound(request_id);
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${media_site_name || title}"`,
         });
@@ -1618,7 +1618,7 @@ export function ChatListPanel() {
             // For agency users, skip sound here - the broadcast handler will play it
             // This prevents double sounds when postgres_changes and broadcast arrive >1500ms apart
             if (!isDialogOpen && !isAgencyUser) {
-              playMessageSound();
+              playMessageSound(requestId);
             }
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, playing sound (toast handled by broadcast)');
@@ -1626,7 +1626,7 @@ export function ChatListPanel() {
             // Only play sound here for non-agency users - agency users get sound from broadcast handler
             // to avoid double sounds when the two listeners fire with >1500ms gap
             if (!isAgencyUser) {
-              playMessageSound();
+              playMessageSound(requestId);
             }
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');

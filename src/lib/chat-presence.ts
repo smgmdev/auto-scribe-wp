@@ -13,17 +13,22 @@ export const isSoundEnabled = () => _soundEnabled;
 // Sound player singleton with debounce to prevent double plays
 let audioInstance: HTMLAudioElement | null = null;
 let lastPlayedAt = 0;
+let lastPlayedRequestId = '';
 
-export const playMessageSound = () => {
+export const playMessageSound = (requestId?: string) => {
   if (!_soundEnabled) return;
-  // Debounce: ignore if played within last 1500ms to prevent double sounds
-  // (postgres_changes + broadcast can fire close together)
   const now = Date.now();
-  if (now - lastPlayedAt < 1500) {
-    console.log('[Sound] Debounced - last played', now - lastPlayedAt, 'ms ago');
+  // Per-request debounce: 3s window for same request, 500ms global minimum
+  if (requestId && requestId === lastPlayedRequestId && now - lastPlayedAt < 3000) {
+    console.log('[Sound] Debounced (same request) - last played', now - lastPlayedAt, 'ms ago');
+    return;
+  }
+  if (now - lastPlayedAt < 500) {
+    console.log('[Sound] Debounced (global) - last played', now - lastPlayedAt, 'ms ago');
     return;
   }
   lastPlayedAt = now;
+  lastPlayedRequestId = requestId || '';
   console.log('[Sound] Playing message sound');
   try {
     if (!audioInstance) {
