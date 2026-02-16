@@ -61,8 +61,47 @@ serve(async (req) => {
       );
     }
 
-    // The user_id can be passed if releasing credits for another user (agency rejecting)
-    const targetUserId = user_id || user.id;
+    // Authorization: if releasing credits for another user, verify caller is admin or the assigned agency
+    let targetUserId = user.id;
+    if (user_id && user_id !== user.id) {
+      const { data: adminRole } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!adminRole) {
+        // Check if caller is the agency for a service request involving this user
+        let isAuthorizedAgency = false;
+        if (service_request_id) {
+          const { data: sr } = await supabaseAdmin
+            .from("service_requests")
+            .select("agency_payout_id, user_id")
+            .eq("id", service_request_id)
+            .single();
+
+          if (sr && sr.user_id === user_id) {
+            const { data: agencyCheck } = await supabaseAdmin
+              .from("agency_payouts")
+              .select("id")
+              .eq("id", sr.agency_payout_id)
+              .eq("user_id", user.id)
+              .maybeSingle();
+            isAuthorizedAgency = !!agencyCheck;
+          }
+        }
+
+        if (!isAuthorizedAgency) {
+          logStep("Unauthorized: cannot release credits for another user");
+          return new Response(
+            JSON.stringify({ error: "Unauthorized" }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+          );
+        }
+      }
+      targetUserId = user_id;
+    }
 
     // Get media site price
     const { data: mediaSite, error: siteError } = await supabaseAdmin
