@@ -18,13 +18,10 @@ let lastPlayedRequestId = '';
 export const playMessageSound = (requestId?: string) => {
   if (!_soundEnabled) return;
   const now = Date.now();
-  // Per-request debounce: 3s window for same request, 500ms global minimum
-  if (requestId && requestId === lastPlayedRequestId && now - lastPlayedAt < 3000) {
-    console.log('[Sound] Debounced (same request) - last played', now - lastPlayedAt, 'ms ago');
-    return;
-  }
-  if (now - lastPlayedAt < 500) {
-    console.log('[Sound] Debounced (global) - last played', now - lastPlayedAt, 'ms ago');
+  // Global debounce: 2500ms prevents double sounds from concurrent listeners
+  // (postgres_changes + broadcast can fire 1-2s apart due to network jitter)
+  if (now - lastPlayedAt < 2500) {
+    console.log('[Sound] Debounced - last played', now - lastPlayedAt, 'ms ago, requestId:', requestId);
     return;
   }
   lastPlayedAt = now;
