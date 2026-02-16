@@ -13,20 +13,38 @@ export const isSoundEnabled = () => _soundEnabled;
 // Sound player singleton with debounce to prevent double plays
 let audioInstance: HTMLAudioElement | null = null;
 let lastPlayedAt = 0;
-let lastPlayedRequestId = '';
+// Track per-request dedup with longer window to handle network jitter
+const recentlyPlayedRequests = new Map<string, number>();
 
 export const playMessageSound = (requestId?: string) => {
   if (!_soundEnabled) return;
   const now = Date.now();
-  // Global debounce: 2500ms prevents double sounds from concurrent listeners
-  // (postgres_changes + broadcast can fire 1-2s apart due to network jitter)
-  if (now - lastPlayedAt < 2500) {
-    console.log('[Sound] Debounced - last played', now - lastPlayedAt, 'ms ago, requestId:', requestId);
+  
+  // Per-request dedup: 5s window prevents double sounds from concurrent listeners
+  // (postgres_changes + broadcast can fire 1-3s apart due to network jitter)
+  if (requestId) {
+    const lastPlayed = recentlyPlayedRequests.get(requestId);
+    if (lastPlayed && now - lastPlayed < 5000) {
+      console.log('[Sound] Debounced (same request) -', now - lastPlayed, 'ms ago, requestId:', requestId);
+      return;
+    }
+    recentlyPlayedRequests.set(requestId, now);
+    // Cleanup old entries
+    if (recentlyPlayedRequests.size > 20) {
+      for (const [key, time] of recentlyPlayedRequests) {
+        if (now - time > 10000) recentlyPlayedRequests.delete(key);
+      }
+    }
+  }
+  
+  // Global debounce: 500ms minimum between any two sounds
+  if (now - lastPlayedAt < 500) {
+    console.log('[Sound] Debounced (global) -', now - lastPlayedAt, 'ms ago');
     return;
   }
+  
   lastPlayedAt = now;
-  lastPlayedRequestId = requestId || '';
-  console.log('[Sound] Playing message sound');
+  console.log('[Sound] Playing message sound, requestId:', requestId);
   try {
     if (!audioInstance) {
       audioInstance = new Audio('/sounds/new-message.mp3?v=2');
