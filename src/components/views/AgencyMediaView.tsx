@@ -1971,7 +1971,7 @@ export function AgencyMediaView() {
                                 openEditSite(site);
                               }}
                             >
-                              <Pencil className="h-3 w-3 mr-1" />
+                              
                               Edit Details
                             </Button>
                           </div>
