@@ -1781,7 +1781,7 @@ export function AgencyMediaView() {
                 placeholder="Search media sites..."
                 value={manageMediaSearch}
                 onChange={(e) => setManageMediaSearch(e.target.value)}
-                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 text-sm rounded-none border-x-0 border-t border-b border-border"
+                className="h-9 bg-black text-white border-0 placeholder:text-white/40 text-sm rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
             {/* List */}
