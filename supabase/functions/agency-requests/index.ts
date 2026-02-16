@@ -24,8 +24,34 @@ serve(async (req) => {
 
   try {
     const agencyId = req.headers.get("x-agency-id");
-    if (!agencyId) {
-      throw new Error("Agency ID required");
+    const sessionToken = req.headers.get("x-session-token");
+    if (!agencyId || !sessionToken) {
+      throw new Error("Agency ID and session token required");
+    }
+
+    // Validate session token
+    const { data: session, error: sessionError } = await supabaseAdmin
+      .from("agency_sessions")
+      .select("agency_id, expires_at")
+      .eq("token", sessionToken)
+      .eq("agency_id", agencyId)
+      .single();
+
+    if (sessionError || !session) {
+      return new Response(JSON.stringify({ error: "Invalid or expired session" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
+    // Check expiry
+    if (new Date(session.expires_at) < new Date()) {
+      // Clean up expired session
+      await supabaseAdmin.from("agency_sessions").delete().eq("token", sessionToken);
+      return new Response(JSON.stringify({ error: "Session expired" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
     }
 
     // Verify agency exists
