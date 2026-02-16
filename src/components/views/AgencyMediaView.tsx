@@ -2080,7 +2080,7 @@ export function AgencyMediaView() {
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Favicon URL</Label>
+                <Label className="text-xs">Media Logo</Label>
                 <Input value={editForm.favicon || ''} disabled className="h-9 text-sm opacity-60" />
               </div>
             </div>
