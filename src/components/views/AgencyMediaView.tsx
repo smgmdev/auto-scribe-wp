@@ -2049,11 +2049,6 @@ export function AgencyMediaView() {
                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                             </p>
                           )}
-                          {sitesWithActiveEngagements.has(site.id) && (
-                            <p className="text-xs text-destructive">
-                              Editing is disabled while there are active engagements or orders for this media listing.
-                            </p>
-                          )}
                           <div className="flex items-center justify-between gap-2">
                             <a
                               href={ensureHttps(site.link)}
@@ -2079,6 +2074,11 @@ export function AgencyMediaView() {
                               Edit Details
                             </Button>
                           </div>
+                          {sitesWithActiveEngagements.has(site.id) && (
+                            <p className="text-xs text-destructive mt-1">
+                              Editing is disabled while there are active engagements or orders for this media listing.
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
