@@ -167,8 +167,8 @@ export function BriefSubmissionDialog({
           const fileName = `${request.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
           const { error: uploadError } = await supabase.storage.from('chat-attachments').upload(fileName, file);
           if (!uploadError) {
-            const { data: urlData } = supabase.storage.from('chat-attachments').getPublicUrl(fileName);
-            uploadedFiles.push({ name: file.name, url: urlData.publicUrl, type: file.type, size: file.size });
+            // Store the file path (not a public URL) - will be resolved to signed URL at render time
+            uploadedFiles.push({ name: file.name, url: fileName, type: file.type, size: file.size });
           }
         }
       }

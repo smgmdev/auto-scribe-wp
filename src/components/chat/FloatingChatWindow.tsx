@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getSignedAttachmentUrl } from '@/lib/attachment-urls';
 
 interface ServiceMessage {
   id: string;
@@ -386,6 +387,44 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   } | null>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   const [timerTick, setTimerTick] = useState(0); // Force re-render for countdown timer
+  
+  // Signed URL resolution for chat attachments (private bucket)
+  const [resolvedUrls, setResolvedUrls] = useState<Map<string, string>>(new Map());
+  const resolvedUrlsRef = useRef<Map<string, string>>(new Map());
+  
+  // Resolve attachment URLs whenever messages change
+  useEffect(() => {
+    const attachmentRegex = /\[ATTACHMENT\](.*?)\[\/ATTACHMENT\]/g;
+    const urlsToResolve: string[] = [];
+    
+    for (const msg of messages) {
+      let match;
+      while ((match = attachmentRegex.exec(msg.message)) !== null) {
+        try {
+          const parsed = JSON.parse(match[1]);
+          if (parsed.url && !resolvedUrlsRef.current.has(parsed.url)) {
+            urlsToResolve.push(parsed.url);
+          }
+        } catch {}
+      }
+    }
+    
+    if (urlsToResolve.length === 0) return;
+    
+    const resolveAll = async () => {
+      const newMap = new Map(resolvedUrlsRef.current);
+      await Promise.all(
+        urlsToResolve.map(async (url) => {
+          const signedUrl = await getSignedAttachmentUrl(url);
+          newMap.set(url, signedUrl);
+        })
+      );
+      resolvedUrlsRef.current = newMap;
+      setResolvedUrls(new Map(newMap));
+    };
+    
+    resolveAll();
+  }, [messages]);
 
   // Reset order details drag position when dialog opens
   useEffect(() => {
@@ -3270,11 +3309,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('chat-attachments')
-          .getPublicUrl(filePath);
-
-        fileUrl = urlData.publicUrl;
+        // Store the file path (not a public URL) - will be resolved to signed URL at render time
+        fileUrl = filePath;
         fileName = selectedFile.name;
         setUploadingFile(false);
       }
@@ -5084,37 +5120,40 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         )}
         {attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {attachments.map((att, index) => (
-              <div key={index}>
-                {att.type.startsWith('image/') ? (
-                  <div 
-                    className="cursor-pointer"
-                    onClick={() => setImagePreview({ url: att.url, name: att.name })}
-                  >
-                    <img 
-                      src={att.url} 
-                      alt={att.name}
-                      className="max-h-40 rounded-lg object-cover"
-                    />
-                    <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
-                      <ImageIcon className="h-3 w-3" />
-                      {att.name}
-                    </p>
-                  </div>
-                ) : (
-                  <div 
-                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
-                      isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
-                    }`}
-                    onClick={() => setFileWebView({ url: att.url, name: att.name })}
-                  >
-                    <FileText className={`h-5 w-5 ${att.type === 'application/pdf' ? 'text-red-500' : 'text-blue-500'}`} />
-                    <span className="text-sm truncate flex-1">{att.name}</span>
-                    <Download className="h-4 w-4 opacity-70" />
-                  </div>
-                )}
-              </div>
-            ))}
+            {attachments.map((att, index) => {
+              const displayUrl = resolvedUrls.get(att.url) || att.url;
+              return (
+                <div key={index}>
+                  {att.type.startsWith('image/') ? (
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => setImagePreview({ url: displayUrl, name: att.name })}
+                    >
+                      <img 
+                        src={displayUrl} 
+                        alt={att.name}
+                        className="max-h-40 rounded-lg object-cover"
+                      />
+                      <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                        <ImageIcon className="h-3 w-3" />
+                        {att.name}
+                      </p>
+                    </div>
+                  ) : (
+                    <div 
+                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                        isOwnMessage ? 'bg-primary-foreground/20' : 'bg-muted'
+                      }`}
+                      onClick={() => setFileWebView({ url: displayUrl, name: att.name })}
+                    >
+                      <FileText className={`h-5 w-5 ${att.type === 'application/pdf' ? 'text-red-500' : 'text-blue-500'}`} />
+                      <span className="text-sm truncate flex-1">{att.name}</span>
+                      <Download className="h-4 w-4 opacity-70" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
         <p className="text-xs opacity-50 mt-1">
