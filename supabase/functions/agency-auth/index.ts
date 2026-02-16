@@ -11,8 +11,34 @@ const logStep = (step: string, details?: any) => {
   console.log(`[AGENCY-AUTH] ${step}${detailsStr}`);
 };
 
-// Simple password hashing using Web Crypto API
-async function hashPassword(password: string, salt: string): Promise<string> {
+const PBKDF2_ITERATIONS = 100000;
+
+// Secure password hashing using PBKDF2
+async function hashPasswordPBKDF2(password: string, salt: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const hashBuffer = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode(salt),
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    key,
+    256
+  );
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Legacy SHA-256 hashing for verifying old passwords
+async function hashPasswordLegacy(password: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + salt);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -22,6 +48,12 @@ async function hashPassword(password: string, salt: string): Promise<string> {
 
 function generateSalt(): string {
   const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function generateSessionToken(): string {
+  const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -42,7 +74,6 @@ serve(async (req) => {
     logStep("Request received", { action, email, agency_id });
 
     if (action === "login") {
-      // Agency login
       if (!email || !password) {
         throw new Error("Email and password required");
       }
@@ -62,13 +93,38 @@ serve(async (req) => {
         throw new Error("Account not activated. Please set your password first.");
       }
 
-      // Extract salt from stored hash (format: salt:hash)
-      const [storedSalt, storedHash] = agency.password_hash.split(':');
-      const inputHash = await hashPassword(password, storedSalt);
+      // Format: "pbkdf2:salt:hash" or legacy "salt:hash"
+      const parts = agency.password_hash.split(':');
+      let passwordValid = false;
+      let needsRehash = false;
 
-      if (inputHash !== storedHash) {
+      if (parts[0] === 'pbkdf2' && parts.length === 3) {
+        // PBKDF2 format
+        const [, storedSalt, storedHash] = parts;
+        const inputHash = await hashPasswordPBKDF2(password, storedSalt);
+        passwordValid = inputHash === storedHash;
+      } else if (parts.length === 2) {
+        // Legacy SHA-256 format — verify and flag for rehash
+        const [storedSalt, storedHash] = parts;
+        const inputHash = await hashPasswordLegacy(password, storedSalt);
+        passwordValid = inputHash === storedHash;
+        needsRehash = passwordValid;
+      }
+
+      if (!passwordValid) {
         logStep("Invalid password");
         throw new Error("Invalid credentials");
+      }
+
+      // Rehash legacy passwords to PBKDF2
+      if (needsRehash) {
+        const newSalt = generateSalt();
+        const newHash = await hashPasswordPBKDF2(password, newSalt);
+        await supabaseAdmin
+          .from("agency_payouts")
+          .update({ password_hash: `pbkdf2:${newSalt}:${newHash}` })
+          .eq("id", agency.id);
+        logStep("Rehashed legacy password to PBKDF2", { agencyId: agency.id });
       }
 
       // Update last login
@@ -77,10 +133,24 @@ serve(async (req) => {
         .update({ last_login_at: new Date().toISOString() })
         .eq("id", agency.id);
 
-      logStep("Login successful", { agencyId: agency.id });
+      // Clean up expired sessions for this agency
+      await supabaseAdmin
+        .from("agency_sessions")
+        .delete()
+        .eq("agency_id", agency.id)
+        .lt("expires_at", new Date().toISOString());
 
-      // Generate a simple session token
-      const sessionToken = generateSalt() + generateSalt();
+      // Create a session token (24h expiry)
+      const sessionToken = generateSessionToken();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      await supabaseAdmin.from("agency_sessions").insert({
+        agency_id: agency.id,
+        token: sessionToken,
+        expires_at: expiresAt,
+      });
+
+      logStep("Login successful", { agencyId: agency.id });
 
       return new Response(JSON.stringify({
         success: true,
@@ -98,7 +168,6 @@ serve(async (req) => {
       });
 
     } else if (action === "set_password") {
-      // Set initial password for agency
       if (!agency_id || !password) {
         throw new Error("Agency ID and password required");
       }
@@ -118,8 +187,8 @@ serve(async (req) => {
       }
 
       const salt = generateSalt();
-      const hash = await hashPassword(password, salt);
-      const passwordHash = `${salt}:${hash}`;
+      const hash = await hashPasswordPBKDF2(password, salt);
+      const passwordHash = `pbkdf2:${salt}:${hash}`;
 
       await supabaseAdmin
         .from("agency_payouts")
@@ -127,6 +196,22 @@ serve(async (req) => {
         .eq("id", agency_id);
 
       logStep("Password set successfully", { agencyId: agency_id });
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
+    } else if (action === "logout") {
+      // Invalidate session token
+      const sessionToken = req.headers.get("x-session-token");
+      if (sessionToken) {
+        await supabaseAdmin
+          .from("agency_sessions")
+          .delete()
+          .eq("token", sessionToken);
+        logStep("Session invalidated");
+      }
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -319,6 +319,38 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_sessions: {
+        Row: {
+          agency_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_sessions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agency_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_withdrawals: {
         Row: {
           admin_notes: string | null
