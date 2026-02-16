@@ -2072,7 +2072,7 @@ export function AgencyMediaView() {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">About / Good to know</Label>
+                <Label className="text-xs">Good to know</Label>
                 <textarea
                   value={editForm.about || ''}
                   onChange={(e) => setEditForm(f => ({ ...f, about: e.target.value }))}
