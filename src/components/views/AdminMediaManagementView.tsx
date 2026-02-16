@@ -639,6 +639,40 @@ export function AdminMediaManagementView() {
     };
   }, [adminManageSubmission?.imported_sites]);
 
+  // Subscribe to media_sites changes for real-time updates across the app
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-media-sites-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'media_sites',
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          setMediaSites(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s));
+          setApprovedMediaSubmissions(prev => prev.map(sub => ({
+            ...sub,
+            imported_sites: sub.imported_sites?.map(s => 
+              s.id === updated.id ? { ...s, ...updated } : s
+            ),
+          })));
+          setAdminManageSubmission(prev => prev ? {
+            ...prev,
+            imported_sites: prev.imported_sites?.map(s => 
+              s.id === updated.id ? { ...s, ...updated } : s
+            ),
+          } : null);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) {
