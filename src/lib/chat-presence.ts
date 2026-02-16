@@ -16,10 +16,15 @@ let lastPlayedAt = 0;
 
 export const playMessageSound = () => {
   if (!_soundEnabled) return;
-  // Debounce: ignore if played within last 500ms
+  // Debounce: ignore if played within last 1500ms to prevent double sounds
+  // (postgres_changes + broadcast can fire close together)
   const now = Date.now();
-  if (now - lastPlayedAt < 500) return;
+  if (now - lastPlayedAt < 1500) {
+    console.log('[Sound] Debounced - last played', now - lastPlayedAt, 'ms ago');
+    return;
+  }
   lastPlayedAt = now;
+  console.log('[Sound] Playing message sound');
   try {
     if (!audioInstance) {
       audioInstance = new Audio('/sounds/new-message.mp3?v=2');
