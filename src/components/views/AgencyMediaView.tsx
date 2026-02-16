@@ -2022,7 +2022,7 @@ export function AgencyMediaView() {
             {/* Header */}
             <div className="px-4 py-3 flex-shrink-0 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold font-display">Edit Details</h3>
+                <h3 className="text-lg font-bold">Edit Details</h3>
                 <p className="text-sm text-muted-foreground">{editingSite.name}</p>
               </div>
               {isMobile && (
@@ -2041,7 +2041,7 @@ export function AgencyMediaView() {
                 <Label className="text-xs">Link</Label>
                 <Input value={editForm.link || ''} onChange={(e) => setEditForm(f => ({ ...f, link: e.target.value }))} className="h-9 text-sm" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Price (USD)</Label>
                   <Input type="number" value={editForm.price ?? 0} onChange={(e) => setEditForm(f => ({ ...f, price: parseInt(e.target.value) || 0 }))} className="h-9 text-sm" />
@@ -2051,7 +2051,7 @@ export function AgencyMediaView() {
                   <Input value={editForm.publication_format || ''} onChange={(e) => setEditForm(f => ({ ...f, publication_format: e.target.value }))} className="h-9 text-sm" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Google Index</Label>
                   <Input value={editForm.google_index || ''} onChange={(e) => setEditForm(f => ({ ...f, google_index: e.target.value }))} className="h-9 text-sm" />
@@ -2061,7 +2061,7 @@ export function AgencyMediaView() {
                   <Input value={editForm.publishing_time || ''} onChange={(e) => setEditForm(f => ({ ...f, publishing_time: e.target.value }))} className="h-9 text-sm" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Category</Label>
                   <Input value={editForm.category || ''} onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))} className="h-9 text-sm" />
@@ -2071,7 +2071,7 @@ export function AgencyMediaView() {
                   <Input value={editForm.subcategory || ''} onChange={(e) => setEditForm(f => ({ ...f, subcategory: e.target.value }))} className="h-9 text-sm" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Marks</Label>
                   <Input value={editForm.marks || ''} onChange={(e) => setEditForm(f => ({ ...f, marks: e.target.value }))} className="h-9 text-sm" />
@@ -2081,7 +2081,7 @@ export function AgencyMediaView() {
                   <Input value={editForm.country || ''} onChange={(e) => setEditForm(f => ({ ...f, country: e.target.value }))} className="h-9 text-sm" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Max Words</Label>
                   <Input type="number" value={editForm.max_words ?? ''} onChange={(e) => setEditForm(f => ({ ...f, max_words: e.target.value ? parseInt(e.target.value) : null }))} className="h-9 text-sm" />
@@ -2105,17 +2105,16 @@ export function AgencyMediaView() {
               </div>
             </div>
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-border flex items-center justify-end gap-2 flex-shrink-0">
-              <Button variant="outline" size="sm" onClick={() => setEditingSite(null)} className="h-8 text-xs">
+            <div className="px-4 py-3 border-t border-border flex flex-col md:flex-row md:items-center md:justify-end gap-2 flex-shrink-0">
+              <Button variant="outline" onClick={() => setEditingSite(null)} className="h-10 text-sm w-full md:w-auto">
                 Cancel
               </Button>
               <Button
-                size="sm"
                 onClick={handleSaveEdit}
                 disabled={isSavingEdit}
-                className="h-8 text-xs bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
+                className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
               >
-                {isSavingEdit ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
                 Save Changes
               </Button>
             </div>
