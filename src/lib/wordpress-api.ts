@@ -121,61 +121,8 @@ async function fetchTagsViaEdgeFunction(siteId: string): Promise<WPTag[]> {
 }
 
 export async function createTag(site: WordPressSite, tagName: string): Promise<WPTag> {
-  // If credentials are missing, use edge function
-  if (!site.username || !site.applicationPassword) {
-    return createTagViaEdgeFunction(site.id, tagName);
-  }
-  
-  try {
-    const baseUrl = normalizeUrl(site.url);
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
-      method: 'POST',
-      headers: {
-        'Authorization': createAuthHeader(site),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: tagName,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Create tag response error:', response.status, response.statusText, errorData);
-      
-      // Tag already exists - WordPress returns the existing tag ID in the error response
-      if (response.status === 400 && errorData.code === 'term_exists' && errorData.data?.term_id) {
-        const existingTagId = errorData.data.term_id;
-        // Fetch the existing tag details
-        const tagResponse = await fetch(`${baseUrl}/wp-json/wp/v2/tags/${existingTagId}`, {
-          headers: {
-            'Authorization': createAuthHeader(site),
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (tagResponse.ok) {
-          const tagData = await tagResponse.json();
-          return {
-            id: tagData.id,
-            name: tagData.name,
-            slug: tagData.slug,
-          };
-        }
-      }
-      throw new Error(`Failed to create tag: ${response.status} ${response.statusText || errorData.message || 'Unknown error'}`);
-    }
-
-    const data = await response.json();
-    return {
-      id: data.id,
-      name: data.name,
-      slug: data.slug,
-    };
-  } catch (error) {
-    console.error('Error creating tag:', error);
-    throw error;
-  }
+  // Always use edge function to avoid CORS issues
+  return createTagViaEdgeFunction(site.id, tagName);
 }
 
 // Create tag via edge function (for users without direct credentials)
