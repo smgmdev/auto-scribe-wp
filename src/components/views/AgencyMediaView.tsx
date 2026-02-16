@@ -1113,7 +1113,7 @@ export function AgencyMediaView() {
                           {/* Expanded Section with Imported Sites */}
                           {isExpanded && submission.imported_sites && submission.imported_sites.length > 0 && (
                             <div 
-                              className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in"
+                              className="mt-4 pt-4 border-t border-border space-y-0 animate-fade-in"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <p className="text-xs font-medium text-muted-foreground mb-3">Imported Media Sites ({submission.imported_sites.length}):</p>
@@ -1121,7 +1121,7 @@ export function AgencyMediaView() {
                                 placeholder="Search imported sites..."
                                 value={importedSitesSearch[submission.id] || ''}
                                 onChange={(e) => setImportedSitesSearch(prev => ({ ...prev, [submission.id]: e.target.value }))}
-                                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 mb-3 text-sm"
+                                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 mb-0 text-sm"
                                 onClick={(e) => e.stopPropagation()}
                               />
                               {submission.imported_sites
@@ -1136,7 +1136,7 @@ export function AgencyMediaView() {
                                 return (
                                   <Card 
                                     key={site.id}
-                                    className="group hover:shadow-md transition-all duration-300 cursor-pointer"
+                                    className="group hover:bg-muted/50 hover:shadow-none transition-all duration-300 cursor-pointer rounded-none -mt-px"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setExpandedSites(prev => {
