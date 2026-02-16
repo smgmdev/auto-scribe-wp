@@ -2086,7 +2086,7 @@ export function AgencyMediaView() {
             </div>
             {/* Footer */}
             <div className="px-4 py-3 border-t border-border flex flex-col md:flex-row md:items-center md:justify-end gap-2 flex-shrink-0">
-              <Button variant="outline" onClick={() => setEditingSite(null)} className="h-10 text-sm w-full md:w-auto">
+              <Button variant="outline" onClick={() => setEditingSite(null)} className="h-10 text-sm w-full md:w-auto hover:bg-black hover:text-white transition-all">
                 Cancel
               </Button>
               <Button
@@ -2095,7 +2095,7 @@ export function AgencyMediaView() {
                 className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
               >
                 {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                Save Changes
+                Update Media Listing
               </Button>
             </div>
           </div>
