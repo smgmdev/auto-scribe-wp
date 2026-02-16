@@ -295,6 +295,39 @@ export function AgencyMediaView() {
     }
   }, [editingSite, editForm, manageMediaSubmission]);
 
+  // Real-time monitoring of active engagements while edit popup is open
+  useEffect(() => {
+    if (!editingSite) return;
+
+    const channel = supabase
+      .channel(`edit-media-engagements-${editingSite.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+          filter: `media_site_id=eq.${editingSite.id}`
+        },
+        async () => {
+          // Re-check active engagements whenever service_requests changes for this media
+          const { data } = await supabase
+            .from('service_requests')
+            .select('id')
+            .eq('media_site_id', editingSite.id)
+            .not('status', 'in', '(cancelled,completed)')
+            .limit(1);
+          
+          setEditHasActiveEngagements(!!(data && data.length > 0));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [editingSite?.id]);
+
 
   useEffect(() => {
     if (agencyMediaTargetTab) {
