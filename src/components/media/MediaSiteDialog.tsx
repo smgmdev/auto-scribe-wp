@@ -419,12 +419,7 @@ export function MediaSiteDialog({
       </Button>
       {!isAgency && !(userAgencyName && mediaSite.agency === userAgencyName) && (
         user ? (
-          checkingEngagement ? (
-            <Button disabled className="rounded-none bg-black text-white w-full md:flex-1">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Checking...
-            </Button>
-          ) : openEngagementData ? (
+          openEngagementData ? (
             <Button 
               className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
               onClick={() => {
@@ -442,6 +437,7 @@ export function MediaSiteDialog({
           ) : (
             <Button 
               className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
+              disabled={checkingEngagement}
               onClick={handleInterested}
             >
               <span>I'm Interested - {mediaSite.price.toLocaleString()} USD</span>
