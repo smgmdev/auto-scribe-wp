@@ -154,12 +154,9 @@ const Landing = () => {
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
 
-        // Fetch active agencies from agency_payouts + agency_applications
+        // Fetch active agencies via secure RPC (avoids exposing sensitive columns)
         const { data: activeAgenciesData } = await supabase
-          .from('agency_payouts')
-          .select('id, agency_name, user_id')
-          .eq('onboarding_complete', true)
-          .eq('downgraded', false);
+          .rpc('get_active_agency_payouts');
         
         if (activeAgenciesData && activeAgenciesData.length > 0) {
           const agencyNames = activeAgenciesData.map(a => a.agency_name);
