@@ -1776,12 +1776,12 @@ export function AgencyMediaView() {
               )}
             </div>
             {/* Search */}
-            <div className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-border">
+            <div className="flex-shrink-0">
               <Input
                 placeholder="Search media sites..."
                 value={manageMediaSearch}
                 onChange={(e) => setManageMediaSearch(e.target.value)}
-                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 text-sm"
+                className="h-9 bg-black text-white border-transparent placeholder:text-white/40 text-sm rounded-none border-x-0 border-t border-b border-border"
               />
             </div>
             {/* List */}
