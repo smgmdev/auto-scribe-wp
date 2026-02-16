@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Search, User, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import amblack from '@/assets/amblack.png';
+import DOMPurify from 'dompurify';
 
 interface PressRelease {
   id: string;
@@ -244,7 +245,7 @@ export default function PressReleaseDetail() {
                     [&_strong]:font-semibold [&_strong]:text-foreground
                     [&_em]:italic
                   "
-                  dangerouslySetInnerHTML={{ __html: pressRelease.content }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pressRelease.content) }}
                 />
 
                 {/* Footer Contacts - Apple Style */}
