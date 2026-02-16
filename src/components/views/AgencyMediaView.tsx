@@ -1776,7 +1776,7 @@ export function AgencyMediaView() {
               )}
             </div>
             {/* Search */}
-            <div className="px-4 pt-3 pb-0 flex-shrink-0">
+            <div className="px-4 pt-3 pb-3 flex-shrink-0 border-b border-border">
               <Input
                 placeholder="Search media sites..."
                 value={manageMediaSearch}
