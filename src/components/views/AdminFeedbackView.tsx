@@ -217,9 +217,24 @@ export function AdminFeedbackView() {
                                 size="sm"
                                 variant="outline"
                                 className="text-sm h-7 px-3 hover:bg-foreground hover:text-background"
-                                onClick={() => {
-                                  setPreviewTitle(report.subject);
-                                  setPreviewUrl(report.attachment_url);
+                                onClick={async () => {
+                                  try {
+                                    // Resolve file path to signed URL (bucket is private)
+                                    const filePath = report.attachment_url!.startsWith('http')
+                                      ? report.attachment_url!.split('/bug-attachments/').pop() || report.attachment_url!
+                                      : report.attachment_url!;
+                                    const { data, error } = await supabase.storage
+                                      .from('bug-attachments')
+                                      .createSignedUrl(filePath, 3600);
+                                    if (error || !data?.signedUrl) {
+                                      toast.error('Failed to load attachment');
+                                      return;
+                                    }
+                                    setPreviewTitle(report.subject);
+                                    setPreviewUrl(data.signedUrl);
+                                  } catch {
+                                    toast.error('Failed to load attachment');
+                                  }
                                 }}
                               >
                                 File

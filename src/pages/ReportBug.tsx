@@ -91,11 +91,8 @@ export default function ReportBug() {
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('bug-attachments')
-          .getPublicUrl(filePath);
-
-        attachmentUrl = urlData.publicUrl;
+        // Store the file path, not a public URL (bucket is private)
+        attachmentUrl = filePath;
         setUploading(false);
       }
 
