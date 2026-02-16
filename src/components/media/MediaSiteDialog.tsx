@@ -55,11 +55,18 @@ export function MediaSiteDialog({
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
 
-  // Drag state
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // Drag state - initialize centered to avoid flash
+  const getCenteredPos = () => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 768;
+    const popupWidth = 450;
+    const popupHeight = Math.min(h * 0.85, 600);
+    return { x: (w - popupWidth) / 2, y: (h - popupHeight) / 2 };
+  };
+  const [position, setPosition] = useState(getCenteredPos);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
-  const positionRef = useRef({ x: 0, y: 0 });
+  const positionRef = useRef(getCenteredPos());
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const popupRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
