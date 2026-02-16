@@ -969,9 +969,9 @@ export function ChatListPanel() {
     const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
     const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
     
-    // CRITICAL: Agency sending as agency should NOT trigger notification for agency
-    // Use isOwnAgencyMessage which was determined by DB lookup earlier
-    const isAgencySendingAsAgency = isOwnAgencyMessage || (!!agencyPayoutIdRef.current && sender_type === 'agency');
+    // CRITICAL: Only suppress notifications for THIS user's own agency messages
+    // Previously this blocked ALL agency messages for agency users, even from OTHER agencies
+    const isAgencySendingAsAgency = isOwnAgencyMessage || (sender_type === 'agency' && sender_id === agencyPayoutIdRef.current);
     
     // Notification conditions:
     // - Client engagement receives agency OR admin message
@@ -1597,9 +1597,9 @@ export function ChatListPanel() {
           
           // Only increment unread for minimized chats when message is from counterparty
           // Check both local lists AND minimized chat type
-          // CRITICAL: An agency sending a message with senderType='agency' is NOT a counterparty message for agency
-          // A client sending a message with senderType='client' is NOT a counterparty message for client
-          const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency';
+          // CRITICAL: Only suppress for THIS user's own agency messages, not messages from OTHER agencies
+          const msgSenderId = newMsg.sender_id;
+          const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency' && msgSenderId === agencyPayoutIdRef.current;
           const isFromCounterparty = !isAgencySendingAsAgency && (
             (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
             (isServiceRequest && senderType === 'client') ||
