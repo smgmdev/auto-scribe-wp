@@ -2045,11 +2045,11 @@ export function AgencyMediaView() {
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
               <div className="space-y-1">
                 <Label className="text-xs">Name</Label>
-                <Input value={editForm.name || ''} onChange={(e) => setEditForm(f => ({ ...f, name: e.target.value }))} className="h-9 text-sm" />
+                <Input value={editForm.name || ''} disabled className="h-9 text-sm opacity-60" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Link</Label>
-                <Input value={editForm.link || ''} onChange={(e) => setEditForm(f => ({ ...f, link: e.target.value }))} className="h-9 text-sm" />
+                <Input value={editForm.link || ''} disabled className="h-9 text-sm opacity-60" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
@@ -2058,44 +2058,17 @@ export function AgencyMediaView() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Publication Format</Label>
-                  <Select value={editForm.publication_format || ''} onValueChange={(v) => setEditForm(f => ({ ...f, publication_format: v }))}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Select format" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[10002]">
-                      {availableFormats.map(fmt => (
-                        <SelectItem key={fmt} value={fmt}>{fmt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input value={editForm.publication_format || ''} disabled className="h-9 text-sm opacity-60" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Category</Label>
-                  <Select value={editForm.category || ''} onValueChange={(v) => setEditForm(f => ({ ...f, category: v }))}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[10002]">
-                      {availableCategories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input value={editForm.category || ''} disabled className="h-9 text-sm opacity-60" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Subcategory</Label>
-                  <Select value={editForm.subcategory || ''} onValueChange={(v) => setEditForm(f => ({ ...f, subcategory: v }))}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Select subcategory" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[10002]">
-                      {availableSubcategories.map(sub => (
-                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input value={editForm.subcategory || ''} disabled className="h-9 text-sm opacity-60" />
                 </div>
               </div>
               <div className="space-y-1">
@@ -2108,7 +2081,7 @@ export function AgencyMediaView() {
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Favicon URL</Label>
-                <Input value={editForm.favicon || ''} onChange={(e) => setEditForm(f => ({ ...f, favicon: e.target.value }))} className="h-9 text-sm" />
+                <Input value={editForm.favicon || ''} disabled className="h-9 text-sm opacity-60" />
               </div>
             </div>
             {/* Footer */}
