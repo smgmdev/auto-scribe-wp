@@ -99,6 +99,46 @@ serve(async (req) => {
       );
     }
 
+    // Verify the calling user is the agency assigned to this service request
+    const { data: serviceRequest, error: srError } = await supabaseAdmin
+      .from("service_requests")
+      .select("agency_payout_id")
+      .eq("id", service_request_id)
+      .single();
+
+    if (srError || !serviceRequest) {
+      return new Response(
+        JSON.stringify({ error: "Service request not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
+    }
+
+    // Check if user is admin
+    const { data: adminRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", agencyUser.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!adminRole) {
+      // Not admin - verify user is the agency assigned to this request
+      const { data: agencyCheck } = await supabaseAdmin
+        .from("agency_payouts")
+        .select("id")
+        .eq("id", serviceRequest.agency_payout_id)
+        .eq("user_id", agencyUser.id)
+        .maybeSingle();
+
+      if (!agencyCheck) {
+        console.error("Unauthorized: user is not the assigned agency for this request");
+        return new Response(
+          JSON.stringify({ error: "Unauthorized - not the assigned agency" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+        );
+      }
+    }
+
     if (!media_site_id) {
       return new Response(
         JSON.stringify({ error: "Media site ID is required" }),
