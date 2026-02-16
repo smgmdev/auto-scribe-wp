@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X, GripHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -1744,20 +1744,36 @@ export function AgencyMediaView() {
             }}
           >
             {/* Drag handle / Header */}
-            <div 
-              className={`flex items-center justify-between p-4 border-b border-border flex-shrink-0 ${!isMobile ? 'cursor-grab active:cursor-grabbing' : ''}`}
-              onMouseDown={handleDragStart}
-            >
+            {/* Drag bar */}
+            {!isMobile && (
+              <div 
+                className="px-4 py-1 border-b border-border bg-muted/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none flex-shrink-0"
+                onMouseDown={handleDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <button 
+                  onClick={() => setManageMediaSubmission(null)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="h-7 w-7 flex items-center justify-center text-muted-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            {/* Header */}
+            <div className={`flex items-center justify-between p-4 border-b border-border flex-shrink-0`}>
               <div>
                 <h2 className="text-lg font-semibold">Manage Approved Media</h2>
                 <p className="text-sm text-muted-foreground">{manageMediaSubmission?.imported_sites?.length || 0} imported media sites</p>
               </div>
-              <button 
-                onClick={() => setManageMediaSubmission(null)}
-                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              {isMobile && (
+                <button 
+                  onClick={() => setManageMediaSubmission(null)}
+                  className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
             {/* Search */}
             <div className="px-4 pt-3 pb-0 flex-shrink-0">
