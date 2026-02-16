@@ -156,6 +156,7 @@ export function AgencyMediaView() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
+  const [availableFormats, setAvailableFormats] = useState<string[]>([]);
   const [editDragPos, setEditDragPos] = useState({ x: 0, y: 0 });
   const [isEditDragging, setIsEditDragging] = useState(false);
   const editDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
@@ -235,14 +236,17 @@ export function AgencyMediaView() {
     setEditForm({ ...site });
     setEditDragPos({ x: 0, y: 0 });
     // Fetch distinct categories and subcategories
-    const [catRes, subRes] = await Promise.all([
+    const [catRes, subRes, fmtRes] = await Promise.all([
       supabase.from('media_sites').select('category').then(r => r.data),
       supabase.from('media_sites').select('subcategory').then(r => r.data),
+      supabase.from('media_sites').select('publication_format').then(r => r.data),
     ]);
     const cats = [...new Set((catRes || []).map((r: any) => r.category).filter(Boolean))].sort();
     const subs = [...new Set((subRes || []).map((r: any) => r.subcategory).filter(Boolean))].sort();
+    const fmts = [...new Set((fmtRes || []).map((r: any) => r.publication_format).filter(Boolean))].sort();
     setAvailableCategories(cats as string[]);
     setAvailableSubcategories(subs as string[]);
+    setAvailableFormats(fmts as string[]);
   }, []);
 
   // Save edit
@@ -2054,7 +2058,16 @@ export function AgencyMediaView() {
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Publication Format</Label>
-                  <Input value={editForm.publication_format || ''} onChange={(e) => setEditForm(f => ({ ...f, publication_format: e.target.value }))} className="h-9 text-sm" />
+                  <Select value={editForm.publication_format || ''} onValueChange={(v) => setEditForm(f => ({ ...f, publication_format: v }))}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[10002]">
+                      {availableFormats.map(fmt => (
+                        <SelectItem key={fmt} value={fmt}>{fmt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
