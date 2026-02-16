@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight, Plug, Unplug, DollarSign, HelpCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Library, Loader2, Globe, ExternalLink, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Trash2, Edit2, Copy, MoreHorizontal, RefreshCw, Sparkles, Upload, X, ArrowUpRight, Plug, Unplug, DollarSign, HelpCircle, GripHorizontal, Pencil } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -214,6 +216,15 @@ export function AdminMediaManagementView() {
   const [currentWpSitePrice, setCurrentWpSitePrice] = useState<number | null>(null);
   const [isWpPriceLoading, setIsWpPriceLoading] = useState(false);
 
+  // Edit media site popup state (admin version - all fields editable)
+  const [adminEditingSite, setAdminEditingSite] = useState<MediaSite | null>(null);
+  const [adminEditForm, setAdminEditForm] = useState<Partial<MediaSite>>({});
+  const [isAdminSavingEdit, setIsAdminSavingEdit] = useState(false);
+  const [adminEditDragPos, setAdminEditDragPos] = useState({ x: 0, y: 0 });
+  const [isAdminEditDragging, setIsAdminEditDragging] = useState(false);
+  const adminEditDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const isMobile = useIsMobile();
+
   const toneOptions: { value: ArticleTone; label: string }[] = [
     { value: 'neutral', label: 'Neutral' },
     { value: 'professional', label: 'Professional Corporate' },
@@ -403,6 +414,80 @@ export function AdminMediaManagementView() {
       setLoadingLogos(new Set(agencyNamesWithLogos));
     }
   }, [agencyLogos]);
+
+  // Admin edit drag handlers
+  const handleAdminEditDragStart = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    setIsAdminEditDragging(true);
+    adminEditDragStartRef.current = { x: e.clientX, y: e.clientY, posX: adminEditDragPos.x, posY: adminEditDragPos.y };
+  }, [isMobile, adminEditDragPos]);
+
+  useEffect(() => {
+    if (!isAdminEditDragging) return;
+    const handleMove = (e: MouseEvent) => {
+      setAdminEditDragPos({
+        x: adminEditDragStartRef.current.posX + (e.clientX - adminEditDragStartRef.current.x),
+        y: adminEditDragStartRef.current.posY + (e.clientY - adminEditDragStartRef.current.y),
+      });
+    };
+    const handleUp = () => setIsAdminEditDragging(false);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isAdminEditDragging]);
+
+  // Open admin edit popup
+  const openAdminEditSite = useCallback((site: MediaSite) => {
+    setAdminEditingSite(site);
+    setAdminEditForm({ ...site });
+    setAdminEditDragPos({ x: 0, y: 0 });
+  }, []);
+
+  // Save admin edit (all fields)
+  const handleAdminSaveEdit = useCallback(async () => {
+    if (!adminEditingSite || !adminEditForm) return;
+    setIsAdminSavingEdit(true);
+    try {
+      const updatePayload: Record<string, any> = {
+        name: adminEditForm.name,
+        link: adminEditForm.link,
+        price: adminEditForm.price,
+        about: adminEditForm.about,
+        category: adminEditForm.category,
+        subcategory: adminEditForm.subcategory,
+        publication_format: adminEditForm.publication_format,
+        google_index: adminEditForm.google_index,
+        publishing_time: adminEditForm.publishing_time,
+        favicon: adminEditForm.favicon,
+      };
+      const { error } = await supabase
+        .from('media_sites')
+        .update(updatePayload)
+        .eq('id', adminEditingSite.id);
+      if (error) throw error;
+      
+      // Update local state
+      setMediaSites(prev => prev.map(s => s.id === adminEditingSite.id ? { ...s, ...updatePayload } as MediaSite : s));
+      // Also update in approved submissions
+      setApprovedMediaSubmissions(prev => prev.map(sub => ({
+        ...sub,
+        imported_sites: sub.imported_sites?.map(s => 
+          s.id === adminEditingSite.id ? { ...s, ...updatePayload } as MediaSite : s
+        ),
+      })));
+      
+      toast({ title: 'Success', description: 'Media listing updated' });
+      setAdminEditingSite(null);
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to update: ' + (err.message || 'Unknown error'), variant: 'destructive' });
+    } finally {
+      setIsAdminSavingEdit(false);
+    }
+  }, [adminEditingSite, adminEditForm]);
+
 
 
   const fetchData = async (isRefresh = false) => {
@@ -2256,31 +2341,44 @@ export function AdminMediaManagementView() {
                                               {site.category}{site.category && site.subcategory && ' → '}{site.subcategory}
                                             </p>
                                           )}
-                                          {/* Link and Agency row */}
+                                          {/* Link, Agency, and Edit row */}
                                           <div className="flex items-center justify-between gap-2">
-                                            <a 
-                                              href={ensureHttps(site.link)}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 min-w-0"
+                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                              <a 
+                                                href={ensureHttps(site.link)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1 min-w-0"
+                                              >
+                                                <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
+                                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                              </a>
+                                              {/* Agency info on mobile - shown on same row as link */}
+                                              {site.agency && (
+                                                <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
+                                                  <span>via</span>
+                                                  <span className="text-foreground">{site.agency}</span>
+                                                  {agencyLogos[site.agency] && (
+                                                    <img 
+                                                      src={agencyLogos[site.agency]} 
+                                                      alt={site.agency} 
+                                                      className="h-4 w-4 object-contain rounded-full flex-shrink-0"
+                                                    />
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="h-7 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black transition-all flex-shrink-0"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                openAdminEditSite(site);
+                                              }}
                                             >
-                                              <span className="truncate">{site.link.replace(/^https?:\/\//, '')}</span>
-                                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                            </a>
-                                            {/* Agency info on mobile - shown on same row as link */}
-                                            {site.agency && (
-                                              <div className="flex md:hidden items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
-                                                <span>via</span>
-                                                <span className="text-foreground">{site.agency}</span>
-                                                {agencyLogos[site.agency] && (
-                                                  <img 
-                                                    src={agencyLogos[site.agency]} 
-                                                    alt={site.agency} 
-                                                    className="h-4 w-4 object-contain rounded-full flex-shrink-0"
-                                                  />
-                                                )}
-                                              </div>
-                                            )}
+                                              Edit Details
+                                            </Button>
                                           </div>
                                         </div>
                                       )}
@@ -3464,6 +3562,119 @@ export function AdminMediaManagementView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Admin Edit Media Site Popup */}
+      {adminEditingSite && createPortal(
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black/50 z-[10000]" onClick={() => setAdminEditingSite(null)} />
+          <div
+            className={`fixed z-[10001] bg-background border border-border shadow-xl flex flex-col ${
+              isMobile ? 'inset-0 h-[100dvh] rounded-none border-0' : 'w-[560px] max-h-[85vh] rounded-none'
+            }`}
+            style={isMobile ? {} : {
+              top: `calc(50% + ${adminEditDragPos.y}px)`,
+              left: `calc(50% + ${adminEditDragPos.x}px)`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {/* Drag bar - Desktop Only */}
+            {!isMobile && (
+              <div
+                className="px-4 py-1 border-b border-border bg-muted/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none flex-shrink-0"
+                onMouseDown={handleAdminEditDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <button onClick={() => setAdminEditingSite(null)} className="h-6 w-6 flex items-center justify-center hover:bg-muted rounded-sm">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            {/* Header */}
+            <div className="px-4 py-3 flex-shrink-0 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold">Edit Media Listing</h3>
+                <p className="text-sm text-muted-foreground">{adminEditingSite.name}</p>
+              </div>
+              {isMobile && (
+                <button onClick={() => setAdminEditingSite(null)} className="h-8 w-8 flex items-center justify-center hover:bg-muted rounded-sm">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            {/* Form */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Name</Label>
+                <Input value={adminEditForm.name || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, name: e.target.value }))} className="h-9 text-sm" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Link</Label>
+                <Input value={adminEditForm.link || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, link: e.target.value }))} className="h-9 text-sm" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Price (USD)</Label>
+                  <Input type="number" value={adminEditForm.price ?? 0} onChange={(e) => setAdminEditForm(f => ({ ...f, price: parseInt(e.target.value) || 0 }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Publication Format</Label>
+                  <Input value={adminEditForm.publication_format || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, publication_format: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Category</Label>
+                  <Input value={adminEditForm.category || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, category: e.target.value }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Subcategory</Label>
+                  <Input value={adminEditForm.subcategory || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, subcategory: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Google Index</Label>
+                  <Input value={adminEditForm.google_index || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, google_index: e.target.value }))} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Publishing Time</Label>
+                  <Input value={adminEditForm.publishing_time || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, publishing_time: e.target.value }))} className="h-9 text-sm" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Good to know</Label>
+                <textarea
+                  value={adminEditForm.about || ''}
+                  onChange={(e) => setAdminEditForm(f => ({ ...f, about: e.target.value }))}
+                  className="w-full min-h-[80px] text-sm px-3 py-2 border border-input bg-background text-foreground rounded-none resize-y focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Media Logo (favicon URL)</Label>
+                <Input value={adminEditForm.favicon || ''} onChange={(e) => setAdminEditForm(f => ({ ...f, favicon: e.target.value }))} className="h-9 text-sm" />
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-border flex flex-col gap-2 flex-shrink-0">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+                <Button variant="outline" onClick={() => setAdminEditingSite(null)} className="h-10 text-sm w-full md:w-auto hover:bg-black hover:text-white transition-all">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAdminSaveEdit}
+                  disabled={isAdminSavingEdit}
+                  className="h-10 text-sm w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black border border-transparent transition-all"
+                >
+                  {isAdminSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                  Update Media Listing
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
       </div>
     </div>
   );
