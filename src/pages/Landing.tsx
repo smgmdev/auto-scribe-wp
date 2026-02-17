@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info, GripHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { createPortal } from 'react-dom';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl, extractDomain } from '@/lib/favicon';
@@ -14,6 +15,7 @@ import { useAppStore } from '@/stores/appStore';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCarousel';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import amblack from '@/assets/amblack.png';
@@ -65,6 +67,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { setPreselectedSiteId, setCurrentView } = useAppStore();
+  const isMobile = useIsMobile();
   const [wpSites, setWpSites] = useState<WPSite[]>([]);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [activeAgencies, setActiveAgencies] = useState<ActiveAgency[]>([]);
@@ -82,6 +85,95 @@ const Landing = () => {
   // Agency details popup state
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
+
+  // WP site draggable popup state
+  const getCenteredPos = () => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 768;
+    const popupWidth = 450;
+    const popupHeight = Math.min(h * 0.85, 500);
+    return { x: (w - popupWidth) / 2, y: (h - popupHeight) / 2 };
+  };
+  const [wpPopupPos, setWpPopupPos] = useState(getCenteredPos);
+  const [isWpDragging, setIsWpDragging] = useState(false);
+  const isWpDraggingRef = useRef(false);
+  const wpPopupPosRef = useRef(getCenteredPos());
+  const wpDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const wpPopupRef = useRef<HTMLDivElement>(null);
+
+  const wpDialogOpen = !!selectedSite && selectedSiteType === 'wp';
+
+  useEffect(() => {
+    if (wpDialogOpen) {
+      const newPos = getCenteredPos();
+      setWpPopupPos(newPos);
+      wpPopupPosRef.current = newPos;
+    }
+  }, [wpDialogOpen]);
+
+  useEffect(() => {
+    if (!wpDialogOpen) { removePopup('landing-wp-site-dialog'); return; }
+    pushPopup('landing-wp-site-dialog', () => setSelectedSite(null));
+    return () => removePopup('landing-wp-site-dialog');
+  }, [wpDialogOpen]);
+
+  useEffect(() => {
+    if (!wpDialogOpen || !isMobile) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [wpDialogOpen, isMobile]);
+
+  const handleWpDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+    isWpDraggingRef.current = true;
+    setIsWpDragging(true);
+    wpDragStartRef.current = {
+      x: e.clientX, y: e.clientY,
+      posX: wpPopupPosRef.current.x, posY: wpPopupPosRef.current.y,
+    };
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (!isWpDraggingRef.current) wpPopupPosRef.current = wpPopupPos;
+  }, [wpPopupPos]);
+
+  useEffect(() => {
+    if (!isWpDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      const newX = wpDragStartRef.current.posX + (e.clientX - wpDragStartRef.current.x);
+      const newY = wpDragStartRef.current.posY + (e.clientY - wpDragStartRef.current.y);
+      wpPopupPosRef.current = { x: newX, y: newY };
+      if (wpPopupRef.current) {
+        wpPopupRef.current.style.left = `${newX}px`;
+        wpPopupRef.current.style.top = `${newY}px`;
+      }
+    };
+    const handleMouseUp = () => {
+      isWpDraggingRef.current = false;
+      setIsWpDragging(false);
+      setWpPopupPos(wpPopupPosRef.current);
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isWpDragging]);
 
   const handlePublishNewArticle = (siteId: string) => {
     setNavigating(true);
@@ -586,100 +678,112 @@ const Landing = () => {
       </main>
 
 
-      {/* WP Site Detail Dialog */}
-      <Dialog open={!!selectedSite && selectedSiteType === 'wp'} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md z-[200]" overlayClassName="bg-transparent">
-
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              {selectedSite && (
-                <>
-                  <img
-                    src={
-                      selectedSiteType === 'wp'
-                        ? (selectedSite as WPSite).favicon || getFaviconUrl((selectedSite as WPSite).url)
-                        : (selectedSite as MediaSite).favicon || getFaviconUrl((selectedSite as MediaSite).link)
-                    }
-                    alt={selectedSite.name}
-                    className="h-12 w-12 rounded-xl bg-muted object-contain"
-                  />
-                  <span>{selectedSite.name}</span>
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedSite && selectedSiteType === 'wp' && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Website</p>
-                <div className="flex items-center gap-2">
-                  <a 
-                    href={(selectedSite as WPSite).url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {extractDomain((selectedSite as WPSite).url)}
-                    <ExternalLink className="h-3 w-3" />
+      {/* WP Site Detail - Draggable Popup */}
+      {wpDialogOpen && selectedSite && (isMobile ? (
+        createPortal(
+          <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black" onClick={() => setSelectedSite(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <img src={(selectedSite as WPSite).favicon || getFaviconUrl((selectedSite as WPSite).url)} alt={selectedSite.name} className="h-12 w-12 rounded-xl object-cover shrink-0" />
+                  <span className="font-semibold text-lg">{selectedSite.name}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Website</p>
+                  <a href={(selectedSite as WPSite).url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1">
+                    {extractDomain((selectedSite as WPSite).url)}<ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Publication Type</p>
-                <p className="text-foreground">Article</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Price</p>
-                <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
-              </div>
-              {(selectedSite as WPSite).agency && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Agency</p>
-                  <p 
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
-                    onClick={() => handleAgencyClick((selectedSite as WPSite).agency!)}
-                  >
-                    {(selectedSite as WPSite).agency}
-                    <Info className="h-3 w-3" />
-                  </p>
+                  <p className="text-sm text-muted-foreground">Publication Type</p>
+                  <p className="text-foreground">Article</p>
                 </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 mt-4">
-            <Button 
-              variant="outline"
-              onClick={() => setSelectedSite(null)}
-              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-32"
-            >
-              Close
-            </Button>
-            {selectedSiteType === 'wp' && selectedSite && (
-              <Button 
-                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-fit px-3 border border-transparent hover:border-black"
-                onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)}
-                disabled={navigating}
-              >
-                {navigating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
-                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </span>
-                  </>
+                <div>
+                  <p className="text-sm text-muted-foreground">Price</p>
+                  <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
+                </div>
+                {(selectedSite as WPSite).agency && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Agency</p>
+                    <p className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1" onClick={() => handleAgencyClick((selectedSite as WPSite).agency!)}>
+                      {(selectedSite as WPSite).agency}<Info className="h-3 w-3" />
+                    </p>
+                  </div>
                 )}
+              </div>
+            </div>
+            <div className="border-t p-4">
+              <div className="flex flex-col-reverse gap-3">
+                <Button variant="outline" onClick={() => setSelectedSite(null)} className="rounded-none hover:bg-black hover:text-white transition-colors w-full">Close</Button>
+                <Button className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full px-3 border border-transparent hover:border-black" onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)} disabled={navigating}>
+                  {navigating ? (<><Loader2 className="h-4 w-4 animate-spin mr-2" /><span>Loading...</span></>) : (<><span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span><span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1"><ArrowRight className="h-4 w-4 shrink-0" /></span></>)}
+                </Button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      ) : (
+        createPortal(
+          <div
+            ref={wpPopupRef}
+            className="fixed z-[200] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
+            style={{ left: `${wpPopupPosRef.current.x}px`, top: `${wpPopupPosRef.current.y}px`, willChange: isWpDragging ? 'left, top' : 'auto' }}
+          >
+            <div className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isWpDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`} onMouseDown={handleWpDragStart}>
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black" onClick={() => setSelectedSite(null)} onMouseDown={(e) => e.stopPropagation()}>
+                <X className="h-4 w-4" />
               </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+            <div className="overflow-y-auto p-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <img src={(selectedSite as WPSite).favicon || getFaviconUrl((selectedSite as WPSite).url)} alt={selectedSite.name} className="h-12 w-12 rounded-xl object-cover shrink-0" />
+                  <span className="font-semibold text-lg">{selectedSite.name}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Website</p>
+                  <a href={(selectedSite as WPSite).url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1">
+                    {extractDomain((selectedSite as WPSite).url)}<ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Publication Type</p>
+                  <p className="text-foreground">Article</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Price</p>
+                  <p className="text-foreground font-medium">{(selectedSite as WPSite).credits_required} USD</p>
+                </div>
+                {(selectedSite as WPSite).agency && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Agency</p>
+                    <p className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1" onClick={() => handleAgencyClick((selectedSite as WPSite).agency!)}>
+                      {(selectedSite as WPSite).agency}<Info className="h-3 w-3" />
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="border-t p-4">
+              <div className="flex flex-col-reverse md:flex-row gap-3">
+                <Button variant="outline" onClick={() => setSelectedSite(null)} className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:flex-1">Close</Button>
+                <Button className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black" onClick={() => handlePublishNewArticle((selectedSite as WPSite).id)} disabled={navigating}>
+                  {navigating ? (<><Loader2 className="h-4 w-4 animate-spin mr-2" /><span>Loading...</span></>) : (<><span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span><span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1"><ArrowRight className="h-4 w-4 shrink-0" /></span></>)}
+                </Button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      ))}
 
       {/* Media Site Dialog with integrated brief submission */}
       <MediaSiteDialog
