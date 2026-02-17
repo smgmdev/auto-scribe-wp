@@ -58,7 +58,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         } catch (e) { /* ignore */ }
         cardElementRef.current = null;
       }
-      const container = document.getElementById('dropIn');
+      const container = document.getElementById('airwallex-drop-in');
       if (container) container.innerHTML = '';
     }
   }, [open]);
@@ -122,6 +122,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       try {
         await airwallexInit({
           env: 'prod',
+          origin: window.location.origin,
           enabledElements: ['payments'],
         });
 
@@ -168,9 +169,9 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         // Wait a tick for the container to be in the DOM
         setTimeout(() => {
           if (mounted) {
-            const container = document.getElementById('dropIn');
+            const container = document.getElementById('airwallex-drop-in');
             if (container) {
-              dropIn.mount('dropIn');
+              dropIn.mount('airwallex-drop-in');
               cardElementRef.current = dropIn;
             }
           }
@@ -216,7 +217,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       cardElementRef.current = null;
     }
     // Clear the container's DOM manually so React doesn't try to remove SDK-injected nodes
-    const container = document.getElementById('dropIn');
+    const container = document.getElementById('airwallex-drop-in');
     if (container) {
       container.innerHTML = '';
     }
@@ -440,7 +441,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                     </div>
                   )}
                   <div 
-                    id="dropIn" 
+                    id="airwallex-drop-in" 
                     className={`min-h-[120px] rounded-none bg-background transition-opacity ${!cardReady ? 'opacity-0' : 'opacity-100'}`}
                     ref={(node) => {
                       if (node) {
