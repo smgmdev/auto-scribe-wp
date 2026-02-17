@@ -97,24 +97,21 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
 
-        // Fetch active agencies
+        // Fetch active agencies using RPC functions that bypass RLS
         const { data: activeAgenciesData } = await supabase
-          .from('agency_payouts')
-          .select('id, agency_name, user_id')
-          .eq('onboarding_complete', true)
-          .eq('downgraded', false);
+          .rpc('get_active_agency_payouts');
         
         if (activeAgenciesData && activeAgenciesData.length > 0) {
-          const agencyNames = activeAgenciesData.map(a => a.agency_name);
-          const { data: appData } = await supabase
-            .from('agency_applications')
-            .select('agency_name, agency_website, country, logo_url')
-            .in('agency_name', agencyNames)
-            .eq('status', 'approved');
+          const { data: publicAgencies } = await supabase
+            .rpc('get_public_agencies');
           
           const agencies: ActiveAgency[] = [];
-          if (appData) {
-            for (const app of appData) {
+          if (publicAgencies) {
+            for (const app of publicAgencies) {
+              // Only include agencies that are active (exist in payouts)
+              const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
+              if (!payoutRecord) continue;
+              
               let logoUrl: string | null = null;
               if (app.logo_url) {
                 const { data: publicUrl } = supabase.storage
@@ -122,11 +119,10 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                   .getPublicUrl(app.logo_url);
                 logoUrl = publicUrl?.publicUrl || null;
               }
-              const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
               agencies.push({
-                id: payoutRecord?.id || app.agency_name,
+                id: payoutRecord.id,
                 name: app.agency_name,
-                link: app.agency_website || '',
+                link: '',
                 favicon: logoUrl,
                 country: app.country || null,
                 about: null
@@ -138,34 +134,22 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
           setActiveAgencies([]);
         }
 
-        // Fetch agency logos
+        // Fetch agency logos using public RPC
         const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
         if (uniqueAgencies.length > 0) {
-          const { data: appData, error: appError } = await supabase
-            .from('agency_applications')
-            .select('agency_name, logo_url, created_at')
-            .in('agency_name', uniqueAgencies)
-            .not('logo_url', 'is', null)
-            .order('created_at', { ascending: true });
-
-          if (!appError && appData && appData.length > 0) {
-            const earliestLogoByAgency: Record<string, string> = {};
-            for (const row of appData) {
-              if (!row?.agency_name || !row?.logo_url) continue;
-              if (!earliestLogoByAgency[row.agency_name]) {
-                earliestLogoByAgency[row.agency_name] = row.logo_url;
-              }
-            }
-
+          const { data: publicAgenciesForLogos } = await supabase.rpc('get_public_agencies');
+          
+          if (publicAgenciesForLogos && publicAgenciesForLogos.length > 0) {
             const logos: Record<string, string> = {};
-            Object.entries(earliestLogoByAgency).forEach(([agencyName, path]) => {
+            for (const agency of publicAgenciesForLogos) {
+              if (!agency.logo_url || !uniqueAgencies.includes(agency.agency_name)) continue;
               const { data: publicUrl } = supabase.storage
                 .from('agency-logos')
-                .getPublicUrl(path);
+                .getPublicUrl(agency.logo_url);
               if (publicUrl?.publicUrl) {
-                logos[agencyName] = publicUrl.publicUrl;
+                logos[agency.agency_name] = publicUrl.publicUrl;
               }
-            });
+            }
             setAgencyLogos(logos);
           }
         }
