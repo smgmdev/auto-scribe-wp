@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Plus, Loader2, MessageSquare, Clock, CheckCircle, X, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +36,7 @@ export function SupportView() {
   const { openSupportChat } = useAppStore();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('open');
 
   // New ticket popup state
   const [newTicketOpen, setNewTicketOpen] = useState(false);
@@ -167,16 +169,31 @@ export function SupportView() {
           </Button>
         </div>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full p-0 h-auto">
+            <TabsTrigger value="open" className="flex-1 py-2.5 text-sm">
+              Open {tickets.filter(t => t.status === 'open').length > 0 && (
+                <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'open').length})</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="closed" className="flex-1 py-2.5 text-sm">
+              Closed
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Ticket List */}
         <div className="space-y-2">
-          {tickets.length === 0 ? (
+          {tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').length === 0 ? (
             <div className="text-center py-16">
               <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-              <p className="text-muted-foreground">No support tickets yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
+              <p className="text-muted-foreground">No {activeTab} tickets</p>
+              {activeTab === 'open' && (
+                <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
+              )}
             </div>
           ) : (
-            tickets.map(ticket => (
+            tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').map(ticket => (
               <button
                 key={ticket.id}
                 className="w-full text-left border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
