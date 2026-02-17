@@ -10,6 +10,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
+declare global {
+  interface Window {
+    Airwallex?: {
+      init: (config: Record<string, unknown>) => Promise<{
+        payment: {
+          redirectToCheckout: (opts: Record<string, unknown>) => void;
+        };
+      }>;
+    };
+  }
+}
+
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 10;
 const QUICK_AMOUNTS = [10, 50, 100, 500];
@@ -57,29 +69,49 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setPurchasing(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: {
-          creditAmount: parsedAmount,
-        },
+      // 1. Create PaymentIntent via edge function
+      const { data, error } = await supabase.functions.invoke('create-airwallex-checkout', {
+        body: { creditAmount: parsedAmount },
       });
 
       if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, '_blank');
-        onOpenChange(false);
-        
-        // Poll for credit updates after checkout
-        const pollInterval = setInterval(async () => {
-          await refreshCredits();
-        }, 3000);
-        
-        // Stop polling after 5 minutes
-        setTimeout(() => clearInterval(pollInterval), 300000);
+      if (!data?.intent_id || !data?.client_secret) {
+        throw new Error('Invalid response from payment service');
       }
+
+      // 2. Load Airwallex SDK and redirect to HPP
+      const script = document.createElement('script');
+      script.src = 'https://checkout.airwallex.com/assets/elements.bundle.min.js';
+      script.onload = async () => {
+        try {
+          const Airwallex = (window as any).Airwallex;
+          if (!Airwallex) throw new Error('Payment SDK failed to load');
+
+          const { payment } = await Airwallex.init({
+            env: 'prod',
+            enabledElements: ['payments'],
+          });
+
+          payment.redirectToCheckout({
+            intent_id: data.intent_id,
+            client_secret: data.client_secret,
+            currency: 'USD',
+            successUrl: data.successUrl,
+          });
+
+          onOpenChange(false);
+        } catch (sdkErr: any) {
+          toast.error(sdkErr.message || 'Payment redirect failed.');
+          setPurchasing(false);
+        }
+      };
+      script.onerror = () => {
+        toast.error('Failed to load payment gateway.');
+        setPurchasing(false);
+      };
+      document.head.appendChild(script);
     } catch (error: any) {
       toast.error(error.message || 'Failed to create checkout session.');
-    } finally {
       setPurchasing(false);
     }
   };
