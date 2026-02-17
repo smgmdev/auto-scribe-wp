@@ -1,8 +1,9 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown } from 'lucide-react';
+import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -83,6 +84,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
+  const [ticketUserDetails, setTicketUserDetails] = useState<{
+    full_name: string | null;
+    email: string | null;
+    whatsapp_phone: string | null;
+    agency_name: string | null;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -198,6 +205,44 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Fetch user details for admin view
+  useEffect(() => {
+    if (!isAdmin || !ticket.id) return;
+    const fetchUserDetails = async () => {
+      // Get user_id from ticket
+      const { data: ticketData } = await supabase
+        .from('support_tickets')
+        .select('user_id')
+        .eq('id', ticket.id)
+        .single();
+      if (!ticketData?.user_id) return;
+
+      // Get profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, username, whatsapp_phone')
+        .eq('id', ticketData.user_id)
+        .single();
+
+      // Get agency name
+      const { data: agency } = await supabase
+        .from('agency_applications')
+        .select('agency_name')
+        .eq('user_id', ticketData.user_id)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      setTicketUserDetails({
+        full_name: profile?.username || null,
+        email: profile?.email || null,
+        whatsapp_phone: profile?.whatsapp_phone || null,
+        agency_name: agency?.agency_name || null,
+      });
+    };
+    fetchUserDetails();
+  }, [isAdmin, ticket.id]);
+
   // Typing indicator with presence
   const senderType = isAdmin ? 'admin' : 'user';
   
@@ -367,14 +412,34 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       <div className="flex items-center justify-between px-4 pb-3 pt-1 border-b border-border shrink-0">
         <div className="min-w-0 flex-1 mr-2">
           <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
-          <p className="text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             {ticket.user_email && <>{ticket.user_email} · </>}
             {format(new Date(ticket.created_at), 'MMM d, yyyy')}
+            {isAdmin && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="ml-1 text-muted-foreground hover:text-foreground inline-flex items-center">
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 bg-popover z-[99999]" side="bottom" align="start">
+                  <div className="space-y-2 text-sm">
+                    <h4 className="font-semibold text-foreground">User Details</h4>
+                    <div className="space-y-1.5 text-xs">
+                      <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+                      <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">{ticketUserDetails?.email || 'N/A'}</span></div>
+                      <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
+                      <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
             {' · '}
             <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
               {ticketStatus}
             </Badge>
-          </p>
+          </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {isAdmin && (
