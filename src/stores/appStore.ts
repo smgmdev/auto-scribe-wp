@@ -267,6 +267,11 @@ interface AppState {
   unreadSupportTicketsCount: number;
   setUnreadSupportTicketsCount: (count: number) => void;
   
+  // Global support chat state (persists across navigation)
+  openSupportTicket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean } | null;
+  openSupportChat: (ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean }) => void;
+  closeSupportChat: () => void;
+  
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
@@ -699,6 +704,11 @@ export const useAppStore = create<AppState>()((set) => ({
   // Support ticket notifications (admin)
   unreadSupportTicketsCount: 0,
   setUnreadSupportTicketsCount: (count) => set({ unreadSupportTicketsCount: count }),
+  
+  // Global support chat state
+  openSupportTicket: null,
+  openSupportChat: (ticket) => set({ openSupportTicket: ticket }),
+  closeSupportChat: () => set({ openSupportTicket: null }),
   
   // Sound toggle
   soundEnabled: (() => {
