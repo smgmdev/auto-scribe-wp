@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X, GripHorizontal } from 'lucide-react';
+import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, X, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -38,30 +38,269 @@ interface SupportMessage {
   created_at: string;
 }
 
+// ─── Floating Support Chat Window ───
+function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose: () => void }) {
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [messages, setMessages] = useState<SupportMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [ticketStatus, setTicketStatus] = useState(ticket.status);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+
+  // Drag state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+  // Center on mount (desktop)
+  useEffect(() => {
+    if (!isMobile) {
+      const w = 420, h = 520;
+      setPosition({
+        x: Math.max(0, Math.round((window.innerWidth - w) / 2)),
+        y: Math.max(0, Math.round((window.innerHeight - h) / 2)),
+      });
+    }
+  }, [isMobile]);
+
+  // Popup stack
+  useEffect(() => {
+    const id = `support-chat-${ticket.id}`;
+    pushPopup(id, onClose);
+    return () => removePopup(id);
+  }, [ticket.id, onClose]);
+
+  // Body scroll lock on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobile]);
+
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY, posX: position.x, posY: position.y };
+  }, [position]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent) => {
+      setPosition({
+        x: dragStartRef.current.posX + (e.clientX - dragStartRef.current.x),
+        y: dragStartRef.current.posY + (e.clientY - dragStartRef.current.y),
+      });
+    };
+    const onUp = () => setIsDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [isDragging]);
+
+  // Fetch messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      setLoadingMessages(true);
+      const { data } = await supabase
+        .from('support_messages')
+        .select('*')
+        .eq('ticket_id', ticket.id)
+        .order('created_at', { ascending: true });
+      if (data) setMessages(data);
+      setLoadingMessages(false);
+
+      // Mark as read
+      if (!ticket.user_read) {
+        await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+      }
+    };
+    fetchMessages();
+
+    // Real-time messages
+    const msgChannel = supabase
+      .channel(`support-msg-popup-${ticket.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+        setMessages(prev => [...prev, payload.new as SupportMessage]);
+      })
+      .subscribe();
+
+    // Real-time ticket status
+    const ticketChannel = supabase
+      .channel(`support-ticket-popup-${ticket.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'support_tickets', filter: `id=eq.${ticket.id}` }, (payload) => {
+        const updated = payload.new as SupportTicket;
+        setTicketStatus(updated.status);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(msgChannel);
+      supabase.removeChannel(ticketChannel);
+    };
+  }, [ticket.id]);
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!user || !newMessage.trim()) return;
+    setSending(true);
+    try {
+      const { error } = await supabase.from('support_messages').insert({
+        ticket_id: ticket.id,
+        sender_id: user.id,
+        sender_type: 'user',
+        message: newMessage.trim()
+      });
+      if (error) throw error;
+      await supabase.from('support_tickets').update({ admin_read: false, updated_at: new Date().toISOString() }).eq('id', ticket.id);
+      setNewMessage('');
+    } catch {
+      toast.error('Failed to send message');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return createPortal(
+    <div
+      ref={chatWindowRef}
+      className={
+        isMobile
+          ? 'fixed inset-0 z-[60] bg-background flex flex-col h-[100dvh]'
+          : 'fixed z-[60] bg-background rounded-lg shadow-xl border border-border flex flex-col'
+      }
+      style={isMobile ? undefined : {
+        left: '50%',
+        top: '50%',
+        transform: `translate(-50%, -50%) translate(${position.x - Math.round(window.innerWidth / 2)}px, ${position.y - Math.round(window.innerHeight / 2)}px)`,
+        width: 420,
+        height: 520,
+        minHeight: 420,
+      }}
+    >
+      {/* Drag Handle - desktop only */}
+      {!isMobile && (
+        <div
+          className={`flex items-center justify-start py-2 px-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          onMouseDown={handleDragStart}
+        >
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pb-3 pt-1 border-b border-border shrink-0">
+        <div className="min-w-0 flex-1 mr-2">
+          <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
+          <p className="text-[11px] text-muted-foreground">
+            {format(new Date(ticket.created_at), 'MMM d, yyyy')}
+            {' · '}
+            <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
+              {ticketStatus}
+            </Badge>
+          </p>
+        </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-4">
+        {loadingMessages ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : messages.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8 text-sm">No messages yet</p>
+        ) : (
+          <div className="space-y-3">
+            {messages.map(msg => (
+              <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
+                  msg.sender_type === 'user'
+                    ? 'bg-foreground text-background'
+                    : 'bg-muted text-foreground'
+                }`}>
+                  <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                  <p className={`text-[10px] mt-1 ${msg.sender_type === 'user' ? 'text-background/60' : 'text-muted-foreground'}`}>
+                    {format(new Date(msg.created_at), 'MMM d, HH:mm')}
+                  </p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </ScrollArea>
+
+      {/* Input */}
+      {ticketStatus === 'open' ? (
+        <div className="border-t border-border p-3 flex gap-2 shrink-0">
+          <Input
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="h-10"
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          />
+          <Button
+            size="icon"
+            className="h-10 w-10 bg-foreground text-background hover:bg-foreground/90 flex-shrink-0"
+            onClick={handleSend}
+            disabled={sending || !newMessage.trim()}
+          >
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
+      ) : (
+        <div className="border-t border-border p-3 text-center text-sm text-muted-foreground shrink-0">
+          This ticket has been closed
+        </div>
+      )}
+    </div>,
+    document.body
+  );
+}
+
+// ─── Main Support View ───
 export function SupportView() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [messages, setMessages] = useState<SupportMessage[]>([]);
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const [newMessage, setNewMessage] = useState('');
-  const [sending, setSending] = useState(false);
+  const [openChatTicket, setOpenChatTicket] = useState<SupportTicket | null>(null);
+
+  // New ticket popup state
   const [newTicketOpen, setNewTicketOpen] = useState(false);
-  const [newSubject, setNewSubject] = useState('');
   const [newFirstMessage, setNewFirstMessage] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [creating, setCreating] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Draggable popup state
+  // New ticket popup drag
   const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
-  const popupRef = useRef<HTMLDivElement>(null);
 
-  // Center popup on open
   useEffect(() => {
     if (newTicketOpen && !isMobile) {
       const w = 460, h = 480;
@@ -72,7 +311,6 @@ export function SupportView() {
     }
   }, [newTicketOpen, isMobile]);
 
-  // Popup stack for Esc handling
   useEffect(() => {
     if (newTicketOpen) {
       pushPopup('new-support-ticket', () => setNewTicketOpen(false));
@@ -80,7 +318,6 @@ export function SupportView() {
     }
   }, [newTicketOpen]);
 
-  // Body scroll lock on mobile
   useEffect(() => {
     if (newTicketOpen && isMobile) {
       document.body.style.overflow = 'hidden';
@@ -119,7 +356,6 @@ export function SupportView() {
     };
     fetchTickets();
 
-    // Real-time ticket updates
     const channel = supabase
       .channel('user-support-tickets')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets', filter: `user_id=eq.${user.id}` }, () => {
@@ -129,43 +365,6 @@ export function SupportView() {
 
     return () => { supabase.removeChannel(channel); };
   }, [user]);
-
-  // Fetch messages when ticket selected
-  useEffect(() => {
-    if (!selectedTicket) return;
-    const fetchMessages = async () => {
-      setLoadingMessages(true);
-      const { data, error } = await supabase
-        .from('support_messages')
-        .select('*')
-        .eq('ticket_id', selectedTicket.id)
-        .order('created_at', { ascending: true });
-      if (!error && data) setMessages(data);
-      setLoadingMessages(false);
-
-      // Mark as read
-      if (!selectedTicket.user_read) {
-        await supabase.from('support_tickets').update({ user_read: true }).eq('id', selectedTicket.id);
-        setTickets(prev => prev.map(t => t.id === selectedTicket.id ? { ...t, user_read: true } : t));
-      }
-    };
-    fetchMessages();
-
-    // Real-time messages
-    const channel = supabase
-      .channel(`support-messages-${selectedTicket.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${selectedTicket.id}` }, (payload) => {
-        setMessages(prev => [...prev, payload.new as SupportMessage]);
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [selectedTicket?.id]);
-
-  // Auto-scroll
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   const handleCreateTicket = async () => {
     if (!user || !newCategory || !newFirstMessage.trim()) return;
@@ -188,35 +387,12 @@ export function SupportView() {
       setNewFirstMessage('');
       setNewCategory('');
       setNewTicketOpen(false);
-      setSelectedTicket(ticket);
+      setOpenChatTicket(ticket);
       toast.success('Support ticket created');
-    } catch (err) {
+    } catch {
       toast.error('Failed to create ticket');
     } finally {
       setCreating(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!user || !selectedTicket || !newMessage.trim()) return;
-    setSending(true);
-    try {
-      const { error } = await supabase.from('support_messages').insert({
-        ticket_id: selectedTicket.id,
-        sender_id: user.id,
-        sender_type: 'user',
-        message: newMessage.trim()
-      });
-      if (error) throw error;
-
-      // Update ticket to mark as unread for admin
-      await supabase.from('support_tickets').update({ admin_read: false, updated_at: new Date().toISOString() }).eq('id', selectedTicket.id);
-
-      setNewMessage('');
-    } catch (err) {
-      toast.error('Failed to send message');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -234,142 +410,69 @@ export function SupportView() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            {selectedTicket ? (
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => setSelectedTicket(null)} className="h-8 w-8">
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">{selectedTicket.subject}</h1>
-                  <p className="text-sm text-muted-foreground">
-                    Opened {format(new Date(selectedTicket.created_at), 'MMM d, yyyy')}
-                    {' · '}
-                    <Badge variant={selectedTicket.status === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
-                      {selectedTicket.status}
-                    </Badge>
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold text-foreground">Support</h1>
-                <p className="mt-1 text-muted-foreground">Get help from our team</p>
-              </>
-            )}
+            <h1 className="text-3xl font-bold text-foreground">Support</h1>
+            <p className="mt-1 text-muted-foreground">Get help from our team</p>
           </div>
-          {!selectedTicket && (
-            <Button
-              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
-              onClick={() => setNewTicketOpen(true)}
-            >
-              New Ticket
-            </Button>
-          )}
+          <Button
+            className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+            onClick={() => setNewTicketOpen(true)}
+          >
+            New Ticket
+          </Button>
         </div>
 
-        {/* Ticket List or Chat */}
-        {selectedTicket ? (
-          <div className="border rounded-lg bg-white flex flex-col" style={{ height: 'calc(100vh - 240px)' }}>
-            <ScrollArea className="flex-1 p-4">
-              {loadingMessages ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : messages.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No messages yet</p>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] rounded-lg px-4 py-2.5 ${
-                        msg.sender_type === 'user'
-                          ? 'bg-black text-white'
-                          : 'bg-gray-100 text-foreground'
-                      }`}>
-                        <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                        <p className={`text-[10px] mt-1 ${msg.sender_type === 'user' ? 'text-white/60' : 'text-muted-foreground'}`}>
-                          {format(new Date(msg.created_at), 'MMM d, HH:mm')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </ScrollArea>
-
-            {selectedTicket.status === 'open' && (
-              <div className="border-t p-3 flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="h-10"
-                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                />
-                <Button
-                  size="icon"
-                  className="h-10 w-10 bg-black text-white hover:bg-black/90 flex-shrink-0"
-                  onClick={handleSendMessage}
-                  disabled={sending || !newMessage.trim()}
-                >
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-              </div>
-            )}
-            {selectedTicket.status === 'closed' && (
-              <div className="border-t p-3 text-center text-sm text-muted-foreground">
-                This ticket has been closed
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {tickets.length === 0 ? (
-              <div className="text-center py-16">
-                <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-                <p className="text-muted-foreground">No support tickets yet</p>
-                <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
-              </div>
-            ) : (
-              tickets.map(ticket => (
-                <button
-                  key={ticket.id}
-                  className="w-full text-left border rounded-lg p-4 hover:bg-gray-50 transition-colors flex items-center justify-between gap-4"
-                  onClick={() => setSelectedTicket(ticket)}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      {!ticket.user_read && (
-                        <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      )}
-                      <p className="font-medium text-sm truncate">{ticket.subject}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
-                    </p>
-                  </div>
-                  <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
-                    {ticket.status === 'open' ? (
-                      <><Clock className="h-3 w-3 mr-1" />Open</>
-                    ) : (
-                      <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+        {/* Ticket List */}
+        <div className="space-y-2">
+          {tickets.length === 0 ? (
+            <div className="text-center py-16">
+              <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
+              <p className="text-muted-foreground">No support tickets yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
+            </div>
+          ) : (
+            tickets.map(ticket => (
+              <button
+                key={ticket.id}
+                className="w-full text-left border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
+                onClick={() => setOpenChatTicket(ticket)}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    {!ticket.user_read && (
+                      <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                     )}
-                  </Badge>
-                </button>
-              ))
-            )}
-          </div>
-        )}
+                    <p className="font-medium text-sm truncate">{ticket.subject}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
+                  </p>
+                </div>
+                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
+                  {ticket.status === 'open' ? (
+                    <><Clock className="h-3 w-3 mr-1" />Open</>
+                  ) : (
+                    <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                  )}
+                </Badge>
+              </button>
+            ))
+          )}
+        </div>
       </div>
+
+      {/* Floating Chat Popup */}
+      {openChatTicket && (
+        <SupportChatPopup
+          ticket={openChatTicket}
+          onClose={() => setOpenChatTicket(null)}
+        />
+      )}
 
       {/* New Ticket Popup */}
       {newTicketOpen && createPortal(
         <>
-          {/* Backdrop */}
           <div className="fixed inset-0 bg-black/50 z-[70]" onClick={() => setNewTicketOpen(false)} />
           <div
-            ref={popupRef}
             className={
               isMobile
                 ? 'fixed inset-0 z-[71] bg-background flex flex-col h-[100dvh]'
@@ -377,7 +480,6 @@ export function SupportView() {
             }
             style={isMobile ? undefined : { left: popupPos.x, top: popupPos.y, width: 460, maxHeight: '80vh' }}
           >
-            {/* Drag Handle - desktop only */}
             {!isMobile && (
               <div
                 className={`flex items-center justify-start py-2 px-5 ${dragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
@@ -387,7 +489,6 @@ export function SupportView() {
               </div>
             )}
 
-            {/* Header */}
             <div className="flex items-center justify-between px-5 pb-4 pt-1 border-b border-border shrink-0">
               <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
               <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">
@@ -395,7 +496,6 @@ export function SupportView() {
               </button>
             </div>
 
-            {/* Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               <div>
                 <label className="text-sm font-medium text-foreground">Category</label>
@@ -421,7 +521,6 @@ export function SupportView() {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-5 py-4 border-t border-border shrink-0">
               <Button
                 className="w-full bg-foreground text-background hover:bg-foreground/90"
