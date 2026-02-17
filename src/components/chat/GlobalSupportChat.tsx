@@ -424,7 +424,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               </div>
             </div>
           )}
-          <div className="flex items-center">
+          <div className="flex items-center border-t border-border">
             <input
               type="file"
               ref={fileInputRef}
