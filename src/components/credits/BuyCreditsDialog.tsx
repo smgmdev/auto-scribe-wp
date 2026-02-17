@@ -10,6 +10,7 @@ import amBlackLogo from '@/assets/amblack-2.png';
 import airwallexLogo from '@/assets/airwallex-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppStore } from '@/stores/appStore';
 import { toast } from 'sonner';
 import { init as airwallexInit, createElement } from '@airwallex/components-sdk';
 
@@ -288,7 +289,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         className={`pointer-events-auto bg-white text-gray-900 relative overflow-y-auto ${
           isMobile
             ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
-            : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+            : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
@@ -473,7 +474,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               </div>
 
               <p className="text-xs text-center text-gray-500">
-                If you want to top up your account by invoice through a wire transfer, <a href="mailto:support@arcanamace.com" className="underline hover:text-gray-700">contact support</a>.
+                If you want to top up your account by invoice through a wire transfer, <button onClick={() => { onOpenChange(false); useAppStore.getState().setCurrentView('support'); }} className="underline hover:text-gray-700">contact support</button>.
               </p>
 
               {confirming && (
