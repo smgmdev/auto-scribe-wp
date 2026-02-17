@@ -1587,7 +1587,7 @@ export function Sidebar({
   };
 
   return <>
-      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-screen lg:h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
+      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
     // Desktop: always visible
     "lg:translate-x-0",
     // Mobile: slide in/out
@@ -1808,7 +1808,7 @@ export function Sidebar({
           </nav>
 
           {/* Agency Status & Account */}
-          <div className="border-t border-sidebar-border px-4 py-4 space-y-3">
+          <div className="border-t border-sidebar-border px-4 py-4 space-y-3 flex-shrink-0">
             {/* Agency Status Card - Only for non-admin users */}
             {!isAdmin && !agencyDataLoaded && (
               <div className="flex items-center justify-center py-4">
