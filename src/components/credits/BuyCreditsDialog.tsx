@@ -432,17 +432,23 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               {/* Card element container */}
               <div className="space-y-2">
                 <Label>Payment Method</Label>
+                {!cardReady && (
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground min-h-[120px]">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading payment form...
+                  </div>
+                )}
                 <div 
                   id="airwallex-card-container" 
-                  className="min-h-[120px] rounded-none bg-background"
-                >
-                  {!cardReady && (
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading payment form...
-                    </div>
-                  )}
-                </div>
+                  className={`min-h-[120px] rounded-none bg-background ${!cardReady ? 'hidden' : ''}`}
+                  ref={(node) => {
+                    // Prevent React from tracking children inside this node
+                    // The Airwallex SDK will manage its own DOM here
+                    if (node) {
+                      (node as any).__reactFiber = undefined;
+                    }
+                  }}
+                />
               </div>
 
               {/* Security badge */}
