@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X, GripVertical } from 'lucide-react';
+import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -378,16 +378,19 @@ export function SupportView() {
             }
             style={isMobile ? undefined : { left: popupPos.x, top: popupPos.y, width: 460, maxHeight: '80vh' }}
           >
-            {/* Header / drag handle */}
-            <div
-              className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0"
-              onMouseDown={handleMouseDown}
-              style={isMobile ? undefined : { cursor: dragging ? 'grabbing' : 'grab' }}
-            >
-              <div className="flex items-center gap-2">
-                {!isMobile && <GripVertical className="h-4 w-4 text-muted-foreground" />}
-                <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
+            {/* Drag Handle - desktop only */}
+            {!isMobile && (
+              <div
+                className={`flex items-center justify-start py-2 px-5 ${dragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                onMouseDown={handleMouseDown}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               </div>
+            )}
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pb-4 pt-1 border-b border-border shrink-0">
+              <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
               <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
