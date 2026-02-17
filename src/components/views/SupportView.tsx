@@ -1,14 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
-import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+
+const TICKET_CATEGORIES = [
+  'Request invoice for wire transfer top up',
+  'Account related issues',
+  'Order related issues',
+  'Other',
+] as const;
 
 interface SupportTicket {
   id: string;
@@ -30,6 +40,7 @@ interface SupportMessage {
 
 export function SupportView() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -40,8 +51,59 @@ export function SupportView() {
   const [newTicketOpen, setNewTicketOpen] = useState(false);
   const [newSubject, setNewSubject] = useState('');
   const [newFirstMessage, setNewFirstMessage] = useState('');
+  const [newCategory, setNewCategory] = useState('');
   const [creating, setCreating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Draggable popup state
+  const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  // Center popup on open
+  useEffect(() => {
+    if (newTicketOpen && !isMobile) {
+      const w = 460, h = 480;
+      setPopupPos({
+        x: Math.max(0, (window.innerWidth - w) / 2),
+        y: Math.max(0, (window.innerHeight - h) / 2),
+      });
+    }
+  }, [newTicketOpen, isMobile]);
+
+  // Popup stack for Esc handling
+  useEffect(() => {
+    if (newTicketOpen) {
+      pushPopup('new-support-ticket', () => setNewTicketOpen(false));
+      return () => removePopup('new-support-ticket');
+    }
+  }, [newTicketOpen]);
+
+  // Body scroll lock on mobile
+  useEffect(() => {
+    if (newTicketOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [newTicketOpen, isMobile]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    setDragging(true);
+    dragOffset.current = { x: e.clientX - popupPos.x, y: e.clientY - popupPos.y };
+  }, [popupPos, isMobile]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent) => {
+      setPopupPos({ x: e.clientX - dragOffset.current.x, y: e.clientY - dragOffset.current.y });
+    };
+    const onUp = () => setDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [dragging]);
 
   // Fetch tickets
   useEffect(() => {
@@ -106,12 +168,13 @@ export function SupportView() {
   }, [messages]);
 
   const handleCreateTicket = async () => {
-    if (!user || !newSubject.trim() || !newFirstMessage.trim()) return;
+    if (!user || !newCategory || !newSubject.trim() || !newFirstMessage.trim()) return;
     setCreating(true);
     try {
+      const fullSubject = `[${newCategory}] ${newSubject.trim()}`;
       const { data: ticket, error } = await supabase
         .from('support_tickets')
-        .insert({ user_id: user.id, subject: newSubject.trim() })
+        .insert({ user_id: user.id, subject: fullSubject })
         .select()
         .single();
       if (error) throw error;
@@ -125,6 +188,7 @@ export function SupportView() {
 
       setNewSubject('');
       setNewFirstMessage('');
+      setNewCategory('');
       setNewTicketOpen(false);
       setSelectedTicket(ticket);
       toast.success('Support ticket created');
@@ -302,42 +366,82 @@ export function SupportView() {
         )}
       </div>
 
-      {/* New Ticket Dialog */}
-      <Dialog open={newTicketOpen} onOpenChange={setNewTicketOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>New Support Ticket</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Subject</label>
-              <Input
-                value={newSubject}
-                onChange={e => setNewSubject(e.target.value)}
-                placeholder="Brief description of your issue"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Message</label>
-              <textarea
-                value={newFirstMessage}
-                onChange={e => setNewFirstMessage(e.target.value)}
-                placeholder="Describe your issue in detail..."
-                className="mt-1 flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0"
-              />
-            </div>
-            <Button
-              className="w-full bg-black text-white hover:bg-black/90"
-              onClick={handleCreateTicket}
-              disabled={creating || !newSubject.trim() || !newFirstMessage.trim()}
+      {/* New Ticket Popup */}
+      {newTicketOpen && createPortal(
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50 z-[70]" onClick={() => setNewTicketOpen(false)} />
+          <div
+            ref={popupRef}
+            className={
+              isMobile
+                ? 'fixed inset-0 z-[71] bg-background flex flex-col h-[100dvh]'
+                : 'fixed z-[71] bg-background rounded-lg shadow-xl border border-border flex flex-col'
+            }
+            style={isMobile ? undefined : { left: popupPos.x, top: popupPos.y, width: 460, maxHeight: '80vh' }}
+          >
+            {/* Header / drag handle */}
+            <div
+              className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0"
+              onMouseDown={handleMouseDown}
+              style={isMobile ? undefined : { cursor: dragging ? 'grabbing' : 'grab' }}
             >
-              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Create Ticket
-            </Button>
+              <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
+              <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Category</label>
+                <Select value={newCategory} onValueChange={setNewCategory}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[80] bg-background">
+                    {TICKET_CATEGORIES.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Subject</label>
+                <Input
+                  value={newSubject}
+                  onChange={e => setNewSubject(e.target.value)}
+                  placeholder="Brief description of your issue"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Message</label>
+                <textarea
+                  value={newFirstMessage}
+                  onChange={e => setNewFirstMessage(e.target.value)}
+                  placeholder="Describe your issue in detail..."
+                  className="mt-1 flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-border shrink-0">
+              <Button
+                className="w-full bg-foreground text-background hover:bg-foreground/90"
+                onClick={handleCreateTicket}
+                disabled={creating || !newCategory || !newSubject.trim() || !newFirstMessage.trim()}
+              >
+                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Create Ticket
+              </Button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </>,
+        document.body
+      )}
     </div>
   );
 }
