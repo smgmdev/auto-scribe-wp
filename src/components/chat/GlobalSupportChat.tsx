@@ -1,6 +1,5 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { playMessageSound } from '@/lib/chat-presence';
 import { createPortal } from 'react-dom';
 import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -244,8 +243,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             // Chat is focused — mark as read immediately
             await markAsRead();
           } else {
-            // Chat is open but not focused — play sound here since sidebar skips open tickets
-            playMessageSound(newMsg.id || ticket.id, newMsg.message?.substring(0, 30));
+            // Chat is open but not focused — sound is handled by Sidebar (single source of truth)
             hasPendingReadRef.current = true;
           }
         }
