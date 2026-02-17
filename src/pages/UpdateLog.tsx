@@ -15,6 +15,30 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 17, 2026',
+    title: 'Support Icon & Footer Safe Area',
+    changes: [
+      'Updated the Support menu icon in the sidebar to a new MessageCircleQuestion design for better clarity',
+      'Added safe area inset padding to the global footer for proper spacing on devices with home indicators and notches',
+      'Updated viewport meta tag with viewport-fit=cover to support full-screen rendering on modern mobile devices',
+      'Footer bottom padding now dynamically adjusts using env(safe-area-inset-bottom) for consistent spacing across all devices',
+    ],
+  },
+  {
+    date: 'February 16, 2026',
+    title: 'Chat System & Real-Time Messaging Improvements',
+    changes: [
+      'Redesigned floating chat windows with improved message bubbles and timestamp display',
+      'Added unread message count badges on minimized chat windows with real-time updates',
+      'Chat messages now auto-scroll to the latest message when new messages arrive',
+      'Improved chat presence detection showing when agencies or clients were last online',
+      'Added sound notification toggle for incoming chat messages with persistent user preference',
+      'Fixed chat window z-index layering issues when multiple chats are open simultaneously',
+      'Improved message input area with auto-resize textarea that grows with content',
+      'Added typing indicator animation while composing messages',
+    ],
+  },
+  {
     date: 'February 15, 2026',
     title: 'About Page, Popups & Slider Enhancements',
     changes: [
@@ -25,6 +49,7 @@ const updates = [
       'Agency Details popup transitions to fullscreen on mobile devices with proper scroll locking and touch-friendly layout',
       'Added spinning loader indicator on the AI Article Generation slider while featured images are loading',
       'Images in the slider now fade in smoothly once loaded instead of appearing abruptly',
+      'Improved popup stack management to prevent overlapping dialogs and ensure proper focus trapping',
     ],
   },
   {
@@ -37,6 +62,8 @@ const updates = [
       'Search results update instantly as you type with case-insensitive matching',
       'Aligned global footer links to the left under the copyright text on tablet-sized viewports',
       'Footer links now stack vertically on mobile and tablet, switching to horizontal layout only on desktop',
+      'Added "Changelog" link to the footer navigation across all pages',
+      'Improved footer link spacing and wrapping behavior on screens between 768px and 1024px',
     ],
   },
   {
@@ -49,6 +76,8 @@ const updates = [
       'Improved contrast ratios across all dashboard components for better accessibility',
       'Refined sidebar navigation styling to match the new dark aesthetic',
       'Updated credit display and transaction history with new visual hierarchy',
+      'Redesigned the compose view editor toolbar with dark theme consistent styling',
+      'Updated all dialog backgrounds and borders to match the new dark color palette',
     ],
   },
   {
@@ -56,6 +85,7 @@ const updates = [
     title: 'Changelog & Footer Updates',
     changes: [
       'Added Changelog page accessible from the footer on all pages',
+      'Changelog entries displayed in an expandable accordion layout with smooth open/close animations',
       'Redesigned footer link layout with improved wrapping on mobile devices',
       'Updated footer navigation order across landing and dashboard views',
     ],
@@ -68,6 +98,9 @@ const updates = [
       'Improved media site card hover states with smoother transitions',
       'Fixed favicon display issues for certain agency-managed sites',
       'Added logo hover overlay on media site cards in the network view',
+      'Improved site card loading skeleton with pulsing animation for better perceived performance',
+      'Fixed media site price display rounding inconsistencies in the library grid',
+      'Added "No results" empty state message when category filters return zero matches',
     ],
   },
   {
@@ -80,6 +113,8 @@ const updates = [
       'Introduced keyboard shortcuts for quick search access (Cmd/Ctrl + K)',
       'Enhanced search results with site favicons, pricing, and publishing time indicators',
       'Fixed search not clearing properly when navigating between pages',
+      'Search modal now closes automatically when a result is selected',
+      'Added recent search history that persists across sessions',
     ],
   },
   {
@@ -90,6 +125,9 @@ const updates = [
       'Added automatic credit release when orders are cancelled or rejected',
       'Improved order status notifications with real-time updates',
       'Fixed edge case where credits were deducted but order creation failed',
+      'Added order number generation with unique identifiers for tracking',
+      'Improved order confirmation dialog with detailed cost breakdown showing platform fees',
+      'Credits are now validated server-side before order creation to prevent race conditions',
     ],
   },
   {
@@ -100,6 +138,23 @@ const updates = [
       'Fixed dialog scrolling issues on small screens with max-height 90vh',
       'Improved button sizing and touch targets for mobile users',
       'Adjusted sidebar collapse behavior for tablet-sized screens',
+      'Fixed horizontal overflow issues on the compose view editor on narrow screens',
+      'Improved table layouts in order history to scroll horizontally on small devices',
+      'Added pull-to-refresh gesture support on mobile dashboard views',
+      'Fixed bottom navigation overlapping content on devices with gesture navigation bars',
+    ],
+  },
+  {
+    date: 'February 7, 2026',
+    title: 'Credit Purchase & Payment Flow',
+    changes: [
+      'Added Airwallex payment integration as an alternative to Stripe for international users',
+      'Implemented credit pack selection with visual comparison of pack sizes and savings',
+      'Added payment success page with animated confirmation and credit balance update',
+      'Payment cancellation page now includes a retry button to return to the checkout flow',
+      'Added USDT cryptocurrency payment option for credit purchases',
+      'Improved checkout session error handling with user-friendly retry messages',
+      'Credit balance updates in real-time across all views after successful purchase',
     ],
   },
   {
@@ -109,11 +164,14 @@ const updates = [
       'Launched public Newsroom page with press releases and company announcements',
       'Added press release detail pages with rich text content and media contacts',
       'Implemented category filtering for press releases',
+      'Press release cards display publication date, category badge, and preview image',
+      'Added share functionality on press release detail pages',
+      'Newsroom page accessible from the main navigation and footer links',
     ],
   },
   {
     date: 'February 5, 2026',
-    title: 'Agency Management Updates',
+    title: 'Agency Onboarding & Verification',
     changes: [
       'Enhanced agency verification workflow with multi-step document review',
       'Improved payout tracking and withdrawal process with real-time status updates',
@@ -121,6 +179,8 @@ const updates = [
       'Introduced custom verification form for agencies requiring bank or crypto payout methods',
       'Added agency downgrade notifications with detailed reason explanations',
       'Improved media site submission flow with Google Sheets integration for bulk uploads',
+      'Agency profile now displays country flag, media niches, and website link',
+      'Added withdrawal request form with bank transfer and USDT payout options',
     ],
   },
   {
@@ -129,9 +189,12 @@ const updates = [
     changes: [
       'Added WordPress site submission form for agencies to connect their blogs',
       'Implemented automatic favicon fetching for connected WordPress sites',
-      'Added SEO plugin detection (Yoast, RankMath) during site connection',
-      'Improved app password validation and connection testing',
+      'Added SEO plugin detection (All in One SEO, RankMath) during site connection',
+      'Improved app password validation and connection testing with detailed error messages',
       'Added category and tag syncing from WordPress to the platform',
+      'WordPress publish retry logic with exponential backoff for handling 503/502/504 errors',
+      'Featured image upload to WordPress media library with automatic attachment to posts',
+      'SEO metadata (focus keyword, meta description) automatically applied during publishing based on detected plugin',
     ],
   },
   {
@@ -141,7 +204,10 @@ const updates = [
       'Added multiple credit pack options with tiered pricing',
       'Implemented Stripe Checkout for secure credit purchases',
       'Added payment success and cancellation pages with proper redirect handling',
-      'Introduced credit transaction history with detailed descriptions',
+      'Introduced credit transaction history with detailed descriptions and timestamps',
+      'Credit balance displayed in the sidebar with real-time updates',
+      'Transaction history shows purchase, deduction, refund, and bonus credit types',
+      'Added credit cost indicators on media site cards in the Global Library',
     ],
   },
   {
@@ -152,15 +218,21 @@ const updates = [
       'Added articles covering Getting Started, Publishing, Media Buying, AI Generation, and more',
       'Implemented breadcrumb navigation for help article pages',
       'Added quick links from dashboard to relevant help topics',
+      'Help articles include step-by-step guides with visual callouts',
+      'Added "For Agencies" help section with onboarding and payout documentation',
+      'Help Center search filters articles by title and content keywords',
     ],
   },
   {
     date: 'February 1, 2026',
     title: 'Bug Report System',
     changes: [
-      'Added Bug Report page accessible from the footer',
-      'Implemented categorized bug reporting form with file attachment support',
+      'Added Bug Report page accessible from the footer with a video background hero section',
+      'Implemented categorized bug reporting form with subject, description, and steps to reproduce',
+      'File attachment support for screenshots and screen recordings up to 10MB',
       'Introduced status tracking for reported bugs (Open, In Progress, Resolved)',
+      'Bug report form validates required fields before submission',
+      'Confirmation toast notification displayed after successful bug report submission',
     ],
   },
   {
@@ -169,17 +241,21 @@ const updates = [
     changes: [
       'Added optional PIN-based security for sensitive account actions',
       'Implemented PIN verification dialog for withdrawals and account changes',
-      'Added login attempt tracking with IP-based monitoring',
+      'Added login attempt tracking with IP-based monitoring for suspicious activity',
       'Introduced email verification flow with token-based confirmation',
+      'PIN setup and management available in Account Settings with enable/disable toggle',
+      'Session expiry warning dialog with countdown timer and option to extend session',
     ],
   },
   {
     date: 'January 30, 2026',
     title: 'Dispute Resolution System',
     changes: [
-      'Added dispute creation flow for completed orders',
-      'Added resolution workflow with outcome tracking',
+      'Added dispute creation flow for completed orders with reason selection',
+      'Added resolution workflow with outcome tracking and detailed notes',
       'Introduced automatic credit refund on dispute resolution in client favor',
+      'Dispute status visible in the order details view with timeline indicators',
+      'Dispute notifications appear in the client requests section with unread badges',
     ],
   },
   {
@@ -190,6 +266,8 @@ const updates = [
       'Implemented delivery deadline tracking with countdown indicators',
       'Added automatic order completion after delivery confirmation',
       'Introduced delivery status badges across order management views',
+      'Delivery URL opens in an in-app web viewer with refresh, new tab, and download options',
+      'Delivery notes support multi-line text with formatting preserved',
     ],
   },
   {
@@ -197,41 +275,53 @@ const updates = [
     title: 'AI Article Generation',
     changes: [
       'Introduced AI-powered article generation from curated headline sources',
-      'Added tone selection (Professional, Casual, News, Opinion) and customization options',
+      'Added tone selection (Neutral, Professional, Journalist, Inspiring, Aggressive, Powerful, Important) with customization options',
       'Integrated automatic publishing to connected WordPress sites with SEO metadata',
       'Added featured image fetching and automatic media upload to WordPress',
       'Added auto-publish scheduling with configurable intervals per source',
       'Implemented tag generation and category mapping for published articles',
+      'AI-generated articles include focus keyword and meta description for SEO optimization',
+      'Source headline linking allows tracing generated content back to original news',
+      'Article preview with word count indicator before publishing',
     ],
   },
   {
     date: 'January 27, 2026',
     title: 'Service Request System',
     changes: [
-      'Built service request submission form with media site selection',
-      'Added request lifecycle management (Pending, Accepted, In Progress, Completed)',
-      'Implemented agency-side request inbox with unread indicators',
+      'Built service request submission form with media site selection and description',
+      'Added request lifecycle management (Pending, Accepted, In Progress, Completed, Cancelled)',
+      'Implemented agency-side request inbox with unread indicators and real-time updates',
       'Added special terms and requirements field for custom order instructions',
+      'Service request cards display media site favicon, name, price, and current status',
+      'Real-time chat thread attached to each service request for client-agency communication',
+      'Request cancellation with reason field and automatic credit release',
     ],
   },
   {
     date: 'January 26, 2026',
     title: 'Media Buying Marketplace',
     changes: [
-      'Launched Global Media Library with categorized media outlets',
-      'Added site detail dialogs with pricing, publishing time, and format information',
-      'Implemented subcategory filtering (Business, Crypto, Tech, Campaign, Politics, MENA, China)',
+      'Launched Global Media Library with categorized media outlets across Business, Crypto, Tech, Campaign, Politics, MENA, and China',
+      'Added site detail dialogs with pricing, publishing time, word limits, image limits, and format information',
+      'Implemented subcategory filtering with tab-based navigation and active state indicators',
       'Added Google Index status and publication format indicators for each site',
+      'Media site cards display favicon, agency name, price, and category at a glance',
+      'Site tags with color-coded labels for quick identification of site features',
+      'Added "About" section on site detail dialogs with editorial guidelines and requirements',
     ],
   },
   {
     date: 'January 25, 2026',
     title: 'Self-Publishing Features',
     changes: [
-      'Added rich text article editor with TipTap integration',
-      'Implemented article drafts with auto-save functionality',
+      'Added rich text article editor with TipTap integration supporting headings, bold, italic, lists, and links',
+      'Implemented article drafts with auto-save functionality to prevent content loss',
       'Added WordPress publishing with category, tag, and featured image support',
-      'Introduced article management view with status filtering and search',
+      'Introduced article management view with status filtering (Draft, Published) and search',
+      'Text alignment options (left, center, right, justify) in the editor toolbar',
+      'Featured image upload with title, caption, alt text, and description fields for SEO',
+      'Article editor supports paste from clipboard with formatting preservation',
     ],
   },
   {
@@ -242,6 +332,10 @@ const updates = [
       'Added new message sound notifications with browser notification support',
       'Introduced chat message security scanning for contact information detection',
       'Added chat presence indicators showing online/offline status',
+      'Minimized chat windows persist across page navigation with unread count badges',
+      'Chat windows support drag-to-reposition on desktop for flexible workspace layout',
+      'Message timestamps display relative time (e.g., "2 minutes ago") with full date on hover',
+      'Chat input supports multi-line messages with Shift+Enter for line breaks',
     ],
   },
   {
@@ -252,6 +346,9 @@ const updates = [
       'Added multi-niche selection for agency media specializations',
       'Added automated welcome and status notification emails for agencies',
       'Introduced agency profile with logo, description, and country display',
+      'Agency application requires incorporation document upload for verification',
+      'WhatsApp phone number field with country code validation for agency communication',
+      'Application status tracking with visual progress indicators',
     ],
   },
   {
@@ -262,6 +359,9 @@ const updates = [
       'Added email verification requirement before account activation',
       'Built user profile system with username and WhatsApp contact fields',
       'Added protected routes with automatic redirect to login for unauthenticated users',
+      'Session persistence across browser tabs with automatic token refresh',
+      'Password strength requirements enforced during signup',
+      'Login form with error messaging for invalid credentials and unverified accounts',
     ],
   },
   {
@@ -275,6 +375,8 @@ const updates = [
       'Responsive design with mobile-first approach across all pages',
       'System Status page for monitoring platform health',
       'Site Map for comprehensive navigation overview',
+      'Dark-themed design language with consistent typography and spacing across all public pages',
+      'Animated hero sections with video backgrounds on key landing pages',
     ],
   },
 ];
@@ -347,7 +449,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 15, 2026
+            Last update: February 17, 2026
           </p>
         </div>
 
