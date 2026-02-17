@@ -5,11 +5,11 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Coins, GripHorizontal, X } from 'lucide-react';
+import { Loader2, Coins, GripHorizontal, X, ArrowLeft, CreditCard, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { init as airwallexInit } from '@airwallex/components-sdk';
+import { init as airwallexInit, createElement } from '@airwallex/components-sdk';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 10;
@@ -20,9 +20,16 @@ interface BuyCreditsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type Step = 'select' | 'payment';
+
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
   const [creditAmount, setCreditAmount] = useState<string>('10');
   const [purchasing, setPurchasing] = useState(false);
+  const [step, setStep] = useState<Step>('select');
+  const [cardReady, setCardReady] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [intentData, setIntentData] = useState<{ intent_id: string; client_secret: string } | null>(null);
+  const cardElementRef = useRef<any>(null);
   const { refreshCredits } = useAuth();
   const isMobile = useIsMobile();
 
@@ -31,25 +38,40 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
-  // Reset position when dialog opens
+  // Reset state when dialog opens/closes
   useEffect(() => {
     if (open) {
       setPosition({ x: 0, y: 0 });
+      setStep('select');
+      setCardReady(false);
+      setConfirming(false);
+      setIntentData(null);
+      cardElementRef.current = null;
     }
   }, [open]);
 
   // Register on popup stack for layered Esc handling
   useEffect(() => {
     if (!open) { removePopup('buy-credits-dialog'); return; }
-    pushPopup('buy-credits-dialog', () => onOpenChange(false));
+    pushPopup('buy-credits-dialog', () => {
+      if (step === 'payment' && !confirming) {
+        setStep('select');
+        setCardReady(false);
+        setIntentData(null);
+        cardElementRef.current = null;
+      } else if (step === 'select') {
+        onOpenChange(false);
+      }
+    });
     return () => removePopup('buy-credits-dialog');
-  }, [open, onOpenChange]);
+  }, [open, onOpenChange, step, confirming]);
 
   const parsedAmount = parseInt(creditAmount) || 0;
   const isValidAmount = parsedAmount >= MIN_CREDITS;
   const totalPrice = parsedAmount * PRICE_PER_CREDIT;
 
-  const handlePurchase = async () => {
+  // Step 1: Create PaymentIntent and move to card step
+  const handleProceedToPayment = async () => {
     if (!isValidAmount) {
       toast.error(`Minimum purchase is ${MIN_CREDITS} credits.`);
       return;
@@ -58,7 +80,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setPurchasing(true);
 
     try {
-      // 1. Create PaymentIntent via edge function
+      // Create PaymentIntent via edge function
       const { data, error } = await supabase.functions.invoke('create-airwallex-checkout', {
         body: { creditAmount: parsedAmount },
       });
@@ -68,30 +90,99 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         throw new Error('Invalid response from payment service');
       }
 
-      // 2. Use Airwallex SDK to redirect to HPP
+      setIntentData({ intent_id: data.intent_id, client_secret: data.client_secret });
+      setStep('payment');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create checkout session.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  // Mount card element when entering payment step
+  useEffect(() => {
+    if (step !== 'payment' || !intentData) return;
+
+    let mounted = true;
+
+    const initCard = async () => {
       try {
-        const { payments } = await airwallexInit({
+        await airwallexInit({
           env: 'prod',
           enabledElements: ['payments'],
         });
 
-        if (!payments) throw new Error('Payment module failed to initialize');
+        const card = await createElement('card' as any);
 
-        payments.redirectToCheckout({
-          intent_id: data.intent_id,
-          client_secret: data.client_secret,
-          currency: 'USD',
-          successUrl: data.successUrl,
+        card.on('ready' as any, () => {
+          if (mounted) setCardReady(true);
         });
 
+        card.on('error' as any, (event: any) => {
+          console.error('Card element error:', event);
+        });
+
+        // Wait a tick for the container to be in the DOM
+        setTimeout(() => {
+          if (mounted) {
+            const container = document.getElementById('airwallex-card-container');
+            if (container) {
+              card.mount(container);
+              cardElementRef.current = card;
+            }
+          }
+        }, 100);
+      } catch (err: any) {
+        console.error('Failed to init Airwallex card:', err);
+        toast.error('Failed to load payment form. Please try again.');
+        setStep('select');
+      }
+    };
+
+    initCard();
+
+    return () => {
+      mounted = false;
+      if (cardElementRef.current) {
+        try {
+          cardElementRef.current.unmount?.();
+        } catch (e) {
+          // ignore
+        }
+        cardElementRef.current = null;
+      }
+    };
+  }, [step, intentData]);
+
+  // Step 2: Confirm payment with the card element
+  const handleConfirmPayment = async () => {
+    if (!cardElementRef.current || !intentData) return;
+
+    setConfirming(true);
+
+    try {
+      const response = await cardElementRef.current.confirm({
+        intent_id: intentData.intent_id,
+        client_secret: intentData.client_secret,
+      });
+
+      if (response?.status === 'SUCCEEDED') {
+        // Verify and credit via webhook
+        await supabase.functions.invoke('airwallex-webhook', {
+          body: { intent_id: intentData.intent_id },
+        });
+
+        toast.success(`${parsedAmount} credits added to your account!`);
+        refreshCredits?.();
         onOpenChange(false);
-      } catch (sdkErr: any) {
-        toast.error(sdkErr.message || 'Payment redirect failed.');
-        setPurchasing(false);
+      } else {
+        toast.error('Payment was not completed. Please try again.');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create checkout session.');
-      setPurchasing(false);
+      console.error('Payment confirmation error:', error);
+      toast.error(error?.message || 'Payment failed. Please try again.');
+    } finally {
+      setConfirming(false);
     }
   };
 
@@ -100,7 +191,14 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setCreditAmount(value);
   };
 
-  // Drag handlers - same pattern as FloatingChatWindow
+  const handleBack = () => {
+    setStep('select');
+    setCardReady(false);
+    setIntentData(null);
+    cardElementRef.current = null;
+  };
+
+  // Drag handlers
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest('button, input, [role="button"]')) return;
     
@@ -139,8 +237,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     };
   }, [isDragging]);
 
-  // (Esc handled via popup-stack registered above)
-
   if (!open) return null;
 
   return createPortal(
@@ -165,107 +261,187 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           </div>
         )}
 
-        {/* Header with title and close button aligned */}
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
-            <Coins className="h-5 w-5 text-accent" />
-            Buy Credits
-          </h2>
+          <div className="flex items-center gap-2">
+            {step === 'payment' && (
+              <button
+                onClick={handleBack}
+                disabled={confirming}
+                className="rounded-sm ring-offset-background transition-all hover:bg-muted focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            )}
+            <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+              {step === 'select' ? (
+                <>
+                  <Coins className="h-5 w-5 text-accent" />
+                  Buy Credits
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-5 w-5 text-accent" />
+                  Payment
+                </>
+              )}
+            </h2>
+          </div>
           <button
             onClick={() => onOpenChange(false)}
+            disabled={confirming}
             className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </button>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Purchase credits to publish articles to media sites.
-        </p>
 
-        <div className="space-y-6 py-4">
-          {/* Quick Select Buttons */}
-          <div className="space-y-2">
-            <Label>Quick Select</Label>
-            <div className="grid grid-cols-4 gap-2">
-              {QUICK_AMOUNTS.map((amount) => (
-                <Button
-                  key={amount}
-                  variant={parsedAmount === amount ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCreditAmount(amount.toString())}
-                  className="w-full rounded-none"
+        {step === 'select' ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Purchase credits to publish articles to media sites.
+            </p>
+
+            <div className="space-y-6 py-4">
+              {/* Quick Select Buttons */}
+              <div className="space-y-2">
+                <Label>Quick Select</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {QUICK_AMOUNTS.map((amount) => (
+                    <Button
+                      key={amount}
+                      variant={parsedAmount === amount ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCreditAmount(amount.toString())}
+                      className="w-full rounded-none"
+                    >
+                      {amount}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or enter custom amount</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="credit-amount">Custom Amount</Label>
+                <Input
+                  id="credit-amount"
+                  type="text"
+                  inputMode="numeric"
+                  value={creditAmount}
+                  onChange={handleInputChange}
+                  placeholder="Enter amount"
+                  className="text-sm rounded-none"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum purchase: {MIN_CREDITS} credits
+                </p>
+              </div>
+
+              <div className="rounded-none border border-border bg-muted/50 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Price per credit</span>
+                  <span className="font-medium">${PRICE_PER_CREDIT}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-muted-foreground">Credits</span>
+                  <span className="font-medium">{parsedAmount || 0}</span>
+                </div>
+                <div className="border-t border-border my-3" />
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">Total</span>
+                  <span className="text-2xl font-bold text-primary">
+                    ${totalPrice.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleProceedToPayment}
+                disabled={purchasing || !isValidAmount}
+                className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
+              >
+                {purchasing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Setting up payment...
+                  </>
+                ) : (
+                  `Continue to Payment — $${totalPrice.toLocaleString()}`
+                )}
+              </Button>
+
+              {!isValidAmount && parsedAmount > 0 && (
+                <p className="text-sm text-destructive text-center">
+                  Please enter at least {MIN_CREDITS} credits
+                </p>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground mt-1">
+              Enter your card details to complete the purchase.
+            </p>
+
+            <div className="space-y-5 py-4">
+              {/* Order summary */}
+              <div className="rounded-none border border-border bg-muted/50 p-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{parsedAmount} credits</span>
+                  <span className="font-semibold">${totalPrice.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Card element container */}
+              <div className="space-y-2">
+                <Label>Card Details</Label>
+                <div 
+                  id="airwallex-card-container" 
+                  className="min-h-[44px] border border-border rounded-none p-3 bg-background"
                 >
-                  {amount}
-                </Button>
-              ))}
-            </div>
-          </div>
+                  {!cardReady && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading payment form...
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or enter custom amount</span>
-            </div>
-          </div>
+              {/* Security badge */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Your payment is securely processed by Airwallex</span>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="credit-amount">Custom Amount</Label>
-            <Input
-              id="credit-amount"
-              type="text"
-              inputMode="numeric"
-              value={creditAmount}
-              onChange={handleInputChange}
-              placeholder="Enter amount"
-              className="text-sm rounded-none"
-            />
-            <p className="text-xs text-muted-foreground">
-              Minimum purchase: {MIN_CREDITS} credits
-            </p>
-          </div>
-
-          <div className="rounded-none border border-border bg-muted/50 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Price per credit</span>
-              <span className="font-medium">${PRICE_PER_CREDIT}</span>
+              {/* Pay button */}
+              <Button
+                onClick={handleConfirmPayment}
+                disabled={confirming || !cardReady}
+                className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
+              >
+                {confirming ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Processing payment...
+                  </>
+                ) : (
+                  `Pay $${totalPrice.toLocaleString()}`
+                )}
+              </Button>
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-muted-foreground">Credits</span>
-              <span className="font-medium">{parsedAmount || 0}</span>
-            </div>
-            <div className="border-t border-border my-3" />
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Total</span>
-              <span className="text-2xl font-bold text-primary">
-                ${totalPrice.toLocaleString()}
-              </span>
-            </div>
-          </div>
-
-          <Button
-            onClick={handlePurchase}
-            disabled={purchasing || !isValidAmount}
-            className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
-          >
-            {purchasing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Processing...
-              </>
-            ) : (
-              `Buy ${parsedAmount || 0} Credits for $${totalPrice.toLocaleString()}`
-            )}
-          </Button>
-
-          {!isValidAmount && parsedAmount > 0 && (
-            <p className="text-sm text-destructive text-center">
-              Please enter at least {MIN_CREDITS} credits
-            </p>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>,
     document.body
