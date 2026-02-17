@@ -65,7 +65,7 @@ interface AppState {
   setPreselectedSiteId: (siteId: string | null) => void;
   
   // UI State
-  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media' | 'admin-media-management' | 'my-agency' | 'credit-history' | 'admin-new-press-release' | 'admin-all-news' | 'admin-system';
+  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media' | 'admin-media-management' | 'my-agency' | 'credit-history' | 'admin-new-press-release' | 'admin-all-news' | 'admin-system' | 'support' | 'admin-support';
   setCurrentView: (view: AppState['currentView']) => void;
   
   // Target tab and subcategory for Sites view navigation
@@ -262,6 +262,10 @@ interface AppState {
   // Sound toggle
   soundEnabled: boolean;
   toggleSound: () => void;
+  
+  // Support ticket notifications (admin)
+  unreadSupportTicketsCount: number;
+  setUnreadSupportTicketsCount: (count: number) => void;
   
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
@@ -692,6 +696,10 @@ export const useAppStore = create<AppState>()((set) => ({
     };
   }),
   
+  // Support ticket notifications (admin)
+  unreadSupportTicketsCount: 0,
+  setUnreadSupportTicketsCount: (count) => set({ unreadSupportTicketsCount: count }),
+  
   // Sound toggle
   soundEnabled: (() => {
     const stored = localStorage.getItem('notification-sound-enabled');
@@ -732,6 +740,7 @@ export const useAppStore = create<AppState>()((set) => ({
     userUnreadDisputesCount: 0,
     userUnreadCompletedCount: 0,
     userUnreadHistoryCount: 0,
+    unreadSupportTicketsCount: 0,
     unreadMessageCounts: {},
     minimizedChats: [],
   }),
