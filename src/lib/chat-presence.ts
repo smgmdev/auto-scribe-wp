@@ -22,7 +22,8 @@ export const playMessageSound = (requestId?: string, messageSnippet?: string) =>
   const now = Date.now();
   
   // Build a unique key for this specific message (not just the request)
-  // This allows multiple messages to the same request to each play a sound
+  // For support messages, requestId is the message ID (unique per message)
+  // For engagement chats, requestId is the request_id + snippet
   const dedupKey = requestId 
     ? `${requestId}:${(messageSnippet || '').substring(0, 30)}` 
     : null;
