@@ -45,8 +45,8 @@ export const playMessageSound = (requestId?: string, messageSnippet?: string) =>
     }
   }
   
-  // Global debounce: 300ms minimum between any two sounds to prevent overlap
-  if (now - lastPlayedAt < 300) {
+  // Global debounce: 500ms minimum between any two sounds to prevent overlap
+  if (now - lastPlayedAt < 500) {
     console.log('[Sound] Debounced (global) -', now - lastPlayedAt, 'ms ago');
     return;
   }
