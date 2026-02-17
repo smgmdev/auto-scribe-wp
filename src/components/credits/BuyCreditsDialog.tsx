@@ -9,18 +9,7 @@ import { Loader2, Coins, GripHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-
-declare global {
-  interface Window {
-    Airwallex?: {
-      init: (config: Record<string, unknown>) => Promise<{
-        payment: {
-          redirectToCheckout: (opts: Record<string, unknown>) => void;
-        };
-      }>;
-    };
-  }
-}
+import { init as airwallexInit } from '@airwallex/components-sdk';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 10;
@@ -79,40 +68,27 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         throw new Error('Invalid response from payment service');
       }
 
-      // 2. Load Airwallex SDK and redirect to HPP
-      const script = document.createElement('script');
-      script.src = 'https://checkout.airwallex.com/assets/elements.bundle.min.js';
-      script.onload = async () => {
-        try {
-          const Airwallex = (window as any).Airwallex;
-          if (!Airwallex) throw new Error('Payment SDK failed to load');
+      // 2. Use Airwallex SDK to redirect to HPP
+      try {
+        const { payments } = await airwallexInit({
+          env: 'prod',
+          enabledElements: ['payments'],
+        });
 
-          const result = await Airwallex.init({
-            env: 'prod',
-            enabledElements: ['payments'],
-          });
+        if (!payments) throw new Error('Payment module failed to initialize');
 
-          const payments = result?.payments;
-          if (!payments) throw new Error('Payment module failed to initialize');
+        payments.redirectToCheckout({
+          intent_id: data.intent_id,
+          client_secret: data.client_secret,
+          currency: 'USD',
+          successUrl: data.successUrl,
+        });
 
-          payments.redirectToCheckout({
-            intent_id: data.intent_id,
-            client_secret: data.client_secret,
-            currency: 'USD',
-            successUrl: data.successUrl,
-          });
-
-          onOpenChange(false);
-        } catch (sdkErr: any) {
-          toast.error(sdkErr.message || 'Payment redirect failed.');
-          setPurchasing(false);
-        }
-      };
-      script.onerror = () => {
-        toast.error('Failed to load payment gateway.');
+        onOpenChange(false);
+      } catch (sdkErr: any) {
+        toast.error(sdkErr.message || 'Payment redirect failed.');
         setPurchasing(false);
-      };
-      document.head.appendChild(script);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to create checkout session.');
       setPurchasing(false);
