@@ -456,7 +456,7 @@ export default function About() {
             <div className="grid md:grid-cols-2 gap-0">
               <div className="p-12 md:p-16 flex flex-col justify-center order-2 md:order-1">
                 <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
-                  <span className="font-semibold">Flexibility that fits your needs.</span> Whether you're running a single campaign or managing multiple brands, choose the payment option that works best for you. Pay per article, buy credits online with credit/debit card, or request an invoice for USDT/Wire transactions for a top up.
+                  <span className="font-semibold">Flexibility that fits your needs.</span> Whether you're running a single campaign or managing multiple brands, choose the payment option that works best for you. Pay per article, buy credits online with credit/debit card, or request an invoice for Wire transactions for a top up.
                 </p>
                 <button 
                   onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
