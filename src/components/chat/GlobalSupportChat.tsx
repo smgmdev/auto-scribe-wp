@@ -99,21 +99,19 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const isFocusedRef = useRef(false);
   const hasPendingReadRef = useRef(false);
 
-  // Drag state
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
-
-  // Center on mount (desktop) — same size as engagement chat: 600×550
-  useEffect(() => {
-    if (!isMobile) {
+  // Initialize position centered immediately to avoid flash
+  const [position, setPosition] = useState(() => {
+    if (typeof window !== 'undefined') {
       const w = 600, h = 550;
-      setPosition({
+      return {
         x: Math.max(0, Math.round((window.innerWidth - w) / 2)),
         y: Math.max(0, Math.round((window.innerHeight - h) / 2)),
-      });
+      };
     }
-  }, [isMobile]);
+    return { x: 0, y: 0 };
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
   // Popup stack
   useEffect(() => {
