@@ -49,6 +49,17 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       setConfirming(false);
       setIntentData(null);
       cardElementRef.current = null;
+    } else {
+      // Clean up Airwallex SDK DOM nodes when closing to prevent removeChild errors
+      if (cardElementRef.current) {
+        try {
+          cardElementRef.current.unmount?.();
+          cardElementRef.current.destroy?.();
+        } catch (e) { /* ignore */ }
+        cardElementRef.current = null;
+      }
+      const container = document.getElementById('airwallex-card-container');
+      if (container) container.innerHTML = '';
     }
   }, [open]);
 
@@ -194,10 +205,24 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   };
 
   const handleBack = () => {
-    setStep('select');
+    // Destroy Airwallex drop-in BEFORE React re-renders to avoid removeChild conflict
+    if (cardElementRef.current) {
+      try {
+        cardElementRef.current.unmount?.();
+        cardElementRef.current.destroy?.();
+      } catch (e) {
+        // ignore SDK cleanup errors
+      }
+      cardElementRef.current = null;
+    }
+    // Clear the container's DOM manually so React doesn't try to remove SDK-injected nodes
+    const container = document.getElementById('airwallex-card-container');
+    if (container) {
+      container.innerHTML = '';
+    }
     setCardReady(false);
     setIntentData(null);
-    cardElementRef.current = null;
+    setStep('select');
   };
 
   // Drag handlers
