@@ -187,13 +187,18 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
 
     const msgChannel = supabase
       .channel(`support-msg-global-${ticket.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${ticket.id}` }, async (payload) => {
         const newMsg = payload.new as SupportMessage;
         setMessages(prev => [...prev, newMsg]);
-        // Play sound for counterparty messages (admin hears user, user hears admin)
         const isCounterparty = isAdmin ? newMsg.sender_type === 'user' : newMsg.sender_type === 'admin';
         if (isCounterparty) {
           playMessageSound(ticket.id, newMsg.message?.substring(0, 30));
+          // Auto-mark as read since chat is open — prevents sidebar badge from appearing
+          if (isAdmin) {
+            await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+          } else {
+            await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+          }
         }
       })
       .subscribe();
