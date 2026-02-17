@@ -87,12 +87,15 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           const Airwallex = (window as any).Airwallex;
           if (!Airwallex) throw new Error('Payment SDK failed to load');
 
-          const { payment } = await Airwallex.init({
+          const result = await Airwallex.init({
             env: 'prod',
             enabledElements: ['payments'],
           });
 
-          payment.redirectToCheckout({
+          const payments = result?.payments;
+          if (!payments) throw new Error('Payment module failed to initialize');
+
+          payments.redirectToCheckout({
             intent_id: data.intent_id,
             client_secret: data.client_secret,
             currency: 'USD',
