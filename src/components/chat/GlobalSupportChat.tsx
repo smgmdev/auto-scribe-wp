@@ -1,5 +1,6 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { playMessageSound } from '@/lib/chat-presence';
 import { createPortal } from 'react-dom';
 import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -187,7 +188,13 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     const msgChannel = supabase
       .channel(`support-msg-global-${ticket.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${ticket.id}` }, (payload) => {
-        setMessages(prev => [...prev, payload.new as SupportMessage]);
+        const newMsg = payload.new as SupportMessage;
+        setMessages(prev => [...prev, newMsg]);
+        // Play sound for counterparty messages (admin hears user, user hears admin)
+        const isCounterparty = isAdmin ? newMsg.sender_type === 'user' : newMsg.sender_type === 'admin';
+        if (isCounterparty) {
+          playMessageSound(ticket.id, newMsg.message?.substring(0, 30));
+        }
       })
       .subscribe();
 
