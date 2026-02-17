@@ -427,6 +427,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain" />
               </div>
 
+              <p className="text-xs text-center text-gray-500">
+                If you want to top up your account by invoice through a wire transfer, <a href="mailto:support@arcanamace.com" className="underline hover:text-gray-700">contact support</a>.
+              </p>
+
               {confirming && (
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
