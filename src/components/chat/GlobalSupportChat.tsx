@@ -721,7 +721,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <AlertDialogFooter>
           <AlertDialogCancel className="hover:bg-foreground hover:text-background hover:border-foreground">Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-foreground text-background border border-foreground shadow-none hover:bg-transparent hover:text-foreground hover:border-border"
+            className="bg-foreground text-background border border-foreground shadow-none hover:bg-transparent hover:text-foreground hover:border-foreground"
             onClick={async () => {
               await supabase.from('support_tickets').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', ticket.id);
               setTicketStatus('closed');
