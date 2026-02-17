@@ -15,6 +15,7 @@ interface SupportTicket {
   status: string;
   created_at: string;
   updated_at: string;
+  closed_at: string | null;
   admin_read: boolean;
   user_read: boolean;
   user_email?: string;
@@ -140,10 +141,16 @@ export function AdminSupportView() {
                       <User className="h-3 w-3 text-muted-foreground" />
                       <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
                     </div>
-                    <span className="hidden sm:inline text-xs text-muted-foreground">·</span>
-                    <p className="text-xs text-muted-foreground sm:pl-0 pl-5">
-                      {format(new Date(ticket.updated_at), 'MMM d, HH:mm')}
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 mt-1.5 pl-5 sm:pl-0">
+                    <p className="text-xs text-muted-foreground">
+                      Ticket Opened: {format(new Date(ticket.created_at), 'MMM d, HH:mm')}
                     </p>
+                    {ticket.status === 'closed' && ticket.closed_at && (
+                      <p className="text-xs text-muted-foreground">
+                        Ticket Closed: {format(new Date(ticket.closed_at), 'MMM d, HH:mm')}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
