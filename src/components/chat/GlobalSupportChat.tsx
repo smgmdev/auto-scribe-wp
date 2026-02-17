@@ -442,21 +442,6 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {!isAdmin && (
-            ticketStatus === 'open' ? (
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
-                await supabase.from('support_tickets').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', ticket.id);
-                setTicketStatus('closed');
-                toast.success('Ticket closed');
-              }}>Close</Button>
-            ) : (
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
-                await supabase.from('support_tickets').update({ status: 'open', closed_at: null }).eq('id', ticket.id);
-                setTicketStatus('open');
-                toast.success('Ticket reopened');
-              }}>Reopen</Button>
-            )
-          )}
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
