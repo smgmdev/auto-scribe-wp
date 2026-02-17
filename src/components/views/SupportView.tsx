@@ -259,10 +259,9 @@ export function SupportView() {
           </div>
           {!selectedTicket && (
             <Button
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
               onClick={() => setNewTicketOpen(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
               New Ticket
             </Button>
           )}
