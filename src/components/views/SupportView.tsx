@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, X, GripHorizontal } from 'lucide-react';
+import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,41 @@ interface SupportMessage {
   created_at: string;
 }
 
+// ─── Attachment Preview Component ───
+function AttachmentPreview({ attachment, isUser }: { attachment: { url: string; name: string; type: string }; isUser: boolean }) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const isImage = attachment.type?.startsWith('image/');
+
+  useEffect(() => {
+    const getUrl = async () => {
+      const { data, error } = await supabase.storage
+        .from('support-attachments')
+        .createSignedUrl(attachment.url, 3600);
+      if (data?.signedUrl) setSignedUrl(data.signedUrl);
+    };
+    getUrl();
+  }, [attachment.url]);
+
+  const handleDownload = () => {
+    if (signedUrl) window.open(signedUrl, '_blank');
+  };
+
+  return (
+    <div className={`mt-1.5 rounded border ${isUser ? 'border-background/20' : 'border-border'}`}>
+      {isImage && signedUrl ? (
+        <img src={signedUrl} alt={attachment.name} className="max-w-full max-h-40 rounded-t object-cover cursor-pointer" onClick={handleDownload} />
+      ) : null}
+      <div className={`flex items-center gap-1.5 px-2 py-1.5 text-xs ${isUser ? 'text-background/80' : 'text-muted-foreground'}`}>
+        <FileText className="h-3.5 w-3.5 shrink-0" />
+        <span className="truncate flex-1">{attachment.name}</span>
+        <button onClick={handleDownload} className="shrink-0 hover:opacity-70">
+          <Download className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Floating Support Chat Window ───
 function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose: () => void }) {
   const { user } = useAuth();
@@ -47,8 +82,11 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [ticketStatus, setTicketStatus] = useState(ticket.status);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -160,21 +198,59 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('File must be under 2MB');
+      return;
+    }
+    setSelectedFile(file);
+    e.target.value = '';
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
+    return <FileText className="h-4 w-4" />;
+  };
+
   const handleSend = async () => {
-    if (!user || !newMessage.trim()) return;
+    if (!user || (!newMessage.trim() && !selectedFile)) return;
     setSending(true);
     try {
+      let fullMessage = newMessage.trim();
+
+      if (selectedFile) {
+        setUploadingFile(true);
+        const fileExt = selectedFile.name.split('.').pop();
+        const filePath = `${user.id}/${ticket.id}/${crypto.randomUUID()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('support-attachments')
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const fileData = JSON.stringify({ url: filePath, name: selectedFile.name, type: selectedFile.type });
+        fullMessage = fullMessage
+          ? `${fullMessage}\n[ATTACHMENT]${fileData}[/ATTACHMENT]`
+          : `[ATTACHMENT]${fileData}[/ATTACHMENT]`;
+        setUploadingFile(false);
+      }
+
       const { error } = await supabase.from('support_messages').insert({
         ticket_id: ticket.id,
         sender_id: user.id,
         sender_type: 'user',
-        message: newMessage.trim()
+        message: fullMessage
       });
       if (error) throw error;
       await supabase.from('support_tickets').update({ admin_read: false, updated_at: new Date().toISOString() }).eq('id', ticket.id);
       setNewMessage('');
+      setSelectedFile(null);
     } catch {
       toast.error('Failed to send message');
+      setUploadingFile(false);
     } finally {
       setSending(false);
     }
@@ -233,20 +309,30 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
           <p className="text-center text-muted-foreground py-8 text-sm">No messages yet</p>
         ) : (
           <div className="space-y-3">
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
-                  msg.sender_type === 'user'
-                    ? 'bg-foreground text-background'
-                    : 'bg-muted text-foreground'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                  <p className={`text-[10px] mt-1 ${msg.sender_type === 'user' ? 'text-background/60' : 'text-muted-foreground'}`}>
-                    {format(new Date(msg.created_at), 'MMM d, HH:mm')}
-                  </p>
+            {messages.map(msg => {
+              const attachmentMatch = msg.message.match(/\[ATTACHMENT\](.*?)\[\/ATTACHMENT\]/);
+              let attachment: { url: string; name: string; type: string } | null = null;
+              let textContent = msg.message;
+              if (attachmentMatch) {
+                try { attachment = JSON.parse(attachmentMatch[1]); } catch {}
+                textContent = msg.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/, '').trim();
+              }
+              return (
+                <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
+                    msg.sender_type === 'user'
+                      ? 'bg-foreground text-background'
+                      : 'bg-muted text-foreground'
+                  }`}>
+                    {textContent && <p className="text-sm whitespace-pre-wrap break-words">{textContent}</p>}
+                    {attachment && <AttachmentPreview attachment={attachment} isUser={msg.sender_type === 'user'} />}
+                    <p className={`text-[10px] mt-1 ${msg.sender_type === 'user' ? 'text-background/60' : 'text-muted-foreground'}`}>
+                      {format(new Date(msg.created_at), 'MMM d, HH:mm')}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -254,22 +340,57 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
 
       {/* Input */}
       {ticketStatus === 'open' ? (
-        <div className="border-t border-border p-3 flex gap-2 shrink-0">
-          <Input
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="h-10"
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          />
-          <Button
-            size="icon"
-            className="h-10 w-10 bg-foreground text-background hover:bg-foreground/90 flex-shrink-0"
-            onClick={handleSend}
-            disabled={sending || !newMessage.trim()}
-          >
-            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
+        <div className="border-t border-border shrink-0">
+          {selectedFile && (
+            <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+              <div className="flex items-center gap-1.5 bg-muted rounded px-2 py-1 text-xs text-foreground max-w-[200px]">
+                {getFileIcon(selectedFile.type)}
+                <span className="truncate">{selectedFile.name}</span>
+                <button onClick={() => setSelectedFile(null)} className="ml-1 text-muted-foreground hover:text-foreground">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="p-3 flex gap-2 items-center">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              onChange={handleFileSelect}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 shrink-0"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending}
+              title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
+            <Input
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="h-10"
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+            <Button
+              size="icon"
+              className="h-10 w-10 bg-foreground text-background hover:bg-foreground/90 flex-shrink-0"
+              onClick={handleSend}
+              disabled={sending || (!newMessage.trim() && !selectedFile)}
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="border-t border-border p-3 text-center text-sm text-muted-foreground shrink-0">
