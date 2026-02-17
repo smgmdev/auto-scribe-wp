@@ -125,10 +125,6 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         }
       ]
     }, {
-      id: 'admin-support',
-      label: 'Support',
-      icon: Headphones
-    }, {
       id: 'admin-feedback',
       label: 'Feedback',
       icon: MessageSquareText
@@ -1850,12 +1846,10 @@ export function Sidebar({
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
                 Account Settings
               </Button>
-              {!isAdmin && (
-                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'support' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('support')}>
-                  <Headphones className={cn("h-5 w-5", currentView === 'support' && "text-[#3872e0]")} />
-                  Support
-                </Button>
-              )}
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'support' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('support')}>
+                <Headphones className={cn("h-5 w-5", currentView === 'support' && "text-[#3872e0]")} />
+                Support
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
                   <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
