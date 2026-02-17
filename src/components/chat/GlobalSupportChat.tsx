@@ -1,7 +1,8 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info } from 'lucide-react';
+import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info, XCircle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -82,6 +83,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const [ticketStatus, setTicketStatus] = useState(ticket.status);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [ticketUserDetails, setTicketUserDetails] = useState<{
@@ -445,7 +447,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     }
   };
 
-  return createPortal(
+  return <>{createPortal(
     <div
       ref={chatWindowRef}
       className={
@@ -505,6 +507,14 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          {isAdmin && ticketStatus === 'open' && (
+            <button
+              onClick={() => setShowCloseConfirm(true)}
+              className="text-xs px-2.5 py-1 rounded border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
+            >
+              Close Ticket
+            </button>
+          )}
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
@@ -681,5 +691,32 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       )}
     </div>,
     document.body
-  );
+  )}
+  {showCloseConfirm && (
+    <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+      <AlertDialogContent className="z-[99999]">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Close this ticket?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will mark the ticket as closed. The user will no longer be able to send messages.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-foreground text-background hover:bg-foreground/90"
+            onClick={async () => {
+              await supabase.from('support_tickets').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', ticket.id);
+              setTicketStatus('closed');
+              setShowCloseConfirm(false);
+              toast.success('Ticket closed');
+            }}
+          >
+            Close Ticket
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )}
+  </>;
 }
