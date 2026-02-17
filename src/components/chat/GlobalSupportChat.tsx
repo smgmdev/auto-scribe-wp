@@ -1,6 +1,6 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { playMessageSound } from '@/lib/chat-presence';
+
 import { createPortal } from 'react-dom';
 import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -243,11 +243,11 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         const isCounterparty = isAdmin ? newMsg.sender_type === 'user' : newMsg.sender_type === 'admin';
         if (isCounterparty) {
           if (isFocusedRef.current) {
-            // Chat is focused — mark as read immediately, no sound
+            // Chat is focused — mark as read immediately
             await markAsRead();
           } else {
-            // Chat is open but not focused — play sound, defer read until focus
-            playMessageSound(ticket.id, newMsg.message?.substring(0, 30));
+            // Chat is open but not focused — defer read until focus
+            // Sound is handled by the sidebar background listener
             hasPendingReadRef.current = true;
           }
         }

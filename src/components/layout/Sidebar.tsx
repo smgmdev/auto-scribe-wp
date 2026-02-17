@@ -1634,10 +1634,8 @@ export function Sidebar({
         // If user sent a message, refetch admin count and play sound if chat not open
         if (msg.sender_type === 'user') {
           refetchAdminSupportCount();
-          const openTicket = useAppStore.getState().openSupportTicket;
-          if (!openTicket || openTicket.id !== msg.ticket_id) {
-            playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
-          }
+          // Play sound — chat component never plays sound, sidebar is single source
+          playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
@@ -1668,10 +1666,8 @@ export function Sidebar({
         // If admin sent a message, refetch user count and play sound if chat not open
         if (msg.sender_type === 'admin') {
           refetchUserSupportCount();
-          const openTicket = useAppStore.getState().openSupportTicket;
-          if (!openTicket || openTicket.id !== msg.ticket_id) {
-            playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
-          }
+          // Play sound — chat component never plays sound, sidebar is single source
+          playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
