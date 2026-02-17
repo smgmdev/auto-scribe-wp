@@ -247,6 +247,12 @@ export function useArticles() {
     if (updates.focusKeyword !== undefined) updateData.focus_keyword = updates.focusKeyword;
     if (updates.metaDescription !== undefined) updateData.meta_description = updates.metaDescription;
 
+    // When publishing a draft, update created_at to current time so the publish date is recent
+    const existingArticle = articles.find(a => a.id === id);
+    if (updates.status === 'published' && existingArticle?.status === 'draft') {
+      updateData.created_at = new Date().toISOString();
+    }
+
     const { error } = await supabase
       .from('articles')
       .update(updateData)
