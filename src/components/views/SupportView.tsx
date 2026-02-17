@@ -352,7 +352,7 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
               </div>
             </div>
           )}
-          <div className="p-3 flex gap-2 items-center">
+          <div className="px-1 py-1 flex gap-1 items-center">
             <input
               type="file"
               ref={fileInputRef}
