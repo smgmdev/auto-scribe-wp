@@ -135,11 +135,13 @@ export function AdminSupportView() {
                     )}
                     <p className="font-medium text-sm truncate">{ticket.subject}</p>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <User className="h-3 w-3 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1">
+                    <div className="flex items-center gap-2">
+                      <User className="h-3 w-3 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
+                    </div>
+                    <span className="hidden sm:inline text-xs text-muted-foreground">·</span>
+                    <p className="text-xs text-muted-foreground sm:pl-0 pl-5">
                       {format(new Date(ticket.updated_at), 'MMM d, HH:mm')}
                     </p>
                   </div>
