@@ -105,21 +105,51 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
     let mounted = true;
 
-    const initCard = async () => {
+    const initDropIn = async () => {
       try {
         await airwallexInit({
           env: 'prod',
           enabledElements: ['payments'],
         });
 
-        const card = await createElement('card' as any);
+        const dropIn = await createElement('dropIn' as any, {
+          intent_id: intentData.intent_id,
+          client_secret: intentData.client_secret,
+          currency: 'USD',
+          methods: ['card', 'googlepay'],
+          layout: {
+            type: 'accordion',
+            defaultCollapsed: false,
+          },
+          googlePayRequestOptions: {
+            countryCode: 'US',
+          },
+        });
 
-        card.on('ready' as any, () => {
+        dropIn.on('ready' as any, () => {
           if (mounted) setCardReady(true);
         });
 
-        card.on('error' as any, (event: any) => {
-          console.error('Card element error:', event);
+        dropIn.on('success' as any, async () => {
+          if (!mounted) return;
+          setConfirming(true);
+          try {
+            await supabase.functions.invoke('airwallex-webhook', {
+              body: { intent_id: intentData.intent_id },
+            });
+            toast.success(`${parsedAmount} credits added to your account!`);
+            refreshCredits?.();
+            onOpenChange(false);
+          } catch (err: any) {
+            toast.error('Payment succeeded but credit update failed. Please contact support.');
+          } finally {
+            setConfirming(false);
+          }
+        });
+
+        dropIn.on('error' as any, (event: any) => {
+          console.error('Payment error:', event);
+          toast.error(event?.message || 'Payment failed. Please try again.');
         });
 
         // Wait a tick for the container to be in the DOM
@@ -127,19 +157,19 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           if (mounted) {
             const container = document.getElementById('airwallex-card-container');
             if (container) {
-              card.mount(container);
-              cardElementRef.current = card;
+              dropIn.mount(container);
+              cardElementRef.current = dropIn;
             }
           }
         }, 100);
       } catch (err: any) {
-        console.error('Failed to init Airwallex card:', err);
+        console.error('Failed to init Airwallex drop-in:', err);
         toast.error('Failed to load payment form. Please try again.');
         setStep('select');
       }
     };
 
-    initCard();
+    initDropIn();
 
     return () => {
       mounted = false;
@@ -154,37 +184,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     };
   }, [step, intentData]);
 
-  // Step 2: Confirm payment with the card element
-  const handleConfirmPayment = async () => {
-    if (!cardElementRef.current || !intentData) return;
-
-    setConfirming(true);
-
-    try {
-      const response = await cardElementRef.current.confirm({
-        intent_id: intentData.intent_id,
-        client_secret: intentData.client_secret,
-      });
-
-      if (response?.status === 'SUCCEEDED') {
-        // Verify and credit via webhook
-        await supabase.functions.invoke('airwallex-webhook', {
-          body: { intent_id: intentData.intent_id },
-        });
-
-        toast.success(`${parsedAmount} credits added to your account!`);
-        refreshCredits?.();
-        onOpenChange(false);
-      } else {
-        toast.error('Payment was not completed. Please try again.');
-      }
-    } catch (error: any) {
-      console.error('Payment confirmation error:', error);
-      toast.error(error?.message || 'Payment failed. Please try again.');
-    } finally {
-      setConfirming(false);
-    }
-  };
+  // handleConfirmPayment is no longer needed - Drop-in handles it via 'success' event
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -390,7 +390,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         ) : (
           <>
             <p className="text-sm text-muted-foreground mt-1">
-              Enter your card details to complete the purchase.
+              Choose a payment method to complete your purchase.
             </p>
 
             <div className="space-y-5 py-4">
@@ -404,10 +404,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
               {/* Card element container */}
               <div className="space-y-2">
-                <Label>Card Details</Label>
+                <Label>Payment Method</Label>
                 <div 
                   id="airwallex-card-container" 
-                  className="min-h-[44px] border border-border rounded-none p-3 bg-background"
+                  className="min-h-[120px] rounded-none bg-background"
                 >
                   {!cardReady && (
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -424,21 +424,12 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 <span>Your payment is securely processed by Airwallex</span>
               </div>
 
-              {/* Pay button */}
-              <Button
-                onClick={handleConfirmPayment}
-                disabled={confirming || !cardReady}
-                className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
-              >
-                {confirming ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Processing payment...
-                  </>
-                ) : (
-                  `Pay $${totalPrice.toLocaleString()}`
-                )}
-              </Button>
+              {confirming && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verifying payment...
+                </div>
+              )}
             </div>
           </>
         )}
