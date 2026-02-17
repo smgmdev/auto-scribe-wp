@@ -32,6 +32,8 @@ import { AdminAgencyWithdrawalsView } from '@/components/views/AdminAgencyWithdr
 import { AdminSecuritySupervisionView } from '@/components/views/AdminSecuritySupervisionView';
 import { AdminFeedbackView } from '@/components/views/AdminFeedbackView';
 import { AdminSystemView } from '@/components/views/AdminSystemView';
+import { SupportView } from '@/components/views/SupportView';
+import { AdminSupportView } from '@/components/views/AdminSupportView';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,6 +56,7 @@ const publicViews: Record<string, React.ComponentType> = {
   orders: OrdersView,
   'my-requests': MyRequestsView,
   'credit-history': CreditHistoryView,
+  'support': SupportView,
 };
 
 // Views for non-admin users only (agency application is user-facing only)
@@ -89,6 +92,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-security-supervision': AdminSecuritySupervisionView,
   'admin-feedback': AdminFeedbackView,
   'admin-system': AdminSystemView,
+  'admin-support': AdminSupportView,
 };
 
 const Index = () => {

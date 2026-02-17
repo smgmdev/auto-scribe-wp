@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, Headphones } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -125,6 +125,10 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
         }
       ]
     }, {
+      id: 'admin-support',
+      label: 'Support',
+      icon: Headphones
+    }, {
       id: 'admin-feedback',
       label: 'Feedback',
       icon: MessageSquareText
@@ -213,6 +217,8 @@ export function Sidebar({
     unreadBugReportsCount,
     setUnreadBugReportsCount,
     incrementUnreadBugReportsCount,
+    unreadSupportTicketsCount,
+    setUnreadSupportTicketsCount,
   } = useAppStore();
   const navigate = useNavigate();
   const {
@@ -424,6 +430,13 @@ export function Sidebar({
           .select('*', { count: 'exact', head: true })
           .eq('status', 'open');
         
+        // Fetch unread support tickets count
+        const { count: supportTicketsCount } = await supabase
+          .from('support_tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'open')
+          .eq('admin_read', false);
+        
         if (isMounted) {
           setUnreadAgencyApplicationsCount(appCount || 0);
           setUnreadCustomVerificationsCount(verificationCount || 0);
@@ -435,6 +448,7 @@ export function Sidebar({
           setAdminUnreadCancelledEngagementsCount(cancelledEngagementsCountResult || 0);
           setUnreadFlaggedMessagesCount(flaggedCount || 0);
           setUnreadBugReportsCount(bugReportsCount || 0);
+          setUnreadSupportTicketsCount(supportTicketsCount || 0);
           setAgencyDataLoaded(true);
         }
         return;
@@ -1781,6 +1795,7 @@ export function Sidebar({
                 );
               }
 
+              const supportBadgeCount = item.id === 'admin-support' ? unreadSupportTicketsCount : 0;
               const feedbackBadgeCount = item.id === 'admin-feedback' ? unreadBugReportsCount : 0;
               
               return (
@@ -1796,9 +1811,9 @@ export function Sidebar({
                     <Icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-[#3872e0]")} />
                     <span className="truncate">{item.label}</span>
                   </Button>
-                  {feedbackBadgeCount > 0 && (
+                  {(feedbackBadgeCount > 0 || supportBadgeCount > 0) && (
                     <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
-                      {feedbackBadgeCount}
+                      {feedbackBadgeCount || supportBadgeCount}
                     </span>
                   )}
                 </div>
@@ -1834,6 +1849,10 @@ export function Sidebar({
               <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
                 Account Settings
+              </Button>
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'support' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('support')}>
+                <Headphones className={cn("h-5 w-5", currentView === 'support' && "text-[#3872e0]")} />
+                Support
               </Button>
               {isAdmin && (
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
