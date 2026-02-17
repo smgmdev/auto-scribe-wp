@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ChatListPanel } from "@/components/ui/ChatListPanel";
 import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
+import { GlobalSupportChat } from "@/components/chat/GlobalSupportChat";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
@@ -111,6 +112,7 @@ function MessagingWidget() {
     <>
       <ChatListPanel />
       <GlobalChatDialog />
+      <GlobalSupportChat />
     </>
   );
 }
