@@ -173,7 +173,7 @@ export default function SystemStatus() {
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-screen bg-white flex flex-col overflow-hidden">
       {/* Header - Same as homepage */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
