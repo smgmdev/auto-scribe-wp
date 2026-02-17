@@ -1635,7 +1635,7 @@ export function Sidebar({
         if (msg.sender_type === 'user') {
           refetchAdminSupportCount();
           // Play sound — chat component never plays sound, sidebar is single source
-          playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
+          playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
@@ -1666,8 +1666,8 @@ export function Sidebar({
         // If admin sent a message, refetch user count and play sound if chat not open
         if (msg.sender_type === 'admin') {
           refetchUserSupportCount();
-          // Play sound — chat component never plays sound, sidebar is single source
-          playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
+          // Play sound — use msg.id for dedup to prevent double sounds
+          playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
