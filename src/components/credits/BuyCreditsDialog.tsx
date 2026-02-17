@@ -141,10 +141,12 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         });
 
         dropIn.on('ready' as any, () => {
+          console.log('[Airwallex] Drop-in ready event fired');
           if (mounted) setCardReady(true);
         });
 
         dropIn.on('success' as any, async () => {
+          console.log('[Airwallex] Payment success event fired');
           if (!mounted) return;
           setConfirming(true);
           try {
@@ -162,7 +164,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         });
 
         dropIn.on('error' as any, (event: any) => {
-          console.error('Payment error:', event);
+          console.error('[Airwallex] Payment error:', event);
           toast.error(event?.message || 'Payment failed. Please try again.');
         });
 
@@ -171,8 +173,19 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           if (mounted) {
             const container = document.getElementById('airwallex-drop-in');
             if (container) {
-              dropIn.mount('airwallex-drop-in');
+              console.log('[Airwallex] Mounting drop-in to container');
+              dropIn.mount(container);
               cardElementRef.current = dropIn;
+              
+              // Fallback: if ready event doesn't fire in 4s, show the form anyway
+              setTimeout(() => {
+                if (mounted && !cardReady) {
+                  console.log('[Airwallex] Ready event timeout - showing form anyway');
+                  setCardReady(true);
+                }
+              }, 4000);
+            } else {
+              console.error('[Airwallex] Container #airwallex-drop-in not found');
             }
           }
         }, 100);
