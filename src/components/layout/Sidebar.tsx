@@ -1633,10 +1633,8 @@ export function Sidebar({
         const msg = payload.new as any;
         if (msg.sender_type === 'user') {
           refetchAdminSupportCount();
-          const openTicket = useAppStore.getState().openSupportTicket;
-          if (!openTicket || openTicket.id !== msg.ticket_id) {
-            playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
-          }
+          // Single source of truth for support chat sounds (same pattern as engagement chat)
+          playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
@@ -1666,10 +1664,8 @@ export function Sidebar({
         const msg = payload.new as any;
         if (msg.sender_type === 'admin') {
           refetchUserSupportCount();
-          const openTicket = useAppStore.getState().openSupportTicket;
-          if (!openTicket || openTicket.id !== msg.ticket_id) {
-            playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
-          }
+          // Single source of truth for support chat sounds (same pattern as engagement chat)
+          playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
         }
       })
       .subscribe();
