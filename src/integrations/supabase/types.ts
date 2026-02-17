@@ -1669,6 +1669,17 @@ export type Database = {
           media_niches: string[]
         }[]
       }
+      get_public_agency_details: {
+        Args: { _agency_name: string }
+        Returns: {
+          agency_description: string
+          agency_name: string
+          agency_website: string
+          country: string
+          created_at: string
+          logo_url: string
+        }[]
+      }
       get_public_sites: {
         Args: never
         Returns: {
