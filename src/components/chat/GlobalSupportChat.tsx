@@ -82,9 +82,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -195,6 +198,70 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  // Typing indicator with presence
+  const senderType = isAdmin ? 'admin' : 'user';
+  
+  useEffect(() => {
+    if (!user || !ticket.id) return;
+
+    const channelName = `support-typing-${ticket.id}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const typing: { sender_id: string; sender_type: string }[] = [];
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((p: any) => {
+            if (p.is_typing && p.sender_id !== user.id) {
+              typing.push({ sender_id: p.sender_id, sender_type: p.sender_type });
+            }
+          });
+        });
+        setTypingUsers(typing);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            sender_id: user.id,
+            sender_type: senderType,
+            is_typing: false
+          });
+        }
+      });
+
+    typingChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+      setTypingUsers([]);
+    };
+  }, [ticket.id, user?.id, senderType]);
+
+  const broadcastTyping = useCallback((isTyping: boolean) => {
+    if (typingChannelRef.current && user) {
+      typingChannelRef.current.track({
+        sender_id: user.id,
+        sender_type: senderType,
+        is_typing: isTyping
+      });
+    }
+  }, [user?.id, senderType]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    if (e.target.value.trim()) {
+      broadcastTyping(true);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      broadcastTyping(false);
+    }, 2000);
+  }, [broadcastTyping]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -215,6 +282,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const handleSend = async () => {
     if (!user || (!newMessage.trim() && !selectedFile)) return;
     setSending(true);
+    broadcastTyping(false);
     try {
       let fullMessage = newMessage.trim();
 
@@ -413,6 +481,20 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         )}
       </ScrollArea>
 
+      {/* Typing Indicator */}
+      {typingUsers.length > 0 && (
+        <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground border-t">
+          <div className="flex gap-1">
+            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <span>
+            {typingUsers.map(u => u.sender_type === 'admin' ? 'Support' : 'User').filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+          </span>
+        </div>
+      )}
+
       {/* Input */}
       {ticketStatus === 'open' ? (
         <div className="shrink-0">
@@ -458,7 +540,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             </Button>
             <Input
               value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Type a message..."
               className="h-10 border-0 shadow-none focus-visible:ring-0"
               onKeyDown={e => {
