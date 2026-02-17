@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X } from 'lucide-react';
+import { Plus, Loader2, Send, MessageSquare, Clock, CheckCircle, ChevronLeft, X, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -168,13 +168,12 @@ export function SupportView() {
   }, [messages]);
 
   const handleCreateTicket = async () => {
-    if (!user || !newCategory || !newSubject.trim() || !newFirstMessage.trim()) return;
+    if (!user || !newCategory || !newFirstMessage.trim()) return;
     setCreating(true);
     try {
-      const fullSubject = `[${newCategory}] ${newSubject.trim()}`;
       const { data: ticket, error } = await supabase
         .from('support_tickets')
-        .insert({ user_id: user.id, subject: fullSubject })
+        .insert({ user_id: user.id, subject: newCategory })
         .select()
         .single();
       if (error) throw error;
@@ -186,7 +185,6 @@ export function SupportView() {
         message: newFirstMessage.trim()
       });
 
-      setNewSubject('');
       setNewFirstMessage('');
       setNewCategory('');
       setNewTicketOpen(false);
@@ -386,7 +384,10 @@ export function SupportView() {
               onMouseDown={handleMouseDown}
               style={isMobile ? undefined : { cursor: dragging ? 'grabbing' : 'grab' }}
             >
-              <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
+              <div className="flex items-center gap-2">
+                {!isMobile && <GripVertical className="h-4 w-4 text-muted-foreground" />}
+                <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
+              </div>
               <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
@@ -408,15 +409,6 @@ export function SupportView() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Subject</label>
-                <Input
-                  value={newSubject}
-                  onChange={e => setNewSubject(e.target.value)}
-                  placeholder="Brief description of your issue"
-                  className="mt-1"
-                />
-              </div>
-              <div>
                 <label className="text-sm font-medium text-foreground">Message</label>
                 <textarea
                   value={newFirstMessage}
@@ -432,7 +424,7 @@ export function SupportView() {
               <Button
                 className="w-full bg-foreground text-background hover:bg-foreground/90"
                 onClick={handleCreateTicket}
-                disabled={creating || !newCategory || !newSubject.trim() || !newFirstMessage.trim()}
+                disabled={creating || !newCategory || !newFirstMessage.trim()}
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Create Ticket
