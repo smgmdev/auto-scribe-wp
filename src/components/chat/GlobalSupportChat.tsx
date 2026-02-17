@@ -1,7 +1,8 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply } from 'lucide-react';
+import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -350,47 +351,60 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               const isMine = isAdmin ? msg.sender_type === 'admin' : msg.sender_type === 'user';
               return (
                 <div key={msg.id} className={`group flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                  {isMine && (
-                    <button
-                      onClick={() => setReplyingTo(msg)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1 text-muted-foreground hover:text-foreground"
-                      title="Reply"
-                    >
-                      <Reply className="h-3.5 w-3.5" />
-                    </button>
-                  )}
                   <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
                     isMine
                       ? 'bg-foreground text-background'
                       : 'bg-muted text-foreground'
                   }`}>
-                    {msg.message.startsWith('[REPLY:') && (() => {
-                      const replyMatch = msg.message.match(/^\[REPLY:(.*?)\]/);
-                      if (!replyMatch) return null;
-                      const replyText = replyMatch[1];
-                      return (
-                        <div className={`text-[10px] mb-1.5 pb-1.5 border-b ${isMine ? 'border-background/20 text-background/50' : 'border-border text-muted-foreground'} italic truncate`}>
-                          ↩ {replyText}
-                        </div>
-                      );
-                    })()}
-                    {textContent && <p className="text-sm whitespace-pre-wrap break-words">
-                      {textContent.replace(/^\[REPLY:.*?\]\s*/, '')}
-                    </p>}
-                    {attachment && <AttachmentPreview attachment={attachment} isUser={isMine} />}
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="flex-1 min-w-0">
+                        {msg.message.startsWith('[REPLY:') && (() => {
+                          const replyMatch = msg.message.match(/^\[REPLY:(.*?)\]/);
+                          if (!replyMatch) return null;
+                          const replyText = replyMatch[1];
+                          return (
+                            <div className={`text-[10px] mb-1.5 pb-1.5 border-b ${isMine ? 'border-background/20 text-background/50' : 'border-border text-muted-foreground'} italic truncate`}>
+                              ↩ {replyText}
+                            </div>
+                          );
+                        })()}
+                        {textContent && <p className="text-sm whitespace-pre-wrap break-words">
+                          {textContent.replace(/^\[REPLY:.*?\]\s*/, '')}
+                        </p>}
+                        {attachment && <AttachmentPreview attachment={attachment} isUser={isMine} />}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className={`h-5 w-5 flex items-center justify-center cursor-pointer rounded hover:bg-black/10 dark:hover:bg-white/10 outline-none border-none bg-transparent shrink-0 ${
+                              isMine ? 'text-background/70' : 'text-muted-foreground'
+                            }`}
+                          >
+                            <ChevronDown className="h-3 w-3 pointer-events-none" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align={isMine ? "end" : "start"}
+                          side="bottom"
+                          sideOffset={5}
+                          collisionPadding={16}
+                          className="bg-popover border shadow-lg z-[99999]"
+                        >
+                          <DropdownMenuItem
+                            onSelect={() => setReplyingTo(msg)}
+                            className="cursor-pointer focus:bg-black focus:text-white dark:focus:bg-white dark:focus:text-black"
+                          >
+                            <Reply className="h-4 w-4 mr-2" />
+                            Reply
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                     <p className={`text-[10px] mt-1 ${isMine ? 'text-background/60' : 'text-muted-foreground'}`}>
                       {msg.sender_type === 'admin' ? 'Support' : (ticket.user_email || 'User')} · {format(new Date(msg.created_at), 'MMM d, HH:mm')}
                     </p>
                   </div>
-                  {!isMine && (
-                    <button
-                      onClick={() => setReplyingTo(msg)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1 text-muted-foreground hover:text-foreground"
-                      title="Reply"
-                    >
-                      <Reply className="h-3.5 w-3.5" />
-                    </button>
-                  )}
                 </div>
               );
             })}
