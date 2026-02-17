@@ -440,7 +440,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 )}
                 <div 
                   id="airwallex-card-container" 
-                  className={`min-h-[120px] rounded-none bg-background ${!cardReady ? 'hidden' : ''}`}
+                  className={`min-h-[120px] rounded-none bg-background ${!cardReady ? 'opacity-0 absolute pointer-events-none h-0 overflow-hidden' : ''}`}
                   ref={(node) => {
                     // Prevent React from tracking children inside this node
                     // The Airwallex SDK will manage its own DOM here
