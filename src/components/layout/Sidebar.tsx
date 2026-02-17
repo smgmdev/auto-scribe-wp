@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, Headphones } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -1938,7 +1938,7 @@ export function Sidebar({
               </Button>
               <div className="relative">
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
-                  <Headphones className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
+                  <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
                   Support
                 </Button>
                 {(isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount) > 0 && (
