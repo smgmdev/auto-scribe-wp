@@ -43,19 +43,19 @@ export function SupportView() {
   const [creating, setCreating] = useState(false);
 
   // New ticket popup drag
-  const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const dragOffset = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    if (newTicketOpen && !isMobile) {
+  // Initialize position centered immediately to avoid flash
+  const [popupPos, setPopupPos] = useState(() => {
+    if (typeof window !== 'undefined') {
       const w = 460, h = 480;
-      setPopupPos({
+      return {
         x: Math.max(0, (window.innerWidth - w) / 2),
         y: Math.max(0, (window.innerHeight - h) / 2),
-      });
+      };
     }
-  }, [newTicketOpen, isMobile]);
+    return { x: 0, y: 0 };
+  });
+  const [dragging, setDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (newTicketOpen) {
