@@ -463,13 +463,43 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         maxHeight: 'calc(100vh - 100px)',
       }}
     >
-      {/* Drag Handle - desktop only */}
+      {/* Drag Handle + actions row - desktop only */}
       {!isMobile && (
         <div
-          className={`flex items-center justify-start py-2 px-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          className={`flex items-center justify-between py-2 px-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
           onMouseDown={handleDragStart}
         >
           <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1 shrink-0">
+            {isAdmin && ticketStatus === 'open' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowCloseConfirm(true); }}
+                className="text-xs px-2.5 py-1 rounded-none border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
+              >
+                Close Ticket
+              </button>
+            )}
+            <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile top-right actions */}
+      {isMobile && (
+        <div className="flex items-center justify-end gap-1 px-4 pt-2 shrink-0">
+          {isAdmin && ticketStatus === 'open' && (
+            <button
+              onClick={() => setShowCloseConfirm(true)}
+              className="text-xs px-2.5 py-1 rounded-none border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
+            >
+              Close Ticket
+            </button>
+          )}
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
         </div>
       )}
 
@@ -505,19 +535,6 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               {ticketStatus}
             </Badge>
           </div>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {isAdmin && ticketStatus === 'open' && (
-            <button
-              onClick={() => setShowCloseConfirm(true)}
-              className="text-xs px-2.5 py-1 rounded border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
-            >
-              Close Ticket
-            </button>
-          )}
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
         </div>
       </div>
 
