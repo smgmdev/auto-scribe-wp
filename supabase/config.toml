@@ -147,3 +147,6 @@ verify_jwt = false
 
 [functions.scan-single-message]
 verify_jwt = false
+
+[functions.process-agency-payout]
+verify_jwt = true
