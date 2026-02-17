@@ -156,13 +156,13 @@ export function SupportView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Support</h1>
             <p className="mt-1 text-muted-foreground">Get help from our team</p>
           </div>
           <Button
-            className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
+            className="w-full lg:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
             onClick={() => setNewTicketOpen(true)}
           >
             New Ticket
