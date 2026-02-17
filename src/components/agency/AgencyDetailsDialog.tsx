@@ -97,37 +97,35 @@ export function AgencyDetailsDialog({
     setLogoLoading(true);
     try {
       const { data, error } = await supabase
-        .from('agency_payouts')
-        .select('agency_name, email, onboarding_complete, created_at')
-        .eq('agency_name', name)
-        .single();
+        .rpc('get_public_agency_details', { _agency_name: name });
+      
       if (error) throw error;
-
-      let logoUrl: string | null = null;
-      let agencyWebsite: string | null = null;
-      let country: string | null = null;
-      let agencyDescription: string | null = null;
-
-      const { data: appData } = await supabase
-        .from('agency_applications')
-        .select('logo_url, agency_website, country, agency_description')
-        .eq('agency_name', name)
-        .eq('status', 'approved')
-        .maybeSingle();
-
-      if (appData) {
-        agencyWebsite = appData.agency_website || null;
-        country = appData.country || null;
-        agencyDescription = appData.agency_description || null;
-        if (appData.logo_url) {
-          const { data: publicUrl } = supabase.storage
-            .from('agency-logos')
-            .getPublicUrl(appData.logo_url);
-          if (publicUrl?.publicUrl) logoUrl = publicUrl.publicUrl;
-        }
+      
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) {
+        setAgencyDetails(null);
+        setLogoLoading(false);
+        return;
       }
 
-      setAgencyDetails({ ...data, logo_url: logoUrl, agency_website: agencyWebsite, country, agency_description: agencyDescription });
+      let logoUrl: string | null = null;
+      if (row.logo_url) {
+        const { data: publicUrl } = supabase.storage
+          .from('agency-logos')
+          .getPublicUrl(row.logo_url);
+        if (publicUrl?.publicUrl) logoUrl = publicUrl.publicUrl;
+      }
+
+      setAgencyDetails({
+        agency_name: row.agency_name,
+        email: null,
+        onboarding_complete: true,
+        created_at: row.created_at,
+        logo_url: logoUrl,
+        agency_website: row.agency_website || null,
+        country: row.country || null,
+        agency_description: row.agency_description || null,
+      });
       if (!logoUrl) setLogoLoading(false);
     } catch (error) {
       console.error('Error fetching agency details:', error);
