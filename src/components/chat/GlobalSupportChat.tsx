@@ -1,7 +1,7 @@
 import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
+import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -79,6 +79,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const [sending, setSending] = useState(false);
   const [ticketStatus, setTicketStatus] = useState(ticket.status);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
@@ -234,6 +235,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         setUploadingFile(false);
       }
 
+      // Prepend reply reference if replying
+      if (replyingTo) {
+        const replyPreview = replyingTo.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/, '').replace(/^\[REPLY:.*?\]\s*/, '').trim().slice(0, 80) || 'Attachment';
+        fullMessage = `[REPLY:${replyPreview}] ${fullMessage}`;
+      }
+
       const senderType = isAdmin ? 'admin' : 'user';
 
       const { error } = await supabase.from('support_messages').insert({
@@ -252,6 +259,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       }
       setNewMessage('');
       setSelectedFile(null);
+      setReplyingTo(null);
     } catch {
       toast.error('Failed to send message');
       setUploadingFile(false);
@@ -341,18 +349,48 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               }
               const isMine = isAdmin ? msg.sender_type === 'admin' : msg.sender_type === 'user';
               return (
-                <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`group flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                  {isMine && (
+                    <button
+                      onClick={() => setReplyingTo(msg)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-1 text-muted-foreground hover:text-foreground"
+                      title="Reply"
+                    >
+                      <Reply className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                   <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
                     isMine
                       ? 'bg-foreground text-background'
                       : 'bg-muted text-foreground'
                   }`}>
-                    {textContent && <p className="text-sm whitespace-pre-wrap break-words">{textContent}</p>}
+                    {msg.message.startsWith('[REPLY:') && (() => {
+                      const replyMatch = msg.message.match(/^\[REPLY:(.*?)\]/);
+                      if (!replyMatch) return null;
+                      const replyText = replyMatch[1];
+                      return (
+                        <div className={`text-[10px] mb-1.5 pb-1.5 border-b ${isMine ? 'border-background/20 text-background/50' : 'border-border text-muted-foreground'} italic truncate`}>
+                          ↩ {replyText}
+                        </div>
+                      );
+                    })()}
+                    {textContent && <p className="text-sm whitespace-pre-wrap break-words">
+                      {textContent.replace(/^\[REPLY:.*?\]\s*/, '')}
+                    </p>}
                     {attachment && <AttachmentPreview attachment={attachment} isUser={isMine} />}
                     <p className={`text-[10px] mt-1 ${isMine ? 'text-background/60' : 'text-muted-foreground'}`}>
                       {msg.sender_type === 'admin' ? 'Support' : (ticket.user_email || 'User')} · {format(new Date(msg.created_at), 'MMM d, HH:mm')}
                     </p>
                   </div>
+                  {!isMine && (
+                    <button
+                      onClick={() => setReplyingTo(msg)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-1 text-muted-foreground hover:text-foreground"
+                      title="Reply"
+                    >
+                      <Reply className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -363,7 +401,18 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
 
       {/* Input */}
       {ticketStatus === 'open' ? (
-        <div className="border-t border-border shrink-0">
+        <div className="shrink-0">
+          {replyingTo && (
+            <div className="flex items-center gap-2 px-3 pt-2 pb-1 border-t border-border">
+              <Reply className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <p className="text-xs text-muted-foreground truncate flex-1 italic">
+                {replyingTo.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/, '').replace(/^\[REPLY:.*?\]\s*/, '').trim() || 'Attachment'}
+              </p>
+              <button onClick={() => setReplyingTo(null)} className="text-muted-foreground hover:text-foreground shrink-0">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
           {selectedFile && (
             <div className="flex items-center gap-2 px-3 pt-2 pb-1">
               <div className="flex items-center gap-1.5 bg-muted rounded px-2 py-1 text-xs text-foreground max-w-[200px]">
@@ -386,7 +435,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0"
+              className="h-10 w-10 shrink-0 text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background"
               onClick={() => fileInputRef.current?.click()}
               disabled={sending}
               title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
@@ -397,7 +446,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              className="h-10"
+              className="h-10 border-0 shadow-none focus-visible:ring-0"
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
                   e.preventDefault();
@@ -406,8 +455,9 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               }}
             />
             <Button
+              variant="ghost"
               size="icon"
-              className="h-10 w-10 bg-foreground text-background hover:bg-foreground/90 flex-shrink-0"
+              className="h-10 w-10 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background"
               onClick={handleSend}
               disabled={sending || (!newMessage.trim() && !selectedFile)}
             >
@@ -416,7 +466,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
         </div>
       ) : (
-        <div className="border-t border-border p-3 text-center text-sm text-muted-foreground shrink-0">
+        <div className="p-3 text-center text-sm text-muted-foreground shrink-0">
           This ticket has been closed
         </div>
       )}
