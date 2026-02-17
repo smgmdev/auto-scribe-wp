@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy, ChevronDown, ChevronUp, Zap, Hand } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,6 +68,8 @@ export function AdminAgencyWithdrawalsView() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<WithdrawalRequest | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'complete' | null>(null);
+  const [payoutMode, setPayoutMode] = useState<'manual' | 'auto'>('manual');
+  const [autoPayoutProcessing, setAutoPayoutProcessing] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
   const [userDetailsDialog, setUserDetailsDialog] = useState<AgencyUserDetails | null>(null);
   const [loadingUserDetailsId, setLoadingUserDetailsId] = useState<string | null>(null);
@@ -179,6 +181,44 @@ export function AdminAgencyWithdrawalsView() {
     setProcessingId(selectedWithdrawal.id);
 
     try {
+      // If approve with auto payout, call the edge function
+      if (actionType === 'approve' && payoutMode === 'auto') {
+        setAutoPayoutProcessing(true);
+        
+        const { data, error } = await supabase.functions.invoke('process-agency-payout', {
+          body: { withdrawal_id: selectedWithdrawal.id },
+        });
+
+        setAutoPayoutProcessing(false);
+
+        if (error) {
+          console.error('Auto payout error:', error);
+          toast.error('Auto payout failed. Please try manual processing.');
+          setProcessingId(null);
+          return;
+        }
+
+        if (data && !data.success) {
+          if (data.error === 'crypto_not_supported') {
+            toast.error('USDT/crypto payouts cannot be processed automatically. Please use manual processing.');
+          } else {
+            toast.error(data.message || 'Auto payout failed. Please try manual processing.');
+          }
+          setProcessingId(null);
+          return;
+        }
+
+        toast.success(`Auto payout initiated! Transfer ID: ${data?.transfer_id}`);
+        fetchWithdrawals();
+        setProcessingId(null);
+        setSelectedWithdrawal(null);
+        setActionType(null);
+        setAdminNotes('');
+        setPayoutMode('manual');
+        return;
+      }
+
+      // Manual approval / reject flow
       const updateData: Record<string, unknown> = {
         admin_notes: adminNotes || null,
         processed_at: new Date().toISOString(),
@@ -186,7 +226,7 @@ export function AdminAgencyWithdrawalsView() {
       };
 
       if (actionType === 'approve') {
-        updateData.status = 'completed'; // Approve = completed in one step
+        updateData.status = 'completed';
       } else if (actionType === 'reject') {
         updateData.status = 'rejected';
       } else if (actionType === 'complete') {
@@ -209,22 +249,20 @@ export function AdminAgencyWithdrawalsView() {
       const withdrawalMethod = selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT';
       
       if (actionType === 'reject') {
-        // Return locked credits - positive amount to restore balance
         await supabase
           .from('credit_transactions')
           .insert({
             user_id: selectedWithdrawal.user_id,
-            amount: amount, // Positive to restore (in cents)
+            amount: amount,
             type: 'withdrawal_unlocked',
             description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`
           });
       } else if (actionType === 'approve' || actionType === 'complete') {
-        // Mark withdrawal as completed
         await supabase
           .from('credit_transactions')
           .insert({
             user_id: selectedWithdrawal.user_id,
-            amount: -amount, // Negative to confirm deduction (in cents)
+            amount: -amount,
             type: 'withdrawal_completed',
             description: `Withdrawal completed - ${withdrawalMethod}`
           });
@@ -240,6 +278,7 @@ export function AdminAgencyWithdrawalsView() {
       setSelectedWithdrawal(null);
       setActionType(null);
       setAdminNotes('');
+      setPayoutMode('manual');
     }
   };
 
@@ -724,7 +763,7 @@ export function AdminAgencyWithdrawalsView() {
       </div>
 
       {/* Action Confirmation Dialog */}
-      <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}>
+      <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -733,7 +772,7 @@ export function AdminAgencyWithdrawalsView() {
                'Complete Withdrawal'}
             </DialogTitle>
             <DialogDescription>
-              {actionType === 'approve' && 'This will approve and mark the withdrawal as completed. The funds should already be transferred.'}
+              {actionType === 'approve' && 'Choose how to process this withdrawal.'}
               {actionType === 'reject' && 'This will reject the withdrawal request. You can optionally provide a reason.'}
               {actionType === 'complete' && 'This will mark the withdrawal as completed (paid out).'}
             </DialogDescription>
@@ -748,7 +787,55 @@ export function AdminAgencyWithdrawalsView() {
                 <p className="font-medium text-lg">
                   ${(selectedWithdrawal.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
+                <p className="text-sm text-muted-foreground mt-2">Method</p>
+                <p className="font-medium">{selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
               </div>
+
+              {/* Payout mode toggle - only show for approve action */}
+              {actionType === 'approve' && (
+                <div className="space-y-2">
+                  <Label>Payout Processing</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayoutMode('auto')}
+                      disabled={selectedWithdrawal.withdrawal_method === 'crypto'}
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-colors ${
+                        payoutMode === 'auto' 
+                          ? 'border-blue-500 bg-blue-500/10 text-blue-700' 
+                          : 'border-border hover:border-muted-foreground/50'
+                      } ${selectedWithdrawal.withdrawal_method === 'crypto' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Zap className={`h-4 w-4 shrink-0 ${payoutMode === 'auto' ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                      <div>
+                        <p className="text-sm font-medium">Auto (API)</p>
+                        <p className="text-xs text-muted-foreground">Via Airwallex</p>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPayoutMode('manual')}
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-colors ${
+                        payoutMode === 'manual' 
+                          ? 'border-foreground bg-foreground/5' 
+                          : 'border-border hover:border-muted-foreground/50'
+                      }`}
+                    >
+                      <Hand className={`h-4 w-4 shrink-0 ${payoutMode === 'manual' ? 'text-foreground' : 'text-muted-foreground'}`} />
+                      <div>
+                        <p className="text-sm font-medium">Manual</p>
+                        <p className="text-xs text-muted-foreground">Process yourself</p>
+                      </div>
+                    </button>
+                  </div>
+                  {selectedWithdrawal.withdrawal_method === 'crypto' && (
+                    <p className="text-xs text-amber-600">Auto payout is not available for USDT withdrawals.</p>
+                  )}
+                  {payoutMode === 'auto' && selectedWithdrawal.withdrawal_method === 'bank' && (
+                    <p className="text-xs text-blue-600">Funds will be transferred automatically via Airwallex to the agency's bank account.</p>
+                  )}
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="admin-notes">
@@ -773,24 +860,32 @@ export function AdminAgencyWithdrawalsView() {
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); }}
+              onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}
               className="hover:bg-foreground hover:text-background hover:border-foreground"
             >
               Cancel
             </Button>
             <Button 
               onClick={confirmAction}
-              disabled={processingId !== null}
+              disabled={processingId !== null || autoPayoutProcessing}
               className={
-                actionType === 'approve' ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500' :
-                actionType === 'reject' ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive' :
-                'bg-green-500 hover:bg-green-600'
+                actionType === 'approve' && payoutMode === 'auto' 
+                  ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
+                  : actionType === 'approve' 
+                    ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
+                    : actionType === 'reject' 
+                      ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive'
+                      : 'bg-green-500 hover:bg-green-600'
               }
             >
-              {processingId ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+              {processingId || autoPayoutProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  {autoPayoutProcessing ? 'Processing Payout...' : 'Processing...'}
+                </>
               ) : (
-                actionType === 'approve' ? 'Approve' :
+                actionType === 'approve' && payoutMode === 'auto' ? 'Auto Payout' :
+                actionType === 'approve' ? 'Approve (Manual)' :
                 actionType === 'reject' ? 'Reject' :
                 'Complete'
               )}
