@@ -266,6 +266,14 @@ interface AppState {
   // Support ticket notifications (admin)
   unreadSupportTicketsCount: number;
   setUnreadSupportTicketsCount: (count: number) => void;
+  incrementUnreadSupportTicketsCount: () => void;
+  decrementUnreadSupportTicketsCount: () => void;
+  
+  // Support ticket notifications (user)
+  userUnreadSupportTicketsCount: number;
+  setUserUnreadSupportTicketsCount: (count: number) => void;
+  incrementUserUnreadSupportTicketsCount: () => void;
+  decrementUserUnreadSupportTicketsCount: () => void;
   
   // Global support chat state (persists across navigation)
   openSupportTicket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean; admin_read?: boolean; user_email?: string } | null;
@@ -704,6 +712,22 @@ export const useAppStore = create<AppState>()((set) => ({
   // Support ticket notifications (admin)
   unreadSupportTicketsCount: 0,
   setUnreadSupportTicketsCount: (count) => set({ unreadSupportTicketsCount: count }),
+  incrementUnreadSupportTicketsCount: () => set((state) => ({
+    unreadSupportTicketsCount: state.unreadSupportTicketsCount + 1
+  })),
+  decrementUnreadSupportTicketsCount: () => set((state) => ({
+    unreadSupportTicketsCount: Math.max(0, state.unreadSupportTicketsCount - 1)
+  })),
+  
+  // Support ticket notifications (user)
+  userUnreadSupportTicketsCount: 0,
+  setUserUnreadSupportTicketsCount: (count) => set({ userUnreadSupportTicketsCount: count }),
+  incrementUserUnreadSupportTicketsCount: () => set((state) => ({
+    userUnreadSupportTicketsCount: state.userUnreadSupportTicketsCount + 1
+  })),
+  decrementUserUnreadSupportTicketsCount: () => set((state) => ({
+    userUnreadSupportTicketsCount: Math.max(0, state.userUnreadSupportTicketsCount - 1)
+  })),
   
   // Global support chat state
   openSupportTicket: null,
@@ -751,6 +775,7 @@ export const useAppStore = create<AppState>()((set) => ({
     userUnreadCompletedCount: 0,
     userUnreadHistoryCount: 0,
     unreadSupportTicketsCount: 0,
+    userUnreadSupportTicketsCount: 0,
     unreadMessageCounts: {},
     minimizedChats: [],
   }),

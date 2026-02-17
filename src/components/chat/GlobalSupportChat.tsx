@@ -159,6 +159,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
   }, [isDragging]);
 
+  const { decrementUnreadSupportTicketsCount, decrementUserUnreadSupportTicketsCount } = useAppStore();
+
   // Fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
@@ -174,8 +176,10 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       // Mark as read based on role
       if (isAdmin && !ticket.admin_read) {
         await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+        decrementUnreadSupportTicketsCount();
       } else if (!isAdmin && !ticket.user_read) {
         await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+        decrementUserUnreadSupportTicketsCount();
       }
     };
     fetchMessages();
