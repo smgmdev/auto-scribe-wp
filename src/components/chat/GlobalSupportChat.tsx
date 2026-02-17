@@ -70,8 +70,8 @@ export function GlobalSupportChat() {
   );
 }
 
-function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean }; onClose: () => void }) {
-  const { user } = useAuth();
+function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean; admin_read?: boolean; user_email?: string }; onClose: () => void }) {
+  const { user, isAdmin } = useAuth();
   const isMobile = useIsMobile();
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
@@ -159,7 +159,10 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       if (data) setMessages(data);
       setLoadingMessages(false);
 
-      if (!ticket.user_read) {
+      // Mark as read based on role
+      if (isAdmin && !ticket.admin_read) {
+        await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+      } else if (!isAdmin && !ticket.user_read) {
         await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
       }
     };
@@ -231,14 +234,22 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         setUploadingFile(false);
       }
 
+      const senderType = isAdmin ? 'admin' : 'user';
+
       const { error } = await supabase.from('support_messages').insert({
         ticket_id: ticket.id,
         sender_id: user.id,
-        sender_type: 'user',
+        sender_type: senderType,
         message: fullMessage
       });
       if (error) throw error;
-      await supabase.from('support_tickets').update({ admin_read: false, updated_at: new Date().toISOString() }).eq('id', ticket.id);
+
+      // Mark the other party as unread
+      if (isAdmin) {
+        await supabase.from('support_tickets').update({ user_read: false, updated_at: new Date().toISOString() }).eq('id', ticket.id);
+      } else {
+        await supabase.from('support_tickets').update({ admin_read: false, updated_at: new Date().toISOString() }).eq('id', ticket.id);
+      }
       setNewMessage('');
       setSelectedFile(null);
     } catch {
@@ -280,6 +291,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <div className="min-w-0 flex-1 mr-2">
           <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
           <p className="text-[11px] text-muted-foreground">
+            {ticket.user_email && <>{ticket.user_email} · </>}
             {format(new Date(ticket.created_at), 'MMM d, yyyy')}
             {' · '}
             <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
@@ -287,9 +299,26 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             </Badge>
           </p>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0">
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          {isAdmin && (
+            ticketStatus === 'open' ? (
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
+                await supabase.from('support_tickets').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', ticket.id);
+                setTicketStatus('closed');
+                toast.success('Ticket closed');
+              }}>Close</Button>
+            ) : (
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
+                await supabase.from('support_tickets').update({ status: 'open', closed_at: null }).eq('id', ticket.id);
+                setTicketStatus('open');
+                toast.success('Ticket reopened');
+              }}>Reopen</Button>
+            )
+          )}
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -310,17 +339,18 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
                 try { attachment = JSON.parse(attachmentMatch[1]); } catch {}
                 textContent = msg.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/, '').trim();
               }
+              const isMine = isAdmin ? msg.sender_type === 'admin' : msg.sender_type === 'user';
               return (
-                <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] rounded-lg px-3 py-2 ${
-                    msg.sender_type === 'user'
+                    isMine
                       ? 'bg-foreground text-background'
                       : 'bg-muted text-foreground'
                   }`}>
                     {textContent && <p className="text-sm whitespace-pre-wrap break-words">{textContent}</p>}
-                    {attachment && <AttachmentPreview attachment={attachment} isUser={msg.sender_type === 'user'} />}
-                    <p className={`text-[10px] mt-1 ${msg.sender_type === 'user' ? 'text-background/60' : 'text-muted-foreground'}`}>
-                      {format(new Date(msg.created_at), 'MMM d, HH:mm')}
+                    {attachment && <AttachmentPreview attachment={attachment} isUser={isMine} />}
+                    <p className={`text-[10px] mt-1 ${isMine ? 'text-background/60' : 'text-muted-foreground'}`}>
+                      {msg.sender_type === 'admin' ? 'Support' : (ticket.user_email || 'User')} · {format(new Date(msg.created_at), 'MMM d, HH:mm')}
                     </p>
                   </div>
                 </div>

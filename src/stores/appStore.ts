@@ -268,8 +268,8 @@ interface AppState {
   setUnreadSupportTicketsCount: (count: number) => void;
   
   // Global support chat state (persists across navigation)
-  openSupportTicket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean } | null;
-  openSupportChat: (ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean }) => void;
+  openSupportTicket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean; admin_read?: boolean; user_email?: string } | null;
+  openSupportChat: (ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean; admin_read?: boolean; user_email?: string }) => void;
   closeSupportChat: () => void;
   
   // Reset all notification counts (for user switch)
