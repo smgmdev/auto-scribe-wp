@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AgencyStatusCard } from '@/components/agency/AgencyStatusCard';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { playMessageSound } from '@/lib/chat-presence';
 
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
@@ -1630,9 +1631,13 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
         const msg = payload.new as any;
-        // If user sent a message, refetch admin count
+        // If user sent a message, refetch admin count and play sound if chat not open
         if (msg.sender_type === 'user') {
           refetchAdminSupportCount();
+          const openTicket = useAppStore.getState().openSupportTicket;
+          if (!openTicket || openTicket.id !== msg.ticket_id) {
+            playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
+          }
         }
       })
       .subscribe();
@@ -1660,9 +1665,13 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
         const msg = payload.new as any;
-        // If admin sent a message, refetch user count
+        // If admin sent a message, refetch user count and play sound if chat not open
         if (msg.sender_type === 'admin') {
           refetchUserSupportCount();
+          const openTicket = useAppStore.getState().openSupportTicket;
+          if (!openTicket || openTicket.id !== msg.ticket_id) {
+            playMessageSound(msg.ticket_id, msg.message?.substring(0, 30));
+          }
         }
       })
       .subscribe();
