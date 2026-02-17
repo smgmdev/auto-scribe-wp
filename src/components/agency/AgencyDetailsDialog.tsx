@@ -213,7 +213,7 @@ export function AgencyDetailsDialog({
   ) : agencyDetails ? (
     <div className="space-y-4">
       {headerContent}
-      {agencyDetails.agency_website && (
+      {isAuthenticated && agencyDetails.agency_website && (
         <div>
           <p className="text-sm text-muted-foreground">Website</p>
           <a 
@@ -227,13 +227,13 @@ export function AgencyDetailsDialog({
           </a>
         </div>
       )}
-      {agencyDetails.country && (
+      {isAuthenticated && agencyDetails.country && (
         <div>
           <p className="text-sm text-muted-foreground">Country</p>
           <p className="text-foreground">{agencyDetails.country}</p>
         </div>
       )}
-      {agencyDetails.agency_description && (
+      {isAuthenticated && agencyDetails.agency_description && (
         <div>
           <p className="text-sm text-muted-foreground">Description</p>
           <p className="text-foreground">{agencyDetails.agency_description}</p>
