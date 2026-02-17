@@ -470,7 +470,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
                       </DropdownMenu>
                     </div>
                     <p className={`text-[10px] mt-1 ${isMine ? 'text-background/60' : 'text-muted-foreground'}`}>
-                      {msg.sender_type === 'admin' ? 'Support' : (ticket.user_email || 'User')} · {format(new Date(msg.created_at), 'MMM d, HH:mm')}
+                      {msg.sender_type === 'admin' ? 'Arcana Mace Support' : (ticket.user_email || 'User')} · {format(new Date(msg.created_at), 'MMM d, HH:mm')}
                     </p>
                   </div>
                 </div>
@@ -490,7 +490,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
           <span>
-            {typingUsers.map(u => u.sender_type === 'admin' ? 'Support' : 'User').filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+            {typingUsers.map(u => u.sender_type === 'admin' ? 'Arcana Mace Support' : 'User').filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
           </span>
         </div>
       )}
