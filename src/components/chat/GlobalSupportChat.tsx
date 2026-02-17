@@ -702,8 +702,9 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
         </div>
       ) : (
-        <div className="p-3 text-center text-sm text-muted-foreground shrink-0">
-          This ticket has been closed
+        <div className="shrink-0">
+          <div className="border-t border-border" />
+          <p className="p-3 text-center text-sm text-muted-foreground">This ticket has been closed</p>
         </div>
       )}
     </div>,
