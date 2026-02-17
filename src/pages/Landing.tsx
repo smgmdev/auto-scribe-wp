@@ -154,76 +154,53 @@ const Landing = () => {
         if (mediaError) throw mediaError;
         setMediaSites(mediaData || []);
 
-        // Fetch active agencies via secure RPC (avoids exposing sensitive columns)
+        // Fetch active agencies via secure RPCs
         const { data: activeAgenciesData } = await supabase
           .rpc('get_active_agency_payouts');
         
-        if (activeAgenciesData && activeAgenciesData.length > 0) {
-          const agencyNames = activeAgenciesData.map(a => a.agency_name);
-          const { data: appData } = await supabase
-            .from('agency_applications')
-            .select('agency_name, agency_website, country, logo_url')
-            .in('agency_name', agencyNames)
-            .eq('status', 'approved');
-          
+        const { data: publicAgencies } = await supabase.rpc('get_public_agencies');
+        
+        if (activeAgenciesData && activeAgenciesData.length > 0 && publicAgencies) {
           const agencies: ActiveAgency[] = [];
-          if (appData) {
-            for (const app of appData) {
-              let logoUrl: string | null = null;
-              if (app.logo_url) {
-                const { data: publicUrl } = supabase.storage
-                  .from('agency-logos')
-                  .getPublicUrl(app.logo_url);
-                logoUrl = publicUrl?.publicUrl || null;
-              }
-              const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
-              agencies.push({
-                id: payoutRecord?.id || app.agency_name,
-                name: app.agency_name,
-                link: app.agency_website || '',
-                favicon: logoUrl,
-                country: app.country || null,
-                about: null
-              });
+          for (const app of publicAgencies) {
+            const payoutRecord = activeAgenciesData.find(a => a.agency_name === app.agency_name);
+            if (!payoutRecord) continue;
+            
+            let logoUrl: string | null = null;
+            if (app.logo_url) {
+              const { data: publicUrl } = supabase.storage
+                .from('agency-logos')
+                .getPublicUrl(app.logo_url);
+              logoUrl = publicUrl?.publicUrl || null;
             }
+            agencies.push({
+              id: payoutRecord.id,
+              name: app.agency_name,
+              link: '',
+              favicon: logoUrl,
+              country: app.country || null,
+              about: null
+            });
           }
           setActiveAgencies(agencies);
         } else {
           setActiveAgencies([]);
         }
 
-        // Fetch agency logos from agency_applications table
+        // Fetch agency logos using public RPC
         const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
-        if (uniqueAgencies.length > 0) {
-          const { data: appData, error: appError } = await supabase
-            .from('agency_applications')
-            .select('agency_name, logo_url, created_at')
-            .in('agency_name', uniqueAgencies)
-            .not('logo_url', 'is', null)
-            .order('created_at', { ascending: true });
-
-          if (!appError && appData && appData.length > 0) {
-            // Get earliest logo per agency_name
-            const earliestLogoByAgency: Record<string, string> = {};
-            for (const row of appData) {
-              if (!row?.agency_name || !row?.logo_url) continue;
-              if (!earliestLogoByAgency[row.agency_name]) {
-                earliestLogoByAgency[row.agency_name] = row.logo_url;
-              }
+        if (uniqueAgencies.length > 0 && publicAgencies) {
+          const logos: Record<string, string> = {};
+          for (const agency of publicAgencies) {
+            if (!agency.logo_url || !uniqueAgencies.includes(agency.agency_name)) continue;
+            const { data: publicUrl } = supabase.storage
+              .from('agency-logos')
+              .getPublicUrl(agency.logo_url);
+            if (publicUrl?.publicUrl) {
+              logos[agency.agency_name] = publicUrl.publicUrl;
             }
-
-            // Get public URLs for each logo
-            const logos: Record<string, string> = {};
-            Object.entries(earliestLogoByAgency).forEach(([agencyName, path]) => {
-              const { data: publicUrl } = supabase.storage
-                .from('agency-logos')
-                .getPublicUrl(path);
-              if (publicUrl?.publicUrl) {
-                logos[agencyName] = publicUrl.publicUrl;
-              }
-            });
-            setAgencyLogos(logos);
           }
+          setAgencyLogos(logos);
         }
 
       } catch (error) {
