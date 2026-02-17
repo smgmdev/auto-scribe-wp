@@ -89,7 +89,7 @@ const PrivacyPolicy = () => {
         {/* Introduction */}
         <div className="mb-10">
           <p className="text-muted-foreground leading-relaxed mb-4">
-            Arcana Mace's Privacy Policy describes how Arcana Mace collects, uses, and shares your personal data.
+            This website, arcanamace.com, is operated by Stankevicius Pacific Limited ("Arcana Mace"). Arcana Mace's Privacy Policy describes how Arcana Mace collects, uses, and shares your personal data.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             In addition to this Privacy Policy, we provide data and privacy information embedded in our products and certain features that ask to use your personal data. You can familiarize yourself with our privacy practices, accessible via the sections below, and contact us if you have any questions.
