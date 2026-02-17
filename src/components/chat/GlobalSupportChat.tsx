@@ -508,27 +508,36 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <div className="min-w-0 flex-1 mr-2">
           <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            {ticket.user_email && <>{ticket.user_email} · </>}
-            {format(new Date(ticket.created_at), 'MMM d, yyyy')}
-            {isAdmin && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="ml-1 text-muted-foreground hover:text-foreground inline-flex items-center">
-                    <Info className="h-3.5 w-3.5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 bg-popover z-[99999]" side="bottom" align="start">
-                  <div className="space-y-2 text-sm">
-                    <h4 className="font-semibold text-foreground">User Details</h4>
-                    <div className="space-y-1.5 text-xs">
-                      <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground">{ticketUserDetails?.full_name || 'N/A'}</span></div>
-                      <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">{ticketUserDetails?.email || 'N/A'}</span></div>
-                      <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-                      <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+            {isAdmin ? (
+              <>
+                <span>User</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="ml-0.5 text-muted-foreground hover:text-foreground inline-flex items-center">
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 bg-popover z-[99999]" side="bottom" align="start">
+                    <div className="space-y-2 text-sm">
+                      <h4 className="font-semibold text-foreground">User Details</h4>
+                      <div className="space-y-1.5 text-xs">
+                        <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+                        <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">{ticketUserDetails?.email || 'N/A'}</span></div>
+                        <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
+                        <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
+              </>
+            ) : (
+              <>
+                <span className="text-foreground font-medium">Arcana Mace Staff</span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+                  <span className="text-emerald-600">Online</span>
+                </span>
+              </>
             )}
             {' · '}
             <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
