@@ -1,16 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2, ExternalLink, ArrowRight, Info } from 'lucide-react';
+import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2, ExternalLink, ArrowRight, Info, X, GripHorizontal } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { createPortal } from 'react-dom';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
 import businessHero from '@/assets/business-hero.jpg';
 
@@ -37,6 +39,7 @@ export default function SelfPublishing() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { setPreselectedSiteId, setCurrentView } = useAppStore();
+  const isMobile = useIsMobile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
@@ -47,6 +50,103 @@ export default function SelfPublishing() {
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Drag state for site popup
+  const getCenteredPos = () => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 768;
+    const popupWidth = 450;
+    const popupHeight = Math.min(h * 0.85, 500);
+    return { x: (w - popupWidth) / 2, y: (h - popupHeight) / 2 };
+  };
+  const [sitePopupPos, setSitePopupPos] = useState(getCenteredPos);
+  const [isSiteDragging, setIsSiteDragging] = useState(false);
+  const isSiteDraggingRef = useRef(false);
+  const sitePopupPosRef = useRef(getCenteredPos());
+  const siteDragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const sitePopupRef = useRef<HTMLDivElement>(null);
+
+  // Center popup every time it opens
+  useEffect(() => {
+    if (selectedSite) {
+      const newPos = getCenteredPos();
+      setSitePopupPos(newPos);
+      sitePopupPosRef.current = newPos;
+    }
+  }, [selectedSite]);
+
+  // Register on popup stack for Esc handling
+  useEffect(() => {
+    if (!selectedSite) { removePopup('self-pub-site-dialog'); return; }
+    pushPopup('self-pub-site-dialog', () => setSelectedSite(null));
+    return () => removePopup('self-pub-site-dialog');
+  }, [selectedSite]);
+
+  // Mobile body scroll lock
+  useEffect(() => {
+    if (!selectedSite || !isMobile) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [selectedSite, isMobile]);
+
+  // Drag handlers
+  const handleSiteDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, a, input, [role="button"]')) return;
+    isSiteDraggingRef.current = true;
+    setIsSiteDragging(true);
+    siteDragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: sitePopupPosRef.current.x,
+      posY: sitePopupPosRef.current.y,
+    };
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (!isSiteDraggingRef.current) {
+      sitePopupPosRef.current = sitePopupPos;
+    }
+  }, [sitePopupPos]);
+
+  useEffect(() => {
+    if (!isSiteDragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      const dx = e.clientX - siteDragStartRef.current.x;
+      const dy = e.clientY - siteDragStartRef.current.y;
+      const newX = siteDragStartRef.current.posX + dx;
+      const newY = siteDragStartRef.current.posY + dy;
+      sitePopupPosRef.current = { x: newX, y: newY };
+      if (sitePopupRef.current) {
+        sitePopupRef.current.style.left = `${newX}px`;
+        sitePopupRef.current.style.top = `${newY}px`;
+      }
+    };
+    const handleMouseUp = () => {
+      isSiteDraggingRef.current = false;
+      setIsSiteDragging(false);
+      setSitePopupPos(sitePopupPosRef.current);
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isSiteDragging]);
 
   const extractDomain = (url: string) => {
     try {
@@ -515,99 +615,178 @@ export default function SelfPublishing() {
       <Footer narrow showTopBorder />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
-      {/* Media Site Detail Dialog */}
-      <Dialog open={!!selectedSite} onOpenChange={(open) => !open && setSelectedSite(null)}>
-        <DialogContent className="sm:max-w-md z-[200]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <img
-                src={selectedSite?.favicon || (selectedSite ? getFaviconUrl(selectedSite.url) : '')}
-                alt={selectedSite?.name || ''}
-                className="h-12 w-12 rounded-xl object-cover"
-              />
-              <span>{selectedSite?.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedSite && (
-            <div className="space-y-4 mt-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Website</p>
-                <div className="flex items-center gap-2">
-                  <a 
-                    href={selectedSite.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {extractDomain(selectedSite.url)}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+      {/* Media Site Detail - Draggable Popup */}
+      {selectedSite && (isMobile ? (
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-[200] bg-background flex flex-col">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black"
+                  onClick={() => setSelectedSite(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={selectedSite.favicon || getFaviconUrl(selectedSite.url)}
+                      alt={selectedSite.name}
+                      className="h-12 w-12 rounded-xl object-cover shrink-0"
+                    />
+                    <span className="font-semibold text-lg">{selectedSite.name}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Website</p>
+                    <a href={selectedSite.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1">
+                      {extractDomain(selectedSite.url)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Publication Type</p>
+                    <p className="text-foreground">Article</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <p className="text-foreground font-medium">{selectedSite.credits_required} USD</p>
+                  </div>
+                  {selectedSite.agency && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Agency</p>
+                      <p className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1" onClick={() => handleAgencyClick(selectedSite.agency!)}>
+                        {selectedSite.agency}
+                        <Info className="h-3 w-3" />
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Publication Type</p>
-                <p className="text-foreground">Article</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Price</p>
-                <p className="text-foreground font-medium">{selectedSite.credits_required} USD</p>
-              </div>
-              {selectedSite.agency && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Agency</p>
-                  <p 
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1"
-                    onClick={() => handleAgencyClick(selectedSite.agency!)}
+              <div className="border-t p-4">
+                <div className="flex flex-col-reverse gap-3">
+                  <Button variant="outline" onClick={() => setSelectedSite(null)} className="rounded-none hover:bg-black hover:text-white transition-colors w-full">
+                    Close
+                  </Button>
+                  <Button
+                    className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full px-3 border border-transparent hover:border-black"
+                    onClick={() => handlePublishNewArticle(selectedSite.id)}
+                    disabled={navigating}
                   >
-                    {selectedSite.agency}
-                    <Info className="h-3 w-3" />
-                  </p>
+                    {navigating ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /><span>Loading...</span></>
+                    ) : (
+                      <><span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span><span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1"><ArrowRight className="h-4 w-4 shrink-0" /></span></>
+                    )}
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
-          )}
-
-          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 mt-4">
-            <Button 
-              variant="outline"
-              onClick={() => setSelectedSite(null)}
-              className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:w-32"
+            <AgencyDetailsDialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen} agencyName={selectedAgencyName} zIndex={250} />
+          </>,
+          document.body
+        )
+      ) : (
+        createPortal(
+          <>
+            <div
+              ref={sitePopupRef}
+              className="fixed z-[200] bg-background border shadow-2xl w-[450px] max-h-[85vh] flex flex-col"
+              style={{
+                left: `${sitePopupPosRef.current.x}px`,
+                top: `${sitePopupPosRef.current.y}px`,
+                willChange: isSiteDragging ? 'left, top' : 'auto',
+              }}
             >
-              Close
-            </Button>
-            {selectedSite && (
-              <Button 
-                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:w-fit px-3 border border-transparent hover:border-black"
-                onClick={() => handlePublishNewArticle(selectedSite.id)}
-                disabled={navigating}
+              <div
+                className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isSiteDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                onMouseDown={handleSiteDragStart}
               >
-                {navigating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span>
-                    <span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1">
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </span>
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black"
+                  onClick={() => setSelectedSite(null)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="overflow-y-auto p-4">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={selectedSite.favicon || getFaviconUrl(selectedSite.url)}
+                      alt={selectedSite.name}
+                      className="h-12 w-12 rounded-xl object-cover shrink-0"
+                    />
+                    <span className="font-semibold text-lg">{selectedSite.name}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Website</p>
+                    <a href={selectedSite.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1">
+                      {extractDomain(selectedSite.url)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Publication Type</p>
+                    <p className="text-foreground">Article</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <p className="text-foreground font-medium">{selectedSite.credits_required} USD</p>
+                  </div>
+                  {selectedSite.agency && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Agency</p>
+                      <p className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline transition-colors flex items-center gap-1" onClick={() => handleAgencyClick(selectedSite.agency!)}>
+                        {selectedSite.agency}
+                        <Info className="h-3 w-3" />
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="border-t p-4">
+                <div className="flex flex-col-reverse md:flex-row gap-3">
+                  <Button variant="outline" onClick={() => setSelectedSite(null)} className="rounded-none hover:bg-black hover:text-white transition-colors w-full md:flex-1">
+                    Close
+                  </Button>
+                  <Button
+                    className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 group w-full md:flex-1 px-3 border border-transparent hover:border-black"
+                    onClick={() => handlePublishNewArticle(selectedSite.id)}
+                    disabled={navigating}
+                  >
+                    {navigating ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /><span>Loading...</span></>
+                    ) : (
+                      <><span>{user ? 'Publish New Article' : 'Sign In to Publish'}</span><span className="inline-flex w-0 overflow-hidden transition-all duration-200 group-hover:w-5 group-hover:ml-1"><ArrowRight className="h-4 w-4 shrink-0" /></span></>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <AgencyDetailsDialog open={agencyDetailsOpen} onOpenChange={setAgencyDetailsOpen} agencyName={selectedAgencyName} zIndex={250} />
+          </>,
+          document.body
+        )
+      ))}
 
-      {/* Agency Details Dialog */}
-      <AgencyDetailsDialog
-        open={agencyDetailsOpen}
-        onOpenChange={setAgencyDetailsOpen}
-        agencyName={selectedAgencyName}
-        zIndex={250}
-      />
+      {/* Agency Details Dialog (when no site selected) */}
+      {!selectedSite && (
+        <AgencyDetailsDialog
+          open={agencyDetailsOpen}
+          onOpenChange={setAgencyDetailsOpen}
+          agencyName={selectedAgencyName}
+          zIndex={250}
+        />
+      )}
     </div>
   );
 }
