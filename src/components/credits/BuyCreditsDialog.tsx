@@ -246,7 +246,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className={`pointer-events-auto bg-background relative overflow-y-auto ${
+        className={`pointer-events-auto bg-white text-gray-900 relative overflow-y-auto ${
           isMobile
             ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
             : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-lg'
@@ -283,7 +283,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </>
               ) : (
                 <>
-                  <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain dark:invert" />
+                  <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain" />
                    Payment
                 </>
               )}
@@ -424,7 +424,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 <span>Your payment is securely processed by</span>
-                <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain dark:invert" />
+                <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain" />
               </div>
 
               {confirming && (
