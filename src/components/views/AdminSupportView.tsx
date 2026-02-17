@@ -126,19 +126,21 @@ export function AdminSupportView() {
             filteredTickets.map(ticket => (
               <button
                 key={ticket.id}
-                className="w-full text-left border rounded-lg p-4 hover:bg-gray-50 transition-colors relative"
+                className="w-full text-left border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                 onClick={() => handleOpenTicket(ticket)}
               >
-                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0 sm:hidden absolute top-3 right-3">
-                  {ticket.status === 'open' ? (
-                    <><Clock className="h-3 w-3 mr-1" />Open</>
-                  ) : (
-                    <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
-                  )}
-                </Badge>
+                <div className="flex items-center justify-end sm:hidden mb-2">
+                  <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs">
+                    {ticket.status === 'open' ? (
+                      <><Clock className="h-3 w-3 mr-1" />Open</>
+                    ) : (
+                      <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                    )}
+                  </Badge>
+                </div>
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 sm:pr-0 pr-16">
+                    <div className="flex items-center gap-2">
                       {!ticket.admin_read && (
                         <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0" />
                       )}
