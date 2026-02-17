@@ -180,7 +180,14 @@ export function SupportView() {
               <button
                 key={ticket.id}
                 className="w-full text-left border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
-                onClick={() => openSupportChat(ticket)}
+                onClick={() => {
+                  if (!ticket.user_read) {
+                    supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+                    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, user_read: true } : t));
+                    useAppStore.getState().decrementUserUnreadSupportTicketsCount();
+                  }
+                  openSupportChat(ticket);
+                }}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

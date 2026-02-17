@@ -215,6 +215,12 @@ export function Sidebar({
     incrementUnreadBugReportsCount,
     unreadSupportTicketsCount,
     setUnreadSupportTicketsCount,
+    incrementUnreadSupportTicketsCount,
+    decrementUnreadSupportTicketsCount,
+    userUnreadSupportTicketsCount,
+    setUserUnreadSupportTicketsCount,
+    incrementUserUnreadSupportTicketsCount,
+    decrementUserUnreadSupportTicketsCount,
   } = useAppStore();
   const navigate = useNavigate();
   const {
@@ -1583,6 +1589,87 @@ export function Sidebar({
       supabase.removeChannel(channel);
     };
   }, [user?.id, isAdmin, isAgencyOnboarded, agencyPayoutId]);
+
+  // Fetch initial user support ticket unread count
+  useEffect(() => {
+    if (!user || isAdmin) return;
+    
+    const fetchUserSupportCount = async () => {
+      const { count } = await supabase
+        .from('support_tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('user_read', false);
+      setUserUnreadSupportTicketsCount(count || 0);
+    };
+    
+    fetchUserSupportCount();
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for support tickets (admin side)
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const refetchAdminSupportCount = async () => {
+      const { count } = await supabase
+        .from('support_tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'open')
+        .eq('admin_read', false);
+      setUnreadSupportTicketsCount(count || 0);
+    };
+
+    const channel = supabase
+      .channel('admin-support-realtime-sidebar')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_tickets' }, () => {
+        console.log('[Sidebar] New support ticket, refetching admin count');
+        refetchAdminSupportCount();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'support_tickets' }, () => {
+        refetchAdminSupportCount();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
+        const msg = payload.new as any;
+        // If user sent a message, refetch admin count
+        if (msg.sender_type === 'user') {
+          refetchAdminSupportCount();
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, isAdmin]);
+
+  // Real-time subscription for support tickets (user side)
+  useEffect(() => {
+    if (!user || isAdmin) return;
+
+    const refetchUserSupportCount = async () => {
+      const { count } = await supabase
+        .from('support_tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('user_read', false);
+      setUserUnreadSupportTicketsCount(count || 0);
+    };
+
+    const channel = supabase
+      .channel('user-support-realtime-sidebar')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'support_tickets', filter: `user_id=eq.${user.id}` }, () => {
+        refetchUserSupportCount();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
+        const msg = payload.new as any;
+        // If admin sent a message, refetch user count
+        if (msg.sender_type === 'admin') {
+          refetchUserSupportCount();
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, isAdmin]);
+
   const handleNavClick = (viewId: string) => {
     // Mark that user has navigated (enables auto-expand for submenus)
     setHasUserNavigated(true);
@@ -1846,10 +1933,17 @@ export function Sidebar({
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
                 Account Settings
               </Button>
-              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
-                <Headphones className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
-                Support
-              </Button>
+              <div className="relative">
+                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
+                  <Headphones className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
+                  Support
+                </Button>
+                {(isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount) > 0 && (
+                  <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                    {isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount}
+                  </span>
+                )}
+              </div>
               {isAdmin && (
                 <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
                   <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
