@@ -85,7 +85,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-xl font-semibold mb-4">Ownership of Site; Agreement to Terms of Use</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              These Terms and Conditions of Use (the "Terms of Use") apply to the Arcana Mace website located at arcana-mace.com, and all associated sites linked to arcana-mace.com by Arcana Mace, its subsidiaries and affiliates (collectively, the "Site"). The Site is the property of Arcana Mace and its licensors. BY USING THE SITE, YOU AGREE TO THESE TERMS OF USE; IF YOU DO NOT AGREE, DO NOT USE THE SITE.
+              These Terms and Conditions of Use (the "Terms of Use") apply to the Arcana Mace website located at arcanamace.com, and all associated sites linked to arcanamace.com by Arcana Mace, its subsidiaries and affiliates (collectively, the "Site"). The Site is the property of Stankevicius Pacific Limited ("Arcana Mace") and its licensors. This website, arcanamace.com, is operated by Stankevicius Pacific Limited. BY USING THE SITE, YOU AGREE TO THESE TERMS OF USE; IF YOU DO NOT AGREE, DO NOT USE THE SITE.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Arcana Mace reserves the right, at its sole discretion, to change, modify, add or remove portions of these Terms of Use, at any time. It is your responsibility to check these Terms of Use periodically for changes. Your continued use of the Site following the posting of changes will mean that you accept and agree to the changes. As long as you comply with these Terms of Use, Arcana Mace grants you a personal, non-exclusive, non-transferable, limited privilege to enter and use the Site.
