@@ -5,7 +5,9 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Coins, GripHorizontal, X, ArrowLeft, CreditCard, ShieldCheck } from 'lucide-react';
+import { Loader2, Coins, GripHorizontal, X, ArrowLeft, ShieldCheck } from 'lucide-react';
+import amBlackLogo from '@/assets/amblack-2.png';
+import airwallexLogo from '@/assets/airwallex-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -281,8 +283,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </>
               ) : (
                 <>
-                  <CreditCard className="h-5 w-5 text-accent" />
-                  Payment
+                  <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain dark:invert" />
+                   Payment
                 </>
               )}
             </h2>
@@ -419,9 +421,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               </div>
 
               {/* Security badge */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Your payment is securely processed by Airwallex</span>
+                <span>Your payment is securely processed by</span>
+                <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain dark:invert" />
               </div>
 
               {confirming && (
