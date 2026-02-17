@@ -189,9 +189,8 @@ function SupportChatPopup({ ticket, onClose }: { ticket: SupportTicket; onClose:
           : 'fixed z-[60] bg-background rounded-lg shadow-xl border border-border flex flex-col'
       }
       style={isMobile ? undefined : {
-        left: '50%',
-        top: '50%',
-        transform: `translate(-50%, -50%) translate(${position.x - Math.round(window.innerWidth / 2)}px, ${position.y - Math.round(window.innerHeight / 2)}px)`,
+        left: position.x,
+        top: position.y,
         width: 420,
         height: 520,
         minHeight: 420,
