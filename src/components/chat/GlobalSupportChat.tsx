@@ -442,7 +442,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {isAdmin && (
+          {!isAdmin && (
             ticketStatus === 'open' ? (
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={async () => {
                 await supabase.from('support_tickets').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', ticket.id);
