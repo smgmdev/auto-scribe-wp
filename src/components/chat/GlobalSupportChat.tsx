@@ -96,6 +96,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFocusedRef = useRef(false);
+  const hasPendingReadRef = useRef(false);
 
   // Drag state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -162,6 +164,54 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
 
   const { decrementUnreadSupportTicketsCount, decrementUserUnreadSupportTicketsCount } = useAppStore();
 
+  // Mark ticket as read helper
+  const markAsRead = useCallback(async () => {
+    if (!user) return;
+    hasPendingReadRef.current = false;
+    if (isAdmin) {
+      await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+    } else {
+      await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+    }
+  }, [user, isAdmin, ticket.id]);
+
+  // Track focus state — mark as read when window is clicked/focused
+  useEffect(() => {
+    const el = chatWindowRef.current;
+    if (!el) return;
+    
+    const handleFocus = () => {
+      isFocusedRef.current = true;
+      // If there are pending unread messages, mark as read now
+      if (hasPendingReadRef.current) {
+        markAsRead();
+      }
+    };
+    const handleBlur = () => {
+      isFocusedRef.current = false;
+    };
+    
+    // Use mousedown/touchstart on the chat window to detect focus
+    el.addEventListener('mousedown', handleFocus);
+    el.addEventListener('touchstart', handleFocus);
+    // Detect when clicking outside
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (!el.contains(e.target as Node)) {
+        handleBlur();
+      }
+    };
+    document.addEventListener('mousedown', handleDocumentClick);
+    
+    // Set focused on mount (user just opened it)
+    isFocusedRef.current = true;
+    
+    return () => {
+      el.removeEventListener('mousedown', handleFocus);
+      el.removeEventListener('touchstart', handleFocus);
+      document.removeEventListener('mousedown', handleDocumentClick);
+    };
+  }, [markAsRead]);
+
   // Fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
@@ -174,12 +224,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       if (data) setMessages(data);
       setLoadingMessages(false);
 
-      // Mark as read based on role
+      // Mark as read on open since user just clicked to open (focused)
       if (isAdmin && !ticket.admin_read) {
-        await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+        await markAsRead();
         decrementUnreadSupportTicketsCount();
       } else if (!isAdmin && !ticket.user_read) {
-        await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+        await markAsRead();
         decrementUserUnreadSupportTicketsCount();
       }
     };
@@ -192,12 +242,13 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         setMessages(prev => [...prev, newMsg]);
         const isCounterparty = isAdmin ? newMsg.sender_type === 'user' : newMsg.sender_type === 'admin';
         if (isCounterparty) {
-          playMessageSound(ticket.id, newMsg.message?.substring(0, 30));
-          // Auto-mark as read since chat is open — prevents sidebar badge from appearing
-          if (isAdmin) {
-            await supabase.from('support_tickets').update({ admin_read: true }).eq('id', ticket.id);
+          if (isFocusedRef.current) {
+            // Chat is focused — mark as read immediately, no sound
+            await markAsRead();
           } else {
-            await supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+            // Chat is open but not focused — play sound, defer read until focus
+            playMessageSound(ticket.id, newMsg.message?.substring(0, 30));
+            hasPendingReadRef.current = true;
           }
         }
       })
