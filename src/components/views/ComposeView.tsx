@@ -1518,7 +1518,7 @@ export function ComposeView() {
                     Saving...
                   </> : 'Save Draft'}
               </Button>}
-            {!editingArticle && <Button variant="outline" className="w-full rounded-none hover:bg-black hover:text-white" onClick={handleSaveDraft} disabled={!title || isPublishing}>
+            {!editingArticle && <Button variant="outline" className="w-full rounded-none hover:bg-black hover:text-white hover:border-black" onClick={handleSaveDraft} disabled={!title || isPublishing}>
                 Save as Draft
               </Button>}
           </div>
