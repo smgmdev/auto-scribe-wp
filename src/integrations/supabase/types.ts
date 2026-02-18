@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action_type: string
+          admin_id: string
+          details: Json | null
+          id: string
+          performed_at: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          details?: Json | null
+          id?: string
+          performed_at?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          details?: Json | null
+          id?: string
+          performed_at?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_investigations: {
         Row: {
           admin_id: string
