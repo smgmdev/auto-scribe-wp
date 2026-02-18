@@ -31,8 +31,8 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Visa, Mastercard, American Express</li>
           <li>Apple Pay and Google Pay</li>
-          <li>Local bank transfer methods (availability varies by region)</li>
-          <li>USDT cryptocurrency (for agency payouts — not credit purchases)</li>
+          <li>International bank transfer methods are available. Contact support for invoice.</li>
+          <li>USDT cryptocurrency top up is available. Contact support for invoice.</li>
         </ul>
         <p>
           All transactions are encrypted and processed through Airwallex, a globally licensed
@@ -69,12 +69,11 @@ const sections: HelpSection[] = [
         <p>We want you to be satisfied with your experience. Here's our refund policy:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Failed Orders:</strong> Full credit refund if publication fails or is cancelled before acceptance</li>
-          <li><strong>Quality Issues:</strong> Reviewed case-by-case via the support ticketing system</li>
           <li><strong>Disputes:</strong> If you raise a dispute, our team will review and may issue a credit refund</li>
         </ul>
         <p>
-          To request a refund, open a support ticket from your dashboard with your order details.
-          Refunds are typically processed within 5–7 business days.
+          You cannot withdraw refunded credits from a failed order or a dispute. Purchased credits are
+          non-withdrawable and can only be used for media buying on Arcana Mace.
         </p>
       </div>
     ),
