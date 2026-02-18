@@ -68,29 +68,6 @@ const sections: HelpSection[] = [
     ),
   },
   {
-    id: 'auto-publishing',
-    title: 'Auto-Publishing (AI Settings)',
-    content: (
-      <div className="space-y-4">
-        <p>
-          The AI Settings feature allows you to configure automated article generation and publishing
-          to your connected WordPress sites:
-        </p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Set a news source (RSS feed or URL) as input for AI rewriting</li>
-          <li>Configure an auto-publish interval (e.g., every 30, 60, or 120 minutes)</li>
-          <li>Choose a target WordPress site and category for automatic publishing</li>
-          <li>Enable or disable image fetching and SEO optimization</li>
-          <li>Toggle rewriting on or off — publish directly or with AI rewrite</li>
-        </ul>
-        <p>
-          Auto-published articles are logged in the "AI Articles" section of your dashboard,
-          with links to the live WordPress posts.
-        </p>
-      </div>
-    ),
-  },
-  {
     id: 'editing-ai',
     title: 'Editing AI Content',
     content: (
