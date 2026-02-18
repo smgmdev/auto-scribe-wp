@@ -17,7 +17,7 @@ const sections: HelpSection[] = [
           <li>Click "Generate" to create your article</li>
           <li>Review, edit, and refine the content using the built-in rich-text editor</li>
           <li>Add a featured image, meta description, and focus keyword</li>
-          <li>Publish to a WordPress site or submit to a media site for distribution</li>
+          <li>Click Publish</li>
         </ol>
         <p>
           AI-generated content provides a strong starting point that you can customize
@@ -28,11 +28,11 @@ const sections: HelpSection[] = [
   },
   {
     id: 'headline-sources',
-    title: 'Headline Sources',
+    title: 'Sources',
     content: (
       <div className="space-y-4">
         <p>
-          The Headlines section aggregates trending news from multiple sources to inspire your content:
+          The Sources section aggregates trending news from multiple sources to inspire your content:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>News Headlines:</strong> Current events and breaking news from global sources</li>
