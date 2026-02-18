@@ -727,7 +727,7 @@ export default function Auth() {
                 <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Email address — used to sign in and receive important updates</li>
-                  <li>Password — securely hashed; we never store it in plain text</li>
+                  
                   <li>Account creation date and last update timestamp</li>
                 </ul>
               </div>
