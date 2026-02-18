@@ -1806,9 +1806,28 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_active_credit_packs: {
+        Args: never
+        Returns: {
+          active: boolean
+          created_at: string
+          credits: number
+          id: string
+          name: string
+          price_cents: number
+        }[]
+      }
       get_agency_payout_id_by_name: {
         Args: { _agency_name: string }
         Returns: string
+      }
+      get_press_release_categories: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+        }[]
       }
       get_public_agencies: {
         Args: never
@@ -1841,6 +1860,40 @@ export type Database = {
           name: string
           seo_plugin: string
           url: string
+        }[]
+      }
+      get_published_articles: {
+        Args: never
+        Returns: {
+          content: string
+          created_at: string
+          focus_keyword: string
+          id: string
+          meta_description: string
+          published_to: string
+          published_to_favicon: string
+          published_to_name: string
+          status: string
+          tags: string[]
+          title: string
+          tone: string
+          updated_at: string
+          wp_link: string
+        }[]
+      }
+      get_published_press_releases: {
+        Args: never
+        Returns: {
+          category: string
+          content: string
+          created_at: string
+          footer_contacts: string[]
+          id: string
+          image_url: string
+          published: boolean
+          published_at: string
+          title: string
+          updated_at: string
         }[]
       }
       get_user_credits: { Args: { _user_id: string }; Returns: number }
