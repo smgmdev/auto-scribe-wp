@@ -69,12 +69,9 @@ export default function PressNews() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch published press releases
+        // Fetch published press releases via secure RPC (strips created_by / author identity)
         const { data: releasesData, error: releasesError } = await supabase
-          .from('press_releases')
-          .select('id, title, content, category, image_url, published_at, created_at')
-          .eq('published', true)
-          .order('published_at', { ascending: false });
+          .rpc('get_published_press_releases');
 
         if (releasesError) throw releasesError;
 

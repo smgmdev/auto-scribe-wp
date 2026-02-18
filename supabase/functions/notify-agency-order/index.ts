@@ -18,6 +18,16 @@ interface OrderNotificationRequest {
   service_request_id: string;
 }
 
+// Escape HTML special chars to prevent email HTML injection
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -60,6 +70,12 @@ serve(async (req) => {
       service_request_id
     }: OrderNotificationRequest = await req.json();
 
+    // Sanitize all client-supplied strings before embedding in email HTML
+    const safeMediaSiteName = escapeHtml(media_site_name || '');
+    const safeOrderId = escapeHtml(order_id || '');
+    const safeClientEmail = client_email ? escapeHtml(client_email) : null;
+    const safeAmountDollars = Number(amount_dollars) || 0;
+
     console.log(`Sending order notification to agency: ${agency_name}`);
 
     // Get agency email from agency_payouts table
@@ -82,7 +98,7 @@ serve(async (req) => {
       );
     }
 
-    const agencyPayout = Math.round(amount_dollars * (1 - (agencyData.commission_percentage ?? 10) / 100));
+    const agencyPayout = Math.round(safeAmountDollars * (1 - (agencyData.commission_percentage ?? 10) / 100));
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -109,25 +125,25 @@ serve(async (req) => {
                 <table style="width: 100%; border-collapse: collapse;">
                   <tr>
                     <td style="padding: 8px 0; color: #666; font-size: 14px;">Media Site</td>
-                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${media_site_name}</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${safeMediaSiteName}</td>
                   </tr>
                   <tr>
                     <td style="padding: 8px 0; color: #666; font-size: 14px;">Order Total</td>
-                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">$${amount_dollars.toLocaleString()}</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">$${safeAmountDollars.toLocaleString()}</td>
                   </tr>
                   <tr>
                     <td style="padding: 8px 0; color: #666; font-size: 14px;">Your Payout</td>
                     <td style="padding: 8px 0; color: #22c55e; font-size: 14px; font-weight: 600; text-align: right;">$${agencyPayout.toLocaleString()}</td>
                   </tr>
-                  ${client_email ? `
+                  ${safeClientEmail ? `
                   <tr>
                     <td style="padding: 8px 0; color: #666; font-size: 14px;">Client</td>
-                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${client_email}</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${safeClientEmail}</td>
                   </tr>
                   ` : ''}
                   <tr>
                     <td style="padding: 8px 0; color: #666; font-size: 14px;">Order ID</td>
-                    <td style="padding: 8px 0; color: #888; font-size: 12px; text-align: right;">${order_id.slice(0, 8)}...</td>
+                    <td style="padding: 8px 0; color: #888; font-size: 12px; text-align: right;">${safeOrderId.slice(0, 8)}...</td>
                   </tr>
                 </table>
               </div>
@@ -154,7 +170,7 @@ serve(async (req) => {
     const emailResponse = await resend.emails.send({
       from: "Arcana Mace <noreply@arcanamace.com>",
       to: [agencyData.email],
-      subject: `New Order: ${media_site_name} - $${amount_dollars.toLocaleString()}`,
+      subject: `New Order: ${safeMediaSiteName} - $${safeAmountDollars.toLocaleString()}`,
       html: emailHtml,
     });
 

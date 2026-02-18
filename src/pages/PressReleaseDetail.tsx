@@ -75,26 +75,25 @@ export default function PressReleaseDetail() {
       }
 
       try {
-        // Fetch press release and contacts in parallel
-        const [releaseResult, contactsResult] = await Promise.all([
-          supabase
-            .from('press_releases')
-            .select('id, title, content, category, image_url, published_at, created_at, footer_contacts')
-            .eq('id', id)
-            .eq('published', true)
-            .single(),
+        // Fetch press release via secure RPC (strips created_by / author identity)
+        // and contacts in parallel
+        const [releasesResult, contactsResult] = await Promise.all([
+          supabase.rpc('get_published_press_releases'),
           supabase
             .from('press_release_contacts')
-            .select('*')
+            .select('id, title, name, company, email, phone')
         ]);
 
-        if (releaseResult.error) throw releaseResult.error;
-        if (!releaseResult.data) {
+        if (releasesResult.error) throw releasesResult.error;
+
+        // Find the specific press release by ID from the returned array
+        const foundRelease = (releasesResult.data || []).find((r: any) => r.id === id);
+        if (!foundRelease) {
           setError('Press release not found');
           return;
         }
 
-        setPressRelease(releaseResult.data);
+        setPressRelease(foundRelease);
         setPressContacts(contactsResult.data || []);
       } catch (err) {
         console.error('Error fetching press release:', err);
