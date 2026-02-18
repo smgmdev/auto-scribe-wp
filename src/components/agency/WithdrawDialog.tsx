@@ -123,44 +123,24 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
     setSubmitting(true);
     
     try {
-      // Prepare bank/crypto details
-      const bankDetails = withdrawalMethod === 'bank' && verificationData ? {
-        bank_name: verificationData.bank_name,
-        bank_account_holder: verificationData.bank_account_holder,
-        bank_account_number: verificationData.bank_account_number,
-        bank_iban: verificationData.bank_iban,
-        bank_swift_code: verificationData.bank_swift_code,
-        bank_country: verificationData.bank_country,
-        bank_address: verificationData.bank_address
-      } : null;
-
-      const cryptoDetails = withdrawalMethod === 'crypto' && verificationData ? {
-        usdt_wallet_address: verificationData.usdt_wallet_address,
-        usdt_network: verificationData.usdt_network
-      } : null;
-
-      // Insert withdrawal request
-      const { data: withdrawalData, error: insertError } = await supabase
-        .from('agency_withdrawals')
-        .insert({
-          user_id: user.id,
-          agency_payout_id: agencyPayoutId,
+      // Invoke server-side edge function which:
+      // 1. Verifies the caller's identity via JWT
+      // 2. Recalculates the available balance from the authoritative ledger
+      // 3. Fetches payment details from the server-verified KYC record
+      // 4. Inserts the withdrawal (triggering the withdrawal_locked credit entry)
+      const { data, error: fnError } = await supabase.functions.invoke('submit-withdrawal', {
+        body: {
           amount_cents: Math.round(numAmount * 100),
           withdrawal_method: withdrawalMethod,
-          bank_details: bankDetails,
-          crypto_details: cryptoDetails
-        })
-        .select('id')
-        .single();
+          agency_payout_id: agencyPayoutId,
+        },
+      });
 
-      if (insertError) {
-        console.error('Error creating withdrawal:', insertError);
-        toast.error('Failed to submit withdrawal request. Please try again.');
+      if (fnError || !data?.success) {
+        const msg = data?.message || data?.error || fnError?.message || 'Failed to submit withdrawal request.';
+        toast.error(msg);
         return;
       }
-
-      // Note: The withdrawal_locked credit transaction is now created automatically
-      // by a database trigger (on_withdrawal_created) when the withdrawal is inserted
 
       toast.success('Withdrawal request submitted successfully. Our team will process it within 24-48 hours.');
       setAmount('');

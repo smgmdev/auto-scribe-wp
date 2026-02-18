@@ -181,7 +181,7 @@ export function AdminAgencyWithdrawalsView() {
     setProcessingId(selectedWithdrawal.id);
 
     try {
-      // If approve with auto payout, call the edge function
+      // If approve with auto payout, call the Airwallex edge function
       if (actionType === 'approve' && payoutMode === 'auto') {
         setAutoPayoutProcessing(true);
         
@@ -218,57 +218,27 @@ export function AdminAgencyWithdrawalsView() {
         return;
       }
 
-      // Manual approval / reject flow
-      const updateData: Record<string, unknown> = {
-        admin_notes: adminNotes || null,
-        processed_at: new Date().toISOString(),
-        read: true
-      };
+      // Manual approval / reject: use server-side edge function to atomically
+      // update withdrawal status AND insert the credit transaction.
+      // This prevents client-side manipulation of credit_transactions.
+      const edgeAction = actionType === 'reject' ? 'reject' : 'complete';
 
-      if (actionType === 'approve') {
-        updateData.status = 'completed';
-      } else if (actionType === 'reject') {
-        updateData.status = 'rejected';
-      } else if (actionType === 'complete') {
-        updateData.status = 'completed';
-      }
+      const { data, error: fnError } = await supabase.functions.invoke('resolve-withdrawal', {
+        body: {
+          withdrawal_id: selectedWithdrawal.id,
+          action: edgeAction,
+          admin_notes: adminNotes || null,
+        },
+      });
 
-      const { error } = await supabase
-        .from('agency_withdrawals')
-        .update(updateData)
-        .eq('id', selectedWithdrawal.id);
-
-      if (error) {
-        console.error('Error updating withdrawal:', error);
-        toast.error('Failed to update withdrawal');
+      if (fnError || !data?.success) {
+        const msg = data?.error || fnError?.message || 'Failed to update withdrawal';
+        console.error('resolve-withdrawal error:', msg);
+        toast.error(msg);
         return;
       }
 
-      // Create credit transaction based on action
-      const amount = selectedWithdrawal.amount_cents;
-      const withdrawalMethod = selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT';
-      
-      if (actionType === 'reject') {
-        await supabase
-          .from('credit_transactions')
-          .insert({
-            user_id: selectedWithdrawal.user_id,
-            amount: amount,
-            type: 'withdrawal_unlocked',
-            description: `Credits unlocked - Withdrawal rejected - ${withdrawalMethod}${adminNotes ? ` - ${adminNotes}` : ''}`
-          });
-      } else if (actionType === 'approve' || actionType === 'complete') {
-        await supabase
-          .from('credit_transactions')
-          .insert({
-            user_id: selectedWithdrawal.user_id,
-            amount: -amount,
-            type: 'withdrawal_completed',
-            description: `Withdrawal completed - ${withdrawalMethod}`
-          });
-      }
-
-      toast.success(`Withdrawal ${actionType === 'approve' ? 'completed' : actionType === 'reject' ? 'rejected' : 'completed'} successfully`);
+      toast.success(data.message || `Withdrawal ${edgeAction === 'reject' ? 'rejected' : 'completed'} successfully`);
       fetchWithdrawals();
     } catch (err) {
       console.error('Error:', err);
