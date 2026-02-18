@@ -350,7 +350,7 @@ const Guidelines = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
-                  Arcana Mace staff may reach out directly to both the client and the agency involved in a dispute. It is strongly recommended to have your contact number saved in your account settings — this allows our team to communicate with all parties directly and work toward a fair and timely resolution.
+                  Arcana Mace staff may reach out directly to both the client and the agency involved in a dispute. It is strongly recommended to have your contact number saved in your account settings — this allows our team to communicate with all parties directly and work toward a fair and timely resolution. Please note that Arcana Mace staff will never ask for your account password, credit or debit card details, or any other sensitive personal or financial information.
                 </li>
                 <li className="flex items-start gap-2">
                   <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
