@@ -426,35 +426,6 @@ export default function About() {
           </div>
         </AnimatedSection>
       </section>
-
-      {/* CTA Section */}
-      <section className="bg-[#f5f5f7] py-16 px-4">
-        <div className="max-w-[980px] mx-auto text-center">
-          <AnimatedSection>
-            <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-4">
-              Ready to get started?
-            </h2>
-            <p className="text-xl text-[#86868b] mb-8">
-              Join global brands publishing with Arcana Mace.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => navigate('/auth?mode=signup')}
-                className="px-8 py-4 bg-[#0071e3] text-white rounded-none text-lg font-medium hover:bg-[#0077ed] transition-colors"
-              >
-                Create an Account
-              </button>
-              <button 
-                onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
-                className="px-8 py-4 bg-transparent text-[#0066cc] rounded-none text-lg font-medium hover:bg-[#0066cc]/10 transition-colors"
-              >
-                Browse Media Network ›
-              </button>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
       {/* Questions Section */}
       <section id="faq" className="bg-white py-20 md:py-28 px-4">
         <div className="max-w-[980px] mx-auto">
