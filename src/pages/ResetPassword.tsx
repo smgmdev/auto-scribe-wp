@@ -1,0 +1,97 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import amblack from '@/assets/amblack.png';
+
+export default function ResetPassword() {
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Supabase puts the session from the recovery link into the URL hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsReady(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters.');
+      return;
+    }
+    if (password !== confirm) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setIsLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password updated successfully! Please sign in.');
+      await supabase.auth.signOut();
+      navigate('/auth');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+      <button onClick={() => navigate('/')} className="mb-8">
+        <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+      </button>
+
+      <div className="w-full max-w-[400px]">
+        <h1 className="text-[28px] font-semibold text-center text-foreground mb-1">
+          Set New Password
+        </h1>
+        <p className="text-center text-muted-foreground text-[14px] mb-8">
+          Enter a new password for your Arcana Mace account.
+        </p>
+
+        {!isReady ? (
+          <p className="text-center text-muted-foreground text-sm">
+            Verifying your reset link…
+          </p>
+        ) : (
+          <form onSubmit={handleReset} className="space-y-3">
+            <Input
+              type="password"
+              placeholder="New password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              className="h-10 text-[14px] bg-[#f5f5f7] border-0 rounded-none px-4 placeholder:text-muted-foreground/60"
+            />
+            <Input
+              type="password"
+              placeholder="Confirm new password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              disabled={isLoading}
+              className="h-10 text-[14px] bg-[#f5f5f7] border-0 rounded-none px-4 placeholder:text-muted-foreground/60"
+            />
+            <Button
+              type="submit"
+              className="w-full h-10 text-[14px] font-medium bg-foreground text-background rounded-none hover:!bg-transparent hover:!text-foreground border border-foreground transition-all"
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Update Password'}
+            </Button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}

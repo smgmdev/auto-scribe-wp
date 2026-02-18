@@ -649,13 +649,13 @@ export default function Auth() {
                       toast.error('Enter your email address above first.');
                       return;
                     }
-                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                      redirectTo: `${window.location.origin}/auth`,
-                    });
-                    if (error) {
-                      toast.error('Failed to send reset email. Please try again.');
-                    } else {
+                    try {
+                      await supabase.functions.invoke('send-password-reset', {
+                        body: { email },
+                      });
                       toast.success('Password reset link sent — check your inbox.');
+                    } catch {
+                      toast.error('Failed to send reset email. Please try again.');
                     }
                   }}
                   className="text-[12px] text-muted-foreground hover:text-foreground hover:underline transition-colors"
