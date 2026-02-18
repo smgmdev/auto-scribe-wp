@@ -1027,6 +1027,10 @@ export function AdminOrdersView() {
             placeholder="Search by site, order number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className="w-full pl-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/60 border-black"
           />
           {searchQuery && (

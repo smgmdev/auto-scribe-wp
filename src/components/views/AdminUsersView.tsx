@@ -1133,6 +1133,10 @@ export function AdminUsersView() {
             placeholder="Search users by email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className="pl-10 h-9 text-sm placeholder:text-sm rounded-none bg-black text-white border-black placeholder:text-white/50"
           />
         </div>

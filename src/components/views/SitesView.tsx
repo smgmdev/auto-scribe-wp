@@ -1422,6 +1422,10 @@ export function SitesView() {
                   value={wpSearchQuery}
                   onChange={(e) => setWpSearchQuery(e.target.value)}
                   className="pl-10 pr-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black border-b-0"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                 />
                 {wpSearchQuery && (
                   <Button
@@ -1476,6 +1480,10 @@ export function SitesView() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                   />
                   {searchQuery && (
                     <Button

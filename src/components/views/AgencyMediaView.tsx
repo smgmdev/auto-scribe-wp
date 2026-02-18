@@ -1409,6 +1409,10 @@ export function AgencyMediaView() {
                                 onChange={(e) => setImportedSitesSearch(prev => ({ ...prev, [submission.id]: e.target.value }))}
                                 className="h-9 bg-black text-white border-transparent placeholder:text-white/40 mb-0 text-sm"
                                 onClick={(e) => e.stopPropagation()}
+                                autoComplete="off"
+                                autoCorrect="off"
+                                autoCapitalize="off"
+                                spellCheck={false}
                               />
                               {submission.imported_sites
                                 .filter(site => {
@@ -1987,6 +1991,10 @@ export function AgencyMediaView() {
                 value={manageMediaSearch}
                 onChange={(e) => setManageMediaSearch(e.target.value)}
                 className="h-9 bg-black text-white border-0 placeholder:text-white/40 text-sm rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
               />
             </div>
             {/* List */}
