@@ -286,10 +286,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className={`pointer-events-auto bg-white text-gray-900 relative overflow-y-auto ${
+        className={`pointer-events-auto bg-background text-foreground relative overflow-y-auto ${
           isMobile
             ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
-            : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg'
+            : 'w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
