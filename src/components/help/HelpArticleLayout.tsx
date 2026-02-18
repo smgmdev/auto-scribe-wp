@@ -152,6 +152,17 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       <main className="flex-1 pt-20 pb-16">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
 
+          {/* Breadcrumb - full width above grid */}
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <button onClick={() => navigate('/help')} className="hover:text-foreground transition-colors">
+              Help Center
+            </button>
+            <ChevronRight className="h-4 w-4" />
+            <button onClick={() => navigate(`/help/${categorySlug}`)} className="hover:text-foreground transition-colors">
+              {category}
+            </button>
+          </nav>
+
           <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-12">
             {/* Sidebar - Quick Links */}
             <aside className="hidden lg:block">
@@ -177,16 +188,6 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
 
             {/* Article Content */}
             <article className="min-w-0 pb-16">
-              {/* Breadcrumb */}
-              <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                <button onClick={() => navigate('/help')} className="hover:text-foreground transition-colors">
-                  Help Center
-                </button>
-                <ChevronRight className="h-4 w-4" />
-                <button onClick={() => navigate(`/help/${categorySlug}`)} className="hover:text-foreground transition-colors">
-                  {category}
-                </button>
-              </nav>
               <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-6">
                 {title}
               </h1>
