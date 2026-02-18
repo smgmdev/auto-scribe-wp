@@ -75,11 +75,10 @@ const sections: HelpSection[] = [
         <p>Select the right publication for your content with these considerations:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Category Match:</strong> Choose sites that align with your content topic and niche</li>
-          <li><strong>Country Targeting:</strong> Filter sites by country to reach specific audiences</li>
-          <li><strong>Google Index:</strong> Prioritize indexed sites for maximum SEO value</li>
+          <li><strong>Area Targeting:</strong> Filter sites by area/region to reach specific audiences</li>
+          <li><strong>Google Index:</strong> Always ask agency if the article will be indexed for maximum SEO value</li>
           <li><strong>Publishing Time:</strong> Check turnaround if you have deadlines</li>
-          <li><strong>Marks & Tags:</strong> Site tags indicate special attributes (e.g., "Fast", "Featured")</li>
-          <li><strong>Agency:</strong> Each site is managed by a verified agency partner</li>
+          <li><strong>Agency:</strong> Each site is being offered by a KYC verified agency</li>
         </ul>
         <p>
           Use the search bar and filters on the Sites page to narrow down publications by category,
