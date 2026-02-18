@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Loader2, MessageSquare, Clock, CheckCircle, X, GripHorizontal } from 'lucide-react';
+import { Loader2, MessageSquare, Clock, CheckCircle, X, GripHorizontal, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,6 +37,7 @@ export function SupportView() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('open');
+  const [hasCreditsHistory, setHasCreditsHistory] = useState<boolean | null>(null);
 
   // New ticket popup state
   const [newTicketOpen, setNewTicketOpen] = useState(false);
@@ -89,6 +90,30 @@ export function SupportView() {
     window.addEventListener('mouseup', onUp);
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
   }, [dragging]);
+
+  // Check credits history in real time
+  useEffect(() => {
+    if (!user) return;
+    const checkCredits = async () => {
+      const { data } = await supabase
+        .from('credit_transactions')
+        .select('id')
+        .eq('user_id', user.id)
+        .not('type', 'in', '(withdrawal_locked,withdrawal_completed)')
+        .limit(1);
+      setHasCreditsHistory(!!(data && data.length > 0));
+    };
+    checkCredits();
+
+    const creditChannel = supabase
+      .channel('support-credit-check')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` }, () => {
+        checkCredits();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(creditChannel); };
+  }, [user]);
 
   // Fetch tickets
   useEffect(() => {
@@ -144,13 +169,15 @@ export function SupportView() {
     }
   };
 
-  if (loading) {
+  if (loading || hasCreditsHistory === null) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
+
+  const isLocked = !hasCreditsHistory;
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
@@ -163,69 +190,90 @@ export function SupportView() {
           </div>
           <Button
             className="w-full lg:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
-            onClick={() => setNewTicketOpen(true)}
+            onClick={() => !isLocked && setNewTicketOpen(true)}
+            disabled={isLocked}
           >
             New Ticket
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full p-0 h-auto">
-            <TabsTrigger value="open" className="flex-1 py-2.5 text-sm">
-              Open {tickets.filter(t => t.status === 'open').length > 0 && (
-                <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'open').length})</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="closed" className="flex-1 py-2.5 text-sm">
-              Closed
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Body — blurred when locked */}
+        <div className="relative">
+          <div className={isLocked ? 'pointer-events-none select-none blur-sm' : undefined}>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full p-0 h-auto">
+                <TabsTrigger value="open" className="flex-1 py-2.5 text-sm">
+                  Open {tickets.filter(t => t.status === 'open').length > 0 && (
+                    <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'open').length})</span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="closed" className="flex-1 py-2.5 text-sm">
+                  Closed
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-        {/* Ticket List */}
-        <div className="space-y-2">
-          {tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').length === 0 ? (
-            <div className="text-center py-16">
-              <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-              <p className="text-muted-foreground">No {activeTab} tickets</p>
-              {activeTab === 'open' && (
-                <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
+            {/* Ticket List */}
+            <div className="space-y-2 mt-6">
+              {tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').length === 0 ? (
+                <div className="text-center py-16">
+                  <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
+                  <p className="text-muted-foreground">No {activeTab} tickets</p>
+                  {activeTab === 'open' && (
+                    <p className="text-sm text-muted-foreground mt-1">Click "New Ticket" to get started</p>
+                  )}
+                </div>
+              ) : (
+                tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').map(ticket => (
+                  <button
+                    key={ticket.id}
+                    className="w-full text-left border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
+                    onClick={() => {
+                      if (!ticket.user_read) {
+                        supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
+                        setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, user_read: true } : t));
+                        useAppStore.getState().decrementUserUnreadSupportTicketsCount();
+                      }
+                      openSupportChat(ticket);
+                    }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        {!ticket.user_read && (
+                          <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                        )}
+                        <p className="font-medium text-sm truncate">{ticket.subject}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
+                      </p>
+                    </div>
+                    <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
+                      {ticket.status === 'open' ? (
+                        <><Clock className="h-3 w-3 mr-1" />Open</>
+                      ) : (
+                        <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                      )}
+                    </Badge>
+                  </button>
+                ))
               )}
             </div>
-          ) : (
-            tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').map(ticket => (
-              <button
-                key={ticket.id}
-                className="w-full text-left border rounded-lg p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
-                onClick={() => {
-                  if (!ticket.user_read) {
-                    supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
-                    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, user_read: true } : t));
-                    useAppStore.getState().decrementUserUnreadSupportTicketsCount();
-                  }
-                  openSupportChat(ticket);
-                }}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    {!ticket.user_read && (
-                      <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    )}
-                    <p className="font-medium text-sm truncate">{ticket.subject}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
-                  </p>
+          </div>
+
+          {/* Locked overlay */}
+          {isLocked && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-background/95 border border-border rounded-xl px-8 py-8 max-w-sm w-full mx-4 text-center shadow-lg">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted mx-auto mb-4">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
-                  {ticket.status === 'open' ? (
-                    <><Clock className="h-3 w-3 mr-1" />Open</>
-                  ) : (
-                    <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
-                  )}
-                </Badge>
-              </button>
-            ))
+                <h3 className="font-semibold text-foreground mb-2">Support Unavailable</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Arcana Mace Client Support is available to accounts that have a credit history — either through purchases (buying credits) or earnings (selling media).
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>
