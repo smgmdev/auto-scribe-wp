@@ -11,8 +11,8 @@ const sections: HelpSection[] = [
           quickly and efficiently:
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Navigate to the "Compose" section in your dashboard</li>
-          <li>Select a trending headline from the Headlines section, or enter your own topic</li>
+          <li>Navigate to the "New Article" section in your dashboard</li>
+          <li>Select a trending headline from the Sources section, or enter your own topic</li>
           <li>Choose your preferred writing tone (Professional, Conversational, Informative, etc.)</li>
           <li>Click "Generate" to create your article</li>
           <li>Review, edit, and refine the content using the built-in rich-text editor</li>
