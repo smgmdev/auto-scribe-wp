@@ -764,6 +764,8 @@ export function ComposeView() {
       setPublishedLink(result.link);
       setIsPublishing(false);
       setShowPublishSuccess(true);
+      // Scroll to top so the success popup is visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       setTimeout(() => {
         setShowPublishSuccess(false);
