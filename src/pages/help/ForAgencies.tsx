@@ -71,7 +71,7 @@ const sections: HelpSection[] = [
           <li><strong>Add Sites via Google Sheet:</strong> Submit new sites using our structured submission sheet</li>
           <li><strong>Add WordPress Sites:</strong> Connect your own WordPress site directly to the platform</li>
           <li><strong>Set Pricing & Details:</strong> Arcana Mace will review your submitted sites with your price offering</li>
-          <li><strong>Update Site Info:</strong> You can update price and description at any time in the My Media section under Agency Management</li>
+          <li><strong>Update Site Info:</strong> Update price and description anytime via Agency Management → My Media</li>
         </ul>
         <p>
           All sites go through a verification and review process before appearing in the marketplace.
