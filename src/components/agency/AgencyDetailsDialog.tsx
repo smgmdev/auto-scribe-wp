@@ -285,12 +285,12 @@ export function AgencyDetailsDialog({
   if (isMobile) {
     return createPortal(
       <div className="fixed inset-0 bg-background flex flex-col" style={{ zIndex }}>
-        <div className="flex items-center justify-between p-4 border-b">
-          <span className="font-semibold">Agency Details</span>
+        <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 hover:!bg-black hover:!text-white"
+            className="h-7 w-7 hover:!bg-black hover:!text-white dark:hover:!bg-white dark:hover:!text-black"
             onClick={handleClose}
           >
             <X className="h-4 w-4" />
