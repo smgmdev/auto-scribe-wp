@@ -427,18 +427,8 @@ export default function About() {
               </span>
             </button>
           </div>
-        </AnimatedSection>
-      </section>
-      {/* Questions Section */}
-      <section id="faq" className="bg-white py-20 md:py-28 px-4">
-        <div className="max-w-[980px] mx-auto">
-          <AnimatedSection>
-            <h2 className="text-5xl md:text-7xl lg:text-[80px] font-semibold text-[#1d1d1f] tracking-tight leading-[1.05] text-center mb-16 md:mb-20">
-              Questions? Answers.
-            </h2>
-          </AnimatedSection>
 
-          <AnimatedSection delay={100}>
+          <div className="mt-16 md:mt-20">
             <Accordion type="multiple" className="w-full">
               <AccordionItem value="q1" className="border-t border-border">
                 <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
@@ -512,8 +502,8 @@ export default function About() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </AnimatedSection>
-        </div>
+          </div>
+        </AnimatedSection>
       </section>
 
       {/* Footer */}
