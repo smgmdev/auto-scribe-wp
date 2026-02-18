@@ -104,7 +104,7 @@ const PrivacyPolicy = () => {
           
           {/* Section 1 */}
           <AccordionItem value="item-1" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">What Is Personal Data at Arcana Mace?</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -125,7 +125,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 2 */}
           <AccordionItem value="item-2" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Your Privacy Rights at Arcana Mace</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -146,7 +146,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 3 */}
           <AccordionItem value="item-3" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Personal Data Arcana Mace Collects from You</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -187,7 +187,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 4 */}
           <AccordionItem value="item-4" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Arcana Mace's Use of Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -219,7 +219,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 5 */}
           <AccordionItem value="item-5" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Protection of Personal Data at Arcana Mace</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -243,7 +243,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 6 */}
           <AccordionItem value="item-6" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Cookies and Other Technologies</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -261,7 +261,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 7 */}
           <AccordionItem value="item-7" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Retention of Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -276,7 +276,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 8 */}
           <AccordionItem value="item-8" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Children and Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -291,7 +291,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 9 */}
           <AccordionItem value="item-9" className="border-t border-b border-border">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Privacy Questions</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
