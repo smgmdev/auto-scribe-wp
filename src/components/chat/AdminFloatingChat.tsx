@@ -807,6 +807,8 @@ export function AdminFloatingChat({
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
+    // Security: never send to a cancelled engagement
+    if (isCancelled) return;
     setSending(true);
     sendTypingIndicator(false);
     

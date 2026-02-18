@@ -3084,6 +3084,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
 
   const sendMessage = async () => {
     if (!user || !globalChatRequest || !senderId || !newMessage.trim()) return;
+    // Security: never send to a cancelled engagement
+    if (isCancelled || globalChatRequest.status === 'cancelled') return;
     
     setSending(true);
     broadcastTyping(false);
@@ -3290,6 +3292,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const uploadFileAndSendMessage = async () => {
     if (!user || !globalChatRequest || !senderId) return;
     if (!newMessage.trim() && !selectedFile) return;
+    // Security: never send to a cancelled engagement
+    if (isCancelled || globalChatRequest.status === 'cancelled') return;
 
     setSending(true);
     broadcastTyping(false);
