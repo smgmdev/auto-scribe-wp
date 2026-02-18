@@ -473,7 +473,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
-                  We accept all major credit and debit cards. You can also purchase credits in bulk for additional savings on future orders, or request an offline invoice for wire transfers.
+                  Account credits can be topped up using any major credit or debit card, or via Google Pay for a seamless checkout experience. For larger transactions or corporate procurement, you may contact our support team to have an invoice issued for a bank wire transfer.
                 </AccordionContent>
               </AccordionItem>
 
