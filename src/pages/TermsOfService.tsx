@@ -76,19 +76,29 @@ const TermsOfService = () => {
             Terms of Service
           </h1>
           <p className="text-muted-foreground border-b border-border pb-8">
-            Legal Information & Notices
+            Legal Information &amp; Notices
           </p>
         </div>
 
         {/* Terms Content */}
         <div className="space-y-10 text-foreground">
           <section>
-            <h2 className="text-xl font-semibold mb-4">Ownership of Site; Agreement to Terms of Use</h2>
+            <h2 className="text-xl font-semibold mb-4">Ownership of Site; Agreement to Terms of Service</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              These Terms and Conditions of Use (the "Terms of Use") apply to the Arcana Mace website located at arcanamace.com, and all associated sites linked to arcanamace.com by Arcana Mace, its subsidiaries and affiliates (collectively, the "Site"). The Site is operated by Stankevicius Pacific Limited ("Arcana Mace") and its licensors. BY USING THE SITE, YOU AGREE TO THESE TERMS OF USE; IF YOU DO NOT AGREE, DO NOT USE THE SITE.
+              These Terms and Conditions of Service (the "Terms of Service") apply to the Arcana Mace website located at arcanamace.com, and all associated sites linked to arcanamace.com by Arcana Mace, its subsidiaries and affiliates (collectively, the "Site"). The Site is operated by Stankevicius Pacific Limited ("Arcana Mace") and its licensors. BY USING THE SITE, YOU AGREE TO THESE TERMS OF SERVICE; IF YOU DO NOT AGREE, DO NOT USE THE SITE.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Arcana Mace reserves the right, at its sole discretion, to change, modify, add or remove portions of these Terms of Use, at any time. It is your responsibility to check these Terms of Use periodically for changes. Your continued use of the Site following the posting of changes will mean that you accept and agree to the changes. As long as you comply with these Terms of Use, Arcana Mace grants you a personal, non-exclusive, non-transferable, limited privilege to enter and use the Site.
+              Arcana Mace reserves the right, at its sole discretion, to change, modify, add or remove portions of these Terms of Service, at any time. It is your responsibility to check these Terms of Service periodically for changes. Your continued use of the Site following the posting of changes will mean that you accept and agree to the changes. As long as you comply with these Terms of Service, Arcana Mace grants you a personal, non-exclusive, non-transferable, limited privilege to enter and use the Site.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4">Marketplace Nature of the Platform</h2>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Arcana Mace operates solely as a marketplace platform designed to facilitate connections between buyers and sellers in the media buying space. Arcana Mace does not work with, collaborate with, represent, or act on behalf of any media channel listed on the platform. Arcana Mace is not affiliated with, endorsed by, or engaged in any commercial or editorial relationship with any media outlet featured on the Site.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              All media channels listed on the platform are submitted and managed by independent third-party agencies. Each agency is solely responsible for the accuracy, legality, and legitimacy of their own listings. Arcana Mace makes no representations or warranties regarding any media channel listed on the platform and assumes no liability arising from transactions, publications, or communications facilitated between buyers and sellers. By using the Site, you acknowledge and accept that Arcana Mace's role is limited strictly to that of an intermediary marketplace.
             </p>
           </section>
 
@@ -131,7 +141,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-xl font-semibold mb-4">Privacy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Arcana Mace's Privacy Policy applies to use of this Site, and its terms are made a part of these Terms of Use by this reference. Additionally, by using the Site, you acknowledge and agree that Internet transmissions are never completely private or secure. You understand that any message or information you send to the Site may be read or intercepted by others, even if there is a special notice that a particular transmission is encrypted.
+              Arcana Mace's Privacy Policy applies to use of this Site, and its terms are made a part of these Terms of Service by this reference. Additionally, by using the Site, you acknowledge and agree that Internet transmissions are never completely private or secure. You understand that any message or information you send to the Site may be read or intercepted by others, even if there is a special notice that a particular transmission is encrypted.
             </p>
           </section>
 
@@ -155,14 +165,14 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-xl font-semibold mb-4">Governing Law</h2>
             <p className="text-muted-foreground leading-relaxed">
-              These Terms of Use are governed by and construed in accordance with the laws of Hong Kong Special Administrative Region, where Arcana Mace's operating entity is based, without giving effect to any principles of conflicts of law. By using this Site, you agree that any disputes arising out of or in connection with these Terms of Use shall be subject to the non-exclusive jurisdiction of the courts of Hong Kong. Nothing in this clause is intended to limit your rights under applicable consumer protection laws in your place of residence.
+              These Terms of Service are governed by and construed in accordance with the laws of Hong Kong Special Administrative Region, where Arcana Mace's operating entity is based, without giving effect to any principles of conflicts of law. By using this Site, you agree that any disputes arising out of or in connection with these Terms of Service shall be subject to the non-exclusive jurisdiction of the courts of Hong Kong. Nothing in this clause is intended to limit your rights under applicable consumer protection laws in your place of residence.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
             <p className="text-muted-foreground leading-relaxed">
-              If you have any questions or concerns about these Terms of Use, please contact us through the appropriate channels available on our website.
+              If you have any questions or concerns about these Terms of Service, please contact us through the appropriate channels available on our website.
             </p>
           </section>
 
