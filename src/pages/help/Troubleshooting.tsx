@@ -78,7 +78,7 @@ const sections: HelpSection[] = [
         <p>Having trouble accessing your account?</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Forgot Password:</strong> Use the password reset link on the login page</li>
-          <li><strong>Forgot PIN:</strong> Reset your PIN via Settings → Security in your dashboard</li>
+          <li><strong>Forgot PIN:</strong> You might not be able to login anymore. Security is tight. Contact support</li>
           <li><strong>Email Not Verified:</strong> Request a new verification email from the login screen</li>
           <li><strong>Account Suspended:</strong> Contact support — do not create a new account</li>
           <li><strong>Session Expired:</strong> Log in again — sessions expire automatically for security</li>
