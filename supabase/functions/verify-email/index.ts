@@ -100,9 +100,8 @@ serve(async (req) => {
 
     console.log("Email verified successfully for:", profile.email);
 
-    // Get the app URL for redirect - use the Lovable project URL
-    const projectId = supabaseUrl.split("//")[1].split(".")[0];
-    const appUrl = `https://${projectId}.lovableproject.com`;
+    // Redirect to arcanamace.com
+    const appUrl = `https://arcanamace.com`;
 
     // Redirect to success page
     return new Response(

@@ -152,7 +152,7 @@ serve(async (req) => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "ArcanaMace <noreply@arcanamace.com>",
+      from: "Arcana Mace <noreply@arcanamace.com>",
       to: [agencyData.email],
       subject: `New Order: ${media_site_name} - $${amount_dollars.toLocaleString()}`,
       html: emailHtml,
