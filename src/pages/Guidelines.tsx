@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Plus } from 'lucide-react';
+import { Search, User, Plus, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/hooks/useAuth';
@@ -102,28 +102,33 @@ const Guidelines = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                <strong className="text-foreground">All communication between clients and agencies must remain within the Arcana Mace platform.</strong> You may not share, request, or solicit any form of contact information — including but not limited to email addresses, phone numbers, WhatsApp handles, social media profiles, Telegram usernames, or any other communication channel — with the intent of moving the conversation outside the platform.
+                All communication between clients and agencies must remain within the Arcana Mace platform. You may not share, request, or solicit any form of contact information — including but not limited to email addresses, phone numbers, WhatsApp handles, social media profiles, Telegram usernames, or any other communication channel — with the intent of moving the conversation outside the platform.
               </p>
               <p className="mb-4">
                 This rule exists to protect both parties, ensure accountability, and maintain a verifiable record of all interactions for dispute resolution purposes.
               </p>
               <p className="mb-4">
-                <strong className="text-foreground">Penalties for violation:</strong>
+                Penalties for violation:
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Immediate account suspension pending review
                 </li>
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Forfeiture of any pending payouts (for agencies)
                 </li>
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Forfeiture of remaining credit balance (for clients)
                 </li>
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Cancellation or freezing of any active orders or engagements
                 </li>
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Permanent removal from the platform in severe or repeated cases
                 </li>
               </ul>
@@ -146,14 +151,17 @@ const Guidelines = () => {
                 All interactions on Arcana Mace — whether in engagement chats, service requests, or any other communication — must remain professional, courteous, and respectful.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No harassment, threats, or abusive language.</strong> Any form of intimidation, discrimination, or hostile communication is strictly prohibited.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No harassment, threats, or abusive language. Any form of intimidation, discrimination, or hostile communication is strictly prohibited.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Constructive feedback only.</strong> If you have concerns about the quality of work or the progress of an order, communicate them clearly and professionally.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Constructive feedback only. If you have concerns about the quality of work or the progress of an order, communicate them clearly and professionally.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No spam or irrelevant messages.</strong> Keep all chat messages relevant to the engagement or order at hand.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No spam or irrelevant messages. Keep all chat messages relevant to the engagement or order at hand.
                 </li>
               </ul>
             </AccordionContent>
@@ -172,13 +180,16 @@ const Guidelines = () => {
                 Both clients and agencies are expected to maintain active communication throughout the lifecycle of an engagement.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Agencies</strong> should respond to new service requests and ongoing engagement messages within a reasonable timeframe — ideally within 24 hours on business days.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Agencies should respond to new service requests and ongoing engagement messages within a reasonable timeframe — ideally within 24 hours on business days.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Clients</strong> should provide necessary information, approvals, and feedback promptly to avoid unnecessary delays in order fulfillment.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Clients should provide necessary information, approvals, and feedback promptly to avoid unnecessary delays in order fulfillment.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
                   Prolonged unresponsiveness may result in automatic escalation, order cancellation, or account review.
                 </li>
               </ul>
@@ -198,14 +209,17 @@ const Guidelines = () => {
                 Agencies are expected to maintain fair and honest pricing for their media services listed on the platform.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No deceptive pricing.</strong> Listed prices must accurately reflect the service being offered. Hidden fees, surprise surcharges, or bait-and-switch tactics are prohibited.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No deceptive pricing. Listed prices must accurately reflect the service being offered. Hidden fees, surprise surcharges, or bait-and-switch tactics are prohibited.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Consistent quality.</strong> The quality of service delivered must match the listing description and pricing tier. Repeatedly delivering substandard work may result in listing removal or account downgrade.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Consistent quality. The quality of service delivered must match the listing description and pricing tier. Repeatedly delivering substandard work may result in listing removal or account downgrade.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No price manipulation.</strong> Artificially inflating or deflating prices to game the marketplace is not permitted.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No price manipulation. Artificially inflating or deflating prices to game the marketplace is not permitted.
                 </li>
               </ul>
             </AccordionContent>
@@ -224,14 +238,17 @@ const Guidelines = () => {
                 Once an order is accepted, agencies are expected to fulfill it within the agreed-upon timeframe and to the standards described in their listing.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Meet delivery deadlines.</strong> Orders must be completed within the publishing time indicated on the media site listing. If delays are unavoidable, communicate them proactively to the client.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Meet delivery deadlines. Orders must be completed within the publishing time indicated on the media site listing. If delays are unavoidable, communicate them proactively to the client.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Provide valid delivery proof.</strong> All completed orders must include a working delivery URL or verifiable proof of publication.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Provide valid delivery proof. All completed orders must include a working delivery URL or verifiable proof of publication.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No fraudulent deliveries.</strong> Submitting fake URLs, broken links, or unrelated content as delivery proof is a serious violation and will result in immediate suspension.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No fraudulent deliveries. Submitting fake URLs, broken links, or unrelated content as delivery proof is a serious violation and will result in immediate suspension.
                 </li>
               </ul>
             </AccordionContent>
@@ -250,17 +267,21 @@ const Guidelines = () => {
                 All content published through Arcana Mace must adhere to the following standards:
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No illegal content.</strong> Content that promotes illegal activities, violence, hate speech, or violates any applicable laws is strictly prohibited.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No illegal content. Content that promotes illegal activities, violence, hate speech, or violates any applicable laws is strictly prohibited.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No plagiarism.</strong> All submitted articles and content must be original or properly attributed. Plagiarized content will be rejected and may result in account penalties.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No plagiarism. All submitted articles and content must be original or properly attributed. Plagiarized content will be rejected and may result in account penalties.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Accuracy and integrity.</strong> Content should be factually accurate and not intentionally misleading. Arcana Mace is not responsible for the accuracy of user-submitted content but reserves the right to remove content that violates these standards.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Accuracy and integrity. Content should be factually accurate and not intentionally misleading. Arcana Mace is not responsible for the accuracy of user-submitted content but reserves the right to remove content that violates these standards.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Respect intellectual property.</strong> Do not use copyrighted images, text, or media without proper authorization or licensing.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Respect intellectual property. Do not use copyrighted images, text, or media without proper authorization or licensing.
                 </li>
               </ul>
             </AccordionContent>
@@ -276,17 +297,21 @@ const Guidelines = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">One account per user.</strong> Creating multiple accounts to circumvent restrictions, exploit promotions, or manipulate the platform is prohibited.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  One account per user. Creating multiple accounts to circumvent restrictions, exploit promotions, or manipulate the platform is prohibited.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Keep credentials secure.</strong> You are responsible for maintaining the security of your account. Do not share your login credentials with anyone. Enable PIN protection for additional security.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Keep credentials secure. You are responsible for maintaining the security of your account. Do not share your login credentials with anyone. Enable PIN protection for additional security.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Accurate information.</strong> All account information, including agency applications and verification documents, must be truthful and accurate. Providing false information is grounds for immediate termination.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Accurate information. All account information, including agency applications and verification documents, must be truthful and accurate. Providing false information is grounds for immediate termination.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No automated abuse.</strong> Using bots, scripts, or automated tools to interact with the platform in unauthorized ways is strictly forbidden.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No automated abuse. Using bots, scripts, or automated tools to interact with the platform in unauthorized ways is strictly forbidden.
                 </li>
               </ul>
             </AccordionContent>
@@ -305,17 +330,21 @@ const Guidelines = () => {
                 Arcana Mace provides a structured dispute resolution process for situations where clients and agencies cannot reach an agreement.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Use the built-in dispute system.</strong> If you have an issue with an order, use the platform's dispute feature rather than attempting to resolve matters outside the platform.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Use the built-in dispute system. If you have an issue with an order, use the platform's dispute feature rather than attempting to resolve matters outside the platform.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Provide evidence.</strong> When filing a dispute, include relevant screenshots, links, and details to support your case.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Provide evidence. When filing a dispute, include relevant screenshots, links, and details to support your case.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Respect the outcome.</strong> Arcana Mace's dispute resolution decisions are final. Attempting to circumvent or manipulate the dispute process is a violation of these guidelines.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Respect the outcome. Arcana Mace's dispute resolution decisions are final. Attempting to circumvent or manipulate the dispute process is a violation of these guidelines.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">No retaliatory actions.</strong> Retaliating against a counterparty for filing a dispute — through negative reviews, service refusal, or any other means — is prohibited.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  No retaliatory actions. Retaliating against a counterparty for filing a dispute — through negative reviews, service refusal, or any other means — is prohibited.
                 </li>
               </ul>
             </AccordionContent>
@@ -334,20 +363,25 @@ const Guidelines = () => {
                 The following activities are strictly prohibited on Arcana Mace:
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Circumventing the platform.</strong> Completing transactions, negotiations, or services outside of Arcana Mace that were initiated on the platform.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Circumventing the platform. Completing transactions, negotiations, or services outside of Arcana Mace that were initiated on the platform.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Credit fraud.</strong> Attempting to exploit the credit system through chargebacks, fraudulent purchases, or unauthorized transfers.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Credit fraud. Attempting to exploit the credit system through chargebacks, fraudulent purchases, or unauthorized transfers.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Impersonation.</strong> Pretending to be another user, agency, or Arcana Mace staff member.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Impersonation. Pretending to be another user, agency, or Arcana Mace staff member.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Data scraping.</strong> Extracting data from the platform through automated means without authorization.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Data scraping. Extracting data from the platform through automated means without authorization.
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Misrepresentation.</strong> Falsely representing the reach, authority, or capabilities of media sites listed on the platform.
+                <li className="flex items-start gap-2">
+                  <Circle className="h-2 w-2 mt-[6px] flex-shrink-0 fill-muted-foreground text-muted-foreground" />
+                  Misrepresentation. Falsely representing the reach, authority, or capabilities of media sites listed on the platform.
                 </li>
               </ul>
               <p className="mt-4">
