@@ -91,19 +91,19 @@ const sections: HelpSection[] = [
     title: 'Tracking Publication Status',
     content: (
       <div className="space-y-4">
-        <p>Monitor your submissions through the "My Orders" section. Here are the status stages:</p>
+        <p>Monitor your submissions through the engagement chat and "My Orders" section. Here are the chat status stages:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Pending:</strong> Order received, awaiting agency acceptance</li>
-          <li><strong>Accepted:</strong> Agency has accepted and is processing your submission</li>
-          <li><strong>Delivered:</strong> Article is live — delivery link provided</li>
-          <li><strong>Delivered – Revision Requested:</strong> You've requested changes after delivery</li>
-          <li><strong>Completed:</strong> Order finalized and credits released to agency</li>
-          <li><strong>Cancelled:</strong> Order was cancelled; credits returned</li>
-          <li><strong>Disputed:</strong> A dispute has been opened for review by our team</li>
+          <li><strong>Order Placed:</strong> Your order has been placed and the agency is working on delivery</li>
+          <li><strong>Offer Accepted:</strong> Agency's custom offer was accepted; order is now active</li>
+          <li><strong>Offer Rejected:</strong> Agency's offer was declined; you can renegotiate or exit</li>
+          <li><strong>Order Delivered:</strong> Article is live — a delivery link has been provided</li>
+          <li><strong>Revision Requested:</strong> You've requested changes after delivery</li>
+          <li><strong>Order Cancelled:</strong> Order was cancelled; credits returned to your balance</li>
+          <li><strong>Dispute Opened:</strong> A dispute has been raised and is under review by staff</li>
+          <li><strong>Dispute Resolved:</strong> Staff has resolved the dispute and finalized the outcome</li>
         </ul>
         <p>
-          Real-time status updates appear in your dashboard. You'll also receive in-platform
-          notifications at each key stage.
+          Real-time status updates appear in your engagement chat and dashboard notifications at each key stage.
         </p>
       </div>
     ),
