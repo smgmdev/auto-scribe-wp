@@ -85,13 +85,12 @@ const sections: HelpSection[] = [
     title: 'Agency Dashboard',
     content: (
       <div className="space-y-4">
-        <p>Your agency dashboard provides tools to manage your publishing business:</p>
+        <p>Your agency dashboard "Agency Management" provides tools to manage your publishing business:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Incoming Requests:</strong> View and respond to new service requests and briefs from clients</li>
+          <li><strong>Client Requests:</strong> View and respond to new service requests and briefs from clients</li>
           <li><strong>Active Orders:</strong> Manage and fulfill orders in progress with real-time chat</li>
           <li><strong>Media Sites:</strong> View and manage your portfolio of listed publications</li>
           <li><strong>Payouts & Withdrawals:</strong> Track your earnings and request payouts</li>
-          <li><strong>Identity Verification:</strong> Submit KYC documents for payout activation</li>
         </ul>
         <p>
           Access your agency dashboard from the main navigation sidebar after your application is approved.
