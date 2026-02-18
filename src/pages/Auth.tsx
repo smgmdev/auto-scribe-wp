@@ -658,7 +658,7 @@ export default function Auth() {
                       toast.error('Failed to send reset email. Please try again.');
                     }
                   }}
-                  className="text-[12px] text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                  className="text-[12px] text-[#06c] hover:underline transition-colors"
                 >
                   Forgot password?
                 </button>
