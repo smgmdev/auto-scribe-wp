@@ -284,6 +284,12 @@ const Guidelines = () => {
                   Respect intellectual property. Do not use copyrighted images, text, or media without proper authorization or licensing.
                 </li>
               </ul>
+              <p className="mt-4">
+                Arcana Mace does not assume responsibility for content published by users that infringes on third-party intellectual property rights. Users who publish copyrighted images, text, or media without proper authorization do so entirely at their own risk and bear full legal responsibility for any resulting claims or disputes.
+              </p>
+              <p className="mt-3">
+                In the event of a valid third-party claim alleging intellectual property infringement, Arcana Mace reserves the right to — and will — cooperate fully with the requesting party by providing relevant user data associated with the breach, in compliance with applicable law.
+              </p>
             </AccordionContent>
           </AccordionItem>
 
