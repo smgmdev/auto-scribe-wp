@@ -277,29 +277,23 @@ export default function SystemStatus() {
             const overall = getOverallStatus(services);
             const bannerConfig = {
               available: {
-                bg: 'bg-[#f0fdf4]',
-                border: 'border-[#34c759]',
-                text: 'text-[#166534]',
+                text: 'text-[#34c759]',
                 icon: <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />,
                 message: 'All systems are operating normally.',
               },
               issue: {
-                bg: 'bg-[#fffbeb]',
-                border: 'border-[#ff9f0a]',
-                text: 'text-[#92400e]',
+                text: 'text-[#ff9f0a]',
                 icon: <AlertTriangle className="w-5 h-5 text-[#ff9f0a] flex-shrink-0" />,
                 message: 'Some systems are experiencing elevated load or minor issues.',
               },
               outage: {
-                bg: 'bg-[#fff1f2]',
-                border: 'border-[#ff3b30]',
-                text: 'text-[#9f1239]',
+                text: 'text-[#ff3b30]',
                 icon: <XCircle className="w-5 h-5 text-[#ff3b30] flex-shrink-0" />,
                 message: 'One or more systems are currently experiencing an outage.',
               },
             }[overall];
             return (
-              <div className={`flex items-center gap-3 px-4 py-3 rounded border ${bannerConfig.bg} ${bannerConfig.border} mb-8`}>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-black bg-black mb-8">
                 {bannerConfig.icon}
                 <span className={`text-sm font-medium ${bannerConfig.text}`}>{bannerConfig.message}</span>
               </div>
