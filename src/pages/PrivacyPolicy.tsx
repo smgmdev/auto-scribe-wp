@@ -280,7 +280,7 @@ const PrivacyPolicy = () => {
                 If you have any questions about Arcana Mace's Privacy Policy or privacy practices, would like to contact our Data Protection Officer, or would like to submit a complaint, you can contact us through the appropriate channels available on our website.
               </p>
               <p>
-                Arcana Mace may update its Privacy Policy from time to time. When we change the policy in a material way, a notice will be posted on our website along with the updated Privacy Policy. We encourage you to periodically review this page for the latest information on our privacy practices.
+                Arcana Mace reserves the right to update this Privacy Policy at any time without prior notice. It is your responsibility to review this page periodically to stay informed of any changes. Continued use of the platform following any updates constitutes your acceptance of the revised Privacy Policy. You may not always be notified of changes, and Arcana Mace assumes no obligation to individually inform users of updates.
               </p>
             </AccordionContent>
           </AccordionItem>
