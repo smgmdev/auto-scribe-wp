@@ -472,29 +472,26 @@ export function AgencyMediaView() {
       setWordpressSites(wpData);
     }
 
-    // Fetch pending WordPress site submissions
-    const { data: pendingData } = await supabase
-      .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at, logo_url')
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
+    // Fetch WordPress site submissions via secure RPC (credentials never exposed to client)
+    const { data: allSubmissions } = await supabase
+      .rpc('get_my_wp_submissions', { _user_id: user.id });
 
-    if (pendingData) {
-      setPendingSubmissions(pendingData);
-    }
+    const pendingData = allSubmissions
+      ? allSubmissions.filter((s: { status: string }) => s.status === 'pending')
+          .sort((a: { created_at: string }, b: { created_at: string }) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      : [];
+    const rejectedData = allSubmissions
+      ? allSubmissions.filter((s: { status: string }) => s.status === 'rejected')
+          .sort((a: { reviewed_at: string | null }, b: { reviewed_at: string | null }) => {
+            const aTime = a.reviewed_at ? new Date(a.reviewed_at).getTime() : 0;
+            const bTime = b.reviewed_at ? new Date(b.reviewed_at).getTime() : 0;
+            return bTime - aTime;
+          })
+      : [];
 
-    // Fetch rejected WordPress site submissions
-    const { data: rejectedData } = await supabase
-      .from('wordpress_site_submissions')
-      .select('id, name, url, seo_plugin, status, created_at, admin_notes, read, reviewed_at, logo_url')
-      .eq('user_id', user.id)
-      .eq('status', 'rejected')
-      .order('reviewed_at', { ascending: false });
-
-    if (rejectedData) {
-      setRejectedSubmissions(rejectedData);
-    }
+    setPendingSubmissions(pendingData);
+    setRejectedSubmissions(rejectedData);
 
     // Fetch pending media site submissions
     const { data: pendingMediaData } = await supabase
