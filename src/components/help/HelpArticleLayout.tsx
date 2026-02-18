@@ -77,9 +77,9 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header */}
+      {/* Main Header - sticky within scroll container */}
       <header 
-        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -130,11 +130,8 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
-
-      {/* Sub-header - Sticky container */}
-      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+      {/* Sub-header - Sticky */}
+      <div className="sticky top-16 z-40">
         <div className="bg-[#f5f5f7] border-b border-border/50">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
             <button 
@@ -148,17 +145,14 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
         </div>
       </div>
 
-      {/* Explicit spacer so content doesn't slide under the sticky sub-header in flex layout */}
-      <div className="h-8 shrink-0" />
-
       {/* Main Content */}
       <main className="flex-1 pb-16">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-4">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-10">
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-12">
             {/* Sidebar - Quick Links */}
             <aside className="hidden lg:block">
-              <div className="sticky top-[172px]">
+              <div className="sticky top-[120px]">
                 <h3 className="text-sm font-semibold text-foreground mb-4">Quick links</h3>
                 <nav className="space-y-1">
                   {sections.map((section) => (
