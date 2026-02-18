@@ -61,11 +61,11 @@ const sections: HelpSection[] = [
           <li><strong>My Engagements:</strong> View and manage your active engagements</li>
           <li><strong>Client Requests:</strong> Chat with clients and manage client orders as an agency</li>
           <li><strong>Credit Management:</strong> View your credit balance and all transactions</li>
-          <li><strong>Support:</strong> Open and manage support tickets with our team</li>
-          <li><strong>Account Settings:</strong> Manage your account, security PIN, and preferences</li>
+          <li><strong>Support:</strong> Open and manage support tickets with Arcana Mace</li>
+          <li><strong>Account Settings:</strong> Manage your account and security PIN</li>
         </ul>
         <p>
-          There is also a messaging widget for real-time chat with other agencies and clients.
+          There is also a messaging widget for real-time chat with other agencies and clients when buying and selling media channels.
         </p>
       </div>
     ),
