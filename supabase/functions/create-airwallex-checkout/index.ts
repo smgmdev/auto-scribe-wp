@@ -44,24 +44,27 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header provided");
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new Error("Unauthorized - No authorization header provided");
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
-    if (userError || !userData.user) {
-      console.error("Authentication error:", userError);
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+
+    if (claimsError || !claimsData?.claims) {
+      console.error("Authentication error:", claimsError);
       throw new Error("Unauthorized - Invalid token");
     }
 
-    const userId = userData.user.id;
-    const email = userData.user.email;
+    const userId = claimsData.claims.sub;
+    const email = claimsData.claims.email as string | undefined;
 
     const { creditAmount } = await req.json();
 
