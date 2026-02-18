@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, Search, GripHorizontal } from 'lucide-react';
+import { Loader2, ArrowRight, Search, GripHorizontal, X } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
@@ -687,20 +687,24 @@ export default function Auth() {
             }
             style={isMobile ? undefined : { left: dataPopupPos.x, top: dataPopupPos.y, width: 520, maxHeight: '80vh' }}
           >
-            {/* Drag handle / header */}
-            <div
-              className={`flex items-center justify-between px-5 py-4 border-b border-border bg-white flex-shrink-0 ${!isMobile ? 'cursor-grab active:cursor-grabbing select-none' : ''}`}
-              onMouseDown={!isMobile ? handleDataDragStart : undefined}
-            >
-              {!isMobile && (
-                <GripHorizontal size={18} className="text-muted-foreground/50 mr-3 flex-shrink-0" />
-              )}
-              <h2 className="text-base font-semibold text-foreground flex-1">How Your Data Is Managed</h2>
+            {/* Drag Handle - desktop only */}
+            {!isMobile && (
+              <div
+                className="flex items-center justify-start px-5 py-2 cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={handleDataDragStart}
+              >
+                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pb-4 border-b border-border flex-shrink-0">
+              <h2 className="text-base font-semibold text-foreground">How Your Data Is Managed</h2>
               <button
                 onClick={() => setIsDataDialogOpen(false)}
-                className="ml-3 p-1.5 rounded-full hover:bg-black/5 transition-colors text-muted-foreground hover:text-foreground"
+                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <X className="h-4 w-4" />
               </button>
             </div>
 
