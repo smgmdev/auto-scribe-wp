@@ -1883,6 +1883,7 @@ export type Database = {
         Returns: {
           content: string
           created_at: string
+          featured_image: Json
           focus_keyword: string
           id: string
           meta_description: string

@@ -109,7 +109,7 @@ export function LatestPublishedCarousel() {
             wp_link: item.wp_link,
             published_to_name: item.published_to_name,
             published_to_favicon: item.published_to_favicon,
-            featured_image: null as FeaturedImage | null, // RPC doesn't expose featured_image
+            featured_image: item.featured_image as FeaturedImage | null,
           }));
         setArticles(mapped);
       }
