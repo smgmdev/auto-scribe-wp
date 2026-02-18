@@ -208,28 +208,43 @@ export function OrderWithCreditsDialog({
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag Handle - desktop only */}
+        {/* Drag handle row with close button - desktop only */}
         {!isMobile && (
-          <div
-            className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-            onMouseDown={handleDragStart}
-          >
-            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center justify-between py-2">
+            <div
+              className={`flex-1 flex items-center ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              onMouseDown={handleDragStart}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <button
+              onClick={() => !sending && onOpenChange(false)}
+              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+          </div>
+        )}
+
+        {/* Mobile close button */}
+        {isMobile && (
+          <div className="flex items-center justify-end mb-2">
+            <button
+              onClick={() => !sending && onOpenChange(false)}
+              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div>
           <h2 className="text-lg font-semibold leading-none tracking-tight">
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </h2>
-          <button
-            onClick={() => !sending && onOpenChange(false)}
-            className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
         </div>
         <p className="text-sm text-muted-foreground">
           {isResendMode ? 'Resend an order request to the agency for approval' : 'Send an order request to the agency for approval'}
