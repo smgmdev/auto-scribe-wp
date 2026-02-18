@@ -311,7 +311,7 @@ export default function About() {
               <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-2xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 Faster and easier than<br />
                 traditional media buying.
               </h2>
@@ -324,7 +324,7 @@ export default function About() {
               <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-2xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 No agency commitments.<br />
                 No contracts. Just publish.
               </h2>
@@ -337,7 +337,7 @@ export default function About() {
               <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-2xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 Privacy and security<br />
                 built in from the start.
               </h2>
@@ -350,7 +350,7 @@ export default function About() {
               <BlueCheckIcon className="mb-6" />
             </AnimatedSection>
             <AnimatedSection delay={100}>
-              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
+              <h2 className="text-2xl md:text-5xl lg:text-[56px] font-semibold text-white tracking-tight leading-[1.1]">
                 {channelsLoading ? <Loader2 className="inline h-10 w-10 animate-spin text-white" /> : totalChannels} global media channels<br />
                 available worldwide.
               </h2>
