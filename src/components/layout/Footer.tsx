@@ -165,7 +165,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
           <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             <button onClick={() => navigate('/terms')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</button>
             <button onClick={() => navigate('/privacy')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
-            <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Do not sell or share my personal information</button>
+            <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>We Do Not Sell or Share Your Personal Information</button>
             <button onClick={() => navigate('/guidelines')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</button>
             <button onClick={() => navigate('/report-bug')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</button>
             <button onClick={() => navigate('/update-log')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Changelog</button>
