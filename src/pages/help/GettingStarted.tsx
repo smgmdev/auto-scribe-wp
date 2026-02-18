@@ -12,12 +12,12 @@ const sections: HelpSection[] = [
         </p>
         <p>Here's how it works:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Browse our catalog of media sites and select publications that match your needs</li>
-          <li>Purchase credits via our secure payment system (Airwallex)</li>
-          <li>Submit your article or content for publication using the brief or order flow</li>
-          <li>Our partner agencies review, accept, and publish your content</li>
+          <li>Browse the media network and select publications that match your needs</li>
+          <li>Choose a media outlet and submit a brief to discuss terms with the agency offering the publication</li>
+          <li>Once terms are agreed, purchase credits via the secure payment system (Airwallex) and submit your order</li>
+          <li>The agency reviews, accepts, and publishes your content</li>
           <li>Track your publication status in real-time through your dashboard</li>
-          <li>Receive a live link once your article is published</li>
+          <li>Receive a live link once your article is published and wait for delivery confirmation</li>
         </ol>
       </div>
     ),
