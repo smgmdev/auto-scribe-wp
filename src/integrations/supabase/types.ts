@@ -1821,6 +1821,22 @@ export type Database = {
         Args: { _agency_name: string }
         Returns: string
       }
+      get_my_wp_submissions: {
+        Args: { _user_id: string }
+        Returns: {
+          admin_notes: string
+          created_at: string
+          id: string
+          logo_url: string
+          name: string
+          read: boolean
+          reviewed_at: string
+          seo_plugin: string
+          status: string
+          updated_at: string
+          url: string
+        }[]
+      }
       get_press_release_categories: {
         Args: never
         Returns: {

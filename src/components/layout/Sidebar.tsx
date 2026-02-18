@@ -499,13 +499,12 @@ export function Sidebar({
           // Fetch agency media notification counts if onboarded
           // Count unread submissions after admin action (approved/rejected with read: false)
           if (agencyData.onboarding_complete === true) {
-            // Count unread rejected WP submissions for this agency user
-            const { count: wpRejectedCount } = await supabase
-              .from('wordpress_site_submissions')
-              .select('*', { count: 'exact', head: true })
-              .eq('user_id', user.id)
-              .eq('status', 'rejected')
-              .eq('read', false);
+            // Count unread rejected WP submissions for this agency user via secure RPC
+            const { data: mySubmissions } = await supabase
+              .rpc('get_my_wp_submissions', { _user_id: user.id });
+            const wpRejectedCount = mySubmissions
+              ? mySubmissions.filter((s: { status: string; read: boolean }) => s.status === 'rejected' && !s.read).length
+              : 0;
             
             // Count unread connected WP sites for this agency user
             const { count: wpConnectedCount } = await supabase
