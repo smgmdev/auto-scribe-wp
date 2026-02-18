@@ -286,7 +286,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className={`pointer-events-auto bg-background text-foreground relative ${
+        className={`pointer-events-auto bg-white text-black relative ${
           isMobile
             ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
             : 'overflow-y-auto w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
