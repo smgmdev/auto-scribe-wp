@@ -1764,6 +1764,7 @@ export type Database = {
         }[]
       }
       get_user_credits: { Args: { _user_id: string }; Returns: number }
+      has_credit_history: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
