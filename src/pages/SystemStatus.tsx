@@ -127,7 +127,7 @@ export default function SystemStatus() {
     'Credit Processing': { internalLink: '/dashboard?view=credit-history' },
     'Media Site Network': { internalLink: '/dashboard?view=sites' },
     'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
-    'Payment Gateway (Airwallex)': { link: 'https://status.airwallex.com' },
+    'Payment Gateway (Airwallex)': { internalLink: '/dashboard?view=credit-history' },
   };
 
   // Name mapping for services (API name -> Display name)
@@ -173,7 +173,7 @@ export default function SystemStatus() {
         { name: 'AI Article Generation', status: 'issue' },
         { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
         { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credit-history' },
-        { name: 'Payment Gateway (Airwallex)', status: 'issue', link: 'https://status.airwallex.com' },
+        { name: 'Payment Gateway (Airwallex)', status: 'issue', internalLink: '/dashboard?view=credit-history' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
         { name: 'Media Site Network', status: 'issue', internalLink: '/dashboard?view=sites' },
