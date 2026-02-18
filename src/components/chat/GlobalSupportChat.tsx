@@ -93,6 +93,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     agency_name: string | null;
   } | null>(null);
   const [userOnline, setUserOnline] = useState(false);
+  const [adminOnline, setAdminOnline] = useState(false);
+  const [adminUserId, setAdminUserId] = useState<string | null>(null);
   const [ticketUserId, setTicketUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
@@ -333,6 +335,72 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     return () => { supabase.removeChannel(channel); };
   }, [isAdmin, ticketUserId]);
 
+  // Track admin online status in real-time for non-admin users
+  useEffect(() => {
+    if (isAdmin) return;
+
+    const checkAdminOnline = (lastOnlineAt: string | null) => {
+      if (!lastOnlineAt) return false;
+      return Date.now() - new Date(lastOnlineAt).getTime() < 2 * 60 * 1000;
+    };
+
+    let pollInterval = 30000;
+    let isActive = true;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let channelRef: ReturnType<typeof supabase.channel> | null = null;
+    let fetchedAdminId: string | null = null;
+
+    const fetchAndTrack = async () => {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin')
+        .limit(1)
+        .maybeSingle();
+
+      if (!roleData?.user_id || !isActive) return;
+      fetchedAdminId = roleData.user_id;
+      setAdminUserId(roleData.user_id);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_online_at')
+        .eq('id', roleData.user_id)
+        .single();
+
+      setAdminOnline(checkAdminOnline(profile?.last_online_at ?? null));
+
+      channelRef = supabase
+        .channel(`support-admin-online-${roleData.user_id}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${roleData.user_id}` }, (payload) => {
+          const updated = payload.new as any;
+          setAdminOnline(checkAdminOnline(updated.last_online_at ?? null));
+          pollInterval = 30000;
+        })
+        .subscribe();
+
+      const poll = async () => {
+        if (!isActive || !fetchedAdminId) return;
+        const { data } = await supabase
+          .from('profiles')
+          .select('last_online_at')
+          .eq('id', fetchedAdminId)
+          .single();
+        setAdminOnline(checkAdminOnline(data?.last_online_at ?? null));
+        if (isActive) timeoutId = setTimeout(poll, pollInterval);
+      };
+      timeoutId = setTimeout(poll, pollInterval);
+    };
+
+    fetchAndTrack();
+
+    return () => {
+      isActive = false;
+      clearTimeout(timeoutId);
+      if (channelRef) supabase.removeChannel(channelRef);
+    };
+  }, [isAdmin]);
+
   // Typing indicator with presence
   const senderType = isAdmin ? 'admin' : 'user';
   
@@ -564,8 +632,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               <>
                 <span className="text-foreground font-medium">Arcana Mace Staff</span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-                  <span className="text-emerald-600">Online</span>
+                  <span className={`h-1.5 w-1.5 rounded-full inline-block ${adminOnline ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
+                  <span className={adminOnline ? 'text-emerald-600' : 'text-muted-foreground'}>{adminOnline ? 'Online' : 'Offline'}</span>
                 </span>
               </>
             )}
