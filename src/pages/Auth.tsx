@@ -34,6 +34,10 @@ export default function Auth() {
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showForgotForm, setShowForgotForm] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
@@ -641,27 +645,84 @@ export default function Auth() {
 
             {/* Forgot Password */}
             {mode === 'signin' && (
-              <div className="text-center pt-1">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!email) {
-                      toast.error('Enter your email address above first.');
-                      return;
-                    }
-                    try {
-                      await supabase.functions.invoke('send-password-reset', {
-                        body: { email },
-                      });
-                      toast.success('Password reset link sent — check your inbox.');
-                    } catch {
-                      toast.error('Failed to send reset email. Please try again.');
-                    }
-                  }}
-                  className="text-[12px] text-[#06c] hover:underline transition-colors"
-                >
-                  Forgot password?
-                </button>
+              <div className="pt-1">
+                {!showForgotForm ? (
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgotEmail(email);
+                        setShowForgotForm(true);
+                        setResetSent(false);
+                      }}
+                      className="text-[12px] text-[#06c] hover:underline transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border border-border rounded-sm p-4 space-y-3 bg-[#f5f5f7]">
+                    {resetSent ? (
+                      <div className="text-center space-y-2">
+                        <p className="text-[13px] font-medium text-foreground">Check your inbox</p>
+                        <p className="text-[12px] text-muted-foreground">A password reset link has been sent to <span className="font-medium text-foreground">{forgotEmail}</span>.</p>
+                        <button
+                          type="button"
+                          onClick={() => { setShowForgotForm(false); setResetSent(false); }}
+                          className="text-[12px] text-[#06c] hover:underline transition-colors"
+                        >
+                          Back to sign in
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-[13px] font-medium text-foreground">Reset your password</p>
+                        <p className="text-[12px] text-muted-foreground">Enter the email address for your account and we'll send a reset link.</p>
+                        <Input
+                          type="email"
+                          placeholder="Email address"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          disabled={isSendingReset}
+                          className="h-9 text-[13px] bg-white border-0 rounded-none px-3 placeholder:text-muted-foreground/60"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            disabled={isSendingReset}
+                            onClick={async () => {
+                              if (!forgotEmail) {
+                                toast.error('Please enter your email address.');
+                                return;
+                              }
+                              setIsSendingReset(true);
+                              try {
+                                await supabase.functions.invoke('send-password-reset', {
+                                  body: { email: forgotEmail },
+                                });
+                                setResetSent(true);
+                              } catch {
+                                toast.error('Failed to send reset email. Please try again.');
+                              } finally {
+                                setIsSendingReset(false);
+                              }
+                            }}
+                            className="flex-1 h-8 text-[12px] font-medium bg-foreground text-background rounded-none border border-foreground hover:!bg-transparent hover:!text-foreground transition-all"
+                          >
+                            {isSendingReset ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Send Reset Link'}
+                          </Button>
+                          <button
+                            type="button"
+                            onClick={() => { setShowForgotForm(false); setResetSent(false); }}
+                            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </form>
