@@ -664,12 +664,12 @@ export default function Auth() {
                   <div className="border border-border rounded-sm p-4 space-y-3 bg-[#f5f5f7]">
                     {resetSent ? (
                       <div className="text-center space-y-2">
-                        <p className="text-[13px] font-medium text-foreground">Check your inbox</p>
-                        <p className="text-[12px] text-muted-foreground">A password reset link has been sent to <span className="font-medium text-foreground">{forgotEmail}</span>.</p>
+                        <p className="text-[15px] font-medium text-foreground">Check your inbox</p>
+                        <p className="text-[15px] text-muted-foreground">A password reset link has been sent to <span className="font-medium text-foreground">{forgotEmail}</span>.</p>
                         <button
                           type="button"
                           onClick={() => { setShowForgotForm(false); setResetSent(false); }}
-                          className="text-[12px] text-[#06c] hover:underline transition-colors"
+                          className="text-[15px] text-[#06c] hover:underline transition-colors"
                         >
                           Back to sign in
                         </button>
