@@ -67,6 +67,28 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ── JWT Authentication ──────────────────────────────────────────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const anonClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+  const token = authHeader.replace('Bearer ', '');
+  const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+  if (claimsError || !claimsData?.claims) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const callerUserId = claimsData.claims.sub;
+  // ───────────────────────────────────────────────────────────────────
+
   try {
     const formData = await req.formData();
     const siteId = formData.get('siteId') as string;
@@ -76,7 +98,7 @@ Deno.serve(async (req) => {
     const caption = formData.get('caption') as string || '';
     const description = formData.get('description') as string || '';
 
-    console.log('[wordpress-upload-media] Request received:', { siteId, fileName: file?.name });
+    console.log('[wordpress-upload-media] Request received:', { siteId, fileName: file?.name, callerUserId });
 
     if (!siteId || !file) {
       console.error('[wordpress-upload-media] Missing required fields');
@@ -91,20 +113,50 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch the WordPress site credentials - first try approved sites, then pending submissions
+    // Check if caller is admin
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', callerUserId)
+      .eq('role', 'admin')
+      .maybeSingle();
+    const isAdmin = !!roleData;
+
+    // Fetch site credentials — verify caller owns the site
     let site: any = null;
     const { data: approvedSite } = await supabase
       .from('wordpress_sites')
-      .select('id, url, username, app_password')
+      .select('id, url, username, app_password, user_id, agency')
       .eq('id', siteId)
       .eq('connected', true)
       .maybeSingle();
 
-    site = approvedSite;
+    if (approvedSite) {
+      if (!isAdmin) {
+        const isDirectOwner = approvedSite.user_id === callerUserId;
+        let isAgencyOwner = false;
+        if (approvedSite.agency) {
+          const { data: agencyData } = await supabase
+            .from('agency_payouts')
+            .select('agency_name')
+            .eq('user_id', callerUserId)
+            .eq('agency_name', approvedSite.agency)
+            .eq('onboarding_complete', true)
+            .eq('downgraded', false)
+            .maybeSingle();
+          isAgencyOwner = !!agencyData;
+        }
+        if (!isDirectOwner && !isAgencyOwner) {
+          return new Response(JSON.stringify({ error: 'Unauthorized: you do not own this site' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+      site = approvedSite;
+    }
 
-    // Fallback: check wordpress_site_submissions for pending sites (admin testing)
-    if (!site) {
-      console.log('[wordpress-upload-media] Site not in wordpress_sites, checking submissions...');
+    // Admin-only: check pending submissions
+    if (!site && isAdmin) {
       const { data: submission } = await supabase
         .from('wordpress_site_submissions')
         .select('id, url, username, app_password')
