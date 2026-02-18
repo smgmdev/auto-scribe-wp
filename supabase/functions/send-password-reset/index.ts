@@ -62,7 +62,12 @@ serve(async (req) => {
     await resend.emails.send({
       from: "Arcana Mace <noreply@arcanamace.com>",
       to: [email],
+      reply_to: "support@arcanamace.com",
       subject: "Reset Your Arcana Mace Password",
+      headers: {
+        "X-Entity-Ref-ID": crypto.randomUUID(),
+        "List-Unsubscribe": "<mailto:noreply@arcanamace.com?subject=unsubscribe>",
+      },
       html: `
         <!DOCTYPE html>
         <html>
