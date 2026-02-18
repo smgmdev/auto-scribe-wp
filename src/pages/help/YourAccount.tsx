@@ -17,7 +17,7 @@ const sections: HelpSection[] = [
           <li><strong>AI Article Creation:</strong> Generate and manage AI-written articles</li>
           <li><strong>Agency Chat:</strong> Real-time messaging with publishing agencies</li>
           <li><strong>Support Tickets:</strong> Open and manage support conversations with our team</li>
-          <li><strong>Saved Preferences:</strong> Default tone, target sites, and user settings</li>
+          
         </ul>
       </div>
     ),
