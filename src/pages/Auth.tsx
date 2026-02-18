@@ -720,58 +720,48 @@ export default function Auth() {
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-muted-foreground">
               <p>
-                At Arcana Mace, we are committed to protecting your privacy and being transparent about the data we collect. Below is a summary of the information we gather and how it is used.
+                At Arcana Mace, we only collect the minimum data necessary to provide you with a secure and seamless experience. Here's a brief overview of what's stored and why.
               </p>
 
               <div>
                 <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Email address (used for authentication and communication)</li>
-                  <li>Password (securely hashed and stored)</li>
-                  <li>Username and profile details</li>
-                  <li>Account creation date and last update timestamps</li>
+                  <li>Email address — used to sign in and receive important updates</li>
+                  <li>Password — securely hashed; we never store it in plain text</li>
+                  <li>Account creation date and last update timestamp</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground mb-2">Security & Login Data</h3>
+                <h3 className="font-semibold text-foreground mb-2">Security & Login</h3>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>IP address at login (for security monitoring)</li>
-                  <li>Geolocation data derived from IP (city and country)</li>
-                  <li>Login attempt timestamps (successful and failed)</li>
-                  <li>Device and session information</li>
+                  <li>IP address at login — used solely for account protection and fraud prevention</li>
+                  <li>General location derived from IP (country/city level only)</li>
+                  <li>Login timestamps — to help you identify unexpected access</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground mb-2">Activity & Usage Data</h3>
+                <h3 className="font-semibold text-foreground mb-2">Platform Activity</h3>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Articles created, edited, and published</li>
-                  <li>Orders and transactions history</li>
-                  <li>Service requests and communications</li>
-                  <li>Credit balance and transaction records</li>
-                  <li>Connected WordPress sites and settings</li>
+                  <li>Orders and service requests you initiate</li>
+                  <li>Credit balance and top-up history</li>
+                  <li>Articles you create or publish through the platform</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground mb-2">Administrative Monitoring</h3>
-                <p>Our administrators may access the following data for security, support, and compliance purposes:</p>
-                <ul className="list-disc pl-5 space-y-1 mt-2">
-                  <li>Account status and verification state</li>
-                  <li>Login history with IP addresses and locations</li>
-                  <li>All account activity and transactions</li>
-                  <li>Communication logs within the platform</li>
-                </ul>
+                <h3 className="font-semibold text-foreground mb-2">Support Access</h3>
+                <p>Our support team may access relevant account information when assisting you with a request or resolving a dispute. Access is limited and purpose-bound.</p>
               </div>
 
               <div>
                 <h3 className="font-semibold text-foreground mb-2">Data Retention</h3>
-                <p>We retain your data for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data by contacting support.</p>
+                <p>Your data is retained only for as long as your account is active. You can request account deletion at any time by reaching out to our support team.</p>
               </div>
 
               <p className="text-xs pt-2 border-t border-border">
-                For more information, please review our{' '}
+                For full details, please review our{' '}
                 <a href="/privacy" className="text-[#06c] hover:underline">Privacy Policy</a>
                 {' '}and{' '}
                 <a href="/terms" className="text-[#06c] hover:underline">Terms of Service</a>.
