@@ -898,65 +898,25 @@ export function AdminUsersView() {
 
     setSaving(true);
 
-    // Fetch fresh credits from database to avoid race conditions
-    const { data: freshCredits, error: fetchError } = await supabase
-      .from('user_credits')
-      .select('credits')
-      .eq('user_id', selectedUser.id)
-      .single();
+    // SECURITY: Route through edge function — server-side admin verification + audit log + rollback
+    const action = creditAction === 'add' ? 'add_credits' : 'remove_credits';
+    const { data, error } = await supabase.functions.invoke('admin-actions', {
+      body: {
+        action,
+        targetUserId: selectedUser.id,
+        amount,
+        reason: creditReason.trim() || undefined,
+      },
+    });
 
-    if (fetchError || !freshCredits) {
-      toast({
-        variant: 'destructive',
-        title: 'Error fetching current credits',
-        description: fetchError?.message || 'User credits not found',
-      });
-      setSaving(false);
-      return;
-    }
-
-    const currentCredits = freshCredits.credits;
-    const newCredits = creditAction === 'add'
-      ? currentCredits + amount
-      : Math.max(0, currentCredits - amount);
-
-    const { error: updateError } = await supabase
-      .from('user_credits')
-      .update({ credits: newCredits, updated_at: new Date().toISOString() })
-      .eq('user_id', selectedUser.id);
-
-    if (updateError) {
+    if (error || !data?.success) {
       toast({
         variant: 'destructive',
         title: 'Error updating credits',
-        description: updateError.message,
+        description: error?.message || data?.error || 'Unknown error',
       });
       setSaving(false);
       return;
-    }
-
-    // Build description with optional reason
-    const formattedAmount = amount.toLocaleString();
-    let description = '';
-    if (creditAction === 'add') {
-      description = creditReason.trim()
-        ? `Gifted ${formattedAmount} credits by Arcana Mace Staff: ${creditReason.trim()}`
-        : `Gifted ${formattedAmount} credits by Arcana Mace Staff`;
-    } else {
-      description = creditReason.trim()
-        ? `Removed ${formattedAmount} credits by Arcana Mace Staff: ${creditReason.trim()}`
-        : `Removed ${formattedAmount} credits by Arcana Mace Staff`;
-    }
-
-    const { error: txError } = await supabase.from('credit_transactions').insert({
-      user_id: selectedUser.id,
-      amount: creditAction === 'add' ? amount : -amount,
-      type: creditAction === 'add' ? 'gifted' : 'admin_deduct',
-      description,
-    });
-
-    if (txError) {
-      console.error('Failed to create transaction record:', txError);
     }
 
     toast({
@@ -986,17 +946,18 @@ export function AdminUsersView() {
     setProcessing(true);
 
     const newSuspendedStatus = !selectedUser.suspended;
-    
-    const { error } = await supabase
-      .from('profiles')
-      .update({ suspended: newSuspendedStatus })
-      .eq('id', selectedUser.id);
+    const action = newSuspendedStatus ? 'suspend' : 'unsuspend';
 
-    if (error) {
+    // SECURITY: Route through edge function — server-side admin verification + audit log
+    const { data, error } = await supabase.functions.invoke('admin-actions', {
+      body: { action, targetUserId: selectedUser.id },
+    });
+
+    if (error || !data?.success) {
       toast({
         variant: 'destructive',
         title: 'Error updating user',
-        description: error.message,
+        description: error?.message || data?.error || 'Unknown error',
       });
     } else {
       // Update local state without full refresh
@@ -1005,18 +966,12 @@ export function AdminUsersView() {
       ));
       setSelectedUser({ ...selectedUser, suspended: newSuspendedStatus });
       
-      // Send email notification for both suspension and unsuspension
+      // Send email notification
       if (selectedUser.email) {
         try {
-          const { error: emailError } = await supabase.functions.invoke('send-suspension-email', {
+          await supabase.functions.invoke('send-suspension-email', {
             body: { email: selectedUser.email, suspended: newSuspendedStatus }
           });
-          
-          if (emailError) {
-            console.error('Failed to send email:', emailError);
-          } else {
-            console.log(`${newSuspendedStatus ? 'Suspension' : 'Unsuspension'} email sent to:`, selectedUser.email);
-          }
         } catch (emailErr) {
           console.error('Error invoking email function:', emailErr);
         }

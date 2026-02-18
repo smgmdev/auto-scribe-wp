@@ -174,3 +174,6 @@ verify_jwt = false
 
 [functions.manage-pin]
 verify_jwt = false
+
+[functions.admin-actions]
+verify_jwt = false
