@@ -638,6 +638,32 @@ export default function Auth() {
                 </span>
               )}
             </Button>
+
+            {/* Forgot Password */}
+            {mode === 'signin' && (
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) {
+                      toast.error('Enter your email address above first.');
+                      return;
+                    }
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: `${window.location.origin}/auth`,
+                    });
+                    if (error) {
+                      toast.error('Failed to send reset email. Please try again.');
+                    } else {
+                      toast.success('Password reset link sent — check your inbox.');
+                    }
+                  }}
+                  className="text-[12px] text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Divider */}
