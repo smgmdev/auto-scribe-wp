@@ -69,11 +69,33 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ── JWT Authentication ──────────────────────────────────────────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const anonClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+  const token = authHeader.replace('Bearer ', '');
+  const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+  if (claimsError || !claimsData?.claims) {
+    return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const callerUserId = claimsData.claims.sub;
+  // ───────────────────────────────────────────────────────────────────
+
   try {
     const body: PublishRequest = await req.json();
     const { siteId, title, content, status, categories, tags, featuredMediaId, seo } = body;
 
-    console.log('[wordpress-publish-article] Request received:', { siteId, title: title?.substring(0, 50), status });
+    console.log('[wordpress-publish-article] Request received:', { siteId, title: title?.substring(0, 50), status, callerUserId });
 
     if (!siteId || !title || !content) {
       console.error('[wordpress-publish-article] Missing required fields');
@@ -91,20 +113,57 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch the WordPress site credentials - first try approved sites, then pending submissions
+    // Fetch WordPress site credentials — verify caller owns the site
     let site: any = null;
-    const { data: approvedSite } = await supabase
-      .from('wordpress_sites')
-      .select('id, url, username, app_password, seo_plugin')
-      .eq('id', siteId)
-      .eq('connected', true)
+
+    // Check if caller is admin
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', callerUserId)
+      .eq('role', 'admin')
       .maybeSingle();
+    const isAdmin = !!roleData;
 
-    site = approvedSite;
+    // Fetch the approved site, scoped to caller ownership (unless admin)
+    const approvedQuery = supabase
+      .from('wordpress_sites')
+      .select('id, url, username, app_password, seo_plugin, user_id, agency')
+      .eq('id', siteId)
+      .eq('connected', true);
 
-    // Fallback: check wordpress_site_submissions for pending sites (admin testing)
-    if (!site) {
-      console.log('[wordpress-publish-article] Site not in wordpress_sites, checking submissions...');
+    const { data: approvedSite } = await approvedQuery.maybeSingle();
+
+    if (approvedSite) {
+      // Verify ownership: site belongs to caller or caller's agency, or caller is admin
+      if (!isAdmin) {
+        const isDirectOwner = approvedSite.user_id === callerUserId;
+        let isAgencyOwner = false;
+        if (approvedSite.agency) {
+          const { data: agencyData } = await supabase
+            .from('agency_payouts')
+            .select('agency_name')
+            .eq('user_id', callerUserId)
+            .eq('agency_name', approvedSite.agency)
+            .eq('onboarding_complete', true)
+            .eq('downgraded', false)
+            .maybeSingle();
+          isAgencyOwner = !!agencyData;
+        }
+        if (!isDirectOwner && !isAgencyOwner) {
+          console.error('[wordpress-publish-article] Caller does not own site', { callerUserId, siteId });
+          return new Response(
+            JSON.stringify({ success: false, error: 'Unauthorized: you do not own this site' }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+      site = approvedSite;
+    }
+
+    // Admin-only fallback: check wordpress_site_submissions for pending sites (admin testing)
+    if (!site && isAdmin) {
+      console.log('[wordpress-publish-article] Admin: checking submissions...');
       const { data: submission } = await supabase
         .from('wordpress_site_submissions')
         .select('id, url, username, app_password, seo_plugin')
@@ -114,7 +173,7 @@ Deno.serve(async (req) => {
     }
 
     if (!site) {
-      console.error('[wordpress-publish-article] Site not found');
+      console.error('[wordpress-publish-article] Site not found or unauthorized');
       return new Response(
         JSON.stringify({ 
           success: false,

@@ -1716,6 +1716,14 @@ export type Database = {
     }
     Functions: {
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
+      check_rate_limit: {
+        Args: {
+          _identifier: string
+          _max_attempts?: number
+          _window_seconds?: number
+        }
+        Returns: boolean
+      }
       check_user_status: { Args: { check_email: string }; Returns: string }
       check_user_suspended: { Args: { check_email: string }; Returns: boolean }
       get_active_agency_payouts: {
