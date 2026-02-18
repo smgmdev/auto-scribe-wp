@@ -23,26 +23,6 @@ const sections: HelpSection[] = [
     ),
   },
   {
-    id: 'credit-packages',
-    title: 'Credit Packages',
-    content: (
-      <div className="space-y-4">
-        <p>We offer various credit packages to suit different publishing needs. Larger packages offer better per-credit value.</p>
-        <p>Key things to know:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Credits never expire once purchased</li>
-          <li>You can purchase multiple packages at any time</li>
-          <li>Your current credit balance is always visible in the dashboard header</li>
-          <li>Credit usage is logged in the "Credit History" section</li>
-        </ul>
-        <p>
-          Visit the <a href="/dashboard?view=credit-history" className="text-[#06c] hover:underline">Credit History</a> section
-          to review all top-ups and deductions.
-        </p>
-      </div>
-    ),
-  },
-  {
     id: 'payment-methods',
     title: 'Payment Methods',
     content: (
