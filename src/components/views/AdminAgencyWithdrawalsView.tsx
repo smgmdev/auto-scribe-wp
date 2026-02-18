@@ -526,6 +526,10 @@ export function AdminAgencyWithdrawalsView() {
             placeholder="Search by agency name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className="pl-9 text-sm rounded-none bg-black text-white placeholder:text-white/60 border-black"
           />
         </div>

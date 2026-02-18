@@ -1176,6 +1176,10 @@ export function MyRequestsView() {
             placeholder="Search engagements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className="pl-10 pr-10 h-9 text-sm bg-black text-white placeholder:text-gray-400 border-black rounded-none"
           />
           {searchQuery && (

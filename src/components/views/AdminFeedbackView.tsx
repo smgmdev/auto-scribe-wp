@@ -170,6 +170,10 @@ export function AdminFeedbackView() {
                 placeholder="Search reports by subject, email, category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 className="pl-10 bg-black text-white border-black placeholder:text-white/50 h-9 text-sm rounded-none"
               />
             </div>

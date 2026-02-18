@@ -403,6 +403,10 @@ export const AdminCreditManagementView = () => {
                     placeholder="Search by email..."
                     value={balancesSearchTerm}
                     onChange={(e) => setBalancesSearchTerm(e.target.value)}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     className="w-full pl-10 h-9 text-sm rounded-none border-0 text-white placeholder:text-white/50"
                     style={{ backgroundColor: '#1d1d1f' }}
                   />

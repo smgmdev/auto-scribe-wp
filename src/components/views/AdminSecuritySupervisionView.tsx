@@ -362,6 +362,10 @@ export function AdminSecuritySupervisionView() {
                 placeholder="Search messages, contacts, engagements..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 className="pl-9 bg-foreground text-background border-foreground placeholder:text-white/50 h-10 text-sm"
               />
             </div>

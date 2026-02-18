@@ -1430,6 +1430,10 @@ export function AgencyRequestsView() {
           placeholder="Search requests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           className="pl-9 w-full h-9 text-sm rounded-none bg-black text-white placeholder:text-white/50 border-black"
         />
       </div>

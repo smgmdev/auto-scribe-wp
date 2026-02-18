@@ -623,6 +623,10 @@ export function AdminAIArticlesView() {
               placeholder="Search articles by title, keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               className="pl-10 h-9 text-sm rounded-none w-full"
             />
           </div>
