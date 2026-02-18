@@ -160,24 +160,12 @@ const PrivacyPolicy = () => {
                 When you create an account, make a purchase, use our services, or contact us, we may collect a variety of information, including:
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4">
-                  Account Information. Your account details, including email address, username, and account status
-                </li>
-                <li className="pl-4">
-                  Contact Information. Data such as name, email address, or other contact information
-                </li>
-                <li className="pl-4">
-                  Payment Information. Data about your billing address and method of payment, such as credit, debit, or other payment card information processed securely through our payment providers
-                </li>
-                <li className="pl-4">
-                  Transaction Information. Data about purchases and transactions facilitated by Arcana Mace
-                </li>
-                <li className="pl-4">
-                  Usage Data. Data about your activity on and use of our platform, including browsing history, search history, and interaction data
-                </li>
-                <li className="pl-4">
-                  Communications. Details such as the content of your communications with Arcana Mace, including interactions with customer support
-                </li>
+                <li>Account Information. Your account details, including email address, username, and account status</li>
+                <li>Contact Information. Data such as name, email address, or other contact information</li>
+                <li>Payment Information. Data about your billing address and method of payment, such as credit, debit, or other payment card information processed securely through our payment providers</li>
+                <li>Transaction Information. Data about purchases and transactions facilitated by Arcana Mace</li>
+                <li>Usage Data. Data about your activity on and use of our platform, including browsing history, search history, and interaction data</li>
+                <li>Communications. Details such as the content of your communications with Arcana Mace, including interactions with customer support</li>
               </ul>
               <p className="mt-4">
                 Providing accurate and complete personal data enables Arcana Mace to deliver services effectively, process requests, and maintain the integrity of your account and transactions on the platform.
@@ -198,21 +186,11 @@ const PrivacyPolicy = () => {
                 Arcana Mace uses personal data to power our services, to process your transactions, to communicate with you, for security and fraud prevention, and to comply with law. We may also use personal data for other purposes with your consent.
               </p>
               <ul className="list-none space-y-3">
-                <li className="pl-4">
-                  Power Our Services. To provide, maintain, and improve our platform and services
-                </li>
-                <li className="pl-4">
-                  Process Transactions. To process payments, fulfill orders, and manage your account
-                </li>
-                <li className="pl-4">
-                  Communicate With You. To send you transactional messages, updates, security alerts, and support communications
-                </li>
-                <li className="pl-4">
-                  Security and Fraud Prevention. To protect our users and our platform from fraudulent, unauthorized, or illegal activity
-                </li>
-                <li className="pl-4">
-                  Legal Compliance. To comply with applicable laws, regulations, and legal processes
-                </li>
+                <li>Power Our Services. To provide, maintain, and improve our platform and services</li>
+                <li>Process Transactions. To process payments, fulfill orders, and manage your account</li>
+                <li>Communicate With You. To send you transactional messages, updates, security alerts, and support communications</li>
+                <li>Security and Fraud Prevention. To protect our users and our platform from fraudulent, unauthorized, or illegal activity</li>
+                <li>Legal Compliance. To comply with applicable laws, regulations, and legal processes</li>
               </ul>
             </AccordionContent>
           </AccordionItem>
