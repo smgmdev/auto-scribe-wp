@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Check, Hand, Lock, Smartphone, ChevronDown, Loader2 } from 'lucide-react';
+import { Search, User, Check, Hand, Lock, Smartphone, Loader2, Plus } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -71,33 +77,6 @@ function AnimatedSection({
   );
 }
 
-// FAQ Item component with Apple-style accordion
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <div className="py-4">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between text-left group"
-      >
-        <span className={`text-lg md:text-xl font-medium transition-colors ${isOpen ? 'text-[#06c]' : 'text-[#1d1d1f] group-hover:text-[#06c]'}`}>
-          {question}
-        </span>
-        <ChevronDown 
-          className={`w-6 h-6 transition-all duration-300 ${isOpen ? 'text-[#06c] rotate-180' : 'text-[#86868b] group-hover:text-[#06c]'}`}
-        />
-      </button>
-      <div 
-        className={`overflow-hidden transition-all duration-300 ease-out ${isOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
-      >
-        <p className="text-[#86868b] text-base md:text-lg leading-relaxed pr-12">
-          {answer}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 export default function About() {
   const navigate = useNavigate();
@@ -470,7 +449,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Questions Section - Apple style FAQ */}
+      {/* Questions Section */}
       <section id="faq" className="bg-white py-20 md:py-28 px-4">
         <div className="max-w-[980px] mx-auto">
           <AnimatedSection>
@@ -480,32 +459,79 @@ export default function About() {
           </AnimatedSection>
 
           <AnimatedSection delay={100}>
-            <div className="divide-y divide-[#d2d2d7]">
-              <FAQItem 
-                question="How do I use Arcana Mace?"
-                answer={`Simply create an account, browse our curated network of ${totalChannels > 0 ? totalChannels + '+' : ''} global channels, select your target outlet, submit your content, and pay. Your article will be published within 24-48 hours on average.`}
-              />
-              <FAQItem 
-                question="How secure is Arcana Mace?"
-                answer="We use industry-standard encryption for all transactions and communications. Your payment details are never shared with publishers or stored on our servers. All data is transmitted over secure HTTPS connections."
-              />
-              <FAQItem 
-                question="How do I set up an account?"
-                answer="Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing publishers and placing orders."
-              />
-              <FAQItem 
-                question="Which payment methods are supported?"
-                answer="We accept all major credit and debit cards, as well as USDT cryptocurrency. You can also purchase credits in bulk for additional savings on future orders."
-              />
-              <FAQItem 
-                question="Can I track my order status?"
-                answer="Yes! Once you place an order, you can track its status in real-time from your dashboard. You'll also receive email notifications when your article is published."
-              />
-              <FAQItem 
-                question="What if I need to cancel an order?"
-                answer="You can cancel an order before it's accepted by the publisher. Once accepted, cancellations are subject to our refund policy. Contact our support team for assistance with any order issues."
-              />
-            </div>
+            <Accordion type="multiple" className="w-full">
+              <AccordionItem value="q1" className="border-t border-border">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">How do I use Arcana Mace?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  Simply create an account, browse our curated network of {totalChannels > 0 ? `${totalChannels}+` : ''} global channels, select your target outlet, submit your content, and pay. Your article will be published within 24–48 hours on average.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q2" className="border-t border-border">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">How secure is Arcana Mace?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  We use industry-standard encryption for all transactions and communications. Your payment details are never shared with publishers or stored on our servers. All data is transmitted over secure HTTPS connections.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q3" className="border-t border-border">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">How do I set up an account?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing publishers and placing orders.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q4" className="border-t border-border">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">Which payment methods are supported?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  We accept all major credit and debit cards. You can also purchase credits in bulk for additional savings on future orders, or request an offline invoice for wire transfers.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q5" className="border-t border-border">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">Can I track my order status?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  Yes! Once you place an order, you can track its status in real-time from your dashboard. You'll also receive notifications when your article is published.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q6" className="border-t border-border border-b">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">What if I need to cancel an order?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                  You can cancel an order before it's accepted by the publisher. Once accepted, cancellations are subject to our refund policy. Contact our support team for assistance with any order issues.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </AnimatedSection>
         </div>
       </section>
