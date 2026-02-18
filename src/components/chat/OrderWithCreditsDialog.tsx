@@ -211,7 +211,7 @@ export function OrderWithCreditsDialog({
         {/* Drag bar */}
         {!isMobile ? (
           <div
-            className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
+            className={`px-4 py-2 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
             onMouseDown={handleDragStart}
           >
             <GripHorizontal className="h-4 w-4 text-muted-foreground" />
@@ -237,7 +237,7 @@ export function OrderWithCreditsDialog({
         )}
 
         {/* Header */}
-        <div>
+        <div className="pt-4">
           <h2 className="text-lg font-semibold leading-none tracking-tight">
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </h2>
