@@ -28,19 +28,17 @@ const sections: HelpSection[] = [
     title: 'Available Publications',
     content: (
       <div className="space-y-4">
-        <p>Our marketplace features publications across a wide range of categories and countries:</p>
+        <p>Arcana Mace marketplace features publications across a wide range of categories:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Business & Finance:</strong> Industry-leading business publications</li>
           <li><strong>Technology:</strong> Tech news and innovation sites</li>
           <li><strong>Lifestyle:</strong> Consumer and lifestyle media</li>
-          <li><strong>Health & Wellness:</strong> Health-focused publications</li>
           <li><strong>Entertainment:</strong> Entertainment and media sites</li>
           <li><strong>Regional:</strong> Country and language-specific publications</li>
           <li><strong>News & Press:</strong> General news portals and press outlets</li>
         </ul>
         <p>
-          New publications are added regularly by verified agencies. Use filters on the Sites page
-          to find sites by category, country, Google index status, and price range.
+          New publications are added regularly by PR agencies. Use filters in the Media Network section to find media sites by category.
         </p>
       </div>
     ),
