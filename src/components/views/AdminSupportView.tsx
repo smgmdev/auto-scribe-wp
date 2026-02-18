@@ -106,12 +106,10 @@ export function AdminSupportView() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full p-0 h-auto">
             <TabsTrigger value="open" className="flex-1 py-2.5 text-sm">
-              Open {tickets.filter(t => t.status === 'open').length > 0 && (
-                <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'open').length})</span>
-              )}
+              Open <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'open').length})</span>
             </TabsTrigger>
             <TabsTrigger value="closed" className="flex-1 py-2.5 text-sm">
-              Closed
+              Closed <span className="ml-1 text-sm">({tickets.filter(t => t.status === 'closed').length})</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
