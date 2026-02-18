@@ -104,13 +104,13 @@ const sections: HelpSection[] = [
           If you believe an order was not delivered as agreed, you can raise a dispute:
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Open the order chat from "My Requests"</li>
-          <li>Click "Raise Dispute" and describe the issue</li>
+          <li>Open the order chat from "My Engagements" or "My Orders"</li>
+          <li>Click "Open Dispute"</li>
           <li>Our team will review the situation and mediate</li>
           <li>A resolution (credit refund or order completion) will be issued</li>
         </ol>
         <p>
-          Disputes are reviewed by the Arcana Mace team. Both parties are contacted and
+          Disputes are reviewed by the Arcana Mace team. Both parties may be contacted and
           the outcome is communicated through the platform.
         </p>
       </div>
