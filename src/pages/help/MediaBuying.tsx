@@ -53,13 +53,13 @@ const sections: HelpSection[] = [
           to an agency before committing to a purchase:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Open a site's detail and click "Submit Brief" to describe your needs</li>
+          <li>Open a media site details and click "Submit Brief" to describe your needs</li>
           <li>The agency reviews your brief and responds through the platform chat</li>
           <li>Once agreed, the agency can convert the request into a formal order</li>
           <li>All communication stays on-platform for full transparency and security</li>
         </ul>
         <p>
-          Service requests are visible in the "My Requests" section of your dashboard.
+          Service requests are visible in the "My Engagements" section of your dashboard.
         </p>
       </div>
     ),
@@ -70,8 +70,7 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Publication times vary by site. Each site displays its expected delivery window.
-          Here's what to typically expect:
+          Publication times vary by media site. Here's what to typically expect:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Express (1–2 days):</strong> Fast-turnaround publications</li>
@@ -80,7 +79,7 @@ const sections: HelpSection[] = [
         </ul>
         <p>
           A delivery countdown is visible inside the order chat once an order is accepted.
-          If a deadline passes without delivery, the order shows as overdue.
+          If a deadline passes without delivery, the order shows as overdue. If the order is in an overdue status you can open a dispute.
         </p>
       </div>
     ),
@@ -93,13 +92,13 @@ const sections: HelpSection[] = [
         <p>We stand behind the quality of our service:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Publication Guarantee:</strong> Your article will be published or credits refunded</li>
-          <li><strong>Google Indexed Sites:</strong> All listed sites are verified for Google indexing status</li>
-          <li><strong>Verified Agencies:</strong> All partner agencies are reviewed and onboarded by our team</li>
-          <li><strong>Dispute System:</strong> If there are quality issues, raise a dispute for our team to review</li>
+          <li><strong>Google Indexed Sites:</strong> Check with the agency first if media site is available for Google indexing</li>
+          <li><strong>PR Agencies:</strong> All agencies are reviewed based on full provided KYC and onboarded by Arcana Mace staff</li>
+          <li><strong>Dispute System:</strong> If there are quality issues in order delivery, raise a dispute for our team to review</li>
         </ul>
         <p>
           If any issues arise, use the order chat to communicate with the agency first,
-          then escalate to support if needed.
+          then escalate to support if needed through dispute.
         </p>
       </div>
     ),
