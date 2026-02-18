@@ -419,32 +419,6 @@ export default function About() {
         </AnimatedSection>
       </section>
 
-      {/* Setup Section */}
-      <section className="bg-[#f5f5f7] py-4 px-4">
-        <div className="max-w-[980px] mx-auto">
-           <AnimatedSection className="bg-white rounded-none overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="p-12 md:p-16 flex flex-col justify-center">
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
-                  It's ready<br />and set.<br />
-                  <span className="text-[#86868b]">Just go.</span>
-                </h2>
-              </div>
-              <button
-                onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
-                className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center text-left group hover:from-[#e8e8ed] hover:to-[#dcdce1] transition-all duration-300 w-full"
-              >
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight group-hover:text-[#0066cc] transition-colors duration-300">
-                  Choose how<br />you top up.<br />
-                  <span className="text-[#86868b] group-hover:text-[#0066cc]/60">Card payments. Offline invoice.</span>
-                </h2>
-                <span className="mt-4 text-[#0066cc] text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">Top up credits ›</span>
-              </button>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
       {/* Global Coverage Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
