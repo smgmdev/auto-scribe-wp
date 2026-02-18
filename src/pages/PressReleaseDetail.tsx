@@ -244,7 +244,28 @@ export default function PressReleaseDetail() {
                     [&_strong]:font-semibold [&_strong]:text-foreground
                     [&_em]:italic
                   "
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pressRelease.content) }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(pressRelease.content, {
+                      ALLOWED_TAGS: [
+                        'p', 'br', 'strong', 'em', 'b', 'i', 'u', 's',
+                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                        'ul', 'ol', 'li',
+                        'blockquote', 'pre', 'code',
+                        'a', 'img',
+                        'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                        'div', 'span',
+                      ],
+                      ALLOWED_ATTR: [
+                        'href', 'target', 'rel',
+                        'src', 'alt', 'title', 'width', 'height',
+                        'class',
+                      ],
+                      ALLOW_DATA_ATTR: false,
+                      FORCE_BODY: true,
+                      // Strip javascript: and data: URIs from href/src
+                      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+                    })
+                  }}
                 />
 
                 {/* Footer Contacts - Apple Style */}
