@@ -485,7 +485,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
-                  Yes! Once you place an order, you can track its status in real-time from your dashboard. You'll also receive notifications when your article is published.
+                  Absolutely. Once an order is placed, you can monitor its progress in real-time from the My Orders section of your dashboard. Each order also has a dedicated engagement chat between you and the agency, updated in real-time, where you can follow up on deliverables, share feedback, or raise any concerns directly.
                 </AccordionContent>
               </AccordionItem>
 
