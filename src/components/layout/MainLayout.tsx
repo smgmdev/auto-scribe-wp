@@ -27,6 +27,14 @@ export function MainLayout({
   
   const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Scroll main content to top whenever the view changes
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0 });
+    }
+  }, [currentView]);
 
   useEffect(() => {
     const measure = () => {
@@ -102,6 +110,7 @@ export function MainLayout({
 
       {/* Main Content */}
       <main 
+        ref={mainRef}
         className={`lg:pl-64 lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
         style={{ paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined }}
       >
