@@ -141,9 +141,9 @@ export default function HelpCenter() {
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header - matches About page */}
+      {/* Main Header - sticky within scroll container */}
       <header 
-        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
@@ -194,11 +194,8 @@ export default function HelpCenter() {
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
-      <div className="h-[92px]" />
-
       {/* Sub-header - Sticky */}
-      <div className={`sticky z-50 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+      <div className="sticky top-16 z-50">
         <div className="bg-white/90 backdrop-blur-sm">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
@@ -293,7 +290,7 @@ export default function HelpCenter() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 pt-20">
+      <main className="flex-1">
         {/* Hero Section */}
         <section className="bg-[#f5f5f7] py-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
