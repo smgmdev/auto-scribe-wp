@@ -154,7 +154,7 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                At Arcana Mace, we believe that you can have great products and great privacy. This means that we strive to collect only the personal data that we need. The personal data Arcana Mace collects depends on how you interact with our platform.
+                At Arcana Mace, we believe in delivering great services while respecting your privacy. We collect personal data that is necessary to facilitate the services you engage with on our platform. The personal data Arcana Mace collects depends on how you interact with and use our services.
               </p>
               <p className="mb-4">
                 When you create an account, make a purchase, use our services, or contact us, we may collect a variety of information, including:
@@ -180,7 +180,7 @@ const PrivacyPolicy = () => {
                 </li>
               </ul>
               <p className="mt-4">
-                You are not required to provide the personal data that we have requested. However, if you choose not to do so, in many cases we will not be able to provide you with our products or services or respond to requests you may have.
+                Providing accurate and complete personal data enables Arcana Mace to deliver services effectively, process requests, and maintain the integrity of your account and transactions on the platform.
               </p>
             </AccordionContent>
           </AccordionItem>
