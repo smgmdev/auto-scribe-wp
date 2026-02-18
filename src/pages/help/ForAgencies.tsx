@@ -28,8 +28,8 @@ const sections: HelpSection[] = [
         <p>Apply to become an agency partner by following these steps:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
           <li>Create a regular Arcana Mace user account</li>
-          <li>Navigate to the Agency section from the sidebar</li>
-          <li>Click "Apply to become an Agency" and complete the application form</li>
+          <li>Navigate to the Agency section from the sidebar → Become an Agency</li>
+          <li>Click "Submit New Application" and complete the application form</li>
           <li>Upload required documentation (business registration, incorporation documents)</li>
           <li>Submit the application — our team reviews within a few business days</li>
           <li>Once approved, your agency dashboard and features become active</li>
@@ -37,8 +37,8 @@ const sections: HelpSection[] = [
         <p>Requirements include:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Registered business entity</li>
-          <li>Access to one or more publishing platforms or media sites</li>
-          <li>Commitment to quality content and agreed turnaround times</li>
+          <li>Access to a minimum of 3 media sites</li>
+          <li>Commitment to quality service provision and agreed turnaround times</li>
         </ul>
       </div>
     ),
