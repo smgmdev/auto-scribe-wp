@@ -76,16 +76,15 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Credits are the currency used on Arcana Mace to pay for publications.
-          Each media site has a credit cost based on factors like authority, reach, and category.
+          Credits are used on Arcana Mace to pay for publications.
+          Each media site has a different credit cost assigned by the service provider agency.
         </p>
         <p><strong>Key things to know about credits:</strong></p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Credits are purchased in packages via Airwallex (our secure payment gateway)</li>
+          <li>Credits are purchased via Airwallex (secure payment gateway)</li>
           <li>Credits never expire once purchased</li>
           <li>Different publications require different credit amounts</li>
-          <li>You can view credit costs before placing any order</li>
-          <li>Some sites can also be ordered with direct payment instead of credits</li>
+          <li>Credits cannot be withdrawn</li>
           <li>Credits are locked when an order is placed and released on delivery</li>
         </ul>
       </div>
