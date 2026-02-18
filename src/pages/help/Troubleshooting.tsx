@@ -85,7 +85,6 @@ const sections: HelpSection[] = [
         </ul>
         <p>
           For security-related account lockouts, our team may require additional verification.
-          Open a support ticket with your account email for the fastest resolution.
         </p>
       </div>
     ),
