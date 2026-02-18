@@ -9,6 +9,7 @@ const corsHeaders = {
 const AIRWALLEX_API_URL = "https://api.airwallex.com";
 const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
 const MIN_CREDITS = 10;
+const MAX_CREDITS = 10000; // $10,000 maximum per transaction
 
 function decodeJwt(token: string): Record<string, unknown> {
   try {
@@ -93,8 +94,11 @@ serve(async (req) => {
 
     console.log("Creating Airwallex checkout:", { creditAmount, userId });
 
-    if (!creditAmount || typeof creditAmount !== "number" || creditAmount < MIN_CREDITS) {
+    if (!creditAmount || typeof creditAmount !== "number" || !Number.isFinite(creditAmount) || creditAmount < MIN_CREDITS) {
       throw new Error(`Invalid credit amount. Minimum is ${MIN_CREDITS} credits.`);
+    }
+    if (creditAmount > MAX_CREDITS) {
+      throw new Error(`Invalid credit amount. Maximum is ${MAX_CREDITS} credits per transaction.`);
     }
 
     const credits = Math.floor(creditAmount);
