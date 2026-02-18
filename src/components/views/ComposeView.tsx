@@ -764,8 +764,13 @@ export function ComposeView() {
       setPublishedLink(result.link);
       setIsPublishing(false);
       setShowPublishSuccess(true);
-      // Scroll to top so the success popup is visible
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll the main content container to top so the success popup is visible
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
       setTimeout(() => {
         setShowPublishSuccess(false);
