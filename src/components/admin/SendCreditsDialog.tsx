@@ -46,30 +46,20 @@ export function SendCreditsDialog({
 
     setLoading(true);
     try {
-      // Update user_credits
-      const newCredits = currentCredits + creditAmount;
-      const { error: updateError } = await supabase
-        .from('user_credits')
-        .update({ credits: newCredits, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-
-      if (updateError) throw updateError;
-
-      // Create transaction record
-      const description = reason 
-        ? `Gifted by Arcana Mace Staff: ${reason}`
-        : 'Gifted credits by Arcana Mace Staff';
-
-      const { error: txError } = await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: userId,
+      // SECURITY: Use edge function so admin role is verified server-side.
+      // Direct DB writes to user_credits are blocked by RLS for regular users,
+      // but an edge function ensures the caller is a verified admin and that
+      // both user_credits AND the immutable transaction ledger are updated atomically.
+      const { data, error } = await supabase.functions.invoke('gift-credits', {
+        body: {
+          targetUserId: userId,
           amount: creditAmount,
-          type: 'gifted',
-          description
-        });
+          reason: reason || undefined,
+        },
+      });
 
-      if (txError) throw txError;
+      if (error) throw new Error(error.message || 'Failed to gift credits');
+      if (!data?.success) throw new Error(data?.error || 'Failed to gift credits');
 
       toast.success(`Successfully sent ${creditAmount} credits to ${userEmail || 'user'}`);
       onSuccess();

@@ -262,44 +262,43 @@ serve(async (req) => {
     // Credits were already validated and locked during lock-order-credits.
     // No need to re-check user_credits.credits balance - just convert locked → completed.
 
-    // 1. Delete the "locked" transaction from lock-order-credits
-    const { error: deleteLockedError } = await supabaseAdmin
+    // SECURITY: Do NOT delete credit_transactions rows. The ledger must be immutable.
+    // Instead, mark the locked/offer_accepted transactions as "superseded" by updating their type.
+    // This preserves full audit history while preventing them from counting against the balance.
+
+    // 1. Mark "locked" transaction as superseded (order_id match first, fallback to description)
+    const { error: updateLockedError } = await supabaseAdmin
       .from("credit_transactions")
-      .delete()
+      .update({ type: "locked_superseded", description: `[Superseded by order_completed] Order: ${order_id}` })
       .eq("user_id", order.user_id)
       .eq("type", "locked")
       .eq("order_id", order_id);
 
-    if (deleteLockedError) {
-      logStep("Error deleting locked transaction by order_id", { error: deleteLockedError.message });
-    } else {
-      logStep("Locked transaction deleted (by order_id)");
+    if (updateLockedError) {
+      logStep("Error updating locked transaction by order_id", { error: updateLockedError.message });
     }
 
-    // 2. Delete the "offer_accepted" transaction (will be replaced by "order_completed")
-    const { error: deleteLockError } = await supabaseAdmin
-      .from("credit_transactions")
-      .delete()
-      .eq("user_id", order.user_id)
-      .eq("type", "offer_accepted")
-      .eq("order_id", order_id);
-
-    if (deleteLockError) {
-      logStep("Error deleting offer_accepted transaction", { error: deleteLockError.message });
-    } else {
-      logStep("Offer_accepted transaction deleted");
-    }
-
-    // Also clean up any locked transactions without order_id (legacy)
-    // Match by description containing the media site name
+    // Fallback: legacy locked transactions without order_id (match by site name in description)
     await supabaseAdmin
       .from("credit_transactions")
-      .delete()
+      .update({ type: "locked_superseded", description: `[Superseded by order_completed] ${mediaSiteName}` })
       .eq("user_id", order.user_id)
       .eq("type", "locked")
       .like("description", `%${mediaSiteName}%`);
 
-    logStep("Credits converted from locked to completed (no balance deduction needed - was never deducted)");
+    // 2. Mark "offer_accepted" transaction as superseded
+    const { error: updateOfferError } = await supabaseAdmin
+      .from("credit_transactions")
+      .update({ type: "offer_superseded", description: `[Superseded by order_completed] Order: ${order_id}` })
+      .eq("user_id", order.user_id)
+      .eq("type", "offer_accepted")
+      .eq("order_id", order_id);
+
+    if (updateOfferError) {
+      logStep("Error updating offer_accepted transaction", { error: updateOfferError.message });
+    }
+
+    logStep("Locked/offer transactions marked as superseded (ledger preserved)");
 
     // 3. Record credit transaction for client (order_completed - permanent deduction)
     await supabaseAdmin

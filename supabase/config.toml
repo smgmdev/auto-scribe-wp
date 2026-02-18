@@ -162,3 +162,6 @@ verify_jwt = false
 
 [functions.confirm-publish-credits]
 verify_jwt = false
+
+[functions.gift-credits]
+verify_jwt = false

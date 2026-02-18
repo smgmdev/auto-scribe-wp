@@ -161,23 +161,55 @@ serve(async (req) => {
       );
     }
 
-    // Get user's current credits
-    const { data: userCreditsData, error: userCreditsError } = await supabaseAdmin
-      .from("user_credits")
-      .select("credits")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // SECURITY: Derive available credits from the authoritative transaction ledger,
+    // not the denormalized user_credits.credits value which could be stale or manipulated.
+    const { data: transactions } = await supabaseAdmin
+      .from("credit_transactions")
+      .select("amount, type, order_id")
+      .eq("user_id", user.id);
 
-    if (userCreditsError) {
-      console.error("Error fetching user credits:", userCreditsError);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch user credits" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
+    const txs = transactions || [];
+    const withdrawalTypes = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+    let incoming = 0;
+    let outgoing = 0;
+    let withdrawn = 0;
+    for (const tx of txs) {
+      if (tx.type === 'withdrawal_completed') { withdrawn += Math.abs(tx.amount) / 100; continue; }
+      if (withdrawalTypes.includes(tx.type)) continue;
+      if (tx.amount > 0 && tx.type !== 'unlocked') incoming += tx.amount;
+      if (tx.amount < 0 && tx.type !== 'locked' && tx.type !== 'offer_accepted' && tx.type !== 'order') outgoing += Math.abs(tx.amount);
+    }
+    const ledgerBalance = incoming - outgoing;
+
+    // Fetch credits locked in active orders
+    const { data: activeOrders } = await supabaseAdmin
+      .from("orders")
+      .select("id, media_sites(price)")
+      .eq("user_id", user.id)
+      .neq("status", "cancelled")
+      .neq("status", "completed")
+      .neq("delivery_status", "accepted");
+
+    let lockedInOrders = 0;
+    const activeOrderIds = new Set<string>();
+    if (activeOrders) {
+      for (const order of activeOrders) {
+        activeOrderIds.add(order.id);
+        const ms = order.media_sites as unknown as { price: number } | null;
+        if (ms?.price) lockedInOrders += ms.price;
+      }
     }
 
-    const currentCredits = userCreditsData?.credits || 0;
-    console.log(`User current credits: ${currentCredits}, required: ${creditCost}`);
+    // locked via offer_accepted only if order still active
+    let offerLocked = 0;
+    for (const tx of txs) {
+      if (tx.type === 'offer_accepted' && tx.amount < 0 && tx.order_id && activeOrderIds.has(tx.order_id)) {
+        offerLocked += Math.abs(tx.amount);
+      }
+    }
+
+    const currentCredits = Math.max(0, ledgerBalance - lockedInOrders - offerLocked - withdrawn);
+    console.log(`User ledger-derived available credits: ${currentCredits}, required: ${creditCost}`);
 
     // Check if user has enough credits
     if (currentCredits < creditCost) {
