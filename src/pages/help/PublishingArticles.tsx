@@ -81,8 +81,7 @@ const sections: HelpSection[] = [
           <li><strong>Agency:</strong> Each site is being offered by a KYC verified agency</li>
         </ul>
         <p>
-          Use the search bar and filters on the Sites page to narrow down publications by category,
-          price range, and country.
+          Use the search bar and filters in the Media Network section to narrow down publications by category.
         </p>
       </div>
     ),
