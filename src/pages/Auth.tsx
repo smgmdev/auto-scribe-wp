@@ -687,25 +687,34 @@ export default function Auth() {
             }
             style={isMobile ? undefined : { left: dataPopupPos.x, top: dataPopupPos.y, width: 520, maxHeight: '80vh' }}
           >
-            {/* Drag Handle - desktop only */}
+            {/* Drag Handle + Close - desktop only */}
             {!isMobile && (
               <div
-                className="flex items-center justify-start px-5 py-2 cursor-grab active:cursor-grabbing select-none"
+                className="flex items-center justify-between px-5 py-2 cursor-grab active:cursor-grabbing select-none"
                 onMouseDown={handleDataDragStart}
               >
                 <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsDataDialogOpen(false); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             )}
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 pb-4 border-b border-border flex-shrink-0">
               <h2 className="text-base font-semibold text-foreground">How Your Data Is Managed</h2>
-              <button
-                onClick={() => setIsDataDialogOpen(false)}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {isMobile && (
+                <button
+                  onClick={() => setIsDataDialogOpen(false)}
+                  className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             {/* Scrollable content */}
