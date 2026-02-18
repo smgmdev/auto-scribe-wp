@@ -156,3 +156,9 @@ verify_jwt = true
 
 [functions.create-airwallex-checkout]
 verify_jwt = false
+
+[functions.lock-publish-credits]
+verify_jwt = false
+
+[functions.confirm-publish-credits]
+verify_jwt = false

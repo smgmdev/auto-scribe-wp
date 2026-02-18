@@ -575,16 +575,43 @@ export function ComposeView() {
       toast.error("Please upload a featured image");
       return;
     }
-    // Check if user can afford total cost (only for new articles, non-admins)
-    if (!isAdmin && !editingArticle) {
-      const totalCost = getTotalCreditCost();
-      if (credits < totalCost) {
-        toast.error(`You need ${totalCost} credits to publish this article`);
-        return;
-      }
-    }
+
     setIsPublishing(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // ── STEP 1: Lock credits BEFORE publishing (atomic, server-side) ──
+    // This prevents: publish-then-fail-deduct exploits and race conditions.
+    // Credits are reserved now; confirmed or refunded after WP publish result.
+    let creditLockId: string | null = null;
+    const isNewPublish = !isAdmin && !editingArticle && user;
+
+    if (isNewPublish) {
+      const { data: lockResult, error: lockError } = await supabase.functions.invoke('lock-publish-credits', {
+        body: { siteId: selectedSite, siteName: currentSite.name },
+      });
+
+      if (lockError) {
+        console.error('[handlePublish] Credit lock invocation error:', lockError);
+        toast.error("Could not verify credits. Please try again.");
+        setIsPublishing(false);
+        return;
+      }
+
+      if (lockResult?.error) {
+        // Insufficient credits or other server-side rejection
+        toast.error(lockResult.error);
+        setIsPublishing(false);
+        return;
+      }
+
+      creditLockId = lockResult?.lockId ?? null;
+      // Optimistically refresh UI credits display
+      if (lockResult?.newBalance !== undefined) {
+        await refreshCredits();
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     try {
       let featuredMediaId: number | undefined = editingArticle?.wpFeaturedMediaId;
       let featuredImageUrl: string | undefined = editingArticle?.featuredImage?.url;
@@ -594,8 +621,6 @@ export function ComposeView() {
       const imageChanged = imagePreview !== originalImageUrl;
 
       // Upload featured image if exists
-      // Case 1: New file from file picker
-      // Case 2: Image from saved draft (data URL in imagePreview but no file) - also applies to edits with new image
       if (featuredImage.file) {
         toast.info("Uploading featured image...");
         const mediaResult = await uploadMedia(currentSite, featuredImage.file, {
@@ -607,15 +632,12 @@ export function ComposeView() {
         featuredMediaId = mediaResult.id;
         featuredImageUrl = mediaResult.source_url;
       } else if (imagePreview && (!featuredMediaId || imageChanged) && imagePreview.startsWith('data:')) {
-        // Convert data URL to File and upload (for drafts with saved images or new images in edit mode)
         toast.info("Uploading featured image...");
-        
         try {
           const response = await fetch(imagePreview);
           const blob = await response.blob();
           const fileName = `featured-image-${Date.now()}.${blob.type.split('/')[1] || 'jpg'}`;
           const file = new File([blob], fileName, { type: blob.type });
-          
           const mediaResult = await uploadMedia(currentSite, file, {
             title: featuredImage.title,
             alt_text: featuredImage.altText,
@@ -629,12 +651,10 @@ export function ComposeView() {
           toast.error("Could not upload the featured image, publishing without it");
         }
       }
-      let result: {
-        id: number;
-        link: string;
-      };
 
-      // Update existing WordPress post or create new
+      let result: { id: number; link: string };
+
+      // ── STEP 2: Publish to WordPress ──────────────────────────────
       if (editingArticle?.wpPostId) {
         result = await updateWPArticle({
           site: currentSite,
@@ -645,10 +665,7 @@ export function ComposeView() {
           categories: selectedCategories,
           tags: selectedTagIds,
           featuredMediaId,
-          seo: {
-            focusKeyword,
-            metaDescription
-          }
+          seo: { focusKeyword, metaDescription }
         });
       } else {
         result = await publishArticle({
@@ -659,14 +676,20 @@ export function ComposeView() {
           categories: selectedCategories,
           tags: selectedTagIds,
           featuredMediaId,
-          seo: {
-            focusKeyword,
-            metaDescription
-          }
+          seo: { focusKeyword, metaDescription }
         });
       }
+      // ─────────────────────────────────────────────────────────────
 
-      // Save to local state
+      // ── STEP 3: Confirm credit deduction (publish succeeded) ──────
+      if (isNewPublish && creditLockId) {
+        await supabase.functions.invoke('confirm-publish-credits', {
+          body: { lockId: creditLockId, success: true, siteName: currentSite.name },
+        });
+      }
+      // ─────────────────────────────────────────────────────────────
+
+      // Save to local DB state
       const savedFeaturedImage = featuredImageUrl ? {
         file: null,
         url: featuredImageUrl,
@@ -675,6 +698,7 @@ export function ComposeView() {
         altText: featuredImage.altText,
         description: featuredImage.description
       } : undefined;
+
       if (editingArticle) {
         await updateArticle(editingArticle.id, {
           title,
@@ -690,7 +714,6 @@ export function ComposeView() {
           wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames or existing tags
           tags: selectedTagIds.map(id => {
             const tag = availableTags.find(t => t.id === id);
             if (tag) return tag.name;
@@ -718,7 +741,6 @@ export function ComposeView() {
           wpFeaturedMediaId: featuredMediaId,
           categories: selectedCategories,
           tagIds: selectedTagIds,
-          // Preserve tag names: use availableTags if loaded, otherwise use editingTagNames
           tags: selectedTagIds.map(id => {
             const tag = availableTags.find(t => t.id === id);
             return tag?.name || editingTagNames[id] || `Tag #${id}`;
@@ -727,39 +749,14 @@ export function ComposeView() {
           metaDescription,
         });
       }
-      // Deduct credits for non-admin users via backend (only for new articles, not updates)
-      if (!isAdmin && !editingArticle && user) {
-        const creditCost = getTotalCreditCost();
-        if (creditCost > 0) {
-          const { data: creditResult, error: creditError } = await supabase.functions.invoke('deduct-publish-credits', {
-            body: {
-              siteId: selectedSite,
-              siteName: currentSite.name
-            }
-          });
 
-          if (creditError) {
-            console.error('Failed to deduct credits:', creditError);
-            toast.error("Article published but credits could not be deducted. Please contact support.");
-          } else if (creditResult?.error) {
-            // Backend returned an error (e.g., insufficient credits)
-            console.error('Backend credit error:', creditResult.error);
-            toast.error(creditResult.error);
-            setIsPublishing(false);
-            return;
-          } else {
-            // Refresh credits in auth context
-            await refreshCredits();
-          }
-        }
-      }
+      await refreshCredits();
 
       // Show success animation
       setPublishedLink(result.link);
       setIsPublishing(false);
       setShowPublishSuccess(true);
 
-      // Reset form after a delay to show success animation, then redirect to articles
       setTimeout(() => {
         setShowPublishSuccess(false);
         setPublishedLink(null);
@@ -772,16 +769,27 @@ export function ComposeView() {
         setFocusKeyword('');
         setMetaDescription('');
         removeImage();
-        
-        // Clear editing state if applicable and redirect to articles view
         if (editingArticle) {
           setEditingArticle(null);
         }
         setCurrentView('articles');
       }, 2500);
+
     } catch (error) {
+      // ── STEP 3 (failure path): Refund credits if publish failed ───
+      if (isNewPublish && creditLockId) {
+        console.log('[handlePublish] WP publish failed, refunding credits for lock:', creditLockId);
+        await supabase.functions.invoke('confirm-publish-credits', {
+          body: { lockId: creditLockId, success: false, siteName: currentSite.name },
+        });
+        await refreshCredits();
+        toast.error("Publish failed — your credits have been refunded.");
+      } else {
+        toast.error(error instanceof Error ? error.message : "Could not publish to WordPress");
+      }
+      // ─────────────────────────────────────────────────────────────
+
       console.error('Publish error:', error);
-      toast.error(error instanceof Error ? error.message : "Could not publish to WordPress");
       setIsPublishing(false);
     }
   };
