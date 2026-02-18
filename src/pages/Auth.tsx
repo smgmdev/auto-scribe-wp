@@ -705,7 +705,7 @@ export default function Auth() {
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-4 border-b border-border flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <h2 className="text-base font-semibold text-foreground">How Your Data Is Managed</h2>
               {isMobile && (
                 <button
