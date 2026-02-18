@@ -345,16 +345,16 @@ export function BriefSubmissionDialog({
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
-            {/* Drag handle row with close button */}
+            {/* Drag bar */}
             <div
-              className={`flex items-center justify-between py-2 pr-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              className={`px-6 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
               onMouseDown={handleDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               <button
                 onClick={() => onOpenChange(false)}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>

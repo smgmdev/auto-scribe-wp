@@ -1414,26 +1414,31 @@ export function AdminFloatingChat({
           zIndex
         }}
       >
-        {/* Header */}
-        <div 
-          className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${!isMobile ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none`}
-          onMouseDown={isMobile ? undefined : handleDragStart}
+        {/* Drag bar - desktop only */}
+        {!isMobile && (
+          <div
+            className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+            onMouseDown={handleDragStart}
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+              onClick={onClose}
+              onMouseDown={(e) => e.stopPropagation()}
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Header content */}
+        <div
+          className={`px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : ''} ${isMobile ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none`}
+          onMouseDown={isMobile ? handleDragStart : undefined}
         >
-          {!isMobile && (
-            <div className="flex items-center justify-between mb-1">
-              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={onClose}
-                onMouseDown={(e) => e.stopPropagation()}
-                title="Close"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {request.media_sites?.favicon && (
