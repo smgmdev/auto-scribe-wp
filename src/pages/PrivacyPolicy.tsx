@@ -104,7 +104,7 @@ const PrivacyPolicy = () => {
           
           {/* Section 1 */}
           <AccordionItem value="item-1" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">What Is Personal Data at Arcana Mace?</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -112,7 +112,7 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                At Arcana Mace, we believe strongly in fundamental privacy rights — and that those fundamental rights should not differ depending on where you live in the world. <strong className="text-foreground">That's why we treat any data that relates to an identified or identifiable individual or that is linked or linkable to them by Arcana Mace as "personal data," no matter where the individual lives.</strong>
+                At Arcana Mace, we believe strongly in fundamental privacy rights — and that those fundamental rights should not differ depending on where you live in the world. That's why we treat any data that relates to an identified or identifiable individual or that is linked or linkable to them by Arcana Mace as "personal data," no matter where the individual lives.
               </p>
               <p className="mb-4">
                 This means that data that directly identifies you — such as your name — is personal data, and also data that does not directly identify you, but that can reasonably be used to identify you — such as your account ID — is personal data. Aggregated data is considered non-personal data for the purposes of this Privacy Policy.
@@ -125,7 +125,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 2 */}
           <AccordionItem value="item-2" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Your Privacy Rights at Arcana Mace</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -139,14 +139,14 @@ const PrivacyPolicy = () => {
                 Where you are requested to consent to the processing of your personal data by Arcana Mace, you have the right to withdraw your consent at any time.
               </p>
               <p>
-                <strong className="text-foreground">To exercise your privacy rights, visit your account settings or contact our support team.</strong> To help protect the security of your personal data, you must sign in to your account and your identity will be verified. You also have the right to lodge a complaint with the applicable regulator.
+                To exercise your privacy rights, visit your account settings or contact our support team. To help protect the security of your personal data, you must sign in to your account and your identity will be verified. You also have the right to lodge a complaint with the applicable regulator.
               </p>
             </AccordionContent>
           </AccordionItem>
 
           {/* Section 3 */}
           <AccordionItem value="item-3" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Personal Data Arcana Mace Collects from You</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -154,29 +154,29 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                At Arcana Mace, we believe that you can have great products and great privacy. This means that we strive to <strong className="text-foreground">collect only the personal data that we need</strong>. The personal data Arcana Mace collects depends on how you interact with our platform.
+                At Arcana Mace, we believe that you can have great products and great privacy. This means that we strive to collect only the personal data that we need. The personal data Arcana Mace collects depends on how you interact with our platform.
               </p>
               <p className="mb-4">
                 When you create an account, make a purchase, use our services, or contact us, we may collect a variety of information, including:
               </p>
               <ul className="list-none space-y-3">
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Account Information.</strong> Your account details, including email address, username, and account status
+                  Account Information. Your account details, including email address, username, and account status
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Contact Information.</strong> Data such as name, email address, or other contact information
+                  Contact Information. Data such as name, email address, or other contact information
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Payment Information.</strong> Data about your billing address and method of payment, such as credit, debit, or other payment card information processed securely through our payment providers
+                  Payment Information. Data about your billing address and method of payment, such as credit, debit, or other payment card information processed securely through our payment providers
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Transaction Information.</strong> Data about purchases and transactions facilitated by Arcana Mace
+                  Transaction Information. Data about purchases and transactions facilitated by Arcana Mace
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Usage Data.</strong> Data about your activity on and use of our platform, including browsing history, search history, and interaction data
+                  Usage Data. Data about your activity on and use of our platform, including browsing history, search history, and interaction data
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Communications.</strong> Details such as the content of your communications with Arcana Mace, including interactions with customer support
+                  Communications. Details such as the content of your communications with Arcana Mace, including interactions with customer support
                 </li>
               </ul>
               <p className="mt-4">
@@ -187,7 +187,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 4 */}
           <AccordionItem value="item-4" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Arcana Mace's Use of Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -195,23 +195,23 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                <strong className="text-foreground">Arcana Mace uses personal data to power our services, to process your transactions, to communicate with you, for security and fraud prevention, and to comply with law.</strong> We may also use personal data for other purposes with your consent.
+                Arcana Mace uses personal data to power our services, to process your transactions, to communicate with you, for security and fraud prevention, and to comply with law. We may also use personal data for other purposes with your consent.
               </p>
               <ul className="list-none space-y-3">
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Power Our Services.</strong> To provide, maintain, and improve our platform and services
+                  Power Our Services. To provide, maintain, and improve our platform and services
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Process Transactions.</strong> To process payments, fulfill orders, and manage your account
+                  Process Transactions. To process payments, fulfill orders, and manage your account
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Communicate With You.</strong> To send you transactional messages, updates, security alerts, and support communications
+                  Communicate With You. To send you transactional messages, updates, security alerts, and support communications
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Security and Fraud Prevention.</strong> To protect our users and our platform from fraudulent, unauthorized, or illegal activity
+                  Security and Fraud Prevention. To protect our users and our platform from fraudulent, unauthorized, or illegal activity
                 </li>
                 <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Legal Compliance.</strong> To comply with applicable laws, regulations, and legal processes
+                  Legal Compliance. To comply with applicable laws, regulations, and legal processes
                 </li>
               </ul>
             </AccordionContent>
@@ -219,7 +219,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 5 */}
           <AccordionItem value="item-5" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Protection of Personal Data at Arcana Mace</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -233,7 +233,7 @@ const PrivacyPolicy = () => {
                 We continuously review and improve our security practices to keep pace with emerging threats. Your trust matters to us, and we take data protection seriously as an ongoing commitment.
               </p>
               <p className="mb-4">
-                <strong className="text-foreground">However, we must be transparent:</strong> no internet-based platform can guarantee complete or absolute security. The internet, by its nature, carries inherent risks that are outside any company's full control. Threats such as cyberattacks, hacking, or unauthorized interception of data in transit can occur despite best efforts and industry-standard precautions.
+                However, we must be transparent: no internet-based platform can guarantee complete or absolute security. The internet, by its nature, carries inherent risks that are outside any company's full control. Threats such as cyberattacks, hacking, or unauthorized interception of data in transit can occur despite best efforts and industry-standard precautions.
               </p>
               <p>
                 By using Arcana Mace, you acknowledge and accept that while we do our utmost to safeguard your data, Arcana Mace cannot be held responsible for security incidents resulting from circumstances beyond our reasonable control. We encourage you to take your own precautions, such as using strong passwords and keeping your account credentials private.
@@ -243,7 +243,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 6 */}
           <AccordionItem value="item-6" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Cookies and Other Technologies</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -261,7 +261,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 7 */}
           <AccordionItem value="item-7" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Retention of Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -276,7 +276,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 8 */}
           <AccordionItem value="item-8" className="border-t border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Children and Personal Data</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
@@ -291,7 +291,7 @@ const PrivacyPolicy = () => {
 
           {/* Section 9 */}
           <AccordionItem value="item-9" className="border-t border-b border-border">
-            <AccordionTrigger className="text-lg md:text-xl text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
                 <span className="text-left">Privacy Questions</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
