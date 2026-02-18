@@ -303,7 +303,6 @@ export default function SystemStatus() {
           {/* Refresh Button - mobile only, under banner */}
           <div className="flex md:hidden justify-center mb-6">
             <Button
-              size="sm"
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
               className={`w-full gap-2 border transition-all duration-200 ${
