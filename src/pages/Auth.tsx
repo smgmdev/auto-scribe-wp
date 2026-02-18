@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, Search } from 'lucide-react';
+import { Loader2, ArrowRight, Search, GripHorizontal } from 'lucide-react';
 import { z } from 'zod';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { supabase } from '@/integrations/supabase/client';
@@ -693,11 +693,7 @@ export default function Auth() {
               onMouseDown={!isMobile ? handleDataDragStart : undefined}
             >
               {!isMobile && (
-                <div className="flex items-center gap-1.5 mr-3">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-                </div>
+                <GripHorizontal size={18} className="text-muted-foreground/50 mr-3 flex-shrink-0" />
               )}
               <h2 className="text-base font-semibold text-foreground flex-1">How Your Data Is Managed</h2>
               <button
