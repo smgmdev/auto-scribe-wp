@@ -345,22 +345,21 @@ export function BriefSubmissionDialog({
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >
-            {/* Drag Handle */}
+            {/* Drag handle row with close button */}
             <div
-              className={`flex items-center justify-start py-2 pr-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              className={`flex items-center justify-between py-2 pr-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
               onMouseDown={handleDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button
+                onClick={() => onOpenChange(false)}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
             </div>
-
-            {/* Close Button */}
-            <button
-              onClick={() => onOpenChange(false)}
-              className="absolute right-6 top-4 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
 
             <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 pr-6">
               <div className="space-y-4">

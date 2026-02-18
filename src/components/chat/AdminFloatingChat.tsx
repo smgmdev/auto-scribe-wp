@@ -1420,8 +1420,18 @@ export function AdminFloatingChat({
           onMouseDown={isMobile ? undefined : handleDragStart}
         >
           {!isMobile && (
-            <div className="flex justify-center mb-1">
+            <div className="flex items-center justify-between mb-1">
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                onClick={onClose}
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Close"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           )}
           <div className="flex items-center justify-between">
@@ -1516,15 +1526,17 @@ export function AdminFloatingChat({
                   <Info className="h-4 w-4" />
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                onClick={onClose}
-                title="Close"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  onClick={onClose}
+                  title="Close"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

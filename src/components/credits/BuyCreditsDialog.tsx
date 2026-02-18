@@ -293,50 +293,63 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag Handle - desktop only */}
+        {/* Drag handle row with close button - desktop only */}
         {!isMobile && (
           <div
-            className={`flex items-center justify-start py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+            className={`flex items-center justify-between py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
             onMouseDown={handleDragStart}
           >
             <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+            <button
+              onClick={() => onOpenChange(false)}
+              disabled={confirming}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+          </div>
+        )}
+
+        {/* Mobile close button */}
+        {isMobile && (
+          <div className="flex items-center justify-end mb-2">
+            <button
+              onClick={() => onOpenChange(false)}
+              disabled={confirming}
+              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {step === 'payment' && (
-              <button
-                onClick={handleBack}
-                disabled={confirming}
-                className="rounded-sm ring-offset-background transition-all hover:bg-muted focus:outline-none h-7 w-7 flex items-center justify-center"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
+        <div className="flex items-center gap-2 mb-1">
+          {step === 'payment' && (
+            <button
+              onClick={handleBack}
+              disabled={confirming}
+              className="rounded-sm ring-offset-background transition-all hover:bg-muted focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+          )}
+          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+            {step === 'select' ? (
+              <>
+                <Coins className="h-5 w-5 text-accent" />
+                Buy Credits
+              </>
+            ) : (
+              <>
+                <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain" />
+                 Payment
+              </>
             )}
-            <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
-              {step === 'select' ? (
-                <>
-                  <Coins className="h-5 w-5 text-accent" />
-                  Buy Credits
-                </>
-              ) : (
-                <>
-                  <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain" />
-                   Payment
-                </>
-              )}
-            </h2>
-          </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            disabled={confirming}
-            className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
+          </h2>
         </div>
 
         {step === 'select' ? (
