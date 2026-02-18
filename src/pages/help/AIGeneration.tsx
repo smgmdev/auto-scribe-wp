@@ -35,10 +35,10 @@ const sections: HelpSection[] = [
           The Sources section aggregates trending news from multiple sources to inspire your content:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>News Headlines:</strong> Current events and breaking news from global sources</li>
-          <li><strong>Industry Trends:</strong> Sector-specific developments</li>
-          <li><strong>Yahoo Finance:</strong> Financial and markets news</li>
-          <li><strong>Custom Topics:</strong> Enter your own subject matter in the Compose section</li>
+          <li><strong>Political:</strong> Latest political news and developments</li>
+          <li><strong>Business:</strong> Business and financial news from global sources</li>
+          <li><strong>Middle East:</strong> Regional news and current events from the Middle East</li>
+          <li><strong>Asia:</strong> News and developments across Asian markets and regions</li>
         </ul>
         <p>
           Click any headline in the Headlines section to use it as the source for AI generation.
