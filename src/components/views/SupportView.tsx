@@ -242,10 +242,10 @@ export function SupportView() {
             }
             style={isMobile ? undefined : { left: popupPos.x, top: popupPos.y, width: 460, maxHeight: '80vh' }}
           >
-            {/* Drag handle row with close button - desktop only */}
+            {/* Drag bar - desktop only */}
             {!isMobile && (
               <div
-                className={`flex items-center justify-between py-2 px-5 ${dragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+                className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${dragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
                 onMouseDown={handleMouseDown}
               >
                 <GripHorizontal className="h-4 w-4 text-muted-foreground" />
@@ -254,12 +254,12 @@ export function SupportView() {
                   onMouseDown={(e) => e.stopPropagation()}
                   className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             )}
 
-            <div className="flex items-center justify-between px-5 pb-4 pt-1 border-b border-border shrink-0">
+            <div className="flex items-center justify-between px-5 pb-4 pt-3 border-b border-border shrink-0">
               <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
               {isMobile && (
                 <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">

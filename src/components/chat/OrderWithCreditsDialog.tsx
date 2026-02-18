@@ -208,31 +208,27 @@ export function OrderWithCreditsDialog({
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag handle row with close button - desktop only */}
-        {!isMobile && (
-          <div className="flex items-center justify-between py-2">
-            <div
-              className={`flex-1 flex items-center ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-              onMouseDown={handleDragStart}
-            >
-              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-            </div>
+        {/* Drag bar */}
+        {!isMobile ? (
+          <div
+            className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
+            onMouseDown={handleDragStart}
+          >
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
             <button
               onClick={() => !sending && onOpenChange(false)}
-              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              onMouseDown={(e) => e.stopPropagation()}
+              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </button>
           </div>
-        )}
-
-        {/* Mobile close button */}
-        {isMobile && (
+        ) : (
           <div className="flex items-center justify-end mb-2">
             <button
               onClick={() => !sending && onOpenChange(false)}
-              className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
