@@ -461,7 +461,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
-                  Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing publishers and placing orders.
+                  Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing media network and placing orders.
                 </AccordionContent>
               </AccordionItem>
 
