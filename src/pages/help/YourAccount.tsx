@@ -7,16 +7,17 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Creating an Arcana Mace account gives you access to powerful features designed to 
+          Creating an Arcana Mace account gives you access to powerful features designed to
           streamline your media buying experience:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Full Site Access:</strong> Browse our complete catalog of premium publications</li>
           <li><strong>Order Tracking:</strong> Monitor your submissions in real-time</li>
-          <li><strong>Credit Management:</strong> Purchase and manage your credit balance</li>
-          <li><strong>Article History:</strong> Access all your published content in one place</li>
-          <li><strong>Saved Preferences:</strong> Store your favorite sites and default settings</li>
-          <li><strong>Priority Support:</strong> Get help when you need it</li>
+          <li><strong>Credit Management:</strong> Purchase and track your credit balance</li>
+          <li><strong>AI Article Creation:</strong> Generate and manage AI-written articles</li>
+          <li><strong>Agency Chat:</strong> Real-time messaging with publishing agencies</li>
+          <li><strong>Support Tickets:</strong> Open and manage support conversations with our team</li>
+          <li><strong>Saved Preferences:</strong> Default tone, target sites, and user settings</li>
         </ul>
       </div>
     ),
@@ -27,7 +28,7 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          If you've forgotten your password or need to reset it for security reasons, 
+          If you've forgotten your password or need to reset it for security reasons,
           follow these steps:
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
@@ -38,8 +39,8 @@ const sections: HelpSection[] = [
           <li>Click the link and create a new password</li>
         </ol>
         <p>
-          <strong>Note:</strong> Password reset links expire after 24 hours for security. 
-          If your link has expired, simply request a new one.
+          <strong>Note:</strong> Password reset links expire after 24 hours. If your link has expired,
+          simply request a new one from the login page.
         </p>
       </div>
     ),
@@ -54,7 +55,7 @@ const sections: HelpSection[] = [
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Email:</strong> Your primary contact for order updates and notifications</li>
-          <li><strong>Username:</strong> Your display name on the platform</li>
+          <li><strong>Username:</strong> Your display name shown to agencies in chats</li>
           <li><strong>WhatsApp:</strong> Optional contact for urgent communications</li>
         </ul>
         <p>
@@ -65,20 +66,40 @@ const sections: HelpSection[] = [
   },
   {
     id: 'security-settings',
-    title: 'Security Settings',
+    title: 'Security & PIN Protection',
+    content: (
+      <div className="space-y-4">
+        <p>Protect your account with our security features:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>PIN Protection:</strong> Add an optional 4-digit PIN that's required on login — ideal for shared devices</li>
+          <li><strong>Email Verification:</strong> Your email must be verified to access all platform features</li>
+          <li><strong>Session Management:</strong> Sessions expire automatically for your protection</li>
+          <li><strong>Security Monitoring:</strong> Our team monitors for unusual account activity</li>
+        </ul>
+        <p>
+          You can enable, disable, or update your PIN from Settings → Security in your dashboard.
+          If you forget your PIN, it can be reset through account settings.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 'support-tickets',
+    title: 'Support Tickets',
     content: (
       <div className="space-y-4">
         <p>
-          Protect your account with our security features:
+          The Support section in your dashboard gives you direct access to our team via real-time ticketing:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>PIN Protection:</strong> Add an extra layer of security with a 4-digit PIN</li>
-          <li><strong>Email Verification:</strong> Ensure your email is verified for account recovery</li>
-          <li><strong>Session Management:</strong> Sign out from all devices when needed</li>
+          <li>Open a new ticket with a subject and description of your issue</li>
+          <li>Chat in real-time with our support staff directly in the platform</li>
+          <li>Attach files or screenshots for faster resolution</li>
+          <li>View open and closed tickets in separate tabs</li>
+          <li>See whether support staff is online before messaging</li>
         </ul>
         <p>
-          We recommend enabling PIN protection, especially if you access your account 
-          from shared devices.
+          All ticket conversations are kept on-platform for security and accountability.
         </p>
       </div>
     ),
@@ -89,20 +110,18 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Your privacy is important to us. We are committed to protecting your personal 
+          Your privacy is important to us. We are committed to protecting your personal
           information and being transparent about how we use it.
-        </p>
-        <p>
-          Key points of our privacy policy:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>We only collect information necessary for service delivery</li>
           <li>Your data is encrypted and stored securely</li>
           <li>We never sell your personal information to third parties</li>
-          <li>You can request data deletion at any time</li>
+          <li>You can request data deletion at any time via a support ticket</li>
         </ul>
         <p>
-          For the complete privacy policy, visit our Privacy Policy page.
+          For the complete policy, visit our <a href="/privacy" className="text-[#06c] hover:underline">Privacy Policy</a> page.
+          You can also review our <a href="/do-not-sell" className="text-[#06c] hover:underline">Do Not Sell or Share</a> page.
         </p>
       </div>
     ),
@@ -117,8 +136,8 @@ export default function YourAccount() {
       categorySlug="your-account"
       intro={
         <p>
-          Learn how to manage your Arcana Mace account, including profile settings, 
-          security options, and password management.
+          Learn how to manage your Arcana Mace account, including profile settings,
+          PIN security, support tickets, and privacy.
         </p>
       }
       sections={sections}

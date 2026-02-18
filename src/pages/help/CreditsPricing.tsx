@@ -6,18 +6,16 @@ const sections: HelpSection[] = [
     title: 'Purchasing Credits',
     content: (
       <div className="space-y-4">
-        <p>
-          Credits are the currency used on Arcana Mace. Here's how to purchase them:
-        </p>
+        <p>Credits are the currency used on Arcana Mace. Here's how to purchase them:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Navigate to your dashboard and click on "Buy Credits"</li>
+          <li>Navigate to your dashboard and click "Buy Credits" in the sidebar or header</li>
           <li>Select a credit package that fits your needs</li>
-          <li>Complete the secure checkout process</li>
-          <li>Credits are added to your account instantly</li>
+          <li>Complete the secure checkout process via Airwallex</li>
+          <li>Credits are added to your account instantly after payment confirmation</li>
         </ol>
         <p>
-          All payments are processed securely through Stripe. We accept all major 
-          credit cards and select payment methods.
+          All payments are processed securely through <strong>Airwallex</strong>, our trusted international
+          payment gateway. The checkout flow is embedded directly in the platform for a seamless experience.
         </p>
       </div>
     ),
@@ -27,18 +25,17 @@ const sections: HelpSection[] = [
     title: 'Credit Packages',
     content: (
       <div className="space-y-4">
-        <p>
-          We offer various credit packages to suit different needs:
-        </p>
+        <p>We offer various credit packages to suit different publishing needs. Larger packages offer better per-credit value.</p>
+        <p>Key things to know:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Starter Pack:</strong> Perfect for trying out the platform</li>
-          <li><strong>Growth Pack:</strong> Best value for regular publishers</li>
-          <li><strong>Professional Pack:</strong> Ideal for agencies and power users</li>
-          <li><strong>Enterprise Pack:</strong> Maximum savings for high-volume needs</li>
+          <li>Credits never expire once purchased</li>
+          <li>You can purchase multiple packages at any time</li>
+          <li>Your current credit balance is always visible in the dashboard header</li>
+          <li>Credit usage is logged in the "Credit History" section</li>
         </ul>
         <p>
-          Larger packages offer better per-credit pricing. Credits never expire, 
-          so you can purchase in bulk with confidence.
+          Visit the <a href="/dashboard?view=credit-history" className="text-[#06c] hover:underline">Credit History</a> section
+          to review all top-ups and deductions.
         </p>
       </div>
     ),
@@ -48,17 +45,36 @@ const sections: HelpSection[] = [
     title: 'Payment Methods',
     content: (
       <div className="space-y-4">
-        <p>
-          We accept multiple payment methods for your convenience:
-        </p>
+        <p>We accept multiple payment methods via Airwallex:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Visa, Mastercard, American Express</li>
           <li>Apple Pay and Google Pay</li>
-          <li>Bank transfers (for enterprise customers)</li>
+          <li>Local bank transfer methods (availability varies by region)</li>
+          <li>USDT cryptocurrency (for agency payouts — not credit purchases)</li>
         </ul>
         <p>
-          All transactions are encrypted and processed through Stripe, 
-          a PCI-compliant payment processor trusted by millions of businesses worldwide.
+          All transactions are encrypted and processed through Airwallex, a globally licensed
+          payment provider. If your payment method isn't available, contact support for assistance.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 'credit-locking',
+    title: 'Credit Locking & Escrow',
+    content: (
+      <div className="space-y-4">
+        <p>
+          When you place an order, the required credits are <strong>locked</strong> from your balance —
+          similar to an escrow system. This protects both buyers and agencies:
+        </p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>On Order:</strong> Credits are deducted from your available balance and held</li>
+          <li><strong>On Delivery:</strong> Credits are released to the agency after you confirm or after the review window</li>
+          <li><strong>On Cancellation:</strong> Locked credits are returned to your available balance</li>
+        </ul>
+        <p>
+          This system ensures your funds are only released once the service is delivered.
         </p>
       </div>
     ),
@@ -68,38 +84,15 @@ const sections: HelpSection[] = [
     title: 'Refund Policy',
     content: (
       <div className="space-y-4">
-        <p>
-          We want you to be completely satisfied with your purchase. Here's our refund policy:
-        </p>
+        <p>We want you to be satisfied with your experience. Here's our refund policy:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Unused Credits:</strong> Refundable within 30 days of purchase</li>
-          <li><strong>Failed Orders:</strong> Full credit refund if publication fails</li>
-          <li><strong>Quality Issues:</strong> Case-by-case review for content concerns</li>
+          <li><strong>Failed Orders:</strong> Full credit refund if publication fails or is cancelled before acceptance</li>
+          <li><strong>Quality Issues:</strong> Reviewed case-by-case via the support ticketing system</li>
+          <li><strong>Disputes:</strong> If you raise a dispute, our team will review and may issue a credit refund</li>
         </ul>
         <p>
-          To request a refund, contact our support team with your order details. 
-          Refunds are typically processed within 5-7 business days.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'promotions',
-    title: 'Promotions & Discounts',
-    content: (
-      <div className="space-y-4">
-        <p>
-          We regularly offer promotions and discounts to help you save:
-        </p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>First-Time Buyer:</strong> Special discount on your first purchase</li>
-          <li><strong>Seasonal Sales:</strong> Holiday and special event promotions</li>
-          <li><strong>Bulk Discounts:</strong> Automatic savings on larger packages</li>
-          <li><strong>Referral Program:</strong> Earn credits by referring new users</li>
-        </ul>
-        <p>
-          Subscribe to our newsletter to stay updated on the latest promotions 
-          and exclusive offers.
+          To request a refund, open a support ticket from your dashboard with your order details.
+          Refunds are typically processed within 5–7 business days.
         </p>
       </div>
     ),
@@ -114,8 +107,8 @@ export default function CreditsPricing() {
       categorySlug="credits-pricing"
       intro={
         <p>
-          Everything you need to know about purchasing credits, pricing packages, 
-          payment methods, and our refund policy.
+          Everything you need to know about purchasing credits, payment methods via Airwallex,
+          credit locking, and our refund policy.
         </p>
       }
       sections={sections}

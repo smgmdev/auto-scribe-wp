@@ -7,20 +7,17 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Join Arcana Mace as a publishing partner and earn revenue by fulfilling orders. 
-          Here's what you need to know:
+          Join Arcana Mace as a publishing partner and earn revenue by fulfilling orders.
+          Here's what agency partnership offers:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Access to a global client base</li>
-          <li>Flexible order acceptance</li>
-          <li>Competitive commission structure</li>
-          <li>Reliable payment processing</li>
-          <li>Dedicated partner support</li>
+          <li>Access to a global client base seeking premium publications</li>
+          <li>Flexible order acceptance — you choose which orders to take</li>
+          <li>Competitive commission structure on all fulfilled orders</li>
+          <li>Multiple payout methods including bank transfer and USDT</li>
+          <li>Dedicated agency dashboard for order and site management</li>
+          <li>Real-time order chat with clients</li>
         </ul>
-        <p>
-          As an agency partner, you'll manage media sites and fulfill publication orders 
-          for clients worldwide.
-        </p>
       </div>
     ),
   },
@@ -29,23 +26,20 @@ const sections: HelpSection[] = [
     title: 'Agency Application',
     content: (
       <div className="space-y-4">
-        <p>
-          Apply to become an agency partner by following these steps:
-        </p>
+        <p>Apply to become an agency partner by following these steps:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Create a regular Arcana Mace account</li>
-          <li>Navigate to the Agency Portal</li>
-          <li>Complete the agency application form</li>
-          <li>Submit required documentation (business registration, etc.)</li>
-          <li>Wait for review (typically 3-5 business days)</li>
+          <li>Create a regular Arcana Mace user account</li>
+          <li>Navigate to the Agency section from the sidebar</li>
+          <li>Click "Apply to become an Agency" and complete the application form</li>
+          <li>Upload required documentation (business registration, incorporation documents)</li>
+          <li>Submit the application — our team reviews within a few business days</li>
+          <li>Once approved, your agency dashboard and features become active</li>
         </ol>
-        <p>
-          Requirements include:
-        </p>
+        <p>Requirements include:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Registered business entity</li>
-          <li>Access to one or more publishing platforms</li>
-          <li>Commitment to quality and turnaround times</li>
+          <li>Access to one or more publishing platforms or media sites</li>
+          <li>Commitment to quality content and agreed turnaround times</li>
         </ul>
       </div>
     ),
@@ -55,17 +49,19 @@ const sections: HelpSection[] = [
     title: 'Payout Methods',
     content: (
       <div className="space-y-4">
-        <p>
-          We offer multiple payout options for our agency partners:
-        </p>
+        <p>We offer multiple payout options for our agency partners:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Stripe Connect:</strong> Fast, secure payouts to your bank</li>
-          <li><strong>Bank Transfer:</strong> Direct wire transfers</li>
-          <li><strong>USDT:</strong> Cryptocurrency payouts available</li>
+          <li><strong>Bank Transfer (Wire):</strong> Direct international wire transfers</li>
+          <li><strong>USDT (TRC20/ERC20):</strong> Cryptocurrency payouts to your wallet</li>
         </ul>
         <p>
-          Payouts are processed after order completion and client satisfaction. 
-          Minimum payout thresholds may apply.
+          To set up or change your payout method, navigate to the Payouts section in your
+          agency dashboard. You'll need to complete identity verification before processing
+          your first withdrawal.
+        </p>
+        <p>
+          Withdrawals are processed after order completion and are subject to a minimum
+          threshold. You can request a withdrawal at any time from your agency payout page.
         </p>
       </div>
     ),
@@ -75,17 +71,16 @@ const sections: HelpSection[] = [
     title: 'Managing Media Sites',
     content: (
       <div className="space-y-4">
-        <p>
-          As an agency, you can add and manage media sites:
-        </p>
+        <p>As an agency, you can add and manage media sites in your portfolio:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Add Sites:</strong> Submit new publications to the marketplace</li>
-          <li><strong>Set Pricing:</strong> Define credit costs for your sites</li>
-          <li><strong>Update Details:</strong> Keep site information current</li>
-          <li><strong>Manage Availability:</strong> Control when sites accept orders</li>
+          <li><strong>Add Sites via Google Sheet:</strong> Submit new sites using our structured submission sheet</li>
+          <li><strong>Add WordPress Sites:</strong> Connect your own WordPress blogs directly to the platform</li>
+          <li><strong>Set Pricing & Details:</strong> Our team reviews and lists sites with your agreed pricing</li>
+          <li><strong>Update Site Info:</strong> Request updates to your listed sites through the agency portal</li>
         </ul>
         <p>
-          All sites go through a verification process before being listed on the marketplace.
+          All sites go through a verification and review process before appearing in the marketplace.
+          You'll be notified once your sites are approved or if any sites are flagged for review.
         </p>
       </div>
     ),
@@ -95,18 +90,38 @@ const sections: HelpSection[] = [
     title: 'Agency Dashboard',
     content: (
       <div className="space-y-4">
-        <p>
-          Your agency dashboard provides tools to manage your business:
-        </p>
+        <p>Your agency dashboard provides tools to manage your publishing business:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Incoming Requests:</strong> View and respond to new orders</li>
-          <li><strong>Active Orders:</strong> Manage orders in progress</li>
-          <li><strong>Earnings:</strong> Track revenue and payouts</li>
-          <li><strong>Media Sites:</strong> Manage your publication portfolio</li>
-          <li><strong>Performance:</strong> View metrics and client feedback</li>
+          <li><strong>Incoming Requests:</strong> View and respond to new service requests and briefs from clients</li>
+          <li><strong>Active Orders:</strong> Manage and fulfill orders in progress with real-time chat</li>
+          <li><strong>Media Sites:</strong> View and manage your portfolio of listed publications</li>
+          <li><strong>Payouts & Withdrawals:</strong> Track your earnings and request payouts</li>
+          <li><strong>Identity Verification:</strong> Submit KYC documents for payout activation</li>
         </ul>
         <p>
-          Access your agency dashboard from the main navigation after approval.
+          Access your agency dashboard from the main navigation sidebar after your application is approved.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 'agency-guidelines',
+    title: 'Agency Guidelines & Conduct',
+    content: (
+      <div className="space-y-4">
+        <p>
+          As an agency partner, you must adhere to Arcana Mace's platform guidelines:
+        </p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>No off-platform contact:</strong> Do not solicit or share personal contact info with clients outside the platform</li>
+          <li><strong>Professional conduct:</strong> Maintain respectful and timely communication with clients</li>
+          <li><strong>Accurate delivery:</strong> Deliver articles as agreed; provide correct live links</li>
+          <li><strong>Fair pricing:</strong> Charge consistent and fair rates across clients</li>
+          <li><strong>Timely responses:</strong> Respond to order requests and client messages promptly</li>
+        </ul>
+        <p>
+          Violations may result in account downgrade, suspension, or forfeiture of pending payouts.
+          Review the <a href="/guidelines" className="text-[#06c] hover:underline">User Guidelines</a> for full details.
         </p>
       </div>
     ),
@@ -121,8 +136,8 @@ export default function ForAgencies() {
       categorySlug="for-agencies"
       intro={
         <p>
-          Learn how to become an Arcana Mace agency partner, manage media sites, 
-          fulfill orders, and receive payouts.
+          Learn how to become an Arcana Mace agency partner, manage media sites,
+          fulfill orders, communicate with clients, and receive payouts.
         </p>
       }
       sections={sections}
