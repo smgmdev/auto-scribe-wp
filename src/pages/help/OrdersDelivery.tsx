@@ -85,9 +85,9 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Need to cancel an order? Here's what you need to know:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Before Acceptance:</strong> Full credit refund — cancel directly from the order details</li>
+          <li><strong>Before Acceptance:</strong> Full credit refund — cancel directly from the engagement chat</li>
           <li><strong>After Acceptance:</strong> Contact the agency through the order chat to agree on cancellation</li>
-          <li><strong>In Progress:</strong> Open a support ticket for case-by-case review</li>
+          <li><strong>After Delivery:</strong> Open dispute for Arcana Mace staff to investigate the matter</li>
         </ul>
         <p>
           To cancel, go to your order and use the "Cancel Order" option if available,
