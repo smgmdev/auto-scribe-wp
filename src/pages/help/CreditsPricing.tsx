@@ -6,16 +6,18 @@ const sections: HelpSection[] = [
     title: 'Purchasing Credits',
     content: (
       <div className="space-y-4">
-        <p>Credits are the currency used on Arcana Mace. Here's how to purchase them:</p>
+        <p>Credits are used for media buying on Arcana Mace. Here's how to purchase them:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Navigate to your dashboard and click "Buy Credits" in the sidebar or header</li>
-          <li>Select a credit package that fits your needs</li>
+          <li>Navigate to your dashboard in the sidebar and click Credit Management → Buy Credits</li>
+          <li>Enter credit amount that fits your needs and click Continue to Payment</li>
           <li>Complete the secure checkout process via Airwallex</li>
           <li>Credits are added to your account instantly after payment confirmation</li>
         </ol>
         <p>
           All payments are processed securely through <strong>Airwallex</strong>, our trusted international
           payment gateway. The checkout flow is embedded directly in the platform for a seamless experience.
+          You can also top up your account through a wire transfer. Contact support and ask for an invoice
+          for a wire based top-up.
         </p>
       </div>
     ),
