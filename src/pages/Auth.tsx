@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -11,12 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { createPortal } from 'react-dom';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -43,9 +38,15 @@ export default function Auth() {
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  const dataPopupRef = useRef<HTMLDivElement>(null);
+  const dataDragRef = useRef({ isDragging: false, startX: 0, startY: 0, origX: 0, origY: 0 });
+  const [dataPopupPos, setDataPopupPos] = useState(() => ({
+    x: Math.max(0, (window.innerWidth - 520) / 2),
+    y: Math.max(0, (window.innerHeight - 600) / 2),
+  }));
   
   // Detect mobile screen size
   useEffect(() => {
@@ -100,6 +101,23 @@ export default function Auth() {
     scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleDataDragStart = useCallback((e: React.MouseEvent) => {
+    const orig = { x: dataPopupPos.x, y: dataPopupPos.y };
+    const start = { x: e.clientX, y: e.clientY };
+    const onMove = (ev: MouseEvent) => {
+      setDataPopupPos({
+        x: Math.max(0, Math.min(window.innerWidth - 520, orig.x + ev.clientX - start.x)),
+        y: Math.max(0, Math.min(window.innerHeight - 100, orig.y + ev.clientY - start.y)),
+      });
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [dataPopupPos]);
 
   // Show loading screen while checking initial auth state
   if (loading) {
@@ -650,77 +668,110 @@ export default function Auth() {
 
       <Footer narrow />
 
-      {/* Data Management Dialog */}
-      <Dialog open={isDataDialogOpen} onOpenChange={setIsDataDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">How Your Data Is Managed</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-sm text-muted-foreground">
-            <p>
-              At Arcana Mace, we are committed to protecting your privacy and being transparent about the data we collect. Below is a summary of the information we gather and how it is used.
-            </p>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Email address (used for authentication and communication)</li>
-                <li>Password (securely hashed and stored)</li>
-                <li>Username and profile details</li>
-                <li>Account creation date and last update timestamps</li>
-              </ul>
+      {/* Data Management Popup - draggable on desktop, fullscreen on mobile */}
+      {isDataDialogOpen && createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[999] bg-black/40"
+            onClick={() => setIsDataDialogOpen(false)}
+          />
+          {/* Popup */}
+          <div
+            ref={dataPopupRef}
+            className={
+              isMobile
+                ? 'fixed inset-0 z-[1000] flex flex-col bg-white overflow-hidden'
+                : 'fixed z-[1000] flex flex-col bg-white rounded-xl shadow-2xl border border-border overflow-hidden'
+            }
+            style={isMobile ? undefined : { left: dataPopupPos.x, top: dataPopupPos.y, width: 520, maxHeight: '80vh' }}
+          >
+            {/* Drag handle / header */}
+            <div
+              className={`flex items-center justify-between px-5 py-4 border-b border-border bg-white flex-shrink-0 ${!isMobile ? 'cursor-grab active:cursor-grabbing select-none' : ''}`}
+              onMouseDown={!isMobile ? handleDataDragStart : undefined}
+            >
+              {!isMobile && (
+                <div className="flex items-center gap-1.5 mr-3">
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                </div>
+              )}
+              <h2 className="text-base font-semibold text-foreground flex-1">How Your Data Is Managed</h2>
+              <button
+                onClick={() => setIsDataDialogOpen(false)}
+                className="ml-3 p-1.5 rounded-full hover:bg-black/5 transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
             </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-2">Security & Login Data</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>IP address at login (for security monitoring)</li>
-                <li>Geolocation data derived from IP (city and country)</li>
-                <li>Login attempt timestamps (successful and failed)</li>
-                <li>Device and session information</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-foreground mb-2">Activity & Usage Data</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Articles created, edited, and published</li>
-                <li>Orders and transactions history</li>
-                <li>Service requests and communications</li>
-                <li>Credit balance and transaction records</li>
-                <li>Connected WordPress sites and settings</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-foreground mb-2">Administrative Monitoring</h3>
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-muted-foreground">
               <p>
-                Our administrators may access the following data for security, support, and compliance purposes:
+                At Arcana Mace, we are committed to protecting your privacy and being transparent about the data we collect. Below is a summary of the information we gather and how it is used.
               </p>
-              <ul className="list-disc pl-5 space-y-1 mt-2">
-                <li>Account status and verification state</li>
-                <li>Login history with IP addresses and locations</li>
-                <li>All account activity and transactions</li>
-                <li>Communication logs within the platform</li>
-              </ul>
-            </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-2">Data Retention</h3>
-              <p>
-                We retain your data for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data by contacting support.
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Email address (used for authentication and communication)</li>
+                  <li>Password (securely hashed and stored)</li>
+                  <li>Username and profile details</li>
+                  <li>Account creation date and last update timestamps</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Security & Login Data</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>IP address at login (for security monitoring)</li>
+                  <li>Geolocation data derived from IP (city and country)</li>
+                  <li>Login attempt timestamps (successful and failed)</li>
+                  <li>Device and session information</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Activity & Usage Data</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Articles created, edited, and published</li>
+                  <li>Orders and transactions history</li>
+                  <li>Service requests and communications</li>
+                  <li>Credit balance and transaction records</li>
+                  <li>Connected WordPress sites and settings</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Administrative Monitoring</h3>
+                <p>Our administrators may access the following data for security, support, and compliance purposes:</p>
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                  <li>Account status and verification state</li>
+                  <li>Login history with IP addresses and locations</li>
+                  <li>All account activity and transactions</li>
+                  <li>Communication logs within the platform</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Data Retention</h3>
+                <p>We retain your data for as long as your account is active or as needed to provide you services. You may request deletion of your account and associated data by contacting support.</p>
+              </div>
+
+              <p className="text-xs pt-2 border-t border-border">
+                For more information, please review our{' '}
+                <a href="/privacy" className="text-[#06c] hover:underline">Privacy Policy</a>
+                {' '}and{' '}
+                <a href="/terms" className="text-[#06c] hover:underline">Terms of Service</a>.
               </p>
             </div>
-
-            <p className="text-xs pt-2 border-t border-border">
-              For more information, please review our{' '}
-              <a href="/privacy" className="text-[#06c] hover:underline">Privacy Policy</a>
-              {' '}and{' '}
-              <a href="/terms" className="text-[#06c] hover:underline">Terms of Service</a>.
-            </p>
           </div>
-        </DialogContent>
-      </Dialog>
+        </>,
+        document.body
+      )}
     </div>
   );
 }
