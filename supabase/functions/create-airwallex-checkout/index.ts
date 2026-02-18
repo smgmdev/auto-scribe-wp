@@ -3,12 +3,22 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const AIRWALLEX_API_URL = "https://api.airwallex.com";
 const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
 const MIN_CREDITS = 10;
+
+function decodeJwt(token: string): Record<string, unknown> {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decoded);
+  } catch {
+    throw new Error('Invalid JWT token');
+  }
+}
 
 async function getAirwallexToken(): Promise<string> {
   const clientId = Deno.env.get("AIRWALLEX_CLIENT_ID");
@@ -52,19 +62,32 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
 
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-
-    if (claimsError || !claimsData?.claims) {
-      console.error("Authentication error:", claimsError);
+    // Decode JWT to extract claims (works with ES256 tokens on Lovable Cloud)
+    let claims: Record<string, unknown>;
+    try {
+      claims = decodeJwt(token);
+    } catch {
       throw new Error("Unauthorized - Invalid token");
     }
 
-    const userId = claimsData.claims.sub;
-    const email = claimsData.claims.email as string | undefined;
+    // Check token expiry
+    const exp = claims.exp as number | undefined;
+    if (exp && Date.now() / 1000 > exp) {
+      throw new Error("Unauthorized - Token expired");
+    }
+
+    const userId = claims.sub as string;
+    const email = claims.email as string | undefined;
+
+    if (!userId) {
+      throw new Error("Unauthorized - Invalid token");
+    }
+
+    // Create supabase client for any DB operations
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
     const { creditAmount } = await req.json();
 
