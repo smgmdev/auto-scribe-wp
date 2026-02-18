@@ -52,19 +52,20 @@ const sections: HelpSection[] = [
           Here's what you'll find:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Home:</strong> Overview of recent global articles, quick stats, and platform news</li>
-          <li><strong>Sites:</strong> Browse and search available media publications with filters</li>
-          <li><strong>Headlines:</strong> Live news headlines you can use to generate articles</li>
-          <li><strong>Compose:</strong> AI-powered article editor and submission tool</li>
+          <li><strong>Home:</strong> Overview of recent global articles, quick stats, and your published articles via instant publishing</li>
+          <li><strong>Media Network:</strong> Browse and search available media channels in local and global libraries</li>
+          <li><strong>Sources:</strong> Live news headlines you can use to generate articles</li>
+          <li><strong>New Article:</strong> AI-powered article editor and submission section</li>
           <li><strong>My Articles:</strong> View and manage all your submitted and drafted content</li>
           <li><strong>My Orders:</strong> Track the status of all your publication orders</li>
-          <li><strong>My Requests:</strong> Manage service requests and chat with agencies</li>
-          <li><strong>Credit History:</strong> View your credit balance and all transactions</li>
+          <li><strong>My Engagements:</strong> View and manage your active engagements</li>
+          <li><strong>Client Requests:</strong> Chat with clients and manage client orders as an agency</li>
+          <li><strong>Credit Management:</strong> View your credit balance and all transactions</li>
           <li><strong>Support:</strong> Open and manage support tickets with our team</li>
-          <li><strong>Settings:</strong> Manage your account, security PIN, and preferences</li>
+          <li><strong>Account Settings:</strong> Manage your account, security PIN, and preferences</li>
         </ul>
         <p>
-          The sidebar also provides a quick-access messaging widget for real-time chat with agencies.
+          There is also a messaging widget for real-time chat with other agencies and clients.
         </p>
       </div>
     ),
