@@ -92,6 +92,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     whatsapp_phone: string | null;
     agency_name: string | null;
   } | null>(null);
+  const [userOnline, setUserOnline] = useState(false);
+  const [ticketUserId, setTicketUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -282,13 +284,20 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         .eq('id', ticket.id)
         .single();
       if (!ticketData?.user_id) return;
+      setTicketUserId(ticketData.user_id);
 
       // Get profile
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email, username, whatsapp_phone')
+        .select('email, username, whatsapp_phone, last_online_at')
         .eq('id', ticketData.user_id)
         .single();
+
+      // Check online status (within last 2 minutes)
+      if (profile?.last_online_at) {
+        const lastOnline = new Date(profile.last_online_at).getTime();
+        setUserOnline(Date.now() - lastOnline < 2 * 60 * 1000);
+      }
 
       // Get agency name
       const { data: agency } = await supabase
@@ -307,6 +316,22 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     };
     fetchUserDetails();
   }, [isAdmin, ticket.id]);
+
+  // Track user online status in real-time for admin via profile updates
+  useEffect(() => {
+    if (!isAdmin || !ticketUserId) return;
+    const channel = supabase
+      .channel(`support-user-online-${ticketUserId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${ticketUserId}` }, (payload) => {
+        const updated = payload.new as any;
+        if (updated.last_online_at) {
+          const lastOnline = new Date(updated.last_online_at).getTime();
+          setUserOnline(Date.now() - lastOnline < 2 * 60 * 1000);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin, ticketUserId]);
 
   // Typing indicator with presence
   const senderType = isAdmin ? 'admin' : 'user';
@@ -508,7 +533,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <div className="min-w-0 flex-1 mr-2">
           <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            {isAdmin ? (
+             {isAdmin ? (
               <>
                 <span>User</span>
                 <Popover>
@@ -529,6 +554,11 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
                     </div>
                   </PopoverContent>
                 </Popover>
+                <span className="mx-0.5">·</span>
+                <span className="flex items-center gap-1">
+                  <span className={`h-1.5 w-1.5 rounded-full inline-block ${userOnline ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
+                  <span className={userOnline ? 'text-emerald-600' : 'text-muted-foreground'}>{userOnline ? 'Online' : 'Offline'}</span>
+                </span>
               </>
             ) : (
               <>
