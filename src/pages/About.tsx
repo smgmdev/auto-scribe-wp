@@ -407,7 +407,7 @@ export default function About() {
             Building trust with total control.
           </h2>
           <p className="text-xl text-[#86868b] leading-relaxed mb-10 max-w-2xl mx-auto">
-            The only marketplace focused exclusively on independent media buying—empowering clients with choice, customization, and content control.
+            The only marketplace focused exclusively on independent media buying. Empowering clients with choice, customization, and content control.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
