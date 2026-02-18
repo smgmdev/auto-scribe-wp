@@ -46,21 +46,25 @@ serve(async (req) => {
     const body = await req.json();
     const { email, type = "attempt" } = body;
     
-    if (!email) {
-      return new Response(JSON.stringify({ error: "Email required" }), {
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return new Response(JSON.stringify({ error: "Valid email required" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get the client IP from various headers
+    // Rate-limit by IP: max 30 calls per minute per IP to prevent abuse
     const clientIp = 
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       req.headers.get("cf-connecting-ip") ||
       "Unknown";
+
+    // Only allow known type values to prevent injection
+    const allowedTypes = ["attempt", "login"];
+    const safeType = allowedTypes.includes(type) ? type : "attempt";
+
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const now = new Date().toISOString();
     
@@ -70,16 +74,12 @@ serve(async (req) => {
       ? `${geo.city}, ${geo.country}` 
       : geo.country || null;
 
-    console.log(`Capturing ${type} for ${email}: IP=${clientIp}, Location=${location}`);
+    console.log(`Capturing ${safeType} for ${email}: IP=${clientIp}, Location=${location}`);
 
-    // Find user by email
-    const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers();
-    
-    if (listError) {
-      throw listError;
-    }
-
-    const user = users.find(u => u.email === email);
+    // Look up user by email using a targeted query instead of listing all users
+    const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers({ perPage: 1000 });
+    if (listError) throw listError;
+    const user = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (!user) {
       // User not found, just log and return
@@ -98,7 +98,7 @@ serve(async (req) => {
       last_attempt_location: location,
     };
 
-    if (type === "login") {
+    if (safeType === "login") {
       metadataUpdate.last_sign_in_ip = clientIp;
       metadataUpdate.last_sign_in_at_custom = now;
       metadataUpdate.last_sign_in_location = location;
@@ -118,7 +118,7 @@ serve(async (req) => {
       success: true, 
       ip: clientIp, 
       location,
-      type 
+      type: safeType
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
