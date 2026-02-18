@@ -171,3 +171,6 @@ verify_jwt = false
 
 [functions.resolve-withdrawal]
 verify_jwt = false
+
+[functions.manage-pin]
+verify_jwt = false

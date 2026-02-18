@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 
+
 type AppRole = 'admin' | 'user';
 
 interface AuthContextType {
@@ -175,9 +176,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
+  // Brute-force protection: track failed attempts in memory (per session)
+  const pinFailedAttemptsRef = useRef(0);
+  const pinLockedUntilRef = useRef<number | null>(null);
+
   const verifyPin = async (pin: string): Promise<boolean> => {
     if (!user) return false;
-    
+
+    // Check if PIN entry is temporarily locked
+    if (pinLockedUntilRef.current && Date.now() < pinLockedUntilRef.current) {
+      const remainingSecs = Math.ceil((pinLockedUntilRef.current - Date.now()) / 1000);
+      toast.error(`Too many failed attempts. Try again in ${remainingSecs}s`);
+      return false;
+    }
+
     const { data } = await supabase
       .from('profiles')
       .select('pin_hash, pin_salt')
@@ -189,9 +201,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const pinHash = await hashPinWithSalt(pin, data.pin_salt);
 
     if (data.pin_hash === pinHash) {
+      // Reset failed attempts on success
+      pinFailedAttemptsRef.current = 0;
+      pinLockedUntilRef.current = null;
       setPinVerified(true);
       return true;
     }
+
+    // Increment failed attempts and apply progressive lockout
+    pinFailedAttemptsRef.current += 1;
+    const attempts = pinFailedAttemptsRef.current;
+
+    if (attempts >= 5) {
+      // Lock for 5 minutes after 5 failures
+      pinLockedUntilRef.current = Date.now() + 5 * 60 * 1000;
+      toast.error('Too many failed attempts. PIN locked for 5 minutes.');
+    } else if (attempts >= 3) {
+      // Lock for 30 seconds after 3 failures
+      pinLockedUntilRef.current = Date.now() + 30 * 1000;
+      toast.error(`Incorrect PIN. ${5 - attempts} attempt(s) remaining before lockout.`);
+    }
+
     return false;
   };
 
