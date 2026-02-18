@@ -718,7 +718,7 @@ export default function Auth() {
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-muted-foreground">
+            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-muted-foreground bg-white">
               <p>
                 At Arcana Mace, we only collect the minimum data necessary to provide you with a secure and seamless experience. Here's a brief overview of what's stored and why.
               </p>
