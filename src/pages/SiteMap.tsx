@@ -14,7 +14,6 @@ const SITEMAP_SECTIONS = [
       { label: 'About', href: '/about' },
       { label: 'Help Center', href: '/help' },
       { label: 'Newsroom', href: '/press' },
-      { label: 'System Status', href: '/system-status' },
     ],
   },
   {
@@ -71,7 +70,17 @@ const SITEMAP_SECTIONS = [
     links: [
       { label: 'Terms of Service', href: '/terms' },
       { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Do Not Sell or Share My Personal Information', href: '/do-not-sell' },
+      { label: 'We Do Not Sell or Share Your Personal Information', href: '/do-not-sell' },
+      { label: 'User Guidelines', href: '/guidelines' },
+    ],
+  },
+  {
+    title: 'More',
+    links: [
+      { label: 'System Status', href: '/system-status' },
+      { label: 'Changelog', href: '/update-log' },
+      { label: 'Report a Bug', href: '/report-bug' },
+      { label: 'Site Map', href: '/sitemap' },
     ],
   },
 ];
