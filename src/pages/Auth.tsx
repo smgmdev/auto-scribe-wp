@@ -30,6 +30,8 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  // Honeypot: bots fill this; real users never see it (hidden via CSS)
+  const [honeypot, setHoneypot] = useState('');
   const searchParams = new URLSearchParams(window.location.search);
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
@@ -227,6 +229,16 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // Honeypot: if filled, silently do nothing (bot detected)
+    if (honeypot.trim().length > 0) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success('Check your email! We sent you a verification link.');
+      }, 1500);
+      return;
+    }
     
     setIsLoading(true);
     setIsSigningUp(true); // Prevent auto-redirect during signup
@@ -247,12 +259,21 @@ export default function Auth() {
     // Send custom verification email via Resend (don't capture IP on signup - only on actual login)
     if (data?.user) {
       try {
-        const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
-          body: { email, userId: data.user.id }
+        const { error: emailError, data: emailData } = await supabase.functions.invoke('send-welcome-email', {
+          body: { email, userId: data.user.id, honeypot }
         });
         
         if (emailError) {
           console.error('Failed to send welcome email:', emailError);
+        }
+
+        // Handle rate limit / disposable email errors from edge function
+        if (emailData?.error) {
+          setIsLoading(false);
+          setIsSigningUp(false);
+          await supabase.auth.signOut();
+          toast.error(emailData.error);
+          return;
         }
       } catch (emailError) {
         console.error('Failed to send welcome email:', emailError);
@@ -604,6 +625,20 @@ export default function Auth() {
               {errors.password && (
                 <p className="text-xs text-destructive mt-1.5 ml-1">{errors.password}</p>
               )}
+            </div>
+
+            {/* Honeypot - invisible to real users, bots fill it automatically */}
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden', opacity: 0, pointerEvents: 'none', tabIndex: -1 } as React.CSSProperties}>
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </div>
 
             {/* Data Management Notice */}
