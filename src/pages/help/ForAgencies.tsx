@@ -75,7 +75,7 @@ const sections: HelpSection[] = [
         </ul>
         <p>
           All sites go through a verification and review process before appearing in the marketplace.
-          You'll be notified once your sites are approved or if any sites are flagged for review.
+          You'll be notified once your sites are approved or if any sites are rejected.
         </p>
       </div>
     ),
