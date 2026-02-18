@@ -445,38 +445,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Flexibility Section */}
-      <section className="bg-[#f5f5f7] py-4 px-4">
-        <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="bg-white rounded-none overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="p-12 md:p-16 flex flex-col justify-center order-2 md:order-1">
-                <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
-                  <span className="font-semibold">Flexibility that fits your needs.</span> Whether you're running a single campaign or managing multiple brands, choose the payment option that works best for you. Pay per article, buy credits online with credit/debit card, or request an invoice for Wire transactions for a top up.
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
-                  className="inline-flex items-center gap-2 text-[#0066cc] hover:underline text-lg"
-                >
-                  Learn about payment options
-                  <span>›</span>
-                </button>
-              </div>
-              <button 
-                onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
-                className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2 text-left group hover:from-[#e8e8ed] hover:to-[#dcdce1] transition-all duration-300"
-              >
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight group-hover:text-[#0066cc] transition-colors duration-300">
-                  Choose how<br />you top up.<br />
-                  <span className="text-[#86868b] group-hover:text-[#0066cc]/60">Card payments. Offline invoice.</span>
-                </h2>
-                <span className="mt-4 text-[#0066cc] text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">Top up credits ›</span>
-              </button>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
       {/* Global Coverage Section */}
       <section className="bg-[#f5f5f7] py-4 px-4">
         <div className="max-w-[980px] mx-auto">
