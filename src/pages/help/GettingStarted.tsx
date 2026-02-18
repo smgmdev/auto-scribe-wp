@@ -54,8 +54,8 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Home:</strong> Overview of recent global articles, quick stats, and your published articles via instant publishing</li>
           <li><strong>Media Network:</strong> Browse and search available media channels in local and global libraries</li>
-          <li><strong>Sources:</strong> Live news headlines you can use to generate articles</li>
           <li><strong>New Article:</strong> AI-powered article editor and submission section</li>
+          <li><strong>Sources:</strong> Live news headlines you can use to generate articles</li>
           <li><strong>My Articles:</strong> View and manage all your submitted and drafted content</li>
           <li><strong>My Orders:</strong> Track the status of all your publication orders</li>
           <li><strong>My Engagements:</strong> View and manage your active engagements</li>
