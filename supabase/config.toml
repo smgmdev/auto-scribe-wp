@@ -165,3 +165,9 @@ verify_jwt = false
 
 [functions.gift-credits]
 verify_jwt = false
+
+[functions.submit-withdrawal]
+verify_jwt = false
+
+[functions.resolve-withdrawal]
+verify_jwt = false
