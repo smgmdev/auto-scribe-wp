@@ -7,19 +7,71 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting: max 3 reset requests per email per hour, 5 per IP per hour
+const RATE_LIMIT_PER_EMAIL = 3;
+const RATE_LIMIT_PER_IP = 5;
+const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+// Simple email format validation (server-side, not trusting client)
+function isValidEmail(email: string): boolean {
+  if (!email || typeof email !== "string") return false;
+  if (email.length > 254) return false; // RFC 5321 max
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(email.trim());
+}
+
+// In-memory rate limit store (resets on cold start — good enough for edge functions)
+// For persistent rate limiting, use the signup_attempts table pattern
+const emailAttempts = new Map<string, number[]>();
+const ipAttempts = new Map<string, number[]>();
+
+function isRateLimited(store: Map<string, number[]>, key: string, maxAttempts: number): boolean {
+  const now = Date.now();
+  const attempts = (store.get(key) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (attempts.length >= maxAttempts) return true;
+  attempts.push(now);
+  store.set(key, attempts);
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const { email } = await req.json();
+  // Always return success to avoid user enumeration — even on errors below
+  const successResponse = new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
 
-    if (!email) {
-      return new Response(JSON.stringify({ error: "Email is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+  try {
+    const body = await req.json().catch(() => ({}));
+    const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+
+    // Server-side email validation
+    if (!isValidEmail(email)) {
+      // Return success anyway — don't leak validation details
+      return successResponse;
+    }
+
+    // IP-based rate limiting
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+
+    if (isRateLimited(ipAttempts, clientIp, RATE_LIMIT_PER_IP)) {
+      console.warn(`[send-password-reset] IP rate limit hit: ${clientIp}`);
+      // Return success silently — don't confirm rate limit to attacker
+      return successResponse;
+    }
+
+    // Per-email rate limiting
+    if (isRateLimited(emailAttempts, email, RATE_LIMIT_PER_EMAIL)) {
+      console.warn(`[send-password-reset] Email rate limit hit: ${email}`);
+      return successResponse;
     }
 
     const supabaseAdmin = createClient(
@@ -39,20 +91,13 @@ serve(async (req) => {
 
     if (error) {
       console.error("Error generating recovery link:", error);
-      // Return success anyway to avoid user enumeration
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      return successResponse;
     }
 
     const resetUrl = data?.properties?.action_link;
     if (!resetUrl) {
       console.error("No action_link in response");
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      return successResponse;
     }
 
     console.log(`Sending password reset email to: ${email}`);
@@ -98,7 +143,7 @@ serve(async (req) => {
                         </tr>
                       </table>
                       <p style="color: #666666; font-size: 12px; line-height: 20px; margin: 20px 0 0 0; text-align: center;">
-                        This link will expire in 24 hours. If you didn't request a password reset, you can safely ignore this email.
+                        This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
                       </p>
                     </td>
                   </tr>
@@ -115,16 +160,10 @@ serve(async (req) => {
     });
 
     console.log("Password reset email sent successfully to:", email);
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    return successResponse;
   } catch (error: any) {
     console.error("Error in send-password-reset:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    // Always return success — never leak error details to caller
+    return successResponse;
   }
 });
