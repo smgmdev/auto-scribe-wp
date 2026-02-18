@@ -65,7 +65,7 @@ const sections: HelpSection[] = [
           <li><strong>Order pending for too long:</strong> Agencies typically accept orders within 24 hours. If no response after 48 hours, contact support</li>
           <li><strong>Delivered but link not live:</strong> Some sites have a short publication delay. Allow a few hours before raising a dispute</li>
           <li><strong>Dispute an order:</strong> If a delivered article doesn't match requirements, use the dispute option in your order view. Include clear reasons and evidence</li>
-          <li><strong>Cancelled order / credit refund:</strong> Refunded credits are returned to your balance automatically. Check your Credit History to confirm</li>
+          <li><strong>Cancelled order / credit refund:</strong> Refunded credits are returned to your balance automatically. Check your Transaction History to confirm in Credit Management Section</li>
         </ul>
       </div>
     ),
