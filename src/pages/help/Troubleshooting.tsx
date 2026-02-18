@@ -10,23 +10,27 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-3 ml-4">
           <li>
             <strong>Can't log in:</strong> Verify your email and password. Use "Forgot Password?" to reset.
-            If you have a PIN set, make sure to enter it after login.
+            If you have a PIN set, enter it after your password.
           </li>
           <li>
             <strong>Order not showing:</strong> Refresh your dashboard. Orders appear immediately after submission.
             If missing after 5 minutes, open a support ticket.
           </li>
           <li>
-            <strong>Credits not added:</strong> Check your email for Airwallex payment confirmation.
-            Contact support if the payment succeeded but credits weren't added.
+            <strong>Credits not added after payment:</strong> Check your email for an Airwallex payment confirmation.
+            If the payment succeeded but credits weren't added, open a support ticket with the transaction reference.
           </li>
           <li>
-            <strong>Article rejected:</strong> Review the rejection reason from the agency in the order chat,
-            then revise and resubmit your content.
+            <strong>Article rejected by agency:</strong> Check the rejection reason in the order chat,
+            revise your content, and resubmit.
           </li>
           <li>
-            <strong>Chat not loading:</strong> Refresh the page. If the issue persists, try clearing
-            your browser cache or using a different browser.
+            <strong>Chat not loading:</strong> Refresh the page. If the issue persists, clear your
+            browser cache or switch to a different browser.
+          </li>
+          <li>
+            <strong>WordPress publishing failed:</strong> Confirm your WordPress site is still connected
+            under Sites. App passwords can expire — reconnect the site if needed.
           </li>
         </ul>
       </div>
@@ -37,17 +41,32 @@ const sections: HelpSection[] = [
     title: 'Payment Problems',
     content: (
       <div className="space-y-4">
-        <p>Experiencing payment issues with Airwallex? Try these solutions:</p>
+        <p>All credit purchases are processed through <strong>Airwallex</strong>. If you encounter a payment issue:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Card Declined:</strong> Verify your card details and available balance. Some banks block international transactions — contact your bank</li>
-          <li><strong>Payment Stuck:</strong> Don't retry immediately; wait a few minutes and check your credit balance</li>
-          <li><strong>Double Charged:</strong> Contact support with your transaction reference</li>
-          <li><strong>Credits Not Credited:</strong> Check your email for a payment receipt and open a support ticket with the reference number</li>
+          <li><strong>Card Declined:</strong> Check your card details and available balance. Some banks block international or online transactions — contact your bank to authorise the payment</li>
+          <li><strong>Payment Stuck or Pending:</strong> Do not retry immediately. Wait a few minutes, then check your credit balance. Airwallex payments can take a moment to confirm</li>
+          <li><strong>Double Charged:</strong> Contact support immediately with your Airwallex transaction reference number</li>
+          <li><strong>Credits Not Added:</strong> Check your email for an Airwallex receipt. If payment completed but credits are missing, open a support ticket with the reference number</li>
+          <li><strong>Wire Transfer / USDT:</strong> If you topped up via bank transfer or USDT, allow up to 1–2 business days for credits to be added manually. Contact support if it's been longer</li>
         </ul>
         <p>
-          All payments are processed through <strong>Airwallex</strong>. If issues persist, open a
-          support ticket from your dashboard with your transaction details.
+          Note: Purchased credits are non-withdrawable and are restricted to media buying on the platform.
         </p>
+      </div>
+    ),
+  },
+  {
+    id: 'orders-delivery',
+    title: 'Orders & Delivery',
+    content: (
+      <div className="space-y-4">
+        <p>Issues with an active or completed order:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>Order pending for too long:</strong> Agencies typically accept orders within 24 hours. If no response after 48 hours, contact support</li>
+          <li><strong>Delivered but link not live:</strong> Some sites have a short publication delay. Allow a few hours before raising a dispute</li>
+          <li><strong>Dispute an order:</strong> If a delivered article doesn't match requirements, use the dispute option in your order view. Include clear reasons and evidence</li>
+          <li><strong>Cancelled order / credit refund:</strong> Refunded credits are returned to your balance automatically. Check your Credit History to confirm</li>
+        </ul>
       </div>
     ),
   },
@@ -56,10 +75,10 @@ const sections: HelpSection[] = [
     title: 'Account Access',
     content: (
       <div className="space-y-4">
-        <p>Having trouble accessing your account? Here's how to resolve common issues:</p>
+        <p>Having trouble accessing your account?</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Forgot Password:</strong> Use the password reset link on the login page</li>
-          <li><strong>Forgot PIN:</strong> Reset your PIN through Settings → Security in your dashboard</li>
+          <li><strong>Forgot PIN:</strong> Reset your PIN via Settings → Security in your dashboard</li>
           <li><strong>Email Not Verified:</strong> Request a new verification email from the login screen</li>
           <li><strong>Account Suspended:</strong> Contact support — do not create a new account</li>
           <li><strong>Session Expired:</strong> Log in again — sessions expire automatically for security</li>
@@ -78,16 +97,16 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>
           If you're experiencing widespread issues, check our live System Status page to see if
-          there are any known outages or maintenance periods:
+          there are known outages or maintenance periods:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Visit <a href="/system-status" className="text-[#06c] hover:underline">System Status</a> to see real-time health of all services</li>
-          <li>Services monitored include: Database, Authentication, Edge Functions, File Storage, AI Article Generation, WordPress Publishing, Payment Gateway (Airwallex), Real-time Messaging, and more</li>
-          <li>An overall status banner shows if all systems are operating normally</li>
-          <li>Past incidents are recorded in the Incident History section</li>
+          <li>Services monitored include: Database, Authentication, AI Article Generation, WordPress Publishing, Payment Gateway (Airwallex), Real-time Messaging, and more</li>
+          <li>An overall status banner shows whether all systems are operating normally</li>
+          <li>Past and ongoing incidents are recorded in the Incident History section</li>
         </ul>
         <p>
-          If systems appear healthy but you're still experiencing issues, open a support ticket
+          If all systems appear healthy but you're still experiencing issues, open a support ticket
           with steps to reproduce the problem.
         </p>
       </div>
@@ -100,16 +119,16 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>For technical issues not covered in this guide:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Try clearing your browser cache and cookies</li>
-          <li>Use a different browser (Chrome, Safari, Firefox) or device</li>
-          <li>Disable browser extensions that might interfere with page loading</li>
+          <li>Clear your browser cache and cookies, then reload</li>
+          <li>Try a different browser (Chrome, Safari, Firefox) or device</li>
+          <li>Disable browser extensions that may interfere with page loading</li>
           <li>Check your internet connection stability</li>
         </ul>
-        <p>If problems persist, use the Report a Bug feature:</p>
+        <p>If problems persist, submit a bug report:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Visit <a href="/report-bug" className="text-[#06c] hover:underline">Report a Bug</a> to submit a detailed report</li>
           <li>Include a description, steps to reproduce, and a screenshot if possible</li>
-          <li>Our team reviews all reports and will follow up via support ticket</li>
+          <li>Our team reviews all reports and follows up via support ticket</li>
         </ul>
       </div>
     ),
@@ -123,7 +142,7 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Support Tickets:</strong> Open a ticket from the "Support" section in your dashboard — the fastest way to get help</li>
           <li><strong>Response Time:</strong> Typically within a few hours during business hours</li>
-          <li><strong>Online Status:</strong> See if a support agent is currently online before messaging</li>
+          <li><strong>Online Status:</strong> Check if a support agent is currently online before messaging</li>
         </ul>
         <p>
           For urgent issues related to active orders or payments, use the support ticket system
@@ -142,8 +161,8 @@ export default function Troubleshooting() {
       categorySlug="troubleshooting"
       intro={
         <p>
-          Find solutions to common issues, payment problems, account access, system status checks,
-          and learn how to contact our support team.
+          Find solutions to common issues with payments, orders, account access, and system status.
+          If you can't find an answer here, our support team is ready to help.
         </p>
       }
       sections={sections}
