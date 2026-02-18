@@ -302,27 +302,37 @@ export default function SystemStatus() {
 
           {/* Refresh Button - mobile only, under banner */}
           <div className="flex md:hidden justify-center mb-6">
-            <button
+            <Button
+              size="sm"
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              className="flex items-center gap-2 text-sm text-[#06c] hover:underline disabled:opacity-50"
+              className={`w-full gap-2 border transition-all duration-200 ${
+                isRefreshing
+                  ? 'bg-transparent text-black border-black'
+                  : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
+              }`}
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
           </div>
 
           {/* Legend and Refresh */}
           <div className="flex items-center justify-center md:justify-between mb-6">
             {/* Refresh - desktop only */}
-            <button
+            <Button
+              size="sm"
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              className="hidden md:flex items-center gap-2 text-sm text-[#06c] hover:underline disabled:opacity-50"
+              className={`hidden md:inline-flex gap-2 border transition-all duration-200 ${
+                isRefreshing
+                  ? 'bg-transparent text-black border-black'
+                  : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
+              }`}
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
             <div className="flex items-center gap-4 flex-wrap justify-center md:justify-end">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
