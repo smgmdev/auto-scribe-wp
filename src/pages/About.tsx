@@ -437,7 +437,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
-                  Simply create an account, browse our curated network of {totalChannels > 0 ? `${totalChannels}+` : ''} global channels, select your target outlet, submit your content, and pay. Your article will be published within 24–48 hours on average.
+                  Simply create an account, browse a network of global media channels, choose your target outlet, and start a conversation with the PR agency. Discuss your content, agree on terms, set a delivery timeline, and place your order. Then sit back while the agency prepares and delivers your article.
                 </AccordionContent>
               </AccordionItem>
 
