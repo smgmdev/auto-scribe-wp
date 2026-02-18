@@ -259,7 +259,7 @@ export function SupportView() {
               </div>
             )}
 
-            <div className="flex items-center justify-between px-5 pb-4 pt-3 border-b border-border shrink-0">
+            <div className="flex items-center justify-between px-5 pb-3 pt-2 border-b border-border shrink-0">
               <h2 className="text-lg font-bold text-foreground select-none">New Support Ticket</h2>
               {isMobile && (
                 <button onClick={() => setNewTicketOpen(false)} className="text-muted-foreground hover:text-foreground">
