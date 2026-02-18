@@ -150,7 +150,7 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
 
       {/* Main Content */}
       <main className="flex-1 pb-16">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-10">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-[120px]">
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-12">
             {/* Sidebar - Quick Links */}
