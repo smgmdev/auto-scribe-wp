@@ -92,19 +92,25 @@ export function LatestPublishedCarousel() {
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
+      // Use SECURITY DEFINER RPC so unauthenticated visitors can see published articles
       const { data, error } = await supabase
-        .from('articles')
-        .select('id, title, created_at, wp_link, published_to_name, published_to_favicon, featured_image')
-        .eq('status', 'published')
-        .not('published_to', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(6);
+        .rpc('get_published_articles');
 
       if (!error && data) {
-        const mapped = data.map(item => ({
-          ...item,
-          featured_image: item.featured_image as FeaturedImage | null,
-        }));
+        // Filter out articles without a published_to site, sort by newest, limit 6
+        const mapped = (data as any[])
+          .filter(item => item.published_to)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 6)
+          .map(item => ({
+            id: item.id,
+            title: item.title,
+            created_at: item.created_at,
+            wp_link: item.wp_link,
+            published_to_name: item.published_to_name,
+            published_to_favicon: item.published_to_favicon,
+            featured_image: null as FeaturedImage | null, // RPC doesn't expose featured_image
+          }));
         setArticles(mapped);
       }
       setLoading(false);
