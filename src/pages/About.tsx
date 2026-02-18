@@ -418,6 +418,30 @@ export default function About() {
           </h2>
         </AnimatedSection>
       </section>
+      {/* Trust Banner Section */}
+      <section className="bg-white py-24 px-4">
+        <AnimatedSection className="max-w-3xl mx-auto text-center">
+          <div className="flex justify-center mb-8">
+            <div className="w-20 h-20 rounded-[22px] bg-[#1d1d1f] flex items-center justify-center shadow-lg">
+              <img src={amblack} alt="Arcana Mace" className="w-12 h-12 object-contain invert" />
+            </div>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
+            Media you trust.<br />
+            From a platform built for it.
+          </h2>
+          <p className="text-xl text-[#86868b] leading-relaxed mb-10 max-w-2xl mx-auto">
+            Every channel on Arcana Mace is verified and indexed. Every article is published with full transparency — no hidden placements, no guesswork.
+          </p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-full transition-colors duration-200"
+          >
+            Explore the network
+          </button>
+        </AnimatedSection>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-[#f5f5f7] py-16 px-4">
         <div className="max-w-[980px] mx-auto text-center">
