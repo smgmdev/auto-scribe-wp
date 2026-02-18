@@ -7,15 +7,14 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Join Arcana Mace as a publishing partner and earn revenue by fulfilling orders.
+          Join Arcana Mace as a PR agency and earn revenue by fulfilling orders.
           Here's what agency partnership offers:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Access to a global client base seeking publications</li>
           <li>Flexible order acceptance — you choose which orders to take</li>
-          <li>Competitive commission structure on all fulfilled orders</li>
           <li>Multiple payout methods including bank transfer and USDT</li>
-          <li>Dedicated agency dashboard for order and site management</li>
+          <li>Dedicated agency dashboard for order and media management</li>
           <li>Real-time order chat with clients</li>
         </ul>
       </div>
