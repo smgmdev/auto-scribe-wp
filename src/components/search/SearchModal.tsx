@@ -320,6 +320,11 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 bg-transparent text-sm md:text-base text-foreground placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground outline-none"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  name="search"
                 />
                 {searchQuery && (
                   <button
