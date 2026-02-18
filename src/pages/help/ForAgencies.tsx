@@ -11,7 +11,7 @@ const sections: HelpSection[] = [
           Here's what agency partnership offers:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Access to a global client base seeking premium publications</li>
+          <li>Access to a global client base seeking publications</li>
           <li>Flexible order acceptance — you choose which orders to take</li>
           <li>Competitive commission structure on all fulfilled orders</li>
           <li>Multiple payout methods including bank transfer and USDT</li>
