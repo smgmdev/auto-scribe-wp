@@ -12,7 +12,7 @@ const sections: HelpSection[] = [
           <h3 className="font-semibold text-base">Local Library — Instant Publishing</h3>
           <p>Publish directly to your own connected WordPress site without agency involvement:</p>
           <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Go to <strong>Media Network</strong> section and select a site from your Local Library</li>
+          <li>Go to <strong>Media Network</strong> section and select a site from Local Library</li>
             <li>Click <strong>Publish New Article</strong> to open the submission flow</li>
             <li>Write your article in the rich-text editor or use AI generation</li>
             <li>Add your article title, meta description, and focus keyword for SEO</li>
