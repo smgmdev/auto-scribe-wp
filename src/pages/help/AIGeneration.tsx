@@ -94,7 +94,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Once your AI article is ready, you have two publishing paths:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li><strong>Publish to WordPress:</strong> Push directly to a connected WordPress site with one click</li>
+          <li><strong>Publish to media site via Local Library:</strong> Push directly to a connected Local Library site with one click</li>
           <li><strong>Submit to Media Site:</strong> Use the article as content for a media buying order</li>
         </ol>
         <p>
