@@ -5,20 +5,45 @@ const sections: HelpSection[] = [
     id: 'submitting-article',
     title: 'Submitting an Article',
     content: (
-      <div className="space-y-4">
-        <p>Follow these steps to submit your article for publication:</p>
-        <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Browse the Sites section and select your target publication</li>
-          <li>Click "Order" or start a service request to open the submission flow</li>
-          <li>Write your article directly in the rich-text editor, or use AI generation</li>
-          <li>Add your article title, meta description, and focus keyword for SEO</li>
-          <li>Upload a featured image if required by the publication</li>
-          <li>Select target categories and tags if applicable</li>
-          <li>Review and confirm your submission</li>
-        </ol>
-        <p>
-          Once submitted, you can track your order status in real-time through the "My Orders" section.
-        </p>
+      <div className="space-y-6">
+        <p>There are two ways to publish an article depending on the library you choose:</p>
+
+        <div className="space-y-3">
+          <h3 className="font-semibold text-base">Local Library — Instant Publishing</h3>
+          <p>Publish directly to your own connected WordPress site without agency involvement:</p>
+          <ol className="list-decimal list-inside space-y-2 ml-4">
+            <li>Go to the <strong>Sites</strong> section and select a site from your Local Library</li>
+            <li>Click <strong>Publish</strong> to open the submission flow</li>
+            <li>Write your article in the rich-text editor or use AI generation</li>
+            <li>Add your article title, meta description, and focus keyword for SEO</li>
+            <li>Upload a featured image if required</li>
+            <li>Select target categories and tags if applicable</li>
+            <li>Confirm your credits and submit — the article publishes instantly</li>
+          </ol>
+          <p>
+            Local Library publishing requires sufficient credits and a connected, approved WordPress site.
+            Articles go live immediately without waiting for an agency review.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="font-semibold text-base">Global Library — Agency Engagement</h3>
+          <p>Submit your article to a media site managed by a verified agency partner:</p>
+          <ol className="list-decimal list-inside space-y-2 ml-4">
+            <li>Browse the <strong>Sites</strong> section and select a site from the Global Library</li>
+            <li>Click <strong>Order</strong> to open the service request flow</li>
+            <li>Write your article in the rich-text editor or use AI generation</li>
+            <li>Add your article title, meta description, and focus keyword for SEO</li>
+            <li>Upload a featured image if required by the publication</li>
+            <li>Select target categories and tags if applicable</li>
+            <li>Review, confirm your credits, and submit your order</li>
+          </ol>
+          <p>
+            Once submitted, the agency will review and accept your order before processing publication.
+            You can track progress in real-time through the <strong>My Orders</strong> section.
+            Typical turnaround is 1–7 business days depending on the site.
+          </p>
+        </div>
       </div>
     ),
   },
