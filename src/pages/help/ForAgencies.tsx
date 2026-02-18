@@ -51,16 +51,12 @@ const sections: HelpSection[] = [
         <p>We offer multiple payout options for our agency partners:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Bank Transfer (Wire):</strong> Direct international wire transfers</li>
-          <li><strong>USDT (TRC20/ERC20):</strong> Cryptocurrency payouts to your wallet</li>
+          <li><strong>USDT (TRC20/ERC20):</strong> Direct payouts to your wallet</li>
         </ul>
         <p>
-          To set up or change your payout method, navigate to the Payouts section in your
-          agency dashboard. You'll need to complete identity verification before processing
-          your first withdrawal.
-        </p>
-        <p>
-          Withdrawals are processed after order completion and are subject to a minimum
-          threshold. You can request a withdrawal at any time from your agency payout page.
+          Withdrawals are processed within 1–10 business days depending on the withdrawal method and amount.
+          We currently use Airwallex as our payments gateway and processing times may vary.
+          You can request a withdrawal at any time from <strong>Agency Management → My Earnings → Withdraw</strong>.
         </p>
       </div>
     ),
