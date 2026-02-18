@@ -419,9 +419,12 @@ export default function About() {
             </button>
             <button
               onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
-              className="inline-flex items-center px-8 py-4 bg-transparent hover:bg-[#f5f5f7] text-[#0071e3] text-lg font-medium rounded-full border border-[#0071e3] transition-colors duration-200"
+              className="group inline-flex items-center gap-2 px-4 py-4 bg-transparent text-[#0071e3] text-lg font-medium transition-all duration-300"
             >
-              Browse Media Network
+              <span className="transition-transform duration-300 group-hover:-translate-x-1">Browse Media Network</span>
+              <span className="inline-flex items-center overflow-hidden w-0 group-hover:w-5 transition-all duration-300 opacity-0 group-hover:opacity-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
             </button>
           </div>
         </AnimatedSection>
