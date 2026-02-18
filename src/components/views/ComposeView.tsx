@@ -491,9 +491,9 @@ export function ComposeView() {
     } catch (error) {
       const msg = error instanceof Error ? error.message : '';
       if (msg.startsWith('PERMISSION_DENIED:')) {
-        toast.error("Tag creation not permitted", {
-          description: "The WordPress user on this site doesn't have permission to create tags. Ask the site admin to upgrade the application user role to Editor or Administrator.",
-          duration: 8000,
+        toast.error("Tag creation not permitted on this site", {
+          description: "The WordPress application user (devhelp) lacks permission to create tags via REST API. In WordPress Admin → Users, verify this user has the Administrator role and that the app password has not been restricted by a security plugin (e.g. Wordfence, iThemes Security).",
+          duration: 12000,
         });
       } else {
         toast.error("Could not create the tag on WordPress");
