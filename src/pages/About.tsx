@@ -427,7 +427,7 @@ export default function About() {
             </button>
           </div>
 
-          <div className="mt-16 md:mt-20">
+          <div className="mt-16 md:mt-20 text-left">
             <Accordion type="multiple" className="w-full">
               <AccordionItem value="q1" className="border-t border-border">
                 <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
