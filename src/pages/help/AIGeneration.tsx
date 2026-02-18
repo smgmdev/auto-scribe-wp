@@ -41,7 +41,7 @@ const sections: HelpSection[] = [
           <li><strong>Asia:</strong> News and developments across Asian markets and regions</li>
         </ul>
         <p>
-          Click any headline in the Headlines section to use it as the source for AI generation.
+          Click any headline in the Sources section to use it as the source for AI generation.
           The platform fetches the content and rewrites it in your chosen tone.
         </p>
       </div>
