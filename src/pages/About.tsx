@@ -401,9 +401,7 @@ export default function About() {
       <section className="bg-white py-24 px-4">
         <AnimatedSection className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 rounded-[22px] bg-[#1d1d1f] flex items-center justify-center shadow-lg">
-              <img src={amblack} alt="Arcana Mace" className="w-12 h-12 object-contain invert" />
-            </div>
+            <img src={amblack} alt="Arcana Mace" className="w-20 h-20 object-contain" />
           </div>
           <h2 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
             Media you trust.<br />
@@ -412,12 +410,20 @@ export default function About() {
           <p className="text-xl text-[#86868b] leading-relaxed mb-10 max-w-2xl mx-auto">
             Every channel on Arcana Mace is verified and indexed. Every article is published with full transparency — no hidden placements, no guesswork.
           </p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-full transition-colors duration-200"
-          >
-            Explore the network
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => navigate('/auth')}
+              className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-full transition-colors duration-200"
+            >
+              Create an Account
+            </button>
+            <button
+              onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
+              className="inline-flex items-center px-8 py-4 bg-transparent hover:bg-[#f5f5f7] text-[#0071e3] text-lg font-medium rounded-full border border-[#0071e3] transition-colors duration-200"
+            >
+              Browse Media Network
+            </button>
+          </div>
         </AnimatedSection>
       </section>
 
