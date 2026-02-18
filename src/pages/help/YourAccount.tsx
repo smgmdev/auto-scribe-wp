@@ -70,14 +70,13 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Protect your account with our security features:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>PIN Protection:</strong> Add an optional 4-digit PIN that's required on login — ideal for shared devices</li>
-          <li><strong>Email Verification:</strong> Your email must be verified to access all platform features</li>
+          <li><strong>PIN Protection:</strong> Add an optional 4-digit PIN that's required on login</li>
+          <li><strong>Email Verification:</strong> Your email must be verified to access Arcana Mace</li>
           <li><strong>Session Management:</strong> Sessions expire automatically for your protection</li>
-          <li><strong>Security Monitoring:</strong> Our team monitors for unusual account activity</li>
+          <li><strong>Security Monitoring:</strong> Arcana Mace AI runs in the background and monitors for unusual account activity</li>
         </ul>
         <p>
-          You can enable, disable, or update your PIN from Settings → Security in your dashboard.
-          If you forget your PIN, it can be reset through account settings.
+          You can enable, disable, or update your PIN in Account Settings.
         </p>
       </div>
     ),
@@ -88,7 +87,7 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          The Support section in your dashboard gives you direct access to our team via real-time ticketing:
+          The Support section in your dashboard gives you direct access to Arcana Mace support via real-time ticketing:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Open a new ticket with a subject and description of your issue</li>
