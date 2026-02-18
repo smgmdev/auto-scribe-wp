@@ -63,7 +63,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>
           Every order comes with a dedicated real-time chat between you and the agency.
-          You can access it from "My Requests" in your dashboard:
+          You can access it from "My Engagements" in your dashboard:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Send messages, ask questions, and share additional materials</li>
