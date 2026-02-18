@@ -189,7 +189,7 @@ const DoNotSell = () => {
           <AccordionItem value="item-5" className="border-t border-border border-b">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">Questions & Contact</span>
+                <span className="text-left">Contact</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
