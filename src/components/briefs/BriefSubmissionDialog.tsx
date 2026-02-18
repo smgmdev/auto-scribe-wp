@@ -220,19 +220,22 @@ export function BriefSubmissionDialog({
       {isMobile ? (
         // Mobile: full-screen scrollable
         <div 
-          className="w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain"
+          className="w-full h-[100dvh] bg-background overflow-y-auto overscroll-contain flex flex-col"
           style={{ WebkitOverflowScrolling: 'touch' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-5 pb-8 space-y-4 relative">
-            {/* Close Button */}
+          {/* Drag bar */}
+          <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30 shrink-0">
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
             <button
               onClick={() => onOpenChange(false)}
-              className="absolute right-0 top-0 rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center z-10"
+              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </button>
+          </div>
+          <div className="flex-1 overflow-y-auto overscroll-contain p-5 pb-8 space-y-4">
 
             <div className="flex flex-col space-y-1.5 text-left pr-8">
               <h2 className="text-base font-semibold leading-none tracking-tight">Send Your Brief</h2>
@@ -341,7 +344,7 @@ export function BriefSubmissionDialog({
         // Desktop: centered draggable popup
         <div className="flex items-center justify-center w-full h-full">
           <div
-            className="w-full max-w-lg border bg-background pt-1 pl-6 pb-6 pr-0 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative"
+            className="w-full max-w-lg border bg-background pt-0 pl-6 pb-6 pr-0 shadow-lg rounded-lg max-h-[85vh] flex flex-col relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
             style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
           >

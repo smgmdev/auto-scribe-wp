@@ -286,45 +286,39 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className={`pointer-events-auto bg-background text-foreground relative overflow-y-auto ${
+        className={`pointer-events-auto bg-background text-foreground relative ${
           isMobile
-            ? 'w-full h-[100dvh] px-6 pt-3 pb-6'
-            : 'w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
+            ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
+            : 'overflow-y-auto w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
         {/* Drag bar */}
-        {!isMobile ? (
-          <div
-            className={`px-4 py-2 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
-            onMouseDown={handleDragStart}
+        <div
+          className={`flex items-center justify-between border-b bg-muted/30 ${
+            isMobile
+              ? 'px-3 py-1.5 shrink-0'
+              : `px-4 py-2 -mx-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
+          }`}
+          onMouseDown={!isMobile ? handleDragStart : undefined}
+        >
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <button
+            onClick={() => onOpenChange(false)}
+            disabled={confirming}
+            onMouseDown={(e) => !isMobile && e.stopPropagation()}
+            className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
           >
-            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-            <button
-              onClick={() => onOpenChange(false)}
-              disabled={confirming}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-end mb-1">
-            <button
-              onClick={() => onOpenChange(false)}
-              disabled={confirming}
-              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-          </div>
-        )}
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
+
+        {/* Scrollable content on mobile / inline on desktop */}
+        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
 
         {/* Header */}
-        <div className={`flex items-center gap-2 mb-1 ${isMobile ? 'pt-1' : 'pt-4'}`}>
+        <div className="flex items-center gap-2 mb-1">
           {step === 'payment' && (
             <button
               onClick={handleBack}
@@ -496,6 +490,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </div>
           </>
         )}
+        </div>
       </div>
     </div>,
     document.body
