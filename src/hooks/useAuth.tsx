@@ -227,17 +227,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Track if this is the initial load to avoid showing toast on refresh
   const isInitialLoadRef = useRef(true);
+  // Track whether initial session load has completed
+  const initialLoadDoneRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
-    
-    // Set up auth state listener FIRST
+
+    // Listener for ONGOING auth changes only — does NOT control isLoading
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         if (!isMounted) return;
-        
+
         console.log('[Auth] onAuthStateChange event:', event, 'user:', newSession?.user?.id);
-        
+
         // Always process sign out
         if (event === 'SIGNED_OUT') {
           console.log('[Auth] User signed out, resetting state');
@@ -245,46 +247,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isInitialLoadRef.current = false;
           return;
         }
-        
+
         // Ignore TOKEN_REFRESHED events - these happen when switching tabs
-        // and we don't need to refetch all user data for a token refresh
         if (event === 'TOKEN_REFRESHED') {
-          // Just update the session silently without triggering data refetch
           setSession(newSession);
           return;
         }
-        
+
+        // Skip if initial load hasn't finished yet — getSession handles that
+        if (!initialLoadDoneRef.current) return;
+
         // Check if this is a different user than before (account switch)
         const newUserId = newSession?.user?.id || null;
         if (previousUserIdRef.current !== null && previousUserIdRef.current !== newUserId && newUserId !== null) {
           console.log('[Auth] User changed from', previousUserIdRef.current, 'to', newUserId, ', resetting state');
-          // Different user - reset everything before setting new state
           setRole(null);
           setCredits(0);
           setPinRequired(false);
           setPinVerified(false);
           hasShownWelcomeRef.current = false;
-          // Reset all notification counts to prevent stale data from previous user
           useAppStore.getState().resetAllNotifications();
           useAppStore.getState().closeAllChats();
         }
-        
+
         previousUserIdRef.current = newUserId;
-        
-        // Mark that we've seen a sign in (for tracking purposes)
+
         if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current && !isInitialLoadRef.current) {
           hasShownWelcomeRef.current = true;
         }
-        
-        // After first auth state change, no longer initial load
+
         isInitialLoadRef.current = false;
-        
+
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        // Ensure loading is cleared so redirect useEffects can fire
-        setLoading(false);
-        
-        // Defer Supabase calls with setTimeout
+
+        // Defer Supabase calls with setTimeout to avoid deadlocks
         if (newSession?.user) {
           setTimeout(async () => {
             if (!isMounted) return;
@@ -299,24 +296,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
-      if (!isMounted) return;
-      
-      console.log('[Auth] Initial session check, user:', existingSession?.user?.id);
-      
-      // Track the initial user ID
-      previousUserIdRef.current = existingSession?.user?.id || null;
-      
-      setSession(existingSession);
-      setUser(existingSession?.user ?? null);
-      
-      if (existingSession?.user) {
-        await fetchUserData(existingSession.user.id);
+    // INITIAL load — awaits everything before setting loading=false
+    // This prevents the race condition where loading=false but user=null
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+
+        console.log('[Auth] Initial session check, user:', existingSession?.user?.id);
+
+        previousUserIdRef.current = existingSession?.user?.id || null;
+
+        setSession(existingSession);
+        setUser(existingSession?.user ?? null);
+
+        if (existingSession?.user) {
+          await fetchUserData(existingSession.user.id);
+        }
+      } finally {
+        if (isMounted) {
+          initialLoadDoneRef.current = true;
+          setLoading(false);
+        }
       }
-      
-      setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     return () => {
       isMounted = false;
