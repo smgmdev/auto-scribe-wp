@@ -69,9 +69,9 @@ const sections: HelpSection[] = [
         <p>As an agency, you can add and manage media sites in your portfolio:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Add Sites via Google Sheet:</strong> Submit new sites using our structured submission sheet</li>
-          <li><strong>Add WordPress Sites:</strong> Connect your own WordPress blogs directly to the platform</li>
-          <li><strong>Set Pricing & Details:</strong> Our team reviews and lists sites with your agreed pricing</li>
-          <li><strong>Update Site Info:</strong> Request updates to your listed sites through the agency portal</li>
+          <li><strong>Add WordPress Sites:</strong> Connect your own WordPress site directly to the platform</li>
+          <li><strong>Set Pricing & Details:</strong> Arcana Mace will review your submitted sites with your price offering</li>
+          <li><strong>Update Site Info:</strong> You can update price and description at any time in the My Media section under Agency Management</li>
         </ul>
         <p>
           All sites go through a verification and review process before appearing in the marketplace.
