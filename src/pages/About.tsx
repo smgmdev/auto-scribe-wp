@@ -420,7 +420,7 @@ export default function About() {
       </section>
 
       {/* Global Coverage Section */}
-      <section className="relative p-12 md:p-20 text-center text-white overflow-hidden min-h-[500px] flex items-center justify-center">
+      <section className="relative text-center text-white overflow-hidden min-h-screen flex items-center justify-center">
         <video 
           src={aboutGlobalCoverageBgVideo} 
           autoPlay 
