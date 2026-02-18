@@ -91,10 +91,10 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>We stand behind the quality of our service:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Publication Guarantee:</strong> Your article will be published or credits refunded</li>
-          <li><strong>Google Indexed Sites:</strong> Check with the agency first if media site is available for Google indexing</li>
-          <li><strong>PR Agencies:</strong> All agencies are reviewed based on full provided KYC and onboarded by Arcana Mace staff</li>
-          <li><strong>Dispute System:</strong> If there are quality issues in order delivery, raise a dispute for our team to review</li>
+          <li><strong>Publication Guarantee:</strong> Article will be published or credits refunded</li>
+          <li><strong>Google Indexed Sites:</strong> Ask the agency if the media site is Google indexed</li>
+          <li><strong>PR Agencies:</strong> All agencies are KYC verified and onboarded by Arcana Mace staff</li>
+          <li><strong>Dispute System:</strong> Raise a dispute for delivery quality issues for team review</li>
         </ul>
         <p>
           If any issues arise, use the order chat to communicate with the agency first,
