@@ -418,61 +418,6 @@ export default function About() {
           </h2>
         </AnimatedSection>
       </section>
-
-      {/* Global Coverage Section */}
-      <section className="relative text-center text-white overflow-hidden min-h-screen flex items-center justify-center">
-        <video 
-          src={aboutGlobalCoverageBgVideo} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        <AnimatedSection className="relative z-10 w-full">
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-8">
-            Global coverage.<br />
-            <span className="text-white/50">Local access.</span>
-          </h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-8">
-            From Business & Finance to Crypto, Tech to Politics — our network spans every major market. MENA, China, and beyond.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {['Business & Finance', 'Crypto', 'Tech', 'Campaign', 'Politics', 'MENA', 'China'].map((category) => (
-              <span 
-                key={category}
-                className="px-4 py-2 bg-white/10 rounded-full text-sm text-white/80"
-              >
-                {category}
-              </span>
-            ))}
-          </div>
-        </AnimatedSection>
-      </section>
-
-      {/* Trust Section */}
-      <section className="bg-[#f5f5f7] py-4 px-4">
-        <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AnimatedSection className="bg-white rounded-none p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">72h</p>
-            <p className="text-lg text-[#86868b]">Average publishing time</p>
-          </AnimatedSection>
-          
-          <AnimatedSection delay={100} className="bg-white rounded-none p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">
-              {channelsLoading ? <Loader2 className="inline h-8 w-8 animate-spin text-[#1d1d1f]" /> : `${totalChannels}+`}
-            </p>
-            <p className="text-lg text-[#86868b]">Global media channels</p>
-          </AnimatedSection>
-          
-          <AnimatedSection delay={200} className="bg-white rounded-none p-10 text-center">
-            <p className="text-5xl md:text-6xl font-semibold text-[#1d1d1f] mb-2">100M+</p>
-            <p className="text-lg text-[#86868b]">Monthly readers</p>
-          </AnimatedSection>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="bg-[#f5f5f7] py-16 px-4">
         <div className="max-w-[980px] mx-auto text-center">
