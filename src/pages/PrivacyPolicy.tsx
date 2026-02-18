@@ -89,7 +89,10 @@ const PrivacyPolicy = () => {
         {/* Introduction */}
         <div className="mb-10">
           <p className="text-muted-foreground leading-relaxed mb-4">
-            This website, arcanamace.com, is operated by Stankevicius Pacific Limited ("Arcana Mace"). Arcana Mace's Privacy Policy describes how Arcana Mace collects, uses, and shares your personal data.
+            This website, arcanamace.com, is operated by Stankevicius Pacific Limited ("Arcana Mace"). We genuinely care about your privacy and the safety of your personal data. This Privacy Policy describes how Arcana Mace collects, uses, and shares your personal data, and the steps we take to protect it.
+          </p>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            We invest in security measures and work continuously to keep your data as safe as possible. However, as with all internet-based platforms and businesses, we cannot guarantee absolute or complete data protection. No online service can fully eliminate the risk of unauthorized access or data breaches. By using Arcana Mace, you acknowledge this inherent limitation of the internet and accept that Arcana Mace, while doing its best, cannot be held liable for circumstances beyond its reasonable control.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             In addition to this Privacy Policy, we provide data and privacy information embedded in our products and certain features that ask to use your personal data. You can familiarize yourself with our privacy practices, accessible via the sections below, and contact us if you have any questions.
@@ -224,10 +227,16 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                At Arcana Mace, we believe that great privacy rests on great security. We use administrative, technical, and physical safeguards to protect your personal data, taking into account the nature of the personal data and the processing, and the threats posed.
+                At Arcana Mace, we genuinely care about protecting your personal data. We use a combination of administrative, technical, and physical safeguards — including encryption, access controls, and secure infrastructure — designed to protect your data from unauthorized access, disclosure, or misuse.
+              </p>
+              <p className="mb-4">
+                We continuously review and improve our security practices to keep pace with emerging threats. Your trust matters to us, and we take data protection seriously as an ongoing commitment.
+              </p>
+              <p className="mb-4">
+                <strong className="text-foreground">However, we must be transparent:</strong> no internet-based platform can guarantee complete or absolute security. The internet, by its nature, carries inherent risks that are outside any company's full control. Threats such as cyberattacks, hacking, or unauthorized interception of data in transit can occur despite best efforts and industry-standard precautions.
               </p>
               <p>
-                We are constantly working to improve on these safeguards to help keep your personal data secure. For more information, visit our security documentation or contact our support team.
+                By using Arcana Mace, you acknowledge and accept that while we do our utmost to safeguard your data, Arcana Mace cannot be held responsible for security incidents resulting from circumstances beyond our reasonable control. We encourage you to take your own precautions, such as using strong passwords and keeping your account credentials private.
               </p>
             </AccordionContent>
           </AccordionItem>
