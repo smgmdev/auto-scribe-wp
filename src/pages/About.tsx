@@ -430,18 +430,16 @@ export default function About() {
                   <span className="text-[#86868b]">Just go.</span>
                 </h2>
               </div>
-              <div className="bg-[#f5f5f7] p-12 md:p-16 flex flex-col justify-center">
-                <p className="text-lg text-[#1d1d1f] leading-relaxed mb-8">
-                  <span className="font-semibold">Set up in seconds.</span> Right on your browser. Arcana Mace is built for brands, agencies, and PR professionals. To get started, simply create an account and browse our media network of global media channels. When you want to publish, just submit your request, pay, and you're set.
-                </p>
-                <button 
-                  onClick={() => navigate('/auth')}
-                  className="inline-flex items-center gap-2 text-[#0066cc] hover:underline text-lg"
-                >
-                  Learn how to set up Arcana Mace
-                  <span>›</span>
-                </button>
-              </div>
+              <button
+                onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
+                className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center text-left group hover:from-[#e8e8ed] hover:to-[#dcdce1] transition-all duration-300 w-full"
+              >
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight group-hover:text-[#0066cc] transition-colors duration-300">
+                  Choose how<br />you top up.<br />
+                  <span className="text-[#86868b] group-hover:text-[#0066cc]/60">Card payments. Offline invoice.</span>
+                </h2>
+                <span className="mt-4 text-[#0066cc] text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">Top up credits ›</span>
+              </button>
             </div>
           </AnimatedSection>
         </div>
