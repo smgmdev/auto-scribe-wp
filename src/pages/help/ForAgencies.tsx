@@ -107,7 +107,7 @@ const sections: HelpSection[] = [
           As an agency partner, you must adhere to Arcana Mace's platform guidelines:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>No off-platform contact:</strong> Do not solicit or share personal contact info with clients outside the platform</li>
+          <li><strong>No off-platform contact:</strong> Do not share or solicit personal contact info outside the platform</li>
           <li><strong>Professional conduct:</strong> Maintain respectful and timely communication with clients</li>
           <li><strong>Accurate delivery:</strong> Deliver articles as agreed; provide correct live links</li>
           <li><strong>Fair pricing:</strong> Charge consistent and fair rates across clients</li>
