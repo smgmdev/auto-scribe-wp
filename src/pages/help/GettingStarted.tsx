@@ -16,8 +16,8 @@ const sections: HelpSection[] = [
           <li>Choose a media outlet and submit a brief to discuss terms with the agency offering the publication</li>
           <li>Once terms are agreed, purchase credits via the secure payment system (Airwallex) and submit your order</li>
           <li>The agency reviews, accepts, and publishes your content</li>
-          <li>Track your publication status in real-time through your dashboard</li>
-          <li>Receive a live link once your article is published and wait for delivery confirmation</li>
+          <li>Track your publication status in real-time in the My Orders section via your dashboard</li>
+          <li>Receive a live link once your article is published</li>
         </ol>
       </div>
     ),
