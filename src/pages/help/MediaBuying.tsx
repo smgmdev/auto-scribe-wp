@@ -8,7 +8,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>
           Media buying on Arcana Mace connects you directly with publishers and agencies
-          who can place your content on premium websites. Here's the process:
+          who can place your content on websites. Here's the process:
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
           <li>Browse our curated catalog of media sites using search and filters</li>
@@ -79,7 +79,7 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Express (1–2 days):</strong> Fast-turnaround publications</li>
           <li><strong>Standard (3–5 days):</strong> Most common timeframe</li>
-          <li><strong>Extended (5–7 days):</strong> Premium publications with editorial review</li>
+          <li><strong>Extended (5–7 days):</strong> Publications with editorial review</li>
         </ul>
         <p>
           A delivery countdown is visible inside the order chat once an order is accepted.

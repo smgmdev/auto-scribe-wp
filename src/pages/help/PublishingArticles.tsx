@@ -54,7 +54,7 @@ const sections: HelpSection[] = [
           <li><strong>Country Targeting:</strong> Filter sites by country to reach specific audiences</li>
           <li><strong>Google Index:</strong> Prioritize indexed sites for maximum SEO value</li>
           <li><strong>Publishing Time:</strong> Check turnaround if you have deadlines</li>
-          <li><strong>Marks & Tags:</strong> Site tags indicate special attributes (e.g., "Fast", "Premium")</li>
+          <li><strong>Marks & Tags:</strong> Site tags indicate special attributes (e.g., "Fast", "Featured")</li>
           <li><strong>Agency:</strong> Each site is managed by a verified agency partner</li>
         </ul>
         <p>

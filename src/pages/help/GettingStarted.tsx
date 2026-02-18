@@ -7,7 +7,7 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Arcana Mace is a media buying marketplace that connects you with premium publications worldwide.
+          Arcana Mace is a media buying marketplace that connects you with publications worldwide.
           Our platform simplifies the process of getting your content published on high-authority websites.
         </p>
         <p>Here's how it works:</p>
@@ -145,7 +145,7 @@ export default function GettingStarted() {
       intro={
         <p>
           Welcome to Arcana Mace! This guide will help you understand how our platform works
-          and get you started with publishing your content on premium media sites.
+          and get you started with publishing your content on media sites.
         </p>
       }
       sections={sections}

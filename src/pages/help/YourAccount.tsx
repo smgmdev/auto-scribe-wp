@@ -11,7 +11,7 @@ const sections: HelpSection[] = [
           streamline your media buying experience:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Full Site Access:</strong> Browse our complete catalog of premium publications</li>
+          <li><strong>Full Site Access:</strong> Browse our complete catalog of publications</li>
           <li><strong>Order Tracking:</strong> Monitor your submissions in real-time</li>
           <li><strong>Credit Management:</strong> Purchase and track your credit balance</li>
           <li><strong>AI Article Creation:</strong> Generate and manage AI-written articles</li>
