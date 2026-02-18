@@ -264,8 +264,8 @@ export function SupportView() {
           {/* Locked overlay */}
           {isLocked && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-background/95 border border-border rounded-xl px-8 py-8 max-w-sm w-full mx-4 text-center shadow-lg">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted mx-auto mb-4">
+              <div className="bg-background/95 border border-border px-8 py-8 max-w-sm w-full mx-4 text-center shadow-lg">
+                <div className="flex items-center justify-center h-12 w-12 bg-muted mx-auto mb-4">
                   <Lock className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Support Unavailable</h3>
