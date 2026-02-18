@@ -655,7 +655,7 @@ export default function Auth() {
                         setShowForgotForm(true);
                         setResetSent(false);
                       }}
-                      className="text-[12px] text-[#06c] hover:underline transition-colors"
+                      className="text-[15px] text-[#06c] hover:underline transition-colors"
                     >
                       Forgot password?
                     </button>
@@ -676,8 +676,8 @@ export default function Auth() {
                       </div>
                     ) : (
                       <>
-                        <p className="text-[13px] font-medium text-foreground">Reset your password</p>
-                        <p className="text-[12px] text-muted-foreground">Enter the email address for your account and we'll send a reset link.</p>
+                        <p className="text-[15px] font-medium text-foreground">Reset your password</p>
+                        <p className="text-[15px] text-muted-foreground">Enter the email address for your account and we'll send a reset link.</p>
                         <Input
                           type="email"
                           placeholder="Email address"
@@ -707,14 +707,14 @@ export default function Auth() {
                                 setIsSendingReset(false);
                               }
                             }}
-                            className="flex-1 h-8 text-[12px] font-medium bg-foreground text-background rounded-none border border-foreground hover:!bg-transparent hover:!text-foreground transition-all"
+                            className="flex-1 h-9 md:h-10 text-[14px] md:text-[15px] font-medium bg-foreground text-background rounded-none border border-foreground hover:!bg-transparent hover:!text-foreground transition-all"
                           >
-                            {isSendingReset ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Send Reset Link'}
+                            {isSendingReset ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Reset Link'}
                           </Button>
                           <button
                             type="button"
                             onClick={() => { setShowForgotForm(false); setResetSent(false); }}
-                            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+                            className="h-9 md:h-10 px-3 text-[14px] md:text-[15px] text-muted-foreground hover:text-foreground transition-colors"
                           >
                             Cancel
                           </button>
