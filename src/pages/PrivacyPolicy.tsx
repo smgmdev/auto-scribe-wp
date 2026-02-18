@@ -133,13 +133,13 @@ const PrivacyPolicy = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                At Arcana Mace, we respect your ability to know, access, correct, transfer, restrict the processing of, and delete your personal data. We have provided these rights to our global customer base and if you choose to exercise these privacy rights, you have the right not to be treated in a discriminatory way nor to receive a lesser degree of service from Arcana Mace.
+                At Arcana Mace, we respect your ability to know, access, correct, and delete your personal data. We are committed to treating all users fairly and without discrimination, regardless of whether you choose to exercise any of your privacy rights.
               </p>
               <p className="mb-4">
-                Where you are requested to consent to the processing of your personal data by Arcana Mace, you have the right to withdraw your consent at any time.
+                If you would like to know what personal data Arcana Mace holds about you, or if you would like to request the removal of your data from our systems, please contact our support team directly. We will review your request and respond in a timely manner.
               </p>
               <p>
-                To exercise your privacy rights, visit your account settings or contact our support team. To help protect the security of your personal data, you must sign in to your account and your identity will be verified. You also have the right to lodge a complaint with the applicable regulator.
+                To help protect the security of your personal data, you may be required to verify your identity before we can process any data-related requests. You also have the right to lodge a complaint with the applicable data protection authority in your jurisdiction.
               </p>
             </AccordionContent>
           </AccordionItem>
