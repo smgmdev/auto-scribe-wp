@@ -374,7 +374,7 @@ export default function About() {
               <div>
                 <Smartphone className="w-10 h-10 text-white mb-6" strokeWidth={1.5} />
                 <p className="text-lg md:text-xl text-[#86868b] leading-relaxed">
-                  <span className="text-white font-semibold">Publish more. Worry less.</span> Arcana Mace works seamlessly from any device, so you can manage campaigns on the go. Every transaction is secured with modern authentication and encrypted payments — keeping your security in your hands.
+                  <span className="text-white font-semibold">Your credits are protected until you approve.</span> Funds are held securely in escrow and only released once you're satisfied with the delivery — if the order doesn't meet your expectations, you don't pay.
                 </p>
               </div>
             </AnimatedSection>
