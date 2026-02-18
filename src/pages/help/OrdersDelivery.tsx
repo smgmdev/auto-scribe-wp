@@ -26,13 +26,14 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Order tracking provides visibility into every stage of the publication process:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Pending:</strong> Order placed, waiting for agency acceptance</li>
-          <li><strong>Accepted:</strong> Agency has accepted and is processing your submission</li>
-          <li><strong>Delivered:</strong> Article is live — delivery link provided in chat</li>
-          <li><strong>Delivered – Revision Requested:</strong> You've flagged changes after delivery</li>
-          <li><strong>Completed:</strong> Order finalized; credits released to the agency</li>
-          <li><strong>Cancelled:</strong> Order was cancelled; locked credits returned to you</li>
-          <li><strong>Disputed:</strong> Dispute raised and under review by our team</li>
+          <li><strong>Order Placed:</strong> Order placed, agency is working on delivery</li>
+          <li><strong>Offer Accepted:</strong> Offer was accepted; order is now active</li>
+          <li><strong>Offer Rejected:</strong> Offer was declined; you can renegotiate or exit</li>
+          <li><strong>Order Delivered:</strong> Article is live — delivery link provided in chat</li>
+          <li><strong>Revision Requested:</strong> You've flagged changes after delivery</li>
+          <li><strong>Order Cancelled:</strong> Order was cancelled; credits returned to your balance</li>
+          <li><strong>Dispute Opened:</strong> Dispute raised and under review by our team</li>
+          <li><strong>Dispute Resolved:</strong> Staff has resolved the dispute and finalized the outcome</li>
         </ul>
       </div>
     ),
