@@ -148,9 +148,12 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
         </div>
       </div>
 
+      {/* Explicit spacer so content doesn't slide under the sticky sub-header in flex layout */}
+      <div className="h-8 shrink-0" />
+
       {/* Main Content */}
-      <main className="flex-1 pt-16 pb-16">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+      <main className="flex-1 pb-16">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-4">
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-12">
             {/* Sidebar - Quick Links */}
