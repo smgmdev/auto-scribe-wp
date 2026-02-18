@@ -55,14 +55,14 @@ const sections: HelpSection[] = [
         <p>To ensure your article is accepted, follow these guidelines:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Original Content:</strong> All submissions must be unique and not published elsewhere</li>
-          <li><strong>Word Count:</strong> Each site displays minimum and maximum word limits</li>
-          <li><strong>Formatting:</strong> Use proper headings, paragraphs, and lists in the editor</li>
-          <li><strong>Images:</strong> High-quality, relevant images; max images per article is set per site</li>
-          <li><strong>Links:</strong> Follow each site's policy on external and backlinks</li>
-          <li><strong>Tone:</strong> Professional, informative, and engaging</li>
+          <li><strong>Word Count:</strong> Average publication word count typically ranges between 450–800 words</li>
+          <li><strong>Formatting:</strong> Highlight important parts of the text, set proper paragraphs, and structure your content professionally</li>
+          <li><strong>Images:</strong> High-quality, relevant images; normally 1 image is recommended for article publishing</li>
+          <li><strong>Links:</strong> You can add several links in publications through Local Library. When publishing through an agency, discuss about link insertions separately</li>
+          <li><strong>Tone:</strong> When writing an article, keep a professional, informative, and engaging tone</li>
         </ul>
         <p>
-          Each publication may have specific requirements visible in the site detail panel.
+          Each publication may have specific requirements visible in the media product detail panel.
           Always review these before submitting.
         </p>
       </div>
