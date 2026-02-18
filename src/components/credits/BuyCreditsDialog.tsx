@@ -288,7 +288,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       <div
         className={`pointer-events-auto bg-background text-foreground relative overflow-y-auto ${
           isMobile
-            ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+            ? 'w-full h-[100dvh] px-6 pt-3 pb-6'
             : 'w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
@@ -311,7 +311,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-end mb-2">
+          <div className="flex items-center justify-end mb-1">
             <button
               onClick={() => onOpenChange(false)}
               disabled={confirming}
@@ -324,7 +324,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         )}
 
         {/* Header */}
-        <div className="flex items-center gap-2 pt-4 mb-1">
+        <div className={`flex items-center gap-2 mb-1 ${isMobile ? 'pt-1' : 'pt-4'}`}>
           {step === 'payment' && (
             <button
               onClick={handleBack}

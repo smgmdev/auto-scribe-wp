@@ -203,7 +203,7 @@ export function OrderWithCreditsDialog({
       <div
         className={`pointer-events-auto bg-background relative overflow-y-auto ${
           isMobile
-            ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
+            ? 'w-full h-[100dvh] px-6 pt-3 pb-6'
             : 'w-full max-w-md border pt-0 px-6 pb-6 shadow-lg rounded-none overflow-hidden'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
@@ -225,7 +225,7 @@ export function OrderWithCreditsDialog({
             </button>
           </div>
         ) : (
-          <div className="flex items-center justify-end mb-2">
+          <div className="flex items-center justify-end mb-1">
             <button
               onClick={() => !sending && onOpenChange(false)}
               className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
@@ -237,7 +237,7 @@ export function OrderWithCreditsDialog({
         )}
 
         {/* Header */}
-        <div className="pt-4">
+        <div className={isMobile ? 'pt-1' : 'pt-4'}>
           <h2 className="text-lg font-semibold leading-none tracking-tight">
             {isResendMode ? 'Resend Order Request' : 'Send Order Request'}
           </h2>
