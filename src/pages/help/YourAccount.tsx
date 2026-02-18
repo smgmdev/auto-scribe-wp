@@ -55,11 +55,10 @@ const sections: HelpSection[] = [
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Email:</strong> Your primary contact for order updates and notifications</li>
-          <li><strong>Username:</strong> Your display name shown to agencies in chats</li>
           <li><strong>WhatsApp:</strong> Optional contact for urgent communications</li>
         </ul>
         <p>
-          To update your profile, navigate to Settings → Account in your dashboard.
+          To update your profile, navigate to Account Settings.
         </p>
       </div>
     ),
