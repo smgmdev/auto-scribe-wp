@@ -484,6 +484,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
 
   const handleSend = async () => {
     if (!user || (!newMessage.trim() && !selectedFile)) return;
+    // Security: never send to a closed support ticket
+    if (ticketStatus === 'closed') return;
     setSending(true);
     broadcastTyping(false);
     try {
