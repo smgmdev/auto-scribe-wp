@@ -118,7 +118,7 @@ const sections: HelpSection[] = [
           You can engage with an agency and place an order via an engagement. Once placed, track your order in the <strong>My Orders</strong> section.
         </p>
         <p>
-          Publications on the Global Library are typically processed within 1–3 business days by the agency.
+          Publications on the Global Library are typically processed within 1–7 business days by the agency.
           You'll be notified when the agency accepts your order and again when it's delivered.
           When placing an order, you can also negotiate the delivery timeline directly with the agency through the order engagement.
         </p>
