@@ -94,7 +94,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Once your AI article is ready, you have two publishing paths:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li><strong>Publish to media site via Local Library:</strong> Push directly to a connected Local Library site with one click</li>
+          <li><strong>Local Library:</strong> Push directly to a connected media site with one click</li>
           <li><strong>Submit to Media Site:</strong> Use the article as content for a media buying order</li>
         </ol>
         <p>
@@ -114,7 +114,7 @@ export default function AIGeneration() {
       categorySlug="ai-generation"
       intro={
       <p>
-          Learn how to use AI-powered tools to generate articles, customize tone and style and streamline your content creation workflow.
+          Learn how to use AI-powered tools to generate articles, customize tone and style, and streamline your content creation workflow.
         </p>
       }
       sections={sections}
