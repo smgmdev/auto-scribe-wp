@@ -405,7 +405,7 @@ export default function About() {
 
 
       {/* Control Your Distribution Section */}
-      <section className="relative overflow-hidden min-h-[400px] md:min-h-[500px] flex items-center justify-center">
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
         <img 
           src={aboutDistributionBg} 
           alt="Control your distribution" 
