@@ -546,13 +546,13 @@ export default function About() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={() => navigate('/auth?mode=signup')}
-                className="px-8 py-4 bg-[#0071e3] text-white rounded-full text-lg font-medium hover:bg-[#0077ed] transition-colors"
+                className="px-8 py-4 bg-[#0071e3] text-white rounded-none text-lg font-medium hover:bg-[#0077ed] transition-colors"
               >
                 Create an Account
               </button>
               <button 
                 onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
-                className="px-8 py-4 bg-transparent text-[#0066cc] rounded-full text-lg font-medium hover:bg-[#0066cc]/10 transition-colors"
+                className="px-8 py-4 bg-transparent text-[#0066cc] rounded-none text-lg font-medium hover:bg-[#0066cc]/10 transition-colors"
               >
                 Browse Media Network ›
               </button>
