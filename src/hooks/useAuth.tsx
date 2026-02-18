@@ -281,6 +281,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        // Ensure loading is cleared so redirect useEffects can fire
+        setLoading(false);
         
         // Defer Supabase calls with setTimeout
         if (newSession?.user) {
