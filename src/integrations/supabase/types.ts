@@ -1147,6 +1147,27 @@ export type Database = {
           },
         ]
       }
+      pin_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          success: boolean
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          success?: boolean
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          success?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       press_release_categories: {
         Row: {
           created_at: string
