@@ -464,12 +464,16 @@ export default function About() {
                   <span>›</span>
                 </button>
               </div>
-              <div className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2">
-                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
+              <button 
+                onClick={() => navigate('/dashboard', { state: { targetView: 'credits' } })}
+                className="bg-gradient-to-br from-[#f5f5f7] to-[#e8e8ed] p-12 md:p-16 flex flex-col justify-center order-1 md:order-2 text-left group hover:from-[#e8e8ed] hover:to-[#dcdce1] transition-all duration-300"
+              >
+                <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight leading-tight group-hover:text-[#0066cc] transition-colors duration-300">
                   Choose how<br />you top up.<br />
-                  <span className="text-[#86868b]">Card payments. Offline invoice.</span>
+                  <span className="text-[#86868b] group-hover:text-[#0066cc]/60">Card payments. Offline invoice.</span>
                 </h2>
-              </div>
+                <span className="mt-4 text-[#0066cc] text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">Top up credits ›</span>
+              </button>
             </div>
           </AnimatedSection>
         </div>
