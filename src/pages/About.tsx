@@ -497,7 +497,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
-                  You can cancel an order before it's accepted by the publisher. Once accepted, cancellations are subject to our refund policy. Contact our support team for assistance with any order issues.
+                  Orders can be cancelled at no cost before they are accepted by the agency. Once accepted, cancellation is available only if the delivery does not meet the requirements outlined in the agreed special terms. If those terms have been breached, you may open a dispute and have Arcana Mace staff investigate the matter. Should the delivery be found faulty, the order will be cancelled through the dispute process by Arcana Mace staff. Please note that a revision request must be submitted before a dispute can be opened — resolving the delivery directly with the agency remains the first priority.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
