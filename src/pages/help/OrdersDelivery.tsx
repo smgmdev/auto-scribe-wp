@@ -90,8 +90,7 @@ const sections: HelpSection[] = [
           <li><strong>After Delivery:</strong> Open dispute for Arcana Mace staff to investigate the matter</li>
         </ul>
         <p>
-          To cancel, go to your order and use the "Cancel Order" option if available,
-          or contact our support team for assistance.
+          To cancel, go to your engagement chat and use the "Cancel" button option if available.
         </p>
       </div>
     ),
