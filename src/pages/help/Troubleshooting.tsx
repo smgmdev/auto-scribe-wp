@@ -139,7 +139,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>Need additional help? Reach out to our support team:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Support Tickets:</strong> Open a ticket from the "Support" section in your dashboard — the fastest way to get help</li>
+          <li><strong>Support Tickets:</strong> Open a ticket from the "Support" section in your dashboard</li>
           <li><strong>Response Time:</strong> Typically within a few hours during business hours</li>
           <li><strong>Online Status:</strong> Check if a support agent is currently online before messaging</li>
         </ul>
