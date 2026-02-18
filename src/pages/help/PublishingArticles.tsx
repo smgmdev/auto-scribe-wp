@@ -28,15 +28,14 @@ const sections: HelpSection[] = [
 
         <div className="space-y-3">
           <h3 className="font-semibold text-base">Global Library — Agency Engagement</h3>
-          <p>Submit your article to a media site managed by a verified agency partner:</p>
+          <p>Submit your article to an agency offering a particular media channel of your choice:</p>
           <ol className="list-decimal list-inside space-y-2 ml-4">
-            <li>Browse the <strong>Sites</strong> section and select a site from the Global Library</li>
-            <li>Click <strong>Order</strong> to open the service request flow</li>
-            <li>Write your article in the rich-text editor or use AI generation</li>
-            <li>Add your article title, meta description, and focus keyword for SEO</li>
-            <li>Upload a featured image if required by the publication</li>
-            <li>Select target categories and tags if applicable</li>
-            <li>Review, confirm your credits, and submit your order</li>
+            <li>Browse <strong>Media Network</strong> section and select a site from the Global Library</li>
+            <li>Click <strong>I'm Interested</strong> to open the service request flow</li>
+            <li>Engage with the agency in real-time chat to discuss your requirements</li>
+            <li>Confirm delivery time, special terms, and then place an order</li>
+            <li>Sit back and wait for the delivery completion</li>
+            <li>You will get a link to your publication</li>
           </ol>
           <p>
             Once submitted, the agency will review and accept your order before processing publication.
