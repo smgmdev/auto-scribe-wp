@@ -320,6 +320,14 @@ export default function HelpCenter() {
                   Go to your account
                   <ChevronRight className="h-4 w-4" />
                 </button>
+                <br />
+                <button 
+                  onClick={() => navigate('/dashboard?view=support')}
+                  className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1 mt-2"
+                >
+                  Go to client support
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>
