@@ -9,9 +9,53 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Maintained list of known disposable/throwaway email domains
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com", "guerrillamail.com", "guerrillamail.info", "guerrillamail.biz",
+  "guerrillamail.de", "guerrillamail.net", "guerrillamail.org", "guerrillamailblock.com",
+  "throwam.com", "throwam.net", "throwaway.email", "tempmail.com", "temp-mail.org",
+  "tempmail.net", "dispostable.com", "maildrop.cc", "yopmail.com", "yopmail.fr",
+  "cool.fr.nf", "jetable.fr.nf", "nospam.ze.tc", "nomail.xl.cx", "mega.zik.dj",
+  "speed.1s.fr", "courriel.fr.nf", "moncourrier.fr.nf", "monemail.fr.nf",
+  "monmail.fr.nf", "sharklasers.com", "guerrillamail.info", "grr.la", "guerrillamail.biz",
+  "spam4.me", "trashmail.at", "trashmail.com", "trashmail.io", "trashmail.me",
+  "trashmail.net", "fakeinbox.com", "fakeinbox.info", "mailnull.com", "spamgourmet.com",
+  "spamgourmet.net", "spamgourmet.org", "spamspot.com", "spamthis.co.uk", "spoofmail.de",
+  "spamtraps.nl", "spam.su", "filzmail.com", "discard.email", "discardmail.com",
+  "discardmail.de", "spamkill.info", "ieh-mail.de", "mailimate.com", "trashmail.fr",
+  "trashmail.org", "mailnew.com", "mailzilla.org", "maildrop.cc", "mailnesia.com",
+  "mailnull.com", "mailscrap.com", "mailsiphon.com", "mailtemp.info", "mailu.gq",
+  "mailueberfall.de", "mailzilla.com", "mohmal.com", "mt2009.com", "mt2014.com",
+  "nada.email", "nada.ltd", "nomail.pw", "nomail2me.com", "nospamfor.us",
+  "notsharingmy.info", "nowmymail.com", "objectmail.com", "obobbo.com", "odnorazovoe.ru",
+  "one-time.email", "onewaymail.com", "otherinbox.com", "ourklips.com", "owlpic.com",
+  "petitweb.fr", "pfui.ru", "pimpedupmyspace.com", "plexolan.de", "politikerclub.de",
+  "postalmail.com", "proxymail.eu", "putthisinyourspamdatabase.com", "qq.com",
+  "rcpt.at", "recode.me", "regbypass.com", "rklips.com", "rmqkr.net", "rppkn.com",
+  "rtrtr.com", "s0ny.net", "safe-mail.net", "selfdestructingmail.com", "sendspamhere.com",
+  "sharklasers.com", "shieldedmail.com", "shitmail.me", "shortmail.net", "shut.ws",
+  "sibmail.com", "sneakemail.com", "snkmail.com", "sofimail.com", "sofort-mail.de",
+  "sogetthis.com", "soodonims.com", "spam.la", "spamavert.com", "spambob.com",
+  "spambob.net", "spambob.org", "spambog.com", "spambog.de", "spambog.ru",
+  "10minutemail.com", "10minutemail.net", "10minutemail.org", "20minutemail.com",
+  "tempinbox.com", "tempr.email", "getairmail.com", "mailnow.top", "harakirimail.com",
+  "mailcatch.com", "inboxalias.com", "spamgap.com", "binkmail.com", "incognitomail.org",
+  "jetable.com", "jetable.fr", "jetable.net", "jetable.org", "temporaryemail.net",
+  "wegwerfmail.de", "wegwerfmail.net", "wegwerfmail.org", "wh4f.org", "whyspam.me",
+  "wilemail.com", "willhackforfood.biz", "willselfdestruct.com", "winemaven.info",
+  "wronghead.com", "wuzup.net", "wuzupmail.net", "xagloo.co", "xagloo.com",
+  "xemaps.com", "xents.com", "xmaily.com", "xoxy.net", "xyzfree.net", "yapped.net",
+  "yazmany.com", "yesey.net", "yogamaven.com", "yopmail.fr", "yopmail.com",
+  "your-temp-email.com", "yourdomain.com", "ypmail.webarnak.fr.eu.org",
+  "yuurok.com", "z1p.biz", "za.com", "zehnminutenmail.de", "zetmail.com",
+  "zhaowei.net", "zippiex.com", "zippymail.info", "zomg.info", "zxcv.com",
+  "zxcvbnm.com", "zzrgg.com",
+]);
+
 interface WelcomeEmailRequest {
   email: string;
   userId: string;
+  honeypot?: string;
 }
 
 serve(async (req) => {
@@ -32,6 +76,7 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAuthClient = createClient(supabaseUrl, supabaseAnonKey);
     const { data: { user: caller }, error: authError } = await supabaseAuthClient.auth.getUser(token);
 
@@ -42,7 +87,17 @@ serve(async (req) => {
       });
     }
 
-    const { email, userId }: WelcomeEmailRequest = await req.json();
+    const { email, userId, honeypot }: WelcomeEmailRequest = await req.json();
+
+    // ── HONEYPOT CHECK ──────────────────────────────────────────────────────
+    // If this hidden field has any value, it's a bot. Silently succeed to not reveal the trap.
+    if (honeypot && honeypot.trim().length > 0) {
+      console.warn(`[signup] Honeypot triggered for email: ${email}`);
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     if (!email || !userId) {
       throw new Error("Email and userId are required");
@@ -56,11 +111,54 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Sending welcome email to: ${email}`);
+    // ── DISPOSABLE EMAIL CHECK ──────────────────────────────────────────────
+    const emailDomain = email.split("@")[1]?.toLowerCase();
+    if (!emailDomain || DISPOSABLE_EMAIL_DOMAINS.has(emailDomain)) {
+      console.warn(`[signup] Disposable email blocked: ${email}`);
+      return new Response(JSON.stringify({ error: "Please use a permanent email address. Temporary or disposable email services are not allowed." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // ── IP-BASED RATE LIMITING ──────────────────────────────────────────────
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Count signups from this IP in the last hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from("signup_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_address", clientIp)
+      .gte("attempted_at", oneHourAgo);
+
+    if (!countError && (count ?? 0) >= 3) {
+      console.warn(`[signup] Rate limit hit for IP: ${clientIp}`);
+      // Log the blocked attempt
+      await supabase.from("signup_attempts").insert({
+        ip_address: clientIp,
+        email,
+        blocked: true,
+      });
+      return new Response(JSON.stringify({ error: "Too many signup attempts. Please try again later." }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Log this signup attempt
+    await supabase.from("signup_attempts").insert({
+      ip_address: clientIp,
+      email,
+      blocked: false,
+    });
+
+    console.log(`Sending welcome email to: ${email}`);
 
     // Generate verification token
     const verificationToken = crypto.randomUUID();
