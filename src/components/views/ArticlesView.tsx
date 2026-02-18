@@ -361,6 +361,10 @@ export function ArticlesView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-black text-white border-black placeholder:text-white/50 h-9 text-sm rounded-none"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
             />
           </div>
 
