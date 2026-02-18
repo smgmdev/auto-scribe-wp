@@ -132,17 +132,17 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          If you manage your own WordPress site, you can connect it to Arcana Mace and publish
-          AI-generated articles directly to it:
+          If you manage your own WordPress site, you can connect it to Arcana Mace and list it in Local Library (available for agencies only):
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Go to Settings → Sites in your dashboard</li>
-          <li>Add your WordPress site URL, username, and Application Password</li>
-          <li>Select your SEO plugin (Yoast, RankMath, or AIOSEO)</li>
-          <li>Once connected, articles can be published directly from the Compose section</li>
+          <li>Go to <strong>Media Management → My Media → Add Media → WordPress Site</strong></li>
+          <li>Add your WordPress site details to connect your site to Arcana Mace via API</li>
+          <li>Select your SEO plugin (RankMath, AIOSEO, Other)</li>
+          <li>Set a publishing fee</li>
+          <li>Once connected, the site will be immediately available on the Local Library for instant publishing</li>
         </ol>
         <p>
-          WordPress sites must be approved before they appear in the publishing selector.
+          WordPress sites must be approved by Arcana Mace Staff.
           You'll receive a notification once your site is approved.
         </p>
       </div>
