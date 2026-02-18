@@ -489,7 +489,15 @@ export function ComposeView() {
       setNewTagInput('');
       toast.success(`"${newTag.name}" has been added to your WordPress site`);
     } catch (error) {
-      toast.error("Could not create the tag on WordPress");
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.startsWith('PERMISSION_DENIED:')) {
+        toast.error("Tag creation not permitted", {
+          description: "The WordPress user on this site doesn't have permission to create tags. Ask the site admin to upgrade the application user role to Editor or Administrator.",
+          duration: 8000,
+        });
+      } else {
+        toast.error("Could not create the tag on WordPress");
+      }
     } finally {
       setIsAddingTag(false);
     }

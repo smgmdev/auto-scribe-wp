@@ -139,7 +139,11 @@ async function createTagViaEdgeFunction(siteId: string, tagName: string): Promis
   }
 
   if (data.error) {
-    console.error('Edge function returned error:', data.error);
+    console.error('Edge function returned error:', data.error, 'code:', data.code);
+    // Handle WordPress permission errors specifically
+    if (data.code === 'rest_cannot_create' || (data.error && data.error.includes('not allowed to create terms'))) {
+      throw new Error('PERMISSION_DENIED: The WordPress user does not have permission to create tags on this site. Ask the site admin to grant the "Editor" or "Administrator" role to the application user.');
+    }
     throw new Error(data.error);
   }
 
