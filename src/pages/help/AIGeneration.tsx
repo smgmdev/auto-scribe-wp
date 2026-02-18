@@ -113,9 +113,8 @@ export default function AIGeneration() {
       category="AI Article Generation"
       categorySlug="ai-generation"
       intro={
-        <p>
-          Learn how to use AI-powered tools to generate articles, customize tone and style,
-          set up auto-publishing, and streamline your content creation workflow.
+      <p>
+          Learn how to use AI-powered tools to generate articles, customize tone and style and streamline your content creation workflow.
         </p>
       }
       sections={sections}
