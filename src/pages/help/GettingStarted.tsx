@@ -95,19 +95,32 @@ const sections: HelpSection[] = [
     title: 'First Article Submission',
     content: (
       <div className="space-y-4">
-        <p>Ready to submit your first article? Here's a step-by-step guide:</p>
+        <p>The quickest way to get your first article published is through the <strong>Local Library</strong>:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Navigate to the "Sites" section and find a publication that fits your content</li>
-          <li>Click on a site to view details, requirements, pricing, and publishing time</li>
-          <li>Click "Order" to start the submission process</li>
-          <li>Write or paste your article, or use the AI generator to create one</li>
-          <li>Add a featured image if required, and fill in SEO fields (meta description, focus keyword)</li>
-          <li>Review your submission and confirm the order</li>
-          <li>Track your order status in the "My Orders" section</li>
+          <li>Navigate to the <strong>Media Network</strong> and select <strong>Local Library</strong>, then find a publication that fits your content interest and click <strong>Publish New Article</strong></li>
+          <li>You'll be taken to the <strong>New Article</strong> section where you can write your content and publish it directly yourself</li>
+          <li>Make sure you have enough credits in your account — if not, save the content as a draft and publish it later once you top up</li>
         </ol>
+        <p>Local Library lets you publish by yourself without prior approvals — just click the Publish button directly.</p>
+
+        <p><strong>Don't know what to write about? Use Sources!</strong></p>
+        <ol className="list-decimal list-inside space-y-2 ml-4">
+          <li>Navigate to <strong>Sources</strong> and select a topic of interest (e.g. Business), then click <strong>Scan Headlines</strong></li>
+          <li>Fresh news articles will be fetched — select one that interests you and click <strong>Use Source</strong></li>
+          <li>You'll be taken to the <strong>New Article</strong> section with your source set as the foundation for content creation</li>
+          <li>Click <strong>Generate Article with AI</strong> to produce unique content</li>
+          <li>Fill in article settings: SEO fields, categories/tags, and a featured image, then publish</li>
+        </ol>
+
+        <p><strong>Publishing on the Global Library</strong></p>
         <p>
-          Most publications are processed within 24–72 hours, depending on the site's publishing schedule.
+          The <strong>Global Library</strong> in the Media Network features a larger list of media channels offered by agencies.
+          You can engage with an agency and place an order via an engagement. Once placed, track your order in the <strong>My Orders</strong> section.
+        </p>
+        <p>
+          Publications on the Global Library are typically processed within 1–3 business days by the agency.
           You'll be notified when the agency accepts your order and again when it's delivered.
+          When placing an order, you can also negotiate the delivery timeline directly with the agency through the order engagement.
         </p>
       </div>
     ),
