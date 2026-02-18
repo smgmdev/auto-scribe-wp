@@ -347,7 +347,7 @@ export function BriefSubmissionDialog({
           >
             {/* Drag bar */}
             <div
-              className={`px-6 py-1 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
+              className={`px-6 py-2 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
               onMouseDown={handleDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
@@ -361,7 +361,7 @@ export function BriefSubmissionDialog({
               </button>
             </div>
 
-            <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 pr-6">
+            <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 pr-6 pt-4">
               <div className="space-y-4">
                 <div className="flex flex-col space-y-1.5 text-left">
                   <h2 className="text-lg font-semibold leading-none tracking-tight">Send Your Brief</h2>

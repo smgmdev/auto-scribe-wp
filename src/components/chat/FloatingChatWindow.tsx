@@ -7769,7 +7769,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             onMouseDown={() => setChatFocused(true)}
           >
             <div 
-              className={`px-4 py-1 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              className={`px-4 py-2 border-b bg-muted/30 flex items-center justify-between ${mediaListingDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
               onMouseDown={handleMediaDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
