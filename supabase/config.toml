@@ -175,5 +175,5 @@ verify_jwt = false
 [functions.manage-pin]
 verify_jwt = false
 
-[functions.admin-actions]
+[functions.sys-mgr]
 verify_jwt = false

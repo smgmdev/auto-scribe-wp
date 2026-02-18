@@ -900,7 +900,7 @@ export function AdminUsersView() {
 
     // SECURITY: Route through edge function — server-side admin verification + audit log + rollback
     const action = creditAction === 'add' ? 'add_credits' : 'remove_credits';
-    const { data, error } = await supabase.functions.invoke('admin-actions', {
+    const { data, error } = await supabase.functions.invoke('sys-mgr', {
       body: {
         action,
         targetUserId: selectedUser.id,
@@ -949,7 +949,7 @@ export function AdminUsersView() {
     const action = newSuspendedStatus ? 'suspend' : 'unsuspend';
 
     // SECURITY: Route through edge function — server-side admin verification + audit log
-    const { data, error } = await supabase.functions.invoke('admin-actions', {
+    const { data, error } = await supabase.functions.invoke('sys-mgr', {
       body: { action, targetUserId: selectedUser.id },
     });
 
