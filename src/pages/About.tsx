@@ -404,8 +404,8 @@ export default function About() {
             <img src={amblack} alt="Arcana Mace" className="w-20 h-20 object-contain" />
           </div>
           <h2 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
-            Media you trust.<br />
-            From a platform built for it.
+            Media that builds trust.<br />
+            From a platform that gives control.
           </h2>
           <p className="text-xl text-[#86868b] leading-relaxed mb-10 max-w-2xl mx-auto">
             Every channel on Arcana Mace is verified and indexed. Every article is published with full transparency — no hidden placements, no guesswork.
