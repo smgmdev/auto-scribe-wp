@@ -7,19 +7,18 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          Media buying on Arcana Mace connects you directly with publishers and agencies
-          who can place your content on websites. Here's the process:
+          Media buying on Arcana Mace connects you directly with PR agencies who can place your content on media sites. Here's the process:
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Browse our curated catalog of media sites using search and filters</li>
+          <li>Browse media network using search and filters</li>
           <li>Select publications that match your target audience, topic, and budget</li>
           <li>Place an order with your content — or submit a brief for custom requests</li>
-          <li>Our verified partner agencies handle acceptance and publication</li>
+          <li>Representative PR agencies handle acceptance and publication</li>
           <li>Receive a live article link once published, with delivery confirmation</li>
         </ol>
         <p>
           This streamlined process eliminates the need to build relationships with individual
-          publications directly — we manage the network for you.
+          publications directly — Arcana Mace brings the network to you.
         </p>
       </div>
     ),
