@@ -320,7 +320,6 @@ export default function SystemStatus() {
           <div className="flex items-center justify-center md:justify-between mb-6">
             {/* Refresh - desktop only */}
             <Button
-              size="sm"
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
               className={`hidden md:inline-flex gap-2 border transition-all duration-200 ${
