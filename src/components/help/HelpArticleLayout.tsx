@@ -149,7 +149,7 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 pt-20 pb-16">
+      <main className="flex-1 pt-28 pb-16">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
 
           {/* Breadcrumb - full width above grid */}
