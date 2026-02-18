@@ -79,7 +79,7 @@ const DoNotSell = () => {
         {/* Title Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
-            Do Not Sell or Share My Personal Information
+            We Do Not Sell or Share Your Personal Information
           </h1>
           <p className="text-muted-foreground border-b border-border pb-8">
             Updated {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -89,30 +89,30 @@ const DoNotSell = () => {
         {/* Introduction */}
         <div className="mb-10">
           <p className="text-muted-foreground leading-relaxed mb-4">
-            At Arcana Mace, we respect your privacy rights and are committed to giving you control over your personal information. This page explains your rights regarding the sale or sharing of your personal information and how you can exercise those rights.
+            At Arcana Mace, we do not sell your personal information and we do not share it with third parties for commercial or advertising purposes. Your data is used solely to facilitate the services you engage with on our platform, and we take that responsibility seriously.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Under certain privacy laws, including the California Consumer Privacy Act (CCPA) and similar state laws, you have the right to opt out of the "sale" or "sharing" of your personal information. We are committed to honoring these rights for all users.
+            That said, there are limited circumstances under which your data may be disclosed — not by choice, but by obligation. We want to be fully transparent about those situations while assuring you that any such disclosure is not something we pursue willingly or casually.
           </p>
         </div>
 
-        {/* Privacy Content - Apple-style accordion sections */}
+        {/* Privacy Content */}
         <Accordion type="multiple" className="w-full">
           
           {/* Section 1 */}
           <AccordionItem value="item-1" className="border-t border-border">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">Your Privacy Rights</span>
+                <span className="text-left">We Do Not Sell Your Information</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                Under certain privacy laws, including the California Consumer Privacy Act (CCPA) and similar state laws, you have the right to opt out of the "sale" or "sharing" of your personal information. <strong className="text-foreground">These laws define "sale" and "sharing" broadly</strong> to include the disclosure of personal information to third parties in exchange for monetary or other valuable consideration, or for cross-context behavioral advertising purposes.
+                Arcana Mace does not sell your personal information to any third party, under any circumstances, for any monetary or commercial consideration. We are not in the business of monetising user data.
               </p>
               <p>
-                At Arcana Mace, we believe in transparency and giving you control over your data. We provide these rights to our global customer base, and if you choose to exercise these privacy rights, you have the right not to be treated in a discriminatory way nor to receive a lesser degree of service from Arcana Mace.
+                Your account data, usage information, transaction records, and any other personal data you provide is used exclusively to operate and improve the Arcana Mace platform. It is not traded, sold, or licensed to external parties for their independent use.
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -121,16 +121,16 @@ const DoNotSell = () => {
           <AccordionItem value="item-2" className="border-t border-border">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">How We Handle Your Information</span>
+                <span className="text-left">We Do Not Share Your Information Voluntarily</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                <strong className="text-foreground">Arcana Mace does not sell your personal information in the traditional sense.</strong> However, like many companies, we may share certain information with third-party partners for advertising, analytics, or other business purposes. This may constitute a "sale" or "sharing" under some privacy laws.
+                We do not voluntarily share your personal information with external parties. We do not engage in cross-context behavioural advertising, data brokering, or any form of information sharing for third-party gain.
               </p>
               <p>
-                We are committed to being transparent about our data practices and providing you with meaningful choices about how your information is used.
+                Where third-party service providers are involved in operating our platform — such as payment processors or infrastructure providers — they are bound by confidentiality and are only permitted to use your data for the specific purpose of delivering those services. They are not permitted to use your information for their own purposes.
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -139,27 +139,30 @@ const DoNotSell = () => {
           <AccordionItem value="item-3" className="border-t border-border">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">Exercising Your Rights</span>
+                <span className="text-left">When Disclosure May Occur</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                If you would like to opt out of the sale or sharing of your personal information, you can submit a request through one of the following methods:
+                There are limited situations in which personal data may be disclosed to third parties without your explicit consent. These are not situations Arcana Mace pursues willingly, but may be legally required or operationally necessary:
               </p>
               <ul className="list-none space-y-3 mb-4">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Email Request.</strong> Email us at <a href="mailto:privacy@arcanamace.com" className="text-[#06c] hover:underline">privacy@arcanamace.com</a> with the subject line "Do Not Sell or Share My Information"
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-current flex-shrink-0" />
+                  Legal investigations, court orders, or requests from law enforcement or regulatory authorities where Arcana Mace is required by law to comply
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Account Settings.</strong> If you are a registered user, you can manage your privacy preferences in your account settings
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-current flex-shrink-0" />
+                  Fraud prevention, security incidents, or situations where disclosure is necessary to protect the rights, safety, or property of Arcana Mace, its users, or the public
                 </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Global Privacy Control.</strong> Use the Global Privacy Control (GPC) signal in your browser, which we honor as a valid opt-out request
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-current flex-shrink-0" />
+                  Business transitions such as a merger, acquisition, or asset transfer, where user data may form part of the transferred assets
                 </li>
               </ul>
               <p>
-                We will process your request promptly and in accordance with applicable law.
+                In any such case, Arcana Mace will seek to limit the scope of disclosure to only what is strictly necessary. However, Arcana Mace does not assume liability for disclosures made under legal obligation or in circumstances beyond its reasonable control.
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -168,55 +171,32 @@ const DoNotSell = () => {
           <AccordionItem value="item-4" className="border-t border-border">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">Verification Process</span>
+                <span className="text-left">Our Commitment & Limitations</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p className="mb-4">
-                When you submit a request, we may need to verify your identity before processing it. <strong className="text-foreground">This helps protect your privacy by ensuring that we only honor requests from you or your authorized agent.</strong>
+                We are genuinely committed to protecting your data and handling it with care. We invest in security measures and data minimisation practices to reduce risk.
               </p>
               <p>
-                The verification process may require you to provide additional information that matches the data we have on file. If you use an authorized agent to submit a request on your behalf, we may require proof of authorization.
+                However, Arcana Mace cannot guarantee that your information will never be exposed under all circumstances. No platform operating on the internet can make that guarantee. By using Arcana Mace, you acknowledge and accept that while we do our best to prevent unauthorised disclosure, we cannot be held liable for disclosures resulting from legal obligations, third-party breaches, or events outside our control.
               </p>
             </AccordionContent>
           </AccordionItem>
 
           {/* Section 5 */}
-          <AccordionItem value="item-5" className="border-t border-border">
+          <AccordionItem value="item-5" className="border-t border-border border-b">
             <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
               <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">No Discrimination</span>
+                <span className="text-left">Questions & Contact</span>
                 <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
               <p>
-                <strong className="text-foreground">We will not discriminate against you for exercising your privacy rights.</strong> You have the right to receive equal service and pricing from us, regardless of whether you choose to opt out of the sale or sharing of your personal information. This includes no denial of goods or services, no different prices or rates, and no different quality of service.
+                If you have any questions about how your personal data is handled, or if you would like to request information about what data we hold on you, please contact our support team through the appropriate channels available on the platform. We will do our best to respond promptly and transparently.
               </p>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Section 6 */}
-          <AccordionItem value="item-6" className="border-t border-border border-b">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
-              <span className="flex items-center justify-between w-full gap-3 text-left">
-                <span className="text-left">Contact Us</span>
-                <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground leading-relaxed pb-6">
-              <p className="mb-4">
-                If you have any questions about this policy or your privacy rights, please contact us:
-              </p>
-              <ul className="list-none space-y-3">
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Email.</strong> <a href="mailto:privacy@arcanamace.com" className="text-[#06c] hover:underline">privacy@arcanamace.com</a>
-                </li>
-                <li className="pl-4 border-l-2 border-border">
-                  <strong className="text-foreground">Response Time.</strong> We will respond to your request within the timeframe required by applicable law
-                </li>
-              </ul>
             </AccordionContent>
           </AccordionItem>
 
