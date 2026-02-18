@@ -405,20 +405,18 @@ export default function About() {
 
 
       {/* Control Your Distribution Section */}
-      <section className="bg-[#f5f5f7] py-4 px-4">
-        <div className="max-w-[980px] mx-auto">
-          <AnimatedSection className="relative overflow-hidden min-h-[400px] md:min-h-[500px] flex items-center justify-center">
-            <img 
-              src={aboutDistributionBg} 
-              alt="Control your distribution" 
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/30" />
-            <h2 className="relative z-10 text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tight text-center">
-              Control your distribution.
-            </h2>
-          </AnimatedSection>
-        </div>
+      <section className="relative overflow-hidden min-h-[400px] md:min-h-[500px] flex items-center justify-center">
+        <img 
+          src={aboutDistributionBg} 
+          alt="Control your distribution" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <AnimatedSection>
+          <h2 className="relative z-10 text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tight text-center">
+            Control your distribution.
+          </h2>
+        </AnimatedSection>
       </section>
 
       {/* Setup Section */}
