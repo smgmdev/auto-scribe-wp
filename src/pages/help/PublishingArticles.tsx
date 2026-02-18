@@ -94,8 +94,8 @@ const sections: HelpSection[] = [
         <p>Monitor your submissions through the engagement chat and "My Orders" section. Here are the chat status stages:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Order Placed:</strong> Your order has been placed and the agency is working on delivery</li>
-          <li><strong>Offer Accepted:</strong> Agency's custom offer was accepted; order is now active</li>
-          <li><strong>Offer Rejected:</strong> Agency's offer was declined; you can renegotiate or exit</li>
+          <li><strong>Offer Accepted:</strong> Offer was accepted; order is now active</li>
+          <li><strong>Offer Rejected:</strong> Offer was declined; you can renegotiate or exit</li>
           <li><strong>Order Delivered:</strong> Article is live — a delivery link has been provided</li>
           <li><strong>Revision Requested:</strong> You've requested changes after delivery</li>
           <li><strong>Order Cancelled:</strong> Order was cancelled; credits returned to your balance</li>
