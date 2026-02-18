@@ -99,6 +99,39 @@ serve(async (req) => {
       );
     }
 
+    // SECURITY: Verify the service_request belongs to the calling user
+    // This prevents a user from placing an order against someone else's service request
+    const { data: serviceReqOwner, error: srOwnerError } = await supabaseAdmin
+      .from("service_requests")
+      .select("user_id, media_site_id")
+      .eq("id", service_request_id)
+      .single();
+
+    if (srOwnerError || !serviceReqOwner) {
+      return new Response(
+        JSON.stringify({ error: "Service request not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
+    }
+
+    if (serviceReqOwner.user_id !== user.id) {
+      console.error(`[SECURITY] User ${user.id} attempted to place order on service request owned by ${serviceReqOwner.user_id}`);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+      );
+    }
+
+    // SECURITY: Also verify the media_site_id matches what's on the service request
+    // Prevents substituting a cheaper media site at payment time
+    if (serviceReqOwner.media_site_id !== media_site_id) {
+      console.error(`[SECURITY] User ${user.id} supplied media_site_id=${media_site_id} but service request references ${serviceReqOwner.media_site_id}`);
+      return new Response(
+        JSON.stringify({ error: "Media site mismatch" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
     // Get media site details
     const { data: mediaSite, error: siteError } = await supabaseAdmin
       .from("media_sites")

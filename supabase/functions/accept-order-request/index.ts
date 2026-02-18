@@ -82,11 +82,11 @@ serve(async (req) => {
     const agencyUser = userData.user;
     console.log(`Processing order acceptance by agency user: ${agencyUser.id}`);
 
-    // Parse request body
+    // Parse request body — NOTE: price is intentionally NOT accepted from the client.
+    // Price is always fetched authoritatively from the media_sites table to prevent manipulation.
     const { 
       service_request_id, 
       media_site_id, 
-      price,
       delivery_duration,
       client_user_id,
       special_terms
@@ -153,17 +153,15 @@ serve(async (req) => {
       );
     }
 
-    if (price === undefined || price <= 0) {
-      return new Response(
-        JSON.stringify({ error: "Valid price is required" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
+    if (price !== undefined) {
+      // Silently ignore any client-supplied price — we always use the DB value
+      console.log(`[SECURITY] Client supplied price=${price} was ignored. Using authoritative DB price.`);
     }
 
-    // Get media site details
+    // Get media site details — price is ALWAYS sourced from here, never from the request body
     const { data: mediaSite, error: siteError } = await supabaseAdmin
       .from("media_sites")
-      .select("id, name, agency")
+      .select("id, name, price, agency")
       .eq("id", media_site_id)
       .single();
 
@@ -175,7 +173,49 @@ serve(async (req) => {
       );
     }
 
-    // Check if order already exists for this specific service request
+    // Authoritative price — never trust client input for price
+    const authorizedPrice = mediaSite.price;
+
+    if (authorizedPrice <= 0) {
+      return new Response(
+        JSON.stringify({ error: "This media site is not available for purchase" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Verify the media site belongs to the agency making this call (non-admins only)
+    if (!adminRole && mediaSite.agency) {
+      const { data: agencyOwnership } = await supabaseAdmin
+        .from("agency_payouts")
+        .select("id")
+        .eq("agency_name", mediaSite.agency)
+        .eq("user_id", agencyUser.id)
+        .maybeSingle();
+
+      if (!agencyOwnership) {
+        console.error("Unauthorized: agency does not own this media site");
+        return new Response(
+          JSON.stringify({ error: "Unauthorized - this media site does not belong to your agency" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+        );
+      }
+    }
+
+    // Calculate amounts using the authoritative DB price
+    const amountCents = authorizedPrice * 100;
+
+    // Get agency payout info for commission calculation
+    const { data: agencyPayout } = await supabaseAdmin
+      .from("agency_payouts")
+      .select("id, commission_percentage")
+      .eq("agency_name", mediaSite.agency)
+      .maybeSingle();
+
+    const commissionPercentage = agencyPayout?.commission_percentage ?? 10;
+    const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
+    const agencyPayoutCents = amountCents - platformFeeCents;
+
+    // Guard: check no order already exists for this service request (race condition protection)
     const { data: existingRequest } = await supabaseAdmin
       .from("service_requests")
       .select("order_id")
@@ -188,20 +228,6 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
-
-    // Calculate amounts
-    const amountCents = price * 100; // Convert to cents
-
-    // Get agency payout info for commission calculation
-    const { data: agencyPayout } = await supabaseAdmin
-      .from("agency_payouts")
-      .select("id, commission_percentage")
-      .eq("agency_name", mediaSite.agency)
-      .maybeSingle();
-
-    const commissionPercentage = agencyPayout?.commission_percentage ?? 10;
-    const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
-    const agencyPayoutCents = amountCents - platformFeeCents;
 
     // Generate unique order number
     const orderNumber = await generateUniqueOrderNumber(supabaseAdmin);
