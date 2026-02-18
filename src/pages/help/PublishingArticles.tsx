@@ -116,13 +116,12 @@ const sections: HelpSection[] = [
         <p>Need to make changes to your submission? Here's what you need to know:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Before Acceptance:</strong> You can cancel and resubmit your order</li>
-          <li><strong>After Acceptance:</strong> Contact the agency through the order chat in "My Requests"</li>
-          <li><strong>After Delivery:</strong> Request a revision directly from the order chat window</li>
-          <li><strong>After Completion:</strong> Minor edits may be possible — open a support ticket</li>
+          <li><strong>After Acceptance:</strong> Contact the agency through the engagement/order chat in My Engagements</li>
+          <li><strong>After Delivery:</strong> Request a revision directly from the engagement/order chat window</li>
         </ul>
         <p>
           To request a revision on a delivered order, use the revision request button inside the
-          order chat. The agency will be notified immediately.
+          engagement/order chat after delivery. The agency will be notified immediately.
         </p>
       </div>
     ),
