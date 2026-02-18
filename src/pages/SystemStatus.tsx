@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ExternalLink, RefreshCw, User } from 'lucide-react';
+import { Search, ExternalLink, RefreshCw, User, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,9 +13,35 @@ interface ServiceStatus {
   name: string;
   status: 'available' | 'issue' | 'outage';
   latency?: number;
-  link?: string; // external link
-  internalLink?: string; // internal app route
+  link?: string;
+  internalLink?: string;
 }
+
+interface Incident {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'minor' | 'major' | 'critical';
+  status: 'investigating' | 'identified' | 'monitoring' | 'resolved';
+  date: string;
+  resolvedAt?: string;
+  affectedServices: string[];
+}
+
+// Static recent incident history (manually curated)
+const INCIDENT_HISTORY: Incident[] = [
+  // Add real incidents here as they occur. Example:
+  // {
+  //   id: '1',
+  //   title: 'Elevated latency on Database',
+  //   description: 'Users may have experienced slow response times on dashboard pages.',
+  //   severity: 'minor',
+  //   status: 'resolved',
+  //   date: '2026-02-10',
+  //   resolvedAt: '2026-02-10',
+  //   affectedServices: ['Database', 'API Server'],
+  // },
+];
 
 const useScrollHeader = (scrollContainerRef: React.RefObject<HTMLDivElement>) => {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
@@ -101,11 +127,18 @@ export default function SystemStatus() {
     'Credit Processing': { internalLink: '/dashboard?view=credit-history' },
     'Media Site Network': { internalLink: '/dashboard?view=sites' },
     'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
+    'Payment Gateway (Airwallex)': { link: 'https://status.airwallex.com' },
   };
 
   // Name mapping for services (API name -> Display name)
   const serviceNameMap: Record<string, string> = {
     'Agency Portal': 'Agency System & Features',
+  };
+
+  const getOverallStatus = (svcs: ServiceStatus[]) => {
+    if (svcs.some(s => s.status === 'outage')) return 'outage';
+    if (svcs.some(s => s.status === 'issue')) return 'issue';
+    return 'available';
   };
 
   const fetchStatus = useCallback(async (showRefresh = false) => {
@@ -140,7 +173,7 @@ export default function SystemStatus() {
         { name: 'AI Article Generation', status: 'issue' },
         { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
         { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credit-history' },
-        { name: 'Payment Gateway (Stripe)', status: 'issue' },
+        { name: 'Payment Gateway (Airwallex)', status: 'issue', link: 'https://status.airwallex.com' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
         { name: 'Media Site Network', status: 'issue', internalLink: '/dashboard?view=sites' },
@@ -235,12 +268,46 @@ export default function SystemStatus() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-[92px]">
         <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 md:py-16">
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-2 md:mb-8">
+          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-6 md:mb-8">
             System Status
           </h1>
-          
-          {/* Refresh Button - mobile only, under title */}
-          <div className="flex md:hidden justify-center mb-8">
+
+          {/* Overall Status Banner */}
+          {!isLoading && services.length > 0 && (() => {
+            const overall = getOverallStatus(services);
+            const bannerConfig = {
+              available: {
+                bg: 'bg-[#f0fdf4]',
+                border: 'border-[#34c759]',
+                text: 'text-[#166534]',
+                icon: <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />,
+                message: 'All systems are operating normally.',
+              },
+              issue: {
+                bg: 'bg-[#fffbeb]',
+                border: 'border-[#ff9f0a]',
+                text: 'text-[#92400e]',
+                icon: <AlertTriangle className="w-5 h-5 text-[#ff9f0a] flex-shrink-0" />,
+                message: 'Some systems are experiencing elevated load or minor issues.',
+              },
+              outage: {
+                bg: 'bg-[#fff1f2]',
+                border: 'border-[#ff3b30]',
+                text: 'text-[#9f1239]',
+                icon: <XCircle className="w-5 h-5 text-[#ff3b30] flex-shrink-0" />,
+                message: 'One or more systems are currently experiencing an outage.',
+              },
+            }[overall];
+            return (
+              <div className={`flex items-center gap-3 px-4 py-3 rounded border ${bannerConfig.bg} ${bannerConfig.border} mb-8`}>
+                {bannerConfig.icon}
+                <span className={`text-sm font-medium ${bannerConfig.text}`}>{bannerConfig.message}</span>
+              </div>
+            );
+          })()}
+
+          {/* Refresh Button - mobile only, under banner */}
+          <div className="flex md:hidden justify-center mb-6">
             <button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
@@ -302,13 +369,65 @@ export default function SystemStatus() {
           )}
 
           {/* Last Updated */}
-          <p className="text-sm text-[#86868b] mt-8">
+          <p className="text-sm text-[#86868b] mt-6">
             Last updated today, {lastUpdated.toLocaleTimeString('en-US', { 
               hour: 'numeric', 
               minute: '2-digit',
               timeZoneName: 'short'
             })}.
           </p>
+
+          {/* Incident History */}
+          <div className="mt-12 border-t border-[#d2d2d7] pt-10">
+            <h2 className="text-2xl font-semibold text-[#1d1d1f] mb-6">Incident History</h2>
+            {INCIDENT_HISTORY.length === 0 ? (
+              <div className="flex items-center gap-3 py-6 text-[#86868b]">
+                <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />
+                <span className="text-sm">No incidents reported in recent history. All systems have been running smoothly.</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {INCIDENT_HISTORY.map((incident) => {
+                  const severityColor = {
+                    minor: 'text-[#ff9f0a]',
+                    major: 'text-[#ff3b30]',
+                    critical: 'text-[#ff3b30] font-semibold',
+                  }[incident.severity];
+                  const statusLabel = {
+                    investigating: 'Investigating',
+                    identified: 'Identified',
+                    monitoring: 'Monitoring',
+                    resolved: 'Resolved',
+                  }[incident.status];
+                  return (
+                    <div key={incident.id} className="border border-[#d2d2d7] rounded p-4">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <h3 className="text-sm font-semibold text-[#1d1d1f]">{incident.title}</h3>
+                          <p className="text-xs text-[#86868b] mt-0.5 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(incident.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            {incident.resolvedAt && incident.resolvedAt !== incident.date && (
+                              <> — Resolved {new Date(incident.resolvedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</>
+                            )}
+                          </p>
+                        </div>
+                        <span className={`text-xs font-medium flex-shrink-0 ${incident.status === 'resolved' ? 'text-[#34c759]' : severityColor}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[#86868b] mb-2">{incident.description}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {incident.affectedServices.map(s => (
+                          <span key={s} className="text-xs bg-[#f5f5f7] text-[#1d1d1f] px-2 py-0.5 rounded">{s}</span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </main>
 
         <Footer narrow />
