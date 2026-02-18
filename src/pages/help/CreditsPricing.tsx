@@ -32,7 +32,7 @@ const sections: HelpSection[] = [
           <li>Visa, Mastercard, American Express</li>
           <li>Apple Pay and Google Pay</li>
           <li>International bank transfer methods are available. Contact support for invoice.</li>
-          <li>USDT cryptocurrency top up is available. Contact support for invoice.</li>
+          <li>USDT top up is available. Contact support for details.</li>
         </ul>
         <p>
           All transactions are encrypted and processed through Airwallex, a globally licensed
