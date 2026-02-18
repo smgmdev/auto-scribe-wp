@@ -6,17 +6,15 @@ const sections: HelpSection[] = [
     title: 'Check Order Status',
     content: (
       <div className="space-y-4">
-        <p>
-          Stay informed about your orders with real-time status tracking:
-        </p>
+        <p>Stay informed about your orders with real-time status tracking:</p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
-          <li>Navigate to the "Orders" section in your dashboard</li>
-          <li>View all your orders with their current status</li>
-          <li>Click on any order to see detailed information</li>
-          <li>Check the activity log for status updates</li>
+          <li>Navigate to the "My Orders" section in your dashboard</li>
+          <li>View all your orders with their current status at a glance</li>
+          <li>Click on any order to open the order chat and see full details</li>
+          <li>Check the delivery countdown for accepted orders</li>
         </ol>
         <p>
-          You'll also receive email notifications when your order status changes.
+          Status updates happen in real-time — no need to refresh your dashboard.
         </p>
       </div>
     ),
@@ -26,15 +24,15 @@ const sections: HelpSection[] = [
     title: 'Track Your Orders',
     content: (
       <div className="space-y-4">
-        <p>
-          Order tracking provides visibility into every stage of the publication process:
-        </p>
+        <p>Order tracking provides visibility into every stage of the publication process:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Order Placed:</strong> Your submission has been received</li>
-          <li><strong>Accepted:</strong> Agency has accepted and is processing</li>
-          <li><strong>In Review:</strong> Content is being reviewed</li>
-          <li><strong>Publishing:</strong> Article is being published</li>
-          <li><strong>Delivered:</strong> Article is live with confirmation link</li>
+          <li><strong>Pending:</strong> Order placed, waiting for agency acceptance</li>
+          <li><strong>Accepted:</strong> Agency has accepted and is processing your submission</li>
+          <li><strong>Delivered:</strong> Article is live — delivery link provided in chat</li>
+          <li><strong>Delivered – Revision Requested:</strong> You've flagged changes after delivery</li>
+          <li><strong>Completed:</strong> Order finalized; credits released to the agency</li>
+          <li><strong>Cancelled:</strong> Order was cancelled; locked credits returned to you</li>
+          <li><strong>Disputed:</strong> Dispute raised and under review by our team</li>
         </ul>
       </div>
     ),
@@ -44,17 +42,37 @@ const sections: HelpSection[] = [
     title: 'Delivery Confirmation',
     content: (
       <div className="space-y-4">
-        <p>
-          When your article is published, you'll receive:
-        </p>
+        <p>When your article is published, you'll receive:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Live URL:</strong> Direct link to your published article</li>
-          <li><strong>Email Notification:</strong> Confirmation sent to your registered email</li>
-          <li><strong>Dashboard Update:</strong> Order status changes to "Delivered"</li>
+          <li><strong>Live URL:</strong> A direct link to your published article inside the order chat</li>
+          <li><strong>Dashboard Update:</strong> Order status changes to "Delivered" in real-time</li>
+          <li><strong>Notification:</strong> In-platform notification in the dashboard sidebar</li>
         </ul>
         <p>
-          We recommend verifying the published article to ensure everything looks correct. 
-          If you notice any issues, contact support immediately.
+          We recommend verifying the published article to confirm it looks correct.
+          If there are issues, use the revision request or raise a dispute within the order chat.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 'order-chat',
+    title: 'Communicating with Agencies',
+    content: (
+      <div className="space-y-4">
+        <p>
+          Every order comes with a dedicated real-time chat between you and the agency.
+          You can access it from "My Requests" in your dashboard:
+        </p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li>Send messages, ask questions, and share additional materials</li>
+          <li>Receive delivery notifications and links directly in the chat</li>
+          <li>Request revisions by using the revision button inside the chat</li>
+          <li>A live delivery countdown timer is shown once the order is accepted</li>
+        </ul>
+        <p>
+          <strong>Important:</strong> All communication must remain on-platform. Sharing personal
+          contact details (email, phone, etc.) is against our platform guidelines.
         </p>
       </div>
     ),
@@ -64,38 +82,36 @@ const sections: HelpSection[] = [
     title: 'Cancel an Order',
     content: (
       <div className="space-y-4">
-        <p>
-          Need to cancel an order? Here's what you need to know:
-        </p>
+        <p>Need to cancel an order? Here's what you need to know:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Before Acceptance:</strong> Full credit refund available</li>
-          <li><strong>After Acceptance:</strong> Partial refund may apply</li>
-          <li><strong>In Progress:</strong> Contact support for case-by-case review</li>
+          <li><strong>Before Acceptance:</strong> Full credit refund — cancel directly from the order details</li>
+          <li><strong>After Acceptance:</strong> Contact the agency through the order chat to agree on cancellation</li>
+          <li><strong>In Progress:</strong> Open a support ticket for case-by-case review</li>
         </ul>
         <p>
-          To cancel, go to your order details and click "Cancel Order" if available, 
+          To cancel, go to your order and use the "Cancel Order" option if available,
           or contact our support team for assistance.
         </p>
       </div>
     ),
   },
   {
-    id: 'order-history',
-    title: 'View Order History',
+    id: 'disputes',
+    title: 'Raising a Dispute',
     content: (
       <div className="space-y-4">
         <p>
-          Access your complete order history in the dashboard:
+          If you believe an order was not delivered as agreed, you can raise a dispute:
         </p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>View all past and current orders</li>
-          <li>Filter by status, date, or publication</li>
-          <li>Export order data for reporting</li>
-          <li>Access delivery links for all completed orders</li>
-        </ul>
+        <ol className="list-decimal list-inside space-y-2 ml-4">
+          <li>Open the order chat from "My Requests"</li>
+          <li>Click "Raise Dispute" and describe the issue</li>
+          <li>Our team will review the situation and mediate</li>
+          <li>A resolution (credit refund or order completion) will be issued</li>
+        </ol>
         <p>
-          Your order history is retained indefinitely, so you can always reference 
-          past publications.
+          Disputes are reviewed by the Arcana Mace team. Both parties are contacted and
+          the outcome is communicated through the platform.
         </p>
       </div>
     ),
@@ -110,8 +126,8 @@ export default function OrdersDelivery() {
       categorySlug="orders-delivery"
       intro={
         <p>
-          Learn how to check order status, track publications, receive delivery confirmations, 
-          and manage your order history.
+          Learn how to check order status, track publications, communicate with agencies,
+          request revisions, and raise disputes.
         </p>
       }
       sections={sections}
