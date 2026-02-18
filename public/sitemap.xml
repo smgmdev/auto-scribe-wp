@@ -110,13 +110,15 @@
   </url>
   <url>
     <loc>https://arcanamace.com/guidelines</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://arcanamace.com/sitemap</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Utility & Info -->
+  <url>
+    <loc>https://arcanamace.com/system-status</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/update-log</loc>
@@ -124,13 +126,13 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://arcanamace.com/system-status</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
+    <loc>https://arcanamace.com/report-bug</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://arcanamace.com/report-bug</loc>
-    <changefreq>yearly</changefreq>
+    <loc>https://arcanamace.com/sitemap</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
 
