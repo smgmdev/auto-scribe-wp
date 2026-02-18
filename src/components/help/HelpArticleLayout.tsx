@@ -136,12 +136,17 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       {/* Sub-header - Sticky container */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
         <div className="bg-[#f5f5f7] border-b border-border/50">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-2 flex flex-col justify-center gap-0.5">
+            <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <button onClick={() => navigate('/help')} className="hover:text-foreground transition-colors">Help Center</button>
+              <ChevronRight className="h-3 w-3" />
+              <button onClick={() => navigate(`/help/${categorySlug}`)} className="hover:text-foreground transition-colors">{category}</button>
+            </nav>
             <button 
               onClick={() => navigate('/help')}
-              className="flex items-center gap-2 text-xl font-semibold text-foreground hover:text-muted-foreground transition-colors"
+              className="flex items-center gap-2 text-base font-semibold text-foreground hover:text-muted-foreground transition-colors"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
               Help Center
             </button>
           </div>
@@ -149,24 +154,8 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 pt-16 pb-16">
+      <main className="flex-1 pt-10 pb-16">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-            <button 
-              onClick={() => navigate('/help')}
-              className="hover:text-foreground transition-colors"
-            >
-              Help Center
-            </button>
-            <ChevronRight className="h-4 w-4" />
-            <button 
-              onClick={() => navigate(`/help/${categorySlug}`)}
-              className="hover:text-foreground transition-colors"
-            >
-              {category}
-            </button>
-          </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-12">
             {/* Sidebar - Quick Links */}
