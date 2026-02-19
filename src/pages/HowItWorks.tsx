@@ -1120,9 +1120,72 @@ const HowItWorks = () => {
       <ScrollColorSection scrollContainerRef={scrollContainerRef} />
 
 
+      {/* More to Explore Section */}
+      <section className="py-24 md:py-32 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-12">
+            More to explore.
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Card 1 - Account */}
+            <a 
+              href="/auth"
+              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#1d1d1f] hover:scale-[1.02] transition-transform duration-300"
+            >
+              <div>
+                <p className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">Arcana Mace Account</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">
+                  Join Arcana Mace<br />Today.
+                </h3>
+                <span className="text-white/70 text-sm group-hover:text-white transition-colors">Create an Account ›</span>
+              </div>
+              <div className="flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <User className="w-10 h-10 text-white/80" />
+                </div>
+              </div>
+            </a>
 
+            {/* Card 2 - Media Buying */}
+            <a 
+              href="/media-buying"
+              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-white hover:scale-[1.02] transition-transform duration-300 border border-[#d2d2d7]"
+            >
+              <div>
+                <p className="text-sm font-semibold text-[#86868b] mb-3 uppercase tracking-wide">More about Arcana Mace</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] leading-tight mb-4">
+                  Media Buying<br />Marketplace.
+                </h3>
+                <span className="text-[#06c] text-sm group-hover:underline transition-colors">Learn more ›</span>
+              </div>
+              <div className="flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-[#f5f5f7] border border-[#d2d2d7]">
+                  <TrendingUp className="w-10 h-10 text-[#1d1d1f]" />
+                </div>
+              </div>
+            </a>
 
-
+            {/* Card 3 - Help Center */}
+            <a 
+              href="/help"
+              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#0071e3] hover:scale-[1.02] transition-transform duration-300"
+            >
+              <div>
+                <p className="text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">Help Center</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">
+                  Find out more<br />about Arcana Mace.
+                </h3>
+                <span className="text-white/80 text-sm group-hover:text-white transition-colors">Learn more ›</span>
+              </div>
+              <div className="flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <FileText className="w-10 h-10 text-white" />
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
 
 
       {/* Disclaimers Section */}
