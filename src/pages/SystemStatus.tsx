@@ -282,8 +282,8 @@ export default function SystemStatus() {
             const overall = getOverallStatus(services);
             const bannerConfig = {
               available: {
-                text: 'text-[#34c759]',
-                icon: <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />,
+                text: 'text-[#86868b]',
+                icon: <CheckCircle className="w-5 h-5 text-[#86868b] flex-shrink-0" />,
                 message: 'All systems are operating normally.',
               },
               issue: {
