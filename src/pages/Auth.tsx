@@ -620,6 +620,7 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                autoComplete="current-password"
                 className="h-9 md:h-10 text-[14px] md:text-[15px] bg-[#f5f5f7] border-0 rounded-none px-4 placeholder:text-muted-foreground/60 focus:bg-white focus:ring-2 focus:ring-foreground/20 transition-all"
               />
               {errors.password && (

@@ -195,6 +195,7 @@ export function AccountSettings() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
+              autoComplete="new-password"
               className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
             <Input
@@ -202,6 +203,7 @@ export function AccountSettings() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
+              autoComplete="new-password"
               className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
             <Button 
