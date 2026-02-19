@@ -681,7 +681,7 @@ const ScrollColorSection = ({
             </a>
 
             {/* Card 2 */}
-            <a href="/help/for-agencies#managing-sites" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+            <a href="/help/ai-auto-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(160deg, #92400e 0%, #b45309 50%, #92400e 100%)' }}>
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">AI Auto<br />Publishing</h3>
