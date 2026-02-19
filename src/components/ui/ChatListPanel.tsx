@@ -427,7 +427,7 @@ export function ChatListPanel() {
     checkAgency();
   }, [user, isAdmin]);
 
-  // Set default tab to disputes for admins, service-requests for everyone else
+  // Set default tab: admins see ONLY disputes, agencies see service-requests, users see my-engagements
   useEffect(() => {
     if (isAdmin) {
       setActiveTab('disputes');
@@ -511,12 +511,14 @@ export function ChatListPanel() {
   useEffect(() => {
     if (!user || loading) return;
     
-    // Fetch my engagements for all users (including agencies who may also be clients)
-    fetchMyEngagements();
-    
+    // Admins only see disputes — skip engagement/service-request fetches
     if (isAdmin) {
       fetchDisputes();
+      return;
     }
+    
+    // Fetch my engagements for non-admin users
+    fetchMyEngagements();
   }, [user, isAdmin, isAgency, loading]);
 
   // Listen for engagement-removed event to refresh list
@@ -2444,7 +2446,7 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            {(isAgency || isAdmin) && (
+            {(isAgency && !isAdmin) && (
               <TabsContent value="service-requests" className="m-0">
                 <ScrollArea className="h-[300px]">
                   {renderChatList(filteredServiceRequests, 'agency-request')}
@@ -2452,11 +2454,13 @@ export function ChatListPanel() {
               </TabsContent>
             )}
 
-            <TabsContent value="my-engagements" className="m-0">
-              <ScrollArea className="h-[300px]">
-                {renderChatList(filteredEngagements, 'my-request')}
-              </ScrollArea>
-            </TabsContent>
+            {!isAdmin && (
+              <TabsContent value="my-engagements" className="m-0">
+                <ScrollArea className="h-[300px]">
+                  {renderChatList(filteredEngagements, 'my-request')}
+                </ScrollArea>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       )}
