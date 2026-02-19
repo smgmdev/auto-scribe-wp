@@ -55,8 +55,8 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
   };
 
   const containerClass = narrow 
-    ? "max-w-[980px] mx-auto px-4 md:px-6 footer-widget-clearance"
-    : "container mx-auto px-4 footer-widget-clearance";
+    ? "max-w-[980px] mx-auto px-4 md:px-6"
+    : "container mx-auto px-4";
 
   return (
     <>
@@ -159,7 +159,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
         </div>
         
         {/* Bottom bar */}
-        <div className={`border-t pt-6 pb-0 md:pb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 ${dark ? 'border-white/20' : 'border-border'}`}>
+        <div className={`border-t pt-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 ${dark ? 'border-white/20' : 'border-border'}`}>
           <p className={`text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             © {new Date().getFullYear()} Arcana Mace. All rights reserved.
           </p>
