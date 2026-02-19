@@ -41,11 +41,7 @@ export function LatestGlobalArticles() {
   useEffect(() => {
     const fetchGlobalArticles = async () => {
       const { data, error } = await supabase
-        .from('articles')
-        .select('id, title, created_at, wp_link, published_to, published_to_name, published_to_favicon')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .rpc('get_published_articles');
 
       if (!error && data) {
         setArticles(data);
