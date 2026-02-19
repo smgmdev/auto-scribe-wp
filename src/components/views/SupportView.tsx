@@ -225,7 +225,7 @@ export function SupportView() {
                 tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').map(ticket => (
                   <button
                     key={ticket.id}
-                    className="w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-muted/50 transition-colors relative"
+                    className={`w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-muted/50 transition-colors relative ${!ticket.user_read ? 'bg-muted/40' : ''}`}
                     onClick={() => {
                       if (!ticket.user_read) {
                         supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
