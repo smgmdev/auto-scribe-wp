@@ -82,13 +82,30 @@ export function LatestPublishedCarousel() {
   useEffect(() => {
     if (!api) return;
 
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on('select', () => {
+    const updateState = () => {
+      setCount(api.scrollSnapList().length);
       setCurrent(api.selectedScrollSnap());
-    });
+    };
+
+    updateState();
+    api.on('select', updateState);
+    api.on('reInit', updateState);
+
+    return () => {
+      api.off('select', updateState);
+      api.off('reInit', updateState);
+    };
   }, [api]);
+
+  // Force carousel reinit after articles load so it's always visible
+  useEffect(() => {
+    if (!api || articles.length === 0) return;
+    // Give the DOM a tick to render the new items, then reinit
+    const timer = setTimeout(() => {
+      api.reInit();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [api, articles.length]);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
