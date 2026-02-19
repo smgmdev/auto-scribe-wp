@@ -273,8 +273,8 @@ export default function SystemStatus() {
             System Status
           </h1>
 
-          {/* Status row: banner + legend */}
-          <div className="flex items-end justify-between gap-3 mb-6">
+          {/* Status row: banner + refresh */}
+          <div className="flex items-center justify-between gap-3 mb-6">
             {/* Status message */}
             <div className="flex items-center gap-3">
               {isLoading ? (
@@ -310,31 +310,16 @@ export default function SystemStatus() {
               })()}
             </div>
 
-            {/* Legend + Refresh */}
-            <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="available" />
-                <span className="text-sm text-[#1d1d1f]">Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="issue" />
-                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="outage" />
-                <span className="text-sm text-[#1d1d1f]">Outage</span>
-              </div>
-              <Button
-                onClick={() => fetchStatus(true)}
-                disabled={isRefreshing}
-                variant="outline"
-                size="sm"
-                className="rounded-none gap-2 border-border hover:bg-black hover:text-white transition-all duration-200 mt-1"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-              </Button>
-            </div>
+            {/* Refresh button - credit management style */}
+            <Button
+              onClick={() => fetchStatus(true)}
+              disabled={isRefreshing}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
 
           {/* Services Grid */}
@@ -419,6 +404,22 @@ export default function SystemStatus() {
                 })}
               </div>
             )}
+
+            {/* Legend - below incident history card */}
+            <div className="flex flex-col items-end gap-1 mt-6">
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="available" />
+                <span className="text-sm text-[#1d1d1f]">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="issue" />
+                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="outage" />
+                <span className="text-sm text-[#1d1d1f]">Outage</span>
+              </div>
+            </div>
           </div>
         </main>
 
