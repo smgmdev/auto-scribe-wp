@@ -260,19 +260,19 @@ export function SupportView() {
                       openSupportChat(ticket);
                     }}
                   >
-                    <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs absolute top-3 right-3">
-                      {ticket.status === 'open' ? (
-                        <><Clock className="h-3 w-3 mr-1" />Open</>
-                      ) : (
-                        <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
-                      )}
-                    </Badge>
-                    <div className="min-w-0 flex-1 pr-20">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         {!ticket.user_read && (
                           <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                         )}
                         <p className="font-medium text-sm truncate">{ticket.subject}</p>
+                        <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
+                          {ticket.status === 'open' ? (
+                            <><Clock className="h-3 w-3 mr-1" />Open</>
+                          ) : (
+                            <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                          )}
+                        </Badge>
                       </div>
                       <div className="flex flex-col gap-0.5 mt-1.5">
                         <p className="text-xs text-muted-foreground">
