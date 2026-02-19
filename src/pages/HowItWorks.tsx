@@ -166,6 +166,7 @@ const ScrollColorSection = ({
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
   const whatYouCanDoRef = useRef<HTMLDivElement>(null);
+  const aiSectionRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     const container = scrollContainerRef.current;
@@ -222,21 +223,22 @@ const ScrollColorSection = ({
       const localLibrary = localLibraryRef.current;
       const globalLibrary = globalLibraryRef.current;
       const whatYouCanDo = whatYouCanDoRef.current;
+      const aiSection = aiSectionRef.current;
       
       if (!coralCard || !localLibrary || !globalLibrary) return;
-
-      const viewportHeight = window.innerHeight;
-      const triggerPoint = viewportHeight * 0.4; // 40% from top of viewport
-      
+      const triggerPoint = window.innerHeight * 0.5;
       const coralRect = coralCard.getBoundingClientRect();
       const localRect = localLibrary.getBoundingClientRect();
       const globalRect = globalLibrary.getBoundingClientRect();
       const whatYouCanDoRect = whatYouCanDo?.getBoundingClientRect();
+      const aiSectionRect = aiSection?.getBoundingClientRect();
       
       let newColor = '#ffffff';
       
       // Determine which section occupies the trigger point - check from bottom to top
-      if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
+      if (aiSectionRect && aiSectionRect.top <= triggerPoint && aiSectionRect.bottom > 0) {
+        newColor = '#b45309'; // Orange for AI section
+      } else if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
         newColor = '#0d1b4b'; // Dark blue for What You Can Do section
       } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         newColor = '#1d1d1f'; // Black for Global Media Library
@@ -563,9 +565,76 @@ const ScrollColorSection = ({
 
           {/* CTA */}
           <div className="flex items-center justify-center mt-10">
-            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-2">
+            <button onClick={() => scrollToSection(aiSectionRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-2">
               There is more! Check out Arcana Mace AI <span className="text-xl">↓</span>
             </button>
+          </div>
+        </div>
+
+        {/* AI Section - Orange */}
+        <div
+          id="ai-section"
+          ref={aiSectionRef}
+          className="mt-16 bg-[#c2410c] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+        >
+          {/* Icon - Arcana Mace Logo White */}
+          <div className="flex justify-center mb-6">
+            <img
+              src={amblack}
+              alt="Arcana Mace"
+              className="w-16 h-16 object-contain brightness-0 invert"
+            />
+          </div>
+
+          {/* Title */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
+            Arcana Mace for Agencies.
+          </h2>
+
+          {/* Description */}
+          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 leading-tight">
+            From self-publishing to global media placements, AI-generated articles to PR agency partnerships — everything you need to amplify your brand's voice is in one place.
+          </p>
+
+          {/* Feature grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
+            {/* Card 1 */}
+            <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #c2410c 100%)' }}>
+              <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #fed7aa, transparent)' }} />
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Connect your own WordPress<br />site to Local Library</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
+              </div>
+            </a>
+
+            {/* Card 2 */}
+            <a href="/help/for-agencies#managing-sites" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(160deg, #92400e 0%, #b45309 50%, #92400e 100%)' }}>
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Add your own media sites<br />to Global Media Library</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
+              </div>
+              <div className="relative z-10 flex justify-center">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <Globe className="w-10 h-10 text-white/80" />
+                </div>
+              </div>
+            </a>
+
+            {/* Card 3 */}
+            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #78350f 0%, #92400e 50%, #b45309 100%)' }}>
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Control pricing<br />and close deals</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how to upgrade to an agency account ›</span>
+              </div>
+              <div className="relative z-10 flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(251, 191, 36, 0.3)' }}>
+                  <Shield className="w-10 h-10 text-white" />
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </div>
