@@ -121,13 +121,12 @@ export function MainLayout({
         {/* Global Footer */}
         <footer className={`border-t px-4 lg:px-8 pb-32 md:pb-[4.5rem] ${isDarkFooter || isDashboardFooter ? 'bg-black border-white/20' : 'border-border/50'}`} style={{ paddingTop: '1rem' }}>
           <div className={`flex flex-col gap-3 text-xs lg:flex-row lg:items-center lg:justify-between ${isDarkFooter || isDashboardFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
-            <span className="text-left">© 2026 Arcana Mace. All rights reserved.</span>
+            <span className="text-left">© {new Date().getFullYear()} Arcana Mace. All rights reserved.</span>
             <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${isDarkFooter || isDashboardFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
               <Link to="/terms" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</Link>
               <Link to="/privacy" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</Link>
+              <Link to="/do-not-sell" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>We Do Not Sell or Share Your Personal Information</Link>
               <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</Link>
-              <Link to="/help" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
-              <Link to="/system-status" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
               <Link to="/report-bug" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
               <Link to="/update-log" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Changelog</Link>
               <Link to="/sitemap" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>

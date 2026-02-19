@@ -55,8 +55,8 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
   };
 
   const containerClass = narrow 
-    ? "max-w-[980px] mx-auto px-4 md:px-6 pb-16 pb-[max(4rem,env(safe-area-inset-bottom))]"
-    : "container mx-auto px-4 pb-16 pb-[max(4rem,env(safe-area-inset-bottom))]";
+    ? "max-w-[980px] mx-auto px-4 md:px-6 pb-32 md:pb-[4.5rem]"
+    : "container mx-auto px-4 pb-32 md:pb-[4.5rem]";
 
   return (
     <footer className={`${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'} ${narrow ? '' : 'mt-12'}`}>
