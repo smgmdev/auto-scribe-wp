@@ -6467,20 +6467,46 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                         agency_whatsapp: agencyWhatsapp
                                       });
                                     } else if (msg.sender_type === 'agency') {
-                                      // For agency, open the AgencyDetailsDialog instead
+                                      // Fetch agency details and show in same User Details popup
                                       const { data: agency } = await supabase
                                         .from('agency_payouts')
-                                        .select('agency_name')
+                                        .select('agency_name, email, user_id')
                                         .eq('id', msg.sender_id)
                                         .maybeSingle();
                                       
-                                      if (agency?.agency_name) {
-                                        setUserDetailsDialogOpen(false);
-                                        setSelectedAgencyName(agency.agency_name);
-                                        setAgencyDetailsOpen(true);
-                                        setUserDetailsLoading(false);
-                                        return;
+                                      let fullName: string | null = null;
+                                      let agencyWhatsapp: string | null = null;
+                                      let userWhatsapp: string | null = null;
+                                      
+                                      if (agency?.user_id) {
+                                        // Get profile whatsapp
+                                        const { data: profile } = await supabase
+                                          .from('profiles')
+                                          .select('whatsapp_phone')
+                                          .eq('id', agency.user_id)
+                                          .maybeSingle();
+                                        userWhatsapp = profile?.whatsapp_phone || null;
+                                        
+                                        // Get agency application details
+                                        const { data: application } = await supabase
+                                          .from('agency_applications')
+                                          .select('full_name, whatsapp_phone')
+                                          .eq('user_id', agency.user_id)
+                                          .eq('status', 'approved')
+                                          .maybeSingle();
+                                        fullName = application?.full_name || null;
+                                        agencyWhatsapp = application?.whatsapp_phone || null;
                                       }
+                                      
+                                      setUserDetails({
+                                        email: agency?.email || null,
+                                        phone: userWhatsapp,
+                                        user_whatsapp: userWhatsapp,
+                                        type: 'agency',
+                                        full_name: fullName,
+                                        agency_name: agency?.agency_name || null,
+                                        agency_whatsapp: agencyWhatsapp
+                                      });
                                     }
                                   } catch (error) {
                                     console.error('Error fetching user details:', error);
@@ -8465,7 +8491,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
               <Info className="h-5 w-5" />
-              Client Details
+              User Details
             </DialogTitle>
           </DialogHeader>
           {userDetailsLoading ? (
