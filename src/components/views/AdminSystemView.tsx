@@ -301,7 +301,7 @@ export function AdminSystemView() {
       onClick={() => inputRef.current?.focus()}
     >
       {/* Terminal Output */}
-      <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm flex flex-col justify-end">
+      <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm flex flex-col justify-end" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div>
           {lines.map(line => {
             if (line.type === 'table' && line.data) {
