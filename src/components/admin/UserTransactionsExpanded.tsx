@@ -697,7 +697,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           })}
         </TabsList>
 
-        <div className="bg-background">
+        <div className="bg-background max-h-[60vh] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <Table>
             <TableHeader>
               <TableRow className="h-6 !border-b border-border">
