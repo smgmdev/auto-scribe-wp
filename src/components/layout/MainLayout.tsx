@@ -135,7 +135,7 @@ export function MainLayout({
             </div>
           </div>
         </footer>
-        <div className="h-[50px] min-h-[50px] w-full flex-shrink-0" />
+        <div className={`h-[50px] min-h-[50px] w-full flex-shrink-0 ${isDashboardFooter ? 'bg-red-500' : ''}`} />
         
       </main>
     </div>;
