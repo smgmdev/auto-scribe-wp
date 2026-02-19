@@ -606,9 +606,10 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           {isAdmin && (
             <button
               onClick={(e) => { e.stopPropagation(); openUserDetails(); }}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-xs px-2.5 py-1 rounded-none border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors inline-flex items-center gap-1"
             >
-              <Info className="h-4 w-4" />
+              <Info className="h-3 w-3" />
+              User
             </button>
           )}
           {isAdmin && ticketStatus === 'open' && (
@@ -868,7 +869,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 flex-1">
           <h4 className="font-semibold text-foreground text-sm">User Details</h4>
           <div className="space-y-3 text-sm">
             <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
@@ -876,6 +877,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
           </div>
+          <Button
+            className="w-full bg-foreground text-background hover:bg-foreground/90"
+            onClick={() => setUserDetailsOpen(false)}
+          >
+            Ok
+          </Button>
         </div>
       </div>
     ) : (
@@ -900,6 +907,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
           </div>
+          <Button
+            className="bg-foreground text-background hover:bg-foreground/90"
+            onClick={() => setUserDetailsOpen(false)}
+          >
+            Ok
+          </Button>
         </div>
       </div>
     ),
