@@ -654,7 +654,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               </>
             ) : (
               <>
-                <span className="text-foreground font-medium">Arcana Mace Staff</span>
+                <span className="text-foreground">Arcana Mace Staff</span>
                 <span className="flex items-center gap-1">
                   <span className={`h-1.5 w-1.5 rounded-full inline-block ${adminOnline ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
                   <span className={adminOnline ? 'text-emerald-600' : 'text-muted-foreground'}>{adminOnline ? 'Online' : 'Offline'}</span>
