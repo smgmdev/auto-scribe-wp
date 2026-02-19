@@ -186,7 +186,7 @@ export function SupportView() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Support</h1>
-            <p className="mt-1 text-muted-foreground">Get help from Arcana Mace staff</p>
+            <p className="mt-1 text-muted-foreground">Ask Arcana Mace staff</p>
           </div>
           <Button
             className="w-full lg:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground"
@@ -225,7 +225,7 @@ export function SupportView() {
                 tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').map(ticket => (
                   <button
                     key={ticket.id}
-                    className="w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-muted/50 transition-colors flex items-center justify-between gap-4"
+                    className="w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-muted/50 transition-colors relative"
                     onClick={() => {
                       if (!ticket.user_read) {
                         supabase.from('support_tickets').update({ user_read: true }).eq('id', ticket.id);
@@ -235,19 +235,19 @@ export function SupportView() {
                       openSupportChat(ticket);
                     }}
                   >
-                    <div className="min-w-0 flex-1">
+                    <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs absolute top-3 right-3">
+                      {ticket.status === 'open' ? (
+                        <><Clock className="h-3 w-3 mr-1" />Open</>
+                      ) : (
+                        <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                      )}
+                    </Badge>
+                    <div className="min-w-0 flex-1 pr-20">
                       <div className="flex items-center gap-2">
                         {!ticket.user_read && (
                           <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                         )}
                         <p className="font-medium text-sm truncate">{ticket.subject}</p>
-                        <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
-                          {ticket.status === 'open' ? (
-                            <><Clock className="h-3 w-3 mr-1" />Open</>
-                          ) : (
-                            <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
-                          )}
-                        </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
