@@ -1211,7 +1211,7 @@ const HowItWorks = () => {
                 <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] leading-tight mb-4">
                   Media Buying<br />Marketplace.
                 </h3>
-                <span className="text-[#06c] text-sm group-hover:underline transition-colors">Learn more ›</span>
+                <span className="text-[#06c] text-sm transition-colors">Learn more ›</span>
               </div>
               <MediaLogoSlider />
             </a>
