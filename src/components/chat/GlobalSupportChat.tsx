@@ -881,7 +881,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
           <div className="flex justify-end">
             <Button
-              className="w-full bg-transparent text-foreground border border-border hover:bg-transparent hover:text-foreground"
+              className="w-full bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
               onClick={() => setUserDetailsOpen(false)}
             >
               Cancel
@@ -913,7 +913,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </div>
           <div className="flex justify-end">
             <Button
-              className="bg-transparent text-foreground border border-border hover:bg-transparent hover:text-foreground"
+              className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
               onClick={() => setUserDetailsOpen(false)}
             >
               Cancel
