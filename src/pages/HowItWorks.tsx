@@ -699,7 +699,7 @@ const ScrollColorSection = ({
               style={{ background: 'linear-gradient(135deg, #78350f 0%, #92400e 50%, #b45309 100%)' }}>
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Arcana Mace AI<br />Security Supervision</h3>
-                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about AI Security Supervision on Arcana Mace ›</span>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about AI Security Supervision ›</span>
               </div>
               <div className="relative z-10 flex justify-end">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(251, 191, 36, 0.3)' }}>
