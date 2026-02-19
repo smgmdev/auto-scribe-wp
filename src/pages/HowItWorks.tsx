@@ -537,7 +537,7 @@ const ScrollColorSection = ({
               style={{ background: 'linear-gradient(160deg, #0a1f2e 0%, #0d2d3a 50%, #0a1a2e 100%)' }}>
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Add your own media sites<br />to Global Media Library</h3>
-                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about our outlets ›</span>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
               </div>
               <div className="relative z-10 flex justify-center">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
