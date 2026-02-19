@@ -273,7 +273,12 @@ export default function SystemStatus() {
           </h1>
 
           {/* Overall Status Banner */}
-          {!isLoading && services.length > 0 && (() => {
+          {isLoading ? (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-[#d2d2d7] mb-4 md:mb-8">
+              <RefreshCw className="w-5 h-5 text-[#86868b] flex-shrink-0 animate-spin" />
+              <span className="text-sm font-medium text-[#86868b]">Checking system status...</span>
+            </div>
+          ) : services.length > 0 && (() => {
             const overall = getOverallStatus(services);
             const bannerConfig = {
               available: {
@@ -293,7 +298,7 @@ export default function SystemStatus() {
               },
             }[overall];
             return (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-black bg-black md:mb-8">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-[#d2d2d7] mb-4 md:mb-8">
                 {bannerConfig.icon}
                 <span className={`text-sm font-medium ${bannerConfig.text}`}>{bannerConfig.message}</span>
               </div>
