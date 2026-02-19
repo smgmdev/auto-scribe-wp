@@ -15,7 +15,7 @@ const sections: HelpSection[] = [
         <p>
           The system operates silently and automatically, requiring no action from users.
           Its purpose is to maintain a safe, trustworthy environment for all participants
-          on the platform — buyers, agencies, and publishers alike.
+          on the platform — media buyers and media sellers (agencies).
         </p>
       </div>
     ),
