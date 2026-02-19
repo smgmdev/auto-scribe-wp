@@ -358,3 +358,19 @@ button:focus-visible,
 details[open] .details-open-rotate {
   transform: rotate(180deg);
 }
+
+/* ── Messaging widget bottom clearance ──────────────────────────────────────
+   The collapsed messaging widget is ~44px tall. We add a fixed offset so the
+   last footer link always has the same breathing room above the widget on
+   every page, regardless of top banners or page structure.
+   Safe-area-inset-bottom handles iPhone notch / home indicator automatically.
+   ─────────────────────────────────────────────────────────────────────────── */
+.footer-widget-clearance {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .footer-widget-clearance {
+    padding-bottom: 4.5rem;
+  }
+}
