@@ -1130,7 +1130,7 @@ const HowItWorks = () => {
             {/* Card 1 - Account */}
             <a 
               href="/auth"
-              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#1d1d1f] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#1d1d1f] hover:scale-[1.02] transition-transform duration-300"
             >
               <div>
                 <p className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">Arcana Mace Account</p>
@@ -1149,7 +1149,7 @@ const HowItWorks = () => {
             {/* Card 2 - Media Buying */}
             <a 
               href="/media-buying"
-              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-white hover:scale-[1.02] transition-transform duration-300 border border-[#d2d2d7]"
+              className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-white hover:scale-[1.02] transition-transform duration-300 border border-[#d2d2d7]"
             >
               <div>
                 <p className="text-sm font-semibold text-[#86868b] mb-3 uppercase tracking-wide">More about Arcana Mace</p>
@@ -1168,7 +1168,7 @@ const HowItWorks = () => {
             {/* Card 3 - Help Center */}
             <a 
               href="/help"
-              className="group relative rounded-[28px] overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#0071e3] hover:scale-[1.02] transition-transform duration-300"
+              className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-[#0071e3] hover:scale-[1.02] transition-transform duration-300"
             >
               <div>
                 <p className="text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">Help Center</p>
