@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Info, Loader2 } from 'lucide-react';
@@ -42,6 +42,30 @@ interface SearchModalProps {
 
 const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
 const GLOBAL_SUBCATEGORIES = ['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'];
+
+function MediaLogo({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <div className="h-10 w-10 flex-shrink-0 relative bg-muted rounded-none">
+      {!loaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      {!error && (
+        <img
+          src={src}
+          alt={alt}
+          className={`h-10 w-10 rounded-none object-cover ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+        />
+      )}
+    </div>
+  );
+}
 
 export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: SearchModalProps) {
   const navigate = useNavigate();
@@ -420,15 +444,8 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
                           }}
                           className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
                         >
-                          {/* Media logo */}
-                          <img
-                            src={site.favicon || getFaviconUrl(site.link)}
-                            alt={site.name}
-                            className="h-10 w-10 rounded-none bg-muted object-cover flex-shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
+                          {/* Media logo with loading spinner */}
+                          <MediaLogo src={site.favicon || getFaviconUrl(site.link)} alt={site.name} />
                           
                           {/* Content container */}
                           <div className="flex-1 min-w-0">
