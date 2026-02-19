@@ -242,12 +242,12 @@ export default function SystemStatus() {
             <Button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="hover:bg-black hover:text-white transition-all duration-200"
+              className="rounded-none border-border hover:bg-black hover:text-white transition-all duration-200"
               title="Refresh status"
             >
-              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
             
             {user ? (
@@ -280,7 +280,7 @@ export default function SystemStatus() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-[92px]">
         <main className="max-w-[980px] mx-auto px-4 md:px-6 py-12 md:py-16">
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-6 md:mb-8">
+          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-12 md:mb-16">
             System Status
           </h1>
 
