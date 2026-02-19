@@ -45,7 +45,7 @@ const sections: HelpSection[] = [
     content: (
       <div className="space-y-4">
         <p>
-          The system uses AI-powered analysis to evaluate messages, actions, and behavioural
+          The system uses AI-powered self learning analysis to evaluate messages, actions, and behavioural
           patterns as they occur. Flagged activity is surfaced to the Arcana Mace
           administration team for review. The AI does not take automated punitive action —
           all enforcement decisions are made by human administrators after review.
