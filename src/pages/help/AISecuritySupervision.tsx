@@ -30,8 +30,8 @@ const sections: HelpSection[] = [
           interaction channels, including:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Chat messages:</strong> Detection of contact-sharing attempts (emails, phone numbers, social handles) that bypass the platform</li>
-          <li><strong>Unusual activity:</strong> Login anomalies, suspicious session patterns, and abnormal account behaviour</li>
+          <li><strong>Chat messages:</strong> Detection of contact-sharing attempts that bypass the platform</li>
+          <li><strong>Unusual activity:</strong> Login anomalies and abnormal account behaviour</li>
           <li><strong>Fraud indicators:</strong> Payment irregularities, duplicate accounts, and manipulation attempts</li>
           <li><strong>Misconduct:</strong> Policy violations, abusive communication, and breach of platform guidelines</li>
           <li><strong>Order integrity:</strong> Monitoring of order flows for signs of manipulation or non-compliance</li>
