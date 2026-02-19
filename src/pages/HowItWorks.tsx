@@ -165,6 +165,7 @@ const ScrollColorSection = ({
   const coralCardRef = useRef<HTMLDivElement>(null);
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
+  const whatYouCanDoRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     const container = scrollContainerRef.current;
@@ -220,6 +221,7 @@ const ScrollColorSection = ({
       const coralCard = coralCardRef.current;
       const localLibrary = localLibraryRef.current;
       const globalLibrary = globalLibraryRef.current;
+      const whatYouCanDo = whatYouCanDoRef.current;
       
       if (!coralCard || !localLibrary || !globalLibrary) return;
 
@@ -229,11 +231,14 @@ const ScrollColorSection = ({
       const coralRect = coralCard.getBoundingClientRect();
       const localRect = localLibrary.getBoundingClientRect();
       const globalRect = globalLibrary.getBoundingClientRect();
+      const whatYouCanDoRect = whatYouCanDo?.getBoundingClientRect();
       
       let newColor = '#ffffff';
       
       // Determine which section occupies the trigger point - check from bottom to top
-      if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
+      if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
+        newColor = '#0071e3'; // Blue for What You Can Do section
+      } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         newColor = '#1d1d1f'; // Black for Global Media Library
       } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
         newColor = '#1d1d1f'; // Black for Local Media Library
@@ -472,6 +477,62 @@ const ScrollColorSection = ({
                 </div>
               </>
             )}
+          </div>
+        </div>
+
+        {/* What You Can Do Section - Blue */}
+        <div
+          id="what-you-can-do"
+          ref={whatYouCanDoRef}
+          className="mt-16 bg-[#0071e3] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+        >
+          {/* Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+          </div>
+
+          {/* Title */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
+            What you can do with Arcana Mace.
+          </h2>
+
+          {/* Description */}
+          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 leading-tight">
+            From self-publishing to global media placements, AI-generated articles to PR agency partnerships — everything you need to amplify your brand's voice is in one place.
+          </p>
+
+          {/* Feature grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-left">
+            <div className="bg-white/10 rounded-[24px] p-6">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
+                <PenTool className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">AI Article Generation</h3>
+              <p className="text-white/70 text-sm leading-relaxed">Generate high-quality, SEO-optimized articles instantly using our AI, powered by real news sources and your chosen tone.</p>
+            </div>
+            <div className="bg-white/10 rounded-[24px] p-6">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Global Media Placements</h3>
+              <p className="text-white/70 text-sm leading-relaxed">Access thousands of premium media outlets worldwide and get your content placed on top-tier publications.</p>
+            </div>
+            <div className="bg-white/10 rounded-[24px] p-6">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Secure Escrow Payments</h3>
+              <p className="text-white/70 text-sm leading-relaxed">Every transaction is protected. Funds are held in escrow and only released upon confirmed delivery.</p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center justify-center gap-6 mt-10">
+            <a href="/auth" className="text-white/70 text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              Get started <span className="text-xl">↗</span>
+            </a>
           </div>
         </div>
       </div>
