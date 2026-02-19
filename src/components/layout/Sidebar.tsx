@@ -1655,12 +1655,15 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
         const msg = payload.new as any;
+        console.log('[Sidebar] Admin: support_messages INSERT received', { sender_type: msg.sender_type, sender_id: msg.sender_id, my_id: user.id, match: msg.sender_type === 'user' && msg.sender_id !== user.id });
         // Admin receives sound only for user-sent messages (never for own messages)
         if (msg.sender_type === 'user' && msg.sender_id !== user.id) {
           console.log('[Sidebar] Admin: new support message from user, playing sound', msg.id);
           refetchAdminSupportCount();
           playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
         }
+        // Always refetch count even if sound is not played
+        refetchAdminSupportCount();
       })
       .subscribe();
 
