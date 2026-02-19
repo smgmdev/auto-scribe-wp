@@ -1655,7 +1655,7 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
         const msg = payload.new as any;
-        if (msg.sender_type === 'user') {
+        if (msg.sender_type === 'user' && msg.sender_id !== user?.id) {
           refetchAdminSupportCount();
           // Single source of truth for support chat sounds (same pattern as engagement chat)
           playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
@@ -1686,7 +1686,7 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
         const msg = payload.new as any;
-        if (msg.sender_type === 'admin') {
+        if (msg.sender_type === 'admin' && msg.sender_id !== user?.id) {
           refetchUserSupportCount();
           // Single source of truth for support chat sounds (same pattern as engagement chat)
           playMessageSound(msg.id || msg.ticket_id, msg.message?.substring(0, 30));
