@@ -19,6 +19,8 @@ interface SupportTicket {
   admin_read: boolean;
   user_read: boolean;
   user_email?: string;
+  last_message_at?: string;
+  last_message_sender?: string;
 }
 
 export function AdminSupportView() {
@@ -42,7 +44,28 @@ export function AdminSupportView() {
         .in('id', userIds);
 
       const emailMap = new Map(profiles?.map(p => [p.id, p.email]) || []);
-      const enriched = data.map(t => ({ ...t, user_email: emailMap.get(t.user_id) || 'Unknown' }));
+
+      // Fetch last message for each ticket
+      const ticketIds = data.map(t => t.id);
+      const { data: lastMessages } = await supabase
+        .from('support_messages')
+        .select('ticket_id, sender_type, created_at')
+        .in('ticket_id', ticketIds)
+        .order('created_at', { ascending: false });
+
+      const lastMessageMap = new Map<string, { created_at: string; sender_type: string }>();
+      lastMessages?.forEach(msg => {
+        if (!lastMessageMap.has(msg.ticket_id)) {
+          lastMessageMap.set(msg.ticket_id, { created_at: msg.created_at, sender_type: msg.sender_type });
+        }
+      });
+
+      const enriched = data.map(t => ({
+        ...t,
+        user_email: emailMap.get(t.user_id) || 'Unknown',
+        last_message_at: lastMessageMap.get(t.id)?.created_at,
+        last_message_sender: lastMessageMap.get(t.id)?.sender_type,
+      }));
       setTickets(enriched);
     }
     setLoading(false);
@@ -145,13 +168,18 @@ export function AdminSupportView() {
                     <User className="h-3 w-3 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 mt-1.5">
+                  <div className="flex flex-col gap-0.5 mt-1.5">
                     <p className="text-xs text-muted-foreground">
-                      Ticket Opened: {format(new Date(ticket.created_at), 'MMM d, HH:mm')}
+                      Ticket Opened: {format(new Date(ticket.created_at), 'MMM d, yyyy HH:mm')}
                     </p>
+                    {ticket.last_message_at && (
+                      <p className="text-xs text-muted-foreground">
+                        Last Message: {format(new Date(ticket.last_message_at), 'MMM d, yyyy HH:mm')} — from {ticket.last_message_sender === 'admin' ? 'Admin' : 'User'}
+                      </p>
+                    )}
                     {ticket.status === 'closed' && ticket.closed_at && (
                       <p className="text-xs text-muted-foreground">
-                        Ticket Closed: {format(new Date(ticket.closed_at), 'MMM d, HH:mm')}
+                        Ticket Closed: {format(new Date(ticket.closed_at), 'MMM d, yyyy HH:mm')}
                       </p>
                     )}
                   </div>
