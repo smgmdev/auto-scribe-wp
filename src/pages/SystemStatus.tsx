@@ -318,10 +318,10 @@ export default function SystemStatus() {
             <Button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              className="w-full md:w-auto rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              className="w-full md:w-[120px] rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              <RefreshCw className={`h-4 w-4 flex-shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="w-[72px] text-center">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
           </div>
 
