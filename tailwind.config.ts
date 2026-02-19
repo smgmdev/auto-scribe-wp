@@ -321,6 +321,10 @@ export default {
 				'90%': { transform: 'rotate(270deg)' },
 				'90.5%': { transform: 'rotate(270deg)' },
 				'100%': { transform: 'rotate(360deg)' }
+			},
+			'slide-articles': {
+				'0%': { transform: 'translateX(0)' },
+				'100%': { transform: 'translateX(-50%)' }
 			}
 		},
 		animation: {
@@ -346,7 +350,8 @@ export default {
 			'border-glow': 'border-glow 3s linear infinite',
 			'purple-glow-pulse': 'purple-glow-pulse 3s ease-in-out infinite',
 			'purple-glow-pulse-intense': 'purple-glow-pulse-intense 3s ease-in-out infinite',
-			'clock-tick': 'clock-tick 12s steps(1) infinite'
+			'clock-tick': 'clock-tick 12s steps(1) infinite',
+			'slide-articles': 'slide-articles 15s linear infinite'
 		}
   	}
   },
