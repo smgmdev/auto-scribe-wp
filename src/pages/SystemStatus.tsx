@@ -237,6 +237,18 @@ export default function SystemStatus() {
             >
               <Search className="h-5 w-5" />
             </Button>
+
+            {/* Refresh Button - top right */}
+            <Button
+              onClick={() => fetchStatus(true)}
+              disabled={isRefreshing}
+              variant="ghost"
+              size="icon"
+              className="hover:bg-black hover:text-white transition-all duration-200"
+              title="Refresh status"
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
             
             {user ? (
               <Button 
@@ -272,71 +284,45 @@ export default function SystemStatus() {
             System Status
           </h1>
 
-          {/* Overall Status Banner */}
-          {isLoading ? (
-            <div className="flex items-center gap-3 py-3 rounded-none mb-4 md:mb-8">
-              <RefreshCw className="w-5 h-5 text-[#86868b] flex-shrink-0 animate-spin" />
-              <span className="text-sm font-medium text-[#86868b]">Checking system status...</span>
+          {/* Status row: banner + legend */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            {/* Status message */}
+            <div className="flex items-center gap-3">
+              {isLoading ? (
+                <>
+                  <RefreshCw className="w-5 h-5 text-[#86868b] flex-shrink-0 animate-spin" />
+                  <span className="text-sm text-[#86868b]">Checking system status...</span>
+                </>
+              ) : services.length > 0 && (() => {
+                const overall = getOverallStatus(services);
+                const bannerConfig = {
+                  available: {
+                    text: 'text-[#86868b]',
+                    icon: <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />,
+                    message: 'All systems are operating normally.',
+                  },
+                  issue: {
+                    text: 'text-[#ff9f0a]',
+                    icon: <AlertTriangle className="w-5 h-5 text-[#ff9f0a] flex-shrink-0" />,
+                    message: 'Some systems are experiencing elevated load or minor issues.',
+                  },
+                  outage: {
+                    text: 'text-[#ff3b30]',
+                    icon: <XCircle className="w-5 h-5 text-[#ff3b30] flex-shrink-0" />,
+                    message: 'One or more systems are currently experiencing an outage.',
+                  },
+                }[overall];
+                return (
+                  <>
+                    {bannerConfig.icon}
+                    <span className={`text-sm ${bannerConfig.text}`}>{bannerConfig.message}</span>
+                  </>
+                );
+              })()}
             </div>
-          ) : services.length > 0 && (() => {
-            const overall = getOverallStatus(services);
-            const bannerConfig = {
-              available: {
-                text: 'text-[#86868b]',
-                icon: <CheckCircle className="w-5 h-5 text-[#34c759] flex-shrink-0" />,
-                message: 'All systems are operating normally.',
-              },
-              issue: {
-                text: 'text-[#ff9f0a]',
-                icon: <AlertTriangle className="w-5 h-5 text-[#ff9f0a] flex-shrink-0" />,
-                message: 'Some systems are experiencing elevated load or minor issues.',
-              },
-              outage: {
-                text: 'text-[#ff3b30]',
-                icon: <XCircle className="w-5 h-5 text-[#ff3b30] flex-shrink-0" />,
-                message: 'One or more systems are currently experiencing an outage.',
-              },
-            }[overall];
-            return (
-              <div className="flex items-center gap-3 py-3 rounded-none">
-                {bannerConfig.icon}
-                <span className={`text-sm font-medium ${bannerConfig.text}`}>{bannerConfig.message}</span>
-              </div>
-            );
-          })()}
 
-          {/* Refresh Button - mobile only, under banner */}
-          <div className="flex md:hidden justify-center mb-6">
-            <Button
-              onClick={() => fetchStatus(true)}
-              disabled={isRefreshing}
-              className={`w-full gap-2 border transition-all duration-200 ${
-                isRefreshing
-                  ? 'bg-transparent text-black border-black'
-                  : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
-              }`}
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </Button>
-          </div>
-
-          {/* Legend and Refresh */}
-          <div className="flex items-center justify-center md:justify-between mb-6">
-            {/* Refresh - desktop only */}
-            <Button
-              onClick={() => fetchStatus(true)}
-              disabled={isRefreshing}
-              className={`hidden md:inline-flex gap-2 border transition-all duration-200 ${
-                isRefreshing
-                  ? 'bg-transparent text-black border-black'
-                  : 'bg-black text-white border-black hover:bg-transparent hover:text-black'
-              }`}
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </Button>
-            <div className="flex items-center gap-4 flex-wrap justify-center md:justify-end">
+            {/* Legend */}
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
                 <span className="text-sm text-[#1d1d1f]">Available</span>
