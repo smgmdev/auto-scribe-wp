@@ -187,9 +187,9 @@ export default function SystemStatus() {
       setIsLoading(false);
       if (showRefresh) {
         sonnerToast.success('Status refreshed');
-        setIsRefreshing(false);
-        refreshInProgressRef.current = false;
       }
+      setIsRefreshing(false);
+      refreshInProgressRef.current = false;
     }
   }, []);
 
@@ -348,14 +348,30 @@ export default function SystemStatus() {
             </div>
           )}
 
-          {/* Last Updated */}
-          <p className="text-sm text-[#86868b] mt-6">
-            Last updated today, {lastUpdated.toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
-              minute: '2-digit',
-              timeZoneName: 'short'
-            })}.
-          </p>
+          {/* Last Updated + Legend */}
+          <div className="flex items-center justify-between mt-6">
+            <p className="text-sm text-[#86868b]">
+              Last updated today, {lastUpdated.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                timeZoneName: 'short'
+              })}.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="available" />
+                <span className="text-sm text-[#1d1d1f]">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="issue" />
+                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusIndicator status="outage" />
+                <span className="text-sm text-[#1d1d1f]">Outage</span>
+              </div>
+            </div>
+          </div>
 
           {/* Incident History */}
           <div className="mt-12 border-t border-[#d2d2d7] pt-10">
@@ -408,21 +424,6 @@ export default function SystemStatus() {
               </div>
             )}
 
-            {/* Legend - below incident history card */}
-            <div className="flex items-center justify-end gap-4 mt-6">
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="available" />
-                <span className="text-sm text-[#1d1d1f]">Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="issue" />
-                <span className="text-sm text-[#1d1d1f]">Heavy Load</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <StatusIndicator status="outage" />
-                <span className="text-sm text-[#1d1d1f]">Outage</span>
-              </div>
-            </div>
           </div>
         </main>
 
