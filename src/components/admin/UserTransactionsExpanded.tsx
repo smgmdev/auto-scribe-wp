@@ -679,7 +679,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="bg-muted/30">
+    <div className="bg-muted/30" style={{ touchAction: 'pan-y' }}>
       <Tabs value={activeType} onValueChange={setActiveType}>
         <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           {transactionTypes.map(type => {
