@@ -237,7 +237,7 @@ const ScrollColorSection = ({
       
       // Determine which section occupies the trigger point - check from bottom to top
       if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
-        newColor = '#0071e3'; // Blue for What You Can Do section
+        newColor = '#0d1b4b'; // Dark blue for What You Can Do section
       } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
         newColor = '#1d1d1f'; // Black for Global Media Library
       } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
@@ -498,13 +498,15 @@ const ScrollColorSection = ({
         <div
           id="what-you-can-do"
           ref={whatYouCanDoRef}
-          className="mt-16 bg-[#0071e3] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#0d1b4b] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
         >
-          {/* Icon */}
+          {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
+            <img
+              src={amblack}
+              alt="Arcana Mace"
+              className="w-16 h-16 object-contain brightness-0 invert"
+            />
           </div>
 
           {/* Title */}
