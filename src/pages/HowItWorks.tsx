@@ -685,36 +685,33 @@ const ScrollColorSection = ({
               </p>
               <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn how</span>
               <div className="flex-1 flex items-end mt-6">
-                {randomArticle ? (
-                  <div className="w-full border border-white/10 bg-white/5 overflow-hidden">
-                    {randomArticle.featured_image?.url && (
-                      <img
-                        src={randomArticle.featured_image.url}
-                        alt={randomArticle.featured_image.alt || randomArticle.title}
-                        className="w-full h-24 object-cover opacity-80"
-                      />
-                    )}
-                    <div className="p-3">
-                      {randomArticle.published_to_name && (
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          {randomArticle.published_to_favicon && (
-                            <img src={randomArticle.published_to_favicon} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" />
-                          )}
-                          <span className="text-[10px] text-[#f7931e] font-medium uppercase tracking-wide truncate">{randomArticle.published_to_name}</span>
+                <div className="w-full border border-white/10 bg-white/5 overflow-hidden">
+                  {(randomArticle?.featured_image?.url) && (
+                    <img
+                      src={randomArticle.featured_image.url}
+                      alt={randomArticle.featured_image.alt || randomArticle.title}
+                      className="w-full h-24 object-cover opacity-80"
+                    />
+                  )}
+                  <div className="p-3">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      {randomArticle?.published_to_favicon ? (
+                        <img src={randomArticle.published_to_favicon} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-sm bg-[#f7931e]/40 flex items-center justify-center">
+                          <FileText className="w-2 h-2 text-[#f7931e]" />
                         </div>
                       )}
-                      <p className="text-white/80 text-xs font-medium leading-snug line-clamp-2">{randomArticle.title}</p>
+                      <span className="text-[10px] text-[#f7931e] font-medium uppercase tracking-wide truncate">
+                        {randomArticle?.published_to_name || 'Washington Morning'}
+                      </span>
                     </div>
+                    <p className="text-white/80 text-xs font-medium leading-snug line-clamp-2">
+                      {randomArticle?.title || 'Global Markets Rally as Central Banks Signal Policy Shift Ahead'}
+                    </p>
+                    <p className="text-white/30 text-[10px] mt-1.5">Published via Local Library · AI Generated</p>
                   </div>
-                ) : (
-                  <div className="flex gap-3 items-end">
-                    {[PenTool, FileText, Zap].map((Icon, i) => (
-                      <div key={i} className={`rounded-2xl bg-gradient-to-b from-[#ff6b35]/30 to-[#f7931e]/10 border border-white/10 flex items-center justify-center ${i === 1 ? 'w-16 h-16' : 'w-12 h-12'}`}>
-                        <Icon className={`text-[#f7931e] ${i === 1 ? 'w-8 h-8' : 'w-6 h-6'}`} />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                </div>
               </div>
             </a>
 
