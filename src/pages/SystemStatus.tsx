@@ -238,17 +238,6 @@ export default function SystemStatus() {
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Refresh Button - top right */}
-            <Button
-              onClick={() => fetchStatus(true)}
-              disabled={isRefreshing}
-              variant="outline"
-              size="icon"
-              className="rounded-none border-border hover:bg-black hover:text-white transition-all duration-200"
-              title="Refresh status"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
             
             {user ? (
               <Button 
@@ -321,7 +310,7 @@ export default function SystemStatus() {
               })()}
             </div>
 
-            {/* Legend */}
+            {/* Legend + Refresh */}
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
@@ -335,6 +324,16 @@ export default function SystemStatus() {
                 <StatusIndicator status="outage" />
                 <span className="text-sm text-[#1d1d1f]">Outage</span>
               </div>
+              <Button
+                onClick={() => fetchStatus(true)}
+                disabled={isRefreshing}
+                variant="outline"
+                size="sm"
+                className="rounded-none gap-2 border-border hover:bg-black hover:text-white transition-all duration-200"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
             </div>
           </div>
 
