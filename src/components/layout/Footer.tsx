@@ -174,7 +174,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
           </div>
         </div>
       </div>
-      {!hideBlackSpacer && <div className="h-[50px] bg-black w-full" />}
+      {!hideBlackSpacer && <div className="h-[50px] w-full" />}
     </footer>
   );
 }
