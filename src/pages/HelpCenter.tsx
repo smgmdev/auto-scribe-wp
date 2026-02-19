@@ -100,10 +100,10 @@ const helpCategories = [
   {
     title: 'AI Auto Publishing',
     topics: [
-      'How AI Auto Publishing Works',
-      'Connecting Your WordPress Site',
-      'News Source APIs',
-      'Automatic Article Generation',
+      { label: 'How AI Auto Publishing Works', anchor: 'how-it-works' },
+      { label: 'Connecting Your WordPress Site', anchor: 'wordpress-connection' },
+      { label: 'News Source APIs', anchor: 'source-apis' },
+      { label: 'Automatic Article Generation', anchor: 'auto-generation' },
     ],
     slug: 'ai-auto-publishing',
   },
@@ -366,19 +366,27 @@ export default function HelpCenter() {
                         {category.title}
                       </h3>
                       <ul className="space-y-2 mb-4">
-                        {category.topics.map((topic, topicIndex) => (
-                          <li key={topicIndex}>
-                            <button 
-                              onClick={() => navigate(`/help/${category.slug}`)}
-                              className="text-base text-muted-foreground hover:text-foreground transition-colors text-left"
-                            >
-                              {topic}
-                            </button>
-                          </li>
-                        ))}
+                        {category.topics.map((topic, topicIndex) => {
+                          const label = typeof topic === 'string' ? topic : topic.label;
+                          const anchor = typeof topic === 'object' ? topic.anchor : undefined;
+                          const path = anchor ? `/help/${category.slug}#${anchor}` : `/help/${category.slug}`;
+                          return (
+                            <li key={topicIndex}>
+                              <button 
+                                onClick={() => navigate(path)}
+                                className="text-base text-muted-foreground hover:text-foreground transition-colors text-left"
+                              >
+                                {label}
+                              </button>
+                            </li>
+                          );
+                        })}
                       </ul>
                       <button 
-                        onClick={() => navigate(`/help/${category.slug}`)}
+                        onClick={() => {
+                          const firstAnchor = typeof category.topics[0] === 'object' ? (category.topics[0] as { label: string; anchor: string }).anchor : undefined;
+                          navigate(firstAnchor ? `/help/${category.slug}#${firstAnchor}` : `/help/${category.slug}`);
+                        }}
                         className="text-[#06c] text-base font-medium hover:underline inline-flex items-center gap-1"
                       >
                         Learn more
