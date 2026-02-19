@@ -98,6 +98,7 @@ export default function AIAutoPublishing() {
       title="AI Auto Publishing"
       category="AI Auto Publishing"
       categorySlug="ai-auto-publishing"
+      topNotice="Automatic AI publishing is currently in a beta mode."
       intro={
         <p>
           Learn how to connect your approved WordPress site to automatic news source APIs,
