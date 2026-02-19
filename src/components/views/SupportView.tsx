@@ -241,18 +241,18 @@ export function SupportView() {
                           <span className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                         )}
                         <p className="font-medium text-sm truncate">{ticket.subject}</p>
+                        <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
+                          {ticket.status === 'open' ? (
+                            <><Clock className="h-3 w-3 mr-1" />Open</>
+                          ) : (
+                            <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                          )}
+                        </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
                       </p>
                     </div>
-                    <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
-                      {ticket.status === 'open' ? (
-                        <><Clock className="h-3 w-3 mr-1" />Open</>
-                      ) : (
-                        <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
-                      )}
-                    </Badge>
                   </button>
                 ))
               )}
