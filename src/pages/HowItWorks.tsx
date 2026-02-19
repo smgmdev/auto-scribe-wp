@@ -331,7 +331,7 @@ const ScrollColorSection = ({
           </div>
           
           {/* WordPress Site Logos Row */}
-          <div className="relative mt-12 overflow-hidden">
+          <div className="relative mt-12 overflow-hidden -mx-12 md:mx-0">
             {/* Right fade overlay - desktop only */}
             <div className="hidden md:block absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/70 to-transparent z-20 pointer-events-none" />
             
