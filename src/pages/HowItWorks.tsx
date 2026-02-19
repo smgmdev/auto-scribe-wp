@@ -165,6 +165,16 @@ const ScrollColorSection = ({
   const coralCardRef = useRef<HTMLDivElement>(null);
   const localLibraryRef = useRef<HTMLDivElement>(null);
   const globalLibraryRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    const container = scrollContainerRef.current;
+    const target = ref.current;
+    if (!container || !target) return;
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const offset = targetRect.top - containerRect.top + container.scrollTop - 100;
+    container.scrollTo({ top: offset, behavior: 'smooth' });
+  };
   const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
   const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
   const [mediaSites, setMediaSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
@@ -272,25 +282,14 @@ const ScrollColorSection = ({
                   Local Media<br />Library
                 </h3>
                 <button 
-                  onClick={() => document.getElementById('local-media-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollToSection(localLibraryRef)}
                   className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
                 >
                   Learn more <span className="text-xl">›</span>
                 </button>
-              </div>
-            </div>
-
-            {/* Vertical Divider - white */}
-            <div className="hidden md:block w-[3px] bg-white/70 rounded-full my-8 flex-shrink-0" />
-
-            {/* Card 2 - Global Media Library */}
-            <div className="flex-1 flex justify-center md:justify-start p-8 md:py-10 lg:py-12">
-              <div className="md:ml-16 text-center md:text-left">
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Global Media<br />Library
-                </h3>
+...
                 <button 
-                  onClick={() => document.getElementById('global-media-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollToSection(globalLibraryRef)}
                   className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
                 >
                   Learn more <span className="text-xl">›</span>
