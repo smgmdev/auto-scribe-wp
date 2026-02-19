@@ -292,7 +292,18 @@ const ScrollColorSection = ({
                 >
                   Learn more <span className="text-xl">›</span>
                 </button>
-...
+              </div>
+            </div>
+
+            {/* Vertical Divider - white */}
+            <div className="hidden md:block w-[3px] bg-white/70 rounded-full my-8 flex-shrink-0" />
+
+            {/* Card 2 - Global Media Library */}
+            <div className="flex-1 flex justify-center md:justify-start p-8 md:py-10 lg:py-12">
+              <div className="md:ml-16 text-center md:text-left">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
+                  Global Media<br />Library
+                </h3>
                 <button 
                   onClick={() => scrollToSection(globalLibraryRef)}
                   className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
