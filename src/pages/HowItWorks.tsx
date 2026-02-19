@@ -237,7 +237,7 @@ const ScrollColorSection = ({
       
       // Determine which section occupies the trigger point - check from bottom to top
       if (aiSectionRect && aiSectionRect.top <= triggerPoint && aiSectionRect.bottom > 0) {
-        newColor = '#c2410c'; // Orange for AI section
+        newColor = '#d88b57'; // Orange for AI section
       } else if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
         newColor = '#0d1b4b'; // Dark blue for What You Can Do section
       } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
@@ -575,7 +575,7 @@ const ScrollColorSection = ({
         <div
           id="ai-section"
           ref={aiSectionRef}
-          className="mt-16 bg-[#c2410c] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#d88b57] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
         >
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
@@ -600,7 +600,7 @@ const ScrollColorSection = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
             {/* Card 1 */}
             <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #c2410c 100%)' }}>
+              style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #d88b57 100%)' }}>
               <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #fed7aa, transparent)' }} />
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Connect your own WordPress<br />site to Local Library</h3>
