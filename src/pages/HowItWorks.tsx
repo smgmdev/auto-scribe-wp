@@ -333,11 +333,11 @@ const ScrollColorSection = ({
           {/* WordPress Site Logos Row */}
           <div className="relative mt-12">
             {/* Left fade overlay */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-r from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-8 md:w-20 bg-gradient-to-r from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
             {/* Right fade overlay */}
-            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 md:w-20 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/80 to-transparent z-20 pointer-events-none" />
             
-            <div className="flex justify-center items-center gap-3 md:gap-4">
+            <div className="flex justify-center items-center gap-2 md:gap-4">
               {wpSites.length > 0 ? (
                 wpSites.map((site, index) => {
                   const isCenter = index === 2;
@@ -348,10 +348,10 @@ const ScrollColorSection = ({
                     <div 
                       key={site.id}
                       className={`
-                        ${isCenter ? 'w-28 h-28 md:w-36 md:h-36 shadow-2xl z-10' : ''}
-                        ${isNearCenter ? 'w-24 h-24 md:w-32 md:h-32 shadow-xl opacity-90' : ''}
-                        ${isEdge ? 'w-20 h-20 md:w-28 md:h-28 shadow-lg opacity-50' : ''}
-                        rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
+                        ${isCenter ? 'w-[18vw] h-[18vw] max-w-[112px] max-h-[112px] md:w-36 md:h-36 shadow-2xl z-10' : ''}
+                        ${isNearCenter ? 'w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 shadow-xl opacity-90' : ''}
+                        ${isEdge ? 'w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 shadow-lg opacity-50' : ''}
+                        rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
                       `}
                     >
                       {site.favicon ? (
@@ -361,27 +361,27 @@ const ScrollColorSection = ({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Globe className={`${isCenter ? 'w-16 h-16 md:w-20 md:h-20' : 'w-12 h-12 md:w-16 md:h-16'} text-[#bf5af2]`} />
+                        <Globe className="w-1/2 h-1/2 text-[#bf5af2]" />
                       )}
                     </div>
                   );
                 })
               ) : (
                 <>
-                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
-                    <FileText className="w-10 h-10 md:w-14 md:h-14 text-[#64d2ff]" />
+                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                    <FileText className="w-1/2 h-1/2 text-[#64d2ff]" />
                   </div>
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
-                    <Globe className="w-12 h-12 md:w-16 md:h-16 text-[#bf5af2]" />
+                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                    <Globe className="w-1/2 h-1/2 text-[#bf5af2]" />
                   </div>
-                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
-                    <Zap className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
+                  <div className="w-[18vw] h-[18vw] max-w-[112px] max-h-[112px] md:w-36 md:h-36 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
+                    <Zap className="w-1/2 h-1/2 text-[#ff6b6b]" />
                   </div>
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
-                    <BarChart3 className="w-12 h-12 md:w-16 md:h-16 text-[#30d158]" />
+                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                    <BarChart3 className="w-1/2 h-1/2 text-[#30d158]" />
                   </div>
-                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
-                    <PenTool className="w-10 h-10 md:w-14 md:h-14 text-[#ffd60a]" />
+                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                    <PenTool className="w-1/2 h-1/2 text-[#ffd60a]" />
                   </div>
                 </>
               )}
