@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 // Admin Credit Management View
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -178,9 +178,32 @@ export const AdminCreditManagementView = () => {
     });
   };
 
+  // Debounced refetch for realtime events
+  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefetch = useCallback(() => {
+    if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    refetchTimerRef.current = setTimeout(() => {
+      fetchUserCredits();
+    }, 1500);
+  }, []);
+
   useEffect(() => {
     fetchUserCredits();
-  }, []);
+
+    const channel = supabase
+      .channel('admin-credit-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_messages' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_withdrawals' }, debouncedRefetch)
+      .subscribe();
+
+    return () => {
+      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+      supabase.removeChannel(channel);
+    };
+  }, [debouncedRefetch]);
 
   const fetchUserCredits = async () => {
     setBalancesLoading(true);

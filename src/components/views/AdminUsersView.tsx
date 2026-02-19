@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits, recalculateSingleUser } from '@/lib/credit-calculations';
@@ -440,9 +440,32 @@ export function AdminUsersView() {
     return filtered;
   }, [users, searchQuery, activeTab]);
 
+  // Debounced refetch for realtime events
+  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefetch = useCallback(() => {
+    if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    refetchTimerRef.current = setTimeout(() => {
+      fetchUsers();
+    }, 1500);
+  }, []);
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+
+    const channel = supabase
+      .channel('admin-users-credit-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_messages' }, debouncedRefetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_withdrawals' }, debouncedRefetch)
+      .subscribe();
+
+    return () => {
+      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+      supabase.removeChannel(channel);
+    };
+  }, [debouncedRefetch]);
 
   // Handle navigation from other views (e.g., Agency Withdrawals -> User Credit History)
   useEffect(() => {

@@ -162,5 +162,27 @@ export function useAvailableCredits(enabled = true) {
     if (enabled) refresh();
   }, [enabled, refresh]);
 
+  // Auto-refresh when credit-related tables change
+  useEffect(() => {
+    if (!enabled || !user) return;
+
+    const channel = supabase
+      .channel('user-credits-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` }, () => {
+        refresh();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, () => {
+        refresh();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests', filter: `user_id=eq.${user.id}` }, () => {
+        refresh();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [enabled, user, refresh]);
+
   return { ...data, refresh };
 }
