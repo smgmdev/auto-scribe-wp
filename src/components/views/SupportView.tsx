@@ -212,7 +212,7 @@ export function SupportView() {
             </Tabs>
 
             {/* Ticket List */}
-            <div className="space-y-2 mt-6">
+            <div className="space-y-2 mt-0">
               {tickets.filter(t => activeTab === 'open' ? t.status === 'open' : t.status === 'closed').length === 0 ? (
                 <div className="text-center py-16">
                   <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
