@@ -112,7 +112,10 @@ export function MainLayout({
       <main 
         ref={mainRef}
         className={`lg:pl-64 lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
-        style={{ paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined }}
+        style={{ 
+          paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
         <div className="flex-1 p-4 lg:p-8">
           {children}
