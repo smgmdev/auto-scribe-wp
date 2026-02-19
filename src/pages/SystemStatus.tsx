@@ -406,7 +406,7 @@ export default function SystemStatus() {
             )}
 
             {/* Legend - below incident history card */}
-            <div className="flex flex-col items-end gap-1 mt-6">
+            <div className="flex items-center justify-end gap-4 mt-6">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
                 <span className="text-sm text-[#1d1d1f]">Available</span>
