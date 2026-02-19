@@ -629,7 +629,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       {/* Header */}
       <div className={`flex items-center justify-between px-4 pb-3 ${isMobile ? 'pt-1' : 'pt-4'} border-b border-border shrink-0`}>
         <div className="min-w-0 flex-1 mr-2">
-          <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
+            <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0 flex-shrink-0">
+              {ticketStatus}
+            </Badge>
+          </div>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
              {isAdmin ? (
               <>
@@ -649,10 +654,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
                 </span>
               </>
             )}
-            {' · '}
-            <Badge variant={ticketStatus === 'open' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
-              {ticketStatus}
-            </Badge>
+
           </div>
         </div>
       </div>
