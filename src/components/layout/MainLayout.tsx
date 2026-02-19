@@ -129,6 +129,8 @@ export function MainLayout({
               <Link to="/guidelines" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</Link>
               <Link to="/report-bug" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</Link>
               <Link to="/update-log" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Changelog</Link>
+              <Link to="/system-status" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</Link>
+              <Link to="/help" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</Link>
               <Link to="/sitemap" className={`transition-colors whitespace-nowrap ${isDarkFooter || isDashboardFooter ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</Link>
             </div>
           </div>
