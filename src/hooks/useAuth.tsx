@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pinVerified, setPinVerified] = useState(false);
   const hasShownWelcomeRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
+  const userInitiatedSignOutRef = useRef(false);
 
   // Helper to fully reset auth state
   const resetAuthState = () => {
@@ -242,8 +243,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Always process sign out
         if (event === 'SIGNED_OUT') {
-          console.log('[Auth] User signed out, resetting state');
-          resetAuthState();
+          // If user initiated the sign-out, reset immediately
+          if (userInitiatedSignOutRef.current) {
+            console.log('[Auth] User-initiated sign out, resetting state');
+            userInitiatedSignOutRef.current = false;
+            resetAuthState();
+            isInitialLoadRef.current = false;
+            return;
+          }
+          
+          // Unexpected sign-out (Supabase session expired, tab backgrounded, etc.)
+          // Try to recover the session before giving up
+          console.log('[Auth] Unexpected SIGNED_OUT event, attempting session recovery...');
+          setTimeout(async () => {
+            if (!isMounted) return;
+            try {
+              const { data: { session: recoveredSession }, error } = await supabase.auth.getSession();
+              if (error || !recoveredSession) {
+                // Try refreshing
+                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+                if (refreshError || !refreshData.session) {
+                  console.log('[Auth] Session recovery failed, resetting state');
+                  resetAuthState();
+                  return;
+                }
+                console.log('[Auth] Session recovered via refresh');
+                setSession(refreshData.session);
+                setUser(refreshData.session.user);
+              } else {
+                console.log('[Auth] Session still valid, ignoring SIGNED_OUT');
+                setSession(recoveredSession);
+                setUser(recoveredSession.user);
+              }
+            } catch (err) {
+              console.error('[Auth] Session recovery error:', err);
+              resetAuthState();
+            }
+          }, 0);
           isInitialLoadRef.current = false;
           return;
         }
@@ -353,6 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    userInitiatedSignOutRef.current = true;
     const store = useAppStore.getState();
     
     // Clear all notifications and chat state
