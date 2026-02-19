@@ -63,6 +63,25 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [sections]);
 
+  // Scroll to anchor on initial load if hash is present
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) return;
+    // Wait for layout to settle before scrolling
+    const timer = setTimeout(() => {
+      const element = document.getElementById(hash);
+      if (element && scrollContainerRef.current) {
+        const headerOffset = 140;
+        scrollContainerRef.current.scrollTo({
+          top: element.offsetTop - headerOffset,
+          behavior: 'smooth',
+        });
+        setActiveSection(hash);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element && scrollContainerRef.current) {
