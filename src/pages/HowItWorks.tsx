@@ -337,12 +337,12 @@ const ScrollColorSection = ({
           
           {/* Links */}
           <div className="flex items-center justify-center gap-6">
-            <a href="/auth" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Get started <span className="text-xl">↗</span>
+            <a href="/self-publishing" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              Discover Self Publishing <span className="text-xl">↗</span>
             </a>
-            <a href="#self-publishing" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Learn more <span className="text-xl">›</span>
-            </a>
+            <button onClick={() => scrollToSection(globalLibraryRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              Learn about Global Library <span className="text-xl">›</span>
+            </button>
           </div>
           
           {/* WordPress Site Logos Row */}
