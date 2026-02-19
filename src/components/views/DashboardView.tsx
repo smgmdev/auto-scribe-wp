@@ -808,7 +808,7 @@ export function DashboardView() {
               <p className="text-sm text-muted-foreground">
                 No articles yet. Start by scanning headlines or writing a new article.
               </p>
-              <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="md:hidden text-muted-foreground hover:bg-black hover:text-white w-full justify-center">
+              <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="md:hidden bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]">
                 View All
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
