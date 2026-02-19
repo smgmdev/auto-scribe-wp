@@ -522,7 +522,7 @@ const ScrollColorSection = ({
           {/* Feature grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
             {/* Card 1: Self Publish */}
-            <a href="/self-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+            <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #0d2a4a 0%, #1a1a3e 60%, #2d1b4e 100%)' }}>
               {/* Purple glow blob */}
               <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #7c3aed, transparent)' }} />
