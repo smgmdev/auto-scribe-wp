@@ -19,9 +19,10 @@ export interface HelpArticleProps {
   categorySlug: string;
   intro: React.ReactNode;
   sections: HelpSection[];
+  topNotice?: string;
 }
 
-export function HelpArticleLayout({ title, category, categorySlug, intro, sections }: HelpArticleProps) {
+export function HelpArticleLayout({ title, category, categorySlug, intro, sections, topNotice }: HelpArticleProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -191,6 +192,9 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
 
             {/* Article Content */}
             <article className="min-w-0 pb-16">
+              {topNotice && (
+                <p className="text-sm text-muted-foreground mb-4">{topNotice}</p>
+              )}
               <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-6">
                 {title}
               </h1>
