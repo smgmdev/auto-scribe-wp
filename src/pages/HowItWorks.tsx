@@ -269,7 +269,7 @@ const ScrollColorSection = ({
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
-          className="bg-[#f87171] rounded-[40px] p-12 md:p-16 pb-0 md:pb-0"
+          className="bg-[#f87171] rounded-none p-12 md:p-16 pb-0 md:pb-0"
         >
           <div className="min-h-[200px] flex flex-col justify-center items-center text-center">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
@@ -317,7 +317,7 @@ const ScrollColorSection = ({
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -405,7 +405,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Global Media Library Section */}
-        <div id="global-media-library" ref={globalLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="global-media-library" ref={globalLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -500,7 +500,7 @@ const ScrollColorSection = ({
         <div
           id="what-you-can-do"
           ref={whatYouCanDoRef}
-          className="mt-16 bg-[#0d1b4b] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#0d1b4b] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center"
         >
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
@@ -575,7 +575,7 @@ const ScrollColorSection = ({
         <div
           id="ai-section"
           ref={aiSectionRef}
-          className="mt-16 bg-[#d88b57] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#d88b57] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center"
         >
           {/* Icon - Arcana Mace Logo White with Orbital Rings */}
           <div className="flex justify-center mb-6">
