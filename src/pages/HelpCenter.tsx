@@ -98,6 +98,26 @@ const helpCategories = [
     slug: 'ai-generation',
   },
   {
+    title: 'AI Auto Publishing',
+    topics: [
+      'How AI Auto Publishing Works',
+      'Connecting Your WordPress Site',
+      'News Source APIs',
+      'Automatic Article Generation',
+    ],
+    slug: 'ai-auto-publishing',
+  },
+  {
+    title: 'AI Security Supervision',
+    topics: [
+      'What Is AI Security Supervision?',
+      'What the System Monitors',
+      'How It Works',
+      'Impact on Regular Users',
+    ],
+    slug: 'ai-security-supervision',
+  },
+  {
     title: 'Troubleshooting',
     topics: [
       'Common Issues',
