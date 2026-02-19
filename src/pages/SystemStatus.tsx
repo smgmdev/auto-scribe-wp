@@ -274,7 +274,7 @@ export default function SystemStatus() {
           </h1>
 
           {/* Status row: banner + legend */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex items-end justify-between gap-3 mb-6">
             {/* Status message */}
             <div className="flex items-center gap-3">
               {isLoading ? (
@@ -311,7 +311,7 @@ export default function SystemStatus() {
             </div>
 
             {/* Legend + Refresh */}
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex flex-col items-end gap-1">
               <div className="flex items-center gap-2">
                 <StatusIndicator status="available" />
                 <span className="text-sm text-[#1d1d1f]">Available</span>
@@ -329,7 +329,7 @@ export default function SystemStatus() {
                 disabled={isRefreshing}
                 variant="outline"
                 size="sm"
-                className="rounded-none gap-2 border-border hover:bg-black hover:text-white transition-all duration-200"
+                className="rounded-none gap-2 border-border hover:bg-black hover:text-white transition-all duration-200 mt-1"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
