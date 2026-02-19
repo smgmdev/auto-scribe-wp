@@ -962,19 +962,19 @@ const HowItWorks = () => {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
             <p>
-              * Apple Intelligence is available in beta. Some features may not be available in all regions or languages. For feature and language availability and system requirements, see support.apple.com/121115.
+              * AI Article Generation is available on all Arcana Mace plans. Generated content quality may vary depending on source material, selected tone, and target publication. Users are solely responsible for reviewing and verifying AI-generated content before publishing.
             </p>
             <p>
-              Available in English (Australia, Canada, United Kingdom, U.S.). This feature is not available on AirPods with the H1 headphone chip and Intel-based Mac computers. Devices must support and have the latest operating system.
+              Self-Publishing via the Local Media Library requires a connected WordPress site with application password access enabled. Publishing availability depends on your WordPress site configuration, installed SEO plugins, and server response. Arcana Mace is not responsible for downtime or errors originating from third-party WordPress hosting providers.
             </p>
             <p>
-              Available in English (Australia, Canada, United Kingdom, U.S.) on iPhone 11 and later, iPad Pro 12.9-inch (3rd generation and later), iPad Pro 11-inch (1st generation and later), iPad Air (3rd generation and later), iPad mini (5th generation and later), iPad (8th generation and later), AirPods, and CarPlay. Available in English (U.S.) on Apple Vision Pro. Devices must support and have the latest operating system.
+              Media placements through the Global Media Library are subject to individual agency terms, availability, and editorial guidelines. Acceptance of submitted content is at the sole discretion of the respective agency or publication. Arcana Mace operates strictly as an intermediary marketplace and does not guarantee placement outcomes.
             </p>
             <p>
-              CarPlay support is either standard or available as an option on many new 2016 cars and later, with some manufacturers offering software updates for earlier models. Some models may support CarPlay only in certain configurations, and not all models are available in all areas. CarPlay support is subject to change. See your dealer for details. "Hey Siri" and "Siri" support requires a compatible vehicle.
+              Escrow payments are processed via Airwallex. Funds are held in escrow and released to the agency only upon client confirmation of delivery. Arcana Mace charges a platform commission on each completed transaction. Refund eligibility is subject to the platform's dispute resolution process.
             </p>
             <p>
-              Apple Pay is a service provided by Apple Payments Services LLC, a subsidiary of Apple Inc. Neither Apple Inc. nor Apple Payments Services LLC is a bank. Any card used in Apple Pay is offered by the card issuer.
+              Arcana Mace is operated by Stankevicius Pacific Limited, Hong Kong. All transactions and services are governed by the laws of Hong Kong. Platform features, pricing, and agency availability may change without prior notice. See our Terms of Service and Privacy Policy for full details.
             </p>
           </div>
         </div>
