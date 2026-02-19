@@ -498,29 +498,10 @@ const ScrollColorSection = ({
         <div
           id="what-you-can-do"
           ref={whatYouCanDoRef}
-          className="mt-16 bg-[#0d1b4b] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#0d1b4b] rounded-[40px] px-6 py-10 md:p-10 lg:p-12"
         >
-          {/* Icon - Arcana Mace Logo White */}
-          <div className="flex justify-center mb-6">
-            <img
-              src={amblack}
-              alt="Arcana Mace"
-              className="w-16 h-16 object-contain brightness-0 invert"
-            />
-          </div>
-
-          {/* Title */}
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
-            What you can do with Arcana Mace.
-          </h2>
-
-          {/* Description */}
-          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 leading-tight">
-            From self-publishing to global media placements, AI-generated articles to PR agency partnerships — everything you need to amplify your brand's voice is in one place.
-          </p>
-
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
             {/* Card 1: Self Publish */}
             <a href="/self-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #0d2a4a 0%, #1a1a3e 60%, #2d1b4e 100%)' }}>
@@ -558,13 +539,6 @@ const ScrollColorSection = ({
                   <Shield className="w-10 h-10 text-white" />
                 </div>
               </div>
-            </a>
-          </div>
-
-          {/* CTA */}
-          <div className="flex items-center justify-center gap-6 mt-10">
-            <a href="/auth" className="text-white/70 text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Get started <span className="text-xl">↗</span>
             </a>
           </div>
         </div>
