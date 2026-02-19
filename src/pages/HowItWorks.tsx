@@ -300,7 +300,7 @@ const ScrollColorSection = ({
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] p-12 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-[40px] px-6 py-10 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -331,7 +331,7 @@ const ScrollColorSection = ({
           </div>
           
           {/* WordPress Site Logos Row */}
-          <div className="relative mt-12 overflow-hidden -mx-12 md:mx-0">
+          <div className="relative mt-12 overflow-hidden -mx-6 md:mx-0">
             {/* Right fade overlay - desktop only */}
             <div className="hidden md:block absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/70 to-transparent z-20 pointer-events-none" />
             
