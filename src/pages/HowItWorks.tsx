@@ -1173,7 +1173,7 @@ const HowItWorks = () => {
               <div>
                 <p className="text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">Help Center</p>
                 <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">
-                  Find out more<br />about Arcana Mace.
+                  Getting Started with<br />Arcana Mace.
                 </h3>
                 <span className="text-white/80 text-sm group-hover:text-white transition-colors">Learn more ›</span>
               </div>
