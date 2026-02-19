@@ -527,7 +527,7 @@ const ScrollColorSection = ({
               {/* Purple glow blob */}
               <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #7c3aed, transparent)' }} />
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Self Publish to<br />your own sites</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Connect your own WordPress<br />site to Local Library</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
               </div>
             </a>
@@ -536,7 +536,7 @@ const ScrollColorSection = ({
             <a href="/media-buying" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(160deg, #0a1f2e 0%, #0d2d3a 50%, #0a1a2e 100%)' }}>
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Media Buying<br />Guide</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Add your own media sites<br />to Global Media Library</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about our outlets ›</span>
               </div>
               <div className="relative z-10 flex justify-center">
@@ -550,7 +550,7 @@ const ScrollColorSection = ({
             <a href="/agency" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #2d1b5e 0%, #3b1f6b 50%, #4a2080 100%)' }}>
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Arcana Mace for<br />agencies</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Control pricing<br />and close deals</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about partnerships ›</span>
               </div>
               <div className="relative z-10 flex justify-end">
