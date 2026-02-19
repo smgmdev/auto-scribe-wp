@@ -2,6 +2,7 @@ import { useAppStore } from '@/stores/appStore';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info, XCircle } from 'lucide-react';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -97,6 +98,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     whatsapp_phone: string | null;
     agency_name: string | null;
   } | null>(null);
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
   const [userOnline, setUserOnline] = useState(false);
   const [adminOnline, setAdminOnline] = useState(false);
   const [adminUserId, setAdminUserId] = useState<string | null>(null);
@@ -877,7 +880,9 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
+              <button className="text-foreground font-medium underline hover:text-accent" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}</button>
+            ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
             <Button
@@ -909,7 +914,9 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
+              <button className="text-foreground font-medium underline hover:text-accent" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}</button>
+            ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
             <Button
@@ -924,5 +931,11 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     ),
     document.body
   )}
+  <AgencyDetailsDialog
+    open={agencyDetailsOpen}
+    onOpenChange={setAgencyDetailsOpen}
+    agencyName={agencyDetailsName}
+    zIndex={350}
+  />
   </>;
 }
