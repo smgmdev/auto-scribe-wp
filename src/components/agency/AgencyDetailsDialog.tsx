@@ -40,7 +40,11 @@ export function AgencyDetailsDialog({
   const [logoLoading, setLogoLoading] = useState(true);
 
   // Drag state
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState(() => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 768;
+    return { x: (w - 420) / 2, y: (h - 400) / 2 };
+  });
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
   const positionRef = useRef({ x: 0, y: 0 });
