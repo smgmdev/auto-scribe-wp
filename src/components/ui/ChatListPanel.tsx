@@ -978,16 +978,21 @@ export function ChatListPanel() {
     // Check if this is a disputed chat the admin is monitoring
     const isDisputedChat = isAdmin && disputesRef.current.some(d => d.service_request_id === request_id);
     
+    // Check if admin has this chat open or minimized (admin can join any engagement chat)
+    const isAdminActiveChat = isAdmin && (isDialogOpen || isMinimized);
+    
     // Notification conditions:
     // - Client engagement receives agency OR admin message
     // - Agency service request receives client OR admin message
     // - Admin dispute chat receives client OR agency message
+    // - Admin has chat open/minimized receives client OR agency message
     const shouldNotify = !isAgencySendingAsAgency && (
       (isMyEngagement && (isFromAgency || isFromAdmin)) || 
       (isServiceRequest && (isFromClient || isFromAdmin)) ||
       (isMinimizedMyRequest && (isFromAgency || isFromAdmin)) || 
       (isMinimizedAgencyRequest && (isFromClient || isFromAdmin)) ||
-      (isDisputedChat && (isFromClient || isFromAgency))
+      (isDisputedChat && (isFromClient || isFromAgency)) ||
+      (isAdminActiveChat && (isFromClient || isFromAgency))
     );
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
