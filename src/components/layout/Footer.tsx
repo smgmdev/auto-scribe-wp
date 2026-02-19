@@ -175,7 +175,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
         </div>
       </div>
     </footer>
-    <div className={`h-[50px] ${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'}`} />
+    <div className="h-[100px] bg-black" />
     </>
   );
 }
