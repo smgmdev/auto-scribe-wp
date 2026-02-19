@@ -511,7 +511,7 @@ const ScrollColorSection = ({
 
           {/* Title */}
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-6">
-            What you can do with Arcana Mace.
+            Arcana Mace for Agencies.
           </h2>
 
           {/* Description */}
