@@ -1024,28 +1024,6 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Disclaimers Section */}
-      <section className="bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
-          <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
-            <p>
-              * AI Article Generation is available on all Arcana Mace plans. Generated content quality may vary depending on source material, selected tone, and target publication. Users are solely responsible for reviewing and verifying AI-generated content before publishing.
-            </p>
-            <p>
-              Self-Publishing via the Local Media Library requires a connected WordPress site with application password access enabled. Publishing availability depends on your WordPress site configuration, installed SEO plugins, and server response. Arcana Mace is not responsible for downtime or errors originating from third-party WordPress hosting providers.
-            </p>
-            <p>
-              Media placements through the Global Media Library are subject to individual agency terms, availability, and editorial guidelines. Acceptance of submitted content is at the sole discretion of the respective agency or publication. Arcana Mace operates strictly as an intermediary marketplace and does not guarantee placement outcomes.
-            </p>
-            <p>
-              Escrow payments are processed via Airwallex. Funds are held in escrow and released to the agency only upon client confirmation of delivery. Arcana Mace charges a platform commission on each completed transaction. Refund eligibility is subject to the platform's dispute resolution process.
-            </p>
-            <p>
-              Arcana Mace is operated by Stankevicius Pacific Limited, Hong Kong. All transactions and services are governed by the laws of Hong Kong. Platform features, pricing, and agency availability may change without prior notice. See our Terms of Service and Privacy Policy for full details.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <Footer narrow showTopBorder />
