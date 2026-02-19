@@ -92,7 +92,7 @@ const helpCategories = [
       'Using AI to Write Articles',
       'Headline Sources',
       'Tone & Style Options',
-      'Auto-Publishing (AI Settings)',
+      
       'Publishing AI Articles',
     ],
     slug: 'ai-generation',
