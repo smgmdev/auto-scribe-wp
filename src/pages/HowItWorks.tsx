@@ -904,6 +904,63 @@ const ArticleCarousel = ({
   );
 };
 
+const MediaLogoSlider = () => {
+  const [logos, setLogos] = useState<{ id: string; name: string; favicon: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('media_sites')
+      .select('id, name, favicon')
+      .not('favicon', 'is', null)
+      .neq('favicon', '')
+      .limit(40)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          // Shuffle randomly
+          const shuffled = [...data].sort(() => Math.random() - 0.5);
+          setLogos(shuffled);
+        }
+      });
+  }, []);
+
+  if (logos.length === 0) return null;
+
+  const doubled = [...logos, ...logos];
+
+  return (
+    <div className="w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}>
+      <div
+        className="flex gap-3 items-center"
+        style={{
+          animation: 'slide-logos 20s linear infinite',
+          width: 'max-content',
+        }}
+      >
+        {doubled.map((logo, i) => (
+          <div
+            key={`${logo.id}-${i}`}
+            className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-white/10"
+            title={logo.name}
+          >
+            <img
+              src={logo.favicon}
+              alt={logo.name}
+              className="w-7 h-7 object-contain"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          </div>
+        ))}
+      </div>
+      <style>{`
+        @keyframes slide-logos {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 const HowItWorks = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -1139,11 +1196,7 @@ const HowItWorks = () => {
                 </h3>
                 <span className="text-white/70 text-sm group-hover:text-white transition-colors">Create an Account ›</span>
               </div>
-              <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <img src={amblack} alt="Arcana Mace" className="w-10 h-10 object-contain brightness-0 invert" />
-                </div>
-              </div>
+              <MediaLogoSlider />
             </a>
 
             {/* Card 2 - Media Buying */}
