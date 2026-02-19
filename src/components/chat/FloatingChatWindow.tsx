@@ -486,6 +486,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     agency_name?: string | null;
   } | null>(null);
   const [userDetailsLogoLoading, setUserDetailsLogoLoading] = useState(true);
+  const [userDetailsPos, setUserDetailsPos] = useState({ x: 0, y: 0 });
+  const [userDetailsDragging, setUserDetailsDragging] = useState(false);
+  const userDetailsDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const userDetailsInitialized = useRef(false);
   
   // Drag state - use position from chat object
   const [localPosition, setLocalPosition] = useState(chat.position);
@@ -3733,6 +3737,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     setAgencyDetailsOpen(true);
   };
 
+  // User details popup drag handlers
+  const handleUserDetailsDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+    setUserDetailsDragging(true);
+    userDetailsDragRef.current = { x: e.clientX, y: e.clientY, posX: userDetailsPos.x, posY: userDetailsPos.y };
+  }, [userDetailsPos]);
+
+  useEffect(() => {
+    if (!userDetailsDragging) return;
+    const onMove = (e: MouseEvent) => {
+      setUserDetailsPos({
+        x: userDetailsDragRef.current.posX + (e.clientX - userDetailsDragRef.current.x),
+        y: userDetailsDragRef.current.posY + (e.clientY - userDetailsDragRef.current.y),
+      });
+    };
+    const onUp = () => setUserDetailsDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [userDetailsDragging]);
+
+  const openUserDetailsPopup = useCallback(() => {
+    if (!userDetailsInitialized.current && !isMobile) {
+      const w = 320, h = 220;
+      setUserDetailsPos({
+        x: Math.max(0, Math.round((window.innerWidth - w) / 2)),
+        y: Math.max(0, Math.round((window.innerHeight - h) / 2)),
+      });
+      userDetailsInitialized.current = true;
+    }
+    setUserDetailsDialogOpen(true);
+  }, [isMobile]);
+
   // Render message content (simplified version)
   const renderMessageContent = (msg: ServiceMessage, isOwnMessage: boolean, quote: ReturnType<typeof parseQuote>) => {
     let displayMessage = msg.message;
@@ -6429,7 +6466,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                 onSelect={async () => {
                                   setUserDetailsLoading(true);
                                   setUserDetailsLogoLoading(true);
-                                  setUserDetailsDialogOpen(true);
+                                  openUserDetailsPopup();
                                   setUserDetails(null);
                                   
                                     try {
@@ -8485,43 +8522,96 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Admin: User Details Dialog */}
-      <Dialog open={userDetailsDialogOpen} onOpenChange={setUserDetailsDialogOpen}>
-        <DialogContent className="z-[250] max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Info className="h-5 w-5" />
-              User Details
-            </DialogTitle>
-          </DialogHeader>
-          {userDetailsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : userDetails ? (
-            <div className="space-y-3 text-sm">
-              <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
-              <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{userDetails.email || 'N/A'}</span></div>
-              <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.user_whatsapp || 'N/A'}</span></div>
-              <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
-              <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {userDetails.agency_name ? (
-                <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setSelectedAgencyName(userDetails.agency_name!); setAgencyDetailsOpen(true); }}>{userDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
-              ) : <span className="text-foreground font-medium">N/A</span>}</div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Unable to load user details.
-            </p>
-          )}
-          <div className="flex justify-end">
-            <DialogClose asChild>
-              <Button variant="outline" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-                Close
+      {/* Admin: User Details Draggable Popup */}
+      {userDetailsDialogOpen && isAdmin && createPortal(
+        isMobile ? (
+          <div className="fixed inset-0 z-[300] bg-background flex flex-col">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                onClick={() => setUserDetailsDialogOpen(false)}
+              >
+                <X className="h-4 w-4" />
               </Button>
-            </DialogClose>
+            </div>
+            <div className="p-4 space-y-4 flex-1">
+              <h4 className="font-semibold text-foreground text-lg">User Details</h4>
+              {userDetailsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : userDetails ? (
+                <div className="space-y-3 text-sm">
+                  <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+                  <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{userDetails.email || 'N/A'}</span></div>
+                  <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.user_whatsapp || 'N/A'}</span></div>
+                  <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+                  <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {userDetails.agency_name ? (
+                    <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setSelectedAgencyName(userDetails.agency_name!); setAgencyDetailsOpen(true); }}>{userDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+                  ) : <span className="text-foreground font-medium">N/A</span>}</div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Unable to load user details.</p>
+              )}
+              <div className="flex justify-end">
+                <Button
+                  className="w-full bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
+                  onClick={() => setUserDetailsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        ) : (
+          <div
+            className="fixed z-[300] bg-background rounded-lg shadow-xl border border-border"
+            style={{ left: userDetailsPos.x, top: userDetailsPos.y, width: 320 }}
+          >
+            <div
+              className={`flex items-center justify-between px-4 py-2 border-b bg-muted/30 ${userDetailsDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              onMouseDown={handleUserDetailsDragStart}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button onClick={() => setUserDetailsDialogOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-4 pt-4 space-y-4">
+              <h4 className="font-semibold text-foreground text-lg">User Details</h4>
+              {userDetailsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : userDetails ? (
+                <div className="space-y-3 text-sm">
+                  <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+                  <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{userDetails.email || 'N/A'}</span></div>
+                  <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.user_whatsapp || 'N/A'}</span></div>
+                  <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+                  <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {userDetails.agency_name ? (
+                    <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setSelectedAgencyName(userDetails.agency_name!); setAgencyDetailsOpen(true); }}>{userDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+                  ) : <span className="text-foreground font-medium">N/A</span>}</div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Unable to load user details.</p>
+              )}
+              <div className="flex justify-end">
+                <Button
+                  className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
+                  onClick={() => setUserDetailsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body
+      )}
       <BuyCreditsDialog open={confirmBuyCreditsOpen} onOpenChange={setConfirmBuyCreditsOpen} />
     </>,
     document.body
