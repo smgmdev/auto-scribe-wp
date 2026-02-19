@@ -673,7 +673,8 @@ const ScrollColorSection = ({
           {/* Feature grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
             {/* Card 1 - AI Article Generation */}
-            <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col p-7 cursor-pointer bg-[#1a1a2e]">
+            <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
+              <div className="p-7 pb-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #ff6b35, #f7931e)' }}>
                   <PenTool className="w-6 h-6 text-white" />
@@ -684,7 +685,8 @@ const ScrollColorSection = ({
                 Generate unique, high-quality articles in seconds using live news sources and AI. Choose your tone, keyword, and target site.
               </p>
               <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn how</span>
-              <div className="mt-6 w-full rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+              </div>
+              <div className="mt-auto w-full border-t border-white/10 bg-white/5 overflow-hidden">
                 <div className="relative w-full h-40 overflow-hidden bg-white/5">
                   {randomArticle?.featured_image?.url ? (
                     <img
