@@ -1196,7 +1196,11 @@ const HowItWorks = () => {
                 </h3>
                 <span className="text-white/70 text-sm group-hover:text-white transition-colors">Create an Account ›</span>
               </div>
-              <MediaLogoSlider />
+              <div className="flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <img src={amblack} alt="Arcana Mace" className="w-10 h-10 object-contain brightness-0 invert" />
+                </div>
+              </div>
             </a>
 
             {/* Card 2 - Media Buying */}
@@ -1211,11 +1215,7 @@ const HowItWorks = () => {
                 </h3>
                 <span className="text-[#06c] text-sm group-hover:underline transition-colors">Learn more ›</span>
               </div>
-              <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-[#f5f5f7] border border-[#d2d2d7]">
-                  <TrendingUp className="w-10 h-10 text-[#1d1d1f]" />
-                </div>
-              </div>
+              <MediaLogoSlider />
             </a>
 
             {/* Card 3 - Help Center */}
