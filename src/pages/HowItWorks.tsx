@@ -675,7 +675,7 @@ const ScrollColorSection = ({
               style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #d88b57 100%)' }}>
               <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #fed7aa, transparent)' }} />
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Connect your own WordPress<br />site to Local Library</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">AI Article<br />Generation</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
               </div>
             </a>
@@ -684,7 +684,7 @@ const ScrollColorSection = ({
             <a href="/help/for-agencies#managing-sites" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(160deg, #92400e 0%, #b45309 50%, #92400e 100%)' }}>
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Add your own media sites<br />to Global Media Library</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">AI Auto<br />Publishing</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
               </div>
               <div className="relative z-10 flex justify-center">
@@ -698,7 +698,7 @@ const ScrollColorSection = ({
             <a href="/help/for-agencies#becoming-agency" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #78350f 0%, #92400e 50%, #b45309 100%)' }}>
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Control pricing<br />and close deals</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Arcana Mace AI<br />Security Supervision</h3>
                 <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how to upgrade to an agency account ›</span>
               </div>
               <div className="relative z-10 flex justify-end">
