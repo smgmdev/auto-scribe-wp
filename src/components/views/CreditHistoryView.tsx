@@ -234,7 +234,6 @@ export function CreditHistoryView() {
           media_site: match.media_sites,
           order: match.orders?.[0] || null,
         };
-        setCurrentView('my-requests');
         openGlobalChat(chatRequest as any, 'my-request');
         return;
       }
