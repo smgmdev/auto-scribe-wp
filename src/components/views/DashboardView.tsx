@@ -784,14 +784,14 @@ export function DashboardView() {
 
       {/* My Recent Articles */}
         <Card className="border-0 bg-black">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between px-0 md:px-6">
           <CardTitle className="text-xl text-white">My Recent Articles</CardTitle>
           <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="hidden md:flex bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0 md:px-6">
           {articlesLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
@@ -874,10 +874,10 @@ export function DashboardView() {
 
       {/* Latest Global Articles */}
       <Card className="border-0 bg-black">
-        <CardHeader>
+        <CardHeader className="px-0 md:px-6">
           <CardTitle className="text-xl text-white">Latest Global Articles</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0 md:px-6">
           <LatestGlobalArticles />
         </CardContent>
       </Card>
