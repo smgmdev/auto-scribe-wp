@@ -1817,6 +1817,7 @@ export type Database = {
           price_cents: number
         }[]
       }
+      get_admin_online_status: { Args: never; Returns: boolean }
       get_agency_payout_id_by_name: {
         Args: { _agency_name: string }
         Returns: string
