@@ -97,8 +97,8 @@ export function AdminSupportView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-6">
-        <div>
+      <div className="max-w-[980px] mx-auto">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Support Tickets</h1>
           <p className="mt-1 text-muted-foreground">Manage user support requests</p>
         </div>
@@ -114,7 +114,7 @@ export function AdminSupportView() {
           </TabsList>
         </Tabs>
 
-        <div className="space-y-2">
+        <div className="space-y-0 mt-0">
           {filteredTickets.length === 0 ? (
             <div className="text-center py-16">
               <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
@@ -124,50 +124,37 @@ export function AdminSupportView() {
             filteredTickets.map(ticket => (
               <button
                 key={ticket.id}
-                className="w-full text-left border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                className="w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-gray-50 transition-colors relative"
                 onClick={() => handleOpenTicket(ticket)}
               >
-                <div className="flex items-center justify-end sm:hidden mb-2">
-                  <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs">
-                    {ticket.status === 'open' ? (
-                      <><Clock className="h-3 w-3 mr-1" />Open</>
-                    ) : (
-                      <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs absolute top-3 right-3">
+                  {ticket.status === 'open' ? (
+                    <><Clock className="h-3 w-3 mr-1" />Open</>
+                  ) : (
+                    <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                  )}
+                </Badge>
+                <div className="min-w-0 flex-1 pr-20">
+                  <div className="flex items-center gap-2">
+                    {!ticket.admin_read && (
+                      <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0" />
                     )}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      {!ticket.admin_read && (
-                        <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0" />
-                      )}
-                      <p className="font-medium text-sm truncate">{ticket.subject}</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1">
-                      <div className="flex items-center gap-2">
-                        <User className="h-3 w-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 mt-1.5 pl-5 sm:pl-0">
-                      <p className="text-xs text-muted-foreground">
-                        Ticket Opened: {format(new Date(ticket.created_at), 'MMM d, HH:mm')}
-                      </p>
-                      {ticket.status === 'closed' && ticket.closed_at && (
-                        <p className="text-xs text-muted-foreground">
-                          Ticket Closed: {format(new Date(ticket.closed_at), 'MMM d, HH:mm')}
-                        </p>
-                      )}
-                    </div>
+                    <p className="font-medium text-sm truncate">{ticket.subject}</p>
                   </div>
-                  <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0 hidden sm:flex">
-                    {ticket.status === 'open' ? (
-                      <><Clock className="h-3 w-3 mr-1" />Open</>
-                    ) : (
-                      <><CheckCircle className="h-3 w-3 mr-1" />Closed</>
+                  <div className="flex items-center gap-2 mt-1">
+                    <User className="h-3 w-3 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground truncate">{ticket.user_email}</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 mt-1.5">
+                    <p className="text-xs text-muted-foreground">
+                      Ticket Opened: {format(new Date(ticket.created_at), 'MMM d, HH:mm')}
+                    </p>
+                    {ticket.status === 'closed' && ticket.closed_at && (
+                      <p className="text-xs text-muted-foreground">
+                        Ticket Closed: {format(new Date(ticket.closed_at), 'MMM d, HH:mm')}
+                      </p>
                     )}
-                  </Badge>
+                  </div>
                 </div>
               </button>
             ))
