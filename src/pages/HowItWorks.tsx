@@ -562,10 +562,7 @@ const ScrollColorSection = ({
           </div>
 
           {/* CTA */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mt-10">
-            <a href="/auth" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Get started <span className="text-xl">↗</span>
-            </a>
+          <div className="flex items-center justify-center mt-10">
             <button onClick={() => scrollToSection(whatYouCanDoRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-2">
               There is more! Check out Arcana Mace AI <span className="text-xl">↓</span>
             </button>
