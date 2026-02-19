@@ -37,6 +37,8 @@ import HelpMediaBuying from "./pages/help/MediaBuying";
 import OrdersDelivery from "./pages/help/OrdersDelivery";
 import ForAgencies from "./pages/help/ForAgencies";
 import AIGeneration from "./pages/help/AIGeneration";
+import AIAutoPublishing from "./pages/help/AIAutoPublishing";
+import AISecuritySupervision from "./pages/help/AISecuritySupervision";
 import Troubleshooting from "./pages/help/Troubleshooting";
 import SelfPublishing from "./pages/SelfPublishing";
 import MediaBuying from "./pages/MediaBuying";
@@ -163,6 +165,8 @@ const App = () => {
               <Route path="/help/orders-delivery" element={<OrdersDelivery />} />
               <Route path="/help/for-agencies" element={<ForAgencies />} />
               <Route path="/help/ai-generation" element={<AIGeneration />} />
+              <Route path="/help/ai-auto-publishing" element={<AIAutoPublishing />} />
+              <Route path="/help/ai-security-supervision" element={<AISecuritySupervision />} />
               <Route path="/help/troubleshooting" element={<Troubleshooting />} />
               <Route path="/self-publishing" element={<SelfPublishing />} />
               <Route path="/media-buying" element={<MediaBuying />} />
