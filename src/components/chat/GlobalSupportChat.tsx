@@ -384,65 +384,35 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   useEffect(() => {
     if (isAdmin) return;
 
-    const checkAdminOnline = (lastOnlineAt: string | null) => {
-      if (!lastOnlineAt) return false;
-      return Date.now() - new Date(lastOnlineAt).getTime() < 2 * 60 * 1000;
-    };
-
-    let pollInterval = 30000;
     let isActive = true;
     let timeoutId: ReturnType<typeof setTimeout>;
-    let channelRef: ReturnType<typeof supabase.channel> | null = null;
-    let fetchedAdminId: string | null = null;
 
-    const fetchAndTrack = async () => {
+    const checkAdminStatus = async () => {
+      if (!isActive) return;
+      const { data, error } = await supabase.rpc('get_admin_online_status');
+      if (!error && data !== null) {
+        setAdminOnline(data as boolean);
+      }
+      if (isActive) timeoutId = setTimeout(checkAdminStatus, 15000);
+    };
+
+    // Also fetch admin user_id for other features
+    const fetchAdminId = async () => {
       const { data: roleData } = await supabase
         .from('user_roles')
         .select('user_id')
         .eq('role', 'admin')
         .limit(1)
         .maybeSingle();
-
-      if (!roleData?.user_id || !isActive) return;
-      fetchedAdminId = roleData.user_id;
-      setAdminUserId(roleData.user_id);
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('last_online_at')
-        .eq('id', roleData.user_id)
-        .single();
-
-      setAdminOnline(checkAdminOnline(profile?.last_online_at ?? null));
-
-      channelRef = supabase
-        .channel(`support-admin-online-${roleData.user_id}`)
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${roleData.user_id}` }, (payload) => {
-          const updated = payload.new as any;
-          setAdminOnline(checkAdminOnline(updated.last_online_at ?? null));
-          pollInterval = 30000;
-        })
-        .subscribe();
-
-      const poll = async () => {
-        if (!isActive || !fetchedAdminId) return;
-        const { data } = await supabase
-          .from('profiles')
-          .select('last_online_at')
-          .eq('id', fetchedAdminId)
-          .single();
-        setAdminOnline(checkAdminOnline(data?.last_online_at ?? null));
-        if (isActive) timeoutId = setTimeout(poll, pollInterval);
-      };
-      timeoutId = setTimeout(poll, pollInterval);
+      if (roleData?.user_id) setAdminUserId(roleData.user_id);
     };
 
-    fetchAndTrack();
+    checkAdminStatus();
+    fetchAdminId();
 
     return () => {
       isActive = false;
       clearTimeout(timeoutId);
-      if (channelRef) supabase.removeChannel(channelRef);
     };
   }, [isAdmin]);
 
