@@ -558,48 +558,29 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         maxHeight: 'calc(100vh - 100px)',
       }}
     >
-      {/* Drag Handle + actions row - desktop only */}
-      {!isMobile && (
-        <div
-          className={`flex items-center justify-between py-2 px-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-          onMouseDown={handleDragStart}
-        >
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          <div className="flex items-center gap-1 shrink-0">
-            {isAdmin && ticketStatus === 'open' && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowCloseConfirm(true); }}
-                className="text-xs px-2.5 py-1 rounded-none border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
-              >
-                Close Ticket
-              </button>
-            )}
-            <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="text-muted-foreground hover:text-foreground">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile top-right actions */}
-      {isMobile && (
-        <div className="flex items-center justify-end gap-1 px-4 pt-2 shrink-0">
+      {/* Drag Handle + actions row */}
+      <div
+        className={`flex items-center justify-between ${isMobile ? 'px-3 py-1.5' : 'py-2 px-4'} border-b bg-muted/30 ${!isMobile ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none shrink-0`}
+        onMouseDown={!isMobile ? handleDragStart : undefined}
+      >
+        <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-1 shrink-0">
           {isAdmin && ticketStatus === 'open' && (
             <button
-              onClick={() => setShowCloseConfirm(true)}
+              onClick={(e) => { e.stopPropagation(); setShowCloseConfirm(true); }}
               className="text-xs px-2.5 py-1 rounded-none border border-border text-muted-foreground hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
             >
               Close Ticket
             </button>
           )}
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
         </div>
-      )}
+      </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pb-3 pt-1 border-b border-border shrink-0">
+      <div className={`flex items-center justify-between px-4 pb-3 ${isMobile ? 'pt-1' : 'pt-4'} border-b border-border shrink-0`}>
         <div className="min-w-0 flex-1 mr-2">
           <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
