@@ -298,7 +298,7 @@ export default function SystemStatus() {
               },
             }[overall];
             return (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-[#d2d2d7] mb-4 md:mb-8">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-none border border-[#d2d2d7]">
                 {bannerConfig.icon}
                 <span className={`text-sm font-medium ${bannerConfig.text}`}>{bannerConfig.message}</span>
               </div>
