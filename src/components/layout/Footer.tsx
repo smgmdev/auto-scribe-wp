@@ -55,8 +55,8 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
   };
 
   const containerClass = narrow 
-    ? "max-w-[980px] mx-auto px-4 md:px-6"
-    : "container mx-auto px-4";
+    ? "max-w-[980px] mx-auto px-4 md:px-6 footer-widget-clearance"
+    : "container mx-auto px-4 footer-widget-clearance";
 
   return (
     <>
