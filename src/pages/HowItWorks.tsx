@@ -520,28 +520,45 @@ const ScrollColorSection = ({
           </p>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-left">
-            <div className="bg-white/10 rounded-[24px] p-6">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
-                <PenTool className="w-5 h-5 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left">
+            {/* Card 1: Self Publish */}
+            <a href="/self-publishing" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #0d2a4a 0%, #1a1a3e 60%, #2d1b4e 100%)' }}>
+              {/* Purple glow blob */}
+              <div className="absolute bottom-8 left-8 w-32 h-32 rounded-full opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, #7c3aed, transparent)' }} />
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Self Publish to<br />your own sites</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn how ›</span>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">AI Article Generation</h3>
-              <p className="text-white/70 text-sm leading-relaxed">Generate high-quality, SEO-optimized articles instantly using our AI, powered by real news sources and your chosen tone.</p>
-            </div>
-            <div className="bg-white/10 rounded-[24px] p-6">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
-                <Globe className="w-5 h-5 text-white" />
+            </a>
+
+            {/* Card 2: Media Buying Guide */}
+            <a href="/media-buying" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(160deg, #0a1f2e 0%, #0d2d3a 50%, #0a1a2e 100%)' }}>
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Media Buying<br />Guide</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about our outlets ›</span>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Global Media Placements</h3>
-              <p className="text-white/70 text-sm leading-relaxed">Access thousands of premium media outlets worldwide and get your content placed on top-tier publications.</p>
-            </div>
-            <div className="bg-white/10 rounded-[24px] p-6">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="relative z-10 flex justify-center">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <Globe className="w-10 h-10 text-white/80" />
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Secure Escrow Payments</h3>
-              <p className="text-white/70 text-sm leading-relaxed">Every transaction is protected. Funds are held in escrow and only released upon confirmed delivery.</p>
-            </div>
+            </a>
+
+            {/* Card 3: Arcana Mace for agencies */}
+            <a href="/agency" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #2d1b5e 0%, #3b1f6b 50%, #4a2080 100%)' }}>
+              <div className="relative z-10">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Arcana Mace for<br />agencies</h3>
+                <span className="text-white/60 text-sm group-hover:text-white/90 transition-colors">Learn more about partnerships ›</span>
+              </div>
+              <div className="relative z-10 flex justify-end">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124, 58, 237, 0.5)' }}>
+                  <Shield className="w-10 h-10 text-white" />
+                </div>
+              </div>
+            </a>
           </div>
 
           {/* CTA */}
