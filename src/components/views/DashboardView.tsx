@@ -497,10 +497,10 @@ export function DashboardView() {
         <div className="grid gap-0 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
            <Card className="border-0 bg-black rounded-none">
-            <CardHeader>
+            <CardHeader className="px-0 md:px-6">
               <CardTitle className="text-xl text-white">Agency Summary</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0 md:px-6">
               {/* Financial Stats - Modern Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
                 {/* Wallet Card with Tooltip */}
@@ -708,10 +708,10 @@ export function DashboardView() {
 
           {/* Agency Management */}
           <Card className="border-0 bg-black rounded-none">
-            <CardHeader>
+            <CardHeader className="px-0 md:px-6">
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-0">
+            <CardContent className="space-y-0 px-0 md:px-6">
               <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
