@@ -879,7 +879,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </Button>
         </div>
         <div className="p-4 space-y-4 flex-1">
-          <h4 className="font-semibold text-foreground text-sm">User Details</h4>
+          <h4 className="font-semibold text-foreground text-lg">User Details</h4>
           <div className="space-y-3 text-sm">
             <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.full_name || 'N/A') : 'Not Agency Account'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
@@ -914,7 +914,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           </button>
         </div>
         <div className="p-4 pt-4 space-y-4">
-          <h4 className="font-semibold text-foreground text-sm">User Details</h4>
+          <h4 className="font-semibold text-foreground text-lg">User Details</h4>
           <div className="space-y-3 text-sm">
             <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.full_name || 'N/A') : 'Not Agency Account'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
