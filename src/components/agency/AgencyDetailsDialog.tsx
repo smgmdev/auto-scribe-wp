@@ -36,7 +36,7 @@ export function AgencyDetailsDialog({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [agencyDetails, setAgencyDetails] = useState<AgencyDetailsData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [logoLoading, setLogoLoading] = useState(true);
 
   // Drag state
@@ -88,6 +88,9 @@ export function AgencyDetailsDialog({
 
   useEffect(() => {
     if (open && agencyName) {
+      setAgencyDetails(null);
+      setLoading(true);
+      setLogoLoading(true);
       fetchAgencyDetails(agencyName);
     }
   }, [open, agencyName]);

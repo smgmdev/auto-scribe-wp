@@ -886,7 +886,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.user_whatsapp || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
             <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
-              <button className="text-accent font-medium hover:text-accent/80 flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}><Info className="h-3.5 w-3.5" />{ticketUserDetails.agency_name}</button>
+              <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
             ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
@@ -921,7 +921,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.user_whatsapp || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
             <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
-              <button className="text-accent font-medium hover:text-accent/80 flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}><Info className="h-3.5 w-3.5" />{ticketUserDetails.agency_name}</button>
+              <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
             ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
