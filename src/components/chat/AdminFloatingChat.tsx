@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -86,6 +87,9 @@ interface ClientDetails {
   email_verified: boolean;
   suspended: boolean;
   whatsapp_phone: string | null;
+  agency_name: string | null;
+  full_name: string | null;
+  agency_whatsapp: string | null;
 }
 
 interface AdminFloatingChatProps {
@@ -926,7 +930,37 @@ export function AdminFloatingChat({
         .eq('id', clientId)
         .maybeSingle();
       
-      setClientDetails(data);
+      // Also fetch agency info for this user
+      let agencyName: string | null = null;
+      let fullName: string | null = null;
+      let agencyWhatsapp: string | null = null;
+      
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
+        .select('agency_name')
+        .eq('user_id', clientId)
+        .maybeSingle();
+      
+      if (agencyData) {
+        agencyName = agencyData.agency_name;
+        // Get full name and whatsapp from agency application
+        const { data: appData } = await supabase
+          .from('agency_applications')
+          .select('full_name, whatsapp_phone')
+          .eq('agency_name', agencyData.agency_name)
+          .maybeSingle();
+        if (appData) {
+          fullName = appData.full_name;
+          agencyWhatsapp = appData.whatsapp_phone;
+        }
+      }
+      
+      setClientDetails(data ? {
+        ...data,
+        agency_name: agencyName,
+        full_name: fullName,
+        agency_whatsapp: agencyWhatsapp,
+      } : null);
     } catch (error) {
       console.error('Error fetching client:', error);
     } finally {
@@ -1979,90 +2013,16 @@ export function AdminFloatingChat({
         </DialogContent>
       </Dialog>
 
-      {/* Agency Details Dialog */}
-      <Dialog open={agencyDetailsOpen} onOpenChange={(open) => {
-        setAgencyDetailsOpen(open);
-        if (!open) setLogoLoading(false);
-      }}>
-        <DialogContent className="sm:max-w-md z-[10000]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div className="relative h-12 w-12">
-                {loadingAgency ? (
-                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  </div>
-                ) : agencyDetails?.logo_url ? (
-                  <>
-                    {logoLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-xl">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-                    <img 
-                      src={agencyDetails.logo_url} 
-                      alt={agencyDetails.agency_name}
-                      className={`h-12 w-12 rounded-xl bg-muted object-contain ${logoLoading ? 'opacity-0' : 'opacity-100'}`}
-                      onLoad={() => setLogoLoading(false)}
-                      onError={() => setLogoLoading(false)}
-                    />
-                  </>
-                ) : (
-                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              <span>{agencyDetails?.agency_name || 'Agency Details'}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {loadingAgency ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : agencyDetails ? (
-            <div className="space-y-4 mt-4">
-              {agencyDetails.email && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="text-foreground">{agencyDetails.email}</p>
-                </div>
-              )}
-              
-              <div>
-                <p className="text-sm text-muted-foreground">Member Since</p>
-                <p className="text-foreground">
-                  {new Date(agencyDetails.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={agencyDetails.onboarding_complete ? 'default' : 'secondary'} className={agencyDetails.onboarding_complete ? 'bg-green-600' : ''}>
-                  {agencyDetails.onboarding_complete ? 'Verified' : 'Pending'}
-                </Badge>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">Agency not found</p>
-          )}
-
-          <div className="flex justify-end mt-6">
-            <Button 
-              variant="outline"
-              onClick={() => setAgencyDetailsOpen(false)}
-              className="hover:bg-black hover:text-white transition-colors"
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Agency Details - uses the actual AgencyDetailsDialog component */}
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={(open) => {
+          setAgencyDetailsOpen(open);
+          if (!open) setLogoLoading(false);
+        }}
+        agencyName={agencyDetails?.agency_name || null}
+        zIndex={10000}
+      />
 
       {/* Order Details Dialog */}
       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
@@ -2203,7 +2163,7 @@ export function AdminFloatingChat({
               <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
                 <User className="h-6 w-6 text-muted-foreground" />
               </div>
-              <span>Client Details</span>
+              <span className="text-lg">Client Details</span>
             </DialogTitle>
           </DialogHeader>
 
@@ -2212,61 +2172,14 @@ export function AdminFloatingChat({
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : clientDetails ? (
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="text-foreground">{clientDetails.email || 'No email'}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">WhatsApp</p>
-                  <p className="text-foreground">{clientDetails.whatsapp_phone || 'N/A'}</p>
-                </div>
-              </div>
-              
-              {clientDetails.username && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Username</p>
-                    <p className="text-foreground">{clientDetails.username}</p>
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Member Since</p>
-                  <p className="text-foreground">
-                    {new Date(clientDetails.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Email Status</p>
-                  <Badge variant={clientDetails.email_verified ? 'default' : 'secondary'} className={clientDetails.email_verified ? 'bg-green-600' : ''}>
-                    {clientDetails.email_verified ? 'Verified' : 'Unverified'}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Account Status</p>
-                  <Badge variant={clientDetails.suspended ? 'destructive' : 'default'} className={!clientDetails.suspended ? 'bg-green-600' : ''}>
-                    {clientDetails.suspended ? 'Suspended' : 'Active'}
-                  </Badge>
-                </div>
-              </div>
+            <div className="space-y-3 text-sm mt-4">
+              <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{clientDetails.agency_name ? (clientDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+              <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{clientDetails.email || 'N/A'}</span></div>
+              <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{clientDetails.whatsapp_phone || 'N/A'}</span></div>
+              <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{clientDetails.agency_name ? (clientDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+              <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {clientDetails.agency_name ? (
+                <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetails({ agency_name: clientDetails.agency_name!, email: null, onboarding_complete: true, created_at: '', logo_url: null }); setClientDetailsOpen(false); setAgencyDetailsOpen(true); }}>{clientDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+              ) : <span className="text-foreground font-medium">N/A</span>}</div>
             </div>
           ) : (
             <p className="text-center text-muted-foreground py-8">Client not found</p>
