@@ -877,12 +877,14 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
           </div>
-          <Button
-            className="w-full bg-foreground text-background hover:bg-foreground/90"
-            onClick={() => setUserDetailsOpen(false)}
-          >
-            Ok
-          </Button>
+          <div className="flex justify-end">
+            <Button
+              className="w-full bg-transparent text-foreground border border-border hover:bg-transparent hover:text-foreground"
+              onClick={() => setUserDetailsOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
     ) : (
@@ -907,12 +909,14 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
             <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
           </div>
-          <Button
-            className="bg-foreground text-background hover:bg-foreground/90"
-            onClick={() => setUserDetailsOpen(false)}
-          >
-            Ok
-          </Button>
+          <div className="flex justify-end">
+            <Button
+              className="bg-transparent text-foreground border border-border hover:bg-transparent hover:text-foreground"
+              onClick={() => setUserDetailsOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
     ),
