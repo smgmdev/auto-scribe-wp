@@ -119,7 +119,7 @@ export function MainLayout({
         </div>
         
         {/* Global Footer */}
-        <footer className={`border-t px-4 lg:px-8 footer-widget-clearance ${isDarkFooter || isDashboardFooter ? 'bg-black border-white/20' : 'border-border/50'}`} style={{ paddingTop: '1rem' }}>
+        <footer className={`border-t px-4 lg:px-8 ${isDarkFooter || isDashboardFooter ? 'bg-black border-white/20' : 'border-border/50'}`} style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
           <div className={`flex flex-col gap-3 text-xs lg:flex-row lg:items-center lg:justify-between ${isDarkFooter || isDashboardFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
             <span className="text-left">© {new Date().getFullYear()} Arcana Mace. All rights reserved.</span>
             <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${isDarkFooter || isDashboardFooter ? 'text-white/50' : 'text-muted-foreground'}`}>
@@ -135,6 +135,7 @@ export function MainLayout({
             </div>
           </div>
         </footer>
+        <div className="h-[50px] bg-black w-full footer-widget-clearance" />
         
       </main>
     </div>;
