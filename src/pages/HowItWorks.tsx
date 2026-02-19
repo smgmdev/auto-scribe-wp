@@ -533,7 +533,7 @@ const ScrollColorSection = ({
             </a>
 
             {/* Card 2: Media Buying Guide */}
-            <a href="/media-buying" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+            <a href="/help/for-agencies#managing-sites" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(160deg, #0a1f2e 0%, #0d2d3a 50%, #0a1a2e 100%)' }}>
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Add your own media sites<br />to Global Media Library</h3>
