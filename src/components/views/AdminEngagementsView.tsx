@@ -161,11 +161,23 @@ export function AdminEngagementsView() {
               };
             });
             
-            // Mark the request as unread and increment count
-            setRequests(prev => prev.map(r => 
-              r.id === newMessage.request_id ? { ...r, read: false } : r
-            ));
-            incrementAdminUnreadEngagementsCount();
+            // Mark the request as unread in DB and local state
+            setRequests(prev => {
+              const target = prev.find(r => r.id === newMessage.request_id);
+              // Only increment count if the request was previously read
+              if (target && target.read) {
+                incrementAdminUnreadEngagementsCount();
+              }
+              return prev.map(r => 
+                r.id === newMessage.request_id ? { ...r, read: false } : r
+              );
+            });
+            // Persist unread status in database so it survives refetches
+            supabase
+              .from('service_requests')
+              .update({ read: false })
+              .eq('id', newMessage.request_id)
+              .then();
           }
         }
       )

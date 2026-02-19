@@ -1007,6 +1007,26 @@ export function Sidebar({
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'service_messages'
+        },
+        async (payload) => {
+          const newMsg = payload.new as { request_id: string; sender_type: string };
+          // When a client or agency sends a message, mark the engagement as unread for admin
+          if (newMsg.sender_type === 'client' || newMsg.sender_type === 'agency') {
+            console.log('[Sidebar] New message from client/agency, marking engagement unread for admin');
+            await supabase
+              .from('service_requests')
+              .update({ read: false })
+              .eq('id', newMsg.request_id);
+            // The service_requests UPDATE will trigger refetchEngagementCounts via the subscription above
+          }
+        }
+      )
       .subscribe();
 
     return () => {
