@@ -237,7 +237,7 @@ const ScrollColorSection = ({
       
       // Determine which section occupies the trigger point - check from bottom to top
       if (aiSectionRect && aiSectionRect.top <= triggerPoint && aiSectionRect.bottom > 0) {
-        newColor = '#b45309'; // Orange for AI section
+        newColor = '#c2410c'; // Orange for AI section
       } else if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
         newColor = '#0d1b4b'; // Dark blue for What You Can Do section
       } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
