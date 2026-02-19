@@ -336,7 +336,7 @@ const ScrollColorSection = ({
           </p>
           
           {/* Links */}
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
             <a href="/self-publishing" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Discover Self Publishing <span className="text-xl">↗</span>
             </a>
@@ -424,7 +424,7 @@ const ScrollColorSection = ({
           </p>
           
           {/* Links */}
-          <div className="flex flex-wrap items-center justify-center gap-6">
+          <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6">
             <a href="/media-buying" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
               Discover Media Buying <span className="text-xl">↗</span>
             </a>
