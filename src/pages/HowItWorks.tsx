@@ -835,9 +835,9 @@ const HowItWorks = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
-            Discover an incredibly diverse network of premium media outlets worldwide. 
+            Discover an incredibly diverse network of media outlets worldwide. 
             Publish your content where it matters most, from self-publishing to agency partnerships.
-            And enjoy it all on a platform designed for publishers and creators.
+            And enjoy it all on a platform designed for publishers and global brands.
           </p>
           
           <Button 
