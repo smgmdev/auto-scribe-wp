@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag, GripHorizontal, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits, recalculateSingleUser } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
 
@@ -259,8 +261,62 @@ export function AdminUsersView() {
   const [deleteOrders, setDeleteOrders] = useState(true);
   const [deleteAccount, setDeleteAccount] = useState(true);
   
+  const isMobile = useIsMobile();
+  
+  // Drag state for credit dialog
+  const [creditDragPos, setCreditDragPos] = useState({ x: 0, y: 0 });
+  const [creditDragging, setCreditDragging] = useState(false);
+  const creditDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  
+  // Drag state for action dialog
+  const [actionDragPos, setActionDragPos] = useState({ x: 0, y: 0 });
+  const [actionDragging, setActionDragging] = useState(false);
+  const actionDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+
+  // Drag handlers for credit dialog
+  const handleCreditDragStart = (e: React.MouseEvent) => {
+    creditDragRef.current = { x: e.clientX, y: e.clientY, posX: creditDragPos.x, posY: creditDragPos.y };
+    setCreditDragging(true);
+  };
+  useEffect(() => {
+    if (!creditDragging) return;
+    const onMove = (e: MouseEvent) => {
+      setCreditDragPos({
+        x: creditDragRef.current.posX + e.clientX - creditDragRef.current.x,
+        y: creditDragRef.current.posY + e.clientY - creditDragRef.current.y,
+      });
+    };
+    const onUp = () => setCreditDragging(false);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+  }, [creditDragging]);
+
+  // Drag handlers for action dialog
+  const handleActionDragStart = (e: React.MouseEvent) => {
+    actionDragRef.current = { x: e.clientX, y: e.clientY, posX: actionDragPos.x, posY: actionDragPos.y };
+    setActionDragging(true);
+  };
+  useEffect(() => {
+    if (!actionDragging) return;
+    const onMove = (e: MouseEvent) => {
+      setActionDragPos({
+        x: actionDragRef.current.posX + e.clientX - actionDragRef.current.x,
+        y: actionDragRef.current.posY + e.clientY - actionDragRef.current.y,
+      });
+    };
+    const onUp = () => setActionDragging(false);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+  }, [actionDragging]);
+
+  // Reset drag position when dialogs open
+  useEffect(() => { if (creditDialogOpen) setCreditDragPos({ x: 0, y: 0 }); }, [creditDialogOpen]);
+  useEffect(() => { if (actionDialogOpen) setActionDragPos({ x: 0, y: 0 }); }, [actionDialogOpen]);
 
   // Validate All: compare transaction sums vs user_credits table (same logic as Credit Management)
   const handleValidateAll = async () => {
@@ -1563,179 +1619,208 @@ export function AdminUsersView() {
       </div>
       </div>
 
-      {/* Credits Dialog */}
-      <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-left">
-            <DialogTitle>Manage Credits</DialogTitle>
-            <DialogDescription className="text-left">
-              {selectedUser?.email}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="text-sm text-muted-foreground">
-              Current balance: <strong>{selectedUser?.credits} credits</strong>
+      {/* Credits Dialog - Draggable Portal */}
+      {creditDialogOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto bg-white text-black relative ${
+              isMobile
+                ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
+                : 'overflow-y-auto w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
+            }`}
+            style={isMobile ? undefined : { transform: `translate(${creditDragPos.x}px, ${creditDragPos.y}px)` }}
+          >
+            {/* Drag bar */}
+            <div
+              className={`flex items-center justify-between border-b bg-muted/30 ${
+                isMobile
+                  ? 'px-3 py-1.5 shrink-0'
+                  : `px-4 py-2 -mx-6 ${creditDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
+              }`}
+              onMouseDown={!isMobile ? handleCreditDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button
+                onClick={() => setCreditDialogOpen(false)}
+                onMouseDown={(e) => !isMobile && e.stopPropagation()}
+                className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant={creditAction === 'add' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setCreditAction('add')}
-                className={`flex-1 rounded-none ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
-              >
-                Gift
-              </Button>
-              <Button
-                variant={creditAction === 'remove' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setCreditAction('remove')}
-                className={`flex-1 rounded-none ${creditAction !== 'remove' ? 'hover:bg-black hover:text-white' : ''}`}
-              >
-                Remove
-              </Button>
-            </div>
+            <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
+              <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2 mb-1">
+                <Coins className="h-5 w-5 text-accent" />
+                Manage Credits
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">{selectedUser?.email}</p>
 
-            <Input
-              type="number"
-              placeholder="Enter amount"
-              value={creditAmount}
-              onChange={(e) => setCreditAmount(e.target.value)}
-              min="1"
-              className="w-full h-9 text-sm rounded-none"
-            />
-
-            <Input
-              type="text"
-              placeholder="Reason (optional)"
-              value={creditReason}
-              onChange={(e) => setCreditReason(e.target.value)}
-              className="w-full h-9 text-sm rounded-none"
-            />
-
-            <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2">
-              <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleCreditChange} 
-                disabled={saving || !creditAmount}
-                className="w-full md:w-auto rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                {creditAction === 'add' ? 'Gift Credits' : 'Remove Credits'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* User Action Dialog */}
-      <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-left">
-            <DialogTitle>User Actions</DialogTitle>
-            <DialogDescription className="text-left">
-              {selectedUser?.email}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            {/* Suspend Section */}
-            <div className="space-y-2">
-              <h4 className="font-medium">Suspension</h4>
-              <p className="text-sm text-muted-foreground">
-                {selectedUser?.suspended 
-                  ? 'This user is currently suspended and cannot login.'
-                  : 'Suspend this user to prevent them from logging in.'}
-              </p>
-              <Button
-                variant={selectedUser?.suspended ? 'default' : 'outline'}
-                onClick={handleSuspendUser}
-                disabled={processing}
-                className={`w-full rounded-none ${!selectedUser?.suspended ? 'hover:bg-black hover:text-white' : ''}`}
-              >
-                {processing ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Ban className="h-4 w-4 mr-2" />
-                )}
-                {selectedUser?.suspended ? 'Remove Suspension' : 'Suspend User'}
-              </Button>
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="font-medium mb-2">Delete Options</h4>
-              <p className="text-sm text-muted-foreground mb-4">
-                Select what to delete. Unchecked items will be preserved.
-              </p>
-              
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="deleteAccount" 
-                    checked={deleteAccount}
-                    onCheckedChange={(checked) => setDeleteAccount(checked === true)}
-                  />
-                  <Label htmlFor="deleteAccount" className="text-sm">
-                    Delete account (user can no longer login)
-                  </Label>
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Current balance: <strong>{selectedUser?.credits} credits</strong>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="deleteCredits" 
-                    checked={deleteCredits}
-                    onCheckedChange={(checked) => setDeleteCredits(checked === true)}
-                  />
-                  <Label htmlFor="deleteCredits" className="text-sm">
-                    Delete credits & transactions
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="deleteArticles" 
-                    checked={deleteArticles}
-                    onCheckedChange={(checked) => setDeleteArticles(checked === true)}
-                  />
-                  <Label htmlFor="deleteArticles" className="text-sm">
-                    Delete articles
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="deleteOrders" 
-                    checked={deleteOrders}
-                    onCheckedChange={(checked) => setDeleteOrders(checked === true)}
-                  />
-                  <Label htmlFor="deleteOrders" className="text-sm">
-                    Delete orders & service requests
-                  </Label>
-                </div>
-              </div>
 
-              <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setActionDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteUser}
-                  disabled={processing || (!deleteAccount && !deleteCredits && !deleteArticles && !deleteOrders)}
-                  className="w-full md:w-auto rounded-none border border-transparent hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
-                >
-                  {processing ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Delete Selected
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant={creditAction === 'add' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreditAction('add')}
+                    className={`flex-1 rounded-none ${creditAction !== 'add' ? 'hover:bg-black hover:text-white' : ''}`}
+                  >
+                    Gift
+                  </Button>
+                  <Button
+                    variant={creditAction === 'remove' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreditAction('remove')}
+                    className={`flex-1 rounded-none ${creditAction !== 'remove' ? 'hover:bg-black hover:text-white' : ''}`}
+                  >
+                    Remove
+                  </Button>
+                </div>
+
+                <Input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(e.target.value)}
+                  min="1"
+                  className="w-full h-9 text-sm rounded-none"
+                />
+
+                <Input
+                  type="text"
+                  placeholder="Reason (optional)"
+                  value={creditReason}
+                  onChange={(e) => setCreditReason(e.target.value)}
+                  className="w-full h-9 text-sm rounded-none"
+                />
+
+                <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2">
+                  <Button variant="outline" onClick={() => setCreditDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleCreditChange} 
+                    disabled={saving || !creditAmount}
+                    className="w-full md:w-auto rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {creditAction === 'add' ? 'Gift Credits' : 'Remove Credits'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>,
+        document.body
+      )}
+
+      {/* User Action Dialog - Draggable Portal */}
+      {actionDialogOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto bg-white text-black relative ${
+              isMobile
+                ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
+                : 'overflow-y-auto w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
+            }`}
+            style={isMobile ? undefined : { transform: `translate(${actionDragPos.x}px, ${actionDragPos.y}px)` }}
+          >
+            {/* Drag bar */}
+            <div
+              className={`flex items-center justify-between border-b bg-muted/30 ${
+                isMobile
+                  ? 'px-3 py-1.5 shrink-0'
+                  : `px-4 py-2 -mx-6 ${actionDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
+              }`}
+              onMouseDown={!isMobile ? handleActionDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button
+                onClick={() => setActionDialogOpen(false)}
+                onMouseDown={(e) => !isMobile && e.stopPropagation()}
+                className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
+              <h2 className="text-lg font-semibold leading-none tracking-tight mb-1">User Actions</h2>
+              <p className="text-sm text-muted-foreground mb-4">{selectedUser?.email}</p>
+
+              <div className="space-y-6">
+                {/* Suspend Section */}
+                <div className="space-y-2">
+                  <h4 className="font-medium">Suspension</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedUser?.suspended 
+                      ? 'This user is currently suspended and cannot login.'
+                      : 'Suspend this user to prevent them from logging in.'}
+                  </p>
+                  <Button
+                    variant={selectedUser?.suspended ? 'default' : 'outline'}
+                    onClick={handleSuspendUser}
+                    disabled={processing}
+                    className={`w-full rounded-none ${!selectedUser?.suspended ? 'hover:bg-black hover:text-white' : ''}`}
+                  >
+                    {processing ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Ban className="h-4 w-4 mr-2" />
+                    )}
+                    {selectedUser?.suspended ? 'Remove Suspension' : 'Suspend User'}
+                  </Button>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-2">Delete Options</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select what to delete. Unchecked items will be preserved.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="deleteAccount" checked={deleteAccount} onCheckedChange={(checked) => setDeleteAccount(checked === true)} />
+                      <Label htmlFor="deleteAccount" className="text-sm">Delete account (user can no longer login)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="deleteCredits" checked={deleteCredits} onCheckedChange={(checked) => setDeleteCredits(checked === true)} />
+                      <Label htmlFor="deleteCredits" className="text-sm">Delete credits & transactions</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="deleteArticles" checked={deleteArticles} onCheckedChange={(checked) => setDeleteArticles(checked === true)} />
+                      <Label htmlFor="deleteArticles" className="text-sm">Delete articles</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="deleteOrders" checked={deleteOrders} onCheckedChange={(checked) => setDeleteOrders(checked === true)} />
+                      <Label htmlFor="deleteOrders" className="text-sm">Delete orders & service requests</Label>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setActionDialogOpen(false)} className="w-full md:w-auto rounded-none hover:bg-black hover:text-white">
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteUser}
+                      disabled={processing || (!deleteAccount && !deleteCredits && !deleteArticles && !deleteOrders)}
+                      className="w-full md:w-auto rounded-none border border-transparent hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
+                    >
+                      {processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                      Delete Selected
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       </div>
     </div>
   );
