@@ -5503,7 +5503,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </Button>
             </div>
           </div>
-          <div className="border-t border-border mt-2 pt-2 flex items-center gap-3">
+          <div className="-mx-3 md:-mx-4 border-t border-border mt-2 pt-2 px-3 md:px-4 flex items-center gap-3">
           {/* Product title row */}
             {globalChatRequest.media_site?.favicon && (
               <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded shrink-0" />
