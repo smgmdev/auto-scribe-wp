@@ -227,7 +227,8 @@ export function Sidebar({
   const {
     signOut,
     isAdmin,
-    user
+    user,
+    loading: authLoading
   } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
@@ -335,11 +336,15 @@ export function Sidebar({
     }
   }, [userApplicationStatus]);
 
-  // Fetch application data only on initial mount
+  // Fetch application data only once auth loading is complete
   useEffect(() => {
     let isMounted = true;
     
     const fetchApplicationStatus = async () => {
+      // Wait for auth to fully resolve before branching on isAdmin
+      // This prevents the race condition where isAdmin=false during initial load
+      if (authLoading) return;
+
       if (!user) {
         if (isMounted) setAgencyDataLoaded(true);
         return;
@@ -698,7 +703,7 @@ export function Sidebar({
     return () => {
       isMounted = false;
     };
-  }, [user?.id, isAdmin]); // Remove userApplicationStatus from dependencies to prevent re-fetch loops
+  }, [user?.id, isAdmin, authLoading]); // authLoading ensures we don't branch on isAdmin before role is resolved
 
   // Real-time subscription for agency application status changes (user side)
   useEffect(() => {
