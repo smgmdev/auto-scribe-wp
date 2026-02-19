@@ -480,6 +480,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     type: 'client' | 'agency';
     name?: string | null;
     logo_url?: string | null;
+    full_name?: string | null;
+    user_whatsapp?: string | null;
+    agency_whatsapp?: string | null;
+    agency_name?: string | null;
   } | null>(null);
   const [userDetailsLogoLoading, setUserDetailsLogoLoading] = useState(true);
   
@@ -6428,7 +6432,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                   setUserDetailsDialogOpen(true);
                                   setUserDetails(null);
                                   
-                                  try {
+                                    try {
                                     if (msg.sender_type === 'client') {
                                       // Fetch client profile including whatsapp_phone
                                       const { data: profile } = await supabase
@@ -6437,48 +6441,46 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                                         .eq('id', msg.sender_id)
                                         .maybeSingle();
                                       
-                                      setUserDetails({
-                                        email: profile?.email || null,
-                                        phone: profile?.whatsapp_phone || null,
-                                        type: 'client'
-                                      });
-                                    } else if (msg.sender_type === 'agency') {
-                                      // Fetch agency details from agency_payouts
-                                      const { data: agency } = await supabase
-                                        .from('agency_payouts')
-                                        .select('agency_name, email, user_id')
-                                        .eq('id', msg.sender_id)
+                                      // Also fetch agency info if user has one
+                                      let agencyName: string | null = null;
+                                      let fullName: string | null = null;
+                                      let agencyWhatsapp: string | null = null;
+                                      const { data: application } = await supabase
+                                        .from('agency_applications')
+                                        .select('agency_name, full_name, whatsapp_phone')
+                                        .eq('user_id', msg.sender_id)
+                                        .eq('status', 'approved')
                                         .maybeSingle();
-                                      
-                                      let whatsappPhone: string | null = null;
-                                      
-                                      // Fetch whatsapp_phone and logo_url from agency_applications using the user_id
-                                      let logoUrl: string | null = null;
-                                      if (agency?.user_id) {
-                                        const { data: application } = await supabase
-                                          .from('agency_applications')
-                                          .select('whatsapp_phone, logo_url')
-                                          .eq('user_id', agency.user_id)
-                                          .eq('status', 'approved')
-                                          .maybeSingle();
-                                        
-                                        whatsappPhone = application?.whatsapp_phone || null;
-                                        // Get public URL from agency-logos bucket
-                                        if (application?.logo_url) {
-                                          const { data: publicUrl } = supabase.storage
-                                            .from('agency-logos')
-                                            .getPublicUrl(application.logo_url);
-                                          logoUrl = publicUrl?.publicUrl || null;
-                                        }
+                                      if (application) {
+                                        agencyName = application.agency_name;
+                                        fullName = application.full_name;
+                                        agencyWhatsapp = application.whatsapp_phone;
                                       }
                                       
                                       setUserDetails({
-                                        email: agency?.email || null,
-                                        phone: whatsappPhone,
-                                        type: 'agency',
-                                        name: agency?.agency_name || null,
-                                        logo_url: logoUrl
+                                        email: profile?.email || null,
+                                        phone: profile?.whatsapp_phone || null,
+                                        user_whatsapp: profile?.whatsapp_phone || null,
+                                        type: 'client',
+                                        full_name: fullName,
+                                        agency_name: agencyName,
+                                        agency_whatsapp: agencyWhatsapp
                                       });
+                                    } else if (msg.sender_type === 'agency') {
+                                      // For agency, open the AgencyDetailsDialog instead
+                                      const { data: agency } = await supabase
+                                        .from('agency_payouts')
+                                        .select('agency_name')
+                                        .eq('id', msg.sender_id)
+                                        .maybeSingle();
+                                      
+                                      if (agency?.agency_name) {
+                                        setUserDetailsDialogOpen(false);
+                                        setSelectedAgencyName(agency.agency_name);
+                                        setAgencyDetailsOpen(true);
+                                        setUserDetailsLoading(false);
+                                        return;
+                                      }
                                     }
                                   } catch (error) {
                                     console.error('Error fetching user details:', error);
@@ -8461,35 +8463,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <Dialog open={userDetailsDialogOpen} onOpenChange={setUserDetailsDialogOpen}>
         <DialogContent className="z-[250] max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {userDetails?.type === 'agency' ? (
-                <>
-                  {userDetails.logo_url ? (
-                    <div className="relative h-6 w-6">
-                      {userDetailsLogoLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                        </div>
-                      )}
-                      <img 
-                        src={userDetails.logo_url} 
-                        alt="" 
-                        className={`h-6 w-6 rounded-full object-cover ${userDetailsLogoLoading ? 'opacity-0' : 'opacity-100'}`}
-                        onLoad={() => setUserDetailsLogoLoading(false)}
-                        onError={() => setUserDetailsLogoLoading(false)}
-                      />
-                    </div>
-                  ) : (
-                    <Building2 className="h-5 w-5" />
-                  )}
-                  Agency Details
-                </>
-              ) : (
-                <>
-                  <Info className="h-5 w-5" />
-                  Client Details
-                </>
-              )}
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Info className="h-5 w-5" />
+              Client Details
             </DialogTitle>
           </DialogHeader>
           {userDetailsLoading ? (
@@ -8497,21 +8473,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : userDetails ? (
-            <div className="space-y-4">
-              {userDetails.name && (
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Name</p>
-                  <p className="font-medium">{userDetails.name}</p>
-                </div>
-              )}
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
-                <p className="font-medium">{userDetails.email || 'Not available'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">WhatsApp</p>
-                <p className="font-medium">{userDetails.phone || 'N/A'}</p>
-              </div>
+            <div className="space-y-3 text-sm">
+              <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+              <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{userDetails.email || 'N/A'}</span></div>
+              <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.user_whatsapp || 'N/A'}</span></div>
+              <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{userDetails.agency_name ? (userDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+              <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {userDetails.agency_name ? (
+                <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setSelectedAgencyName(userDetails.agency_name!); setAgencyDetailsOpen(true); }}>{userDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+              ) : <span className="text-foreground font-medium">N/A</span>}</div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
