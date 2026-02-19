@@ -159,10 +159,10 @@ const GradientScrollReveal = ({
 // Scroll-triggered background color section - Apple Wallet style
 const ScrollColorSection = ({ 
   scrollContainerRef,
-  randomArticle
+  slidingArticles
 }: { 
   scrollContainerRef: React.RefObject<HTMLDivElement>;
-  randomArticle: PublishedArticle | null;
+  slidingArticles: PublishedArticle[];
 }) => {
   const coralCardRef = useRef<HTMLDivElement>(null);
   const localLibraryRef = useRef<HTMLDivElement>(null);
@@ -687,37 +687,42 @@ const ScrollColorSection = ({
               <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn how</span>
               </div>
               <div className="mt-auto w-full border-t border-white/10 bg-white/5 overflow-hidden">
-                <div className="relative w-full h-40 overflow-hidden bg-white/5">
-                  {randomArticle?.featured_image?.url ? (
-                    <img
-                      src={randomArticle.featured_image.url}
-                      alt={randomArticle.featured_image.alt || randomArticle.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#ff6b35]/20 to-[#f7931e]/10">
-                      <FileText className="w-10 h-10 text-[#f7931e]/40" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    {randomArticle?.published_to_favicon ? (
-                      <img src={randomArticle.published_to_favicon} alt="" className="w-4 h-4 rounded-sm object-contain" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-sm bg-[#f7931e]/40 flex items-center justify-center">
-                        <FileText className="w-2.5 h-2.5 text-[#f7931e]" />
+                <div className="flex animate-slide-articles" style={{ width: `${(slidingArticles.length > 0 ? slidingArticles.length * 2 : 2) * 100}%` }}>
+                  {[...slidingArticles, ...slidingArticles].map((article, i) => (
+                    <div key={`${article.id}-${i}`} className="flex-shrink-0" style={{ width: `${100 / (slidingArticles.length > 0 ? slidingArticles.length * 2 : 2)}%` }}>
+                      <div className="relative w-full h-36 overflow-hidden bg-white/5">
+                        {article.featured_image?.url ? (
+                          <img
+                            src={article.featured_image.url}
+                            alt={article.featured_image.alt || article.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#ff6b35]/20 to-[#f7931e]/10">
+                            <FileText className="w-10 h-10 text-[#f7931e]/40" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       </div>
-                    )}
-                    <span className="text-[11px] text-[#f7931e] font-semibold uppercase tracking-wide truncate">
-                      {randomArticle?.published_to_name || 'Washington Morning'}
-                    </span>
-                  </div>
-                  <p className="text-white/85 text-sm font-medium leading-snug line-clamp-2">
-                    {randomArticle?.title || 'Global Markets Rally as Central Banks Signal Policy Shift Ahead'}
-                  </p>
-                  <p className="text-white/30 text-[10px] mt-2">Published via Local Library · WordPress</p>
+                      <div className="p-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          {article.published_to_favicon ? (
+                            <img src={article.published_to_favicon} alt="" className="w-4 h-4 rounded-sm object-contain" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-sm bg-[#f7931e]/40 flex items-center justify-center">
+                              <FileText className="w-2.5 h-2.5 text-[#f7931e]" />
+                            </div>
+                          )}
+                          <span className="text-[10px] text-[#f7931e] font-semibold uppercase tracking-wide truncate">
+                            {article.published_to_name || 'Published'}
+                          </span>
+                        </div>
+                        <p className="text-white/85 text-xs font-medium leading-snug line-clamp-2">
+                          {article.title}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </a>
@@ -1036,7 +1041,7 @@ const HowItWorks = () => {
   const [articles, setArticles] = useState<PublishedArticle[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [logoLoaded, setLogoLoaded] = useState(false);
-  const [randomArticle, setRandomArticle] = useState<PublishedArticle | null>(null);
+  const [slidingArticles, setSlidingArticles] = useState<PublishedArticle[]>([]);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -1055,8 +1060,9 @@ const HowItWorks = () => {
         }));
         setArticles(mapped);
         if (mapped.length > 0) {
-          const idx = Math.floor(Math.random() * mapped.length);
-          setRandomArticle(mapped[idx]);
+          // Pick 3 random articles for the sliding preview
+          const shuffled = [...mapped].sort(() => Math.random() - 0.5);
+          setSlidingArticles(shuffled.slice(0, 3));
         }
       }
       setLoadingArticles(false);
@@ -1245,7 +1251,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Scroll-triggered Background Color Section */}
-      <ScrollColorSection scrollContainerRef={scrollContainerRef} randomArticle={randomArticle} />
+      <ScrollColorSection scrollContainerRef={scrollContainerRef} slidingArticles={slidingArticles} />
 
 
       {/* More to Explore Section */}
