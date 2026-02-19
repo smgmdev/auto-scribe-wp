@@ -278,7 +278,7 @@ export default function SystemStatus() {
           </h1>
 
           {/* Status row: banner + refresh */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             {/* Status message */}
             <div className="flex items-center gap-3">
               {isLoading ? (
@@ -318,7 +318,7 @@ export default function SystemStatus() {
             <Button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              className="w-full md:w-auto min-w-[120px] rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black overflow-hidden"
+              className="w-full sm:w-auto min-w-[120px] rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black overflow-hidden"
             >
               <RefreshCw className={`h-4 w-4 flex-shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
@@ -349,7 +349,7 @@ export default function SystemStatus() {
           )}
 
           {/* Last Updated + Legend */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-6">
             <p className="text-sm text-[#86868b]">
               Last updated today, {lastUpdated.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
