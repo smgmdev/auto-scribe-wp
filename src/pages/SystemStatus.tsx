@@ -349,7 +349,7 @@ export default function SystemStatus() {
           )}
 
           {/* Last Updated + Legend */}
-          <div className="flex items-center justify-between mt-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-6">
             <p className="text-sm text-[#86868b]">
               Last updated today, {lastUpdated.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
