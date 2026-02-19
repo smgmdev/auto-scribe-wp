@@ -59,7 +59,6 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
     : "container mx-auto px-4 footer-widget-clearance";
 
   return (
-    <>
     <footer className={`${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'} ${narrow ? '' : 'mt-12'}`}>
       <div className={containerClass}>
         <div className={`${showTopBorder ? (dark ? 'border-t border-white/20' : 'border-t border-[#d2d2d7]') : ''} pt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8`}>
@@ -174,8 +173,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
           </div>
         </div>
       </div>
+      <div className="h-[50px] bg-black" />
     </footer>
-    <div className="h-[50px] bg-black" />
-    </>
   );
 }
