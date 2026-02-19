@@ -928,24 +928,24 @@ const MediaLogoSlider = () => {
   const doubled = [...logos, ...logos];
 
   return (
-    <div className="w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}>
+    <div className="w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
       <div
-        className="flex gap-3 items-center"
+        className="flex gap-1 items-center"
         style={{
-          animation: 'slide-logos 20s linear infinite',
+          animation: 'slide-logos 60s linear infinite',
           width: 'max-content',
         }}
       >
         {doubled.map((logo, i) => (
           <div
             key={`${logo.id}-${i}`}
-            className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-white/10"
+            className="flex-shrink-0 w-20 h-20 flex items-center justify-center"
             title={logo.name}
           >
             <img
               src={logo.favicon}
               alt={logo.name}
-              className="w-7 h-7 object-contain"
+              className="w-20 h-20 object-contain"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
