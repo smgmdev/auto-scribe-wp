@@ -423,14 +423,17 @@ const ScrollColorSection = ({
             Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
           </p>
           
-          {/* Link */}
-          <div className="flex items-center justify-center gap-6">
-            <a href="/auth" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Get started <span className="text-xl">↗</span>
-            </a>
+          {/* Links */}
+          <div className="flex flex-wrap items-center justify-center gap-6">
             <a href="/media-buying" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Learn more <span className="text-xl">›</span>
+              Discover Media Buying <span className="text-xl">↗</span>
             </a>
+            <button onClick={() => scrollToSection(localLibraryRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              Learn about Local Library <span className="text-xl">›</span>
+            </button>
+            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+              What's next? <span className="text-xl">↓</span>
+            </button>
           </div>
           
           {/* Circular Media Site Icons - Apple Floating Style */}
