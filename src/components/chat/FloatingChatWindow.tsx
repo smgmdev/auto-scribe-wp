@@ -5206,7 +5206,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       >
         {/* Header */}
         <div 
-          className={`px-3 md:px-4 py-2 border-b ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${!isMobile && isDragging ? 'cursor-grabbing' : !isMobile ? 'cursor-grab' : ''} select-none`}
+          className={`px-3 md:px-4 py-2 border-b border-border ${isCancelled ? 'bg-red-500/20' : 'bg-muted/30'} ${!isMobile && isDragging ? 'cursor-grabbing' : !isMobile ? 'cursor-grab' : ''} select-none`}
           onMouseDown={!isMobile ? handleDragStart : undefined}
         >
           {/* Top row: Grip handle and action buttons */}
