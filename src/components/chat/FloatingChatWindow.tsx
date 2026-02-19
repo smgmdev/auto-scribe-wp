@@ -5211,8 +5211,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         >
           {/* Top row: Grip handle and action buttons */}
           <div className="flex items-center justify-between">
-            {!isMobile && <GripHorizontal className="h-4 w-4 text-muted-foreground" />}
-            {isMobile && <div className="w-4" />}
+            <GripHorizontal className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-1 shrink-0">
               {!isCancelled && localOrder?.status !== 'cancelled' && (
                 <DropdownMenu modal={false} open={actionDropdownOpen} onOpenChange={setActionDropdownOpen}>
