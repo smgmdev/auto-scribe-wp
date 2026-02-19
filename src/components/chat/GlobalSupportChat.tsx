@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Loader2, Send, X, GripHorizontal, Paperclip, FileText, Image as ImageIcon, Download, Reply, ChevronDown, Info, XCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +84,11 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [userDetailsOpen, setUserDetailsOpen] = useState(false);
+  const [userDetailsPos, setUserDetailsPos] = useState({ x: 0, y: 0 });
+  const [userDetailsDragging, setUserDetailsDragging] = useState(false);
+  const userDetailsDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const userDetailsInitialized = useRef(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ sender_id: string; sender_type: string }[]>([]);
   const [ticketUserDetails, setTicketUserDetails] = useState<{
@@ -164,6 +169,39 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     window.addEventListener('mouseup', onUp);
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
   }, [isDragging]);
+
+  // User details popup drag handlers
+  const handleUserDetailsDragStart = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+    setUserDetailsDragging(true);
+    userDetailsDragRef.current = { x: e.clientX, y: e.clientY, posX: userDetailsPos.x, posY: userDetailsPos.y };
+  }, [userDetailsPos]);
+
+  useEffect(() => {
+    if (!userDetailsDragging) return;
+    const onMove = (e: MouseEvent) => {
+      setUserDetailsPos({
+        x: userDetailsDragRef.current.posX + (e.clientX - userDetailsDragRef.current.x),
+        y: userDetailsDragRef.current.posY + (e.clientY - userDetailsDragRef.current.y),
+      });
+    };
+    const onUp = () => setUserDetailsDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [userDetailsDragging]);
+
+  const openUserDetails = useCallback(() => {
+    if (!userDetailsInitialized.current && !isMobile) {
+      const w = 320, h = 220;
+      setUserDetailsPos({
+        x: Math.max(0, Math.round((window.innerWidth - w) / 2)),
+        y: Math.max(0, Math.round((window.innerHeight - h) / 2)),
+      });
+      userDetailsInitialized.current = true;
+    }
+    setUserDetailsOpen(true);
+  }, [isMobile]);
 
   const { decrementUnreadSupportTicketsCount, decrementUserUnreadSupportTicketsCount } = useAppStore();
 
@@ -565,6 +603,14 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       >
         <GripHorizontal className="h-4 w-4 text-muted-foreground" />
         <div className="flex items-center gap-1 shrink-0">
+          {isAdmin && (
+            <button
+              onClick={(e) => { e.stopPropagation(); openUserDetails(); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          )}
           {isAdmin && ticketStatus === 'open' && (
             <button
               onClick={(e) => { e.stopPropagation(); setShowCloseConfirm(true); }}
@@ -587,24 +633,6 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
              {isAdmin ? (
               <>
                 <span>User</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="ml-0.5 text-muted-foreground hover:text-foreground inline-flex items-center">
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 bg-popover z-[99999]" side="bottom" align="start">
-                    <div className="space-y-2 text-sm">
-                      <h4 className="font-semibold text-foreground">User Details</h4>
-                      <div className="space-y-1.5 text-xs">
-                        <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground">{ticketUserDetails?.full_name || 'N/A'}</span></div>
-                        <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">{ticketUserDetails?.email || 'N/A'}</span></div>
-                        <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-                        <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
                 <span className="mx-0.5">·</span>
                 <span className="flex items-center gap-1">
                   <span className={`h-1.5 w-1.5 rounded-full inline-block ${userOnline ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
@@ -825,6 +853,57 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )}
+  {userDetailsOpen && isAdmin && createPortal(
+    isMobile ? (
+      <div className="fixed inset-0 z-[300] bg-background flex flex-col">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={() => setUserDetailsOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="p-4 space-y-4">
+          <h4 className="font-semibold text-foreground text-sm">User Details</h4>
+          <div className="space-y-3 text-sm">
+            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div
+        className="fixed z-[200] bg-background rounded-lg shadow-xl border border-border"
+        style={{ left: userDetailsPos.x, top: userDetailsPos.y, width: 320 }}
+      >
+        <div
+          className={`flex items-center justify-between px-4 py-2 border-b bg-muted/30 ${userDetailsDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+          onMouseDown={handleUserDetailsDragStart}
+        >
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <button onClick={() => setUserDetailsOpen(false)} className="text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-4 pt-4 space-y-4">
+          <h4 className="font-semibold text-foreground text-sm">User Details</h4>
+          <div className="space-y-3 text-sm">
+            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name || 'N/A'}</span></div>
+          </div>
+        </div>
+      </div>
+    ),
+    document.body
   )}
   </>;
 }
