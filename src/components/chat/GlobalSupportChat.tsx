@@ -604,7 +604,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       </div>
 
       {/* Header */}
-      <div className={`flex items-center justify-between px-4 ${isMobile ? 'py-2' : 'pt-4 pb-3'} border-b border-border shrink-0`}>
+      <div className={`flex items-center justify-between px-4 ${isMobile ? 'py-1.5' : 'py-2'} border-b border-border shrink-0`}>
         <div className="min-w-0 flex-1 mr-2">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm text-foreground truncate">{ticket.subject}</h3>
