@@ -97,7 +97,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
 
 const Index = () => {
   const { currentView, setCurrentView, setTargetTab, setTargetSubcategory, setPreselectedSiteId } = useAppStore();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, loading: authLoading } = useAuth();
   const location = useLocation();
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,10 +123,15 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, [currentView]);
 
-  // Check if user is an approved agency
+  // Check if user is an approved agency — only AFTER auth has fully resolved
+  // This prevents the race condition where isAdmin=false during initial auth load
   useEffect(() => {
+    // Wait for auth to fully resolve before doing any role-based checks
+    if (authLoading) return;
+
     const checkAgencyStatus = async () => {
       if (!user || isAdmin) {
+        setIsApprovedAgency(false);
         setIsLoading(false);
         return;
       }
@@ -141,17 +146,19 @@ const Index = () => {
         setIsApprovedAgency(data?.onboarding_complete === true);
       } catch (error) {
         console.error('Error checking agency status:', error);
+        setIsApprovedAgency(false);
       }
       setIsLoading(false);
     };
     
     checkAgencyStatus();
-  }, [user, isAdmin]);
+  }, [user?.id, isAdmin, authLoading]);
   
   // Determine which view to render based on role
   const getAuthorizedView = () => {
-    // While loading, always show dashboard to prevent unauthorized view access
-    if (isLoading) {
+    // While auth OR agency check is still loading, always show dashboard
+    // This is the critical guard that prevents role-jumping during page refresh
+    if (authLoading || isLoading) {
       return DashboardView;
     }
     
@@ -189,8 +196,9 @@ const Index = () => {
   const CurrentView = getAuthorizedView();
   
   // If user tries to access unauthorized view, reset to dashboard
+  // Only enforce AFTER both auth and agency status are fully resolved
   useEffect(() => {
-    if (isLoading) return;
+    if (authLoading || isLoading) return;
     
     const isAdminView = !!adminOnlyViews[currentView];
     const isAgencyView = !!agencyOnlyViews[currentView];
@@ -213,7 +221,7 @@ const Index = () => {
       setCurrentView('dashboard');
       return;
     }
-  }, [currentView, isAdmin, isApprovedAgency, isLoading, setCurrentView]);
+  }, [currentView, isAdmin, isApprovedAgency, isLoading, authLoading, setCurrentView]);
   
   useEffect(() => {
     const state = location.state as LocationState | null;
