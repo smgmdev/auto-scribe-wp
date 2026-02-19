@@ -5210,7 +5210,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           onMouseDown={!isMobile ? handleDragStart : undefined}
         >
           {/* Top row: Grip handle and action buttons */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             {!isMobile && <GripHorizontal className="h-4 w-4 text-muted-foreground" />}
             {isMobile && <div className="w-4" />}
             <div className="flex items-center gap-1 shrink-0">
@@ -5503,8 +5503,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               </Button>
             </div>
           </div>
+          <div className="border-t border-border mt-2 pt-2 flex items-center gap-3">
           {/* Product title row */}
-          <div className="flex items-center gap-3">
             {globalChatRequest.media_site?.favicon && (
               <img src={globalChatRequest.media_site.favicon} alt="" className="w-8 h-8 rounded shrink-0" />
             )}
