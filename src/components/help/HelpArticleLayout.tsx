@@ -67,18 +67,13 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (!hash) return;
-    // Wait for layout to settle before scrolling
     const timer = setTimeout(() => {
       const element = document.getElementById(hash);
-      if (element && scrollContainerRef.current) {
-        const headerOffset = 140;
-        scrollContainerRef.current.scrollTo({
-          top: element.offsetTop - headerOffset,
-          behavior: 'smooth',
-        });
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setActiveSection(hash);
       }
-    }, 300);
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
