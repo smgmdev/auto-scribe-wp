@@ -975,14 +975,19 @@ export function ChatListPanel() {
     // Previously this blocked ALL agency messages for agency users, even from OTHER agencies
     const isAgencySendingAsAgency = isOwnAgencyMessage || (sender_type === 'agency' && sender_id === agencyPayoutIdRef.current);
     
+    // Check if this is a disputed chat the admin is monitoring
+    const isDisputedChat = isAdmin && disputesRef.current.some(d => d.service_request_id === request_id);
+    
     // Notification conditions:
     // - Client engagement receives agency OR admin message
     // - Agency service request receives client OR admin message
+    // - Admin dispute chat receives client OR agency message
     const shouldNotify = !isAgencySendingAsAgency && (
       (isMyEngagement && (isFromAgency || isFromAdmin)) || 
       (isServiceRequest && (isFromClient || isFromAdmin)) ||
       (isMinimizedMyRequest && (isFromAgency || isFromAdmin)) || 
-      (isMinimizedAgencyRequest && (isFromClient || isFromAdmin))
+      (isMinimizedAgencyRequest && (isFromClient || isFromAdmin)) ||
+      (isDisputedChat && (isFromClient || isFromAgency))
     );
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
