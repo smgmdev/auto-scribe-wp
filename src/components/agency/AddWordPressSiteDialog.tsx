@@ -473,6 +473,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
                 setFormData({ ...formData, applicationPassword: e.target.value });
                 setValidationErrors(prev => ({ ...prev, applicationPassword: false }));
               }}
+              autoComplete="new-password"
               className={validationErrors.applicationPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}
             />
             <p className="text-xs text-muted-foreground">

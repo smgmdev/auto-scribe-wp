@@ -1800,6 +1800,7 @@ export function SitesView() {
                 placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" 
                 value={wpFormData.applicationPassword} 
                 onChange={e => setWpFormData({ ...wpFormData, applicationPassword: e.target.value })} 
+                autoComplete="new-password"
               />
               <p className="text-xs text-muted-foreground">
                 Generate this in WordPress under Users → Profile → Application Passwords
