@@ -695,7 +695,7 @@ const ScrollColorSection = ({
             </a>
 
             {/* Card 3 */}
-            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
+            <a href="/help/ai-security-supervision#overview" className="group relative rounded-[24px] overflow-hidden min-h-[280px] flex flex-col justify-between p-7 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #78350f 0%, #92400e 50%, #b45309 100%)' }}>
               <div className="relative z-10">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">Arcana Mace AI<br />Security Supervision</h3>
