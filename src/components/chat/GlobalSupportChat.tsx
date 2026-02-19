@@ -97,6 +97,8 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     email: string | null;
     whatsapp_phone: string | null;
     agency_name: string | null;
+    agency_whatsapp: string | null;
+    user_whatsapp: string | null;
   } | null>(null);
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
@@ -342,19 +344,21 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         setUserOnline(Date.now() - lastOnline < 2 * 60 * 1000);
       }
 
-      // Get agency name
+      // Get agency application (for name, full_name, whatsapp)
       const { data: agency } = await supabase
         .from('agency_applications')
-        .select('agency_name')
+        .select('agency_name, full_name, whatsapp_phone')
         .eq('user_id', ticketData.user_id)
         .eq('status', 'approved')
         .maybeSingle();
 
       setTicketUserDetails({
-        full_name: profile?.username || null,
+        full_name: agency?.full_name || null,
         email: profile?.email || null,
         whatsapp_phone: profile?.whatsapp_phone || null,
         agency_name: agency?.agency_name || null,
+        agency_whatsapp: agency?.whatsapp_phone || null,
+        user_whatsapp: profile?.whatsapp_phone || null,
       });
     };
     fetchUserDetails();
@@ -877,11 +881,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <div className="p-4 space-y-4 flex-1">
           <h4 className="font-semibold text-foreground text-sm">User Details</h4>
           <div className="space-y-3 text-sm">
-            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.full_name || 'N/A') : 'Not Agency Account'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
-              <button className="text-foreground font-medium underline hover:text-accent" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}</button>
+            <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.user_whatsapp || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+            <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
+              <button className="text-accent font-medium hover:text-accent/80 flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}><Info className="h-3.5 w-3.5" />{ticketUserDetails.agency_name}</button>
             ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
@@ -911,11 +916,12 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         <div className="p-4 pt-4 space-y-4">
           <h4 className="font-semibold text-foreground text-sm">User Details</h4>
           <div className="space-y-3 text-sm">
-            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.full_name || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.full_name || 'N/A') : 'Not Agency Account'}</span></div>
             <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{ticketUserDetails?.email || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.whatsapp_phone || 'N/A'}</span></div>
-            <div><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
-              <button className="text-foreground font-medium underline hover:text-accent" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{ticketUserDetails.agency_name}</button>
+            <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.user_whatsapp || 'N/A'}</span></div>
+            <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{ticketUserDetails?.agency_name ? (ticketUserDetails?.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+            <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {ticketUserDetails?.agency_name ? (
+              <button className="text-accent font-medium hover:text-accent/80 flex items-center gap-1" onClick={() => { setAgencyDetailsName(ticketUserDetails.agency_name); setAgencyDetailsOpen(true); }}><Info className="h-3.5 w-3.5" />{ticketUserDetails.agency_name}</button>
             ) : <span className="text-foreground font-medium">N/A</span>}</div>
           </div>
           <div className="flex justify-end">
