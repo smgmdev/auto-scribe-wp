@@ -1197,9 +1197,7 @@ const HowItWorks = () => {
                 <span className="text-white/70 text-sm group-hover:text-white transition-colors">Create an Account ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <img src={amblack} alt="Arcana Mace" className="w-10 h-10 object-contain brightness-0 invert" />
-                </div>
+                <img src={amblack} alt="Arcana Mace" className="w-20 h-20 object-contain brightness-0 invert" />
               </div>
             </a>
 
