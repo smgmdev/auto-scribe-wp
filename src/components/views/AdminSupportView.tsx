@@ -147,7 +147,7 @@ export function AdminSupportView() {
             filteredTickets.map(ticket => (
               <button
                 key={ticket.id}
-                className={`w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-gray-50 transition-colors relative ${!ticket.admin_read ? 'bg-muted/40' : ''}`}
+                className={`w-full text-left border rounded-none -mt-px first:mt-0 p-4 hover:bg-gray-50 transition-colors relative ${!ticket.admin_read ? 'bg-blue-50' : ''}`}
                 onClick={() => handleOpenTicket(ticket)}
               >
                 <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs absolute top-3 right-3">
