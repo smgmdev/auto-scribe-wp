@@ -789,7 +789,7 @@ export default function Auth() {
         </div>
       </div>
 
-      <Footer narrow />
+      <Footer narrow hideBlackSpacer />
 
 
       {/* Data Management Popup - draggable on desktop, fullscreen on mobile */}

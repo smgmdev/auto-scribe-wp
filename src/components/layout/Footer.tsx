@@ -9,9 +9,10 @@ interface FooterProps {
   narrow?: boolean;
   showTopBorder?: boolean;
   dark?: boolean;
+  hideBlackSpacer?: boolean;
 }
 
-export function Footer({ narrow = false, showTopBorder = false, dark = false }: FooterProps) {
+export function Footer({ narrow = false, showTopBorder = false, dark = false, hideBlackSpacer = false }: FooterProps) {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [isAgency, setIsAgency] = useState(false);
@@ -175,7 +176,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false }: 
         </div>
       </div>
     </footer>
-    <div className="h-[50px] bg-black" />
+    {!hideBlackSpacer && <div className="h-[50px] bg-black" />}
     </>
   );
 }
