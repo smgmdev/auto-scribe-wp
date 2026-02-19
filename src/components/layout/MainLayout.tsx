@@ -135,7 +135,8 @@ export function MainLayout({
             </div>
           </div>
         </footer>
-        <div className="h-[50px] bg-black w-full footer-widget-clearance" />
+        <div className="h-[50px] bg-black w-full" />
+        <div className="footer-widget-clearance bg-black" />
         
       </main>
     </div>;
