@@ -218,7 +218,7 @@ export default function HelpCenter() {
       <div className="h-[92px]" />
 
       {/* Sub-header - Sticky, adjusts top when header hides */}
-      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+      <div className={`sticky z-50 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
         <div className="bg-white">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Help Center</span>
