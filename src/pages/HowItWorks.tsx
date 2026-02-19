@@ -1203,7 +1203,7 @@ const HowItWorks = () => {
 
             {/* Card 2 - Media Buying */}
             <a 
-              href="/media-buying"
+              href="/about"
               className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer bg-white hover:scale-[1.02] transition-transform duration-300 border border-[#d2d2d7]"
             >
               <div>
