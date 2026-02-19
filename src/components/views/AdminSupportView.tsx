@@ -174,7 +174,7 @@ export function AdminSupportView() {
                     </p>
                     {ticket.last_message_at && (
                       <p className="text-xs text-muted-foreground">
-                        Last Message: {format(new Date(ticket.last_message_at), 'MMM d, yyyy HH:mm')} — from {ticket.last_message_sender === 'admin' ? 'Admin' : 'User'}
+                        Last Message: {format(new Date(ticket.last_message_at), 'MMM d, yyyy HH:mm')} — from {ticket.last_message_sender === 'admin' ? 'Staff' : 'User'}
                       </p>
                     )}
                     {ticket.status === 'closed' && ticket.closed_at && (
