@@ -151,11 +151,11 @@ export function AdminSupportView() {
                 onClick={() => handleOpenTicket(ticket)}
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full">
                     {!ticket.admin_read && (
                       <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0" />
                     )}
-                    <p className="font-medium text-sm truncate">{ticket.subject}</p>
+                    <p className="font-medium text-sm truncate flex-1">{ticket.subject}</p>
                     <Badge variant={ticket.status === 'open' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
                       {ticket.status === 'open' ? (
                         <><Clock className="h-3 w-3 mr-1" />Open</>
