@@ -119,6 +119,7 @@ export default function SystemStatus() {
   const [services, setServices] = useState<ServiceStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshInProgressRef = useRef(false);
 
   // Link mapping for services
   const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
@@ -142,6 +143,8 @@ export default function SystemStatus() {
   };
 
   const fetchStatus = useCallback(async (showRefresh = false) => {
+    if (showRefresh && refreshInProgressRef.current) return;
+    if (showRefresh) refreshInProgressRef.current = true;
     if (showRefresh) setIsRefreshing(true);
     
     try {
@@ -184,8 +187,9 @@ export default function SystemStatus() {
       setIsLoading(false);
       if (showRefresh) {
         sonnerToast.success('Status refreshed');
+        setIsRefreshing(false);
+        refreshInProgressRef.current = false;
       }
-      setIsRefreshing(false);
     }
   }, []);
 
