@@ -274,7 +274,7 @@ export default function SystemStatus() {
           </h1>
 
           {/* Status row: banner + refresh */}
-          <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
             {/* Status message */}
             <div className="flex items-center gap-3">
               {isLoading ? (
@@ -310,15 +310,14 @@ export default function SystemStatus() {
               })()}
             </div>
 
-            {/* Refresh button - credit management style */}
+            {/* Refresh button */}
             <Button
               onClick={() => fetchStatus(true)}
               disabled={isRefreshing}
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-[hsl(var(--icon-hover))] hover:text-white"
+              className="w-full md:w-auto rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </div>
 
