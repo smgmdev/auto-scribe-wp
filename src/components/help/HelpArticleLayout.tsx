@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, User } from 'lucide-react';
+import { ArrowLeft, Info, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -193,7 +193,10 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
             {/* Article Content */}
             <article className="min-w-0 pb-16">
               {topNotice && (
-                <p className="text-sm text-muted-foreground mb-4">{topNotice}</p>
+                <div className="flex items-center gap-2 bg-black text-white text-sm px-4 py-2 mb-6 w-fit">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span>{topNotice}</span>
+                </div>
               )}
               <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-6">
                 {title}
