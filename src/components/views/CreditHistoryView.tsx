@@ -1655,53 +1655,52 @@ export function CreditHistoryView() {
                       const siteNameMatch = transaction.description?.match(/Published article to (.+)/);
                       const siteName = siteNameMatch ? siteNameMatch[1].trim() : null;
                       
+                      // Check if transaction has metadata with persisted links
+                      const txMetadata = (transaction as any).metadata;
+                      
                       if (siteName) {
-                        // Find the article published around the same time to this site
-                        const { data: articles } = await supabase
-                          .from('articles')
-                          .select('id, title, wp_link, published_to, published_to_name, published_to_favicon, created_at')
-                          .eq('status', 'published')
-                          .eq('published_to_name', siteName)
-                          .order('created_at', { ascending: false })
-                          .limit(5);
+                        // Fetch site favicon via RPC
+                        const { data: publicSites } = await supabase.rpc('get_public_sites');
+                        const wpSite = publicSites?.find((s: any) => s.name === siteName);
                         
-                        if (articles && articles.length > 0) {
-                          // Find closest article by time
-                          const txTime = new Date(transaction.created_at).getTime();
-                          let bestArticle = articles[0];
-                          let bestDiff = Infinity;
-                          for (const a of articles) {
-                            const diff = Math.abs(new Date(a.created_at).getTime() - txTime);
-                            if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
-                          }
-                          // Fetch site URL and favicon via RPC (accessible to all users)
-                          const { data: publicSites } = await supabase.rpc('get_public_sites');
-                          const wpSite = publicSites?.find((s: any) => s.name === siteName);
-                          
+                        // If metadata has wp_link, use it directly (survives article deletion)
+                        if (txMetadata?.wp_link) {
                           setPublishDetails(prev => ({ ...prev, [transaction.id]: {
-                            ...bestArticle,
-                            site_url: wpSite?.url || null,
-                            site_favicon: wpSite?.favicon || bestArticle.published_to_favicon,
+                            published_to_name: siteName,
+                            wp_link: txMetadata.wp_link,
+                            site_url: txMetadata.site_url || wpSite?.url || null,
+                            site_favicon: wpSite?.favicon || null,
+                            published_to_favicon: wpSite?.favicon || null,
                           }}));
                         } else {
-                          // Fallback: try to get favicon and URL via RPC
-                          const { data: publicSites } = await supabase.rpc('get_public_sites');
-                          const wpSite = publicSites?.find((s: any) => s.name === siteName);
+                          // Fallback: try to find the article (legacy transactions without metadata)
+                          const { data: articles } = await supabase
+                            .from('articles')
+                            .select('id, title, wp_link, published_to, published_to_name, published_to_favicon, created_at')
+                            .eq('status', 'published')
+                            .eq('published_to_name', siteName)
+                            .order('created_at', { ascending: false })
+                            .limit(5);
                           
-                          if (wpSite) {
+                          if (articles && articles.length > 0) {
+                            const txTime = new Date(transaction.created_at).getTime();
+                            let bestArticle = articles[0];
+                            let bestDiff = Infinity;
+                            for (const a of articles) {
+                              const diff = Math.abs(new Date(a.created_at).getTime() - txTime);
+                              if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
+                            }
                             setPublishDetails(prev => ({ ...prev, [transaction.id]: {
-                              published_to_name: siteName,
-                              published_to_favicon: wpSite.favicon,
-                              site_url: wpSite.url,
-                              site_favicon: wpSite.favicon,
-                              wp_link: null,
+                              ...bestArticle,
+                              site_url: wpSite?.url || null,
+                              site_favicon: wpSite?.favicon || bestArticle.published_to_favicon,
                             }}));
                           } else {
                             setPublishDetails(prev => ({ ...prev, [transaction.id]: {
                               published_to_name: siteName,
-                              published_to_favicon: null,
-                              site_url: null,
-                              site_favicon: null,
+                              published_to_favicon: wpSite?.favicon || null,
+                              site_url: wpSite?.url || null,
+                              site_favicon: wpSite?.favicon || null,
                               wp_link: null,
                             }}));
                           }

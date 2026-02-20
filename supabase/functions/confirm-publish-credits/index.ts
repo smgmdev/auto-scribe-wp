@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    const { lockId, success: publishSuccess, siteName } = await req.json();
+    const { lockId, success: publishSuccess, siteName, wpLink, siteUrl } = await req.json();
 
     // If no lockId, nothing to confirm (e.g. admin or free site)
     if (!lockId) {
@@ -67,12 +67,22 @@ Deno.serve(async (req) => {
 
     if (publishSuccess) {
       // Publish succeeded — convert the locked transaction to a confirmed publish deduction
-      const { error: updateTxError } = await supabase
-        .from('credit_transactions')
-        .update({
+      const updatePayload: Record<string, unknown> = {
           type: 'publish',
           description: `Published article to ${siteName || 'media site'}`,
-        })
+        };
+        
+        // Persist publication metadata so links survive article deletion
+        if (wpLink || siteUrl) {
+          updatePayload.metadata = {
+            ...(wpLink ? { wp_link: wpLink } : {}),
+            ...(siteUrl ? { site_url: siteUrl } : {}),
+          };
+        }
+        
+      const { error: updateTxError } = await supabase
+        .from('credit_transactions')
+        .update(updatePayload)
         .eq('id', lockId);
 
       if (updateTxError) {
