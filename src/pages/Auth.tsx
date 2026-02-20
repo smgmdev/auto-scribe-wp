@@ -344,8 +344,8 @@ export default function Auth() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleActiveSessionCancel}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleActiveSessionConfirm}>Continue & Sign In</AlertDialogAction>
+            <AlertDialogCancel onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleActiveSessionConfirm} className="hover:bg-transparent hover:text-black border border-primary">Continue to Sign In</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
