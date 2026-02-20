@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,14 +27,14 @@ Deno.serve(async (req) => {
   });
 
   const token = authHeader.replace('Bearer ', '');
-  const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
-  if (claimsError || !claimsData?.claims) {
-    console.error('[confirm-publish-credits] Auth failed:', claimsError?.message);
+  const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
+  if (userError || !user) {
+    console.error('[confirm-publish-credits] Auth failed:', userError?.message);
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-  const userId = claimsData.claims.sub;
+  const userId = user.id;
   // ───────────────────────────────────────────────────────────────────
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
