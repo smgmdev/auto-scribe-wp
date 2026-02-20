@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, X, Loader2, AlertCircle, Download, ExternalLink } from 'lucide-react';
+import { RefreshCw, Loader2, AlertCircle, Download, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 
 interface WebViewDialogProps {
   open: boolean;
@@ -31,15 +31,10 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
     if (open) {
       setStatus('loading');
       loadedRef.current = false;
-      
       clearTimers();
-      // Fallback timeout - if nothing loads in 15s, show blocked
       timeoutRef.current = setTimeout(() => {
-        if (!loadedRef.current) {
-          setStatus('blocked');
-        }
+        if (!loadedRef.current) setStatus('blocked');
       }, 15000);
-
       return () => clearTimers();
     }
   }, [open, normalizedUrl]);
@@ -49,9 +44,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
     loadedRef.current = false;
     clearTimers();
     timeoutRef.current = setTimeout(() => {
-      if (!loadedRef.current) {
-        setStatus('blocked');
-      }
+      if (!loadedRef.current) setStatus('blocked');
     }, 15000);
     if (iframeRef.current) {
       iframeRef.current.src = '';
@@ -70,22 +63,15 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
   };
 
   const handleIframeLoad = () => {
-    // Only handle load once to prevent blinking from multiple load events
     if (loadedRef.current) return;
-    
     clearTimers();
     loadedRef.current = true;
-    
-    // Small delay to let content render, then mark as loaded
-    setTimeout(() => {
-      setStatus('loaded');
-    }, 300);
+    setTimeout(() => setStatus('loaded'), 300);
   };
 
   const handleDownload = async () => {
     const urlToDownload = downloadUrl || url;
     const fileName = downloadName || title || 'download';
-    
     try {
       const response = await fetch(urlToDownload);
       const blob = await response.blob();
@@ -99,111 +85,101 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
       window.URL.revokeObjectURL(blobUrl);
       toast.success(`Download started: ${fileName}`);
     } catch (error) {
-      // Fallback: open in new tab
       window.open(urlToDownload, '_blank');
     }
   };
 
+  const titleBar = (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <Button
+          onClick={handleRefresh}
+          variant="ghost"
+          size="sm"
+          disabled={status === 'loading'}
+          className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black disabled:opacity-100 flex-shrink-0"
+        >
+          <RefreshCw className={`h-4 w-4 ${status === 'loading' ? 'animate-spin' : ''}`} />
+        </Button>
+        <span className="text-sm font-medium truncate">{title}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {isWebsite ? (
+          <Button
+            onClick={() => window.open(normalizedUrl, '_blank')}
+            variant="outline"
+            size="sm"
+            className="flex-1 sm:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            New Tab
+          </Button>
+        ) : (downloadUrl || url) && (
+          <Button
+            onClick={handleDownload}
+            variant="outline"
+            size="sm"
+            className="flex-1 sm:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
+          >
+            <Download className="h-3 w-3 mr-1" />
+            Download
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[95vw] md:w-[90vw] max-w-[95vw] md:max-w-[90vw] max-h-[90vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden z-[300]" overlayClassName="bg-black/50 z-[299]">
-        <DialogHeader className="px-2 md:px-3 pb-0">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <Button
-                onClick={handleRefresh}
-                variant="ghost"
-                size="sm"
-                disabled={status === 'loading'}
-                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black disabled:opacity-100 flex-shrink-0"
-              >
-                <RefreshCw className={`h-4 w-4 ${status === 'loading' ? 'animate-spin' : ''}`} />
-              </Button>
-              <span className="text-sm font-medium truncate">{title}</span>
-              <Button
-                onClick={() => onOpenChange(false)}
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black md:hidden ml-auto flex-shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+    <DraggablePopup
+      open={open}
+      onOpenChange={handleOpenChange}
+      width={960}
+      maxHeight="90vh"
+      zIndex={300}
+      title={titleBar}
+      bodyClassName="p-0 !p-0"
+    >
+      <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted">
+        {status === 'loading' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Loading...</p>
             </div>
-            <div className="flex items-center gap-2">
-              {isWebsite ? (
-                <Button
-                  onClick={() => window.open(normalizedUrl, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  New Tab
-                </Button>
-              ) : (downloadUrl || url) && (
-                <Button
-                  onClick={handleDownload}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black h-7 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-              )}
+          </div>
+        )}
+        {status === 'blocked' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+            <div className="flex flex-col items-center gap-4 text-center px-6">
+              <AlertCircle className="h-12 w-12 text-muted-foreground" />
+              <div>
+                <p className="text-foreground font-medium mb-1">Preview not available</p>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  This file cannot be previewed. You can download it instead.
+                </p>
+              </div>
               <Button
-                onClick={() => onOpenChange(false)}
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hidden md:flex flex-shrink-0"
+                onClick={handleDownload}
+                variant="outline"
+                className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
               >
-                <X className="h-4 w-4" />
+                <Download className="h-4 w-4 mr-2" />
+                Download File
               </Button>
             </div>
           </div>
-        </DialogHeader>
-        <div className="w-full h-[70vh] md:h-[80vh] relative bg-muted">
-          {status === 'loading' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Loading...</p>
-              </div>
-            </div>
-          )}
-          {status === 'blocked' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
-              <div className="flex flex-col items-center gap-4 text-center px-6">
-                <AlertCircle className="h-12 w-12 text-muted-foreground" />
-                <div>
-                  <p className="text-foreground font-medium mb-1">Preview not available</p>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    This file cannot be previewed. You can download it instead.
-                  </p>
-                </div>
-                <Button
-                  onClick={handleDownload}
-                  variant="outline"
-                  className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download File
-                </Button>
-              </div>
-            </div>
-          )}
-          <iframe
-            ref={iframeRef}
-            key={normalizedUrl}
-            src={normalizedUrl}
-            className={`w-full h-full border-0 transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
-            title="WebView"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            onLoad={handleIframeLoad}
-            onError={() => { setStatus('blocked'); clearTimers(); }}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
+        )}
+        <iframe
+          ref={iframeRef}
+          key={normalizedUrl}
+          src={normalizedUrl}
+          className={`w-full h-full border-0 transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+          title="WebView"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+          onLoad={handleIframeLoad}
+          onError={() => { setStatus('blocked'); clearTimers(); }}
+        />
+      </div>
+    </DraggablePopup>
   );
 }
