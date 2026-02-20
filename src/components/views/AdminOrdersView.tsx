@@ -1205,28 +1205,18 @@ export function AdminOrdersView() {
                               )}
                             </div>
                           </div>
-                          {/* Desktop: Badge + View Publication */}
+                          {/* Desktop: Badge */}
                           <div className="hidden md:flex flex-col items-end gap-1">
-                            <div className="flex gap-2 items-center">
-                              <Badge className="bg-green-600 text-white border-green-600">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Published
-                              </Badge>
-                              {wpLink && (
-                                <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="outline" size="default" className="text-sm">
-                                    <ExternalLink className="h-4 w-4 mr-1.5" />
-                                    View Publication
-                                  </Button>
-                                </a>
-                              )}
-                            </div>
+                            <Badge className="bg-green-600 text-white border-green-600">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Published
+                            </Badge>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0 pb-3 px-3 md:px-4">
-                        {/* Desktop layout */}
-                        <div className="hidden md:flex items-end justify-between">
+                      <CardContent className="pt-0 pb-3 px-3 md:px-4 space-y-3">
+                        {/* Info row */}
+                        <div className="flex items-end justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
                               User: {item.user_email || 'Unknown user'}
@@ -1245,39 +1235,15 @@ export function AdminOrdersView() {
                             </p>
                           </div>
                         </div>
-                        
-                        {/* Mobile layout */}
-                        <div className="md:hidden space-y-2">
-                          <div className="space-y-0.5">
-                            <span className="text-xs text-muted-foreground block">
-                              User: {item.user_email || 'Unknown user'}
-                            </span>
-                            <span className="text-xs text-muted-foreground block">
-                              Published: {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-end">
-                            <div>
-                              {wpLink && (
-                                <a href={wpLink} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="default" className="text-sm">
-                                    <ExternalLink className="h-4 w-4 mr-1.5" />
-                                    View Publication
-                                  </Button>
-                                </a>
-                              )}
-                            </div>
-                            <div className="flex flex-col items-end gap-0.5">
-                              <span className="text-xs text-muted-foreground capitalize">Article</span>
-                              <p className="text-sm">
-                                ${amountUsd.toFixed(2)}
-                                <span className="text-xs text-green-600 ml-2">
-                                  +${platformFee.toFixed(2)} fee
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        {/* View Publication button */}
+                        {wpLink && (
+                          <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="outline" size="default" className="text-sm w-full">
+                              <ExternalLink className="h-4 w-4 mr-1.5" />
+                              View Publication
+                            </Button>
+                          </a>
+                        )}
                       </CardContent>
                     </Card>
                   );
