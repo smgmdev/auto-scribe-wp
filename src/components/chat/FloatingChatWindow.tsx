@@ -7323,39 +7323,38 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative flex flex-col ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-6 pb-6 overflow-y-auto scrollbar-hide'
-                : 'w-full max-w-md max-h-[90vh] border pt-2 px-6 pb-6 shadow-lg rounded-lg overflow-y-auto scrollbar-hide'
+                ? 'w-full h-[100dvh] overflow-y-auto scrollbar-hide'
+                : 'w-full max-w-md max-h-[90vh] border shadow-lg rounded-lg overflow-y-auto scrollbar-hide'
             }`}
             style={isMobile ? undefined : { transform: `translate(${orderDetailsDragPos.x}px, ${orderDetailsDragPos.y}px)` }}
           >
-            {/* Drag Handle - desktop only */}
-            {!isMobile && (
-              <div
-                className={`flex items-center justify-start py-2 ${orderDetailsDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-                onMouseDown={handleOrderDetailsDragStart}
-              >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
-
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold leading-none tracking-tight">Order Details</h2>
+            {/* Header bar with drag handle and close */}
+            <div
+              className={`flex items-center justify-between px-4 py-2 border-b bg-muted/30 ${!isMobile ? (orderDetailsDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none`}
+              onMouseDown={!isMobile ? handleOrderDetailsDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               <button
                 onClick={() => setOrderDetailsOpen(false)}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                onMouseDown={(e) => e.stopPropagation()}
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </button>
             </div>
 
+            {/* Title */}
+            <div className="px-6 pt-4">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">Order Details</h2>
+            </div>
+
             {loadingOrderDetails ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-8 px-6">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : orderDetails ? (
-              <div className="flex-1 mt-4">
+              <div className="flex-1 mt-4 px-6 pb-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                   {globalChatRequest?.media_site?.favicon ? (
