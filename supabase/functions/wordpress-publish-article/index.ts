@@ -136,6 +136,7 @@ Deno.serve(async (req) => {
     if (approvedSite) {
       // Verify ownership: site belongs to caller or caller's agency, or caller is admin
       if (!isAdmin) {
+        const isGlobalSite = approvedSite.user_id === null;
         const isDirectOwner = approvedSite.user_id === callerUserId;
         let isAgencyOwner = false;
         if (approvedSite.agency) {
@@ -149,7 +150,7 @@ Deno.serve(async (req) => {
             .maybeSingle();
           isAgencyOwner = !!agencyData;
         }
-        if (!isDirectOwner && !isAgencyOwner) {
+        if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
           console.error('[wordpress-publish-article] Caller does not own site', { callerUserId, siteId });
           return new Response(
             JSON.stringify({ success: false, error: 'Unauthorized: you do not own this site' }),
