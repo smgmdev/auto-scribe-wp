@@ -1258,10 +1258,10 @@ export function AdminOrdersView() {
                           </div>
                         </div>
                         {/* Action buttons */}
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end">
                           <Button 
                             size="sm" 
-                            className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black"
+                            className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black flex-1 md:flex-none rounded-r-none"
                             disabled={instantUserDetailsLoading === item.id}
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -1299,16 +1299,13 @@ export function AdminOrdersView() {
                             }}
                           >
                             {instantUserDetailsLoading === item.id ? (
-                              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                            ) : (
-                              <Eye className="h-3.5 w-3.5 mr-1" />
-                            )}
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : null}
                             User Details
                           </Button>
                           {wpLink && (
-                            <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                              <Button size="sm" className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black w-full md:w-auto">
-                                <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                            <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1 md:flex-none">
+                              <Button size="sm" className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black w-full rounded-l-none -ml-px">
                                 View Publication
                               </Button>
                             </a>
