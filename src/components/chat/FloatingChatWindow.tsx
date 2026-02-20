@@ -7882,38 +7882,37 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           <div
             className={`pointer-events-auto bg-background relative overflow-y-auto ${
               isMobile
-                ? 'w-full h-[100dvh] px-6 pt-6 pb-6'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg'
+                ? 'w-full h-[100dvh]'
+                : 'w-full max-w-md border shadow-lg'
             }`}
             style={isMobile ? undefined : { transform: `translate(${confirmOrderPos.x}px, ${confirmOrderPos.y}px)` }}
           >
-            {/* Drag Handle - desktop only */}
-            {!isMobile && (
-              <div
-                className={`flex items-center justify-start py-2 ${confirmOrderDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-                onMouseDown={handleConfirmOrderDragStart}
-              >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
-
-            {/* Header with title and close button aligned */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold leading-none tracking-tight flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                Confirm Order
-              </h2>
+            {/* Header bar with drag handle and close */}
+            <div
+              className={`flex items-center justify-between px-4 py-2 border-b bg-muted/30 ${!isMobile ? (confirmOrderDragging ? 'cursor-grabbing' : 'cursor-grab') : ''} select-none`}
+              onMouseDown={!isMobile ? handleConfirmOrderDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               <button
                 onClick={() => { setAcceptOrderDialogOpen(false); setPendingOrderRequest(null); }}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                onMouseDown={(e) => e.stopPropagation()}
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </button>
             </div>
 
+            {/* Title */}
+            <div className="px-6 pt-4">
+              <h2 className="text-base font-semibold leading-none tracking-tight flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                Confirm Order
+              </h2>
+            </div>
+
             {pendingOrderRequest && (
-              <div className="space-y-2 py-4">
+              <div className="space-y-2 py-4 px-6 pb-6">
                 {/* Order Summary */}
                 <div className="rounded-none border border-border bg-muted/50 p-4">
                   <div className="flex items-start gap-3">
