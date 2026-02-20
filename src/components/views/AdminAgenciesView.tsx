@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
-import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle, ArchiveRestore } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle, ArchiveRestore, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -112,6 +112,7 @@ export function AdminAgenciesView() {
   const [processing, setProcessing] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
+  const [agencySearchTerm, setAgencySearchTerm] = useState('');
   const [verificationSubTab, setVerificationSubTab] = useState('pending-verification');
   const [onboardedSubTab, setOnboardedSubTab] = useState('active');
   const [voidSubTab, setVoidSubTab] = useState('cancelled');
@@ -246,12 +247,42 @@ export function AdminAgenciesView() {
     }
   };
 
+  // Search filter helper for applications
+  const matchesAppSearch = (app: AgencyApplication) => {
+    if (!agencySearchTerm) return true;
+    const term = agencySearchTerm.toLowerCase();
+    return (
+      app.agency_name.toLowerCase().includes(term) ||
+      app.email.toLowerCase().includes(term) ||
+      app.full_name.toLowerCase().includes(term) ||
+      app.country.toLowerCase().includes(term)
+    );
+  };
+
+  // Search filter helper for agency payouts
+  const matchesAgencySearch = (agency: AgencyPayout) => {
+    if (!agencySearchTerm) return true;
+    const term = agencySearchTerm.toLowerCase();
+    const application = approvedApplications.find(app => app.user_id === agency.user_id);
+    return (
+      agency.agency_name.toLowerCase().includes(term) ||
+      (agency.email?.toLowerCase().includes(term) ?? false) ||
+      (application?.country.toLowerCase().includes(term) ?? false) ||
+      (application?.full_name.toLowerCase().includes(term) ?? false)
+    );
+  };
+
   const cancelledApplications = applications.filter(app => app.status === 'cancelled');
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const unreadPendingCount = pendingApplications.filter(app => !app.read).length;
   const unreadCancelledCount = cancelledApplications.filter(app => !app.read).length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
   const approvedApplications = applications.filter(app => app.status === 'approved');
+
+  // Filtered versions for display
+  const filteredPendingApplications = pendingApplications.filter(matchesAppSearch);
+  const filteredCancelledApplications = cancelledApplications.filter(matchesAppSearch);
+  const filteredRejectedApplications = rejectedApplications.filter(matchesAppSearch);
   
   // Filter agencies under verification - only include those with approved applications
   // An agency is under verification if: not onboarding complete AND not downgraded AND has an approved application for this user
@@ -286,6 +317,12 @@ export function AdminAgenciesView() {
     const verification = customVerifications.find(v => v.agency_payout_id === a.id);
     return verification && !verification.read;
   }).length;
+
+  // Filtered agency lists for display
+  const filteredAgenciesPendingVerification = agenciesPendingVerification.filter(matchesAgencySearch);
+  const filteredAgenciesPendingApprovalReview = agenciesPendingApprovalReview.filter(matchesAgencySearch);
+  const filteredActiveAgencies = agencies.filter(a => a.onboarding_complete && !a.downgraded).filter(matchesAgencySearch);
+  const filteredDowngradedAgencies = agencies.filter(a => a.downgraded).filter(matchesAgencySearch);
 
   const handleOpenApplication = async (app: AgencyApplication) => {
     setSelectedApp(app);
@@ -809,10 +846,29 @@ export function AdminAgenciesView() {
           </TabsTrigger>
         </TabsList>
 
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search agencies by name, email, country..."
+            value={agencySearchTerm}
+            onChange={(e) => setAgencySearchTerm(e.target.value)}
+            className="pl-9 rounded-none border-x-0 border-t-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+          {agencySearchTerm && (
+            <button
+              onClick={() => setAgencySearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
         {/* Pending Applications Tab */}
         <TabsContent value="pending">
           <p className="text-sm bg-black text-white px-3 py-2">New agency applications</p>
-          {pendingApplications.length === 0 ? (
+          {filteredPendingApplications.length === 0 ? (
             <Card className="border-dashed border-2">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Clock className="h-12 w-12 text-muted-foreground/50" />
@@ -824,7 +880,7 @@ export function AdminAgenciesView() {
             </Card>
           ) : (
             <div className="grid gap-0">
-              {pendingApplications.map((app) => (
+              {filteredPendingApplications.map((app) => (
                 <Card 
                   key={app.id} 
                   className={cn(
@@ -916,7 +972,7 @@ export function AdminAgenciesView() {
             {/* Cancelled Sub-Tab */}
             <TabsContent value="cancelled">
               <p className="text-sm bg-black text-white px-3 py-2">Cancelled agency applications by user</p>
-              {cancelledApplications.length === 0 ? (
+              {filteredCancelledApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <XCircle className="h-12 w-12 text-muted-foreground/50" />
@@ -928,7 +984,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="grid gap-0">
-                  {cancelledApplications.map((app) => (
+                  {filteredCancelledApplications.map((app) => (
                     <Card 
                       key={app.id} 
                       className={cn(
@@ -1050,7 +1106,7 @@ export function AdminAgenciesView() {
             {/* Rejected Sub-Tab */}
             <TabsContent value="rejected">
               <p className="text-sm bg-black text-white px-3 py-2">Rejected agency applications by Arcana Mace Staff</p>
-              {rejectedApplications.length === 0 ? (
+              {filteredRejectedApplications.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <XCircle className="h-12 w-12 text-muted-foreground/50" />
@@ -1062,7 +1118,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                  <div className="grid gap-0">
-                   {[...rejectedApplications].sort((a, b) => {
+                   {[...filteredRejectedApplications].sort((a, b) => {
                      const dateA = a.reviewed_at || a.updated_at || a.created_at;
                      const dateB = b.reviewed_at || b.updated_at || b.created_at;
                      return new Date(dateB).getTime() - new Date(dateA).getTime();
@@ -1205,7 +1261,7 @@ export function AdminAgenciesView() {
             {/* Pending Verification Sub-Tab */}
             <TabsContent value="pending-verification">
               <p className="text-sm bg-black text-white px-3 py-2">Agency applications undergoing verification</p>
-              {agenciesPendingVerification.length === 0 ? (
+              {filteredAgenciesPendingVerification.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Clock className="h-12 w-12 text-muted-foreground/50" />
@@ -1217,7 +1273,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-0">
-                  {agenciesPendingVerification.map(agency => {
+                  {filteredAgenciesPendingVerification.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     return (
                       <Card 
@@ -1297,7 +1353,7 @@ export function AdminAgenciesView() {
             {/* Pending Approval Sub-Tab */}
             <TabsContent value="pending-approval">
               <p className="text-sm bg-black text-white px-3 py-2">Agency applications undergoing approval</p>
-              {agenciesPendingApprovalReview.length === 0 ? (
+              {filteredAgenciesPendingApprovalReview.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <FileText className="h-12 w-12 text-muted-foreground/50" />
@@ -1309,7 +1365,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-0">
-                  {agenciesPendingApprovalReview.map(agency => {
+                  {filteredAgenciesPendingApprovalReview.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
                     return (
@@ -1423,7 +1479,7 @@ export function AdminAgenciesView() {
             {/* Active Sub-Tab */}
             <TabsContent value="active">
               <p className="text-sm bg-black text-white px-3 py-2">Onboarded active agencies</p>
-              {agencies.filter(a => a.onboarding_complete && !a.downgraded).length === 0 ? (
+              {filteredActiveAgencies.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Building2 className="h-12 w-12 text-muted-foreground/50" />
@@ -1435,7 +1491,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-0">
-                  {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
+                  {filteredActiveAgencies.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
                     return (
@@ -1569,7 +1625,7 @@ export function AdminAgenciesView() {
             {/* Downgraded Sub-Tab */}
             <TabsContent value="downgraded">
               <p className="text-sm bg-black text-white px-3 py-2">Onboarded downgraded agencies</p>
-              {agencies.filter(a => a.downgraded).length === 0 ? (
+              {filteredDowngradedAgencies.length === 0 ? (
                 <Card className="border-dashed border-2">
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <UserMinus className="h-12 w-12 text-muted-foreground/50" />
@@ -1581,7 +1637,7 @@ export function AdminAgenciesView() {
                 </Card>
               ) : (
                 <div className="space-y-0">
-                  {agencies.filter(a => a.downgraded).map(agency => {
+                  {filteredDowngradedAgencies.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     return (
                       <Card 
