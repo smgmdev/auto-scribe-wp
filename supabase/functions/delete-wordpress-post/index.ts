@@ -77,6 +77,7 @@ serve(async (req) => {
 
     // ── Ownership verification ─────────────────────────────────────
     if (!isAdmin) {
+      const isGlobalSite = site.user_id === null;
       const isDirectOwner = site.user_id === callerUserId;
       let isAgencyOwner = false;
       if (site.agency) {
@@ -90,7 +91,7 @@ serve(async (req) => {
           .maybeSingle();
         isAgencyOwner = !!agencyData;
       }
-      if (!isDirectOwner && !isAgencyOwner) {
+      if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
         console.error('[delete-wordpress-post] Caller does not own site', { callerUserId, siteId });
         return new Response(
           JSON.stringify({ error: 'Unauthorized: you do not own this site', deleted: false }),

@@ -133,6 +133,7 @@ Deno.serve(async (req) => {
 
     if (approvedSite) {
       if (!isAdmin) {
+        const isGlobalSite = approvedSite.user_id === null;
         const isDirectOwner = approvedSite.user_id === callerUserId;
         let isAgencyOwner = false;
         if (approvedSite.agency) {
@@ -146,7 +147,7 @@ Deno.serve(async (req) => {
             .maybeSingle();
           isAgencyOwner = !!agencyData;
         }
-        if (!isDirectOwner && !isAgencyOwner) {
+        if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
           return new Response(JSON.stringify({ error: 'Unauthorized: you do not own this site' }), {
             status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
