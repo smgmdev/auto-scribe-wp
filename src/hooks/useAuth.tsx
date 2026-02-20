@@ -108,10 +108,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (newGrace > sessionGraceUntilRef.current) {
       sessionGraceUntilRef.current = newGrace;
     }
-    await supabase
-      .from('profiles')
-      .update({ active_session_id: sessionId } as any)
-      .eq('id', userId);
+
+    // Retry up to 3 times to ensure registration succeeds
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ active_session_id: sessionId } as any)
+        .eq('id', userId);
+
+      if (error) {
+        console.error(`[Auth] registerActiveSession attempt ${attempt} failed:`, error);
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 500 * attempt));
+          continue;
+        }
+        return;
+      }
+
+      // Verify the update took effect
+      const { data: verifyData } = await supabase
+        .from('profiles')
+        .select('active_session_id')
+        .eq('id', userId)
+        .single();
+
+      const dbValue = (verifyData as any)?.active_session_id;
+      if (dbValue === sessionId) {
+        console.log('[Auth] Session registration verified on attempt', attempt);
+        return;
+      }
+
+      console.warn(`[Auth] Session registration verification failed on attempt ${attempt}. DB has: ${dbValue}, expected: ${sessionId}`);
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 500 * attempt));
+      }
+    }
+
+    console.error('[Auth] Failed to register active session after 3 attempts');
   };
 
   // Force logout when kicked by another session
@@ -470,7 +503,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // the session-guard poll from kicking us out while we're still
           // registering our own session
           if (event === 'SIGNED_IN') {
-            sessionGraceUntilRef.current = Date.now() + 10000;
+            sessionGraceUntilRef.current = Date.now() + 15000;
             // Keep loading true until fetchUserData completes so
             // ProtectedRoute doesn't flash the dashboard before
             // pinRequired is resolved.
@@ -483,7 +516,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // seeing the old ID and kicking itself)
             if (event === 'SIGNED_IN') {
               sessionKickedRef.current = false;
+              // Small delay to ensure supabase client auth headers are fully set
+              await new Promise(r => setTimeout(r, 200));
               await registerActiveSession(newSession.user.id);
+              // Extend grace period after registration completes
+              sessionGraceUntilRef.current = Date.now() + 10000;
             }
             await fetchUserData(newSession.user.id);
             if (isMounted && event === 'SIGNED_IN') {
