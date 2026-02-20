@@ -2392,21 +2392,7 @@ export function AdminMediaManagementView() {
                               </Badge>
                               </div>
                             </div>
-                          {/* Mobile manage button */}
-                          <div className="mt-2 md:hidden">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-7 w-full border-border hover:bg-black hover:text-white hover:border-black transition-all"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAdminManageSubmission(submission);
-                                setAdminManageSearch('');
-                              }}
-                            >
-                              Manage Approved Media
-                            </Button>
-                          </div>
+                          
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {/* Manage button - hidden on mobile */}
                               <Button
@@ -2606,6 +2592,21 @@ export function AdminMediaManagementView() {
                               })}
                             </div>
                           )}
+                          {/* Mobile manage button - bottom of card */}
+                          <div className="mt-3 md:hidden">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-7 w-full border-border hover:bg-black hover:text-white hover:border-black transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAdminManageSubmission(submission);
+                                setAdminManageSearch('');
+                              }}
+                            >
+                              Manage Approved Media
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     );
