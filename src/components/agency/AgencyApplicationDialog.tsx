@@ -11,19 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Loader2, Upload, CheckCircle, Image, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { COUNTRIES } from '@/constants/countries';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
   TooltipContent,
@@ -232,14 +226,12 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
   };
 
   const isValidPhone = (phone: string) => {
-    // Allow formats: +1234567890, +1 234 567 8900, (123) 456-7890, etc.
-    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
     const cleanedPhone = phone.replace(/[\s\-\.\(\)]/g, '');
     return cleanedPhone.length >= 7 && cleanedPhone.length <= 15 && /^[\+]?[0-9]+$/.test(cleanedPhone);
   };
 
   const isValidUrl = (url: string) => {
-    // URL without https:// prefix (already added)
     const urlRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+([\/\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/;
     return urlRegex.test(url);
   };
@@ -375,13 +367,30 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>Apply for Agency Account</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="max-h-[calc(90vh-80px)] px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+    <DraggablePopup
+      open={open}
+      onOpenChange={onOpenChange}
+      width={672}
+      title={<h2 className="text-lg font-semibold leading-none tracking-tight">Apply for Agency Account</h2>}
+      footer={
+        <Button 
+          type="button"
+          className="w-full bg-black text-white hover:bg-transparent hover:text-black border border-black"
+          disabled={submitting || uploading || uploadingLogo || !documentUrl || !logoUrl}
+          onClick={handleSubmit}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Submitting...
+            </>
+          ) : (
+            'Submit Application'
+          )}
+        </Button>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="h-5 flex items-center">
@@ -805,24 +814,7 @@ export function AgencyApplicationDialog({ open, onOpenChange, onSubmitSuccess }:
                 </div>
               </div>
             </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-black text-white hover:bg-transparent hover:text-black border border-black"
-              disabled={submitting || uploading || uploadingLogo || !documentUrl || !logoUrl}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Submitting...
-                </>
-              ) : (
-                'Submit Application'
-              )}
-            </Button>
           </form>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    </DraggablePopup>
   );
 }
