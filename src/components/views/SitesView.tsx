@@ -119,6 +119,7 @@ export function SitesView() {
   
   // Track user's agency name (if they are an agency)
   const [userAgencyName, setUserAgencyName] = useState<string | null>(null);
+  const [ownedSiteIds, setOwnedSiteIds] = useState<Set<string>>(new Set());
 
   // Logo editing state
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
@@ -204,6 +205,18 @@ export function SitesView() {
     if (wpAgencies.length > 0) {
       fetchAgencyLogos(wpAgencies);
     }
+    // Fetch user's owned site IDs
+    const fetchOwnedSites = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('wordpress_sites')
+        .select('id')
+        .eq('user_id', user.id);
+      if (data) {
+        setOwnedSiteIds(new Set(data.map((s: any) => s.id)));
+      }
+    };
+    fetchOwnedSites();
   }, [sites]);
 
   // Subscribe to site_credits changes for real-time price updates
@@ -999,7 +1012,14 @@ export function SitesView() {
                 {/* Price and Plugin badges - visible only on mobile under name */}
                 <div className="flex md:hidden items-center gap-2 mt-0.5">
                   <Badge variant="secondary" className="text-xs">
-                    {siteCredits[site.id] || 1} USD
+                    {ownedSiteIds.has(site.id) ? (
+                      <span className="flex items-center gap-1">
+                        <span className="line-through">{siteCredits[site.id] || 1}</span>
+                        <span className="text-green-600 font-medium">0</span> USD
+                      </span>
+                    ) : (
+                      <>{siteCredits[site.id] || 1} USD</>
+                    )}
                   </Badge>
                   {isAdmin && (
                     <Badge variant="outline" className="text-xs">
@@ -1012,7 +1032,14 @@ export function SitesView() {
             <div className="flex items-center gap-2 flex-shrink-0 pr-3">
               {/* Price badge - hidden on mobile */}
               <Badge variant="secondary" className="hidden md:inline-flex">
-                {siteCredits[site.id] || 1} USD
+                {ownedSiteIds.has(site.id) ? (
+                  <span className="flex items-center gap-1">
+                    <span className="line-through">{siteCredits[site.id] || 1}</span>
+                    <span className="text-green-600 font-medium">0</span> USD
+                  </span>
+                ) : (
+                  <>{siteCredits[site.id] || 1} USD</>
+                )}
               </Badge>
 
               {/* Agency info */}

@@ -75,6 +75,7 @@ export function ComposeView() {
   
   // Site credits state
   const [siteCredits, setSiteCredits] = useState<SiteCredit[]>([]);
+  const [ownedSiteIds, setOwnedSiteIds] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tone, setTone] = useState<ArticleTone>(editingArticle?.tone || 'neutral');
   const [title, setTitle] = useState(editingArticle?.title || selectedHeadline?.title || '');
@@ -164,6 +165,19 @@ export function ComposeView() {
     };
     fetchSiteCredits();
 
+    // Fetch user's owned site IDs
+    const fetchOwnedSites = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('wordpress_sites')
+        .select('id')
+        .eq('user_id', user.id);
+      if (data) {
+        setOwnedSiteIds(new Set(data.map((s: any) => s.id)));
+      }
+    };
+    fetchOwnedSites();
+
     // Subscribe to site_credits changes for real-time price updates
     const channel = supabase
       .channel('site_credits_compose')
@@ -183,17 +197,27 @@ export function ComposeView() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.id]);
 
-  // Helper to get credit cost for a site
+  // Check if user owns a site
+  const isOwnedSite = (siteId: string): boolean => ownedSiteIds.has(siteId);
+
+  // Helper to get credit cost for a site (0 if owned)
   const getSiteCreditCost = (siteId: string): number => {
+    if (isOwnedSite(siteId)) return 0;
     const siteCredit = siteCredits.find(sc => sc.site_id === siteId);
     return siteCredit?.credits_required || 0;
   };
 
-  // Check if user can afford a site (admins bypass credit check)
+  // Get the original (non-owner-adjusted) credit cost for display
+  const getOriginalCreditCost = (siteId: string): number => {
+    const siteCredit = siteCredits.find(sc => sc.site_id === siteId);
+    return siteCredit?.credits_required || 0;
+  };
+
+  // Check if user can afford a site (admins and owners bypass credit check)
   const canAffordSite = (siteId: string): boolean => {
-    if (isAdmin) return true;
+    if (isAdmin || isOwnedSite(siteId)) return true;
     const cost = getSiteCreditCost(siteId);
     return credits >= cost;
   };
@@ -1206,7 +1230,12 @@ export function ComposeView() {
                         <span>{currentSite.name}</span>
                         <span className="ml-auto flex items-center gap-1 text-muted-foreground">
                           <Coins className="h-3 w-3" />
-                          {getSiteCreditCost(currentSite.id)}
+                          {isOwnedSite(currentSite.id) ? (
+                            <span className="flex items-center gap-1">
+                              <span className="line-through">{getOriginalCreditCost(currentSite.id)}</span>
+                              <span className="text-green-600 font-medium">0</span>
+                            </span>
+                          ) : getSiteCreditCost(currentSite.id)}
                         </span>
                       </div>}
                   </SelectValue>
@@ -1214,7 +1243,9 @@ export function ComposeView() {
                 <SelectContent className="bg-popover border border-border z-50">
                   {sites.map(site => {
                     const creditCost = getSiteCreditCost(site.id);
+                    const originalCost = getOriginalCreditCost(site.id);
                     const canAfford = canAffordSite(site.id);
+                    const owned = isOwnedSite(site.id);
                     
                     return (
                       <SelectItem 
@@ -1236,7 +1267,14 @@ export function ComposeView() {
                           <div className={`flex items-center gap-1 text-xs ml-auto flex-shrink-0 ${canAfford ? 'text-muted-foreground group-hover:text-white group-data-[highlighted]:text-white' : 'text-destructive'}`}>
                             {!canAfford && <Lock className="h-3 w-3" />}
                             <Coins className="h-3 w-3" />
-                            <span>{creditCost}</span>
+                            {owned ? (
+                              <span className="flex items-center gap-1">
+                                <span className="line-through">{originalCost}</span>
+                                <span className="text-green-600 font-medium">0</span>
+                              </span>
+                            ) : (
+                              <span>{creditCost}</span>
+                            )}
                           </div>
                         </div>
                       </SelectItem>
