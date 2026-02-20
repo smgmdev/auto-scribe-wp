@@ -335,7 +335,7 @@ export default function Auth() {
     <>
       <AlertDialog open={showActiveSessionWarning} onOpenChange={(open) => { if (!open) handleActiveSessionCancel(); }}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Active Session Detected</AlertDialogTitle>
             <AlertDialogDescription>
               Your account is currently signed in on another device or browser. If you continue, you will be automatically logged out from the other session.
