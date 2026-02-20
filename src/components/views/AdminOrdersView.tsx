@@ -1276,6 +1276,7 @@ export function AdminOrdersView() {
                                   .from('agency_applications')
                                   .select('full_name, whatsapp_phone, agency_name')
                                   .eq('user_id', item.user_id)
+                                  .eq('status', 'approved')
                                   .maybeSingle();
                                 setInstantUserDetails({
                                   agency_name: applicationData?.agency_name || item.agency_name || null,
