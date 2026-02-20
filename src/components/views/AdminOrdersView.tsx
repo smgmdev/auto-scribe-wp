@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare, RefreshCw } from 'lucide-react';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare, RefreshCw, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +52,20 @@ interface Order {
   } | null;
 }
 
+interface InstantOrder {
+  id: string;
+  amount: number;
+  description: string | null;
+  created_at: string;
+  user_id: string;
+  metadata: {
+    site_url?: string;
+    wp_link?: string;
+    site_name?: string;
+    site_favicon?: string;
+  } | null;
+  user_email?: string | null;
+}
 
 export function AdminOrdersView() {
   const { isAdmin } = useAuth();
@@ -75,6 +89,8 @@ export function AdminOrdersView() {
   const [agencyCommissions, setAgencyCommissions] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [instantOrders, setInstantOrders] = useState<InstantOrder[]>([]);
+  const [instantOrdersLoading, setInstantOrdersLoading] = useState(true);
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -95,6 +111,7 @@ export function AdminOrdersView() {
     if (isAdmin) {
       fetchOrders();
       fetchDisputedOrders();
+      fetchInstantOrders();
       
       // Subscribe to orders changes to refresh the list
       const ordersChannel = supabase
@@ -355,7 +372,34 @@ export function AdminOrdersView() {
     setIsRefreshing(false);
   };
 
-  // Handle deep-linking from Users section - auto-open chat for selected engagement
+  const fetchInstantOrders = async () => {
+    setInstantOrdersLoading(true);
+    const { data, error } = await supabase
+      .from('credit_transactions')
+      .select('id, amount, description, created_at, metadata, user_id')
+      .eq('type', 'publish')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      // Fetch user emails for all unique user_ids
+      const userIds = [...new Set(data.map((d: any) => d.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .in('id', userIds);
+
+      const emailMap: Record<string, string | null> = {};
+      profiles?.forEach((p: any) => { emailMap[p.id] = p.email; });
+
+      setInstantOrders(data.map((d: any) => ({
+        ...d,
+        metadata: d.metadata as InstantOrder['metadata'],
+        user_email: emailMap[d.user_id] || null,
+      })));
+    }
+    setInstantOrdersLoading(false);
+  };
+
   useEffect(() => {
     if (loading || orders.length === 0) return;
     
@@ -399,7 +443,7 @@ export function AdminOrdersView() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([fetchOrders(true), fetchDisputedOrders()]);
+    await Promise.all([fetchOrders(true), fetchDisputedOrders(), fetchInstantOrders()]);
     setIsRefreshing(false);
     sonnerToast.success('Orders refreshed');
   };
@@ -1019,6 +1063,9 @@ export function AdminOrdersView() {
           <TabsTrigger value="history" className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
             Order History ({allOrdersCount})
           </TabsTrigger>
+          <TabsTrigger value="instant" className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-black data-[state=inactive]:text-white">
+            Instant Orders ({instantOrders.length})
+          </TabsTrigger>
         </TabsList>
 
         <div className="relative w-full">
@@ -1068,7 +1115,73 @@ export function AdminOrdersView() {
         )}
 
         <TabsContent value={activeTab} className="mt-0">
-          {loading ? (
+          {activeTab === 'instant' ? (
+            instantOrdersLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : instantOrders.length === 0 ? (
+              <Card className="border-dashed border-2">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <Zap className="h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-xl font-semibold">No instant orders</h3>
+                  <p className="mt-2 text-sm text-muted-foreground text-center max-w-sm">
+                    No publications through the local library yet.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-0">
+                {instantOrders.map((item) => {
+                  const siteName = item.description?.replace('Published article to ', '') || 'Unknown Site';
+                  const credits = Math.abs(item.amount);
+                  const wpLink = item.metadata?.wp_link;
+                  const siteFavicon = item.metadata?.site_favicon;
+
+                  return (
+                    <Card key={item.id} className="rounded-none border-x-0 border-t-0 last:border-b-0 shadow-none">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex items-center justify-center h-9 w-9 rounded-full bg-green-100 shrink-0">
+                              <Zap className="h-4 w-4 text-green-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                {siteFavicon && (
+                                  <img src={siteFavicon} alt="" className="h-4 w-4 rounded-sm shrink-0" />
+                                )}
+                                <p className="font-medium text-sm truncate">{siteName}</p>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <span>{item.user_email || 'Unknown user'}</span>
+                                <span>•</span>
+                                <span>{format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <Badge className="bg-green-600 text-white">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Published
+                            </Badge>
+                            <span className="text-sm font-semibold text-red-600">-{credits.toLocaleString()}</span>
+                            {wpLink && (
+                              <a href={wpLink} target="_blank" rel="noopener noreferrer">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )
+          ) : loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
