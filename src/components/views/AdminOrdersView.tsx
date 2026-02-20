@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare, RefreshCw, Zap } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Loader2, Package, CheckCircle, Clock, Truck, CreditCard, Send, ExternalLink, X, Copy, XCircle, Search, ChevronDown, Eye, DollarSign, AlertTriangle, HelpCircle, MessageSquare, RefreshCw, Zap, GripHorizontal, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow, format, differenceInSeconds } from 'date-fns';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Order {
   id: string;
@@ -93,8 +96,22 @@ export function AdminOrdersView() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [instantOrders, setInstantOrders] = useState<InstantOrder[]>([]);
   const [instantOrdersLoading, setInstantOrdersLoading] = useState(true);
-  const [instantUserDetails, setInstantUserDetails] = useState<{ agency_name: string | null; full_name: string | null; email: string | null; whatsapp_phone: string | null } | null>(null);
+  const [instantUserDetails, setInstantUserDetails] = useState<{
+    full_name: string | null;
+    email: string | null;
+    agency_name: string | null;
+    agency_whatsapp: string | null;
+    user_whatsapp: string | null;
+  } | null>(null);
   const [instantUserDetailsLoading, setInstantUserDetailsLoading] = useState<string | null>(null);
+  const [instantUserDetailsOpen, setInstantUserDetailsOpen] = useState(false);
+  const [instantUserDetailsPos, setInstantUserDetailsPos] = useState({ x: 100, y: 100 });
+  const [instantUserDetailsDragging, setInstantUserDetailsDragging] = useState(false);
+  const instantUserDetailsDragRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const instantUserDetailsInitialized = useRef(false);
+  const isMobile = useIsMobile();
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -1241,8 +1258,7 @@ export function AdminOrdersView() {
                         <div className="flex justify-end gap-2">
                           <Button 
                             size="sm" 
-                            variant="outline"
-                            className="text-xs"
+                            className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black"
                             disabled={instantUserDetailsLoading === item.id}
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -1262,8 +1278,14 @@ export function AdminOrdersView() {
                                   agency_name: applicationData?.agency_name || item.agency_name || null,
                                   full_name: applicationData?.full_name || null,
                                   email: profileData?.email || item.user_email || null,
-                                  whatsapp_phone: applicationData?.whatsapp_phone || profileData?.whatsapp_phone || null,
+                                  agency_whatsapp: applicationData?.whatsapp_phone || null,
+                                  user_whatsapp: profileData?.whatsapp_phone || null,
                                 });
+                                setInstantUserDetailsOpen(true);
+                                if (!instantUserDetailsInitialized.current) {
+                                  setInstantUserDetailsPos({ x: Math.max(100, window.innerWidth / 2 - 160), y: 100 });
+                                  instantUserDetailsInitialized.current = true;
+                                }
                               } catch (err) {
                                 console.error('Error fetching user details:', err);
                                 sonnerToast.error('Failed to fetch user details');
@@ -1737,52 +1759,103 @@ export function AdminOrdersView() {
         title="Delivery"
       />
 
-      {/* Instant Order User Details Dialog */}
-      <Dialog open={!!instantUserDetails} onOpenChange={() => setInstantUserDetails(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-          </DialogHeader>
-          {instantUserDetails && (
-            <div className="space-y-4">
-              <div className="space-y-3">
-                {instantUserDetails.agency_name && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Agency Name</p>
-                    <p className="font-medium">{instantUserDetails.agency_name}</p>
-                  </div>
-                )}
-                {instantUserDetails.full_name && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Full Name</p>
-                    <p className="font-medium">{instantUserDetails.full_name}</p>
-                  </div>
-                )}
-                {instantUserDetails.email && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{instantUserDetails.email}</p>
-                  </div>
-                )}
-                {instantUserDetails.whatsapp_phone && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">WhatsApp</p>
-                    <p className="font-medium">{instantUserDetails.whatsapp_phone}</p>
-                  </div>
-                )}
+      {/* Instant Order User Details - Universal Draggable Popup */}
+      {instantUserDetailsOpen && instantUserDetails && createPortal(
+        isMobile ? (
+          <div className="fixed inset-0 z-[300] bg-background flex flex-col">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/30">
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                onClick={() => setInstantUserDetailsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 space-y-4 flex-1">
+              <h4 className="font-semibold text-foreground text-lg">User Details</h4>
+              <div className="space-y-3 text-sm">
+                <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{instantUserDetails.agency_name ? (instantUserDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+                <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{instantUserDetails.email || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{instantUserDetails.user_whatsapp || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{instantUserDetails.agency_name ? (instantUserDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+                <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {instantUserDetails.agency_name ? (
+                  <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetailsName(instantUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{instantUserDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+                ) : <span className="text-foreground font-medium">N/A</span>}</div>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  className="w-full bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
+                  onClick={() => setInstantUserDetailsOpen(false)}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
-          )}
-          <DialogFooter>
-            <Button 
-              onClick={() => setInstantUserDetails(null)}
-              className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+          </div>
+        ) : (
+          <div
+            className="fixed z-[200] bg-background rounded-lg shadow-xl border border-border"
+            style={{ left: instantUserDetailsPos.x, top: instantUserDetailsPos.y, width: 320 }}
+          >
+            <div
+              className={`flex items-center justify-between px-4 py-2 border-b bg-muted/30 ${instantUserDetailsDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+              onMouseDown={(e) => {
+                if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+                instantUserDetailsDragRef.current = { x: e.clientX, y: e.clientY, posX: instantUserDetailsPos.x, posY: instantUserDetailsPos.y };
+                setInstantUserDetailsDragging(true);
+                const onMove = (ev: MouseEvent) => {
+                  setInstantUserDetailsPos({
+                    x: instantUserDetailsDragRef.current.posX + ev.clientX - instantUserDetailsDragRef.current.x,
+                    y: instantUserDetailsDragRef.current.posY + ev.clientY - instantUserDetailsDragRef.current.y,
+                  });
+                };
+                const onUp = () => {
+                  setInstantUserDetailsDragging(false);
+                  window.removeEventListener('mousemove', onMove);
+                  window.removeEventListener('mouseup', onUp);
+                };
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+              }}
             >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button onClick={() => setInstantUserDetailsOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-4 pt-4 space-y-4">
+              <h4 className="font-semibold text-foreground text-lg">User Details</h4>
+              <div className="space-y-3 text-sm">
+                <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{instantUserDetails.agency_name ? (instantUserDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+                <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{instantUserDetails.email || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{instantUserDetails.user_whatsapp || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{instantUserDetails.agency_name ? (instantUserDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+                <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {instantUserDetails.agency_name ? (
+                  <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetailsName(instantUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{instantUserDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+                ) : <span className="text-foreground font-medium">N/A</span>}</div>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  className="bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
+                  onClick={() => setInstantUserDetailsOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body
+      )}
+
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={agencyDetailsName || ''}
+      />
       </div>
     </div>
   );
