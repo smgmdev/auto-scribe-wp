@@ -26,7 +26,8 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   });
 
-  const { data: { user }, error: userError } = await anonClient.auth.getUser();
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
   if (userError || !user) {
     console.error('[lock-publish-credits] Auth failed:', userError?.message);
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
