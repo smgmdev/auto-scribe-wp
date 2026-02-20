@@ -90,7 +90,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
   };
 
   const titleBar = (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <Button
           onClick={handleRefresh}
