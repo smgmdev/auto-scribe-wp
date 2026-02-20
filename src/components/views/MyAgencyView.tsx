@@ -486,11 +486,11 @@ export function MyAgencyView() {
 
 
         {/* Media Sites Tabs */}
-        <Card className="md:col-span-2">
-          <CardHeader>
+        <Card className="md:col-span-2 rounded-none sm:rounded-lg border-x-0 sm:border-x">
+          <CardHeader className="px-2 sm:px-6">
             <CardTitle className="text-lg">My Media</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             <Tabs defaultValue="media-sites" className="w-full">
               <TabsList className="w-full p-0 h-auto rounded-none mb-4">
                 <TabsTrigger value="media-sites" className="flex-1 py-2.5">
