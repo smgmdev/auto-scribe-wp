@@ -1674,7 +1674,19 @@ export function CreditHistoryView() {
                             const diff = Math.abs(new Date(a.created_at).getTime() - txTime);
                             if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
                           }
-                          setPublishDetails(prev => ({ ...prev, [transaction.id]: bestArticle }));
+                          // Also fetch the wordpress site URL and favicon
+                          const { data: wpSite } = await supabase
+                            .from('wordpress_sites')
+                            .select('url, favicon')
+                            .eq('name', siteName)
+                            .limit(1)
+                            .maybeSingle();
+                          
+                          setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+                            ...bestArticle,
+                            site_url: wpSite?.url || null,
+                            site_favicon: wpSite?.favicon || bestArticle.published_to_favicon,
+                          }}));
                         } else {
                           // Fallback: try to get favicon from wordpress_sites by name
                           const { data: wpSites } = await supabase
@@ -1897,8 +1909,8 @@ export function CreditHistoryView() {
                                   <span className="text-muted-foreground">Media Channel:</span>
                                   {publishDetails[transaction.id] ? (
                                     <div className="flex items-center gap-2 mt-0.5">
-                                      {publishDetails[transaction.id].published_to_favicon && (
-                                        <img src={publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" />
+                                      {(publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon) && (
+                                        <img src={publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                       )}
                                       <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
                                     </div>
@@ -1921,20 +1933,20 @@ export function CreditHistoryView() {
                                   </p>
                                 </div>
                                 <div>
-                                   <span className="text-muted-foreground">Date & Time:</span>
+                                   <span className="text-muted-foreground">Published:</span>
                                    <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                  </div>
                                  <div>
                                     <span className="text-muted-foreground">Published URL:</span>
-                                    {publishDetails[transaction.id]?.published_to ? (
+                                    {publishDetails[transaction.id]?.site_url ? (
                                       <a
-                                        href={publishDetails[transaction.id].published_to.startsWith('http') ? publishDetails[transaction.id].published_to : `https://${publishDetails[transaction.id].published_to}`}
+                                        href={publishDetails[transaction.id].site_url.startsWith('http') ? publishDetails[transaction.id].site_url : `https://${publishDetails[transaction.id].site_url}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
                                         className="font-medium text-blue-500 hover:text-blue-600 hover:underline break-all block mt-0.5"
                                       >
-                                        {publishDetails[transaction.id].published_to}
+                                        {publishDetails[transaction.id].site_url}
                                       </a>
                                     ) : (
                                       <p className="font-medium text-muted-foreground mt-0.5">—</p>
