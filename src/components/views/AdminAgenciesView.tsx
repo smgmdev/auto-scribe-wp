@@ -848,17 +848,17 @@ export function AdminAgenciesView() {
 
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
           <Input
             placeholder="Search agencies by name, email, country..."
             value={agencySearchTerm}
             onChange={(e) => setAgencySearchTerm(e.target.value)}
-            className="pl-9 rounded-none border-x-0 border-t-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="pl-9 rounded-none border-x-0 border-t-0 bg-black text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
           {agencySearchTerm && (
             <button
               onClick={() => setAgencySearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
