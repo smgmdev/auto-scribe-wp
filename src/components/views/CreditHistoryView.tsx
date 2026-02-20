@@ -592,7 +592,7 @@ export function CreditHistoryView() {
   // Total spent = only from completed orders + other usage/deductions
   // Don't subtract refunds here - refunds are for cancelled orders, not completed ones
   const otherSpending = transactions
-    .filter(t => t.type === 'usage' || t.type === 'deduction')
+    .filter(t => t.type === 'usage' || t.type === 'deduction' || t.type === 'publish')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const totalSpent = completedOrdersSpent + otherSpending;
@@ -647,6 +647,9 @@ export function CreditHistoryView() {
     if (type === 'unlocked') {
       return <LockOpen className="h-5 w-5 text-green-500" />;
     }
+    if (type === 'publish') {
+      return <ArrowDownCircle className="h-5 w-5 text-blue-500" />;
+    }
     if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
     }
@@ -672,7 +675,8 @@ export function CreditHistoryView() {
       admin_deduct: { className: 'bg-foreground text-background', label: 'Deduction' },
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700', label: 'Withdrawal Pending' },
       withdrawal_unlocked: { className: 'bg-red-100 text-red-700', label: 'Withdrawal Rejected' },
-      withdrawal_completed: { className: 'bg-foreground text-background', label: 'Withdrawal Completed' }
+      withdrawal_completed: { className: 'bg-foreground text-background', label: 'Withdrawal Completed' },
+      publish: { className: 'bg-blue-100 text-blue-700', label: 'Published' },
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={badge.className}>{badge.label}</Badge>;
@@ -681,7 +685,7 @@ export function CreditHistoryView() {
   // Filter transactions to show all order-related events
   // When a withdrawal_completed exists, replace the corresponding withdrawal_locked (same amount and method)
   const filteredTransactions = transactions.filter(t => 
-    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct', 'withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(t.type)
+    ['purchase', 'locked', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'spent', 'order_completed', 'order', 'gifted', 'admin_credit', 'order_payout', 'admin_deduct', 'withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed', 'publish'].includes(t.type)
   );
 
   // Find completed and rejected withdrawals to identify which pending ones to hide
