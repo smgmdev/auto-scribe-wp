@@ -71,7 +71,7 @@ export const AdminCreditManagementView = () => {
     try {
       const [txsRes, activeOrdersRes, dbCreditsRes] = await Promise.all([
         supabase.from('credit_transactions').select('amount, type, description').eq('user_id', userId),
-        supabase.from('orders').select('user_id, media_sites(price)')
+        supabase.from('orders').select('user_id, amount_cents')
           .eq('user_id', userId).neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
         supabase.from('user_credits').select('credits').eq('user_id', userId).single(),
       ]);
@@ -105,7 +105,7 @@ export const AdminCreditManagementView = () => {
       const userTxs = (txsRes.data || []).map(tx => ({ ...tx, description: tx.description || undefined }));
       const orders = (activeOrdersRes.data || []).map(o => ({
         user_id: userId,
-        media_sites: o.media_sites as { price: number } | null,
+        media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
       }));
       const dbValue = dbCreditsRes.data?.credits ?? 0;
 
@@ -214,9 +214,9 @@ export const AdminCreditManagementView = () => {
         supabase.from('profiles').select('id, email'),
         supabase.from('agency_payouts').select('user_id').eq('onboarding_complete', true).eq('downgraded', false),
         supabase.from('credit_transactions').select('user_id, amount, type, description'),
-        supabase.from('orders').select('user_id, media_sites(price)')
+        supabase.from('orders').select('user_id, amount_cents')
           .neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
-        supabase.from('orders').select('user_id, media_sites(price)').eq('delivery_status', 'accepted'),
+        supabase.from('orders').select('user_id, amount_cents').eq('delivery_status', 'accepted'),
         supabase.from('agency_withdrawals').select('user_id, amount_cents, withdrawal_method').eq('status', 'pending'),
       ]);
 
@@ -239,12 +239,12 @@ export const AdminCreditManagementView = () => {
         })),
         activeOrders: (activeOrdersRes.data || []).map(o => ({
           user_id: o.user_id,
-          media_sites: o.media_sites as { price: number } | null,
+          media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
         })),
         pendingRequests,
         completedOrders: (completedOrdersRes.data || []).map(o => ({
           user_id: o.user_id,
-          media_sites: o.media_sites as { price: number } | null,
+          media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
         })),
         pendingWithdrawals: withdrawalsRes.data || [],
       });
