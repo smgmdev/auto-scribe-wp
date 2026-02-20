@@ -357,20 +357,17 @@ export function CreditHistoryView() {
     setLockedOrders(orders);
 
     // Fetch completed orders to calculate total spent
-    // Only count orders where client has accepted delivery
+    // Use amount_cents from the order (locked at purchase time) not current media_sites.price
     const { data: completedOrders } = await supabase
       .from('orders')
-      .select('id, media_sites(price)')
+      .select('id, amount_cents')
       .eq('user_id', user.id)
       .eq('delivery_status', 'accepted');
 
     let completedSpent = 0;
     if (completedOrders && completedOrders.length > 0) {
       for (const order of completedOrders) {
-        const mediaSite = order.media_sites as { price: number } | null;
-        if (mediaSite?.price) {
-          completedSpent += mediaSite.price;
-        }
+        completedSpent += Math.round((order.amount_cents || 0) / 100);
       }
     }
     setCompletedOrdersSpent(completedSpent);
