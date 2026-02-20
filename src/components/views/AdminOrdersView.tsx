@@ -1248,7 +1248,7 @@ export function AdminOrdersView() {
                             </span>
                           </div>
                           <div className="flex items-center justify-between md:flex-col md:items-end gap-0.5">
-                            <span className="text-xs text-muted-foreground capitalize">Article</span>
+                            <span className="text-xs text-muted-foreground">Self Publishing</span>
                             <p className="text-sm">
                               ${amountUsd.toFixed(2)}
                               <span className="text-xs text-green-600 ml-2">
