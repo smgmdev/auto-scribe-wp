@@ -692,7 +692,7 @@ export function ComposeView() {
       // ── STEP 3: Confirm credit deduction (publish succeeded) ──────
       if (isNewPublish && creditLockId) {
         await supabase.functions.invoke('confirm-publish-credits', {
-          body: { lockId: creditLockId, success: true, siteName: currentSite.name },
+          body: { lockId: creditLockId, success: true, siteName: currentSite.name, wpLink: result.link, siteUrl: currentSite.url },
         });
       }
       // ─────────────────────────────────────────────────────────────
