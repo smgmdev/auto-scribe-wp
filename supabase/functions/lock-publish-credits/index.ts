@@ -77,38 +77,91 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check user current balance
-    const { data: userCreditsData } = await supabase
-      .from('user_credits')
-      .select('credits')
+    // ── Calculate real-time available credits from the authoritative transaction ledger ──
+    const { data: transactions } = await supabase
+      .from('credit_transactions')
+      .select('amount, type, description')
+      .eq('user_id', userId);
+
+    const txs = transactions || [];
+    const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+
+    // Total balance (same formula as credit-calculations.ts)
+    const incomingCredits = txs
+      .filter((t: any) => t.amount > 0 && !WITHDRAWAL_TYPES.includes(t.type) && t.type !== 'unlocked')
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
+    const outgoingCredits = txs
+      .filter((t: any) => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !WITHDRAWAL_TYPES.includes(t.type))
+      .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0);
+    const totalBalance = incomingCredits - outgoingCredits;
+
+    // Withdrawal amounts
+    let lockedWithdrawalCents = 0;
+    let completedWithdrawalCents = 0;
+    for (const tx of txs) {
+      if (tx.type === 'withdrawal_locked') lockedWithdrawalCents += Math.abs(tx.amount);
+      else if (tx.type === 'withdrawal_unlocked') lockedWithdrawalCents -= Math.abs(tx.amount);
+      else if (tx.type === 'withdrawal_completed') {
+        lockedWithdrawalCents -= Math.abs(tx.amount);
+        completedWithdrawalCents += Math.abs(tx.amount);
+      }
+    }
+    const creditsInWithdrawals = Math.max(0, lockedWithdrawalCents) / 100;
+    const creditsWithdrawn = completedWithdrawalCents / 100;
+
+    // Locked credits from active orders
+    const { data: activeOrders } = await supabase
+      .from('orders')
+      .select('id, media_sites(price)')
       .eq('user_id', userId)
-      .maybeSingle();
+      .neq('status', 'cancelled')
+      .neq('status', 'completed')
+      .neq('delivery_status', 'accepted');
 
-    const currentCredits = userCreditsData?.credits ?? 0;
+    let creditsInOrders = 0;
+    if (activeOrders) {
+      for (const order of activeOrders) {
+        const ms = order.media_sites as { price: number } | null;
+        if (ms?.price) creditsInOrders += ms.price;
+      }
+    }
 
-    if (currentCredits < creditCost) {
+    // Locked credits from pending service requests (with CLIENT_ORDER_REQUEST)
+    const { data: pendingRequests } = await supabase
+      .from('service_requests')
+      .select('id, media_sites(price)')
+      .eq('user_id', userId)
+      .is('order_id', null)
+      .neq('status', 'cancelled');
+
+    let creditsInPendingRequests = 0;
+    if (pendingRequests) {
+      for (const request of pendingRequests) {
+        const { data: orderRequestMessages } = await supabase
+          .from('service_messages')
+          .select('id')
+          .eq('request_id', request.id)
+          .like('message', '%CLIENT_ORDER_REQUEST%')
+          .limit(1);
+        if (orderRequestMessages && orderRequestMessages.length > 0) {
+          const ms = request.media_sites as { price: number } | null;
+          if (ms?.price) creditsInPendingRequests += ms.price;
+        }
+      }
+    }
+
+    // Final available credits (same formula as useAvailableCredits)
+    const availableCredits = totalBalance - creditsInOrders - creditsInPendingRequests - creditsInWithdrawals - creditsWithdrawn;
+
+    console.log(`[lock-publish-credits] Real-time balance for ${userId}: total=${totalBalance}, inOrders=${creditsInOrders}, inRequests=${creditsInPendingRequests}, inWithdrawals=${creditsInWithdrawals}, withdrawn=${creditsWithdrawn}, available=${availableCredits}, required=${creditCost}`);
+
+    if (availableCredits < creditCost) {
       return new Response(JSON.stringify({
         error: 'Insufficient credits',
-        currentCredits,
+        currentCredits: availableCredits,
         requiredCredits: creditCost,
       }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Atomically deduct credits and record a "pending" transaction (lock)
-    const newCredits = currentCredits - creditCost;
-
-    const { error: updateError } = await supabase
-      .from('user_credits')
-      .update({ credits: newCredits, updated_at: new Date().toISOString() })
-      .eq('user_id', userId)
-      .eq('credits', currentCredits); // optimistic lock: only update if balance hasn't changed
-
-    if (updateError) {
-      console.error('[lock-publish-credits] Optimistic lock failed:', updateError);
-      return new Response(JSON.stringify({ error: 'Credit balance changed, please retry' }), {
-        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -126,24 +179,19 @@ Deno.serve(async (req) => {
 
     if (txError) {
       console.error('[lock-publish-credits] Failed to record lock transaction:', txError);
-      // Refund immediately since we can't track this
-      await supabase
-        .from('user_credits')
-        .update({ credits: currentCredits, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
-
       return new Response(JSON.stringify({ error: 'Failed to lock credits, please retry' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`[lock-publish-credits] Locked ${creditCost} credits for user ${userId}, lockId: ${txData.id}`);
+    const newAvailable = availableCredits - creditCost;
+    console.log(`[lock-publish-credits] Locked ${creditCost} credits for user ${userId}, lockId: ${txData.id}, newAvailable: ${newAvailable}`);
 
     return new Response(JSON.stringify({
       success: true,
       lockId: txData.id,
       creditsRequired: creditCost,
-      newBalance: newCredits,
+      newBalance: newAvailable,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
