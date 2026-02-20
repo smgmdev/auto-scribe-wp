@@ -1224,7 +1224,7 @@ export function CreditHistoryView() {
               )}
               {publishSpending > 0 && (
                 <div className="flex justify-between gap-4">
-                  <span className="text-background/70">Publishing:</span>
+                  <span className="text-background/70">Instant Publishing:</span>
                   <span className="font-semibold">{publishSpending.toLocaleString()}</span>
                 </div>
               )}
