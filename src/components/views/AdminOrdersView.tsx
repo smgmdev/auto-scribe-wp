@@ -1237,12 +1237,14 @@ export function AdminOrdersView() {
                         </div>
                         {/* View Publication button */}
                         {wpLink && (
-                          <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                            <Button variant="outline" size="default" className="text-sm w-full md:w-auto">
-                              <ExternalLink className="h-4 w-4 mr-1.5" />
-                              View Publication
-                            </Button>
-                          </a>
+                          <div className="flex justify-end">
+                            <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              <Button size="sm" className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black w-full md:w-auto">
+                                <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                                View Publication
+                              </Button>
+                            </a>
+                          </div>
                         )}
                       </CardContent>
                     </Card>
