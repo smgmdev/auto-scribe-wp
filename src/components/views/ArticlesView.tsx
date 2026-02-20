@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
@@ -288,8 +289,8 @@ export function ArticlesView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0 md:space-y-6 relative">
       {/* Deleting Overlay */}
-      {isDeleting && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+      {isDeleting && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
           <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <Loader2 className="h-10 w-10 animate-spin text-destructive" />
             <div className="text-center">
@@ -297,12 +298,13 @@ export function ArticlesView() {
               <p className="text-sm text-muted-foreground mt-1">Please wait while your article is being removed</p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Delete Success Overlay */}
-      {showDeleteSuccess && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
+      {showDeleteSuccess && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
           <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
             <div className="relative">
               <div className="h-16 w-16 rounded-full bg-success/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
@@ -314,7 +316,8 @@ export function ArticlesView() {
               <p className="text-sm text-muted-foreground mt-2">"{deletingTitle}" has been removed</p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Header */}
       <div className="mb-0 md:mb-6">
