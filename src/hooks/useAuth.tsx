@@ -224,6 +224,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const checkSessionValidity = async () => {
+      if (sessionKickedRef.current) return;
+      if (Date.now() < sessionGraceUntilRef.current) return;
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('active_session_id')
+          .eq('id', user.id)
+          .single();
+        const currentActive = (data as any)?.active_session_id;
+        if (currentActive && currentActive !== localSessionIdRef.current) {
+          handleSessionKicked();
+        }
+      } catch {
+        // ignore fetch errors
+      }
+    };
+
+    // Poll every 2 seconds as a fast fallback alongside realtime
+    const pollInterval = setInterval(checkSessionValidity, 2000);
+
     const channel = supabase
       .channel(`session-guard-${user.id}`)
       .on(
@@ -250,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .subscribe();
 
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
