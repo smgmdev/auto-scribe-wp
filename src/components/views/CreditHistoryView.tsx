@@ -1879,12 +1879,15 @@ export function CreditHistoryView() {
                                       <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
                                     </div>
                                   ) : (
-                                    <p className="font-medium">
-                                      {(() => {
-                                        const siteMatch = transaction.description?.match(/Published article to (.+)/);
-                                        return siteMatch ? siteMatch[1] : 'Unknown';
-                                      })()}
-                                    </p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                      <p className="font-medium">
+                                        {(() => {
+                                          const siteMatch = transaction.description?.match(/Published article to (.+)/);
+                                          return siteMatch ? siteMatch[1] : 'Unknown';
+                                        })()}
+                                      </p>
+                                    </div>
                                   )}
                                 </div>
                                 <div>
