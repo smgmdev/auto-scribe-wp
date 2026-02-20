@@ -1204,11 +1204,11 @@ export function CreditHistoryView() {
 
 
       {/* Transactions List */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
+        <CardHeader className="px-2 sm:px-6">
           <CardTitle className="text-lg">Transaction History</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
