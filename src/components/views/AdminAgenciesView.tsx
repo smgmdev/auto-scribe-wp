@@ -2026,7 +2026,7 @@ export function AdminAgenciesView() {
 
       {/* Document Viewer Dialog */}
       <Dialog open={documentDialogOpen} onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent" style={{ zIndex: 300 }}>
           <DialogHeader className="px-2 md:px-3 pb-0">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -2566,6 +2566,7 @@ export function AdminAgenciesView() {
           setShowVerificationRejectDialog(open); 
           if (!open) setVerificationRejectionReason(''); 
         }}
+        zIndex={300}
         width={420}
         title={
           <h4 className="font-semibold text-lg flex items-center gap-2 text-red-600">
@@ -2614,7 +2615,7 @@ export function AdminAgenciesView() {
 
       {/* KYC Document Viewer Dialog */}
       <Dialog open={docViewerOpen} onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent">
+        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent" style={{ zIndex: 300 }}>
           <DialogHeader className="px-2 md:px-3 pb-0">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -2696,6 +2697,7 @@ export function AdminAgenciesView() {
       <DraggablePopup
         open={showDowngradeDialog}
         onOpenChange={setShowDowngradeDialog}
+        zIndex={300}
         width={420}
         title={
           <h4 className="font-semibold text-lg flex items-center gap-2">
@@ -2759,6 +2761,7 @@ export function AdminAgenciesView() {
       <DraggablePopup
         open={showCommissionDialog}
         onOpenChange={setShowCommissionDialog}
+        zIndex={300}
         width={420}
         title={<h4 className="font-semibold text-lg">Edit Commission</h4>}
         footer={
