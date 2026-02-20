@@ -196,7 +196,7 @@ export default function HelpCenter() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />
@@ -334,7 +334,7 @@ export default function HelpCenter() {
                   Check order status, track your publications, manage your account and more.
                 </p>
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/account')}
                   className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1"
                 >
                   Go to your account
@@ -342,7 +342,7 @@ export default function HelpCenter() {
                 </button>
                 <br />
                 <button 
-                  onClick={() => navigate('/dashboard?view=support')}
+                  onClick={() => navigate('/account?view=support')}
                   className="text-[#06c] text-sm font-medium hover:underline inline-flex items-center gap-1 mt-2"
                 >
                   Go to client support

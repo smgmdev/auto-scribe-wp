@@ -420,7 +420,7 @@ export default function UpdateLog() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-white text-black hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />

@@ -40,7 +40,7 @@ const PaymentSuccess = () => {
       }
 
       setVerifying(false);
-      navigate('/dashboard', {
+      navigate('/account', {
         state: { targetView: 'credits' },
         replace: true,
       });

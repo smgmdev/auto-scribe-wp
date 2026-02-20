@@ -28,13 +28,13 @@ const SITEMAP_SECTIONS = [
   {
     title: 'For Business',
     links: [
-      { label: 'Agency Account', href: '/dashboard', state: { targetView: 'agency-application' } },
+      { label: 'Agency Account', href: '/account', state: { targetView: 'agency-application' } },
     ],
   },
   {
     title: 'Account',
     links: [
-      { label: 'Manage Your Account', href: '/dashboard', requiresAuth: true },
+      { label: 'Manage Your Account', href: '/account', requiresAuth: true },
       { label: 'Sign In', href: '/auth' },
       { label: 'Create Account', href: '/auth' },
     ],
@@ -42,13 +42,13 @@ const SITEMAP_SECTIONS = [
   {
     title: 'Media Categories',
     links: [
-      { label: 'Business and Finance', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Business and Finance' } },
-      { label: 'Crypto', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Crypto' } },
-      { label: 'Tech', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Tech' } },
-      { label: 'Campaign', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Campaign' } },
-      { label: 'Politics and Economy', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Politics and Economy' } },
-      { label: 'MENA', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'MENA' } },
-      { label: 'China', href: '/dashboard', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'China' } },
+      { label: 'Business and Finance', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Business and Finance' } },
+      { label: 'Crypto', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Crypto' } },
+      { label: 'Tech', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Tech' } },
+      { label: 'Campaign', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Campaign' } },
+      { label: 'Politics and Economy', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'Politics and Economy' } },
+      { label: 'MENA', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'MENA' } },
+      { label: 'China', href: '/account', state: { targetView: 'sites', targetTab: 'global', targetSubcategory: 'China' } },
     ],
   },
   {
@@ -135,7 +135,7 @@ const SiteMap = () => {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ChatListPanel } from "@/components/ui/ChatListPanel";
 import { GlobalChatDialog } from "@/components/chat/GlobalChatDialog";
@@ -138,13 +138,15 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route 
-                path="/dashboard" 
+                path="/account" 
                 element={
                   <ProtectedRoute>
                     <Index />
                   </ProtectedRoute>
                 } 
               />
+              {/* Redirect old /dashboard to /account */}
+              <Route path="/dashboard" element={<Navigate to="/account" replace />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/payment-cancelled" element={<PaymentCancelled />} />
               <Route path="/verify-email" element={<VerifyEmail />} />

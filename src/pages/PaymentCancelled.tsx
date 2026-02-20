@@ -10,7 +10,7 @@ const PaymentCancelled = () => {
     toast.error('Payment cancelled');
 
     // Redirect to orders view
-    navigate('/dashboard', { 
+    navigate('/account', { 
       state: { targetView: 'orders' },
       replace: true 
     });

@@ -186,7 +186,7 @@ export default function PressNews() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />

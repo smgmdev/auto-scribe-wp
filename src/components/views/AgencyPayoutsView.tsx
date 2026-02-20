@@ -673,7 +673,7 @@ export function AgencyPayoutsView() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(`/dashboard?view=credit-history&withdrawalId=${withdrawal.id}`);
+                                    navigate(`/account?view=credit-history&withdrawalId=${withdrawal.id}`);
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
@@ -771,7 +771,7 @@ export function AgencyPayoutsView() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(`/dashboard?view=credit-history&transaction=${order.id}`);
+                                    navigate(`/account?view=credit-history&transaction=${order.id}`);
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >

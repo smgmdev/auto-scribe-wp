@@ -9,8 +9,8 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
   const hiddenPaths = ['/auth'];
   const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path));
   
-  // Global instance hides on dashboard; dashboard instance only shows on dashboard
-  if (!inDashboard && location.pathname.startsWith('/dashboard')) return null;
+  // Global instance hides on account page; account instance only shows on account page
+  if (!inDashboard && (location.pathname.startsWith('/account') || location.pathname.startsWith('/dashboard'))) return null;
   
   if (shouldHide) return null;
 

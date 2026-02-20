@@ -161,7 +161,7 @@ export default function SelfPublishing() {
     setPreselectedSiteId(siteId);
     if (user) {
       setCurrentView('compose');
-      navigate('/dashboard', { 
+      navigate('/account', { 
         state: { 
           targetView: 'compose',
           preselectedSiteId: siteId
@@ -170,7 +170,7 @@ export default function SelfPublishing() {
     } else {
       navigate('/auth', { 
         state: { 
-          redirectTo: '/dashboard',
+          redirectTo: '/account',
           targetView: 'compose',
           preselectedSiteId: siteId
         } 
@@ -279,7 +279,7 @@ export default function SelfPublishing() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />
@@ -316,9 +316,9 @@ export default function SelfPublishing() {
               size="sm"
               onClick={() => {
                 if (user) {
-                  navigate('/dashboard', { state: { targetView: 'sites', targetTab: 'local' } });
+                  navigate('/account', { state: { targetView: 'sites', targetTab: 'local' } });
                 } else {
-                  navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetTab: 'local' } });
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'local' } });
                 }
               }}
               className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-black transition-all duration-200"
@@ -344,9 +344,9 @@ export default function SelfPublishing() {
               size="lg"
               onClick={() => {
                 if (user) {
-                  navigate('/dashboard', { state: { targetView: 'compose' } });
+                  navigate('/account', { state: { targetView: 'compose' } });
                 } else {
-                  navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'compose' } });
                 }
               }}
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg px-8 py-3 h-auto rounded-full"
@@ -455,7 +455,7 @@ export default function SelfPublishing() {
                 </p>
                 <div className="flex flex-wrap gap-6">
                   <a 
-                    href="/dashboard" 
+                    href="/account" 
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
                     <span className="group-hover:underline">Buy credits</span> <span>↗</span>
@@ -552,7 +552,7 @@ export default function SelfPublishing() {
                     <span className="group-hover:underline">Learn more</span> <span>↗</span>
                   </a>
                   <a 
-                    href="/dashboard" 
+                    href="/account" 
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
                     <span className="group-hover:underline">Add credits</span> <span>↗</span>
