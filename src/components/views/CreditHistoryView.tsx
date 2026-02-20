@@ -1674,13 +1674,9 @@ export function CreditHistoryView() {
                             const diff = Math.abs(new Date(a.created_at).getTime() - txTime);
                             if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
                           }
-                          // Also fetch the wordpress site URL and favicon
-                          const { data: wpSite } = await supabase
-                            .from('wordpress_sites')
-                            .select('url, favicon')
-                            .eq('name', siteName)
-                            .limit(1)
-                            .maybeSingle();
+                          // Fetch site URL and favicon via RPC (accessible to all users)
+                          const { data: publicSites } = await supabase.rpc('get_public_sites');
+                          const wpSite = publicSites?.find((s: any) => s.name === siteName);
                           
                           setPublishDetails(prev => ({ ...prev, [transaction.id]: {
                             ...bestArticle,
@@ -1688,26 +1684,24 @@ export function CreditHistoryView() {
                             site_favicon: wpSite?.favicon || bestArticle.published_to_favicon,
                           }}));
                         } else {
-                          // Fallback: try to get favicon from wordpress_sites by name
-                          const { data: wpSites } = await supabase
-                            .from('wordpress_sites')
-                            .select('favicon, url, name')
-                            .eq('name', siteName)
-                            .limit(1);
+                          // Fallback: try to get favicon and URL via RPC
+                          const { data: publicSites } = await supabase.rpc('get_public_sites');
+                          const wpSite = publicSites?.find((s: any) => s.name === siteName);
                           
-                          if (wpSites && wpSites.length > 0) {
+                          if (wpSite) {
                             setPublishDetails(prev => ({ ...prev, [transaction.id]: {
                               published_to_name: siteName,
-                              published_to_favicon: wpSites[0].favicon,
-                              published_to: wpSites[0].url,
+                              published_to_favicon: wpSite.favicon,
+                              site_url: wpSite.url,
+                              site_favicon: wpSite.favicon,
                               wp_link: null,
                             }}));
                           } else {
-                            // Mark as loaded with no data to stop spinner
                             setPublishDetails(prev => ({ ...prev, [transaction.id]: {
                               published_to_name: siteName,
                               published_to_favicon: null,
-                              published_to: null,
+                              site_url: null,
+                              site_favicon: null,
                               wp_link: null,
                             }}));
                           }
