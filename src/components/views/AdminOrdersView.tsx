@@ -65,6 +65,8 @@ interface InstantOrder {
     site_favicon?: string;
   } | null;
   user_email?: string | null;
+  agency_name?: string | null;
+  commission_percentage?: number;
 }
 
 export function AdminOrdersView() {
@@ -391,23 +393,35 @@ export function AdminOrdersView() {
       const emailMap: Record<string, string | null> = {};
       profiles?.forEach((p: any) => { emailMap[p.id] = p.email; });
 
-      // Fetch wordpress site favicons for fallback
+      // Fetch wordpress sites with agency info for favicon + commission
       const { data: wpSites } = await supabase
         .from('wordpress_sites')
-        .select('name, favicon');
+        .select('name, favicon, agency');
       
-      const wpFaviconMap: Record<string, string> = {};
-      wpSites?.forEach((s: any) => { if (s.favicon) wpFaviconMap[s.name] = s.favicon; });
+      const wpSiteMap: Record<string, { favicon: string | null; agency: string | null }> = {};
+      wpSites?.forEach((s: any) => { wpSiteMap[s.name] = { favicon: s.favicon, agency: s.agency }; });
+
+      // Fetch agency commission percentages
+      const { data: agencyData } = await supabase
+        .from('agency_payouts')
+        .select('agency_name, commission_percentage');
+      
+      const commissionMap: Record<string, number> = {};
+      agencyData?.forEach((a: any) => { commissionMap[a.agency_name] = a.commission_percentage; });
 
       setInstantOrders(data.map((d: any) => {
         const meta = d.metadata as InstantOrder['metadata'];
         const siteName = d.description?.replace('Published article to ', '') || '';
-        // Use metadata favicon first, then fallback to wordpress_sites favicon by name
-        const resolvedFavicon = meta?.site_favicon || wpFaviconMap[siteName] || null;
+        const wpInfo = wpSiteMap[siteName];
+        const resolvedFavicon = meta?.site_favicon || wpInfo?.favicon || null;
+        const agencyName = wpInfo?.agency || null;
+        const commission = agencyName ? (commissionMap[agencyName] ?? 10) : 10;
         return {
           ...d,
           metadata: { ...meta, site_favicon: resolvedFavicon } as InstantOrder['metadata'],
           user_email: emailMap[d.user_id] || null,
+          agency_name: agencyName,
+          commission_percentage: commission,
         };
       }));
     }
@@ -1149,6 +1163,9 @@ export function AdminOrdersView() {
                 {instantOrders.map((item, index) => {
                   const siteName = item.description?.replace('Published article to ', '') || 'Unknown Site';
                   const credits = Math.abs(item.amount);
+                  const amountUsd = credits; // 1 credit = $1
+                  const commissionPct = item.commission_percentage ?? 10;
+                  const platformFee = amountUsd * (commissionPct / 100);
                   const wpLink = item.metadata?.wp_link;
                   const siteFavicon = item.metadata?.site_favicon;
 
@@ -1183,9 +1200,12 @@ export function AdminOrdersView() {
                             </div>
                             <div className="flex flex-col">
                               <CardTitle className="text-base">{siteName}</CardTitle>
+                              {item.agency_name && (
+                                <span className="text-xs text-muted-foreground">via {item.agency_name}</span>
+                              )}
                             </div>
                           </div>
-                          {/* Desktop: Badge at right side */}
+                          {/* Desktop: Badge + View Publication */}
                           <div className="hidden md:flex flex-col items-end gap-1">
                             <div className="flex gap-2 items-center">
                               <Badge className="bg-green-600 text-white border-green-600">
@@ -1194,8 +1214,9 @@ export function AdminOrdersView() {
                               </Badge>
                               {wpLink && (
                                 <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                    View Publication
                                   </Button>
                                 </a>
                               )}
@@ -1208,12 +1229,19 @@ export function AdminOrdersView() {
                         <div className="hidden md:flex items-end justify-between">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
-                              {item.user_email || 'Unknown user'} • {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
+                              User: {item.user_email || 'Unknown user'}
+                            </span>
+                            <span className="text-xs text-muted-foreground block">
+                              Published: {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
                           <div className="flex flex-col items-end gap-0.5">
-                            <p className="font-semibold text-sm text-red-600">
-                              -{credits.toLocaleString()} credits
+                            <span className="text-xs text-muted-foreground capitalize">Article</span>
+                            <p className="text-sm">
+                              ${amountUsd.toFixed(2)}
+                              <span className="text-xs text-green-600 ml-2">
+                                +${platformFee.toFixed(2)} fee
+                              </span>
                             </p>
                           </div>
                         </div>
@@ -1222,23 +1250,32 @@ export function AdminOrdersView() {
                         <div className="md:hidden space-y-2">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
-                              {item.user_email || 'Unknown user'}
+                              User: {item.user_email || 'Unknown user'}
                             </span>
                             <span className="text-xs text-muted-foreground block">
-                              {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
+                              Published: {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <p className="font-semibold text-sm text-red-600">
-                              -{credits.toLocaleString()} credits
-                            </p>
-                            {wpLink && (
-                              <a href={wpLink} target="_blank" rel="noopener noreferrer">
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                </Button>
-                              </a>
-                            )}
+                          <div className="flex justify-between items-end">
+                            <div>
+                              {wpLink && (
+                                <a href={wpLink} target="_blank" rel="noopener noreferrer">
+                                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                    View Publication
+                                  </Button>
+                                </a>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="text-xs text-muted-foreground capitalize">Article</span>
+                              <p className="text-sm">
+                                ${amountUsd.toFixed(2)}
+                                <span className="text-xs text-green-600 ml-2">
+                                  +${platformFee.toFixed(2)} fee
+                                </span>
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
