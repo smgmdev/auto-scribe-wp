@@ -769,18 +769,18 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 sm:h-10 sm:w-10 h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background"
+              className="h-10 w-10 shrink-0 rounded-none hover:bg-foreground hover:text-background"
               onClick={() => fileInputRef.current?.click()}
               disabled={sending}
               title="Attach file (PDF, Word, PNG, JPG - max 2MB)"
             >
-              <Paperclip className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Paperclip className="h-4 w-4" />
             </Button>
             <Input
               value={newMessage}
               onChange={handleInputChange}
               placeholder="Type a message..."
-              className="h-8 sm:h-10 border-0 shadow-none focus-visible:ring-0 text-sm"
+              className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base shadow-none focus-visible:ring-0"
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
                   e.preventDefault();
@@ -791,11 +791,11 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background"
+              className="h-10 w-10 shrink-0 rounded-none hover:bg-foreground hover:text-background"
               onClick={handleSend}
               disabled={sending || (!newMessage.trim() && !selectedFile)}
             >
-              {sending ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" /> : <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
         </div>
