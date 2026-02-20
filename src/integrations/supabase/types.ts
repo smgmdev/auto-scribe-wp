@@ -1296,6 +1296,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_session_id: string | null
           created_at: string
           email: string | null
           email_verified: boolean
@@ -1312,6 +1313,7 @@ export type Database = {
           whatsapp_phone: string | null
         }
         Insert: {
+          active_session_id?: string | null
           created_at?: string
           email?: string | null
           email_verified?: boolean
@@ -1328,6 +1330,7 @@ export type Database = {
           whatsapp_phone?: string | null
         }
         Update: {
+          active_session_id?: string | null
           created_at?: string
           email?: string | null
           email_verified?: boolean
@@ -1790,6 +1793,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_active_session: { Args: { check_email: string }; Returns: string }
       check_email_verified: { Args: { check_email: string }; Returns: boolean }
       check_rate_limit: {
         Args: {
