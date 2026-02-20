@@ -549,7 +549,7 @@ export function AdminAgencyWithdrawalsView() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-0">
               {filteredWithdrawals.map((withdrawal) => {
                 const amount = withdrawal.amount_cents / 100;
                 

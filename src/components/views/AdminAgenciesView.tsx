@@ -823,7 +823,7 @@ export function AdminAgenciesView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-1">
+            <div className="grid gap-0">
               {pendingApplications.map((app) => (
                 <Card 
                   key={app.id} 
@@ -927,7 +927,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-1">
+                <div className="grid gap-0">
                   {cancelledApplications.map((app) => (
                     <Card 
                       key={app.id} 
@@ -1061,7 +1061,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                 <div className="grid gap-1">
+                 <div className="grid gap-0">
                    {[...rejectedApplications].sort((a, b) => {
                      const dateA = a.reviewed_at || a.updated_at || a.created_at;
                      const dateB = b.reviewed_at || b.updated_at || b.created_at;
@@ -1216,7 +1216,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-0">
                   {agenciesPendingVerification.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     return (
@@ -1308,7 +1308,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-0">
                   {agenciesPendingApprovalReview.map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
@@ -1434,7 +1434,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {agencies.filter(a => a.onboarding_complete && !a.downgraded).map(agency => {
                     const application = getAgencyWithApplication(agency);
                     const verification = customVerifications.find(v => v.agency_payout_id === agency.id);
@@ -1580,7 +1580,7 @@ export function AdminAgenciesView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-0">
                   {agencies.filter(a => a.downgraded).map(agency => {
                     const application = getAgencyWithApplication(agency);
                     return (
