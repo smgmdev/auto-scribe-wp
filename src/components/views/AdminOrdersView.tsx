@@ -1194,7 +1194,7 @@ export function AdminOrdersView() {
                   return (
                     <Card 
                       key={item.id} 
-                      className={`rounded-none ${index > 0 ? '-mt-px' : ''}`}
+                      className={`rounded-none relative ${index > 0 ? '-mt-px' : ''}`}
                     >
                       {/* Mobile: Badge at top-right */}
                       <div className="md:hidden absolute top-2 right-3 flex gap-1 flex-wrap justify-end">
