@@ -6797,11 +6797,12 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <AlertDialogDescription className="text-left" asChild>
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">Please provide a reason for cancelling this engagement.</p>
-                <Input
+                <textarea
                   placeholder="Reason for cancellation..."
                   value={cancellationReason}
                   onChange={(e) => setCancellationReason(e.target.value)}
-                  className="rounded-none h-9 text-sm"
+                  rows={3}
+                  className="flex w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
                 />
               </div>
             </AlertDialogDescription>
