@@ -48,6 +48,7 @@ export function CreditHistoryView() {
   const [expandedWithdrawals, setExpandedWithdrawals] = useState<Set<string>>(new Set());
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
+  const [publishDetails, setPublishDetails] = useState<Record<string, any>>({});
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
@@ -648,7 +649,7 @@ export function CreditHistoryView() {
       return <LockOpen className="h-5 w-5 text-green-500" />;
     }
     if (type === 'publish') {
-      return <ArrowDownCircle className="h-5 w-5 text-blue-500" />;
+      return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
     if (amount > 0) {
       return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
@@ -676,7 +677,7 @@ export function CreditHistoryView() {
       withdrawal_locked: { className: 'bg-amber-100 text-amber-700', label: 'Withdrawal Pending' },
       withdrawal_unlocked: { className: 'bg-red-100 text-red-700', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background', label: 'Withdrawal Completed' },
-      publish: { className: 'bg-blue-100 text-blue-700', label: 'Published' },
+      publish: { className: 'bg-green-100 text-green-700', label: 'Instant Publishing' },
     };
     const badge = config[type] || { className: 'bg-gray-100 text-gray-700', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={badge.className}>{badge.label}</Badge>;
@@ -1647,6 +1648,37 @@ export function CreditHistoryView() {
                         }));
                       }
                     }
+                    
+                    // Fetch article details for publish transactions
+                    if (transaction.type === 'publish' && !publishDetails[transaction.id]) {
+                      // Extract site name from description like "Published article to Washington Morning"
+                      const siteNameMatch = transaction.description?.match(/Published article to (.+)/);
+                      const siteName = siteNameMatch ? siteNameMatch[1].trim() : null;
+                      
+                      if (siteName) {
+                        // Find the article published around the same time to this site
+                        const { data: articles } = await supabase
+                          .from('articles')
+                          .select('id, title, wp_link, published_to, published_to_name, published_to_favicon, created_at')
+                          .eq('user_id', user!.id)
+                          .eq('status', 'published')
+                          .eq('published_to_name', siteName)
+                          .order('created_at', { ascending: false })
+                          .limit(5);
+                        
+                        if (articles && articles.length > 0) {
+                          // Find closest article by time
+                          const txTime = new Date(transaction.created_at).getTime();
+                          let bestArticle = articles[0];
+                          let bestDiff = Infinity;
+                          for (const a of articles) {
+                            const diff = Math.abs(new Date(a.created_at).getTime() - txTime);
+                            if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
+                          }
+                          setPublishDetails(prev => ({ ...prev, [transaction.id]: bestArticle }));
+                        }
+                      }
+                    }
                   }
                   setExpandedWithdrawals(newExpanded);
                 };
@@ -1663,7 +1695,7 @@ export function CreditHistoryView() {
                         <div className="flex-1">
                           <p className="font-medium">{displayDescription}</p>
                           <div className={`text-lg md:hidden mt-1 ${
-                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
+                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted' || transaction.type === 'publish'
                               ? 'text-foreground'
                               : transaction.type === 'withdrawal_locked' 
                                 ? 'text-amber-500' 
@@ -1673,6 +1705,8 @@ export function CreditHistoryView() {
                               <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
                             ) : transaction.type === 'order_accepted' && orderInfo ? (
                               <>-{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
+                            ) : transaction.type === 'publish' ? (
+                              <>{Math.abs(transaction.amount).toLocaleString()}</>
                             ) : (
                               <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                             )}
@@ -1683,7 +1717,7 @@ export function CreditHistoryView() {
                         </div>
                       </div>
                       <div className={`text-lg hidden md:block ${
-                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
+                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted' || transaction.type === 'publish'
                           ? 'text-foreground'
                           : transaction.type === 'withdrawal_locked' 
                             ? 'text-amber-500' 
@@ -1693,6 +1727,8 @@ export function CreditHistoryView() {
                           <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
                         ) : transaction.type === 'order_accepted' && orderInfo ? (
                           <>-{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
+                        ) : transaction.type === 'publish' ? (
+                          <>{Math.abs(transaction.amount).toLocaleString()}</>
                         ) : (
                           <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                         )}
@@ -1826,6 +1862,60 @@ export function CreditHistoryView() {
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                             </div>
+                           ) : transaction.type === 'publish' ? (
+                           /* Instant Publishing - Show media channel and publication link */
+                             <>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                <div>
+                                  <span className="text-muted-foreground">Transaction Type:</span>
+                                  <p className="font-medium">Instant Publishing</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Amount:</span>
+                                  <p className="font-medium text-foreground">
+                                    {Math.abs(transaction.amount).toLocaleString()} credits
+                                  </p>
+                                </div>
+                                {publishDetails[transaction.id] ? (
+                                  <div>
+                                    <span className="text-muted-foreground">Media Channel:</span>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      {publishDetails[transaction.id].published_to_favicon && (
+                                        <img src={publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" />
+                                      )}
+                                      <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <span className="text-muted-foreground">Media Channel:</span>
+                                    <p className="font-medium">
+                                      {(() => {
+                                        const siteMatch = transaction.description?.match(/Published article to (.+)/);
+                                        return siteMatch ? siteMatch[1] : 'Unknown';
+                                      })()}
+                                    </p>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-muted-foreground">Date & Time:</span>
+                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
+                              </div>
+                              {publishDetails[transaction.id]?.wp_link && (
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  <a
+                                    href={publishDetails[transaction.id].wp_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Publication →
+                                  </a>
+                                </div>
+                              )}
+                             </>
                            ) : (
                            /* Other transaction types - Show standard details */
                              <>
