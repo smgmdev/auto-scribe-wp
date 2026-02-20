@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2, Plus, Settings, Pencil, Trash2, Check } from 'lucide-react';
+import { Upload, X, Loader2, Plus, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -13,13 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,6 +22,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AddCategoryDialog } from '@/components/press/AddCategoryDialog';
+import { ManageCategoriesDialog } from '@/components/press/ManageCategoriesDialog';
+import { ManageContactsDialog } from '@/components/press/ManageContactsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -64,16 +60,12 @@ export function AdminNewPressReleaseView() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newCategoryDialogOpen, setNewCategoryDialogOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [manageCategoriesOpen, setManageCategoriesOpen] = useState(false);
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [editingCategoryName, setEditingCategoryName] = useState('');
   const [isSavingCategory, setIsSavingCategory] = useState(false);
   const [footerContacts, setFooterContacts] = useState<string[]>([]);
   const [pressContacts, setPressContacts] = useState<PressContact[]>([]);
   const [manageContactsOpen, setManageContactsOpen] = useState(false);
-  const [editingContact, setEditingContact] = useState<PressContact | null>(null);
   const [isSavingContact, setIsSavingContact] = useState(false);
   const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState<{ id: string; name: string } | null>(null);
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
@@ -118,8 +110,8 @@ export function AdminNewPressReleaseView() {
     fetchContacts();
   }, []);
 
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) {
+  const handleAddCategory = async (categoryName: string) => {
+    if (!categoryName.trim()) {
       toast.error('Please enter a category name');
       return;
     }
@@ -129,7 +121,7 @@ export function AdminNewPressReleaseView() {
     try {
       const { data, error } = await supabase
         .from('press_release_categories')
-        .insert({ name: newCategoryName.trim(), created_by: user.id })
+        .insert({ name: categoryName.trim(), created_by: user.id })
         .select()
         .single();
 
@@ -144,7 +136,6 @@ export function AdminNewPressReleaseView() {
 
       setCategories(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
       setCategory(data.name);
-      setNewCategoryName('');
       setNewCategoryDialogOpen(false);
       toast.success('Category added successfully');
     } catch (error: any) {
@@ -155,23 +146,16 @@ export function AdminNewPressReleaseView() {
     }
   };
 
-  const handleEditCategory = (cat: Category) => {
-    setEditingCategoryId(cat.id);
-    setEditingCategoryName(cat.name);
-  };
-
-  const handleSaveCategory = async () => {
-    if (!editingCategoryName.trim() || !editingCategoryId) return;
-
+  const handleEditCategory = async (id: string, newName: string) => {
     setIsSavingCategory(true);
     try {
-      const oldCategory = categories.find(c => c.id === editingCategoryId);
+      const oldCategory = categories.find(c => c.id === id);
       const oldName = oldCategory?.name;
 
       const { error } = await supabase
         .from('press_release_categories')
-        .update({ name: editingCategoryName.trim() })
-        .eq('id', editingCategoryId);
+        .update({ name: newName })
+        .eq('id', id);
 
       if (error) {
         if (error.code === '23505') {
@@ -182,26 +166,22 @@ export function AdminNewPressReleaseView() {
         return;
       }
 
-      // Update press releases that use this category
       if (oldName) {
         await supabase
           .from('press_releases')
-          .update({ category: editingCategoryName.trim() })
+          .update({ category: newName })
           .eq('category', oldName);
       }
 
       setCategories(prev => 
-        prev.map(c => c.id === editingCategoryId ? { ...c, name: editingCategoryName.trim() } : c)
+        prev.map(c => c.id === id ? { ...c, name: newName } : c)
           .sort((a, b) => a.name.localeCompare(b.name))
       );
 
-      // Update selected category if it was the one being edited
       if (category === oldName) {
-        setCategory(editingCategoryName.trim());
+        setCategory(newName);
       }
 
-      setEditingCategoryId(null);
-      setEditingCategoryName('');
       toast.success('Category updated successfully');
     } catch (error: any) {
       console.error('Error updating category:', error);
@@ -225,7 +205,6 @@ export function AdminNewPressReleaseView() {
 
       setCategories(prev => prev.filter(c => c.id !== deleteCategoryConfirm.id));
       
-      // If deleted category was selected, select first available
       if (category === deleteCategoryConfirm.name && categories.length > 1) {
         const remaining = categories.filter(c => c.id !== deleteCategoryConfirm.id);
         if (remaining.length > 0) {
@@ -243,29 +222,26 @@ export function AdminNewPressReleaseView() {
     }
   };
 
-  const handleSaveContact = async () => {
-    if (!editingContact) return;
-
+  const handleSaveContact = async (contact: PressContact) => {
     setIsSavingContact(true);
     try {
       const { error } = await supabase
         .from('press_release_contacts')
         .update({
-          title: editingContact.title,
-          name: editingContact.name,
-          company: editingContact.company,
-          email: editingContact.email,
-          phone: editingContact.phone || null,
+          title: contact.title,
+          name: contact.name,
+          company: contact.company,
+          email: contact.email,
+          phone: contact.phone || null,
         })
-        .eq('id', editingContact.id);
+        .eq('id', contact.id);
 
       if (error) throw error;
 
       setPressContacts(prev =>
-        prev.map(c => c.id === editingContact.id ? editingContact : c)
+        prev.map(c => c.id === contact.id ? contact : c)
       );
 
-      setEditingContact(null);
       toast.success('Contact updated successfully');
     } catch (error: any) {
       console.error('Error updating contact:', error);
@@ -517,133 +493,22 @@ export function AdminNewPressReleaseView() {
           </div>
 
           {/* Add Category Dialog */}
-          <Dialog open={newCategoryDialogOpen} onOpenChange={setNewCategoryDialogOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-none max-md:w-full max-md:max-w-none max-md:rounded-none max-md:border-0 md:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Add New Category</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-category">Category Name</Label>
-                  <Input
-                    id="new-category"
-                    placeholder="Enter category name..."
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    className="bg-background text-foreground border-input placeholder:text-muted-foreground"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddCategory();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setNewCategoryDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddCategory} disabled={isAddingCategory || !newCategoryName.trim()}>
-                  {isAddingCategory ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Category'
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <AddCategoryDialog
+            open={newCategoryDialogOpen}
+            onOpenChange={setNewCategoryDialogOpen}
+            onAdd={handleAddCategory}
+            isAdding={isAddingCategory}
+          />
 
           {/* Manage Categories Dialog */}
-          <Dialog open={manageCategoriesOpen} onOpenChange={setManageCategoriesOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-none max-md:w-full max-md:max-w-none max-md:rounded-none max-md:border-0 md:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Manage Categories</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-2 py-4 max-h-[400px] overflow-y-auto">
-                {categories.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No categories yet</p>
-                ) : (
-                  categories.map(cat => (
-                    <div key={cat.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50">
-                      {editingCategoryId === cat.id ? (
-                        <>
-                          <Input
-                            value={editingCategoryName}
-                            onChange={(e) => setEditingCategoryName(e.target.value)}
-                            className="flex-1 h-8 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleSaveCategory();
-                              } else if (e.key === 'Escape') {
-                                setEditingCategoryId(null);
-                                setEditingCategoryName('');
-                              }
-                            }}
-                            autoFocus
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 hover:bg-foreground hover:text-background"
-                            onClick={handleSaveCategory}
-                            disabled={isSavingCategory || !editingCategoryName.trim()}
-                          >
-                            {isSavingCategory ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Check className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 hover:bg-foreground hover:text-background"
-                            onClick={() => {
-                              setEditingCategoryId(null);
-                              setEditingCategoryName('');
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <span className="flex-1 text-sm">{cat.name}</span>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 hover:bg-foreground hover:text-background"
-                            onClick={() => handleEditCategory(cat)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 hover:bg-foreground hover:text-background"
-                            onClick={() => setDeleteCategoryConfirm({ id: cat.id, name: cat.name })}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setManageCategoriesOpen(false)}>
-                  Close
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <ManageCategoriesDialog
+            open={manageCategoriesOpen}
+            onOpenChange={setManageCategoriesOpen}
+            categories={categories}
+            onEdit={handleEditCategory}
+            onDelete={(id, name) => setDeleteCategoryConfirm({ id, name })}
+            isSaving={isSavingCategory}
+          />
 
           {/* Delete Category Confirmation */}
           <AlertDialog open={!!deleteCategoryConfirm} onOpenChange={(open) => !open && setDeleteCategoryConfirm(null)}>
@@ -784,109 +649,13 @@ export function AdminNewPressReleaseView() {
           </div>
 
           {/* Manage Contacts Dialog */}
-          <Dialog open={manageContactsOpen} onOpenChange={setManageContactsOpen}>
-            <DialogContent className="max-md:inset-0 max-md:translate-x-0 max-md:translate-y-0 max-md:h-[100dvh] max-md:max-h-none max-md:w-full max-md:max-w-none max-md:rounded-none max-md:border-0 md:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Manage Press Contacts</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4 max-h-[500px] overflow-y-auto">
-                {pressContacts.map(contact => (
-                  <div key={contact.id} className="p-4 rounded-lg border border-border">
-                    {editingContact?.id === contact.id ? (
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Title</Label>
-                          <Input
-                            value={editingContact.title}
-                            onChange={(e) => setEditingContact({ ...editingContact, title: e.target.value })}
-                            placeholder="e.g. Press Contact"
-                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Name</Label>
-                          <Input
-                            value={editingContact.name}
-                            onChange={(e) => setEditingContact({ ...editingContact, name: e.target.value })}
-                            placeholder="e.g. John Smith"
-                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Company</Label>
-                          <Input
-                            value={editingContact.company}
-                            onChange={(e) => setEditingContact({ ...editingContact, company: e.target.value })}
-                            placeholder="e.g. Arcana Mace"
-                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Email</Label>
-                          <Input
-                            type="email"
-                            value={editingContact.email}
-                            onChange={(e) => setEditingContact({ ...editingContact, email: e.target.value })}
-                            placeholder="e.g. press@arcanamace.com"
-                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Phone (optional)</Label>
-                          <Input
-                            value={editingContact.phone || ''}
-                            onChange={(e) => setEditingContact({ ...editingContact, phone: e.target.value })}
-                            placeholder="e.g. (408) 862-1142"
-                            className="h-9 bg-background text-foreground border-input placeholder:text-muted-foreground"
-                          />
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            size="sm"
-                            onClick={handleSaveContact}
-                            disabled={isSavingContact || !editingContact.title || !editingContact.name || !editingContact.email}
-                          >
-                            {isSavingContact ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
-                            Save
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingContact(null)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-medium text-sm">{contact.title}</h4>
-                          <p className="text-sm text-foreground mt-1">{contact.name}</p>
-                          <p className="text-sm text-muted-foreground">{contact.company}</p>
-                          <p className="text-sm text-[#06c]">{contact.email}</p>
-                          {contact.phone && <p className="text-sm text-muted-foreground">{contact.phone}</p>}
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 hover:bg-foreground hover:text-background"
-                          onClick={() => setEditingContact(contact)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setManageContactsOpen(false)}>
-                  Close
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <ManageContactsDialog
+            open={manageContactsOpen}
+            onOpenChange={setManageContactsOpen}
+            contacts={pressContacts}
+            onSave={handleSaveContact}
+            isSaving={isSavingContact}
+          />
         </div>
 
         {/* Sidebar */}
