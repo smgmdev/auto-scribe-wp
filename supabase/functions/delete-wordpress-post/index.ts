@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,13 +24,13 @@ serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } }
   );
   const token = authHeader.replace('Bearer ', '');
-  const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
-  if (claimsError || !claimsData?.claims) {
+  const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
+  if (userError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized', deleted: false }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-  const callerUserId = claimsData.claims.sub;
+  const callerUserId = user.id;
   // ──────────────────────────────────────────────────────────────────
 
   try {
