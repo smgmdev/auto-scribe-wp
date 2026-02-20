@@ -7,14 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Upload, CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -885,24 +878,13 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
         </div>
       </form>
 
-      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cancel Agency Application?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to cancel your agency application? You will need to reapply if you want to become an agency in the future.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <label className="text-sm font-medium mb-2 block">Reason for cancellation <span className="text-destructive">*</span></label>
-            <Textarea
-              placeholder="Please let us know why you're cancelling..."
-              value={cancellationReason}
-              onChange={(e) => setCancellationReason(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-          <DialogFooter>
+      <DraggablePopup
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        width={480}
+        title={<h2 className="text-lg font-semibold leading-none tracking-tight">Cancel Agency Application?</h2>}
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <Button variant="outline" onClick={() => setCancelDialogOpen(false)} className="hover:bg-black hover:text-white">
               Keep Application
             </Button>
@@ -914,9 +896,23 @@ export function CustomVerificationForm({ agencyPayoutId, agencyName, prefillData
               {cancelling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, Cancel Application
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+        zIndex={300}
+      >
+        <p className="text-sm text-muted-foreground mb-4">
+          Are you sure you want to cancel your agency application? You will need to reapply if you want to become an agency in the future.
+        </p>
+        <div>
+          <label className="text-sm font-medium mb-2 block">Reason for cancellation <span className="text-destructive">*</span></label>
+          <Textarea
+            placeholder="Please let us know why you're cancelling..."
+            value={cancellationReason}
+            onChange={(e) => setCancellationReason(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+      </DraggablePopup>
     </div>
   );
 }
