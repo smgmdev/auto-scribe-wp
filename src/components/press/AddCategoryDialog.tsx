@@ -4,7 +4,6 @@ import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { GripHorizontal, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface AddCategoryDialogProps {
@@ -92,15 +91,19 @@ export function AddCategoryDialog({ open, onOpenChange, onAdd, isAdding }: AddCa
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="new-category">Category Name</Label>
-              <Input
-                id="new-category"
-                placeholder="Enter category name..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-background text-foreground border-input placeholder:text-muted-foreground h-9 md:h-10"
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
-                autoFocus
-              />
+              <div className="flex items-center gap-2 border border-input rounded-md px-3 py-2 md:py-2.5 bg-background">
+                <input
+                  id="new-category"
+                  type="text"
+                  placeholder="Enter category name..."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-sm placeholder:text-muted-foreground outline-none"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
+                  autoFocus
+                  autoComplete="off"
+                />
+              </div>
             </div>
           </div>
           <div className="flex flex-col-reverse md:flex-row md:justify-end gap-3 pt-6">
