@@ -70,6 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasShownWelcomeRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
   const userInitiatedSignOutRef = useRef(false);
+  // Single-session enforcement: unique ID for this browser tab
+  const localSessionIdRef = useRef<string>(crypto.randomUUID());
+  const sessionKickedRef = useRef(false);
 
   // Helper to fully reset auth state
   const resetAuthState = () => {
@@ -82,6 +85,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPinVerified(false);
     hasShownWelcomeRef.current = false;
     previousUserIdRef.current = null;
+  };
+
+  // Register this browser tab as the active session
+  const registerActiveSession = async (userId: string) => {
+    const sessionId = localSessionIdRef.current;
+    console.log('[Auth] Registering active session:', sessionId);
+    await supabase
+      .from('profiles')
+      .update({ active_session_id: sessionId } as any)
+      .eq('id', userId);
+  };
+
+  // Force logout when kicked by another session
+  const handleSessionKicked = async () => {
+    if (sessionKickedRef.current) return;
+    sessionKickedRef.current = true;
+    console.log('[Auth] Session kicked by another device/browser');
+    
+    // Clear local state first
+    resetAuthState();
+    
+    // Sign out from Supabase without updating active_session_id
+    userInitiatedSignOutRef.current = true;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.log('[Auth] Sign out after kick:', err);
+    }
+    
+    toast.error('You have been logged out because your account was signed in on another device or browser.', {
+      duration: 8000,
+    });
   };
 
   const fetchUserData = async (userId: string): Promise<void> => {
@@ -167,6 +202,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (payload) => {
           if (payload.new && 'credits' in payload.new) {
             setCredits(payload.new.credits as number);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  // Single-session enforcement: watch for active_session_id changes
+  useEffect(() => {
+    if (!user) {
+      sessionKickedRef.current = false;
+      return;
+    }
+
+    const channel = supabase
+      .channel(`session-guard-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        (payload) => {
+          const newSessionId = (payload.new as any)?.active_session_id;
+          if (newSessionId && newSessionId !== localSessionIdRef.current) {
+            // Another device/browser has taken over
+            handleSessionKicked();
           }
         }
       )
@@ -322,6 +389,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(async () => {
             if (!isMounted) return;
             await fetchUserData(newSession.user.id);
+            // Register this tab as the active session (kicks other devices)
+            if (event === 'SIGNED_IN') {
+              sessionKickedRef.current = false;
+              await registerActiveSession(newSession.user.id);
+            }
           }, 0);
         } else {
           setRole(null);
@@ -348,6 +420,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (existingSession?.user) {
           await fetchUserData(existingSession.user.id);
+          // Register this tab as the active session on page load/refresh
+          sessionKickedRef.current = false;
+          await registerActiveSession(existingSession.user.id);
         }
       } finally {
         if (isMounted) {
@@ -404,7 +479,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const now = new Date().toISOString();
         await supabase
           .from('profiles')
-          .update({ last_online_at: now })
+          .update({ last_online_at: now, active_session_id: null } as any)
           .eq('id', user.id);
         // Also update agency_payouts if user is an agency
         await supabase
