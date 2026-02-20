@@ -114,6 +114,19 @@ export function AdminOrdersView() {
   const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Close user details popup on Escape key
+  useEffect(() => {
+    if (!instantUserDetailsOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setInstantUserDetailsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [instantUserDetailsOpen]);
+
   const [deliveryForm, setDeliveryForm] = useState({
     delivery_url: '',
     delivery_notes: ''
