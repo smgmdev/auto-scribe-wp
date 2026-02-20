@@ -298,12 +298,15 @@ const Landing = () => {
       } catch (error) {
         console.error('Error fetching sites:', error);
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     };
 
-    fetchSites();
-  }, []);
+    // Only fetch after auth has settled to avoid stale token issues during logout
+    if (!authLoading) {
+      fetchSites();
+    }
+  }, [authLoading]);
 
   // Real-time media_sites sync
   useEffect(() => {
