@@ -1068,12 +1068,15 @@ export function OrdersView() {
 
       <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg pt-0 px-0 pb-0 gap-0" hideCloseButton>
-          <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2">
+          <div className="px-4 py-2 border-b bg-muted/30 flex items-center justify-between">
             <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-            <DialogClose className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center">
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+            >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
-            </DialogClose>
+            </button>
           </div>
           <div className="px-6 pb-6 pt-4">
           <DialogHeader>
