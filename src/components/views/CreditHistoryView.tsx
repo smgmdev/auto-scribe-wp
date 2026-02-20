@@ -1870,8 +1870,22 @@ export function CreditHistoryView() {
                              <>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                 <div>
-                                  <span className="text-muted-foreground">Transaction Type:</span>
-                                  <p className="font-medium">Instant Publishing</p>
+                                  <span className="text-muted-foreground">Media Channel:</span>
+                                  {publishDetails[transaction.id] ? (
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      {publishDetails[transaction.id].published_to_favicon && (
+                                        <img src={publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" />
+                                      )}
+                                      <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
+                                    </div>
+                                  ) : (
+                                    <p className="font-medium">
+                                      {(() => {
+                                        const siteMatch = transaction.description?.match(/Published article to (.+)/);
+                                        return siteMatch ? siteMatch[1] : 'Unknown';
+                                      })()}
+                                    </p>
+                                  )}
                                 </div>
                                 <div>
                                   <span className="text-muted-foreground">Amount:</span>
@@ -1879,27 +1893,6 @@ export function CreditHistoryView() {
                                     {Math.abs(transaction.amount).toLocaleString()} credits
                                   </p>
                                 </div>
-                                {publishDetails[transaction.id] ? (
-                                  <div>
-                                    <span className="text-muted-foreground">Media Channel:</span>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      {publishDetails[transaction.id].published_to_favicon && (
-                                        <img src={publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" />
-                                      )}
-                                      <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div>
-                                    <span className="text-muted-foreground">Media Channel:</span>
-                                    <p className="font-medium">
-                                      {(() => {
-                                        const siteMatch = transaction.description?.match(/Published article to (.+)/);
-                                        return siteMatch ? siteMatch[1] : 'Unknown';
-                                      })()}
-                                    </p>
-                                  </div>
-                                )}
                                 <div>
                                   <span className="text-muted-foreground">Date & Time:</span>
                                   <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
