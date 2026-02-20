@@ -375,7 +375,7 @@ export function SupportView() {
 
             <div className="px-5 py-4 border-t border-border shrink-0">
               <Button
-                className="w-full bg-foreground text-background hover:bg-foreground/90"
+                className="w-full bg-foreground text-background border border-transparent hover:!bg-transparent hover:!text-foreground hover:!border-foreground transition-all"
                 onClick={handleCreateTicket}
                 disabled={creating || !newCategory || !newFirstMessage.trim()}
               >
