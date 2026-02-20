@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Loader2, Clock, CheckCircle, XCircle, ExternalLink, FileText, Building2, Percent, Mail, Trash2, AlertTriangle, X, RefreshCw, Copy, Download, UserMinus, UserCheck, ArrowDownCircle, ArchiveRestore } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { WebViewDialog } from '@/components/ui/WebViewDialog';
@@ -1671,35 +1672,37 @@ export function AdminAgenciesView() {
       </Tabs>
 
       {/* Application Review Dialog */}
-      <Dialog open={!!selectedApp} onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null); }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-3">
-              {logoLoading ? (
-                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : logoUrl ? (
-                <>
-                  {!dialogLogoLoaded && (
-                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
-                  <img 
-                    src={logoUrl} 
-                    alt="Agency logo" 
-                    className={`w-12 h-12 rounded-lg object-cover border border-border ${!dialogLogoLoaded ? 'hidden' : ''}`}
-                    onLoad={() => setDialogLogoLoaded(true)}
-                  />
-                </>
-              ) : null}
-              <DialogTitle>{selectedApp?.agency_name}</DialogTitle>
-            </div>
-          </DialogHeader>
+      <DraggablePopup
+        open={!!selectedApp}
+        onOpenChange={() => { setSelectedApp(null); setLogoUrl(null); setDialogLogoLoaded(false); setSelectedAgencyPayout(null); }}
+        width={520}
+        title={
+          <div className="flex items-center gap-3">
+            {logoLoading ? (
+              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : logoUrl ? (
+              <>
+                {!dialogLogoLoaded && (
+                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                <img 
+                  src={logoUrl} 
+                  alt="Agency logo" 
+                  className={`w-12 h-12 rounded-lg object-cover border border-border ${!dialogLogoLoaded ? 'hidden' : ''}`}
+                  onLoad={() => setDialogLogoLoaded(true)}
+                />
+              </>
+            ) : null}
+            <h4 className="font-semibold text-lg">{selectedApp?.agency_name}</h4>
+          </div>
+        }
+      >
             {(() => {
               if (!selectedApp) return null;
-              // Only show verification for apps that were pre-approved and have a verification submitted after pre-approval
               if (!(selectedApp as any).pre_approved_at) return null;
               const preApprovedAt = new Date((selectedApp as any).pre_approved_at).getTime();
               const verification = customVerifications.find(v => 
@@ -1728,9 +1731,7 @@ export function AdminAgenciesView() {
 
           {selectedApp && (
             <div className="space-y-4">
-              {/* Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {/* 1. Application Date - always shown */}
                 <div>
                   <p className="text-muted-foreground">Application Date</p>
                   <p className="font-medium">{format(new Date(selectedApp.created_at), 'MMM d, yyyy h:mm a')}</p>
@@ -1744,7 +1745,6 @@ export function AdminAgenciesView() {
                   
                   return (
                     <>
-                      {/* 2. Pre-Approved Date */}
                       {(selectedApp as any).pre_approved_at && (
                         <div>
                           <p className="text-muted-foreground">Pre-Approved Date</p>
@@ -1753,14 +1753,12 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
-                      {/* 3. Final Submission Date (verification submitted after pre-approval) */}
                       {verification?.submitted_at && (
                         <div>
                           <p className="text-muted-foreground">Final Submission Date</p>
                           <p className="font-medium">{format(new Date(verification.submitted_at), 'MMM d, yyyy h:mm a')}</p>
                         </div>
                       )}
-                      {/* 4a. Verification Rejection / Approval Date */}
                       {verification?.reviewed_at && (
                         <div>
                           <p className="text-muted-foreground">
@@ -1771,7 +1769,6 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
-                      {/* 4b. Direct Rejection Date (no verification involved) */}
                       {((selectedApp as any).rejected_at && !verification) && (
                         <div>
                           <p className="text-muted-foreground">Rejection Date</p>
@@ -1780,7 +1777,6 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
-                      {/* Cancelled Date */}
                       {selectedApp.status === 'cancelled' && (
                         <div>
                           <p className="text-muted-foreground">Cancelled Date</p>
@@ -1789,7 +1785,6 @@ export function AdminAgenciesView() {
                           </p>
                         </div>
                       )}
-                      {/* Onboarded Date */}
                       {agencyPayout?.created_at && agencyPayout.onboarding_complete && (
                         <div>
                           <p className="text-muted-foreground">Onboarded Date</p>
@@ -1801,7 +1796,6 @@ export function AdminAgenciesView() {
                 })()}
               </div>
 
-              {/* Contact & Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Full Name</p>
@@ -1905,7 +1899,6 @@ export function AdminAgenciesView() {
                 </Button>
               </div>
 
-              {/* Actions Section */}
               {selectedApp.status === 'pending' && (
                 <div className="space-y-4 border-t pt-4">
                   <div className="space-y-2">
@@ -1955,7 +1948,6 @@ export function AdminAgenciesView() {
                 </div>
               )}
 
-              {/* Downgrade button for active agencies */}
               {selectedAgencyPayout && (
                 <div className="border-t pt-4">
                   <Button
@@ -1974,8 +1966,7 @@ export function AdminAgenciesView() {
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+      </DraggablePopup>
 
       {/* Document Viewer Dialog */}
       <Dialog open={documentDialogOpen} onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}>
@@ -2067,14 +2058,17 @@ export function AdminAgenciesView() {
 
 
       {/* Custom Verification Details Dialog */}
-      <Dialog open={!!selectedVerification} onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); setVerificationLogoLoaded(false); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Custom Verification Details
-            </DialogTitle>
-          </DialogHeader>
+      <DraggablePopup
+        open={!!selectedVerification}
+        onOpenChange={() => { setSelectedVerification(null); setVerificationDocUrls({}); setVerificationLogoLoaded(false); }}
+        width={640}
+        title={
+          <h4 className="font-semibold text-lg flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Custom Verification Details
+          </h4>
+        }
+      >
 
           {selectedVerification && (
             <div className="space-y-6">
@@ -2507,57 +2501,60 @@ export function AdminAgenciesView() {
               )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+      </DraggablePopup>
 
       {/* Verification Rejection Reason Dialog */}
-      <Dialog open={showVerificationRejectDialog} onOpenChange={(open) => { 
-        setShowVerificationRejectDialog(open); 
-        if (!open) setVerificationRejectionReason(''); 
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <XCircle className="h-5 w-5" />
-              Reject Verification
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Please provide a reason for rejecting this verification. This will be recorded in the notes.
-            </p>
-            <Textarea
-              placeholder="Enter rejection reason..."
-              value={verificationRejectionReason}
-              onChange={(e) => setVerificationRejectionReason(e.target.value)}
-              className="min-h-[100px]"
-            />
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowVerificationRejectDialog(false);
-                  setVerificationRejectionReason('');
-                }}
-                className="flex-1 hover:bg-black hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleRejectVerification}
-                disabled={!verificationRejectionReason.trim() || processingVerification}
-                variant="outline"
-                className="flex-1 bg-transparent text-red-500 border-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
-              >
-                {processingVerification ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : null}
-                Confirm Rejection
-              </Button>
-            </div>
+      <DraggablePopup
+        open={showVerificationRejectDialog}
+        onOpenChange={(open) => { 
+          setShowVerificationRejectDialog(open); 
+          if (!open) setVerificationRejectionReason(''); 
+        }}
+        width={420}
+        title={
+          <h4 className="font-semibold text-lg flex items-center gap-2 text-red-600">
+            <XCircle className="h-5 w-5" />
+            Reject Verification
+          </h4>
+        }
+        footer={
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowVerificationRejectDialog(false);
+                setVerificationRejectionReason('');
+              }}
+              className="flex-1 hover:bg-black hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRejectVerification}
+              disabled={!verificationRejectionReason.trim() || processingVerification}
+              variant="outline"
+              className="flex-1 bg-transparent text-red-500 border-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
+            >
+              {processingVerification ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
+              Confirm Rejection
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Please provide a reason for rejecting this verification. This will be recorded in the notes.
+          </p>
+          <Textarea
+            placeholder="Enter rejection reason..."
+            value={verificationRejectionReason}
+            onChange={(e) => setVerificationRejectionReason(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+      </DraggablePopup>
 
       {/* KYC Document Viewer Dialog */}
       <Dialog open={docViewerOpen} onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}>
@@ -2640,122 +2637,125 @@ export function AdminAgenciesView() {
       </Dialog>
 
       {/* Downgrade Agency Confirmation Dialog */}
-      <Dialog open={showDowngradeDialog} onOpenChange={setShowDowngradeDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <X className="h-5 w-5" />
-              Downgrade Agency
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to downgrade <span className="font-semibold text-foreground">{agencyToDowngrade?.agency_name}</span>?
-            </p>
-            
-            <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-2">
-              <p>• The account will be downgraded to a normal user account</p>
-              <p>• All data will stay in the system</p>
-              <p>• The user can re-apply to become an agency later</p>
-              <p>• Agency account can still be restored</p>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Reason (optional)</label>
-              <Textarea
-                value={downgradeReason}
-                onChange={(e) => setDowngradeReason(e.target.value)}
-                placeholder="Provide a reason for downgrading..."
-                className="rounded-none text-sm resize-none"
-                rows={2}
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-none hover:bg-black hover:text-white"
-                onClick={() => {
-                  setShowDowngradeDialog(false);
-                  setAgencyToDowngrade(null);
-                  setDowngradeReason('');
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 rounded-none text-destructive border-destructive bg-transparent hover:bg-destructive hover:text-white"
-                onClick={handleDowngradeAgency}
-                disabled={deleting === agencyToDowngrade?.id}
-              >
-                {deleting === agencyToDowngrade?.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Downgrade
-              </Button>
-            </div>
+      <DraggablePopup
+        open={showDowngradeDialog}
+        onOpenChange={setShowDowngradeDialog}
+        width={420}
+        title={
+          <h4 className="font-semibold text-lg flex items-center gap-2">
+            <X className="h-5 w-5" />
+            Downgrade Agency
+          </h4>
+        }
+        footer={
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-none hover:bg-black hover:text-white"
+              onClick={() => {
+                setShowDowngradeDialog(false);
+                setAgencyToDowngrade(null);
+                setDowngradeReason('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-none text-destructive border-destructive bg-transparent hover:bg-destructive hover:text-white"
+              onClick={handleDowngradeAgency}
+              disabled={deleting === agencyToDowngrade?.id}
+            >
+              {deleting === agencyToDowngrade?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Downgrade
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to downgrade <span className="font-semibold text-foreground">{agencyToDowngrade?.agency_name}</span>?
+          </p>
+          
+          <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-2">
+            <p>• The account will be downgraded to a normal user account</p>
+            <p>• All data will stay in the system</p>
+            <p>• The user can re-apply to become an agency later</p>
+            <p>• Agency account can still be restored</p>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Reason (optional)</label>
+            <Textarea
+              value={downgradeReason}
+              onChange={(e) => setDowngradeReason(e.target.value)}
+              placeholder="Provide a reason for downgrading..."
+              className="rounded-none text-sm resize-none"
+              rows={2}
+            />
+          </div>
+        </div>
+      </DraggablePopup>
 
       {/* Edit Commission Dialog */}
-      <Dialog open={showCommissionDialog} onOpenChange={setShowCommissionDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Commission</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Set the platform commission percentage for <span className="font-semibold">{agencyToEditCommission?.agency_name}</span>
-            </p>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Commission Percentage</label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={newCommissionPercentage}
-                  onChange={(e) => setNewCommissionPercentage(e.target.value)}
-                  placeholder="Enter percentage"
-                  className="flex-1"
-                />
-                <span className="text-muted-foreground">%</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Agency keeps {100 - (parseFloat(newCommissionPercentage) || 0)}% of each order
-              </p>
-            </div>
-            
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 hover:bg-black hover:text-white"
-                onClick={() => {
-                  setShowCommissionDialog(false);
-                  setAgencyToEditCommission(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-black text-white hover:bg-black/80"
-                onClick={handleUpdateCommission}
-                disabled={updatingCommission}
-              >
-                {updatingCommission ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Save
-              </Button>
-            </div>
+      <DraggablePopup
+        open={showCommissionDialog}
+        onOpenChange={setShowCommissionDialog}
+        width={420}
+        title={<h4 className="font-semibold text-lg">Edit Commission</h4>}
+        footer={
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 hover:bg-black hover:text-white"
+              onClick={() => {
+                setShowCommissionDialog(false);
+                setAgencyToEditCommission(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-black text-white hover:bg-black/80"
+              onClick={handleUpdateCommission}
+              disabled={updatingCommission}
+            >
+              {updatingCommission ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Save
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Set the platform commission percentage for <span className="font-semibold">{agencyToEditCommission?.agency_name}</span>
+          </p>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Commission Percentage</label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={newCommissionPercentage}
+                onChange={(e) => setNewCommissionPercentage(e.target.value)}
+                placeholder="Enter percentage"
+                className="flex-1"
+              />
+              <span className="text-muted-foreground">%</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Agency keeps {100 - (parseFloat(newCommissionPercentage) || 0)}% of each order
+            </p>
+          </div>
+        </div>
+      </DraggablePopup>
       </div>
     </div>
   );
