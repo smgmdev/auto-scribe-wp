@@ -538,11 +538,11 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Earnings History */}
-      <Card className="border-border/50">
-        <CardHeader>
+      <Card className="border-border/50 rounded-none sm:rounded-lg border-x-0 sm:border-x">
+        <CardHeader className="px-2 sm:px-6">
           <CardTitle className="text-lg">Earnings History</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-6">
           {completedOrders.length === 0 && withdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
