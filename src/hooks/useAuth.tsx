@@ -467,6 +467,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // registering our own session
           if (event === 'SIGNED_IN') {
             sessionGraceUntilRef.current = Date.now() + 10000;
+            // Keep loading true until fetchUserData completes so
+            // ProtectedRoute doesn't flash the dashboard before
+            // pinRequired is resolved.
+            setLoading(true);
           }
           setTimeout(async () => {
             if (!isMounted) return;
@@ -478,6 +482,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               await registerActiveSession(newSession.user.id);
             }
             await fetchUserData(newSession.user.id);
+            if (isMounted && event === 'SIGNED_IN') {
+              setLoading(false);
+            }
           }, 0);
         } else {
           setRole(null);
