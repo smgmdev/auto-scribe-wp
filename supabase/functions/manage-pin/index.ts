@@ -25,55 +25,49 @@ function generateSalt(): string {
   return Array.from(array).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-Deno.serve(async (req) => {
-  console.log("[manage-pin] Request received:", req.method);
+Deno.serve(async (req: Request) => {
+  console.log("[manage-pin] Function invoked, method:", req.method);
 
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     const authHeader = req.headers.get("Authorization");
-    console.log("[manage-pin] Auth header present:", !!authHeader);
-
     if (!authHeader?.startsWith("Bearer ")) {
-      console.error("[manage-pin] Missing or invalid auth header");
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const token = authHeader.replace("Bearer ", "");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify user via Supabase auth
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    // Verify user
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
-    console.log("[manage-pin] Calling getUser with token...");
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
-    console.log("[manage-pin] getUser result - user:", !!user, "error:", authError?.message);
-
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
     if (authError || !user) {
-      console.error("[manage-pin] Auth failed:", authError?.message);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      console.error("[manage-pin] Auth error:", authError?.message);
+      return new Response(JSON.stringify({ error: "Invalid authentication" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const userId = user.id;
-    console.log("[manage-pin] Authenticated user:", userId);
+    console.log("[manage-pin] User authenticated:", userId);
 
-    // Use service role for actual DB writes (bypasses RLS field restrictions)
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } }
-    );
+    // Service role client for DB writes
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false },
+    });
 
-    const { action, pin, current_pin } = await req.json();
+    const body = await req.json();
+    const { action, pin, current_pin } = body;
     console.log("[manage-pin] Action:", action);
 
     if (action === "set_pin") {
@@ -91,8 +85,12 @@ Deno.serve(async (req) => {
         .update({ pin_hash: pinHash, pin_salt: salt, pin_enabled: true })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("[manage-pin] DB error:", error.message);
+        throw error;
+      }
 
+      console.log("[manage-pin] PIN set successfully for user:", userId);
       return new Response(JSON.stringify({ success: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -110,7 +108,10 @@ Deno.serve(async (req) => {
         .eq("id", userId)
         .single();
 
-      if (fetchError || !profile) throw new Error("Profile not found");
+      if (fetchError || !profile) {
+        console.error("[manage-pin] Profile fetch error:", fetchError?.message);
+        throw new Error("Profile not found");
+      }
 
       if (!profile.pin_enabled || !profile.pin_hash || !profile.pin_salt) {
         return new Response(JSON.stringify({ error: "PIN is not currently enabled" }), {
@@ -130,9 +131,53 @@ Deno.serve(async (req) => {
         .update({ pin_hash: null, pin_salt: null, pin_enabled: false })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("[manage-pin] DB error:", error.message);
+        throw error;
+      }
 
+      console.log("[manage-pin] PIN disabled for user:", userId);
       return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
+    } else if (action === "verify_pin") {
+      if (!pin || pin.length !== 4) {
+        return new Response(JSON.stringify({ error: "PIN is required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: profile, error: fetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("pin_hash, pin_salt, pin_enabled")
+        .eq("id", userId)
+        .single();
+
+      if (fetchError || !profile) throw new Error("Profile not found");
+
+      if (!profile.pin_enabled || !profile.pin_hash || !profile.pin_salt) {
+        return new Response(JSON.stringify({ error: "PIN is not enabled" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const providedHash = await hashPinPBKDF2(pin, profile.pin_salt);
+      const valid = providedHash === profile.pin_hash;
+
+      // Log attempt
+      await supabaseAdmin.from("pin_attempts").insert({
+        user_id: userId,
+        success: valid,
+      });
+
+      if (!valid) {
+        return new Response(JSON.stringify({ error: "Incorrect PIN", valid: false }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ valid: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
@@ -141,10 +186,11 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-  } catch (error: any) {
-    console.error("[manage-pin] Error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[manage-pin] Unhandled error:", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
