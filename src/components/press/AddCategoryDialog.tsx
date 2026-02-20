@@ -97,7 +97,7 @@ export function AddCategoryDialog({ open, onOpenChange, onAdd, isAdding }: AddCa
                 placeholder="Enter category name..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-background text-foreground border-input placeholder:text-muted-foreground"
+                className="bg-background text-foreground border-input placeholder:text-muted-foreground h-9 md:h-10"
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
                 autoFocus
               />
