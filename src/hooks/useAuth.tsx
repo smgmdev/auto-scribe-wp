@@ -87,10 +87,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     previousUserIdRef.current = null;
   };
 
+  // Grace period: ignore realtime kicks briefly after registering our own session
+  const sessionGraceUntilRef = useRef<number>(0);
+
   // Register this browser tab as the active session
   const registerActiveSession = async (userId: string) => {
     const sessionId = localSessionIdRef.current;
     console.log('[Auth] Registering active session:', sessionId);
+    // Set grace period to ignore incoming realtime events for 5 seconds
+    sessionGraceUntilRef.current = Date.now() + 5000;
     await supabase
       .from('profiles')
       .update({ active_session_id: sessionId } as any)
@@ -232,6 +237,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (payload) => {
           const newSessionId = (payload.new as any)?.active_session_id;
           if (newSessionId && newSessionId !== localSessionIdRef.current) {
+            // Skip if we're within the grace period (just registered our own session)
+            if (Date.now() < sessionGraceUntilRef.current) {
+              console.log('[Auth] Ignoring session change during grace period');
+              return;
+            }
             // Another device/browser has taken over
             handleSessionKicked();
           }
