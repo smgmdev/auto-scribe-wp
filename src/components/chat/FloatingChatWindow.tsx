@@ -6930,28 +6930,23 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       {sendOrderDialogOpen && createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
           <div
-            className={`pointer-events-auto bg-background relative ${
+            className={`pointer-events-auto bg-background text-foreground relative ${
               isMobile
-                ? 'w-full h-[100dvh] px-4 pt-4 pb-4 overflow-y-auto'
-                : 'w-full max-w-md border pt-2 px-6 pb-6 shadow-lg rounded-none overflow-y-auto'
+                ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
+                : 'w-full max-w-md border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-y-auto overflow-hidden'
             }`}
-            style={isMobile ? { maxHeight: '100dvh' } : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
+            style={isMobile ? undefined : { transform: `translate(${sendOfferPos.x}px, ${sendOfferPos.y}px)` }}
           >
-            {/* Drag Handle - desktop only */}
-            {!isMobile && (
-              <div
-                className={`flex items-center justify-start py-2 ${sendOfferDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
-                onMouseDown={handleSendOfferDragStart}
-              >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
-
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold leading-none tracking-tight">
-                {isResendMode ? 'Resend Offer' : 'Send Offer'}
-              </h2>
+            {/* Drag bar header */}
+            <div
+              className={`flex items-center justify-between border-b bg-muted/30 ${
+                isMobile
+                  ? 'px-3 py-1.5 shrink-0'
+                  : `px-4 py-2 -mx-6 ${sendOfferDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
+              }`}
+              onMouseDown={!isMobile ? handleSendOfferDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
               <button
                 onClick={() => {
                   setSendOrderDialogOpen(false);
@@ -6961,11 +6956,22 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   setOrderDeliveryHours(0);
                   setOrderDeliveryMinutes(0);
                 }}
-                className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none h-7 w-7 flex items-center justify-center"
+                onMouseDown={(e) => !isMobile && e.stopPropagation()}
+                className="rounded-sm transition-all hover:bg-foreground hover:text-background focus:outline-none h-7 w-7 flex items-center justify-center"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className={isMobile ? 'flex-1 overflow-y-auto px-4 pb-4 pt-4' : 'pt-4'}>
+
+            {/* Header */}
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">
+                {isResendMode ? 'Resend Offer' : 'Send Offer'}
+              </h2>
             </div>
 
             <div className="space-y-4 mt-4">
@@ -7159,6 +7165,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   )}
                 </Button>
               </div>
+            </div>
             </div>
           </div>
         </div>,
