@@ -380,6 +380,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Unexpected sign-out (Supabase session expired, tab backgrounded, etc.)
           // Try to recover the session before giving up
           console.log('[Auth] Unexpected SIGNED_OUT event, attempting session recovery...');
+          // Capture user id before async work — state may change
+          const expiredUserId = previousUserIdRef.current;
           setTimeout(async () => {
             if (!isMounted) return;
             try {
@@ -388,7 +390,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // Try refreshing
                 const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
                 if (refreshError || !refreshData.session) {
-                  console.log('[Auth] Session recovery failed, resetting state');
+                  console.log('[Auth] Session recovery failed, clearing active session and resetting state');
+                  // Clear active_session_id so next login isn't blocked
+                  if (expiredUserId) {
+                    supabase
+                      .from('profiles')
+                      .update({ active_session_id: null } as any)
+                      .eq('id', expiredUserId)
+                      .then(() => console.log('[Auth] Cleared active_session_id for expired session'));
+                  }
                   resetAuthState();
                   return;
                 }
@@ -402,6 +412,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             } catch (err) {
               console.error('[Auth] Session recovery error:', err);
+              // Clear active_session_id on unrecoverable expiry
+              if (expiredUserId) {
+                supabase
+                  .from('profiles')
+                  .update({ active_session_id: null } as any)
+                  .eq('id', expiredUserId)
+                  .then(() => console.log('[Auth] Cleared active_session_id after recovery error'));
+              }
               resetAuthState();
             }
           }, 0);
