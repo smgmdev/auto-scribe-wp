@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { DashboardView } from '@/components/views/DashboardView';
@@ -193,7 +193,30 @@ const Index = () => {
     return DashboardView;
   };
   
-  const CurrentView = getAuthorizedView();
+  const CurrentViewComponent = getAuthorizedView();
+  
+  // Track which views have been visited to keep them mounted
+  const [visitedViews, setVisitedViews] = useState<Set<string>>(new Set(['dashboard']));
+  
+  useEffect(() => {
+    setVisitedViews(prev => {
+      if (prev.has(currentView)) return prev;
+      const next = new Set(prev);
+      next.add(currentView);
+      return next;
+    });
+  }, [currentView]);
+
+  // Build a map of view key -> component for all authorized views
+  const allViews = useMemo(() => {
+    const views: Record<string, React.ComponentType> = { ...publicViews, ...userOnlyViews };
+    if (isAdmin) {
+      Object.assign(views, adminOnlyViews, agencyOnlyViews);
+    } else if (isApprovedAgency) {
+      Object.assign(views, agencyOnlyViews);
+    }
+    return views;
+  }, [isAdmin, isApprovedAgency]);
   
   // If user tries to access unauthorized view, reset to dashboard
   // Only enforce AFTER both auth and agency status are fully resolved
@@ -249,7 +272,15 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <CurrentView />
+      {Array.from(visitedViews).map(viewKey => {
+        const ViewComponent = allViews[viewKey];
+        if (!ViewComponent) return null;
+        return (
+          <div key={viewKey} style={{ display: viewKey === currentView ? 'block' : 'none' }}>
+            <ViewComponent />
+          </div>
+        );
+      })}
     </MainLayout>
   );
 };
