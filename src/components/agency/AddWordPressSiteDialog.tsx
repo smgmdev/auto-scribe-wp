@@ -288,7 +288,7 @@ export function AddWordPressSiteDialog({ open, onOpenChange, onSuccess }: AddWor
         </div>
 
         {/* Scrollable content */}
-        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-1' : 'pt-4'}>
+        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-4' : 'pt-4'}>
           {/* Header */}
           <div className="text-left mb-4">
             <h2 className="text-xl font-semibold leading-none tracking-tight">Add WordPress Site</h2>
