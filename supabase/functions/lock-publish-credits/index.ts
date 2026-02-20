@@ -62,6 +62,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check if the user owns this WordPress site — owners publish for free
+    const { data: siteOwnerData } = await supabase
+      .from('wordpress_sites')
+      .select('user_id')
+      .eq('id', siteId)
+      .maybeSingle();
+
+    if (siteOwnerData?.user_id === userId) {
+      console.log(`[lock-publish-credits] User ${userId} owns site ${siteId}, publishing for free`);
+      return new Response(JSON.stringify({ success: true, lockId: null, creditsRequired: 0, message: 'Site owner - free publish' }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Fetch the credit cost for this site server-side — never trust the client
     const { data: siteCreditData } = await supabase
       .from('site_credits')
