@@ -1921,25 +1921,25 @@ export function CreditHistoryView() {
                                   </p>
                                 </div>
                                 <div>
-                                   <span className="text-muted-foreground">Published URL:</span>
-                                   {publishDetails[transaction.id]?.published_to ? (
-                                     <a
-                                       href={publishDetails[transaction.id].published_to.startsWith('http') ? publishDetails[transaction.id].published_to : `https://${publishDetails[transaction.id].published_to}`}
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       onClick={(e) => e.stopPropagation()}
-                                       className="font-medium text-blue-500 hover:text-blue-600 hover:underline break-all block mt-0.5"
-                                     >
-                                       {publishDetails[transaction.id].published_to}
-                                     </a>
-                                   ) : (
-                                     <p className="font-medium text-muted-foreground mt-0.5">—</p>
-                                   )}
-                                 </div>
-                                 <div>
                                    <span className="text-muted-foreground">Date & Time:</span>
                                    <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                  </div>
+                                 <div>
+                                    <span className="text-muted-foreground">Published URL:</span>
+                                    {publishDetails[transaction.id]?.published_to ? (
+                                      <a
+                                        href={publishDetails[transaction.id].published_to.startsWith('http') ? publishDetails[transaction.id].published_to : `https://${publishDetails[transaction.id].published_to}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="font-medium text-blue-500 hover:text-blue-600 hover:underline break-all block mt-0.5"
+                                      >
+                                        {publishDetails[transaction.id].published_to}
+                                      </a>
+                                    ) : (
+                                      <p className="font-medium text-muted-foreground mt-0.5">—</p>
+                                    )}
+                                  </div>
                                </div>
                                {publishDetails[transaction.id]?.wp_link && (
                                  <div className="mt-3 pt-3 border-t border-border/50">
