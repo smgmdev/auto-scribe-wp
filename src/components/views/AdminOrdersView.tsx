@@ -1131,45 +1131,97 @@ export function AdminOrdersView() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-0">
-                {instantOrders.map((item) => {
+            <div className="space-y-0">
+                {instantOrders.map((item, index) => {
                   const siteName = item.description?.replace('Published article to ', '') || 'Unknown Site';
                   const credits = Math.abs(item.amount);
                   const wpLink = item.metadata?.wp_link;
                   const siteFavicon = item.metadata?.site_favicon;
 
                   return (
-                    <Card key={item.id} className="rounded-none border-x-0 border-t-0 last:border-b-0 shadow-none">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex items-center justify-center h-9 w-9 rounded-full bg-green-100 shrink-0">
-                              <Zap className="h-4 w-4 text-green-600" />
+                    <Card 
+                      key={item.id} 
+                      className={`rounded-none ${index > 0 ? '-mt-px' : ''}`}
+                    >
+                      {/* Mobile: Badge at top-right */}
+                      <div className="md:hidden absolute top-2 right-3 flex gap-1 flex-wrap justify-end">
+                        <Badge className="bg-green-600 text-white border-green-600 text-[10px] px-1.5 py-0.5">
+                          <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
+                          Published
+                        </Badge>
+                      </div>
+
+                      <CardHeader className="pb-2 px-3 md:px-4 pt-8 md:pt-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              {siteFavicon ? (
+                                <img 
+                                  src={siteFavicon} 
+                                  alt="" 
+                                  className="h-8 w-8 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <Zap className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              )}
                             </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                {siteFavicon && (
-                                  <img src={siteFavicon} alt="" className="h-4 w-4 rounded-sm shrink-0" />
-                                )}
-                                <p className="font-medium text-sm truncate">{siteName}</p>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                <span>{item.user_email || 'Unknown user'}</span>
-                                <span>•</span>
-                                <span>{format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}</span>
-                              </div>
+                            <div className="flex flex-col">
+                              <CardTitle className="text-base">{siteName}</CardTitle>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <Badge className="bg-green-600 text-white">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Published
-                            </Badge>
-                            <span className="text-sm font-semibold text-red-600">-{credits.toLocaleString()}</span>
+                          {/* Desktop: Badge at right side */}
+                          <div className="hidden md:flex flex-col items-end gap-1">
+                            <div className="flex gap-2 items-center">
+                              <Badge className="bg-green-600 text-white border-green-600">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Published
+                              </Badge>
+                              {wpLink && (
+                                <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </Button>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0 pb-3 px-3 md:px-4">
+                        {/* Desktop layout */}
+                        <div className="hidden md:flex items-end justify-between">
+                          <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground block">
+                              {item.user_email || 'Unknown user'} • {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5">
+                            <p className="font-semibold text-sm text-red-600">
+                              -{credits.toLocaleString()} credits
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Mobile layout */}
+                        <div className="md:hidden space-y-2">
+                          <div className="space-y-0.5">
+                            <span className="text-xs text-muted-foreground block">
+                              {item.user_email || 'Unknown user'}
+                            </span>
+                            <span className="text-xs text-muted-foreground block">
+                              {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <p className="font-semibold text-sm text-red-600">
+                              -{credits.toLocaleString()} credits
+                            </p>
                             {wpLink && (
                               <a href={wpLink} target="_blank" rel="noopener noreferrer">
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <ExternalLink className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <ExternalLink className="h-3.5 w-3.5" />
                                 </Button>
                               </a>
                             )}
