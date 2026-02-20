@@ -866,7 +866,7 @@ export function DashboardView() {
             </ul>
           )}
           {/* Mobile-only full-width View All button — always shown below content */}
-          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="md:hidden w-full mt-3 bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] justify-center">
+          <Button variant="ghost" size="sm" onClick={() => setCurrentView('articles')} className="md:hidden w-full mt-0 bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] justify-center rounded-none">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
