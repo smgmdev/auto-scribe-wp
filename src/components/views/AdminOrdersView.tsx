@@ -1856,6 +1856,7 @@ export function AdminOrdersView() {
         open={agencyDetailsOpen}
         onOpenChange={setAgencyDetailsOpen}
         agencyName={agencyDetailsName || ''}
+        zIndex={350}
       />
       </div>
     </div>
