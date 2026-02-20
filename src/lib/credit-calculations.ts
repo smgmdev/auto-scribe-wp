@@ -151,6 +151,8 @@ export interface AdminUserCredit {
   orders: number;
   purchaseOrders: number;
   deliveryOrders: number;
+  /** Credits spent on publishing articles */
+  publishSpent: number;
   totalSpent: number;
   /** Raw DB value for validation */
   dbCredits: number;
@@ -274,6 +276,7 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     // Deductions & refunded
     let deductions = 0;
     let refunded = 0;
+    let publishSpent = 0;
     let rawTxSum = 0;
     const withdrawalTypesSet = new Set(WITHDRAWAL_TYPES);
     userTxs.forEach(tx => {
@@ -282,6 +285,7 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       }
       if (tx.type === 'admin_deduct') deductions += Math.abs(tx.amount);
       if (tx.type === 'refund' && tx.amount > 0) refunded += tx.amount;
+      if (tx.type === 'publish') publishSpent += Math.abs(tx.amount);
     });
 
     const deliveryOrders = userTxs.filter(t => t.type === 'order_payout').length;
@@ -309,6 +313,7 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       orders: purchaseOrders + deliveryOrders,
       purchaseOrders,
       deliveryOrders,
+      publishSpent,
       totalSpent: totalSpentMap.get(userId) || 0,
       dbCredits: credit.credits,
       rawTxSum,
