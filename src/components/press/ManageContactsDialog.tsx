@@ -154,7 +154,7 @@ export function ManageContactsDialog({
             ))}
           </div>
           <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="hover:!bg-foreground hover:!text-background">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full md:w-auto bg-foreground text-background border border-transparent hover:!bg-transparent hover:!text-foreground hover:!border-foreground transition-all">
               Close
             </Button>
           </div>
