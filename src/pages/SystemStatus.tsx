@@ -124,11 +124,11 @@ export default function SystemStatus() {
   // Link mapping for services
   const serviceLinks: Record<string, { link?: string; internalLink?: string }> = {
     'Authentication': { internalLink: '/auth' },
-    'WordPress Publishing': { internalLink: '/dashboard?view=compose' },
-    'Credit Processing': { internalLink: '/dashboard?view=credit-history' },
-    'Media Site Network': { internalLink: '/dashboard?view=sites' },
-    'Headlines Scanner': { internalLink: '/dashboard?view=headlines' },
-    'Payment Gateway (Airwallex)': { internalLink: '/dashboard?view=credit-history' },
+    'WordPress Publishing': { internalLink: '/account?view=compose' },
+    'Credit Processing': { internalLink: '/account?view=credit-history' },
+    'Media Site Network': { internalLink: '/account?view=sites' },
+    'Headlines Scanner': { internalLink: '/account?view=headlines' },
+    'Payment Gateway (Airwallex)': { internalLink: '/account?view=credit-history' },
   };
 
   // Name mapping for services (API name -> Display name)
@@ -174,14 +174,14 @@ export default function SystemStatus() {
         { name: 'Edge Functions', status: 'issue' },
         { name: 'File Storage', status: 'issue' },
         { name: 'AI Article Generation', status: 'issue' },
-        { name: 'WordPress Publishing', status: 'issue', internalLink: '/dashboard?view=compose' },
-        { name: 'Credit Processing', status: 'issue', internalLink: '/dashboard?view=credit-history' },
-        { name: 'Payment Gateway (Airwallex)', status: 'issue', internalLink: '/dashboard?view=credit-history' },
+        { name: 'WordPress Publishing', status: 'issue', internalLink: '/account?view=compose' },
+        { name: 'Credit Processing', status: 'issue', internalLink: '/account?view=credit-history' },
+        { name: 'Payment Gateway (Airwallex)', status: 'issue', internalLink: '/account?view=credit-history' },
         { name: 'Email Notifications', status: 'issue' },
         { name: 'Real-time Messaging', status: 'issue' },
-        { name: 'Media Site Network', status: 'issue', internalLink: '/dashboard?view=sites' },
+        { name: 'Media Site Network', status: 'issue', internalLink: '/account?view=sites' },
         { name: 'Agency System & Features', status: 'issue' },
-        { name: 'Headlines Scanner', status: 'issue', internalLink: '/dashboard?view=headlines' },
+        { name: 'Headlines Scanner', status: 'issue', internalLink: '/account?view=headlines' },
       ]);
     } finally {
       setIsLoading(false);
@@ -245,7 +245,7 @@ export default function SystemStatus() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />

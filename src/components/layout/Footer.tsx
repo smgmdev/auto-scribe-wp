@@ -44,14 +44,11 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
 
   const handleAgencyAccountClick = () => {
     if (!user) {
-      // Not logged in - redirect to auth, then to agency application
-      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'agency-application' } });
+      navigate('/auth', { state: { redirectTo: '/account', targetView: 'agency-application' } });
     } else if (isAdmin || isAgency) {
-      // Admin or Agency user - just go to dashboard
-      navigate('/dashboard');
+      navigate('/account');
     } else {
-      // Regular user - redirect to agency application in dashboard
-      navigate('/dashboard', { state: { targetView: 'agency-application' } });
+      navigate('/account', { state: { targetView: 'agency-application' } });
     }
   };
 
@@ -72,7 +69,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
                   <button 
                     onClick={() => {
                       if (user) {
-                        navigate('/dashboard', { 
+                        navigate('/account', { 
                           state: { 
                             targetView: 'sites', 
                             targetTab: 'global',
@@ -82,7 +79,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
                       } else {
                         navigate('/auth', { 
                           state: { 
-                            redirectTo: '/dashboard', 
+                            redirectTo: '/account', 
                             targetView: 'sites', 
                             targetTab: 'global',
                             targetSubcategory: subcategory 
@@ -107,9 +104,9 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
                 <button 
                   onClick={() => {
                     if (user) {
-                      navigate('/dashboard', { state: { targetView: 'account' } });
+                      navigate('/account', { state: { targetView: 'account' } });
                     } else {
-                      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'account' } });
+                      navigate('/auth', { state: { redirectTo: '/account', targetView: 'account' } });
                     }
                   }}
                   className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}

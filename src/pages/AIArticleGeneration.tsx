@@ -232,9 +232,9 @@ export default function AIArticleGeneration() {
 
   const handleGetStarted = () => {
     if (user) {
-      navigate('/dashboard', { state: { targetView: 'compose' } });
+      navigate('/account', { state: { targetView: 'compose' } });
     } else {
-      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'compose' } });
+      navigate('/auth', { state: { redirectTo: '/account', targetView: 'compose' } });
     }
   };
 
@@ -254,7 +254,7 @@ export default function AIArticleGeneration() {
           <div className="flex items-center gap-2">
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />
@@ -316,7 +316,7 @@ export default function AIArticleGeneration() {
                 Prepare for publishing
               </h2>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                AI-generated content lets you publish professional articles to your <Link to="/dashboard" className="text-[#06c] hover:underline">WordPress sites</Link> instantly. 
+                AI-generated content lets you publish professional articles to your <Link to="/account" className="text-[#06c] hover:underline">WordPress sites</Link> instantly. 
                 Articles created with Arcana Mace are optimized for SEO and can take advantage of advanced features such as automatic meta tags and focus keywords.
               </p>
 
@@ -353,7 +353,7 @@ export default function AIArticleGeneration() {
                 Create articles from headlines, URLs, or custom topics using the latest AI models.
               </p>
               <div className="space-y-3">
-                <Link to="/dashboard" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                <Link to="/account" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />
                   Open Dashboard
                 </Link>

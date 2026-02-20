@@ -81,7 +81,7 @@ export default function Auth() {
     // Don't redirect during signup flow - user needs to verify email first
     if (user && !isSigningUp) {
       // Pass along the target view, tab and subcategory state when redirecting
-      navigate('/dashboard', { 
+      navigate('/account', { 
         state: { 
           targetView: locationState?.targetView,
           targetTab: locationState?.targetTab,

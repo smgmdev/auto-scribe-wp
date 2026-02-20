@@ -180,7 +180,7 @@ const Landing = () => {
     setPreselectedSiteId(siteId);
     if (user) {
       setCurrentView('compose');
-      navigate('/dashboard', { 
+      navigate('/account', { 
         state: { 
           targetView: 'compose',
           preselectedSiteId: siteId
@@ -189,7 +189,7 @@ const Landing = () => {
     } else {
       navigate('/auth', { 
         state: { 
-          redirectTo: '/dashboard',
+          redirectTo: '/account',
           targetView: 'compose',
           preselectedSiteId: siteId
         } 
@@ -475,7 +475,7 @@ const Landing = () => {
     const handleSeeAll = () => {
       if (user) {
         // Logged in user - go directly to dashboard
-        navigate('/dashboard', { 
+        navigate('/account', { 
           state: { 
             targetView: 'sites', 
             targetTab: seeAllConfig?.tab,
@@ -486,7 +486,7 @@ const Landing = () => {
         // Not logged in - go to auth with redirect
         navigate('/auth', { 
           state: { 
-            redirectTo: '/dashboard', 
+            redirectTo: '/account', 
             targetView: 'sites', 
             targetTab: seeAllConfig?.tab,
             targetSubcategory: seeAllConfig?.subcategory 
@@ -557,7 +557,7 @@ const Landing = () => {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />

@@ -193,9 +193,9 @@ export default function MediaBuying() {
 
   const handleGetStarted = () => {
     if (user) {
-      navigate('/dashboard', { state: { targetView: 'sites', targetTab: 'global' } });
+      navigate('/account', { state: { targetView: 'sites', targetTab: 'global' } });
     } else {
-      navigate('/auth', { state: { redirectTo: '/dashboard', targetView: 'sites', targetTab: 'global' } });
+      navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'global' } });
     }
   };
 
@@ -236,7 +236,7 @@ export default function MediaBuying() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />

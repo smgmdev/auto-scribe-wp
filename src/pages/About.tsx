@@ -187,7 +187,7 @@ export default function About() {
             
             {user ? (
               <Button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/account')}
                 className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
               >
                 <User className="h-4 w-4" />
@@ -417,7 +417,7 @@ export default function About() {
               Create an Account
             </button>
             <button
-              onClick={() => navigate('/dashboard', { state: { targetView: 'sites' } })}
+              onClick={() => navigate('/account', { state: { targetView: 'sites' } })}
               className="group inline-flex items-center gap-2 px-4 py-4 bg-transparent text-[#0071e3] text-lg font-medium transition-all duration-300"
             >
               <span className="transition-transform duration-300 group-hover:-translate-x-1">Browse Media Network</span>
