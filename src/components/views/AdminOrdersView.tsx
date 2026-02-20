@@ -1238,7 +1238,7 @@ export function AdminOrdersView() {
                       </CardHeader>
                       <CardContent className="pt-0 pb-3 px-3 md:px-4 space-y-3">
                         {/* Info row */}
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-1 md:gap-0">
                           <div className="space-y-0.5">
                             <span className="text-xs text-muted-foreground block">
                               User: {item.user_email || 'Unknown user'}
@@ -1247,7 +1247,7 @@ export function AdminOrdersView() {
                               Published: {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
                             </span>
                           </div>
-                          <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex items-center justify-between md:flex-col md:items-end gap-0.5">
                             <span className="text-xs text-muted-foreground capitalize">Article</span>
                             <p className="text-sm">
                               ${amountUsd.toFixed(2)}
