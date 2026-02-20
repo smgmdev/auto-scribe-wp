@@ -1238,7 +1238,7 @@ export function AdminOrdersView() {
                         {/* View Publication button */}
                         {wpLink && (
                           <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                            <Button variant="outline" size="default" className="text-sm w-full">
+                            <Button variant="outline" size="default" className="text-sm w-full md:w-auto">
                               <ExternalLink className="h-4 w-4 mr-1.5" />
                               View Publication
                             </Button>
