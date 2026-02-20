@@ -173,7 +173,7 @@ export function AddMediaSiteDialog({
         </div>
 
         {/* Scrollable content */}
-        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-1' : 'pt-4'}>
+        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-4' : 'pt-4'}>
           {/* Header */}
           <div className="space-y-1 mb-4">
             <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
