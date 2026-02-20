@@ -19,8 +19,6 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 
 const authSchema = z.object({
@@ -335,7 +333,7 @@ export default function Auth() {
 
   return (
     <>
-      <AlertDialog open={showActiveSessionWarning} onOpenChange={setShowActiveSessionWarning}>
+      <AlertDialog open={showActiveSessionWarning} onOpenChange={(open) => { if (!open) handleActiveSessionCancel(); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Active Session Detected</AlertDialogTitle>
@@ -344,8 +342,10 @@ export default function Auth() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleActiveSessionConfirm} className="hover:bg-transparent hover:text-black border border-primary">Continue to Sign In</AlertDialogAction>
+            <Button variant="outline" onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white" disabled={isLoading}>Cancel</Button>
+            <Button onClick={handleActiveSessionConfirm} className="bg-primary text-primary-foreground hover:bg-transparent hover:text-black border border-primary" disabled={isLoading}>
+              {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : 'Continue to Sign In'}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
