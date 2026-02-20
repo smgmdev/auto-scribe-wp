@@ -877,38 +877,34 @@ export default function Auth() {
             }
             style={isMobile ? undefined : { left: dataPopupPos.x, top: dataPopupPos.y, width: 520, maxHeight: '80vh' }}
           >
-            {/* Drag Handle + Close - desktop only */}
-            {!isMobile && (
-              <div
-                className="flex items-center justify-between px-5 py-2 cursor-grab active:cursor-grabbing select-none"
-                onMouseDown={handleDataDragStart}
+            {/* Drag bar */}
+            <div
+              className={`flex items-center justify-between border-b bg-muted/30 ${
+                isMobile
+                  ? 'px-3 py-1.5 shrink-0'
+                  : 'px-4 py-2 cursor-grab active:cursor-grabbing select-none'
+              }`}
+              onMouseDown={!isMobile ? handleDataDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsDataDialogOpen(false); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="rounded-sm transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center cursor-pointer"
               >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setIsDataDialogOpen(false); }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            {/* Header */}
-            <div className={`flex items-center justify-between px-5 pb-2.5 border-b border-border flex-shrink-0 ${isMobile ? 'pt-2.5' : 'pt-0'}`}>
-              <h2 className="text-base font-semibold text-foreground">How Your Data Is Managed</h2>
-              {isMobile && (
-                <button
-                  onClick={() => setIsDataDialogOpen(false)}
-                  className="rounded-sm ring-offset-background transition-all hover:bg-black hover:text-white focus:outline-none h-7 w-7 flex items-center justify-center"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-muted-foreground bg-white">
+            {/* Scrollable content on mobile / inline on desktop */}
+            <div className={isMobile ? 'flex-1 overflow-y-auto px-5 pb-5 pt-3' : 'px-5 pb-5 pt-4 overflow-y-auto'} style={isMobile ? undefined : { maxHeight: 'calc(80vh - 45px)' }}>
+
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">How Your Data Is Managed</h2>
+            </div>
+
+            <div className="space-y-4 text-sm text-muted-foreground mt-3">
               <p>
                 At Arcana Mace, we only collect the minimum data necessary to provide you with a secure and seamless experience. Here's a brief overview of what's stored and why.
               </p>
@@ -917,7 +913,6 @@ export default function Auth() {
                 <h3 className="font-semibold text-foreground mb-2">Account Information</h3>
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Email address — used to sign in and receive important updates</li>
-                  
                   <li>Account creation date and last update timestamp</li>
                 </ul>
               </div>
@@ -956,6 +951,7 @@ export default function Auth() {
                 {' '}and{' '}
                 <a href="/terms" className="text-[#06c] hover:underline">Terms of Service</a>.
               </p>
+            </div>
             </div>
           </div>
         </>,
