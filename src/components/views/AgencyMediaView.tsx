@@ -1952,37 +1952,29 @@ export function AgencyMediaView() {
               transform: 'translate(-50%, -50%)',
             }}
           >
-            {/* Drag handle / Header */}
             {/* Drag bar */}
-            {!isMobile && (
-              <div 
-                className="px-4 py-1 border-b border-border bg-muted/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none flex-shrink-0"
-                onMouseDown={handleDragStart}
+            <div 
+              className={`flex items-center justify-between border-b border-border bg-muted/30 flex-shrink-0 ${
+                isMobile
+                  ? 'px-3 py-1.5'
+                  : 'px-4 py-1 cursor-grab active:cursor-grabbing select-none'
+              }`}
+              onMouseDown={!isMobile ? handleDragStart : undefined}
+            >
+              <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+              <button 
+                onClick={() => setManageMediaSubmission(null)}
+                onMouseDown={(e) => !isMobile && e.stopPropagation()}
+                className="h-7 w-7 flex items-center justify-center rounded-sm transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black focus:outline-none"
               >
-                <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-                <button 
-                  onClick={() => setManageMediaSubmission(null)}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="h-7 w-7 flex items-center justify-center text-muted-foreground hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </button>
+            </div>
             {/* Header */}
-            <div className={`flex items-center justify-between p-4 border-b border-border flex-shrink-0`}>
-              <div>
-                <h2 className="text-lg font-semibold">Manage Approved Media</h2>
-                <p className="text-sm text-muted-foreground">{manageMediaSubmission?.imported_sites?.length || 0} imported media sites</p>
-              </div>
-              {isMobile && (
-                <button 
-                  onClick={() => setManageMediaSubmission(null)}
-                  className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
+            <div className="p-4 border-b border-border flex-shrink-0">
+              <h2 className="text-lg font-semibold">Manage Approved Media</h2>
+              <p className="text-sm text-muted-foreground">{manageMediaSubmission?.imported_sites?.length || 0} imported media sites</p>
             </div>
             {/* Search */}
             <div className="flex-shrink-0">
