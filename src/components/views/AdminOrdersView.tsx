@@ -1214,8 +1214,8 @@ export function AdminOrdersView() {
                               </Badge>
                               {wpLink && (
                                 <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="outline" size="sm" className="h-7 text-xs">
-                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                  <Button variant="outline" size="default" className="text-sm">
+                                    <ExternalLink className="h-4 w-4 mr-1.5" />
                                     View Publication
                                   </Button>
                                 </a>
@@ -1260,8 +1260,8 @@ export function AdminOrdersView() {
                             <div>
                               {wpLink && (
                                 <a href={wpLink} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="outline" size="sm" className="h-7 text-xs">
-                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                  <Button variant="outline" size="default" className="text-sm">
+                                    <ExternalLink className="h-4 w-4 mr-1.5" />
                                     View Publication
                                   </Button>
                                 </a>
