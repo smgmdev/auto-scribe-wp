@@ -1675,6 +1675,30 @@ export function CreditHistoryView() {
                             if (diff < bestDiff) { bestDiff = diff; bestArticle = a; }
                           }
                           setPublishDetails(prev => ({ ...prev, [transaction.id]: bestArticle }));
+                        } else {
+                          // Fallback: try to get favicon from wordpress_sites by name
+                          const { data: wpSites } = await supabase
+                            .from('wordpress_sites')
+                            .select('favicon, url, name')
+                            .eq('name', siteName)
+                            .limit(1);
+                          
+                          if (wpSites && wpSites.length > 0) {
+                            setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+                              published_to_name: siteName,
+                              published_to_favicon: wpSites[0].favicon,
+                              published_to: wpSites[0].url,
+                              wp_link: null,
+                            }}));
+                          } else {
+                            // Mark as loaded with no data to stop spinner
+                            setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+                              published_to_name: siteName,
+                              published_to_favicon: null,
+                              published_to: null,
+                              wp_link: null,
+                            }}));
+                          }
                         }
                       }
                     }
@@ -1897,23 +1921,39 @@ export function CreditHistoryView() {
                                   </p>
                                 </div>
                                 <div>
-                                  <span className="text-muted-foreground">Date & Time:</span>
-                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
-                                </div>
-                              </div>
-                              {publishDetails[transaction.id]?.wp_link && (
-                                <div className="mt-3 pt-3 border-t border-border/50">
-                                  <a
-                                    href={publishDetails[transaction.id].wp_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                  >
-                                    View Publication →
-                                  </a>
-                                </div>
-                              )}
+                                   <span className="text-muted-foreground">Published URL:</span>
+                                   {publishDetails[transaction.id]?.published_to ? (
+                                     <a
+                                       href={publishDetails[transaction.id].published_to.startsWith('http') ? publishDetails[transaction.id].published_to : `https://${publishDetails[transaction.id].published_to}`}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       onClick={(e) => e.stopPropagation()}
+                                       className="font-medium text-blue-500 hover:text-blue-600 hover:underline break-all block mt-0.5"
+                                     >
+                                       {publishDetails[transaction.id].published_to}
+                                     </a>
+                                   ) : (
+                                     <p className="font-medium text-muted-foreground mt-0.5">—</p>
+                                   )}
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">Date & Time:</span>
+                                   <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                 </div>
+                               </div>
+                               {publishDetails[transaction.id]?.wp_link && (
+                                 <div className="mt-3 pt-3 border-t border-border/50">
+                                   <a
+                                     href={publishDetails[transaction.id].wp_link}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     onClick={(e) => e.stopPropagation()}
+                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                   >
+                                     View Publication →
+                                   </a>
+                                 </div>
+                               )}
                              </>
                            ) : (
                            /* Other transaction types - Show standard details */
