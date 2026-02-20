@@ -103,8 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerActiveSession = async (userId: string) => {
     const sessionId = localSessionIdRef.current;
     console.log('[Auth] Registering active session:', sessionId);
-    // Set grace period to ignore incoming realtime events for 5 seconds
-    sessionGraceUntilRef.current = Date.now() + 5000;
+    // Extend grace period only if the new value is longer than the existing one
+    const newGrace = Date.now() + 8000;
+    if (newGrace > sessionGraceUntilRef.current) {
+      sessionGraceUntilRef.current = newGrace;
+    }
     await supabase
       .from('profiles')
       .update({ active_session_id: sessionId } as any)
@@ -120,10 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear local state first
     resetAuthState();
     
-    // Sign out from Supabase without updating active_session_id
+    // Sign out with LOCAL scope only — global scope would revoke the
+    // NEW session's refresh token and kick the other browser too.
     userInitiatedSignOutRef.current = true;
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (err) {
       console.log('[Auth] Sign out after kick:', err);
     }
