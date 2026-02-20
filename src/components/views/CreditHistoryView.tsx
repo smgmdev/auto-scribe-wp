@@ -1660,7 +1660,6 @@ export function CreditHistoryView() {
                         const { data: articles } = await supabase
                           .from('articles')
                           .select('id, title, wp_link, published_to, published_to_name, published_to_favicon, created_at')
-                          .eq('user_id', user!.id)
                           .eq('status', 'published')
                           .eq('published_to_name', siteName)
                           .order('created_at', { ascending: false })
@@ -1695,18 +1694,20 @@ export function CreditHistoryView() {
                         <div className="flex-1">
                           <p className="font-medium">{displayDescription}</p>
                           <div className={`text-lg md:hidden mt-1 ${
-                            transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted' || transaction.type === 'publish'
+                         transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                               ? 'text-foreground'
                               : transaction.type === 'withdrawal_locked' 
                                 ? 'text-amber-500' 
-                                : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                                : transaction.type === 'publish'
+                                  ? 'text-red-500'
+                                  : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                           }`}>
                             {transaction.type === 'withdrawal_locked' ? (
                               <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
                             ) : transaction.type === 'order_accepted' && orderInfo ? (
                               <>-{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
                             ) : transaction.type === 'publish' ? (
-                              <>{Math.abs(transaction.amount).toLocaleString()}</>
+                              <>-{Math.abs(transaction.amount).toLocaleString()}</>
                             ) : (
                               <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                             )}
@@ -1717,18 +1718,20 @@ export function CreditHistoryView() {
                         </div>
                       </div>
                       <div className={`text-lg hidden md:block ${
-                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted' || transaction.type === 'publish'
+                        transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                           ? 'text-foreground'
                           : transaction.type === 'withdrawal_locked' 
                             ? 'text-amber-500' 
-                            : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                            : transaction.type === 'publish'
+                              ? 'text-red-500'
+                              : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                       }`}>
                         {transaction.type === 'withdrawal_locked' ? (
                           <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
                         ) : transaction.type === 'order_accepted' && orderInfo ? (
                           <>-{(orderInfo.media_sites?.price || 0).toLocaleString()}</>
                         ) : transaction.type === 'publish' ? (
-                          <>{Math.abs(transaction.amount).toLocaleString()}</>
+                          <>-{Math.abs(transaction.amount).toLocaleString()}</>
                         ) : (
                           <>{transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString()}</>
                         )}
