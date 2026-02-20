@@ -12,6 +12,16 @@ import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
 import { createPortal } from 'react-dom';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -43,6 +53,8 @@ export default function Auth() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [headerLineWidth, setHeaderLineWidth] = useState(0);
   const [isDataDialogOpen, setIsDataDialogOpen] = useState(false);
+  const [showActiveSessionWarning, setShowActiveSessionWarning] = useState(false);
+  const pendingSignInRef = useRef<{ email: string; password: string } | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -201,8 +213,30 @@ export default function Auth() {
       return;
     }
 
+    // Check if another session is already active for this account
+    const { data: profileCheck } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if ((profileCheck as any)?.active_session_id) {
+      // Another device/browser is logged in — ask for confirmation
+      pendingSignInRef.current = { email, password };
+      setIsLoading(false);
+      setShowActiveSessionWarning(true);
+      return;
+    }
+
+    // No active session — proceed normally
+    await proceedWithSignIn(email, password);
+  };
+
+  const proceedWithSignIn = async (signInEmail: string, signInPassword: string) => {
+    setIsLoading(true);
+
     // Only proceed with sign in if email is verified
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(signInEmail, signInPassword);
     
     if (error) {
       setIsLoading(false);
@@ -217,7 +251,7 @@ export default function Auth() {
     // Capture successful login with location
     try {
       await supabase.functions.invoke('capture-login-attempt', {
-        body: { email, type: 'login' }
+        body: { email: signInEmail, type: 'login' }
       });
     } catch (ipError) {
       console.error('Failed to capture login IP:', ipError);
@@ -288,7 +322,36 @@ export default function Auth() {
     toast.success('Check your email! We sent you a verification link.');
   };
 
+  const handleActiveSessionConfirm = async () => {
+    setShowActiveSessionWarning(false);
+    if (pendingSignInRef.current) {
+      const { email: e, password: p } = pendingSignInRef.current;
+      pendingSignInRef.current = null;
+      await proceedWithSignIn(e, p);
+    }
+  };
+
+  const handleActiveSessionCancel = () => {
+    setShowActiveSessionWarning(false);
+    pendingSignInRef.current = null;
+  };
+
   return (
+    <>
+      <AlertDialog open={showActiveSessionWarning} onOpenChange={setShowActiveSessionWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Active Session Detected</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your account is currently signed in on another device or browser. If you continue, you will be automatically logged out from the other session.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleActiveSessionCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleActiveSessionConfirm}>Continue & Sign In</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - Apple-style centered with expanding bottom line */}
       <header className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
@@ -895,5 +958,6 @@ export default function Auth() {
         document.body
       )}
     </div>
+    </>
   );
 }
