@@ -109,12 +109,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionGraceUntilRef.current = newGrace;
     }
 
-    // Retry up to 3 times to ensure registration succeeds
+    // Use SECURITY DEFINER RPC to bypass RLS — direct .update() was silently failing
     for (let attempt = 1; attempt <= 3; attempt++) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ active_session_id: sessionId } as any)
-        .eq('id', userId);
+      const { error } = await supabase.rpc('register_active_session', {
+        _user_id: userId,
+        _session_id: sessionId,
+      });
 
       if (error) {
         console.error(`[Auth] registerActiveSession attempt ${attempt} failed:`, error);
