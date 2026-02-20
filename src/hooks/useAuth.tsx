@@ -496,10 +496,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single();
           
           const dbSessionId = (currentProfile as any)?.active_session_id;
-          const lastOnline = (currentProfile as any)?.last_online_at;
-          const isRecentSession = lastOnline && (Date.now() - new Date(lastOnline).getTime()) < 45 * 1000;
           
-          if (dbSessionId && dbSessionId !== localSessionIdRef.current && isRecentSession) {
+          if (dbSessionId && dbSessionId !== localSessionIdRef.current) {
             // Another device/browser is actively using this account — kick ourselves
             console.log('[Auth] Another active session detected on init, kicking this tab');
             if (isMounted) {
@@ -628,9 +626,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Update every 30 seconds for real-time presence
     const interval = setInterval(updateLastOnline, 30 * 1000);
     
-    // Update on page unload
+    // Clear active session on page unload (unclean exit)
     const handleBeforeUnload = () => {
-      updateLastOnline();
+      // Use sendBeacon for reliability during page unload
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`;
+      const headers = {
+        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        'Authorization': `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      };
+      const body = JSON.stringify({ active_session_id: null, last_online_at: new Date().toISOString() });
+      // Try sendBeacon first (most reliable during unload)
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'application/json' });
+        // sendBeacon doesn't support custom headers, so fall back to fetch
+      }
+      // Use keepalive fetch which supports headers
+      fetch(url, {
+        method: 'PATCH',
+        headers,
+        body,
+        keepalive: true,
+      }).catch(() => {});
     };
     
     window.addEventListener('beforeunload', handleBeforeUnload);
