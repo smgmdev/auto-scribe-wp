@@ -6794,16 +6794,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         <AlertDialogContent className="z-[250] text-left">
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle className="text-left">Cancel Engagement</AlertDialogTitle>
-            <AlertDialogDescription className="text-left">
-              Please provide a reason for cancelling this engagement.
+            <AlertDialogDescription className="text-left" asChild>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Please provide a reason for cancelling this engagement.</p>
+                <Input
+                  placeholder="Reason for cancellation..."
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  className="rounded-none h-9 text-sm"
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Input
-            placeholder="Reason for cancellation..."
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            className="rounded-none h-9 text-sm"
-          />
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-none hover:bg-black hover:text-white hover:border-black">Keep Engagement</AlertDialogCancel>
             <AlertDialogAction 
