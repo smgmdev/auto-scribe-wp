@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Wallet, Building2, Search, RefreshCw, Info, Copy, ChevronDown, ChevronUp, Zap, Hand } from 'lucide-react';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -737,20 +738,60 @@ export function AdminAgencyWithdrawalsView() {
       </div>
 
       {/* Action Confirmation Dialog */}
-      <Dialog open={!!selectedWithdrawal && !!actionType} onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {actionType === 'approve' ? 'Complete Withdrawal' : 
-               actionType === 'reject' ? 'Reject Withdrawal' : 
-               'Complete Withdrawal'}
-            </DialogTitle>
-            <DialogDescription>
-              {actionType === 'approve' && 'Choose how to process this withdrawal.'}
-              {actionType === 'reject' && 'This will reject the withdrawal request. You can optionally provide a reason.'}
-              {actionType === 'complete' && 'This will mark the withdrawal as completed (paid out).'}
-            </DialogDescription>
-          </DialogHeader>
+      <DraggablePopup
+        open={!!selectedWithdrawal && !!actionType}
+        onOpenChange={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}
+        width={480}
+        title={
+          <h4 className="font-semibold text-lg">
+            {actionType === 'approve' ? 'Complete Withdrawal' : 
+             actionType === 'reject' ? 'Reject Withdrawal' : 
+             'Complete Withdrawal'}
+          </h4>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}
+              className="hover:bg-foreground hover:text-background hover:border-foreground"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={confirmAction}
+              disabled={processingId !== null || autoPayoutProcessing}
+              className={
+                actionType === 'approve' && payoutMode === 'auto' 
+                  ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
+                  : actionType === 'approve' 
+                    ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
+                    : actionType === 'reject' 
+                      ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive'
+                      : 'bg-green-500 hover:bg-green-600'
+              }
+            >
+              {processingId || autoPayoutProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  {autoPayoutProcessing ? 'Processing Payout...' : 'Processing...'}
+                </>
+              ) : (
+                actionType === 'approve' && payoutMode === 'auto' ? 'Auto Payout' :
+                actionType === 'approve' ? 'Approve (Manual)' :
+                actionType === 'reject' ? 'Reject' :
+                'Complete'
+              )}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {actionType === 'approve' && 'Choose how to process this withdrawal.'}
+            {actionType === 'reject' && 'This will reject the withdrawal request. You can optionally provide a reason.'}
+            {actionType === 'complete' && 'This will mark the withdrawal as completed (paid out).'}
+          </p>
           
           {selectedWithdrawal && (
             <div className="space-y-4">
@@ -765,7 +806,6 @@ export function AdminAgencyWithdrawalsView() {
                 <p className="font-medium">{selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
               </div>
 
-              {/* Payout mode toggle - only show for approve action */}
               {actionType === 'approve' && (
                 <div className="space-y-2">
                   <Label>Payout Processing</Label>
@@ -830,90 +870,53 @@ export function AdminAgencyWithdrawalsView() {
               </div>
             </div>
           )}
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}
-              className="hover:bg-foreground hover:text-background hover:border-foreground"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={confirmAction}
-              disabled={processingId !== null || autoPayoutProcessing}
-              className={
-                actionType === 'approve' && payoutMode === 'auto' 
-                  ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
-                  : actionType === 'approve' 
-                    ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
-                    : actionType === 'reject' 
-                      ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive'
-                      : 'bg-green-500 hover:bg-green-600'
-              }
-            >
-              {processingId || autoPayoutProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  {autoPayoutProcessing ? 'Processing Payout...' : 'Processing...'}
-                </>
-              ) : (
-                actionType === 'approve' && payoutMode === 'auto' ? 'Auto Payout' :
-                actionType === 'approve' ? 'Approve (Manual)' :
-                actionType === 'reject' ? 'Reject' :
-                'Complete'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </DraggablePopup>
 
       {/* User Details Dialog */}
-      <Dialog open={!!userDetailsDialog} onOpenChange={() => setUserDetailsDialog(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-          </DialogHeader>
-          
-          {userDetailsDialog && (
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Agency Name</p>
-                  <p className="font-medium">{userDetailsDialog.agency_name}</p>
-                </div>
-                {userDetailsDialog.full_name && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Full Name</p>
-                    <p className="font-medium">{userDetailsDialog.full_name}</p>
-                  </div>
-                )}
-                {userDetailsDialog.email && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{userDetailsDialog.email}</p>
-                  </div>
-                )}
-                {userDetailsDialog.whatsapp_phone && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">WhatsApp</p>
-                    <p className="font-medium">{userDetailsDialog.whatsapp_phone}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
+      <DraggablePopup
+        open={!!userDetailsDialog}
+        onOpenChange={() => setUserDetailsDialog(null)}
+        width={400}
+        title={<h4 className="font-semibold text-lg">User Details</h4>}
+        footer={
+          <div className="flex justify-end">
             <Button 
               onClick={() => setUserDetailsDialog(null)}
               className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
             >
               Close
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        {userDetailsDialog && (
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-muted-foreground">Agency Name</p>
+              <p className="font-medium">{userDetailsDialog.agency_name}</p>
+            </div>
+            {userDetailsDialog.full_name && (
+              <div>
+                <p className="text-sm text-muted-foreground">Full Name</p>
+                <p className="font-medium">{userDetailsDialog.full_name}</p>
+              </div>
+            )}
+            {userDetailsDialog.email && (
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium">{userDetailsDialog.email}</p>
+              </div>
+            )}
+            {userDetailsDialog.whatsapp_phone && (
+              <div>
+                <p className="text-sm text-muted-foreground">WhatsApp</p>
+                <p className="font-medium">{userDetailsDialog.whatsapp_phone}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </DraggablePopup>
       </div>
     </div>
   );
