@@ -519,7 +519,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const now = new Date().toISOString();
         await supabase
           .from('profiles')
-          .update({ last_online_at: now } as any)
+          .update({ last_online_at: now, active_session_id: null } as any)
           .eq('id', user.id);
         // Also update agency_payouts if user is an agency
         await supabase
