@@ -1,9 +1,8 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const PBKDF2_ITERATIONS = 100000;
@@ -26,7 +25,7 @@ function generateSalt(): string {
   return Array.from(array).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -38,6 +37,8 @@ serve(async (req) => {
     });
   }
 
+  const token = authHeader.replace("Bearer ", "");
+
   // Verify user via Supabase auth
   const supabaseUser = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -45,12 +46,15 @@ serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } }
   );
 
-  const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+  const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
   if (authError || !user) {
+    console.error("[manage-pin] Auth error:", authError?.message);
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  const userId = user.id;
 
   // Use service role for actual DB writes (bypasses RLS field restrictions)
   const supabaseAdmin = createClient(
@@ -75,7 +79,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("profiles")
         .update({ pin_hash: pinHash, pin_salt: salt, pin_enabled: true })
-        .eq("id", user.id);
+        .eq("id", userId);
 
       if (error) throw error;
 
@@ -95,7 +99,7 @@ serve(async (req) => {
       const { data: profile, error: fetchError } = await supabaseAdmin
         .from("profiles")
         .select("pin_hash, pin_salt, pin_enabled")
-        .eq("id", user.id)
+        .eq("id", userId)
         .single();
 
       if (fetchError || !profile) throw new Error("Profile not found");
@@ -117,7 +121,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("profiles")
         .update({ pin_hash: null, pin_salt: null, pin_enabled: false })
-        .eq("id", user.id);
+        .eq("id", userId);
 
       if (error) throw error;
 
