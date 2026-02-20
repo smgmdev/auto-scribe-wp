@@ -245,6 +245,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Poll every 2 seconds as a fast fallback alongside realtime
     const pollInterval = setInterval(checkSessionValidity, 2000);
 
+    // Also check when the page regains focus (critical for mobile browsers
+    // that suspend JS when backgrounded/tab-switched)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Auth] Page became visible, checking session validity');
+        checkSessionValidity();
+      }
+    };
+    const handleFocus = () => {
+      console.log('[Auth] Window focused, checking session validity');
+      checkSessionValidity();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
     const channel = supabase
       .channel(`session-guard-${user.id}`)
       .on(
@@ -272,6 +287,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearInterval(pollInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
