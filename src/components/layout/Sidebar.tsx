@@ -15,7 +15,7 @@ import { playMessageSound } from '@/lib/chat-presence';
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'Account Dashboard',
     icon: LayoutDashboard
   }, {
     id: 'sites',
