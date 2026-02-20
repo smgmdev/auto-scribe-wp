@@ -1930,6 +1930,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      register_active_session: {
+        Args: { _session_id: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
