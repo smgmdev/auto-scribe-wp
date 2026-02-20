@@ -418,6 +418,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Defer Supabase calls with setTimeout to avoid deadlocks
         if (newSession?.user) {
+          // Set grace period IMMEDIATELY before any async work to prevent
+          // the session-guard poll from kicking us out while we're still
+          // registering our own session
+          if (event === 'SIGNED_IN') {
+            sessionGraceUntilRef.current = Date.now() + 10000;
+          }
           setTimeout(async () => {
             if (!isMounted) return;
             await fetchUserData(newSession.user.id);
@@ -451,6 +457,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(existingSession?.user ?? null);
 
         if (existingSession?.user) {
+          // Set grace period immediately before async work
+          sessionGraceUntilRef.current = Date.now() + 10000;
           await fetchUserData(existingSession.user.id);
           // Register this tab as the active session on page load/refresh
           sessionKickedRef.current = false;
