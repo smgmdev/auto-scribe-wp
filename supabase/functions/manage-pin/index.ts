@@ -26,45 +26,55 @@ function generateSalt(): string {
 }
 
 Deno.serve(async (req) => {
+  console.log("[manage-pin] Request received:", req.method);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const token = authHeader.replace("Bearer ", "");
-
-  // Verify user via Supabase auth
-  const supabaseUser = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    { global: { headers: { Authorization: authHeader } } }
-  );
-
-  const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
-  if (authError || !user) {
-    console.error("[manage-pin] Auth error:", authError?.message);
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const userId = user.id;
-
-  // Use service role for actual DB writes (bypasses RLS field restrictions)
-  const supabaseAdmin = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
-
   try {
+    const authHeader = req.headers.get("Authorization");
+    console.log("[manage-pin] Auth header present:", !!authHeader);
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      console.error("[manage-pin] Missing or invalid auth header");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
+    // Verify user via Supabase auth
+    const supabaseUser = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    console.log("[manage-pin] Calling getUser with token...");
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
+    console.log("[manage-pin] getUser result - user:", !!user, "error:", authError?.message);
+
+    if (authError || !user) {
+      console.error("[manage-pin] Auth failed:", authError?.message);
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = user.id;
+    console.log("[manage-pin] Authenticated user:", userId);
+
+    // Use service role for actual DB writes (bypasses RLS field restrictions)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
     const { action, pin, current_pin } = await req.json();
+    console.log("[manage-pin] Action:", action);
 
     if (action === "set_pin") {
       if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
@@ -84,18 +94,16 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
     } else if (action === "disable_pin") {
-      // Require current PIN to disable (prevents attacker with stolen session from removing PIN)
       if (!current_pin || current_pin.length !== 4) {
         return new Response(JSON.stringify({ error: "Current PIN is required to disable PIN" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Fetch current pin hash
       const { data: profile, error: fetchError } = await supabaseAdmin
         .from("profiles")
         .select("pin_hash, pin_salt, pin_enabled")
@@ -110,7 +118,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Verify the current PIN before allowing disable
       const providedHash = await hashPinPBKDF2(current_pin, profile.pin_salt);
       if (providedHash !== profile.pin_hash) {
         return new Response(JSON.stringify({ error: "Incorrect PIN" }), {
@@ -126,7 +133,7 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
     } else {
