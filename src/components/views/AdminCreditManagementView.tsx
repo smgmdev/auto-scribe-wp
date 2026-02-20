@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -445,7 +445,8 @@ export const AdminCreditManagementView = () => {
                   )}
                 </div>
               </div>
-              <Table>
+              <div className="w-full">
+              <table className="w-full caption-bottom text-sm">
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
@@ -661,7 +662,8 @@ export const AdminCreditManagementView = () => {
                     })
                   )}
                 </TableBody>
-              </Table>
+              </table>
+              </div>
             </CardContent>
           </Card>
         </div>
