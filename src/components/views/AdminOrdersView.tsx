@@ -391,11 +391,25 @@ export function AdminOrdersView() {
       const emailMap: Record<string, string | null> = {};
       profiles?.forEach((p: any) => { emailMap[p.id] = p.email; });
 
-      setInstantOrders(data.map((d: any) => ({
-        ...d,
-        metadata: d.metadata as InstantOrder['metadata'],
-        user_email: emailMap[d.user_id] || null,
-      })));
+      // Fetch wordpress site favicons for fallback
+      const { data: wpSites } = await supabase
+        .from('wordpress_sites')
+        .select('name, favicon');
+      
+      const wpFaviconMap: Record<string, string> = {};
+      wpSites?.forEach((s: any) => { if (s.favicon) wpFaviconMap[s.name] = s.favicon; });
+
+      setInstantOrders(data.map((d: any) => {
+        const meta = d.metadata as InstantOrder['metadata'];
+        const siteName = d.description?.replace('Published article to ', '') || '';
+        // Use metadata favicon first, then fallback to wordpress_sites favicon by name
+        const resolvedFavicon = meta?.site_favicon || wpFaviconMap[siteName] || null;
+        return {
+          ...d,
+          metadata: { ...meta, site_favicon: resolvedFavicon } as InstantOrder['metadata'],
+          user_email: emailMap[d.user_id] || null,
+        };
+      }));
     }
     setInstantOrdersLoading(false);
   };
