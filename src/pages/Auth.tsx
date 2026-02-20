@@ -214,13 +214,10 @@ export default function Auth() {
     }
 
     // Check if another session is already active for this account
-    const { data: profileCheck } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
+    const { data: activeSessionId } = await supabase
+      .rpc('check_active_session', { check_email: email });
 
-    if ((profileCheck as any)?.active_session_id) {
+    if (activeSessionId) {
       // Another device/browser is logged in — ask for confirmation
       pendingSignInRef.current = { email, password };
       setIsLoading(false);
