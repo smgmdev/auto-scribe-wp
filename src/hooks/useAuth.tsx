@@ -71,7 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const previousUserIdRef = useRef<string | null>(null);
   const userInitiatedSignOutRef = useRef(false);
   // Single-session enforcement: unique ID for this browser tab
-  const localSessionIdRef = useRef<string>(crypto.randomUUID());
+  // Use sessionStorage so the ID persists across same-tab refreshes
+  // but is unique per tab and per browser
+  const localSessionIdRef = useRef<string>((() => {
+    const key = 'auth_local_session_id';
+    const existing = sessionStorage.getItem(key);
+    if (existing) return existing;
+    const newId = crypto.randomUUID();
+    sessionStorage.setItem(key, newId);
+    return newId;
+  })());
   const sessionKickedRef = useRef(false);
 
   // Helper to fully reset auth state
@@ -443,12 +452,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setTimeout(async () => {
             if (!isMounted) return;
-            await fetchUserData(newSession.user.id);
-            // Register this tab as the active session (kicks other devices)
+            // Register session FIRST to minimize the window where the old
+            // session ID is still in the DB (prevents the new device from
+            // seeing the old ID and kicking itself)
             if (event === 'SIGNED_IN') {
               sessionKickedRef.current = false;
               await registerActiveSession(newSession.user.id);
             }
+            await fetchUserData(newSession.user.id);
           }, 0);
         } else {
           setRole(null);
@@ -476,10 +487,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (existingSession?.user) {
           // Set grace period immediately before async work
           sessionGraceUntilRef.current = Date.now() + 10000;
-          await fetchUserData(existingSession.user.id);
-          // Register this tab as the active session on page load/refresh
+          
+          // Check if another device/tab has an active session before overwriting
+          const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('active_session_id, last_online_at')
+            .eq('id', existingSession.user.id)
+            .single();
+          
+          const dbSessionId = (currentProfile as any)?.active_session_id;
+          const lastOnline = (currentProfile as any)?.last_online_at;
+          const isRecentSession = lastOnline && (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000;
+          
+          if (dbSessionId && dbSessionId !== localSessionIdRef.current && isRecentSession) {
+            // Another device/browser is actively using this account — kick ourselves
+            console.log('[Auth] Another active session detected on init, kicking this tab');
+            if (isMounted) {
+              initialLoadDoneRef.current = true;
+              setLoading(false);
+            }
+            handleSessionKicked();
+            return;
+          }
+          
+          // Register this tab as the active session FIRST, then fetch data
           sessionKickedRef.current = false;
           await registerActiveSession(existingSession.user.id);
+          await fetchUserData(existingSession.user.id);
         }
       } finally {
         if (isMounted) {
