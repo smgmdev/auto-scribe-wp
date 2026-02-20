@@ -67,17 +67,43 @@ Deno.serve(async (req) => {
 
     if (publishSuccess) {
       // Publish succeeded — convert the locked transaction to a confirmed publish deduction
+      // Look up agency commission to lock it into the transaction metadata
+      let commissionPercentage: number | null = null;
+      if (siteName) {
+        // Find the wordpress site to get the agency name
+        const { data: wpSiteData } = await supabase
+          .from('wordpress_sites')
+          .select('agency')
+          .eq('name', siteName)
+          .maybeSingle();
+        
+        if (wpSiteData?.agency) {
+          const { data: agencyData } = await supabase
+            .from('agency_payouts')
+            .select('commission_percentage')
+            .eq('agency_name', wpSiteData.agency)
+            .maybeSingle();
+          
+          if (agencyData) {
+            commissionPercentage = agencyData.commission_percentage;
+          }
+        }
+      }
+
       const updatePayload: Record<string, unknown> = {
           type: 'publish',
           description: `Published article to ${siteName || 'media site'}`,
         };
         
         // Persist publication metadata so links survive article deletion
-        if (wpLink || siteUrl) {
-          updatePayload.metadata = {
-            ...(wpLink ? { wp_link: wpLink } : {}),
-            ...(siteUrl ? { site_url: siteUrl } : {}),
-          };
+        // Also store commission_percentage at the time of publish for historical accuracy
+        const metadataObj: Record<string, unknown> = {};
+        if (wpLink) metadataObj.wp_link = wpLink;
+        if (siteUrl) metadataObj.site_url = siteUrl;
+        if (commissionPercentage !== null) metadataObj.commission_percentage = commissionPercentage;
+        
+        if (Object.keys(metadataObj).length > 0) {
+          updatePayload.metadata = metadataObj;
         }
         
       const { error: updateTxError } = await supabase

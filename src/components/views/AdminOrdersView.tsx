@@ -430,11 +430,14 @@ export function AdminOrdersView() {
 
       setInstantOrders(data.map((d: any) => {
         const meta = d.metadata as InstantOrder['metadata'];
+        const metaRaw = d.metadata as Record<string, unknown> | null;
         const siteName = d.description?.replace('Published article to ', '') || '';
         const wpInfo = wpSiteMap[siteName];
         const resolvedFavicon = meta?.site_favicon || wpInfo?.favicon || null;
         const agencyName = wpInfo?.agency || null;
-        const commission = agencyName ? (commissionMap[agencyName] ?? 10) : 10;
+        // Use commission stored at publish time if available; fall back to current
+        const storedCommission = metaRaw?.commission_percentage as number | undefined;
+        const commission = storedCommission ?? (agencyName ? (commissionMap[agencyName] ?? 10) : 10);
         return {
           ...d,
           metadata: { ...meta, site_favicon: resolvedFavicon } as InstantOrder['metadata'],
