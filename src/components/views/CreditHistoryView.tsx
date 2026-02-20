@@ -592,11 +592,19 @@ export function CreditHistoryView() {
 
   // Total spent = only from completed orders + other usage/deductions
   // Don't subtract refunds here - refunds are for cancelled orders, not completed ones
-  const otherSpending = transactions
-    .filter(t => t.type === 'usage' || t.type === 'deduction' || t.type === 'publish')
+  const adminDeductions = transactions
+    .filter(t => t.type === 'deduction' || t.type === 'admin_deduct')
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  const totalSpent = completedOrdersSpent + otherSpending;
+  const publishSpending = transactions
+    .filter(t => t.type === 'publish')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const usageSpending = transactions
+    .filter(t => t.type === 'usage')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const totalSpent = completedOrdersSpent + adminDeductions + publishSpending + usageSpending;
 
   const completedPurchaseOrders = transactions
     .filter(t => t.type === 'order_completed')
@@ -1200,9 +1208,37 @@ export function CreditHistoryView() {
           <TooltipContent 
             side="bottom" 
             sideOffset={8}
-            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg"
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-xs shadow-lg"
           >
-            <p>Total credits spent on orders and other usage</p>
+            <div className="space-y-1">
+              <p className="font-medium mb-1">Expenses Breakdown</p>
+              <div className="flex justify-between gap-4">
+                <span className="text-background/70">Media Orders:</span>
+                <span className="font-semibold">{completedOrdersSpent.toLocaleString()}</span>
+              </div>
+              {adminDeductions > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Admin Deductions:</span>
+                  <span className="font-semibold text-red-400">{adminDeductions.toLocaleString()}</span>
+                </div>
+              )}
+              {publishSpending > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Publishing:</span>
+                  <span className="font-semibold">{publishSpending.toLocaleString()}</span>
+                </div>
+              )}
+              {usageSpending > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Other Usage:</span>
+                  <span className="font-semibold">{usageSpending.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-background/20">
+                <span className="text-background/70">Total:</span>
+                <span className="font-semibold">{totalSpent.toLocaleString()}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
       </div>
