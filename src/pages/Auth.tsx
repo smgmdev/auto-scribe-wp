@@ -212,15 +212,22 @@ export default function Auth() {
     }
 
     // Check if another session is already active for this account
-    const { data: activeSessionId } = await supabase
-      .rpc('check_active_session', { check_email: email });
+    try {
+      const { data: activeSessionId, error: sessionCheckError } = await supabase
+        .rpc('check_active_session', { check_email: email });
 
-    if (activeSessionId) {
-      // Another device/browser is logged in — ask for confirmation
-      pendingSignInRef.current = { email, password };
-      setIsLoading(false);
-      setShowActiveSessionWarning(true);
-      return;
+      console.log('[Auth] check_active_session result:', { activeSessionId, error: sessionCheckError });
+
+      if (!sessionCheckError && activeSessionId && activeSessionId !== 'null' && activeSessionId.trim() !== '') {
+        // Another device/browser is logged in — ask for confirmation
+        pendingSignInRef.current = { email, password };
+        setIsLoading(false);
+        setShowActiveSessionWarning(true);
+        return;
+      }
+    } catch (rpcError) {
+      console.error('[Auth] check_active_session RPC failed:', rpcError);
+      // If the check fails, proceed with sign in anyway rather than blocking
     }
 
     // No active session — proceed normally
