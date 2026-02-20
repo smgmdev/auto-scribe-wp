@@ -1541,8 +1541,8 @@ export function ComposeView() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="sticky top-4 space-y-4">
-          {/* Actions - At Top */}
-          <div className="space-y-0">
+          {/* Actions - Desktop only (top position) */}
+          <div className="hidden lg:block space-y-0">
             <Button 
               className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
               onClick={handlePublish} 
@@ -1678,6 +1678,49 @@ export function ComposeView() {
                   </>}
               </CardContent>
             </Card>}
+
+          {/* Actions - Mobile only (bottom position, after categories & tags) */}
+          <div className="lg:hidden space-y-0">
+            <Button 
+              className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" 
+              onClick={handlePublish} 
+              disabled={
+                isPublishing || 
+                !title.trim() || 
+                !content.trim() || 
+                !selectedSite || 
+                selectedCategories.length === 0 || 
+                selectedTagIds.length === 0 || 
+                !focusKeyword.trim() || 
+                (currentSite?.seoPlugin === 'aioseo' && !metaDescription.trim()) || 
+                !imagePreview || 
+                (!isAdmin && !canAffordSite(selectedSite))
+              }
+            >
+              {isPublishing ? <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publishing...
+                </> : <>
+                  {editingArticle 
+                    ? (editingArticle.status === 'published' ? 'Update & Publish' : 'Publish') 
+                    : 'Publish Article'}
+                </>}
+            </Button>
+            {!isAdmin && selectedSite && !canAffordSite(selectedSite) && (
+              <p className="text-xs text-destructive text-center">
+                Insufficient credits. You need {getSiteCreditCost(selectedSite)} credits to publish.
+              </p>
+            )}
+            {editingArticle && editingArticle.status === 'draft' && <Button variant="default" className="w-full rounded-none border border-transparent transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground" onClick={handleSaveChanges} disabled={!title || isSavingDraft}>
+                {isSavingDraft ? <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </> : 'Save Draft'}
+              </Button>}
+            {!editingArticle && <Button variant="outline" className="w-full rounded-none hover:bg-black hover:text-white hover:border-black" onClick={handleSaveDraft} disabled={!title || isPublishing}>
+                Save as Draft
+              </Button>}
+          </div>
           </div>
         </div>
       </div>
