@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -93,6 +93,8 @@ export function AdminOrdersView() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [instantOrders, setInstantOrders] = useState<InstantOrder[]>([]);
   const [instantOrdersLoading, setInstantOrdersLoading] = useState(true);
+  const [instantUserDetails, setInstantUserDetails] = useState<{ agency_name: string | null; full_name: string | null; email: string | null; whatsapp_phone: string | null } | null>(null);
+  const [instantUserDetailsLoading, setInstantUserDetailsLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [deliveryForm, setDeliveryForm] = useState({
@@ -1235,17 +1237,57 @@ export function AdminOrdersView() {
                             </p>
                           </div>
                         </div>
-                        {/* View Publication button */}
-                        {wpLink && (
-                          <div className="flex justify-end">
+                        {/* Action buttons */}
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-xs"
+                            disabled={instantUserDetailsLoading === item.id}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setInstantUserDetailsLoading(item.id);
+                              try {
+                                const { data: profileData } = await supabase
+                                  .from('profiles')
+                                  .select('email, whatsapp_phone')
+                                  .eq('id', item.user_id)
+                                  .maybeSingle();
+                                const { data: applicationData } = await supabase
+                                  .from('agency_applications')
+                                  .select('full_name, whatsapp_phone, agency_name')
+                                  .eq('user_id', item.user_id)
+                                  .maybeSingle();
+                                setInstantUserDetails({
+                                  agency_name: applicationData?.agency_name || item.agency_name || null,
+                                  full_name: applicationData?.full_name || null,
+                                  email: profileData?.email || item.user_email || null,
+                                  whatsapp_phone: applicationData?.whatsapp_phone || profileData?.whatsapp_phone || null,
+                                });
+                              } catch (err) {
+                                console.error('Error fetching user details:', err);
+                                sonnerToast.error('Failed to fetch user details');
+                              } finally {
+                                setInstantUserDetailsLoading(null);
+                              }
+                            }}
+                          >
+                            {instantUserDetailsLoading === item.id ? (
+                              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                            ) : (
+                              <Eye className="h-3.5 w-3.5 mr-1" />
+                            )}
+                            User Details
+                          </Button>
+                          {wpLink && (
                             <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                               <Button size="sm" className="text-xs bg-black text-white hover:bg-transparent hover:text-black border border-black w-full md:w-auto">
                                 <ExternalLink className="h-3.5 w-3.5 mr-1" />
                                 View Publication
                               </Button>
                             </a>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   );
@@ -1694,6 +1736,53 @@ export function AdminOrdersView() {
         url={webViewUrl || ''}
         title="Delivery"
       />
+
+      {/* Instant Order User Details Dialog */}
+      <Dialog open={!!instantUserDetails} onOpenChange={() => setInstantUserDetails(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {instantUserDetails && (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {instantUserDetails.agency_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Agency Name</p>
+                    <p className="font-medium">{instantUserDetails.agency_name}</p>
+                  </div>
+                )}
+                {instantUserDetails.full_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{instantUserDetails.full_name}</p>
+                  </div>
+                )}
+                {instantUserDetails.email && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">{instantUserDetails.email}</p>
+                  </div>
+                )}
+                {instantUserDetails.whatsapp_phone && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">WhatsApp</p>
+                    <p className="font-medium">{instantUserDetails.whatsapp_phone}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              onClick={() => setInstantUserDetails(null)}
+              className="bg-foreground text-background hover:bg-transparent hover:text-foreground hover:border-foreground border"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </div>
   );
