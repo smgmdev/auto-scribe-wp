@@ -853,7 +853,7 @@ export function AdminAgenciesView() {
             placeholder="Search agencies by name, email, country..."
             value={agencySearchTerm}
             onChange={(e) => setAgencySearchTerm(e.target.value)}
-            className="pl-9 rounded-none border-x-0 border-t-0 bg-black text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="pl-9 rounded-none border-x-0 border-t-0 border-b-0 bg-black text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
           />
           {agencySearchTerm && (
             <button
