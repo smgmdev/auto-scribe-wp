@@ -318,10 +318,10 @@ export default function Auth() {
   };
 
   const handleActiveSessionConfirm = async () => {
-    setShowActiveSessionWarning(false);
     if (pendingSignInRef.current) {
       const { email: e, password: p } = pendingSignInRef.current;
       pendingSignInRef.current = null;
+      setShowActiveSessionWarning(false);
       await proceedWithSignIn(e, p);
     }
   };
@@ -343,7 +343,7 @@ export default function Auth() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button variant="outline" onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white" disabled={isLoading}>Cancel</Button>
-            <Button onClick={handleActiveSessionConfirm} className="bg-primary text-primary-foreground hover:bg-transparent hover:text-black border border-primary" disabled={isLoading}>
+            <Button onClick={handleActiveSessionConfirm} className="bg-black text-white hover:bg-transparent hover:text-black border border-black" disabled={isLoading}>
               {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : 'Continue to Sign In'}
             </Button>
           </AlertDialogFooter>
