@@ -497,7 +497,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           const dbSessionId = (currentProfile as any)?.active_session_id;
           const lastOnline = (currentProfile as any)?.last_online_at;
-          const isRecentSession = lastOnline && (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000;
+          const isRecentSession = lastOnline && (Date.now() - new Date(lastOnline).getTime()) < 45 * 1000;
           
           if (dbSessionId && dbSessionId !== localSessionIdRef.current && isRecentSession) {
             // Another device/browser is actively using this account — kick ourselves
