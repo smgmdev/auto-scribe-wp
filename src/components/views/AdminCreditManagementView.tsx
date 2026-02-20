@@ -664,7 +664,7 @@ export const AdminCreditManagementView = () => {
                                           )}
                                           {user.publishSpent > 0 && (
                                             <div className="flex justify-between gap-4">
-                                              <span className="text-white/70">Publishing:</span>
+                                              <span className="text-white/70">Instant Publishing:</span>
                                               <span className="font-semibold text-white">{user.publishSpent.toLocaleString()}</span>
                                             </div>
                                           )}
