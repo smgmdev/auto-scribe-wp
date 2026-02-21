@@ -609,14 +609,18 @@ export function CreditHistoryView() {
     .length;
 
   const completedAgencyDeliveryOrders = transactions
-    .filter(t => t.type === 'order_payout')
+    .filter(t => t.type === 'order_payout' && t.order_id)
     .length;
 
   const completedInstantPublishOrders = transactions
     .filter(t => t.type === 'publish')
     .length;
 
-  const totalCompletedOrders = completedPurchaseOrders + completedAgencyDeliveryOrders + completedInstantPublishOrders;
+  const completedInstantPublishDeliveryOrders = transactions
+    .filter(t => t.type === 'order_payout' && !t.order_id)
+    .length;
+
+  const totalCompletedOrders = completedPurchaseOrders + completedAgencyDeliveryOrders + completedInstantPublishOrders + completedInstantPublishDeliveryOrders;
 
   const getTransactionIcon = (type: string, amount: number) => {
     if (type === 'order' || type === 'locked') {
@@ -1174,16 +1178,20 @@ export function CreditHistoryView() {
               <p className="font-medium">Number of completed orders:</p>
               <div className="space-y-1 pt-1 border-t border-muted-foreground/20">
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed Purchase Orders:</span>
+                  <span className="text-muted-foreground">Completed B2B Media Purchase Orders:</span>
                   <span className="font-medium">{completedPurchaseOrders}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed Agency Delivery Orders:</span>
+                  <span className="text-muted-foreground">Completed B2B Media Delivery Orders:</span>
                   <span className="font-medium">{completedAgencyDeliveryOrders}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Instant Publishing Orders:</span>
+                  <span className="text-muted-foreground">Completed Instant Publishing Purchase Orders:</span>
                   <span className="font-medium">{completedInstantPublishOrders}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Completed Instant Publishing Delivery Orders:</span>
+                  <span className="font-medium">{completedInstantPublishDeliveryOrders}</span>
                 </div>
               </div>
             </div>
