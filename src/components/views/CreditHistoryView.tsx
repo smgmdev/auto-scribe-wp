@@ -958,7 +958,7 @@ export function CreditHistoryView() {
   // ── Tab definitions (same order as admin-side UserTransactionsExpanded) ──
   const transactionTypesTabs = [
     { key: 'all', label: 'All' },
-    { key: 'earnings', label: 'Earnings' },
+    { key: 'earnings', label: 'Sales' },
     { key: 'purchases', label: 'Purchases' },
     { key: 'system', label: 'System' },
     { key: 'withdrawals', label: 'Withdrawals' },
@@ -1382,7 +1382,7 @@ export function CreditHistoryView() {
       {/* Transactions List */}
       <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
         <CardHeader className="px-0 sm:px-0 pb-0 space-y-0">
-          <CardTitle className="text-lg mb-3">Transaction History</CardTitle>
+          <CardTitle className="text-lg mb-3 bg-foreground text-background px-3 py-2 -mx-0">Transaction History</CardTitle>
           {/* Tab filters */}
           <Tabs value={activeType} onValueChange={(val) => setActiveType(val)} className="mb-0">
             <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full mb-0" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
