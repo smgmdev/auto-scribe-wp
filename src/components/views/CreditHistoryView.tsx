@@ -1991,46 +1991,17 @@ export function CreditHistoryView() {
                                        </p>
                                      </div>
                                    )}
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">Order Value:</span>
-                                   <p className="font-medium">
-                                     {(() => {
-                                       const commPct = transaction.metadata?.commission_percentage;
-                                       if (commPct != null && commPct > 0) {
-                                         const netAmount = Math.abs(transaction.amount);
-                                         const orderValue = Math.round(netAmount / (1 + commPct / 100));
-                                         return `${orderValue.toLocaleString()} credits`;
-                                       }
-                                       return `${Math.abs(transaction.amount).toLocaleString()} credits`;
-                                     })()}
-                                   </p>
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">Platform Fee:</span>
-                                   <p className="font-medium">
-                                     {(() => {
-                                       const commPct = transaction.metadata?.commission_percentage;
-                                       if (commPct != null && commPct > 0) {
-                                         const netAmount = Math.abs(transaction.amount);
-                                         const orderValue = Math.round(netAmount / (1 + commPct / 100));
-                                         const fee = netAmount - orderValue;
-                                         return `${fee.toLocaleString()} credits (${commPct}%)`;
-                                       }
-                                       return '0 credits';
-                                     })()}
-                                   </p>
-                                 </div>
-                                 <div>
-                                   <span className="text-muted-foreground">Net Amount:</span>
-                                   <p className="font-medium text-red-500">
-                                     -{Math.abs(transaction.amount).toLocaleString()} credits
-                                   </p>
-                                 </div>
-                                 <div>
-                                    <span className="text-muted-foreground">Published:</span>
-                                    <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                   </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Order Value:</span>
+                                    <p className="font-medium">
+                                      {Math.abs(transaction.amount).toLocaleString()} credits
+                                    </p>
+                                  </div>
+                                  <div>
+                                     <span className="text-muted-foreground">Published:</span>
+                                     <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                   </div>
                                </div>
                                <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
                                  {publishDetails[transaction.id]?.wp_link && (
