@@ -1231,6 +1231,18 @@ export function Sidebar({
             // No toast here - FloatingChatWindow or ChatListPanel already shows one
           }
           
+          // Skip refetch if the only change is read status / last_read_at (user just marked as read)
+          const isReadOnlyChange = 
+            updated.status === old?.status &&
+            updated.order_id === old?.order_id &&
+            (updated.client_read !== old?.client_read || updated.client_last_read_at !== old?.client_last_read_at) &&
+            updated.agency_read === old?.agency_read &&
+            updated.agency_last_read_at === old?.agency_last_read_at;
+          
+          if (isReadOnlyChange) {
+            return; // Don't refetch - the optimistic update from onFocus is already correct
+          }
+          
           // Refetch counts when any engagement is updated using timestamp-based logic
           const refetchCounts = async () => {
             const { data: allRequests } = await supabase
@@ -1651,7 +1663,22 @@ export function Sidebar({
       .channel('agency-sidebar-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, (payload) => {
         const row = (payload.new || payload.old) as any;
+        const old = payload.old as any;
+        const updated = payload.new as any;
         if (row?.agency_payout_id === agencyPayoutId) {
+          // Skip refetch if the only change is read status / last_read_at (agency just marked as read)
+          if (payload.eventType === 'UPDATE' && updated && old) {
+            const isReadOnlyChange = 
+              updated.status === old.status &&
+              updated.order_id === old.order_id &&
+              updated.client_read === old.client_read &&
+              updated.client_last_read_at === old.client_last_read_at &&
+              (updated.agency_read !== old.agency_read || updated.agency_last_read_at !== old.agency_last_read_at);
+            
+            if (isReadOnlyChange) {
+              return; // Don't refetch - the optimistic update from onFocus is already correct
+            }
+          }
           console.log('[Sidebar] Agency service request changed, refetching counts');
           refetchAgencyNotificationCounts();
         }
