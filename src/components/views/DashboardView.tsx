@@ -483,6 +483,11 @@ export function DashboardView() {
                 </Badge>
               </button>
             )}
+            {!isAdmin && userSessionStartedAt && (
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors">
+                Online:&nbsp;{formatSessionDuration(userSessionStartedAt)}
+              </Badge>
+            )}
             {agencyStatusLoading ? (
               <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
                 <Loader2 className="h-3 w-3 animate-spin text-white/40" />
@@ -497,11 +502,6 @@ export function DashboardView() {
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
-            {!isAdmin && userSessionStartedAt && (
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap font-mono text-xs">
-                Online: {formatSessionDuration(userSessionStartedAt)}
-              </Badge>
-            )}
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
@@ -513,6 +513,11 @@ export function DashboardView() {
                 {activeSessionCount}&nbsp;sessions
               </Badge>
             </button>
+          )}
+          {!isAdmin && userSessionStartedAt && (
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors">
+              Online:&nbsp;{formatSessionDuration(userSessionStartedAt)}
+            </Badge>
           )}
           {agencyStatusLoading ? (
             <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
@@ -526,11 +531,6 @@ export function DashboardView() {
           ) : (
             <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
-            </Badge>
-          )}
-          {!isAdmin && userSessionStartedAt && (
-            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap font-mono text-xs">
-              Online: {formatSessionDuration(userSessionStartedAt)}
             </Badge>
           )}
         </div>
