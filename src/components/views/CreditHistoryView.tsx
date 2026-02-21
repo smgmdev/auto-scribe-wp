@@ -91,9 +91,15 @@ export function CreditHistoryView() {
     if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current) {
       // Handle order_payout highlight
       if (highlightedOrderId) {
-        const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
+        // Try matching by order_id first, then by transaction id directly
+        const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout')
+          || transactions.find(t => t.id === highlightedOrderId);
         if (transaction) {
           setExpandedWithdrawals(new Set([transaction.id]));
+          // Normalize highlightedOrderId to the transaction id for consistent highlighting
+          if (highlightedOrderId !== transaction.id && highlightedOrderId !== transaction.order_id) {
+            setHighlightedOrderId(transaction.id);
+          }
           hasScrolledToTransaction.current = true;
           setTimeout(() => {
             highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1550,7 +1556,7 @@ export function CreditHistoryView() {
                 
                 // Expandable card for earnings with platform fee
                 if (isEarnings && platformFee !== null) {
-                  const isHighlighted = transaction.order_id === highlightedOrderId;
+                  const isHighlighted = transaction.order_id === highlightedOrderId || transaction.id === highlightedOrderId;
                   return (
                     <div
                       key={transaction.id}
