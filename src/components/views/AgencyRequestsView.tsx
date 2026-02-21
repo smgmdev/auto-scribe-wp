@@ -1477,7 +1477,7 @@ export function AgencyRequestsView() {
                 <div className="space-y-0">
                   {sortedRequests.map((request) => {
                     const requestMessages = messages[request.id] || [];
-                    const hasUnread = !request.read;
+                    const hasUnread = !request.read || (unreadMessageCounts[request.id] || 0) > 0;
                     const { eventName, eventTime } = getLastEventInfo(request);
                     
                     // Check order status for badges
@@ -1735,7 +1735,7 @@ export function AgencyRequestsView() {
                     <div className="space-y-0">
                       {sortedCompletedRequests.map((request) => {
                         const requestMessages = messages[request.id] || [];
-                        const hasUnread = !request.read;
+                        const hasUnread = !request.read || (unreadMessageCounts[request.id] || 0) > 0;
                         
                         return (
                           <Card 
@@ -1854,7 +1854,7 @@ export function AgencyRequestsView() {
                     <div className="space-y-0">
                       {sortedCancelledRequests.map((request) => {
                         const requestMessages = messages[request.id] || [];
-                        const hasUnread = !request.read;
+                        const hasUnread = !request.read || (unreadMessageCounts[request.id] || 0) > 0;
                         
                         return (
                           <Card 
