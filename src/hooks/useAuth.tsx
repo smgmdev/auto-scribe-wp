@@ -483,6 +483,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Check if this is a different user than before (account switch)
         const newUserId = newSession?.user?.id || null;
+
+        // If the same user is already fully loaded, skip re-processing.
+        // This prevents tab-switch SIGNED_IN events from causing full re-renders.
+        if (event === 'SIGNED_IN' && newUserId && newUserId === previousUserIdRef.current && user) {
+          accessTokenRef.current = newSession?.access_token ?? null;
+          // Only update session object if token actually changed
+          if (newSession && newSession.access_token !== session?.access_token) {
+            setSession(newSession);
+          }
+          console.log('[Auth] Skipping redundant SIGNED_IN for same user on tab focus');
+          return;
+        }
+
         if (previousUserIdRef.current !== null && previousUserIdRef.current !== newUserId && newUserId !== null) {
           console.log('[Auth] User changed from', previousUserIdRef.current, 'to', newUserId, ', resetting state');
           setRole(null);
