@@ -28,6 +28,7 @@ import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getSignedAttachmentUrl } from '@/lib/attachment-urls';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
+import { setNotificationGuard } from '@/lib/notification-guard';
 
 interface ServiceMessage {
   id: string;
@@ -6805,6 +6806,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       
                       // Only dispatch events and decrement sidebar counts if chat was actually unread
                       if (wasUnread) {
+                        // Set guard to prevent sidebar refetch from overwriting this optimistic update
+                        setNotificationGuard();
                         if (globalChatType === 'my-request') {
                           window.dispatchEvent(new CustomEvent('my-engagement-updated', {
                             detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
