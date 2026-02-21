@@ -61,7 +61,7 @@ interface UserTransactionsExpandedProps {
 
 const transactionTypes = [
   { key: 'all', label: 'All' },
-  { key: 'earnings', label: 'Earnings' },
+  { key: 'earnings', label: 'Sales' },
   { key: 'purchases', label: 'Purchases' },
   { key: 'system', label: 'System' },
   { key: 'withdrawals', label: 'Withdrawals' },
