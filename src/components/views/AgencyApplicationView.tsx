@@ -149,6 +149,7 @@ export function AgencyApplicationView() {
   const [webViewIsWebsite, setWebViewIsWebsite] = useState(false);
   const [webViewDownloadUrl, setWebViewDownloadUrl] = useState<string | undefined>();
   const [webViewDownloadName, setWebViewDownloadName] = useState<string | undefined>();
+  const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
 
   // Track if initial data fetch has been done - persists across re-renders
   const initialFetchDoneRef = useRef(false);
@@ -585,13 +586,19 @@ export function AgencyApplicationView() {
           className="sticky top-0 h-[60vh] overflow-hidden"
           style={{ zIndex: 0 }}
         >
+          {!heroVideoLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f]">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            </div>
+          )}
           <video 
             src={agencyHeroVideo} 
             autoPlay 
             loop 
             muted 
             playsInline
-            className="w-full h-full object-cover"
+            onCanPlayThrough={() => setHeroVideoLoaded(true)}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${heroVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
           {/* Text Overlay on video */}
           <div 
