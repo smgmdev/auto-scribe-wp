@@ -289,7 +289,13 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     });
 
     const deliveryOrders = userTxs.filter(t => t.type === 'order_payout').length;
+    const instantPublishOrders = userTxs.filter(t => t.type === 'publish').length;
     const purchaseOrders = purchaseOrdersMap.get(userId) || 0;
+
+    // Usage spending (type === 'usage')
+    const usageSpent = userTxs
+      .filter(t => t.type === 'usage')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
     return {
       user_id: userId,
@@ -310,11 +316,11 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       lockedFromWithdrawals: creditsInWithdrawals,
       pendingBankWithdrawals: pendingBankMap.get(userId) || 0,
       pendingCryptoWithdrawals: pendingCryptoMap.get(userId) || 0,
-      orders: purchaseOrders + deliveryOrders,
+      orders: purchaseOrders + deliveryOrders + instantPublishOrders,
       purchaseOrders,
       deliveryOrders,
       publishSpent,
-      totalSpent: totalSpentMap.get(userId) || 0,
+      totalSpent: (totalSpentMap.get(userId) || 0) + deductions + publishSpent + usageSpent,
       dbCredits: credit.credits,
       rawTxSum,
       validationStatus: 'unchecked' as const,
