@@ -1086,7 +1086,17 @@ export function AdminOrdersView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-foreground text-background px-3 py-2 text-sm">
-            <p>Total value of successfully completed orders</p>
+            <p className="font-medium mb-1">Total value of successfully completed orders</p>
+            <div className="space-y-0.5 text-xs">
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">B2B Media Buying:</span>
+                <span className="font-semibold">${orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.amount_cents, 0).toLocaleString('en-US')}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Instant Publishing:</span>
+                <span className="font-semibold">${instantOrdersValue.toLocaleString('en-US')}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
         
