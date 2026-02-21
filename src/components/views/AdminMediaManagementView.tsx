@@ -3177,10 +3177,10 @@ export function AdminMediaManagementView() {
             </Button>
             <Button 
               type="button" 
-              variant="outline"
+              variant="destructive"
               onClick={handleReject}
               disabled={isProcessing || !wpRejectReason.trim()}
-              className="w-full md:w-auto hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
+              className="w-full md:w-auto hover:!bg-transparent hover:!text-destructive hover:!border-destructive border"
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirm Rejection
