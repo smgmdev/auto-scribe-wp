@@ -3386,7 +3386,7 @@ export function AdminMediaManagementView() {
                 placeholder="Enter article title..."
                 value={testArticleTitle}
                 onChange={(e) => setTestArticleTitle(e.target.value)}
-                className="w-full"
+                className="w-full !text-sm"
               />
               <Button
                 type="button"
@@ -3483,7 +3483,7 @@ export function AdminMediaManagementView() {
                     addNewTestTag();
                   }
                 }}
-                className="w-full md:max-w-xs"
+                className="w-full md:max-w-xs !text-sm"
                 disabled={testSelectedTagIds.length >= 3}
               />
               <Button
@@ -3513,6 +3513,7 @@ export function AdminMediaManagementView() {
                 placeholder="Enter focus keyword..."
                 value={testFocusKeyword}
                 onChange={(e) => setTestFocusKeyword(e.target.value)}
+                className="!text-sm"
               />
               <p className="text-xs text-muted-foreground">
                 {selectedSubmission?.seo_plugin === 'rankmath' 
