@@ -273,21 +273,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    let consecutiveFailures = 0;
+    
     const checkSessionValidity = async () => {
       if (sessionKickedRef.current) return;
       if (Date.now() < sessionGraceUntilRef.current) return;
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
           .select('active_session_id')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+        
+        // If the query fails due to RLS (session expired/invalid), the auth session is broken
+        if (error || data === null) {
+          consecutiveFailures++;
+          console.warn(`[Auth] Session check failed (${consecutiveFailures}/3) - profile not accessible`);
+          
+          // Only attempt recovery after 3 consecutive failures to avoid reacting to transient issues
+          if (consecutiveFailures >= 3) {
+            console.warn('[Auth] 3 consecutive session check failures, attempting session refresh');
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            if (refreshError || !refreshData?.session) {
+              console.error('[Auth] Session refresh failed during validity check, signing out');
+              handleSessionKicked();
+              return;
+            }
+            // Refresh succeeded, reset counter
+            consecutiveFailures = 0;
+          }
+          return;
+        }
+        
+        // Success - reset failure counter
+        consecutiveFailures = 0;
+        
         const currentActive = (data as any)?.active_session_id;
         if (currentActive && currentActive !== localSessionIdRef.current) {
           handleSessionKicked();
         }
       } catch {
-        // ignore fetch errors
+        // ignore transient fetch errors
       }
     };
 
