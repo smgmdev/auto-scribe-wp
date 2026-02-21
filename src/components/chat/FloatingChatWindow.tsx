@@ -5248,12 +5248,21 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           handleWindowClick();
           setIsChatFocused(true);
           setChatFocused(true);
+          useAppStore.getState().setFocusedChatId(chat.request.id);
         }}
-        onFocus={() => setIsChatFocused(true)}
+        onFocus={() => {
+          setIsChatFocused(true);
+          useAppStore.getState().setFocusedChatId(chat.request.id);
+        }}
         onBlur={(e) => {
           // Only blur if the new focus target is outside the chat
           if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             setIsChatFocused(false);
+            // Only clear focusedChatId if this chat was the focused one
+            const current = useAppStore.getState().focusedChatId;
+            if (current === chat.request.id) {
+              useAppStore.getState().setFocusedChatId(null);
+            }
           }
         }}
         tabIndex={-1}
