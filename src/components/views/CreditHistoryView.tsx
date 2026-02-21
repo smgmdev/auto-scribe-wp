@@ -1006,7 +1006,10 @@ export function CreditHistoryView() {
 
   const tabFilteredTransactions = (() => {
     switch (effectiveFilter) {
-      case 'all': return displayedTransactions;
+      case 'all': {
+        const lockUnlockTypes = ['locked', 'order', 'unlocked', 'order_accepted', 'offer_accepted', 'order_delivered', 'withdrawal_locked', 'withdrawal_unlocked'];
+        return displayedTransactions.filter(tx => !lockUnlockTypes.includes(tx.type));
+      }
       case 'earnings': return displayedTransactions.filter(tx => tx.type === 'order_payout');
       case 'earnings_b2b': return displayedTransactions.filter(isB2BEarning);
       case 'earnings_instant': return displayedTransactions.filter(isInstantEarning);
