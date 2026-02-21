@@ -1414,7 +1414,7 @@ export function CreditHistoryView() {
 
           {/* Sub-tabs for Earnings */}
           {activeType === 'earnings' && (
-            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mt-px">
               {earningsSubTabsDef.map(sub => {
                 const count = tabCounts[sub.key] || 0;
                 return (
@@ -1437,7 +1437,7 @@ export function CreditHistoryView() {
 
           {/* Sub-tabs for Purchases */}
           {activeType === 'purchases' && (
-            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mt-px">
               {purchasesSubTabsDef.map(sub => {
                 const count = tabCounts[sub.key] || 0;
                 return (
@@ -1460,7 +1460,7 @@ export function CreditHistoryView() {
 
           {/* Sub-tabs for System */}
           {activeType === 'system' && (
-            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mt-px">
               {systemSubTabsDef.map(sub => {
                 const count = tabCounts[sub.key] || 0;
                 return (
@@ -1483,7 +1483,7 @@ export function CreditHistoryView() {
 
           {/* Sub-tabs for Withdrawals */}
           {activeType === 'withdrawals' && (
-            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mt-px">
               {withdrawalsSubTabsDef.map(sub => {
                 const count = tabCounts[sub.key] || 0;
                 return (
