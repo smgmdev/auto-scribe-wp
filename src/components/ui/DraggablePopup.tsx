@@ -34,23 +34,27 @@ export function DraggablePopup({
   headerClassName = '',
 }: DraggablePopupProps) {
   const isMobile = useIsMobile();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const getCenteredPosition = useCallback(() => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    return { x: (w - width) / 2, y: Math.max(40, (h - 500) / 2) };
+  }, [width]);
+
+  const [position, setPosition] = useState(getCenteredPosition);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
-  const positionRef = useRef({ x: 0, y: 0 });
+  const positionRef = useRef(getCenteredPosition());
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const popupRef = useRef<HTMLDivElement>(null);
 
-  // Center on open
+  // Re-center on open
   useEffect(() => {
     if (open && !isMobile) {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const newPos = { x: (w - width) / 2, y: Math.max(40, (h - 500) / 2) };
+      const newPos = getCenteredPosition();
       setPosition(newPos);
       positionRef.current = newPos;
     }
-  }, [open, isMobile, width]);
+  }, [open, isMobile, getCenteredPosition]);
 
   // Escape key
   useEffect(() => {
