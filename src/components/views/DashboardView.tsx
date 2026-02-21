@@ -31,6 +31,19 @@ function formatRelativeTime(dateInput: string | Date): string {
   return format(date, 'MMM d, yyyy');
 }
 
+function formatSessionDuration(dateInput: string | Date): string {
+  if (!dateInput) return '0s';
+  const start = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  const now = new Date();
+  const totalSeconds = Math.max(0, Math.floor((now.getTime() - start.getTime()) / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
 const stats = [{
   label: 'Local Library',
   icon: Library,
@@ -97,12 +110,12 @@ export function DashboardView() {
   
   // Real-time active sessions count (admin only)
   const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
-  const [recentSessions, setRecentSessions] = useState<{ email: string; last_online_at: string }[]>([]);
-  // Ticker to force re-render of relative times every 10s
+  const [recentSessions, setRecentSessions] = useState<{ email: string; session_started_at: string }[]>([]);
+  // Ticker to force re-render of session durations every second
   const [, setSessionTick] = useState(0);
   useEffect(() => {
     if (!isAdmin) return;
-    const tickInterval = setInterval(() => setSessionTick(t => t + 1), 10000);
+    const tickInterval = setInterval(() => setSessionTick(t => t + 1), 1000);
     return () => clearInterval(tickInterval);
   }, [isAdmin]);
 
@@ -111,13 +124,13 @@ export function DashboardView() {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { data, count } = await supabase
       .from('profiles')
-      .select('email, last_online_at', { count: 'exact' })
+      .select('email, session_started_at', { count: 'exact' })
       .not('active_session_id', 'is', null)
       .gt('last_online_at', fiveMinAgo)
       .order('last_online_at', { ascending: false })
       .limit(5);
     setActiveSessionCount(count ?? 0);
-    setRecentSessions(data?.map(d => ({ email: d.email || 'Unknown', last_online_at: d.last_online_at || '' })) ?? []);
+    setRecentSessions(data?.map(d => ({ email: d.email || 'Unknown', session_started_at: d.session_started_at || '' })) ?? []);
   }, [isAdmin]);
 
   useEffect(() => {
@@ -445,7 +458,7 @@ export function DashboardView() {
                       {recentSessions.map((s, i) => (
                         <div key={i} className="flex justify-between gap-3 text-xs">
                           <span className="truncate">{s.email}</span>
-                          <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
+                          <span className="text-white/50 whitespace-nowrap shrink-0">{formatSessionDuration(s.session_started_at)}</span>
                         </div>
                       ))}
                       {activeSessionCount > 5 && (
@@ -493,7 +506,7 @@ export function DashboardView() {
                     {recentSessions.map((s, i) => (
                       <div key={i} className="flex justify-between gap-3 text-xs">
                         <span className="truncate">{s.email}</span>
-                        <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
+                        <span className="text-white/50 whitespace-nowrap shrink-0">{formatSessionDuration(s.session_started_at)}</span>
                       </div>
                     ))}
                     {activeSessionCount > 5 && (
