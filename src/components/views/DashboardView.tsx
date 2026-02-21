@@ -659,50 +659,58 @@ export function DashboardView() {
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
                     <div className="space-y-1">
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Earnings:</span>
-                        <span className="font-semibold text-green-400">{availableCreditsData.earnedCredits.toLocaleString()}</span>
+                        <span className="text-white/70">Total Earnings:</span>
+                        <span className="font-semibold text-green-400">${agencySummary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-2">
+                        <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                        <span className="text-white/50 text-xs">${agencySummary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-2">
+                        <span className="text-white/50 text-xs">Instant Publishing:</span>
+                        <span className="text-white/50 text-xs">${agencySummary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Withdrawals:</span>
-                        <span className="font-semibold text-red-400">{availableCreditsData.creditsWithdrawn > 0 ? `-${Math.round(availableCreditsData.creditsWithdrawn).toLocaleString()}` : '0'}</span>
+                        <span className="text-white/70">Total Withdrawals:</span>
+                        <span className="font-semibold text-red-400">{agencySummary.completedWithdrawals > 0 ? `-$${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
                       </div>
                       <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-                      {availableCreditsData.withdrawalsByBank > 0 && (
+                      {agencySummary.pendingBankWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
                           <span className="text-white/70">Bank:</span>
-                          <span className="font-semibold text-amber-400">${availableCreditsData.withdrawalsByBank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span className="font-semibold text-amber-400">${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
-                      {availableCreditsData.withdrawalsByCrypto > 0 && (
+                      {agencySummary.pendingCryptoWithdrawals > 0 && (
                         <div className="flex justify-between gap-4 pl-2">
                           <span className="text-white/70">USDT:</span>
-                          <span className="font-semibold text-amber-400">${availableCreditsData.withdrawalsByCrypto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span className="font-semibold text-amber-400">${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       )}
-                      {availableCreditsData.withdrawalsByBank === 0 && availableCreditsData.withdrawalsByCrypto === 0 && (
+                      {agencySummary.pendingBankWithdrawals === 0 && agencySummary.pendingCryptoWithdrawals === 0 && (
                         <div className="flex justify-between gap-4 pl-2">
                           <span className="text-white/50">None</span>
                         </div>
                       )}
                       <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Offer Requests:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(availableCreditsData.creditsInPendingRequests).toLocaleString()}</span>
+                        <span className="text-white/70">Locked in Order Requests:</span>
+                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Orders:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(availableCreditsData.creditsInOrders).toLocaleString()}</span>
+                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Total Purchased:</span>
-                        <span className="font-semibold text-green-400">{availableCreditsData.totalPurchased.toLocaleString()}</span>
+                        <span className="text-white/50 text-xs">Not Included</span>
                       </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Total Spent:</span>
-                        <span className="font-semibold text-red-400">{availableCreditsData.totalSpent > 0 ? `-${availableCreditsData.totalSpent.toLocaleString()}` : '0'}</span>
+                        <span className="text-white/50 text-xs">Not Included</span>
                       </div>
-                      <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                        <span className="text-white/70">Total Available Credits:</span>
-                        <span className="font-semibold text-green-400">{availableCreditsData.availableCredits.toLocaleString()}</span>
+                      <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
+                        <span className="text-white/70">Wallet Balance:</span>
+                        <span className="font-semibold">${agencySummary.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </TooltipContent>
