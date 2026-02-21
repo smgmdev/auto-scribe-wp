@@ -82,15 +82,23 @@ export function PinSettings() {
 
     setSaving(true);
 
-    // Server verifies the current PIN before disabling
-    const { data, error } = await supabase.functions.invoke('manage-pin', {
-      body: { action: 'disable_pin', current_pin: currentPin },
-    });
+    try {
+      // Server verifies the current PIN before disabling
+      const { data, error } = await supabase.functions.invoke('manage-pin', {
+        body: { action: 'disable_pin', current_pin: currentPin },
+      });
 
-    setSaving(false);
+      setSaving(false);
 
-    if (error || data?.error) {
-      toast.error(data?.error || error?.message || 'Failed to disable PIN');
+      if (error || data?.error) {
+        const errorMsg = data?.error || 'Incorrect PIN. Please try again.';
+        toast.error(errorMsg);
+        setCurrentPin('');
+        return;
+      }
+    } catch (e) {
+      setSaving(false);
+      toast.error('Incorrect PIN. Please try again.');
       setCurrentPin('');
       return;
     }
