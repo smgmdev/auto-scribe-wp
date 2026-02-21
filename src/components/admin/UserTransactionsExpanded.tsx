@@ -61,9 +61,7 @@ interface UserTransactionsExpandedProps {
 
 const transactionTypes = [
   { key: 'all', label: 'All' },
-  { key: 'earnings', label: 'Earnings', isGroup: true },
-  { key: 'earnings_b2b', label: 'B2B Media Sales', parent: 'earnings' },
-  { key: 'earnings_instant', label: 'Instant Publishing Sales', parent: 'earnings' },
+  { key: 'earnings', label: 'Earnings' },
   { key: 'purchase', label: 'Purchase' },
   { key: 'gifted', label: 'Gifted' },
   { key: 'spent', label: 'Spent' },
@@ -71,15 +69,25 @@ const transactionTypes = [
   { key: 'unlocked', label: 'Unlocked' },
   { key: 'order_accepted', label: 'Order Accepted' },
   { key: 'offer_accepted', label: 'Credits Locked' },
-  { key: 'purchases', label: 'Purchases', isGroup: true },
-  { key: 'purchases_b2b', label: 'B2B Media Purchases', parent: 'purchases' },
-  { key: 'purchases_instant', label: 'Instant Publishing Purchases', parent: 'purchases' },
+  { key: 'purchases', label: 'Purchases' },
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
   { key: 'admin_deduct', label: 'Deduction' },
   { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
   { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
   { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
+];
+
+const earningsSubTabs = [
+  { key: 'earnings', label: 'All Earnings' },
+  { key: 'earnings_b2b', label: 'B2B Media Sales' },
+  { key: 'earnings_instant', label: 'Instant Publishing Sales' },
+];
+
+const purchasesSubTabs = [
+  { key: 'purchases', label: 'All Purchases' },
+  { key: 'purchases_b2b', label: 'B2B Media Purchases' },
+  { key: 'purchases_instant', label: 'Instant Publishing Purchases' },
 ];
 
 export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedProps) => {
@@ -89,6 +97,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const [mediaSitesByName, setMediaSitesByName] = useState<Map<string, { name: string; favicon: string | null }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [activeType, setActiveType] = useState('all');
+  const [earningsSubTab, setEarningsSubTab] = useState('earnings');
+  const [purchasesSubTab, setPurchasesSubTab] = useState('purchases');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const fetchTransactions = async () => {
@@ -674,8 +684,15 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const isB2BPurchase = (tx: Transaction) => tx.type === 'order_completed' && tx.description?.startsWith('Order completed:');
   const isInstantPurchase = (tx: Transaction) => tx.type === 'order_completed' && !tx.description?.startsWith('Order completed:');
 
+  // Determine the effective filter key based on active tab + sub-tab
+  const effectiveFilter = (() => {
+    if (activeType === 'earnings') return earningsSubTab;
+    if (activeType === 'purchases') return purchasesSubTab;
+    return activeType;
+  })();
+
   const filteredTransactions = (() => {
-    switch (activeType) {
+    switch (effectiveFilter) {
       case 'all': return processedTransactions;
       case 'earnings': return processedTransactions.filter(tx => tx.type === 'order_payout');
       case 'earnings_b2b': return processedTransactions.filter(isB2BEarning);
@@ -683,7 +700,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'purchases': return processedTransactions.filter(tx => tx.type === 'order_completed');
       case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
       case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
-      default: return processedTransactions.filter(tx => tx.type === activeType);
+      default: return processedTransactions.filter(tx => tx.type === effectiveFilter);
     }
   })();
 
@@ -691,7 +708,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     const counts: Record<string, number> = { all: processedTransactions.length };
     processedTransactions.forEach(tx => {
       counts[tx.type] = (counts[tx.type] || 0) + 1;
-      // Virtual group counts
       if (tx.type === 'order_payout') {
         counts['earnings'] = (counts['earnings'] || 0) + 1;
         if (isB2BEarning(tx)) counts['earnings_b2b'] = (counts['earnings_b2b'] || 0) + 1;
@@ -710,26 +726,68 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
   return (
     <div className="bg-muted/30 overflow-hidden">
-      <Tabs value={activeType} onValueChange={setActiveType}>
+      <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
         <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             if (type.key !== 'all' && count === 0) return null;
-            const isChild = 'parent' in type && type.parent;
             return (
               <TabsTrigger
                 key={type.key}
                 value={type.key}
-                className={cn(
-                  "data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap sm:flex-1",
-                  isChild && "text-[10px] opacity-80"
-                )}
+                className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap sm:flex-1"
               >
                 {type.label} ({count})
               </TabsTrigger>
             );
           })}
         </TabsList>
+
+        {/* Sub-tabs for Earnings */}
+        {activeType === 'earnings' && (
+          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+            {earningsSubTabs.map(sub => {
+              const count = counts[sub.key] || 0;
+              return (
+                <button
+                  key={sub.key}
+                  onClick={() => setEarningsSubTab(sub.key)}
+                  className={cn(
+                    "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                    earningsSubTab === sub.key
+                      ? "bg-[#ff6600]/80 text-white"
+                      : "text-white/50 hover:text-white/70"
+                  )}
+                >
+                  {sub.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sub-tabs for Purchases */}
+        {activeType === 'purchases' && (
+          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+            {purchasesSubTabs.map(sub => {
+              const count = counts[sub.key] || 0;
+              return (
+                <button
+                  key={sub.key}
+                  onClick={() => setPurchasesSubTab(sub.key)}
+                  className={cn(
+                    "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                    purchasesSubTab === sub.key
+                      ? "bg-[#ff6600]/80 text-white"
+                      : "text-white/50 hover:text-white/70"
+                  )}
+                >
+                  {sub.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="bg-background max-h-[60vh] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full caption-bottom text-sm">
