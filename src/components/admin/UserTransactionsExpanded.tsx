@@ -870,7 +870,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <>
               {activeType === 'all' && (
                 <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                    Balance
+                    <span className="ml-2 text-[10px] text-muted-foreground/70 normal-case">
+                      ({Array.from(orders.values()).reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0).toLocaleString()} commission paid)
+                    </span>
+                  </p>
                   <p className="text-base font-bold text-foreground">
                     {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
                   </p>
