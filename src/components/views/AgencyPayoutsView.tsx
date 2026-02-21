@@ -773,16 +773,6 @@ export function AgencyPayoutsView() {
                                 </div>
                               </div>
                               <div className="pt-2 border-t border-border/30 space-y-1">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/account?view=credit-history&transaction=${tx.id}`);
-                                  }}
-                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
-                                >
-                                  View transaction details
-                                  <ArrowRight className="h-3.5 w-3.5" />
-                                </button>
                                 {wpLink && (
                                   <a
                                     href={wpLink}
@@ -795,6 +785,16 @@ export function AgencyPayoutsView() {
                                     <ArrowRight className="h-3 w-3" />
                                   </a>
                                 )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/account?view=credit-history&transaction=${tx.id}`);
+                                  }}
+                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                >
+                                  View Transaction Details
+                                  <ArrowRight className="h-3.5 w-3.5" />
+                                </button>
                               </div>
                             </div>
                           </div>
