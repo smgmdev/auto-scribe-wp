@@ -9,5 +9,5 @@ export const setNotificationGuard = () => {
 };
 
 export const isNotificationGuarded = (): boolean => {
-  return Date.now() - lastOptimisticUpdate < 3000; // 3-second guard window
+  return Date.now() - lastOptimisticUpdate < 5000; // 5-second guard window
 };
