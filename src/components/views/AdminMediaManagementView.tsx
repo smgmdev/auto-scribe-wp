@@ -3334,7 +3334,7 @@ export function AdminMediaManagementView() {
           </div>
         }
         footer={
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col md:flex-row md:justify-end gap-2 md:gap-3">
             <Button 
               type="button" 
               variant="outline" 
@@ -3343,12 +3343,13 @@ export function AdminMediaManagementView() {
                 resetTestArticleForm();
               }}
               disabled={isPublishingTestArticle}
-              className="hover:bg-foreground hover:text-background"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background"
             >
               Cancel
             </Button>
             <Button 
               type="button"
+              className="w-full md:w-auto"
               onClick={handlePublishTestArticle}
               disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim() || testSelectedCategories.length === 0 || testSelectedTagIds.length === 0 || !testFocusKeyword.trim() || (selectedSubmission?.seo_plugin === 'aioseo' && !testMetaDescription.trim()) || !testArticleImagePreview}
             >
@@ -3379,19 +3380,20 @@ export function AdminMediaManagementView() {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="test-title">Title</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <Input
                 id="test-title"
                 placeholder="Enter article title..."
                 value={testArticleTitle}
                 onChange={(e) => setTestArticleTitle(e.target.value)}
+                className="w-full"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleGenerateTestArticle}
                 disabled={isGeneratingTestArticle || !testArticleTitle.trim()}
-                className="shrink-0"
+                className="shrink-0 w-full md:w-auto"
               >
                 {isGeneratingTestArticle ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
