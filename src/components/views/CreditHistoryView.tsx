@@ -1807,9 +1807,9 @@ export function CreditHistoryView() {
                          <div className="flex-1">
                           {isInstantPublishingPayout && transaction.metadata?.site_name ? (
                             <p className="font-medium flex items-center gap-2">
-                              {publishDetails[transaction.id]?.site_favicon && (
+                              {(transaction.metadata?.site_favicon || publishDetails[transaction.id]?.site_favicon) && (
                                 <img 
-                                  src={publishDetails[transaction.id].site_favicon} 
+                                  src={(transaction.metadata?.site_favicon as string) || publishDetails[transaction.id]?.site_favicon} 
                                   alt="" 
                                   className="h-4 w-4 rounded-sm object-contain"
                                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
