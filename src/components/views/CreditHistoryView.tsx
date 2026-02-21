@@ -1333,49 +1333,23 @@ export function CreditHistoryView() {
           </TooltipContent>
         </Tooltip>
 
-        {/* Total Spent + Profitability Ratio */}
+        {/* Total Spent */}
         <Tooltip delayDuration={100}>
           <TooltipTrigger asChild>
-            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help md:col-span-2">
+            <Card className="border-border/30 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all py-2 md:py-3 hover:border-[#4771d9] cursor-help">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-0 px-3 md:px-4">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Total Spent
+                </CardTitle>
+                <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
+              </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="grid grid-cols-2 divide-x divide-border/40">
-                  {/* Total Spent Column */}
-                  <div className="pr-3 md:pr-4">
-                    <div className="flex items-center justify-between pb-1">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Spent</span>
-                      <ArrowDownCircle className="h-4 w-4 text-muted-foreground/60" />
-                    </div>
-                    <div className="text-xl md:text-2xl font-semibold text-foreground">
-                      {loading ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      ) : (
-                        totalSpent.toLocaleString()
-                      )}
-                    </div>
-                  </div>
-                  {/* Profitability Ratio Column */}
-                  <div className="pl-3 md:pl-4">
-                    <div className="flex items-center justify-between pb-1">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Profitability</span>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground/60" />
-                    </div>
-                    {(() => {
-                      const totalEarnings = transactions
-                        .filter(t => t.type === 'order_payout')
-                        .reduce((sum, t) => sum + t.amount, 0);
-                      const netProfit = totalEarnings - totalSpent;
-                      const isProfit = netProfit >= 0;
-                      return (
-                        <div className={`text-xl md:text-2xl font-semibold ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
-                          {loading ? (
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                          ) : (
-                            <>{isProfit ? '+' : ''}{netProfit.toLocaleString()}</>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
+                <div className="text-xl md:text-2xl font-semibold text-foreground">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    totalSpent.toLocaleString()
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1383,63 +1357,68 @@ export function CreditHistoryView() {
           <TooltipContent 
             side="bottom" 
             sideOffset={8}
-            className="max-w-[320px] z-[9999] bg-foreground text-background px-3 py-2 text-xs shadow-lg"
+            className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-xs shadow-lg"
           >
             <div className="space-y-1">
-              <p className="font-medium mb-1">Profitability Overview</p>
+              <p className="font-medium mb-1">Expenses Breakdown</p>
               <div className="flex justify-between gap-4">
-                <span className="text-background/70">Total Purchased:</span>
-                <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                <span className="text-background/70">Media Orders:</span>
+                <span className="font-semibold">{completedOrdersSpent.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-background/70">Total Spent:</span>
-                <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-background/70">Total Earnings:</span>
-                <span className="font-semibold text-green-400">
-                  {transactions.filter(t => t.type === 'order_payout').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
-                </span>
-              </div>
-              {(() => {
-                const totalEarnings = transactions
-                  .filter(t => t.type === 'order_payout')
-                  .reduce((sum, t) => sum + t.amount, 0);
-                const netProfit = totalEarnings - totalSpent;
-                const isProfit = netProfit >= 0;
-                return (
-                  <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-background/20">
-                    <span className="text-background/70">{isProfit ? 'Profit:' : 'Loss:'}</span>
-                    <span className={`font-semibold ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
-                      {isProfit ? '+' : ''}{netProfit.toLocaleString()}
-                    </span>
-                  </div>
-                );
-              })()}
-              <div className="pt-2 mt-1 border-t border-background/20 space-y-1">
-                <p className="font-medium text-background/50">Expenses Breakdown</p>
+              {adminDeductions > 0 && (
                 <div className="flex justify-between gap-4">
-                  <span className="text-background/70">Media Orders:</span>
-                  <span className="font-semibold">{completedOrdersSpent.toLocaleString()}</span>
+                  <span className="text-background/70">Admin Deductions:</span>
+                  <span className="font-semibold text-red-400">{adminDeductions.toLocaleString()}</span>
                 </div>
-                {adminDeductions > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Admin Deductions:</span>
-                    <span className="font-semibold text-red-400">{adminDeductions.toLocaleString()}</span>
-                  </div>
-                )}
-                {publishSpending > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Instant Publishing:</span>
-                    <span className="font-semibold">{publishSpending.toLocaleString()}</span>
-                  </div>
-                )}
-                {usageSpending > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-background/70">Other Usage:</span>
-                    <span className="font-semibold">{usageSpending.toLocaleString()}</span>
-                  </div>
-                )}
+              )}
+              {publishSpending > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Instant Publishing:</span>
+                  <span className="font-semibold">{publishSpending.toLocaleString()}</span>
+                </div>
+              )}
+              {usageSpending > 0 && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Other Usage:</span>
+                  <span className="font-semibold">{usageSpending.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-background/20">
+                <span className="text-background/70">Total:</span>
+                <span className="font-semibold">{totalSpent.toLocaleString()}</span>
+              </div>
+              {/* Profitability Ratio */}
+              <div className="pt-2 mt-1 border-t border-background/20 space-y-1">
+                <p className="font-medium mb-1">Profitability Ratio</p>
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Total Purchased:</span>
+                  <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Total Spent:</span>
+                  <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-background/70">Total Earnings:</span>
+                  <span className="font-semibold text-green-400">
+                    {transactions.filter(t => t.type === 'order_payout').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
+                  </span>
+                </div>
+                {(() => {
+                  const totalEarnings = transactions
+                    .filter(t => t.type === 'order_payout')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                  const netProfit = totalEarnings - totalSpent;
+                  const isProfit = netProfit >= 0;
+                  return (
+                    <div className="flex justify-between gap-4 pt-1 mt-1 border-t border-background/20">
+                      <span className="text-background/70 font-medium">{isProfit ? 'Profit:' : 'Loss:'}</span>
+                      <span className={`font-semibold ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+                        {isProfit ? '+' : ''}{netProfit.toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </TooltipContent>
