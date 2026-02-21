@@ -467,6 +467,32 @@ export function CreditHistoryView() {
     fetchData();
   }, [fetchData, user?.id]);
 
+  // Pre-fetch favicons for instant publishing payout transactions
+  useEffect(() => {
+    if (loading || transactions.length === 0) return;
+    const instantPayouts = transactions.filter(t => t.type === 'order_payout' && !t.order_id && t.metadata?.site_name);
+    if (instantPayouts.length === 0) return;
+    
+    const fetchFavicons = async () => {
+      const { data: publicSites } = await supabase.rpc('get_public_sites');
+      if (!publicSites) return;
+      
+      const updates: Record<string, any> = {};
+      for (const tx of instantPayouts) {
+        if (publishDetails[tx.id]?.site_favicon) continue;
+        const wpSite = publicSites.find((s: any) => s.name === tx.metadata?.site_name);
+        updates[tx.id] = {
+          site_favicon: wpSite?.favicon || null,
+          site_name: tx.metadata?.site_name,
+        };
+      }
+      if (Object.keys(updates).length > 0) {
+        setPublishDetails(prev => ({ ...prev, ...updates }));
+      }
+    };
+    fetchFavicons();
+  }, [loading, transactions]);
+
   // Real-time subscriptions for live updates
   useEffect(() => {
     if (!user) return;
