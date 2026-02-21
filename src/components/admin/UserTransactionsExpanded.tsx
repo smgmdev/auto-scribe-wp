@@ -698,7 +698,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         </TabsList>
 
         <div className="bg-background max-h-[60vh] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <Table>
+          <table className="w-full caption-bottom text-sm">
             <TableHeader>
               <TableRow className="h-6 !border-b border-border">
                 <TableHead className="w-10 py-0"></TableHead>
@@ -824,7 +824,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 })
               )}
             </TableBody>
-          </Table>
+          </table>
         </div>
       </Tabs>
     </div>
