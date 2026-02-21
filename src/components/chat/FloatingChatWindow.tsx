@@ -7276,43 +7276,43 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       </AlertDialog>
 
       {/* Request Revision Dialog */}
-      <AlertDialog open={revisionDialogOpen} onOpenChange={setRevisionDialogOpen}>
-        <AlertDialogContent className="z-[250]">
-           <AlertDialogHeader className="text-left space-y-1 mb-0">
-            <AlertDialogTitle>Request Revision</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please describe what changes you need for this delivery.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="pb-4">
-            <Textarea
-              placeholder="Describe the revisions needed..."
-              value={revisionReason}
-              onChange={(e) => setRevisionReason(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
+      <DraggablePopup
+        open={revisionDialogOpen}
+        onOpenChange={setRevisionDialogOpen}
+        title={<h2 className="text-lg font-semibold leading-none tracking-tight">Request Revision</h2>}
+        width={440}
+        zIndex={300}
+        footer={
+          <div className="flex flex-col-reverse md:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setRevisionDialogOpen(false)}
               disabled={submittingRevision}
               className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
             >
               Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
+            </Button>
+            <Button
               disabled={!revisionReason.trim() || submittingRevision}
               className="bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
-              onClick={(e) => {
-                e.preventDefault();
-                handleRequestRevision();
-              }}
+              onClick={handleRequestRevision}
             >
               {submittingRevision ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Submit Request
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-muted-foreground mb-3">
+          Please describe what changes you need for this delivery.
+        </p>
+        <Textarea
+          placeholder="Describe the revisions needed..."
+          value={revisionReason}
+          onChange={(e) => setRevisionReason(e.target.value)}
+          className="min-h-[100px]"
+        />
+      </DraggablePopup>
 
       {orderDetailsOpen && createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none">
