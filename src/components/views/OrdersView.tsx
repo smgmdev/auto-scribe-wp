@@ -838,10 +838,10 @@ export function OrdersView() {
             {order.media_sites?.publication_format && (
               <p className="text-xs text-muted-foreground">{order.media_sites.publication_format}</p>
             )}
-            <p className="font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+            <p className="font-semibold">${order.amount_cents.toLocaleString()}</p>
             {isAdmin && (
               <p className="text-xs text-muted-foreground">
-                Fee: ${(order.platform_fee_cents / 100).toFixed(2)}
+                Fee: ${order.platform_fee_cents.toLocaleString()}
               </p>
             )}
           </div>
@@ -1119,17 +1119,17 @@ export function OrdersView() {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Paid</span>
-                  <span className="font-semibold">${(selectedOrder.amount_cents / 100).toFixed(2)}</span>
+                  <span className="font-semibold">${selectedOrder.amount_cents.toLocaleString()}</span>
                 </div>
                 {isAdmin && (
                   <>
                     <div className="flex justify-between text-sm mt-2">
                       <span className="text-muted-foreground">Platform Fee</span>
-                      <span className="text-green-600">${(selectedOrder.platform_fee_cents / 100).toFixed(2)}</span>
+                      <span className="text-green-600">${selectedOrder.platform_fee_cents.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm mt-2">
                       <span className="text-muted-foreground">Agency Payout</span>
-                      <span>${(selectedOrder.agency_payout_cents / 100).toFixed(2)}</span>
+                      <span>${selectedOrder.agency_payout_cents.toLocaleString()}</span>
                     </div>
                   </>
                 )}
@@ -1194,7 +1194,7 @@ export function OrdersView() {
                     Accept Delivery & Release Payment
                   </Button>
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    This will release ${(selectedOrder.agency_payout_cents / 100).toFixed(2)} to the agency
+                    This will release ${selectedOrder.agency_payout_cents.toLocaleString()} credits to the agency
                   </p>
                 </div>
               )}

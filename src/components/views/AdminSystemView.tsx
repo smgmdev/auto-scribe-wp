@@ -141,8 +141,8 @@ export function AdminSystemView() {
         const userTxs = txMap.get(p.id) || [];
         const totalBalance = calculateTotalBalance(userTxs);
         const withdrawalInfo = calculateWithdrawals(userTxs);
-        const creditsWithdrawn = withdrawalInfo.completedCents / 100;
-        const creditsInWithdrawals = withdrawalInfo.lockedCents / 100;
+        const creditsWithdrawn = withdrawalInfo.completed;
+        const creditsInWithdrawals = withdrawalInfo.locked;
         const lockedFromOrders = lockedFromOrdersMap.get(p.id) || 0;
         const lockedFromRequests = lockedFromRequestsMap.get(p.id) || 0;
         const available = calculateAvailableCredits(totalBalance, lockedFromOrders, lockedFromRequests, creditsInWithdrawals, creditsWithdrawn);

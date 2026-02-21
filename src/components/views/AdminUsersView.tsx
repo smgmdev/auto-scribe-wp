@@ -923,8 +923,8 @@ export function AdminUsersView() {
       const userTxs = userTransactionsMap.get(profile.id) || [];
       const calculatedBalance = calculateTotalBalance(userTxs);
       const withdrawalData = calculateWithdrawals(userTxs);
-      const creditsInWithdrawals = withdrawalData.lockedCents / 100;
-      const creditsWithdrawn = withdrawalData.completedCents / 100;
+      const creditsInWithdrawals = withdrawalData.locked;
+      const creditsWithdrawn = withdrawalData.completed;
 
       const lockedFromOrders = lockedFromOrdersMap.get(profile.id) || 0;
       const lockedFromRequests = lockedFromRequestsMap.get(profile.id) || 0;

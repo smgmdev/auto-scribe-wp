@@ -382,7 +382,7 @@ export function CreditHistoryView() {
     let completedSpent = 0;
     if (completedOrders && completedOrders.length > 0) {
       for (const order of completedOrders) {
-        completedSpent += Math.round((order.amount_cents || 0) / 100);
+        completedSpent += order.amount_cents || 0;
       }
     }
     setCompletedOrdersSpent(completedSpent);
@@ -1551,7 +1551,7 @@ export function CreditHistoryView() {
                 {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
               </p>
               <p className="text-lg font-bold text-foreground">
-                -${(tabFilteredTransactions.filter(tx => tx.type === 'withdrawal_completed').reduce((sum, tx) => sum + Math.abs(tx.amount), 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                -${tabFilteredTransactions.filter(tx => tx.type === 'withdrawal_completed').reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()}
               </p>
             </div>
           )}
@@ -1600,7 +1600,7 @@ export function CreditHistoryView() {
                                   : 'Withdrawal Completed'}
                             </p>
                             <div className="text-lg text-foreground md:hidden mt-1">
-                              -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                              -{Math.abs(transaction.amount).toLocaleString()}
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
                               {format(new Date(details?.processed_at || transaction.created_at), 'MMM d, yyyy h:mm a')}
@@ -1608,7 +1608,7 @@ export function CreditHistoryView() {
                           </div>
                         </div>
                         <div className="text-lg text-foreground hidden md:block">
-                          -{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}
+                          -{Math.abs(transaction.amount).toLocaleString()}
                         </div>
                       </div>
                       
@@ -1627,7 +1627,7 @@ export function CreditHistoryView() {
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <p className="font-medium">{(details.amount_cents / 100).toLocaleString()}</p>
+                                    <p className="font-medium">{details.amount_cents.toLocaleString()}</p>
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Requested:</span>
@@ -1715,7 +1715,7 @@ export function CreditHistoryView() {
                                   : 'Withdrawal Rejected'}
                             </p>
                             <div className="text-lg text-muted-foreground md:hidden mt-1">
-                              {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
+                              {Math.abs(transaction.amount).toLocaleString()} unlocked
                             </div>
                             <span className="text-xs text-muted-foreground mt-1">
                               {format(new Date(details?.processed_at || transaction.created_at), 'MMM d, yyyy h:mm a')}
@@ -1723,7 +1723,7 @@ export function CreditHistoryView() {
                           </div>
                         </div>
                         <div className="text-lg text-muted-foreground hidden md:block">
-                          {Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} unlocked
+                          {Math.abs(transaction.amount).toLocaleString()} unlocked
                         </div>
                       </div>
                       
@@ -1742,7 +1742,7 @@ export function CreditHistoryView() {
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Amount:</span>
-                                    <p className="font-medium">{(details.amount_cents / 100).toLocaleString()}</p>
+                                    <p className="font-medium">{details.amount_cents.toLocaleString()}</p>
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Requested:</span>
@@ -1897,7 +1897,7 @@ export function CreditHistoryView() {
                               {(transaction as any).order_details?.amount_cents != null && (
                                 <div>
                                   <span className="text-muted-foreground">Order Value:</span>
-                                  <p className="font-medium">{Math.round((transaction as any).order_details.amount_cents / 100).toLocaleString()} credits</p>
+                                  <p className="font-medium">{((transaction as any).order_details.amount_cents || 0).toLocaleString()} credits</p>
                                 </div>
                               )}
                               <div>
@@ -2107,9 +2107,9 @@ export function CreditHistoryView() {
                                   : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                           }`}>
                             {transaction.type === 'withdrawal_locked' ? (
-                              <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                              <>-{Math.abs(transaction.amount).toLocaleString()}</>
                             ) : transaction.type === 'order_accepted' && orderInfo ? (
-                              <>-{Math.round((orderInfo.amount_cents || 0) / 100).toLocaleString()}</>
+                              <>-{(orderInfo.amount_cents || 0).toLocaleString()}</>
                             ) : transaction.type === 'publish' ? (
                               <>-{Math.abs(transaction.amount).toLocaleString()}</>
                             ) : (
@@ -2131,9 +2131,9 @@ export function CreditHistoryView() {
                               : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                       }`}>
                         {transaction.type === 'withdrawal_locked' ? (
-                          <>-{Math.round(Math.abs(transaction.amount) / 100).toLocaleString()}</>
+                          <>-{Math.abs(transaction.amount).toLocaleString()}</>
                         ) : transaction.type === 'order_accepted' && orderInfo ? (
-                          <>-{Math.round((orderInfo.amount_cents || 0) / 100).toLocaleString()}</>
+                          <>-{(orderInfo.amount_cents || 0).toLocaleString()}</>
                         ) : transaction.type === 'publish' ? (
                           <>-{Math.abs(transaction.amount).toLocaleString()}</>
                         ) : (
@@ -2229,7 +2229,7 @@ export function CreditHistoryView() {
                                     </div>
                                     <div>
                                       <span className="text-muted-foreground">Order Value:</span>
-                                      <p className="font-medium">{Math.round((orderInfo.amount_cents || 0) / 100).toLocaleString()} credits</p>
+                                      <p className="font-medium">{(orderInfo.amount_cents || 0).toLocaleString()} credits</p>
                                     </div>
                                     <div>
                                       <span className="text-muted-foreground">Completed:</span>
@@ -2402,9 +2402,9 @@ export function CreditHistoryView() {
                                         : transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
                                   }`}>
                                     {transaction.type === 'withdrawal_locked' 
-                                      ? `${Math.round(Math.abs(transaction.amount) / 100).toLocaleString()} credits`
+                                      ? `${Math.abs(transaction.amount).toLocaleString()} credits`
                                       : transaction.type === 'order_accepted' && orderInfo
-                                        ? `${Math.round((orderInfo.amount_cents || 0) / 100).toLocaleString()} credits`
+                                        ? `${(orderInfo.amount_cents || 0).toLocaleString()} credits`
                                         : `${transaction.amount > 0 ? '+' : ''}${transaction.amount.toLocaleString()} credits`
                                     }
                                   </p>

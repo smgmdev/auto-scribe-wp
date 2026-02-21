@@ -983,21 +983,21 @@ export function AdminOrdersView() {
   const activeOrdersCount = regularActiveOrdersCount + disputeOrdersCount;
   const activeOrdersValue = regularActiveOrdersValue + disputeValue;
   
-  // Instant orders value (in cents) and platform fees
-  const instantOrdersValueCents = instantOrders.reduce((sum, item) => sum + Math.abs(item.amount) * 100, 0);
-  const instantOrdersFeesCents = instantOrders.reduce((sum, item) => {
+  // Instant orders value (in credits) and platform fees
+  const instantOrdersValue = instantOrders.reduce((sum, item) => sum + Math.abs(item.amount), 0);
+  const instantOrdersFees = instantOrders.reduce((sum, item) => {
     const credits = Math.abs(item.amount);
     const commissionPct = item.commission_percentage ?? 10;
-    return sum + Math.round(credits * (commissionPct / 100) * 100);
+    return sum + Math.round(credits * (commissionPct / 100));
   }, 0);
 
   const deliveredValue = orders
     .filter(o => o.status === 'completed')
-    .reduce((sum, o) => sum + o.amount_cents, 0) + instantOrdersValueCents;
+    .reduce((sum, o) => sum + o.amount_cents, 0) + instantOrdersValue;
   
   const totalFeeEarnings = orders
     .filter(o => o.status === 'completed')
-    .reduce((sum, o) => sum + calculatePlatformFee(o), 0) + instantOrdersFeesCents;
+    .reduce((sum, o) => sum + calculatePlatformFee(o), 0) + instantOrdersFees;
 
   if (!isAdmin) {
     return <div className="text-center py-12 text-muted-foreground">Admin access required</div>;

@@ -108,7 +108,7 @@ serve(async (req) => {
     
     for (const tx of (transactions || [])) {
       if (tx.type === 'withdrawal_completed') {
-        withdrawn += Math.abs(tx.amount) / 100;
+        withdrawn += Math.abs(tx.amount);
         continue;
       }
       if (withdrawalTypes.includes(tx.type)) continue;

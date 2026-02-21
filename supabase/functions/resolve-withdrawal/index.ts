@@ -131,7 +131,7 @@ serve(async (req) => {
       });
     }
 
-    const amountFormatted = `$${(withdrawal.amount_cents / 100).toFixed(2)}`;
+    const amountFormatted = `$${withdrawal.amount_cents}`;
     const message =
       action === "reject"
         ? `Withdrawal of ${amountFormatted} rejected. Credits returned to agency.`

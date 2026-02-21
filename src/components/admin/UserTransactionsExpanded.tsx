@@ -369,7 +369,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     if (tx.order_id && orders.has(tx.order_id)) {
       const order = orders.get(tx.order_id)!;
       const netEarnings = tx.type === 'order_completed' 
-        ? (order.amount_cents - order.platform_fee_cents) / 100 
+        ? order.amount_cents - order.platform_fee_cents
         : null;
 
       const handleViewOrderChat = async (e: React.MouseEvent) => {
@@ -424,12 +424,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           )}
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
-            <p className="font-medium">{(order.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
+            <p className="font-medium">{order.amount_cents.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
           </div>
           {order.platform_fee_cents > 0 && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Platform Fee</p>
-              <p className="font-medium">{(order.platform_fee_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
+              <p className="font-medium">{order.platform_fee_cents.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
             </div>
           )}
           {netEarnings !== null && (
@@ -952,16 +952,16 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                           tx.amount > 0 ? 'text-green-600' : 'text-destructive'
                         )}>
                           {tx.type === 'withdrawal_unlocked' ? (
-                            <>{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
+                            <>{Math.abs(tx.amount).toLocaleString()}</>
                           ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
                             <>
-                              {tx.amount > 0 ? '+' : '-'}{Math.abs(tx.amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {tx.amount > 0 ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()}
                             </>
                           ) : (
                             <>
                               {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
                               {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
-                                ? (orders.get(tx.order_id)!.amount_cents / 100).toLocaleString()
+                                ? orders.get(tx.order_id)!.amount_cents.toLocaleString()
                                 : Math.abs(tx.amount).toLocaleString()}
                             </>
                           )}

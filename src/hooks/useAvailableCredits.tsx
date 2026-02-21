@@ -111,8 +111,8 @@ export function useAvailableCredits(enabled = true) {
 
     // 6. Withdrawal amounts (shared formula)
     const withdrawals = calculateWithdrawals(txs);
-    const creditsInWithdrawals = withdrawals.lockedCents / 100;
-    const creditsWithdrawn = withdrawals.completedCents / 100;
+    const creditsInWithdrawals = withdrawals.locked;
+    const creditsWithdrawn = withdrawals.completed;
 
     // 7. Completed orders count and total spent (using amount_cents locked at purchase time)
     const { data: completedOrders } = await supabase
@@ -128,7 +128,7 @@ export function useAvailableCredits(enabled = true) {
     if (completedOrders) {
       totalOrders = completedOrders.length;
       for (const order of completedOrders) {
-        completedOrdersSpent += Math.round((order.amount_cents || 0) / 100);
+        completedOrdersSpent += order.amount_cents || 0;
       }
     }
 
@@ -166,8 +166,8 @@ export function useAvailableCredits(enabled = true) {
       creditsInPendingRequests,
       creditsWithdrawn,
       creditsInWithdrawals,
-      withdrawalsByBank: withdrawals.bankLockedCents / 100,
-      withdrawalsByCrypto: withdrawals.cryptoLockedCents / 100,
+      withdrawalsByBank: withdrawals.bankLocked,
+      withdrawalsByCrypto: withdrawals.cryptoLocked,
       totalOrders,
       totalSpent,
       loading: false,

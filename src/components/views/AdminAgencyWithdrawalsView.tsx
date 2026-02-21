@@ -289,16 +289,16 @@ export function AdminAgencyWithdrawalsView() {
 
   const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
   const completedCount = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').length;
-  const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
-  const totalCompleted = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + w.amount_cents, 0);
+  const totalCompleted = withdrawals.filter(w => w.status === 'completed' || w.status === 'approved').reduce((sum, w) => sum + w.amount_cents, 0);
 
   // Pending breakdown by method
-  const pendingBankAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
-  const pendingCryptoAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const pendingBankAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0);
+  const pendingCryptoAmount = withdrawals.filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0);
 
   // Completed breakdown by method (includes 'approved' status as completed)
-  const completedBankAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
-  const completedCryptoAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0) / 100;
+  const completedBankAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank').reduce((sum, w) => sum + w.amount_cents, 0);
+  const completedCryptoAmount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto').reduce((sum, w) => sum + w.amount_cents, 0);
   const completedBankCount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank').length;
   const completedCryptoCount = withdrawals.filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto').length;
 

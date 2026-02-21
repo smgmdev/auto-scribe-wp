@@ -115,7 +115,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
     try {
       const { data, error: fnError } = await supabase.functions.invoke('submit-withdrawal', {
         body: {
-          amount_cents: Math.round(numAmount * 100),
+          amount_cents: numAmount,
           withdrawal_method: withdrawalMethod,
           agency_payout_id: agencyPayoutId,
         },
