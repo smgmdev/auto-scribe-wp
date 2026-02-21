@@ -581,9 +581,9 @@ export function AgencyPayoutsView() {
       </div>
 
       {/* Earnings History */}
-      <Card className="border-border/50 rounded-none sm:rounded-lg border-x-0 sm:border-x">
-        <CardHeader className="px-2 sm:px-6 pb-0">
-          <CardTitle className="text-lg">Earnings History</CardTitle>
+      <Card className="rounded-none border-0 shadow-none">
+        <CardHeader className="px-0 sm:px-0 pb-0 pt-0 space-y-0">
+          <CardTitle className="text-lg bg-foreground text-background px-3 py-2">Earnings History</CardTitle>
           <Tabs value={earningsTab} onValueChange={setEarningsTab} className="mt-3">
             <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full mb-0" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
               <TabsTrigger value="all" className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap">
@@ -601,7 +601,7 @@ export function AgencyPayoutsView() {
             </TabsList>
           </Tabs>
         </CardHeader>
-        <CardContent className="px-2 sm:px-6 pt-0">
+        <CardContent className="px-0 sm:px-0 pt-0 pb-0">
           {/* Tab summary */}
           {earningsTab === 'all' && (
             <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
