@@ -745,7 +745,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   return (
     <div className="bg-muted/30 overflow-hidden">
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
-        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 !flex-nowrap">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             return (
