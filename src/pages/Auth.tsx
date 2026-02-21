@@ -219,11 +219,27 @@ export default function Auth() {
       console.log('[Auth] check_active_session result:', { activeSessionId, error: sessionCheckError });
 
       if (!sessionCheckError && activeSessionId && activeSessionId !== 'null' && activeSessionId.trim() !== '') {
-        // Another device/browser is logged in — ask for confirmation
-        pendingSignInRef.current = { email, password };
-        setIsLoading(false);
-        setShowActiveSessionWarning(true);
-        return;
+        // Check if the session is stale by looking at last_online_at
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('last_online_at')
+          .eq('email', email)
+          .single();
+        
+        const lastOnline = (profileData as any)?.last_online_at;
+        const SESSION_STALE_MS = 35 * 60 * 1000; // 35 min (30 min session + 5 min buffer)
+        const isStale = lastOnline && (Date.now() - new Date(lastOnline).getTime() > SESSION_STALE_MS);
+
+        if (isStale) {
+          // Session is stale — auto-clear and proceed
+          console.log('[Auth] Stale session detected (last online:', lastOnline, '), auto-clearing');
+        } else {
+          // Another device/browser is actively logged in — ask for confirmation
+          pendingSignInRef.current = { email, password };
+          setIsLoading(false);
+          setShowActiveSessionWarning(true);
+          return;
+        }
       }
     } catch (rpcError) {
       console.error('[Auth] check_active_session RPC failed:', rpcError);
