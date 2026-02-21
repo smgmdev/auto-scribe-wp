@@ -158,10 +158,9 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
     <DraggablePopup
       open={open}
       onOpenChange={onOpenChange}
-      title="Withdraw Funds"
+      title={<h2 className="text-lg font-semibold">Withdraw Funds</h2>}
       width={440}
     >
-      <div className="p-4 md:p-5 overflow-y-auto max-h-[calc(100vh-120px)] md:max-h-[70vh]">
         <p className="text-sm text-muted-foreground mb-4">
           Available balance: <span className="text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </p>
@@ -313,7 +312,6 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
             </div>
           </div>
         )}
-      </div>
     </DraggablePopup>
   );
 }
