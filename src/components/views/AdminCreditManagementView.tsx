@@ -356,149 +356,140 @@ export const AdminCreditManagementView = () => {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[340px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+              <TooltipContent side="bottom" sideOffset={8} className="max-w-[360px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
                 {(() => {
-                  const totalEarned = activeUsers.reduce((sum, user) => sum + user.earned, 0);
-                  const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
                   const totalPurchased = activeUsers.reduce((sum, user) => sum + user.purchased, 0);
                   const totalPurchasedOnline = activeUsers.reduce((sum, user) => sum + (user.purchasedOnline || 0), 0);
                   const totalPurchasedInvoice = activeUsers.reduce((sum, user) => sum + (user.purchasedInvoice || 0), 0);
-                  const totalSpent = activeUsers.reduce((sum, user) => sum + user.totalSpent, 0);
-                  const totalDeductions = activeUsers.reduce((sum, user) => sum + (user.deductions || 0), 0);
-                  const totalMediaOrders = activeUsers.reduce((sum, user) => sum + (user.totalSpent - user.publishSpent - (user.usageSpent || 0)), 0);
-                  const totalPublishSpent = activeUsers.reduce((sum, user) => sum + (user.publishSpent || 0), 0);
-                  const totalUsageSpent = activeUsers.reduce((sum, user) => sum + (user.usageSpent || 0), 0);
-                  const totalLockedFromOrders = activeUsers.reduce((sum, user) => sum + user.lockedFromOrders, 0);
-                  const totalLockedFromRequests = activeUsers.reduce((sum, user) => sum + (user.lockedFromRequests || 0), 0);
-                  const totalLockedFromWithdrawals = activeUsers.reduce((sum, user) => sum + user.lockedFromWithdrawals, 0);
-                  const totalPendingBankWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingBankWithdrawals, 0);
-                  const totalPendingCryptoWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingCryptoWithdrawals, 0);
-                  const totalLocked = Math.round(totalLockedFromOrders + totalLockedFromRequests + totalLockedFromWithdrawals);
-                  const totalAvailable = totalCredits;
-                  const totalAllSpending = totalSpent + totalDeductions;
-                  // Smart formula: Purchased + Earned - AllSpent - Withdrawn - Locked = Available
-                  const totalInflows = totalPurchased + totalEarned;
-                  const totalOutflows = totalAllSpending + Math.round(totalWithdrawn) + totalLocked;
-                  const expectedAvailable = totalInflows - totalOutflows;
-                  const isAligned = expectedAvailable === totalAvailable;
+                  const totalEarned = activeUsers.reduce((sum, user) => sum + user.earned, 0);
+                  const totalB2bEarnings = activeUsers.reduce((sum, user) => sum + user.b2bEarnings, 0);
+                  const totalInstantEarnings = activeUsers.reduce((sum, user) => sum + user.instantPublishingEarnings, 0);
+                  const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
+                  const totalPendingBank = activeUsers.reduce((sum, user) => sum + user.pendingBankWithdrawals, 0);
+                  const totalPendingCrypto = activeUsers.reduce((sum, user) => sum + user.pendingCryptoWithdrawals, 0);
+                  const totalPending = totalPendingBank + totalPendingCrypto;
+
+                  const agencyUsers = activeUsers.filter(u => u.isAgency);
+                  const regularUsers = activeUsers.filter(u => !u.isAgency);
+                  const agencyAvailable = agencyUsers.reduce((sum, u) => sum + u.available, 0);
+                  const regularAvailable = regularUsers.reduce((sum, u) => sum + u.available, 0);
+
+                  // Withdrawable = available minus locked
+                  const agencyWithdrawable = agencyUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
+                  const regularWithdrawable = regularUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
+
+                  // Commission: platform_fee_cents from completed orders
+                  const totalCommission = Math.round(totalPlatformFees / 100);
+                  // Estimate B2B vs IP commission from earnings ratio
+                  const totalEarnedSafe = totalEarned || 1;
+                  const b2bCommission = totalEarned > 0 ? Math.round(totalCommission * (totalB2bEarnings / totalEarnedSafe)) : totalCommission;
+                  const ipCommission = totalCommission - b2bCommission;
+                  const b2bCommissionPct = totalB2bEarnings > 0 ? ((b2bCommission / (totalB2bEarnings + b2bCommission)) * 100).toFixed(1) : '0';
+                  const ipCommissionPct = totalInstantEarnings > 0 ? ((ipCommission / (totalInstantEarnings + ipCommission)) * 100).toFixed(1) : '0';
+
+                  const fmt = (n: number) => n.toLocaleString();
+
                   return (
-                    <div className="space-y-3 min-w-[280px]">
-                      {/* Row 1: Inflows */}
+                    <div className="space-y-3 min-w-[300px]">
+                      {/* Purchased */}
                       <div className="space-y-1">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Inflows</div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Purchased (Online):</span>
-                          <span className="font-semibold text-green-400">+{totalPurchasedOnline.toLocaleString()}</span>
+                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Purchased by Users</div>
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/50 text-xs">Online via Platform:</span>
+                          <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedOnline)}</span>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Purchased (Invoice):</span>
-                          <span className="font-semibold text-green-400">+{totalPurchasedInvoice.toLocaleString()}</span>
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/50 text-xs">Offline via Invoice:</span>
+                          <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedInvoice)}</span>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Agency Earnings:</span>
-                          <span className="font-semibold text-green-400">+{totalEarned.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                          <span className="text-white font-medium">Total In:</span>
-                          <span className="font-semibold text-green-400">{totalInflows.toLocaleString()}</span>
+                        <div className="flex justify-between gap-4 pt-1">
+                          <span className="text-white font-medium text-xs">Total:</span>
+                          <span className="font-semibold text-green-400 text-xs">{fmt(totalPurchased)}</span>
                         </div>
                       </div>
-                      {/* Row 2: Outflows */}
+
+                      {/* Earned */}
                       <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Outflows</div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Media Orders:</span>
-                          <span className="font-semibold text-red-400">-{totalMediaOrders.toLocaleString()}</span>
+                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Earned by Agencies</div>
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                          <span className="text-xs font-medium text-green-400">{fmt(totalB2bEarnings)}</span>
                         </div>
-                        {totalPublishSpent > 0 && (
-                          <div className="flex justify-between gap-4">
-                            <span className="text-white/70">Instant Publishing:</span>
-                            <span className="font-semibold text-red-400">-{totalPublishSpent.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {totalUsageSpent > 0 && (
-                          <div className="flex justify-between gap-4">
-                            <span className="text-white/70">Other Usage:</span>
-                            <span className="font-semibold text-red-400">-{totalUsageSpent.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {totalDeductions > 0 && (
-                          <div className="flex justify-between gap-4">
-                            <span className="text-white/70">Admin Deductions:</span>
-                            <span className="font-semibold text-red-400">-{totalDeductions.toLocaleString()}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Withdrawn:</span>
-                          <span className="font-semibold text-red-400">-{Math.round(totalWithdrawn).toLocaleString()}</span>
+                        <div className="flex justify-between gap-4 pl-2">
+                          <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
+                          <span className="text-xs font-medium text-green-400">{fmt(totalInstantEarnings)}</span>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Currently Locked:</span>
-                          <span className="font-semibold text-amber-400">{totalLocked.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                          <span className="text-white font-medium">Total Out:</span>
-                          <span className="font-semibold text-red-400">{totalOutflows.toLocaleString()}</span>
+                        <div className="flex justify-between gap-4 pt-1">
+                          <span className="text-white font-medium text-xs">Total:</span>
+                          <span className="font-semibold text-green-400 text-xs">{fmt(totalEarned)}</span>
                         </div>
                       </div>
-                      {/* Row 3: Reconciliation */}
+
+                      {/* Withdrawn */}
                       <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Reconciliation</div>
                         <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Total In:</span>
-                          <span className="font-semibold text-green-400">{totalInflows.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Total Out:</span>
-                          <span className="font-semibold text-red-400">-{totalOutflows.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                          <span className="text-white/70">Expected Available:</span>
-                          <span className="font-semibold text-white">{expectedAvailable.toLocaleString()}</span>
+                          <span className="text-white/70">Total Withdrawn:</span>
+                          <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${fmt(Math.round(totalWithdrawn))}` : '0'}</span>
                         </div>
                         <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Actual Available:</span>
-                          <span className="font-semibold text-white">{totalAvailable.toLocaleString()}</span>
+                          <span className="text-white/70">Total Pending Withdrawal:</span>
+                          <span className="font-semibold text-amber-400">{totalPending > 0 ? fmt(totalPending) : '0'}</span>
                         </div>
-                        <div className={`flex items-center gap-2 pt-2 mt-1 border-t border-white/20 ${isAligned ? 'text-green-400' : 'text-red-400'}`}>
-                          <span className="text-xs font-semibold">{isAligned ? '✓ Balanced' : `✗ Mismatch (${(totalAvailable - expectedAvailable > 0 ? '+' : '')}${(totalAvailable - expectedAvailable).toLocaleString()})`}</span>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">USDT:</span>
+                          <span className="text-xs font-medium text-amber-400/80">{totalPendingCrypto > 0 ? fmt(totalPendingCrypto) : '0'}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Bank Transfer:</span>
+                          <span className="text-xs font-medium text-amber-400/80">{totalPendingBank > 0 ? fmt(totalPendingBank) : '0'}</span>
                         </div>
                       </div>
-                      {/* Row 4: Locked Breakdown */}
+
+                      {/* Available within platform */}
                       <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Locked Breakdown</div>
                         <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Order Requests:</span>
-                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromRequests).toLocaleString()}</span>
+                          <span className="text-white/70">Credits Available in Platform:</span>
+                          <span className="font-semibold text-white">{fmt(totalCredits)}</span>
                         </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Agencies:</span>
+                          <span className="text-xs font-medium text-white/80">{fmt(agencyAvailable)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Regular Users:</span>
+                          <span className="text-xs font-medium text-white/80">{fmt(regularAvailable)}</span>
+                        </div>
+                      </div>
+
+                      {/* Withdrawable */}
+                      <div className="space-y-1 border-t border-white/20 pt-3">
                         <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Active Orders:</span>
-                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
+                          <span className="text-white/70">Withdrawable Credits:</span>
+                          <span className="font-semibold text-white">{fmt(agencyWithdrawable + regularWithdrawable)}</span>
                         </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Agencies:</span>
+                          <span className="text-xs font-medium text-white/80">{fmt(agencyWithdrawable)}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Users:</span>
+                          <span className="text-xs font-medium text-white/80">{fmt(regularWithdrawable)}</span>
+                        </div>
+                      </div>
+
+                      {/* Platform Commission */}
+                      <div className="space-y-1 border-t border-white/20 pt-3">
                         <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Withdrawals:</span>
-                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromWithdrawals).toLocaleString()}</span>
+                          <span className="text-white/70">Platform Commission Fees:</span>
+                          <span className="font-semibold text-blue-400">{fmt(totalCommission)}</span>
                         </div>
-                        {(totalPendingBankWithdrawals > 0 || totalPendingCryptoWithdrawals > 0) && (
-                          <>
-                            <div className="text-white/70 text-xs uppercase tracking-wide pt-2">Pending Withdrawals</div>
-                            {totalPendingBankWithdrawals > 0 && (
-                              <div className="flex justify-between gap-4 pl-2">
-                                <span className="text-white/70">Bank:</span>
-                                <span className="font-semibold text-amber-400">${totalPendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                              </div>
-                            )}
-                            {totalPendingCryptoWithdrawals > 0 && (
-                              <div className="flex justify-between gap-4 pl-2">
-                                <span className="text-white/70">USDT:</span>
-                                <span className="font-semibold text-amber-400">${totalPendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                          <span className="text-white/70">Platform Fees:</span>
-                          <span className="font-semibold text-red-400">{totalPlatformFees > 0 ? `-${totalPlatformFees.toLocaleString()}` : '0'}</span>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">B2B Media Buying:</span>
+                          <span className="text-xs font-medium text-blue-400/80">{fmt(b2bCommission)} ({b2bCommissionPct}%)</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pl-3">
+                          <span className="text-white/50 text-xs">Instant Publishing:</span>
+                          <span className="text-xs font-medium text-blue-400/80">{fmt(ipCommission)} ({ipCommissionPct}%)</span>
                         </div>
                       </div>
                     </div>
