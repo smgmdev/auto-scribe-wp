@@ -822,6 +822,32 @@ export function AdminMediaManagementView() {
     fetchData();
   }, []);
 
+  // Real-time: auto-refresh when new WP or media submissions arrive
+  useEffect(() => {
+    const wpChannel = supabase
+      .channel('admin-wp-submissions-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'wordpress_site_submissions' },
+        () => { fetchData(); }
+      )
+      .subscribe();
+
+    const mediaChannel = supabase
+      .channel('admin-media-submissions-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'media_site_submissions' },
+        () => { fetchData(); }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(wpChannel);
+      supabase.removeChannel(mediaChannel);
+    };
+  }, []);
+
   const handleOpenReview = async (submission: WordPressSiteSubmission) => {
     setSelectedSubmission(submission);
     setIsReviewDialogOpen(true);
