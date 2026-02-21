@@ -622,6 +622,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return () => removePopup('confirm-order-dialog');
   }, [acceptOrderDialogOpen]);
 
+  // Media listing popup stack
+  useEffect(() => {
+    if (mediaListingOpen) {
+      pushPopup('media-listing-popup', () => { setMediaListingOpen(false); mediaListingInitialized.current = false; });
+    } else {
+      removePopup('media-listing-popup');
+    }
+    return () => removePopup('media-listing-popup');
+  }, [mediaListingOpen]);
+
   // Credit balance now comes from the centralized useAvailableCredits hook
   // Refresh when the confirm order dialog opens
   useEffect(() => {
