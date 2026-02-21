@@ -858,7 +858,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <TableRow className="h-6 !border-b border-border">
                 <TableHead className="w-10 py-0"></TableHead>
                 <TableHead className="py-0">Description</TableHead>
-                <TableHead className="text-right py-0">Amount</TableHead>
+                <TableHead className="text-right py-0 hidden md:table-cell">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -936,10 +936,34 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                                 </button>
                               )}
                             </div>
+                            <span className={cn(
+                              "md:hidden font-medium text-sm",
+                              tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : 
+                              tx.type === 'withdrawal_completed' ? 'text-foreground' : 
+                              tx.type === 'offer_accepted' ? 'text-foreground' : 
+                              tx.type === 'order_accepted' ? 'text-foreground' :
+                              tx.type === 'locked' ? 'text-foreground' :
+                              tx.type === 'unlocked' ? 'text-foreground' :
+                              tx.type === 'order_completed' ? 'text-destructive' : 
+                              tx.amount > 0 ? 'text-green-600' : 'text-destructive'
+                            )}>
+                              {tx.type === 'withdrawal_unlocked' ? (
+                                <>{Math.abs(tx.amount).toLocaleString()}</>
+                              ) : ['withdrawal_locked', 'withdrawal_completed'].includes(tx.type) ? (
+                                <>{tx.amount > 0 ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()}</>
+                              ) : (
+                                <>
+                                  {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
+                                  {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
+                                    ? orders.get(tx.order_id)!.amount_cents.toLocaleString()
+                                    : Math.abs(tx.amount).toLocaleString()}
+                                </>
+                              )}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className={cn(
-                          "text-right font-medium",
+                          "text-right font-medium hidden md:table-cell",
                           tx.type === 'withdrawal_unlocked' ? 'text-muted-foreground' : 
                           tx.type === 'withdrawal_completed' ? 'text-foreground' : 
                           tx.type === 'offer_accepted' ? 'text-foreground' : 
