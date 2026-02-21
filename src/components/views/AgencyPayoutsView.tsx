@@ -130,8 +130,8 @@ export function AgencyPayoutsView() {
     .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
-  // Wallet balance = total earnings minus completed withdrawals minus locked credits (rejected withdrawals stay in wallet)
-  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal - lockedInOrders - lockedInOrderRequests;
+  // Wallet balance = total earnings minus completed withdrawals (locked credits are buyer-side only, not applicable to seller)
+  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal;
 
   // Available balance = wallet balance minus pending withdrawals
   const availableBalance = walletBalance - pendingWithdrawalsTotal;
@@ -446,22 +446,6 @@ export function AgencyPayoutsView() {
                   <span className="text-white/50">None</span>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked in Order Requests:</span>
-                <span className="font-semibold text-amber-400">${lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked in Orders:</span>
-                <span className="font-semibold text-amber-400">${lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Purchased:</span>
-                <span className="text-white/50 text-xs">Not Included</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Spent:</span>
-                <span className="text-white/50 text-xs">Not Included</span>
-              </div>
               <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
                 <span className="text-white/70">Wallet Balance:</span>
                 <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
