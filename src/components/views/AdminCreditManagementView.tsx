@@ -341,7 +341,7 @@ export const AdminCreditManagementView = () => {
                 <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
                     <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
-                      Total Available Credits
+                      Circulating Credits
                     </CardTitle>
                     <CreditCard className="h-4 w-4 text-white/60" />
                   </CardHeader>
@@ -404,7 +404,7 @@ export const AdminCreditManagementView = () => {
                         <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                        <span className="text-white/70">Total Available Credits:</span>
+                        <span className="text-white/70">Circulating Credits:</span>
                         <span className="font-semibold text-green-400">{totalCredits.toLocaleString()}</span>
                       </div>
                     </div>
