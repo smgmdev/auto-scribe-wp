@@ -353,6 +353,39 @@ export function AgencyPayoutsView() {
     fetchCompletedOrders();
   }, [user]);
 
+  // Real-time subscriptions for earnings-related changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('agency-earnings-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => fetchCompletedOrders()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` },
+        () => fetchCompletedOrders()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'agency_withdrawals', filter: `user_id=eq.${user.id}` },
+        () => fetchCompletedOrders()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'payout_transactions' },
+        () => fetchCompletedOrders()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
