@@ -8091,7 +8091,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       <DraggablePopup
         open={deliverOrderDialogOpen}
         onOpenChange={setDeliverOrderDialogOpen}
-        title="Deliver Order"
+        title={<h2 className="text-lg font-semibold leading-none tracking-tight">Deliver Order</h2>}
         width={440}
         zIndex={300}
         footer={
