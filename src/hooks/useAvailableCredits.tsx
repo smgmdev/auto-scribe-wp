@@ -114,25 +114,39 @@ export function useAvailableCredits(enabled = true) {
     const creditsInWithdrawals = withdrawals.lockedCents / 100;
     const creditsWithdrawn = withdrawals.completedCents / 100;
 
-    // 7. Completed orders count and total spent
+    // 7. Completed orders count and total spent (using amount_cents locked at purchase time)
     const { data: completedOrders } = await supabase
       .from('orders')
-      .select('media_sites(price)')
+      .select('id, amount_cents')
       .eq('user_id', user.id)
       .eq('delivery_status', 'accepted');
 
     let totalOrders = 0;
-    let totalSpent = 0;
+    let completedOrdersSpent = 0;
     if (completedOrders) {
       totalOrders = completedOrders.length;
       for (const order of completedOrders) {
-        const ms = order.media_sites as { price: number } | null;
-        if (ms?.price) totalSpent += ms.price;
+        completedOrdersSpent += Math.round((order.amount_cents || 0) / 100);
       }
     }
 
     const deliveryOrdersCount = txs.filter(t => t.type === 'order_payout').length;
     totalOrders += deliveryOrdersCount;
+
+    // Include admin deductions, publish spending, and usage spending in totalSpent
+    const adminDeductions = txs
+      .filter(t => t.type === 'deduction' || t.type === 'admin_deduct')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    const publishSpending = txs
+      .filter(t => t.type === 'publish')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    const usageSpending = txs
+      .filter(t => t.type === 'usage')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    const totalSpent = completedOrdersSpent + adminDeductions + publishSpending + usageSpending;
 
     // 8. Final available credits (shared formula)
     const availableCredits = calculateAvailableCredits(
