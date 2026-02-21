@@ -128,11 +128,31 @@ export function DashboardView() {
   const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
   // Ticker to force re-render of session durations every second
   const [, setSessionTick] = useState(0);
+  // User's own session start time (for non-admin session badge)
+  const [userSessionStartedAt, setUserSessionStartedAt] = useState<string | null>(null);
   useEffect(() => {
-    if (!isAdmin) return;
+    // Tick every second for admin session list OR user session badge
+    const needsTick = isAdmin || userSessionStartedAt;
+    if (!needsTick) return;
     const tickInterval = setInterval(() => setSessionTick(t => t + 1), 1000);
     return () => clearInterval(tickInterval);
-  }, [isAdmin]);
+  }, [isAdmin, userSessionStartedAt]);
+
+  // Fetch current user's session_started_at for the session badge
+  useEffect(() => {
+    if (!user || isAdmin) return;
+    const fetchUserSession = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('session_started_at')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (data?.session_started_at) {
+        setUserSessionStartedAt(data.session_started_at);
+      }
+    };
+    fetchUserSession();
+  }, [user, isAdmin]);
 
   const fetchActiveSessions = useCallback(async () => {
     if (!isAdmin) return;
@@ -477,6 +497,11 @@ export function DashboardView() {
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
+            {!isAdmin && userSessionStartedAt && (
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap font-mono text-xs">
+                Online: {formatSessionDuration(userSessionStartedAt)}
+              </Badge>
+            )}
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
@@ -501,6 +526,11 @@ export function DashboardView() {
           ) : (
             <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
+            </Badge>
+          )}
+          {!isAdmin && userSessionStartedAt && (
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap font-mono text-xs">
+              Online: {formatSessionDuration(userSessionStartedAt)}
             </Badge>
           )}
         </div>
