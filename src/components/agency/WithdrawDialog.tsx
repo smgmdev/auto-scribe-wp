@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { pushPopup, removePopup } from '@/lib/popup-stack';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,13 +39,6 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
 
-  // Register on popup stack for layered Esc handling
-  useEffect(() => {
-    if (!open) { removePopup('withdraw-dialog'); return; }
-    pushPopup('withdraw-dialog', () => onOpenChange(false));
-    return () => removePopup('withdraw-dialog');
-  }, [open, onOpenChange]);
-
   const hasBankData = verificationData?.bank_account_holder || verificationData?.bank_account_number || verificationData?.bank_name;
   const hasCryptoData = verificationData?.usdt_wallet_address;
 
@@ -61,7 +53,6 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
     setLoading(true);
 
     try {
-      // Fetch agency payout id
       const { data: agencyData } = await supabase
         .from('agency_payouts')
         .select('id')
@@ -83,7 +74,6 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
         console.error('Error fetching verification data:', error);
       } else {
         setVerificationData(data);
-        // Set default method based on available data
         if (data?.usdt_wallet_address && !data?.bank_account_holder) {
           setWithdrawalMethod('crypto');
         }
@@ -123,11 +113,6 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
     setSubmitting(true);
     
     try {
-      // Invoke server-side edge function which:
-      // 1. Verifies the caller's identity via JWT
-      // 2. Recalculates the available balance from the authoritative ledger
-      // 3. Fetches payment details from the server-verified KYC record
-      // 4. Inserts the withdrawal (triggering the withdrawal_locked credit entry)
       const { data, error: fnError } = await supabase.functions.invoke('submit-withdrawal', {
         body: {
           amount_cents: Math.round(numAmount * 100),
@@ -170,14 +155,16 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto [&_input]:h-8 [&_input]:text-sm" onEscapeKeyDown={(e) => e.preventDefault()}>
-        <DialogHeader className="text-left">
-          <DialogTitle>Withdraw Funds</DialogTitle>
-          <DialogDescription>
-            Available balance: <span className="text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          </DialogDescription>
-        </DialogHeader>
+    <DraggablePopup
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Withdraw Funds"
+      width={440}
+    >
+      <div className="p-4 md:p-5 overflow-y-auto max-h-[calc(100vh-120px)] md:max-h-[70vh]">
+        <p className="text-sm text-muted-foreground mb-4">
+          Available balance: <span className="text-green-500">${availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </p>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -281,7 +268,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  className="pl-7"
+                  className="pl-7 !text-sm"
                   min="0"
                   max={availableBalance}
                   step="0.01"
@@ -326,7 +313,7 @@ export function WithdrawDialog({ open, onOpenChange, availableBalance, onSuccess
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </DraggablePopup>
   );
 }
