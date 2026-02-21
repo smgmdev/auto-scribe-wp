@@ -667,7 +667,7 @@ export function DashboardView() {
                         <span className="text-white/50 text-xs">${agencySummary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4 pl-2">
-                        <span className="text-white/50 text-xs">Instant Publishing:</span>
+                        <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
                         <span className="text-white/50 text-xs">${agencySummary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4">
@@ -756,7 +756,7 @@ export function DashboardView() {
                         <span className="text-white/50 text-xs">${agencySummary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between gap-4 pl-2">
-                        <span className="text-white/50 text-xs">Instant Publishing:</span>
+                        <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
                         <span className="text-white/50 text-xs">${agencySummary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
