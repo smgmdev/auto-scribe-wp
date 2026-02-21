@@ -615,7 +615,7 @@ export function AgencyPayoutsView() {
         <CardContent className="px-2 sm:px-6 pt-0">
           {/* Tab summary */}
           {earningsTab === 'all' && (
-            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Earnings</p>
               <p className="text-lg font-bold text-green-600">
                 +${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -623,7 +623,7 @@ export function AgencyPayoutsView() {
             </div>
           )}
           {earningsTab === 'b2b' && (
-            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">B2B Media Earnings</p>
               <p className="text-lg font-bold text-green-600">
                 +${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -631,7 +631,7 @@ export function AgencyPayoutsView() {
             </div>
           )}
           {earningsTab === 'instant' && (
-            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Instant Publishing Earnings</p>
               <p className="text-lg font-bold text-green-600">
                 +${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -639,7 +639,7 @@ export function AgencyPayoutsView() {
             </div>
           )}
           {earningsTab === 'withdrawals' && (
-            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Withdrawn</p>
               <p className="text-lg font-bold text-foreground">
                 -${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
