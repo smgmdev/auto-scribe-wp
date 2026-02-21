@@ -968,8 +968,8 @@ export function DashboardView() {
           open={sessionsPopupOpen}
           onOpenChange={setSessionsPopupOpen}
           title={
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-white">
+              <Users className="h-4 w-4 text-white" />
               <span>Active Sessions</span>
               <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 ml-1">
                 {activeSessionCount}
