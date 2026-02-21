@@ -84,21 +84,27 @@ export function PinSettings() {
 
     try {
       // Server verifies the current PIN before disabling
-      const { data, error } = await supabase.functions.invoke('manage-pin', {
+      const response = await supabase.functions.invoke('manage-pin', {
         body: { action: 'disable_pin', current_pin: currentPin },
       });
 
       setSaving(false);
 
-      if (error || data?.error) {
-        const errorMsg = data?.error || 'Incorrect PIN. Please try again.';
-        toast.error(errorMsg);
+      // Check for any error - edge function returns non-2xx for wrong PIN
+      if (response.error || response.data?.error) {
+        toast.error('Invalid PIN');
         setCurrentPin('');
         return;
       }
-    } catch (e) {
+
+      if (!response.data?.success) {
+        toast.error('Invalid PIN');
+        setCurrentPin('');
+        return;
+      }
+    } catch (e: any) {
       setSaving(false);
-      toast.error('Incorrect PIN. Please try again.');
+      toast.error('Invalid PIN');
       setCurrentPin('');
       return;
     }
