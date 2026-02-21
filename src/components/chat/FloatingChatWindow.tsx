@@ -6599,15 +6599,15 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             </div>
             <span className="flex items-center gap-1.5">
               {/* Show agency logo in typing indicator if agency is typing */}
-              {typingUsers.some(u => u.sender_type === 'agency') && counterpartyLogo && (
+              {typingUsers.some(u => u.sender_type === 'agency') && (counterpartyLogo || (isAdmin && adminAgencyInfo?.logo_url)) && (
                 <img 
-                  src={counterpartyLogo} 
+                  src={(counterpartyLogo || adminAgencyInfo?.logo_url) as string} 
                   alt="" 
                   className="w-4 h-4 rounded-full object-cover"
                 />
               )}
               {typingUsers.map(u => 
-                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? counterpartyLabel : 'Client'
+                u.sender_type === 'admin' ? 'Admin' : u.sender_type === 'agency' ? (counterpartyAgencyInfo?.name || adminAgencyInfo?.name || 'Agency') : 'Client'
               ).filter((v, i, a) => a.indexOf(v) === i).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
             </span>
           </div>
