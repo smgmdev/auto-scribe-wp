@@ -1238,6 +1238,18 @@ export function Sidebar({
             return;
           }
           
+          // Skip refetch if the only change is read status / last_read_at (prevents flicker when marking as read)
+          const isReadOnlyChange = 
+            updated.status === old?.status &&
+            updated.order_id === old?.order_id &&
+            updated.description === old?.description &&
+            (updated.client_read !== old?.client_read || updated.client_last_read_at !== old?.client_last_read_at);
+          
+          if (isReadOnlyChange) {
+            console.log('[Sidebar] Skipping user engagement refetch - read-only change');
+            return;
+          }
+          
           // Refetch counts when any engagement is updated using timestamp-based logic
           const refetchCounts = async () => {
             const { data: allRequests } = await supabase
