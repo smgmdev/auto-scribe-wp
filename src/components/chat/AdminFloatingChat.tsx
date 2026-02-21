@@ -1878,6 +1878,10 @@ export function AdminFloatingChat({
                     value={newMessage}
                     onChange={handleInputChange}
                     disabled={sending}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
+                    name="admin-chat-message-input"
                     className="rounded-none border-0 flex-1"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {

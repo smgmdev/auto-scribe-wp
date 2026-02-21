@@ -6767,7 +6767,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     </Button>
                   </div>
                 )}
-                <div className="flex items-stretch relative z-10">
+                <form autoComplete="off" onSubmit={(e) => e.preventDefault()} className="flex items-stretch relative z-10" data-form-type="other">
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -6791,6 +6791,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     value={newMessage}
                     onChange={handleInputChange}
                     disabled={sending}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
+                    name="chat-message-input"
                     className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base"
                     onFocus={() => {
                       // Mark as read immediately when user clicks the input field
@@ -6861,7 +6865,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       {leavingChat ? <Loader2 className="h-3 w-3 animate-spin" /> : <><LogOut className="h-3 w-3 sm:hidden" /><span className="hidden sm:inline">Leave</span></>}
                     </button>
                   )}
-                </div>
+                </form>
               </>
             )}
           </div>

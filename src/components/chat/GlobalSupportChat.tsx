@@ -780,6 +780,10 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
               value={newMessage}
               onChange={handleInputChange}
               placeholder="Type a message..."
+              autoComplete="off"
+              data-lpignore="true"
+              data-form-type="other"
+              name="support-chat-message-input"
               className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base shadow-none focus-visible:ring-0"
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
