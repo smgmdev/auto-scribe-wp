@@ -64,6 +64,7 @@ const transactionTypes = [
   { key: 'earnings', label: 'Earnings' },
   { key: 'purchases', label: 'Purchases' },
   { key: 'system', label: 'System' },
+  { key: 'withdrawals', label: 'Withdrawals' },
   { key: 'purchase', label: 'Purchase' },
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
@@ -71,8 +72,12 @@ const transactionTypes = [
   { key: 'locked', label: 'Locked' },
   { key: 'order_accepted', label: 'Order Accepted' },
   { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
-  { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
+];
+
+const withdrawalsSubTabs = [
+  { key: 'withdrawals', label: 'All Withdrawals' },
   { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
+  { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
 ];
 
 const earningsSubTabs = [
@@ -105,6 +110,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const [earningsSubTab, setEarningsSubTab] = useState('earnings');
   const [purchasesSubTab, setPurchasesSubTab] = useState('purchases');
   const [systemSubTab, setSystemSubTab] = useState('system');
+  const [withdrawalsSubTab, setWithdrawalsSubTab] = useState('withdrawals');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const fetchTransactions = async () => {
@@ -695,6 +701,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     if (activeType === 'earnings') return earningsSubTab;
     if (activeType === 'purchases') return purchasesSubTab;
     if (activeType === 'system') return systemSubTab;
+    if (activeType === 'withdrawals') return withdrawalsSubTab;
     return activeType;
   })();
 
@@ -710,6 +717,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
       case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
       case 'system': return processedTransactions.filter(tx => systemTypes.includes(tx.type));
+      case 'withdrawals': return processedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked'].includes(tx.type));
       default: return processedTransactions.filter(tx => tx.type === effectiveFilter);
     }
   })();
@@ -730,6 +738,9 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       }
       if (systemTypes.includes(tx.type)) {
         counts['system'] = (counts['system'] || 0) + 1;
+      }
+      if (['withdrawal_completed', 'withdrawal_unlocked'].includes(tx.type)) {
+        counts['withdrawals'] = (counts['withdrawals'] || 0) + 1;
       }
     });
     return counts;
@@ -814,6 +825,29 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   className={cn(
                     "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
                     systemSubTab === sub.key
+                      ? "bg-[#ff6600]/80 text-white"
+                      : "text-white/50 hover:text-white/70"
+                  )}
+                >
+                  {sub.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sub-tabs for Withdrawals */}
+        {activeType === 'withdrawals' && (
+          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+            {withdrawalsSubTabs.map(sub => {
+              const count = counts[sub.key] || 0;
+              return (
+                <button
+                  key={sub.key}
+                  onClick={() => setWithdrawalsSubTab(sub.key)}
+                  className={cn(
+                    "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                    withdrawalsSubTab === sub.key
                       ? "bg-[#ff6600]/80 text-white"
                       : "text-white/50 hover:text-white/70"
                   )}
