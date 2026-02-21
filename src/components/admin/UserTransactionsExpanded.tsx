@@ -89,9 +89,9 @@ const purchasesSubTabs = [
 
 const systemSubTabs = [
   { key: 'system', label: 'All System' },
-  { key: 'gifted', label: 'Gifted' },
-  { key: 'unlocked', label: 'Unlocked' },
   { key: 'offer_accepted', label: 'Credits Locked' },
+  { key: 'unlocked', label: 'Unlocked' },
+  { key: 'gifted', label: 'Gifted' },
   { key: 'admin_deduct', label: 'Deduction' },
 ];
 
