@@ -1516,7 +1516,7 @@ export function CreditHistoryView() {
               <p className="text-sm mt-1">{activeType === 'all' ? 'Your credit history will appear here' : 'No transactions in this category'}</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-0">
               {tabFilteredTransactions.map((transaction) => {
                 const isClickable = transaction.type === 'order_completed' && transaction.order_id;
                 const isWithdrawalCompleted = transaction.type === 'withdrawal_completed';
@@ -1531,7 +1531,7 @@ export function CreditHistoryView() {
                     <div
                       key={transaction.id}
                       ref={isHighlighted ? highlightedTransactionRef : undefined}
-                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                      className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer ${
                         isHighlighted 
                           ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
                           : 'border-border hover:border-[#4771d9]'
@@ -1646,7 +1646,7 @@ export function CreditHistoryView() {
                     <div
                       key={transaction.id}
                       ref={isHighlighted ? highlightedTransactionRef : undefined}
-                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                      className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer ${
                         isHighlighted 
                           ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
                           : 'border-border hover:border-[#4771d9]'
@@ -1770,7 +1770,7 @@ export function CreditHistoryView() {
                     <div
                       key={transaction.id}
                       ref={isHighlighted ? highlightedTransactionRef : undefined}
-                      className={`rounded-lg border transition-colors overflow-hidden cursor-pointer ${
+                      className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer ${
                         isHighlighted 
                           ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
                           : 'border-border hover:border-[#4771d9]'
@@ -2039,7 +2039,7 @@ export function CreditHistoryView() {
                 return (
                   <div
                     key={transaction.id}
-                    className={`rounded-lg border transition-colors overflow-hidden cursor-pointer border-border hover:border-[#4771d9]`}
+                    className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer border-border hover:border-[#4771d9]`}
                     onClick={handleCardClick}
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
