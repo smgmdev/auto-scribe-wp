@@ -1157,6 +1157,22 @@ export function CreditHistoryView() {
               <p>No credits currently locked</p>
             ) : (
               <div className="space-y-2">
+                {/* Summary */}
+                <div className="space-y-1 mb-2">
+                  <div className="flex justify-between gap-4 text-xs">
+                    <span className="text-muted-foreground">Locked in Order Requests:</span>
+                    <span className="font-medium text-amber-400">{creditsInPendingRequests.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between gap-4 text-xs">
+                    <span className="text-muted-foreground">Locked in Orders:</span>
+                    <span className="font-medium text-amber-400">{creditsInOrders.toLocaleString()}</span>
+                  </div>
+                  <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4 text-xs">
+                    <span className="text-muted-foreground">Total Locked:</span>
+                    <span className="font-medium">{(creditsInOrders + creditsInPendingRequests).toLocaleString()}</span>
+                  </div>
+                </div>
+
                 {/* Locked in Offer Requests Section */}
                 {lockedOrders.filter(o => o.type === 'pending_request').length > 0 && (
                   <div>
@@ -1186,11 +1202,6 @@ export function CreditHistoryView() {
                     </div>
                   </div>
                 )}
-
-                <div className="border-t border-muted-foreground/20 pt-1 mt-2 flex justify-between gap-4">
-                  <span className="text-muted-foreground">Total locked:</span>
-                  <span className="font-medium">{(creditsInOrders + creditsInPendingRequests).toLocaleString()}</span>
-                </div>
               </div>
             )}
           </TooltipContent>
