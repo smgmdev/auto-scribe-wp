@@ -44,17 +44,30 @@ export function DraggablePopup({
 
   const [position, setPosition] = useState(getCenteredPosition);
   const [isDragging, setIsDragging] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const isDraggingRef = useRef(false);
   const positionRef = useRef(getCenteredPosition());
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const popupRef = useRef<HTMLDivElement>(null);
 
-  // Re-center on open
+  // Re-center on open and trigger entrance animation
   useEffect(() => {
     if (open && !isMobile) {
       const newPos = getCenteredPosition();
       setPosition(newPos);
       positionRef.current = newPos;
+      // Reset visibility then trigger animation on next frame
+      setIsVisible(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsVisible(true));
+      });
+    } else if (open && isMobile) {
+      setIsVisible(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsVisible(true));
+      });
+    } else {
+      setIsVisible(false);
     }
   }, [open, isMobile, getCenteredPosition]);
 
@@ -151,7 +164,7 @@ export function DraggablePopup({
   // Mobile: fullscreen
   if (isMobile) {
     return createPortal(
-      <div className={`fixed inset-0 bg-background flex flex-col ${className}`} style={{ zIndex }}>
+      <div className={`fixed inset-0 bg-background flex flex-col transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'} ${className}`} style={{ zIndex }}>
         {dragBar}
         <div className={`flex-1 overflow-y-auto p-4 ${bodyClassName}`}>
           {title && <div className="mb-3">{title}</div>}
@@ -167,7 +180,7 @@ export function DraggablePopup({
   return createPortal(
     <div
       ref={popupRef}
-      className={`fixed bg-background border shadow-2xl flex flex-col ${className}`}
+      className={`fixed bg-background border shadow-2xl flex flex-col transition-all duration-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${className}`}
       style={{
         zIndex,
         left: `${positionRef.current.x}px`,
@@ -175,6 +188,7 @@ export function DraggablePopup({
         width,
         maxHeight,
         willChange: isDragging ? 'left, top' : 'auto',
+        transformOrigin: 'center center',
       }}
     >
       {dragBar}
