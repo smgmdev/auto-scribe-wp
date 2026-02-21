@@ -925,9 +925,12 @@ export function ChatListPanel() {
     const currentMinimizedChats = useAppStore.getState().minimizedChats;
     const currentOpenChats = useAppStore.getState().openChats;
     const isMinimized = currentMinimizedChats.some(c => c.id === request_id);
-    // Check if the chat is actually focused/targeted (not just open)
+    // Check if the chat is actually focused/targeted (not just open in background)
+    // A chat is "targeted" if it's DOM-focused OR is the topmost (highest zIndex) open chat
     const focusedChatId = useAppStore.getState().focusedChatId;
-    const isDialogOpen = focusedChatId === request_id;
+    const isDialogFocused = focusedChatId === request_id;
+    const isTopmost = currentOpenChats.length > 0 && currentOpenChats.some(c => c.request.id === request_id && c.zIndex === Math.max(...currentOpenChats.map(oc => oc.zIndex)));
+    const isDialogOpen = isDialogFocused || isTopmost;
     
     // Determine message source type
     const isFromAgency = sender_type === 'agency';
@@ -939,12 +942,17 @@ export function ChatListPanel() {
     });
     
     // Update last message in local state immediately for UI responsiveness
-    // Don't set read: false here - let the postgres_changes subscription handle it after DB update
+    // If dialog is open/targeted, also force unread to 0
     if (isMyEngagement && (isFromAgency || isFromAdmin)) {
       setMyEngagements(prev => {
         const updated = prev.map(e => 
           e.id === request_id 
-            ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString() }
+            ? { 
+                ...e, 
+                lastMessage: message, 
+                lastMessageTime: new Date().toISOString(),
+                ...(isDialogOpen ? { unreadCount: 0, read: true } : {})
+              }
             : e
         );
         myEngagementsRef.current = updated;
@@ -957,7 +965,12 @@ export function ChatListPanel() {
       setServiceRequests(prev => {
         const updated = prev.map(r => 
           r.id === request_id 
-            ? { ...r, lastMessage: message, lastMessageTime: messageTime }
+            ? { 
+                ...r, 
+                lastMessage: message, 
+                lastMessageTime: messageTime,
+                ...(isDialogOpen ? { unreadCount: 0, read: true } : {})
+              }
             : r
         );
         serviceRequestsRef.current = updated;
@@ -1510,24 +1523,27 @@ export function ChatListPanel() {
             return;
           }
           
-          // Check if chat is actually focused/targeted - not just open
+          // Check if chat is actually focused/targeted - not just open in background
           const focusedChatId = useAppStore.getState().focusedChatId;
-          const isDialogOpen = focusedChatId === requestId;
+          const isDialogFocused = focusedChatId === requestId;
+          const isDialogOpen = isDialogFocused || currentOpenChats.some(c => c.request.id === requestId && c.zIndex === Math.max(...currentOpenChats.map(oc => oc.zIndex)));
           
           // For received messages (not own), update last message and increment unread count
           // Only increment if message is from counterparty AND the chat is NOT already open
           if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
             if (isDialogOpen) {
-              // Chat is open - just update last message, don't increment unread
+              // Chat is targeted - update last message AND ensure read state is clean
               setMyEngagements(prev => {
                 const updated = prev.map(e => 
                   e.id === requestId 
-                    ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, unreadCount: 0, read: true }
                     : e
                 );
                 myEngagementsRef.current = updated;
                 return updated;
               });
+              // Also mark as read in database
+              supabase.from('service_requests').update({ client_read: true, client_last_read_at: new Date().toISOString() }).eq('id', requestId).then(() => {});
             } else {
               setMyEngagements(prev => {
                 const updated = prev.map(e => 
@@ -1572,16 +1588,18 @@ export function ChatListPanel() {
           
           if (isServiceRequest && senderType === 'client') {
             if (isDialogOpen) {
-              // Chat is open - just update last message, don't increment unread
+              // Chat is targeted - update last message AND ensure read state is clean
               setServiceRequests(prev => {
                 const updated = prev.map(r => 
                   r.id === requestId 
-                    ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at, unreadCount: 0, read: true }
                     : r
                 );
                 serviceRequestsRef.current = updated;
                 return updated;
               });
+              // Also mark as read in database
+              supabase.from('service_requests').update({ agency_read: true, agency_last_read_at: new Date().toISOString() }).eq('id', requestId).then(() => {});
             } else {
               setServiceRequests(prev => {
                 const updated = prev.map(r => 
