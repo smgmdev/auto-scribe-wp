@@ -24,6 +24,7 @@ export const AdminCreditManagementView = () => {
   // Balances state
   const [userCredits, setUserCredits] = useState<UserCredit[]>([]);
   const [totalPlatformFees, setTotalPlatformFees] = useState(0);
+  const [ipPlatformFees, setIpPlatformFees] = useState(0);
   const [balancesLoading, setBalancesLoading] = useState(true);
   const [balancesSearchTerm, setBalancesSearchTerm] = useState('');
   // Expanded user rows state
@@ -215,7 +216,7 @@ export const AdminCreditManagementView = () => {
         supabase.from('user_credits').select('user_id, credits').order('credits', { ascending: false }),
         supabase.from('profiles').select('id, email'),
         supabase.from('agency_payouts').select('user_id').eq('onboarding_complete', true).eq('downgraded', false),
-        supabase.from('credit_transactions').select('user_id, amount, type, description'),
+        supabase.from('credit_transactions').select('user_id, amount, type, description, metadata'),
         supabase.from('orders').select('user_id, amount_cents')
           .neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
         supabase.from('orders').select('user_id, amount_cents, platform_fee_cents').eq('delivery_status', 'accepted'),
@@ -253,9 +254,14 @@ export const AdminCreditManagementView = () => {
 
       setUserCredits(combined);
 
-      // Compute total platform fees from completed orders
-      const platformFeesSum = (completedOrdersRes.data || []).reduce((sum, o) => sum + ((o as any).platform_fee_cents || 0), 0);
-      setTotalPlatformFees(platformFeesSum);
+      // Compute total platform fees from completed B2B orders
+      const b2bFeesSum = (completedOrdersRes.data || []).reduce((sum, o) => sum + ((o as any).platform_fee_cents || 0), 0);
+      // Compute Instant Publishing platform fees from order_payout transactions with metadata.platform_fee
+      const ipFeesSum = (transactionsRes.data || [])
+        .filter(tx => tx.type === 'order_payout' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
+        .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
+      setTotalPlatformFees(b2bFeesSum + ipFeesSum * 100);
+      setIpPlatformFees(ipFeesSum * 100);
     } catch (error) {
       console.error('Error fetching user credits:', error);
     } finally {
@@ -385,9 +391,8 @@ export const AdminCreditManagementView = () => {
                   }, 0);
 
                   const totalCommission = Math.round(totalPlatformFees / 100);
-                  const totalEarnedSafe = totalEarned || 1;
-                  const b2bCommission = totalEarned > 0 ? Math.round(totalCommission * (totalB2bEarnings / totalEarnedSafe)) : totalCommission;
-                  const ipCommission = totalCommission - b2bCommission;
+                  const ipCommission = Math.round(ipPlatformFees / 100);
+                  const b2bCommission = totalCommission - ipCommission;
                   const b2bCommissionPct = totalB2bEarnings > 0 ? ((b2bCommission / (totalB2bEarnings + b2bCommission)) * 100).toFixed(1) : '0';
                   const ipCommissionPct = totalInstantEarnings > 0 ? ((ipCommission / (totalInstantEarnings + ipCommission)) * 100).toFixed(1) : '0';
 
