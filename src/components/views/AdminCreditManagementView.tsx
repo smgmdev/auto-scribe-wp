@@ -241,12 +241,12 @@ export const AdminCreditManagementView = () => {
         })),
         activeOrders: (activeOrdersRes.data || []).map(o => ({
           user_id: o.user_id,
-          media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
+          media_sites: { price: o.amount_cents || 0 },
         })),
         pendingRequests,
         completedOrders: (completedOrdersRes.data || []).map(o => ({
           user_id: o.user_id,
-          media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
+          media_sites: { price: o.amount_cents || 0 },
         })),
         pendingWithdrawals: withdrawalsRes.data || [],
       });
@@ -255,7 +255,7 @@ export const AdminCreditManagementView = () => {
 
       // Compute total platform fees from completed orders
       const platformFeesSum = (completedOrdersRes.data || []).reduce((sum, o) => sum + ((o as any).platform_fee_cents || 0), 0);
-      setTotalPlatformFees(Math.round(platformFeesSum / 100));
+      setTotalPlatformFees(platformFeesSum);
     } catch (error) {
       console.error('Error fetching user credits:', error);
     } finally {
