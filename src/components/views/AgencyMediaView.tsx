@@ -995,7 +995,7 @@ export function AgencyMediaView() {
             Manage your listed media sites and channels
           </p>
         </div>
-        <div className="flex flex-col md:flex-row w-full md:w-auto gap-2 md:gap-0">
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="group w-full md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all md:rounded-r-none md:border-r-0">
