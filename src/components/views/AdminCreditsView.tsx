@@ -75,7 +75,7 @@ export function AdminCreditsView() {
     setFormData({
       name: pack.name,
       credits: pack.credits.toString(),
-      price: (pack.price_cents / 100).toFixed(2),
+      price: pack.price_cents.toString(),
       stripe_price_id: pack.stripe_price_id || '',
       active: pack.active
     });
@@ -94,7 +94,7 @@ export function AdminCreditsView() {
     const packData = {
       name: formData.name,
       credits: parseInt(formData.credits),
-      price_cents: Math.round(parseFloat(formData.price) * 100),
+      price_cents: parseInt(formData.price),
       stripe_price_id: formData.stripe_price_id || null,
       active: formData.active
     };

@@ -2,6 +2,8 @@
  * Shared credit calculation logic.
  * This is the SINGLE SOURCE OF TRUTH for credit balance formulas.
  * Used by: useAvailableCredits hook, AdminUsersView, and should mirror lock-order-credits edge function.
+ * 
+ * ALL amounts are in CREDITS (1 credit = $1 USD). No cents anywhere.
  */
 
 export interface CreditTransaction {
@@ -30,25 +32,25 @@ export function calculateTotalBalance(transactions: CreditTransaction[]): number
 }
 
 export interface WithdrawalBreakdown {
-  /** Currently locked withdrawal amount in cents */
-  lockedCents: number;
-  /** Completed withdrawal amount in cents */
-  completedCents: number;
-  /** Bank-specific locked cents */
-  bankLockedCents: number;
-  /** Crypto-specific locked cents */
-  cryptoLockedCents: number;
+  /** Currently locked withdrawal amount in credits */
+  locked: number;
+  /** Completed withdrawal amount in credits */
+  completed: number;
+  /** Bank-specific locked credits */
+  bankLocked: number;
+  /** Crypto-specific locked credits */
+  cryptoLocked: number;
 }
 
 /**
  * Calculate withdrawal amounts from transaction ledger.
- * Amounts are stored in cents in the transactions.
+ * All amounts are in credits (1 credit = $1).
  */
 export function calculateWithdrawals(transactions: CreditTransaction[]): WithdrawalBreakdown {
-  let lockedCents = 0;
-  let completedCents = 0;
-  let bankLockedCents = 0;
-  let cryptoLockedCents = 0;
+  let locked = 0;
+  let completed = 0;
+  let bankLocked = 0;
+  let cryptoLocked = 0;
 
   const withdrawalTxs = transactions.filter(t => WITHDRAWAL_TYPES.includes(t.type));
   for (const tx of withdrawalTxs) {
@@ -57,28 +59,28 @@ export function calculateWithdrawals(transactions: CreditTransaction[]): Withdra
 
     if (tx.type === 'withdrawal_locked') {
       const amount = Math.abs(tx.amount);
-      lockedCents += amount;
-      if (isBank) bankLockedCents += amount;
-      if (isCrypto) cryptoLockedCents += amount;
+      locked += amount;
+      if (isBank) bankLocked += amount;
+      if (isCrypto) cryptoLocked += amount;
     } else if (tx.type === 'withdrawal_unlocked') {
       const amount = Math.abs(tx.amount);
-      lockedCents -= amount;
-      if (isBank) bankLockedCents -= amount;
-      if (isCrypto) cryptoLockedCents -= amount;
+      locked -= amount;
+      if (isBank) bankLocked -= amount;
+      if (isCrypto) cryptoLocked -= amount;
     } else if (tx.type === 'withdrawal_completed') {
       const amount = Math.abs(tx.amount);
-      lockedCents -= amount;
-      completedCents += amount;
-      if (isBank) bankLockedCents -= amount;
-      if (isCrypto) cryptoLockedCents -= amount;
+      locked -= amount;
+      completed += amount;
+      if (isBank) bankLocked -= amount;
+      if (isCrypto) cryptoLocked -= amount;
     }
   }
 
   return {
-    lockedCents: Math.max(0, lockedCents),
-    completedCents,
-    bankLockedCents: Math.max(0, bankLockedCents),
-    cryptoLockedCents: Math.max(0, cryptoLockedCents),
+    locked: Math.max(0, locked),
+    completed,
+    bankLocked: Math.max(0, bankLocked),
+    cryptoLocked: Math.max(0, cryptoLocked),
   };
 }
 
@@ -145,9 +147,9 @@ export interface AdminUserCredit {
   deductions: number;
   /** Refunded credits */
   refunded: number;
-  /** Completed withdrawal amount (converted from cents) */
+  /** Completed withdrawal amount in credits */
   withdrawn: number;
-  /** Pending locked withdrawal cents by method */
+  /** Pending locked withdrawal credits by method */
   lockedFromWithdrawals: number;
   pendingBankWithdrawals: number;
   pendingCryptoWithdrawals: number;
@@ -249,15 +251,15 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     purchaseOrdersMap.set(o.user_id, (purchaseOrdersMap.get(o.user_id) || 0) + 1);
   });
 
-  // Pending withdrawals by method
+  // Pending withdrawals by method (amount_cents now stores credits)
   const pendingBankMap = new Map<string, number>();
   const pendingCryptoMap = new Map<string, number>();
   pendingWithdrawals.forEach(w => {
-    const dollars = (w.amount_cents || 0) / 100;
+    const credits = w.amount_cents || 0;
     if (w.withdrawal_method === 'bank') {
-      pendingBankMap.set(w.user_id, (pendingBankMap.get(w.user_id) || 0) + dollars);
+      pendingBankMap.set(w.user_id, (pendingBankMap.get(w.user_id) || 0) + credits);
     } else if (w.withdrawal_method === 'usdt') {
-      pendingCryptoMap.set(w.user_id, (pendingCryptoMap.get(w.user_id) || 0) + dollars);
+      pendingCryptoMap.set(w.user_id, (pendingCryptoMap.get(w.user_id) || 0) + credits);
     }
   });
 
@@ -269,8 +271,8 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     const totalBalance = calculateTotalBalance(userTxs);
     const { earnedCredits, purchasedOnline, purchasedOffline } = categoriseTransactions(userTxs);
     const withdrawalInfo = calculateWithdrawals(userTxs);
-    const creditsWithdrawn = withdrawalInfo.completedCents / 100;
-    const creditsInWithdrawals = withdrawalInfo.lockedCents / 100;
+    const creditsWithdrawn = withdrawalInfo.completed;
+    const creditsInWithdrawals = withdrawalInfo.locked;
 
     const lockedFromOrders = lockedFromOrdersMap.get(userId) || 0;
     const lockedFromRequests = lockedFromRequestsMap.get(userId) || 0;
@@ -357,8 +359,8 @@ export function recalculateSingleUser(
 ): Partial<AdminUserCredit> {
   const totalBalance = calculateTotalBalance(userTxs);
   const withdrawalInfo = calculateWithdrawals(userTxs);
-  const creditsWithdrawn = withdrawalInfo.completedCents / 100;
-  const creditsInWithdrawals = withdrawalInfo.lockedCents / 100;
+  const creditsWithdrawn = withdrawalInfo.completed;
+  const creditsInWithdrawals = withdrawalInfo.locked;
 
   const lockedFromOrders = activeOrders.reduce((sum, o) => sum + (o.media_sites?.price || 0), 0);
   const lockedFromRequests = pendingRequests

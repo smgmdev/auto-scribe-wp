@@ -201,8 +201,8 @@ serve(async (req) => {
       }
     }
 
-    // Calculate amounts using the authoritative DB price
-    const amountCents = authorizedPrice * 100;
+    // Calculate amounts using the authoritative DB price (already in credits)
+    const amountCredits = authorizedPrice;
 
     // Get agency payout info for commission calculation
     const { data: agencyPayout } = await supabaseAdmin
@@ -212,8 +212,8 @@ serve(async (req) => {
       .maybeSingle();
 
     const commissionPercentage = agencyPayout?.commission_percentage ?? 10;
-    const platformFeeCents = Math.round(amountCents * (commissionPercentage / 100));
-    const agencyPayoutCents = amountCents - platformFeeCents;
+    const platformFee = Math.round(amountCredits * (commissionPercentage / 100));
+    const agencyPayoutAmount = amountCredits - platformFee;
 
     // Guard: check no order already exists for this service request (race condition protection)
     const { data: existingRequest } = await supabaseAdmin
@@ -256,9 +256,9 @@ serve(async (req) => {
         order_number: orderNumber,
         user_id: client_user_id,
         media_site_id: media_site_id,
-        amount_cents: amountCents,
-        platform_fee_cents: platformFeeCents,
-        agency_payout_cents: agencyPayoutCents,
+        amount_cents: amountCredits,
+        platform_fee_cents: platformFee,
+        agency_payout_cents: agencyPayoutAmount,
         status: "pending_payment",
         delivery_status: "pending",
         delivery_deadline: deliveryDeadline,

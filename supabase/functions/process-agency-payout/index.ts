@@ -90,7 +90,7 @@ serve(async (req) => {
       throw new Error(`Withdrawal is not pending (status: ${withdrawal.status})`);
     }
 
-    const amountUsd = (withdrawal.amount_cents / 100).toFixed(2);
+    const amountUsd = withdrawal.amount_cents.toString();
     const agencyName = withdrawal.agency_payout?.agency_name || "Unknown Agency";
 
     console.log(`Processing auto payout for ${agencyName}: $${amountUsd}`);

@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
         completedWithdrawalCents += Math.abs(tx.amount);
       }
     }
-    const creditsInWithdrawals = Math.max(0, lockedWithdrawalCents) / 100;
-    const creditsWithdrawn = completedWithdrawalCents / 100;
+    const creditsInWithdrawals = Math.max(0, lockedWithdrawalCents);
+    const creditsWithdrawn = completedWithdrawalCents;
 
     // Locked credits from active orders
     const { data: activeOrders } = await supabase

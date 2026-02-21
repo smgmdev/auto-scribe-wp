@@ -222,34 +222,28 @@ serve(async (req) => {
       );
     }
 
-    // Get the credit cost from media site price
+    // Get the credit cost from media site price (amount_cents now stores credits directly)
     const mediaSiteData = order.media_sites as unknown as { id: string; name: string; agency: string; price: number } | null;
-    const creditCost = mediaSiteData?.price || Math.floor(order.amount_cents / 100);
+    const creditCost = mediaSiteData?.price || order.amount_cents;
 
     // DYNAMIC FEE CALCULATION: Use current agency commission at completion time
-    // This allows admin to adjust fees and have them apply to ongoing orders
     const currentCommission = agencyPayout.commission_percentage ?? 10;
-    const dynamicPlatformFeeCents = Math.round(order.amount_cents * (currentCommission / 100));
-    const dynamicAgencyPayoutCents = order.amount_cents - dynamicPlatformFeeCents;
+    const dynamicPlatformFee = Math.round(order.amount_cents * (currentCommission / 100));
+    const dynamicAgencyPayout = order.amount_cents - dynamicPlatformFee;
     
     logStep("Dynamic fee calculation", {
-      amountCents: order.amount_cents,
+      amountCredits: order.amount_cents,
       currentCommission,
-      dynamicPlatformFeeCents,
-      dynamicAgencyPayoutCents,
-      originalPlatformFeeCents: order.platform_fee_cents,
-      originalAgencyPayoutCents: order.agency_payout_cents
+      dynamicPlatformFee,
+      dynamicAgencyPayout,
     });
 
-    // Calculate credits to allocate to agency using DYNAMIC fees
-    // 1 credit = $1 = 100 cents
-    const creditsToAllocate = Math.floor(dynamicAgencyPayoutCents / 100);
-    const platformFeeCredits = Math.floor(dynamicPlatformFeeCents / 100);
+    // Credits to allocate (already in credits, no conversion needed)
+    const creditsToAllocate = dynamicAgencyPayout;
+    const platformFeeCredits = dynamicPlatformFee;
     
     logStep("Credit calculation", { 
       creditCost,
-      agencyPayoutCents: order.agency_payout_cents,
-      platformFeeCents: order.platform_fee_cents,
       creditsToAllocate,
       platformFeeCredits,
       agencyUserId 
@@ -324,8 +318,8 @@ serve(async (req) => {
         read: false, // Notify user
         agency_read: false, // Notify agency
         // Lock in the dynamic fees at completion time
-        platform_fee_cents: dynamicPlatformFeeCents,
-        agency_payout_cents: dynamicAgencyPayoutCents
+        platform_fee_cents: dynamicPlatformFee,
+        agency_payout_cents: dynamicAgencyPayout
       })
       .eq("id", order_id);
 
@@ -416,7 +410,7 @@ serve(async (req) => {
       .insert({
         order_id: order_id,
         agency_payout_id: serviceRequest.agency_payout_id,
-        amount_cents: dynamicAgencyPayoutCents,
+        amount_cents: dynamicAgencyPayout,
         status: "completed",
         completed_at: now
       });

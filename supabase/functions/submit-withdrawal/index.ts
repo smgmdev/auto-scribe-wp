@@ -83,8 +83,8 @@ serve(async (req) => {
     }
     lockedCents = Math.max(0, lockedCents);
 
-    const creditsInWithdrawals = lockedCents / 100;
-    const creditsWithdrawn = completedCents / 100;
+    const creditsInWithdrawals = lockedCents;
+    const creditsWithdrawn = completedCents;
 
     // 2. Fetch locked credits from active orders
     const { data: activeOrders } = await supabase
@@ -127,8 +127,8 @@ serve(async (req) => {
     // 4. Calculate available balance
     const availableCredits = totalBalance - creditsInOrders - creditsInPendingRequests - creditsInWithdrawals - creditsWithdrawn;
 
-    // Convert requested amount from cents to credits (1 credit = $1)
-    const requestedCredits = amount_cents / 100;
+    // amount_cents now stores credits directly (1 credit = $1)
+    const requestedCredits = amount_cents;
 
     console.log(`User ${userId}: available=${availableCredits}, requested=${requestedCredits}`);
 
