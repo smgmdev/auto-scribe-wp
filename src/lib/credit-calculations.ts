@@ -332,7 +332,7 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       purchaseOrders,
       deliveryOrders,
       publishSpent,
-      totalSpent: (totalSpentMap.get(userId) || 0) + deductions + publishSpent + usageSpent,
+      totalSpent: (totalSpentMap.get(userId) || 0) + publishSpent + usageSpent,
       dbCredits: credit.credits,
       rawTxSum,
       validationStatus: 'unchecked' as const,
