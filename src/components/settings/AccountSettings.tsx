@@ -190,12 +190,16 @@ export function AccountSettings() {
             Change Password
           </Label>
           <div className="space-y-3">
+            <input type="text" name="prevent_autofill" id="prevent_autofill" value="" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
+            <input type="password" name="prevent_autofill_pass" id="prevent_autofill_pass" value="" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="New password"
-              autoComplete="new-password"
+              autoComplete="off"
+              data-lpignore="true"
+              data-form-type="other"
               className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
             <Input
@@ -203,7 +207,9 @@ export function AccountSettings() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
-              autoComplete="new-password"
+              autoComplete="off"
+              data-lpignore="true"
+              data-form-type="other"
               className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
             <Button 
