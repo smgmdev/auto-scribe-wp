@@ -101,32 +101,32 @@ export function AgencyPayoutsView() {
   // Calculate pending withdrawals (only 'pending' status)
   const pendingWithdrawalsTotal = withdrawals
     .filter(w => w.status === 'pending')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Calculate pending bank withdrawals
   const pendingBankWithdrawals = withdrawals
     .filter(w => w.status === 'pending' && w.withdrawal_method === 'bank')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Calculate pending crypto withdrawals
   const pendingCryptoWithdrawals = withdrawals
     .filter(w => w.status === 'pending' && w.withdrawal_method === 'crypto')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Calculate completed withdrawals (both 'completed' and 'approved' status - these are deducted from wallet)
   const completedWithdrawalsTotal = withdrawals
     .filter(w => w.status === 'completed' || w.status === 'approved')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Calculate completed bank withdrawals
   const completedBankWithdrawals = withdrawals
     .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'bank')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Calculate completed crypto withdrawals
   const completedCryptoWithdrawals = withdrawals
     .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto')
-    .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
+    .reduce((sum, w) => sum + (w.amount_cents || 0), 0);
 
   // Wallet balance = total earnings minus completed withdrawals minus locked credits (rejected withdrawals stay in wallet)
   const walletBalance = summary.totalEarnings - completedWithdrawalsTotal - lockedInOrders - lockedInOrderRequests;
@@ -267,7 +267,7 @@ export function AgencyPayoutsView() {
           .neq('delivery_status', 'accepted')
           .neq('status', 'cancelled');
 
-        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.amount_cents || 0) / 100), 0);
+        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + (o.amount_cents || 0), 0);
       }
 
       // Fetch pending order requests (service_requests without orders yet)
@@ -287,8 +287,8 @@ export function AgencyPayoutsView() {
         .select('amount_cents, status')
         .eq('agency_payout_id', agencyData.id);
 
-      pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
-      completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+      pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0);
+      completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0);
     }
 
     setCompletedOrders(typedOrders);
@@ -307,8 +307,8 @@ export function AgencyPayoutsView() {
     setPayoutTransactions(payoutTxs);
 
     // Calculate summary from completed orders + order_payout transactions
-    const orderSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
-    const orderEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
+    const orderSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0);
+    const orderEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0);
     // Only count instant publishing payouts (those with metadata.site_name) to avoid double-counting B2B order payouts
     const instantPublishTxs = payoutTxs.filter(t => t.metadata?.site_name);
     const payoutTxEarnings = instantPublishTxs.reduce((sum, t) => sum + t.amount, 0);
@@ -636,7 +636,7 @@ export function AgencyPayoutsView() {
                 return combinedItems.map((item) => {
                   if (item.type === 'withdrawal') {
                     const withdrawal = item.data;
-                    const withdrawalAmount = withdrawal.amount_cents / 100;
+                    const withdrawalAmount = withdrawal.amount_cents;
                     const isExpanded = expandedCards.has(`withdrawal-${withdrawal.id}`);
 
                     const getCardIcon = () => {
@@ -820,9 +820,9 @@ export function AgencyPayoutsView() {
                   } else {
                     // Order card
                     const order = item.data;
-                    const earningsAmount = (order.agency_payout_cents || 0) / 100;
-                    const saleAmount = (order.amount_cents || 0) / 100;
-                    const platformFee = (order.platform_fee_cents || 0) / 100;
+                    const earningsAmount = order.agency_payout_cents || 0;
+                    const saleAmount = order.amount_cents || 0;
+                    const platformFee = order.platform_fee_cents || 0;
                     const completedDate = order.accepted_at || order.delivered_at || order.created_at;
                     const isExpanded = expandedCards.has(`order-${order.id}`);
 
