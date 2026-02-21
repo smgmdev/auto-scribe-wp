@@ -35,6 +35,21 @@ interface EarningsSummary {
   completedPayouts: number;
 }
 
+interface PayoutTransaction {
+  id: string;
+  amount: number;
+  description: string | null;
+  created_at: string;
+  metadata: {
+    site_name?: string;
+    gross_amount?: number;
+    commission_percentage?: number;
+    platform_fee?: number;
+    wp_link?: string;
+    buyer_id?: string;
+  } | null;
+}
+
 interface WithdrawalRequest {
   id: string;
   amount_cents: number;
@@ -63,6 +78,7 @@ export function AgencyPayoutsView() {
   const [openingChat, setOpeningChat] = useState<string | null>(null);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [payoutTransactions, setPayoutTransactions] = useState<PayoutTransaction[]>([]);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const toggleCardExpand = (id: string) => {
@@ -198,90 +214,98 @@ export function AgencyPayoutsView() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (!agencyData) {
-      setLoading(false);
-      setRefreshing(false);
-      return;
+    let typedOrders: CompletedOrder[] = [];
+    let lockedAmount = 0;
+    let lockedRequestsAmount = 0;
+    let pendingPayouts = 0;
+    let completedPayouts = 0;
+
+    if (agencyData) {
+      // Get all service requests for this agency to find associated orders
+      const { data: serviceRequests } = await supabase
+        .from('service_requests')
+        .select('order_id')
+        .eq('agency_payout_id', agencyData.id)
+        .not('order_id', 'is', null);
+
+      const orderIds = (serviceRequests || []).map(sr => sr.order_id).filter(Boolean) as string[];
+
+      if (orderIds.length > 0) {
+        // Fetch completed orders (only 'accepted' = client confirmed) for this agency
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            order_number,
+            amount_cents,
+            platform_fee_cents,
+            agency_payout_cents,
+            delivery_status,
+            accepted_at,
+            delivered_at,
+            created_at,
+            media_site:media_sites(name, favicon)
+          `)
+          .in('id', orderIds)
+          .eq('delivery_status', 'accepted')
+          .order('accepted_at', { ascending: false });
+
+        typedOrders = (ordersData || []) as unknown as CompletedOrder[];
+
+        // Fetch in-progress orders (locked in orders - not yet accepted by client)
+        const { data: inProgressOrders } = await supabase
+          .from('orders')
+          .select('agency_payout_cents')
+          .in('id', orderIds)
+          .neq('delivery_status', 'accepted')
+          .neq('status', 'cancelled');
+
+        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.agency_payout_cents || 0) / 100), 0);
+      }
+
+      // Fetch pending order requests (service_requests without orders yet)
+      const { data: pendingRequests } = await supabase
+        .from('service_requests')
+        .select('media_site_id, media_sites!inner(price)')
+        .eq('agency_payout_id', agencyData.id)
+        .is('order_id', null)
+        .not('status', 'in', '("cancelled","completed")');
+
+      lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + ((req.media_sites?.price || 0) / 100), 0);
+
+      // Fetch payout transactions for pending/completed payouts
+      const { data: payoutData } = await supabase
+        .from('payout_transactions')
+        .select('amount_cents, status')
+        .eq('agency_payout_id', agencyData.id);
+
+      pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+      completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
     }
 
-    // Get all service requests for this agency to find associated orders
-    const { data: serviceRequests } = await supabase
-      .from('service_requests')
-      .select('order_id')
-      .eq('agency_payout_id', agencyData.id)
-      .not('order_id', 'is', null);
-
-    if (!serviceRequests || serviceRequests.length === 0) {
-      setLoading(false);
-      setRefreshing(false);
-      return;
-    }
-
-    const orderIds = serviceRequests.map(sr => sr.order_id).filter(Boolean) as string[];
-
-    // Fetch completed orders (only 'accepted' = client confirmed) for this agency
-    const { data: ordersData, error } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        order_number,
-        amount_cents,
-        platform_fee_cents,
-        agency_payout_cents,
-        delivery_status,
-        accepted_at,
-        delivered_at,
-        created_at,
-        media_site:media_sites(name, favicon)
-      `)
-      .in('id', orderIds)
-      .eq('delivery_status', 'accepted')
-      .order('accepted_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching completed orders:', error);
-      setLoading(false);
-      setRefreshing(false);
-      return;
-    }
-
-    const typedOrders = (ordersData || []) as unknown as CompletedOrder[];
     setCompletedOrders(typedOrders);
-
-    // Calculate summary from completed orders
-    const totalSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
-    const totalEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
-
-    // Fetch in-progress orders (locked in orders - not yet accepted by client)
-    const { data: inProgressOrders } = await supabase
-      .from('orders')
-      .select('agency_payout_cents')
-      .in('id', orderIds)
-      .neq('delivery_status', 'accepted')
-      .neq('status', 'cancelled');
-
-    const lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.agency_payout_cents || 0) / 100), 0);
     setLockedInOrders(lockedAmount);
-
-    // Fetch pending order requests (service_requests without orders yet)
-    const { data: pendingRequests } = await supabase
-      .from('service_requests')
-      .select('media_site_id, media_sites!inner(price)')
-      .eq('agency_payout_id', agencyData.id)
-      .is('order_id', null)
-      .not('status', 'in', '("cancelled","completed")');
-
-    const lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + ((req.media_sites?.price || 0) / 100), 0);
     setLockedInOrderRequests(lockedRequestsAmount);
 
-    // Fetch payout transactions for pending/completed payouts
-    const { data: payoutData } = await supabase
-      .from('payout_transactions')
-      .select('amount_cents, status')
-      .eq('agency_payout_id', agencyData.id);
+    // Fetch order_payout credit transactions (from instant publishing / WP site sales)
+    const { data: payoutTxData } = await supabase
+      .from('credit_transactions')
+      .select('id, amount, description, created_at, metadata')
+      .eq('user_id', user.id)
+      .eq('type', 'order_payout')
+      .order('created_at', { ascending: false });
 
-    const pendingPayouts = (payoutData || []).filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
-    const completedPayouts = (payoutData || []).filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount_cents || 0), 0) / 100;
+    const payoutTxs = (payoutTxData || []) as unknown as PayoutTransaction[];
+    setPayoutTransactions(payoutTxs);
+
+    // Calculate summary from completed orders + order_payout transactions
+    const orderSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
+    const orderEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
+    const payoutTxEarnings = payoutTxs.reduce((sum, t) => sum + t.amount, 0);
+    const payoutTxSales = payoutTxs.reduce((sum, t) => sum + (t.metadata?.gross_amount || t.amount), 0);
+
+    const totalSales = orderSales + payoutTxSales;
+    const totalEarnings = orderEarnings + payoutTxEarnings;
 
     // Fetch withdrawal requests
     const { data: withdrawalData } = await supabase
@@ -543,7 +567,7 @@ export function AgencyPayoutsView() {
           <CardTitle className="text-lg">Earnings History</CardTitle>
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
-          {completedOrders.length === 0 && withdrawals.length === 0 ? (
+          {completedOrders.length === 0 && withdrawals.length === 0 && payoutTransactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground text-center">
@@ -557,7 +581,8 @@ export function AgencyPayoutsView() {
                 // Create combined list with type discriminator and event date
                 type EarningsItem = 
                   | { type: 'withdrawal'; data: WithdrawalRequest; eventDate: Date }
-                  | { type: 'order'; data: CompletedOrder; eventDate: Date };
+                  | { type: 'order'; data: CompletedOrder; eventDate: Date }
+                  | { type: 'payout_tx'; data: PayoutTransaction; eventDate: Date };
 
                 const combinedItems: EarningsItem[] = [
                   ...withdrawals.map(w => ({
@@ -569,6 +594,11 @@ export function AgencyPayoutsView() {
                     type: 'order' as const,
                     data: o,
                     eventDate: new Date(o.accepted_at || o.delivered_at || o.created_at)
+                  })),
+                  ...payoutTransactions.map(t => ({
+                    type: 'payout_tx' as const,
+                    data: t,
+                    eventDate: new Date(t.created_at)
                   }))
                 ];
 
@@ -680,6 +710,73 @@ export function AgencyPayoutsView() {
                                   See transaction details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else if (item.type === 'payout_tx') {
+                    // Payout transaction card (WP site / instant publishing sales)
+                    const tx = item.data;
+                    const earningsAmount = tx.amount;
+                    const siteName = tx.metadata?.site_name || 'Site Sale';
+                    const grossAmount = tx.metadata?.gross_amount || tx.amount;
+                    const platformFee = tx.metadata?.platform_fee || 0;
+                    const wpLink = tx.metadata?.wp_link;
+                    const isExpanded = expandedCards.has(`payout-${tx.id}`);
+
+                    return (
+                      <div 
+                        key={`payout-${tx.id}`}
+                        onClick={() => toggleCardExpand(`payout-${tx.id}`)}
+                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
+                      >
+                        <div className="relative p-3">
+                          <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
+                            +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <div className="flex items-start gap-3 md:pr-24">
+                            <ArrowUpCircle className="h-5 w-5 text-green-500" />
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                Credited: {siteName}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}
+                              </p>
+                              <p className="md:hidden mt-2 text-lg text-green-500">
+                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div className="px-3 pb-3 pt-0 border-t border-border bg-muted/30">
+                            <div className="pt-2 space-y-3 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                <div>
+                                  <span className="text-muted-foreground">Sale Amount:</span>
+                                  <p className="font-medium">${grossAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Platform Fee ({tx.metadata?.commission_percentage || 10}%):</span>
+                                  <p className="font-medium">${platformFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Your Earning:</span>
+                                  <p className="font-medium text-green-600">${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                </div>
+                                {wpLink && (
+                                  <div>
+                                    <span className="text-muted-foreground">Publication:</span>
+                                    <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline">
+                                      View Article <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
