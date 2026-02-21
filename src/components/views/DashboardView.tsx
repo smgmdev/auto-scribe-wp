@@ -823,10 +823,10 @@ export function DashboardView() {
       <div className="grid gap-0 md:grid-cols-2">
         {/* Instant Publishing */}
         <Card className="border-0 bg-black rounded-none">
-          <CardHeader className="px-0 md:px-6">
+          <CardHeader className="px-0">
             <CardTitle className="text-xl text-white">Instant Publishing</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-0 px-0 md:px-6">
+          <CardContent className="space-y-0 px-0">
             <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('headlines')}>
               <Newspaper className="mr-2 h-4 w-4" />
               Scan Headlines
@@ -844,10 +844,10 @@ export function DashboardView() {
 
         {/* B2B Media Buying */}
         <Card className="border-0 bg-black rounded-none">
-          <CardHeader className="px-0 md:px-6">
+          <CardHeader className="px-0">
             <CardTitle className="text-xl text-white">B2B Media Buying</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-0 px-0 md:px-6">
+          <CardContent className="space-y-0 px-0">
             <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => {
               setTargetTab('custom');
               setCurrentView('sites');
