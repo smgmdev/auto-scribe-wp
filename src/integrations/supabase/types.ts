@@ -1305,6 +1305,7 @@ export type Database = {
           pin_enabled: boolean
           pin_hash: string | null
           pin_salt: string | null
+          session_started_at: string | null
           suspended: boolean
           updated_at: string
           username: string | null
@@ -1322,6 +1323,7 @@ export type Database = {
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          session_started_at?: string | null
           suspended?: boolean
           updated_at?: string
           username?: string | null
@@ -1339,6 +1341,7 @@ export type Database = {
           pin_enabled?: boolean
           pin_hash?: string | null
           pin_salt?: string | null
+          session_started_at?: string | null
           suspended?: boolean
           updated_at?: string
           username?: string | null
