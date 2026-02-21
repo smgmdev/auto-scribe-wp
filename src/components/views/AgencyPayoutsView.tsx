@@ -407,12 +407,16 @@ export function AgencyPayoutsView() {
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
-                <span className="text-white/70">B2B Media Sales:</span>
-                <span className="font-semibold text-green-400">${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-white/70">Total Earnings:</span>
+                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Instant Publishing Sales:</span>
-                <span className="font-semibold text-green-400">${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <div className="flex justify-between gap-4 pl-2">
+                <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                <span className="text-white/50 text-xs">${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4 pl-2">
+                <span className="text-white/50 text-xs">Instant Publishing:</span>
+                <span className="text-white/50 text-xs">${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Total Withdrawals:</span>
@@ -487,12 +491,16 @@ export function AgencyPayoutsView() {
                 <span className="font-semibold">${(summary.totalSales - summary.totalEarnings).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                <span className="text-white/70">B2B Media Sales:</span>
-                <span className="font-semibold text-green-400">${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-white/70">Total Earnings:</span>
+                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Instant Publishing Sales:</span>
-                <span className="font-semibold text-green-400">${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <div className="flex justify-between gap-4 pl-2">
+                <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                <span className="text-white/50 text-xs">${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between gap-4 pl-2">
+                <span className="text-white/50 text-xs">Instant Publishing:</span>
+                <span className="text-white/50 text-xs">${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </TooltipContent>
