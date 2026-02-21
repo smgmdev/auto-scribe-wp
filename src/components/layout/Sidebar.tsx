@@ -1620,6 +1620,33 @@ export function Sidebar({
       setAgencyUnreadDisputesCount(disputesCnt || 0);
     };
 
+    const refetchAgencyMediaCounts = async () => {
+      const { data: mySubmissions } = await supabase
+        .rpc('get_my_wp_submissions', { _user_id: user.id });
+      const wpRejectedCount = mySubmissions
+        ? mySubmissions.filter((s: { status: string; read: boolean }) => s.status === 'rejected' && !s.read).length
+        : 0;
+      const { count: wpConnectedCount } = await supabase
+        .from('wordpress_sites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      const { count: mediaApprovedCount } = await supabase
+        .from('media_site_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .eq('read', false);
+      const { count: mediaRejectedCount } = await supabase
+        .from('media_site_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'rejected')
+        .eq('read', false);
+      setAgencyUnreadWpSubmissionsCount((wpRejectedCount || 0) + (wpConnectedCount || 0));
+      setAgencyUnreadMediaSubmissionsCount((mediaApprovedCount || 0) + (mediaRejectedCount || 0));
+    };
+
     const channel = supabase
       .channel('agency-sidebar-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, (payload) => {
@@ -1631,7 +1658,6 @@ export function Sidebar({
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_messages' }, (payload) => {
         const msg = payload.new as any;
-        // Check if this message belongs to one of our requests
         if (msg.sender_type === 'client' || msg.sender_type === 'admin') {
           console.log('[Sidebar] New client/admin message, refetching agency counts');
           refetchAgencyNotificationCounts();
@@ -1648,6 +1674,22 @@ export function Sidebar({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'disputes' }, () => {
         console.log('[Sidebar] Dispute changed, refetching agency counts');
         refetchAgencyNotificationCounts();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wordpress_site_submissions' }, (payload) => {
+        const updated = payload.new as any;
+        const old = payload.old as any;
+        if (updated.user_id === user.id && updated.status !== old?.status) {
+          console.log('[Sidebar] WP submission status changed, refetching agency media counts');
+          refetchAgencyMediaCounts();
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'media_site_submissions' }, (payload) => {
+        const updated = payload.new as any;
+        const old = payload.old as any;
+        if (updated.user_id === user.id && updated.status !== old?.status) {
+          console.log('[Sidebar] Media submission status changed, refetching agency media counts');
+          refetchAgencyMediaCounts();
+        }
       })
       .subscribe();
 
