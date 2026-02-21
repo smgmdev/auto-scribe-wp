@@ -312,7 +312,7 @@ export const AdminCreditManagementView = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 bg-foreground text-background">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
                     <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Total Users
@@ -331,7 +331,7 @@ export const AdminCreditManagementView = () => {
 
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 bg-foreground text-background">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
                     <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Users with Credits
@@ -350,7 +350,7 @@ export const AdminCreditManagementView = () => {
 
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
-                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0" style={{ backgroundColor: '#1d1d1f' }}>
+                <Card className="transition-colors hover:border-[#4771d9] py-2 md:py-3 border-0 bg-foreground text-background">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0.5 md:pb-1 pt-0 px-3 md:px-4">
                     <CardTitle className="text-xs font-medium text-white/80 uppercase tracking-wide">
                       Circulating Credits
@@ -568,7 +568,7 @@ export const AdminCreditManagementView = () => {
           </div>
 
           <Card className="p-0 border-0 shadow-none overflow-hidden">
-            <CardHeader className="pb-3 px-3 py-2 border-t border-white/20" style={{ backgroundColor: '#1d1d1f' }}>
+            <CardHeader className="pb-3 px-3 py-2 border-t border-white/20 bg-foreground text-background">
               <CardTitle className="text-lg font-semibold text-white">User Credit Balances</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
@@ -583,8 +583,7 @@ export const AdminCreditManagementView = () => {
                     autoCorrect="off"
                     autoCapitalize="off"
                     spellCheck={false}
-                    className="w-full pl-10 h-9 text-sm rounded-none border-0 text-white placeholder:text-white/50"
-                    style={{ backgroundColor: '#1d1d1f' }}
+                    className="w-full pl-10 h-9 text-sm rounded-none border-0 text-white placeholder:text-white/50 bg-foreground"
                   />
                   {balancesSearchTerm && (
                     <Button
@@ -690,7 +689,7 @@ export const AdminCreditManagementView = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-5">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1d1d1f' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Available Credits</p>
                                           <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
@@ -712,7 +711,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1d1d1f' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Locked</p>
                                           <p className="font-semibold text-amber-400">{user.locked.toLocaleString()}</p>
                                         </div>
@@ -727,7 +726,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1d1d1f' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Purchased</p>
                                           <p className="font-semibold text-white">{user.purchased.toLocaleString()}</p>
                                         </div>
@@ -744,7 +743,7 @@ export const AdminCreditManagementView = () => {
                                     
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1d1d1f' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Orders</p>
                                           <p className="font-semibold text-white">{user.orders.toLocaleString()}</p>
                                         </div>
@@ -761,7 +760,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1d1d1f' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Total Spent</p>
                                           <p className="font-semibold text-white">{(user.totalSpent + user.deductions).toLocaleString()}</p>
                                         </div>
