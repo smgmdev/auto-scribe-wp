@@ -767,7 +767,7 @@ export function AgencyPayoutsView() {
                                 Credited: {siteName}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                {format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}
+                                Order: Instant Publishing
                               </p>
                               <p className="md:hidden mt-2 text-lg text-green-500">
                                 +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
