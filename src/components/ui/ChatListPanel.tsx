@@ -98,6 +98,7 @@ export function ChatListPanel() {
   const [agencyPayoutId, setAgencyPayoutId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [engagementsLoaded, setEngagementsLoaded] = useState(false);
   const [openingChatId, setOpeningChatId] = useState<string | null>(null);
 
   // Refs to avoid stale closures in subscriptions
@@ -121,6 +122,7 @@ export function ChatListPanel() {
   const fetchMyEngagements = async () => {
     if (!user) return;
 
+    console.log('[ChatListPanel] fetchMyEngagements called for user:', user.id);
     const { data, error } = await supabase
       .from('service_requests')
       .select(`
@@ -140,7 +142,20 @@ export function ChatListPanel() {
       .neq('status', 'cancelled')
       .order('updated_at', { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error('[ChatListPanel] Error fetching my engagements:', error);
+      setEngagementsLoaded(true);
+      return;
+    }
+    
+    if (!data) {
+      console.warn('[ChatListPanel] fetchMyEngagements returned null data');
+      setEngagementsLoaded(true);
+      return;
+    }
+
+    console.log('[ChatListPanel] fetchMyEngagements got', data.length, 'results');
+    if (data) {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
       let lastMessages: Record<string, { message: string; created_at: string; sender_type: string }> = {};
@@ -202,6 +217,7 @@ export function ChatListPanel() {
       
       setMyEngagements(engagements);
       myEngagementsRef.current = engagements;
+      setEngagementsLoaded(true);
       
       // Sync minimized chat unread counts with freshly calculated data
       const currentMinimizedChats = useAppStore.getState().minimizedChats;
@@ -2178,6 +2194,15 @@ export function ChatListPanel() {
 
   const renderChatList = (items: ChatItem[], type: 'my-request' | 'agency-request') => {
     if (items.length === 0) {
+      // Show loading state if engagements haven't been loaded yet
+      if (type === 'my-request' && !engagementsLoaded) {
+        return (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+            <Loader2 className="h-6 w-6 mb-2 animate-spin opacity-50" />
+            <p className="text-sm">Loading engagements...</p>
+          </div>
+        );
+      }
       const emptyMessage = type === 'my-request' ? 'No engagements yet' : 'No service requests yet';
       return (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
