@@ -259,14 +259,15 @@ export function AgencyPayoutsView() {
         typedOrders = (ordersData || []) as unknown as CompletedOrder[];
 
         // Fetch in-progress orders (locked in orders - not yet accepted by client)
+        // Show full order amount (not commission-adjusted) since the full amount is locked in escrow
         const { data: inProgressOrders } = await supabase
           .from('orders')
-          .select('agency_payout_cents')
+          .select('amount_cents')
           .in('id', orderIds)
           .neq('delivery_status', 'accepted')
           .neq('status', 'cancelled');
 
-        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.agency_payout_cents || 0) / 100), 0);
+        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + ((o.amount_cents || 0) / 100), 0);
       }
 
       // Fetch pending order requests (service_requests without orders yet)
@@ -277,7 +278,8 @@ export function AgencyPayoutsView() {
         .is('order_id', null)
         .not('status', 'in', '("cancelled","completed")');
 
-      lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + ((req.media_sites?.price || 0) / 100), 0);
+      // media_sites.price is in whole credits/dollars, not cents — no division needed
+      lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + (req.media_sites?.price || 0), 0);
 
       // Fetch payout transactions for pending/completed payouts
       const { data: payoutData } = await supabase
