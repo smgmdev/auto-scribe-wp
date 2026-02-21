@@ -1548,18 +1548,6 @@ export function AdminAgenciesView() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 md:hidden justify-end">
-                              {verification && (
-                                <Badge 
-                                  className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenVerification(verification, e);
-                                  }}
-                                >
-                                  <FileText className="h-3 w-3 mr-1" />
-                                  Verification Details
-                                </Badge>
-                              )}
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -1581,19 +1569,6 @@ export function AdminAgenciesView() {
                             </div>
 
                             <div className="hidden md:flex items-center gap-2 flex-wrap">
-                              {verification && (
-                                <Badge 
-                                  className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenVerification(verification, e);
-                                  }}
-                                >
-                                  <FileText className="h-3 w-3 mr-1" />
-                                  Verification Details
-                                </Badge>
-                              )}
-
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
