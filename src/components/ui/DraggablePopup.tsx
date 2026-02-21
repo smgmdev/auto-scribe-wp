@@ -180,7 +180,7 @@ export function DraggablePopup({
   return createPortal(
     <div
       ref={popupRef}
-      className={`fixed bg-background border shadow-2xl flex flex-col transition-all duration-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${className}`}
+      className={`fixed bg-background border shadow-2xl flex flex-col ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${!isVisible ? 'transition-all duration-200' : ''} ${className}`}
       style={{
         zIndex,
         left: `${positionRef.current.x}px`,
