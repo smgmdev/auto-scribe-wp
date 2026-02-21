@@ -423,9 +423,11 @@ export function DashboardView() {
             {isAdmin && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default">
-                    {activeSessionCount}&nbsp;sessions
-                  </Badge>
+                  <button type="button" className="cursor-default">
+                    <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
+                      {activeSessionCount}&nbsp;sessions
+                    </Badge>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
                   {recentSessions.length === 0 ? (
@@ -469,9 +471,11 @@ export function DashboardView() {
           {isAdmin && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default">
-                  {activeSessionCount}&nbsp;sessions
-                </Badge>
+                <button type="button" className="cursor-default">
+                  <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
+                    {activeSessionCount}&nbsp;sessions
+                  </Badge>
+                </button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
                 {recentSessions.length === 0 ? (
