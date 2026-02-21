@@ -1626,17 +1626,6 @@ export function CreditHistoryView() {
                             </div>
                             {(transaction.order_id || transaction.metadata?.wp_link) && (
                               <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
-                                {transaction.order_id && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOrderCompletedClick(transaction.order_id!, transaction.type);
-                                    }}
-                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                  >
-                                    View Order Details →
-                                  </button>
-                                )}
                                 {transaction.metadata?.wp_link && (
                                   <a
                                     href={transaction.metadata.wp_link}
@@ -1647,6 +1636,17 @@ export function CreditHistoryView() {
                                   >
                                     View Publication <ArrowRight className="h-3 w-3" />
                                   </a>
+                                )}
+                                {transaction.order_id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOrderCompletedClick(transaction.order_id!, transaction.type);
+                                    }}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Transaction Details <ArrowRight className="h-3 w-3" />
+                                  </button>
                                 )}
                               </div>
                             )}
