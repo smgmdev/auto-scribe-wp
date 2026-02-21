@@ -1671,10 +1671,20 @@ export function Sidebar({
         const old = payload.old as any;
         const updated = payload.new as any;
         if (row?.agency_payout_id === agencyPayoutId) {
-          // Skip refetch if an optimistic count update just happened (prevents overwriting)
-          if (payload.eventType === 'UPDATE' && isNotificationGuarded()) {
-            console.log('[Sidebar] Skipping agency engagement refetch - notification guard active');
-            return;
+          if (payload.eventType === 'UPDATE') {
+            // Skip refetch if notification guard is active
+            if (isNotificationGuarded()) {
+              console.log('[Sidebar] Skipping agency engagement refetch - notification guard active');
+              return;
+            }
+            // Only refetch when structural fields change (status, order_id)
+            // Skip read-status-only changes (agency_read, agency_last_read_at, client_read, client_last_read_at)
+            const statusChanged = updated.status !== old?.status;
+            const orderIdChanged = updated.order_id !== old?.order_id;
+            if (!statusChanged && !orderIdChanged) {
+              console.log('[Sidebar] Skipping agency engagement refetch - no structural change');
+              return;
+            }
           }
           console.log('[Sidebar] Agency service request changed, refetching counts');
           refetchAgencyNotificationCounts();
