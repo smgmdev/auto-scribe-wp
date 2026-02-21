@@ -328,10 +328,10 @@ export function AdminAgencyWithdrawalsView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Agency Withdrawals</h1>
-          <p className="mt-1 mb-4 text-muted-foreground">
+          <p className="mt-1 text-muted-foreground">
             Manage agency withdrawal requests
           </p>
         </div>
