@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -95,7 +95,26 @@ export function DashboardView() {
     loading: true
   });
   
-  // Use centralized available credits hook
+  // Real-time active sessions count (admin only)
+  const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
+
+  const fetchActiveSessions = useCallback(async () => {
+    if (!isAdmin) return;
+    const { count } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .not('active_session_id', 'is', null)
+      .gt('last_online_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+    setActiveSessionCount(count ?? 0);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchActiveSessions();
+    if (!isAdmin) return;
+    const interval = setInterval(fetchActiveSessions, 30000);
+    return () => clearInterval(interval);
+  }, [fetchActiveSessions, isAdmin]);
+
   const availableCreditsData = useAvailableCredits();
 
   const agencyStatusLoading = isAgency === null && !isAdmin;
@@ -384,7 +403,7 @@ export function DashboardView() {
             Account Dashboard
           </h1>
           {/* Badge on mobile - shown above description */}
-          <div className="md:hidden mt-2">
+          <div className="md:hidden mt-2 flex items-center gap-2">
             {agencyStatusLoading ? (
               <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
                 <Loader2 className="h-3 w-3 animate-spin text-white/40" />
@@ -399,11 +418,17 @@ export function DashboardView() {
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
+            {isAdmin && (
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {activeSessionCount} active
+              </Badge>
+            )}
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {/* Badge on desktop - shown to the right */}
-        <div className="hidden md:block order-1 md:order-2">
+        <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
           {agencyStatusLoading ? (
             <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
               <Loader2 className="h-3 w-3 animate-spin text-white/40" />
@@ -416,6 +441,12 @@ export function DashboardView() {
           ) : (
             <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
+            </Badge>
+          )}
+          {isAdmin && (
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {activeSessionCount} active
             </Badge>
           )}
         </div>
