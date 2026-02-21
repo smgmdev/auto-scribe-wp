@@ -604,7 +604,40 @@ export function AgencyPayoutsView() {
             </TabsList>
           </Tabs>
         </CardHeader>
-        <CardContent className="px-2 sm:px-6">
+        <CardContent className="px-2 sm:px-6 pt-0">
+          {/* Tab summary */}
+          {earningsTab === 'all' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Earnings</p>
+              <p className="text-lg font-bold text-green-600">
+                +${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+          {earningsTab === 'b2b' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">B2B Media Earnings</p>
+              <p className="text-lg font-bold text-green-600">
+                +${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+          {earningsTab === 'instant' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Instant Publishing Earnings</p>
+              <p className="text-lg font-bold text-green-600">
+                +${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+          {earningsTab === 'withdrawals' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Withdrawn</p>
+              <p className="text-lg font-bold text-foreground">
+                -${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
           {completedOrders.length === 0 && withdrawals.length === 0 && payoutTransactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
