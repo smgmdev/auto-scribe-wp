@@ -1105,7 +1105,17 @@ export function AdminOrdersView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-foreground text-background px-3 py-2 text-sm">
-            <p>Platform fee earnings from completed orders</p>
+            <p className="font-medium mb-1">Platform fee earnings from completed orders</p>
+            <div className="space-y-0.5 text-xs">
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">B2B Media Buying:</span>
+                <span className="font-semibold">${orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + calculatePlatformFee(o), 0).toLocaleString('en-US')}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-white/70">Instant Publishing:</span>
+                <span className="font-semibold">${instantOrdersFees.toLocaleString('en-US')}</span>
+              </div>
+            </div>
           </TooltipContent>
         </Tooltip>
       </div>
