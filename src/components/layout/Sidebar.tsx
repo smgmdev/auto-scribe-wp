@@ -1238,15 +1238,13 @@ export function Sidebar({
             return;
           }
           
-          // Skip refetch if the only change is read status / last_read_at (prevents flicker when marking as read)
-          const isReadOnlyChange = 
-            updated.status === old?.status &&
-            updated.order_id === old?.order_id &&
-            updated.description === old?.description &&
-            (updated.client_read !== old?.client_read || updated.client_last_read_at !== old?.client_last_read_at);
+          // Only refetch when fields that affect buyer notification grouping actually change
+          // (status affects active/cancelled bucketing, order_id affects whether it has an order)
+          const statusChanged = updated.status !== old?.status;
+          const orderIdChanged = updated.order_id !== old?.order_id;
           
-          if (isReadOnlyChange) {
-            console.log('[Sidebar] Skipping user engagement refetch - read-only change');
+          if (!statusChanged && !orderIdChanged) {
+            console.log('[Sidebar] Skipping user engagement refetch - no structural change');
             return;
           }
           
