@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle, ArrowRight } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -85,6 +86,7 @@ export function AgencyPayoutsView() {
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [payoutTransactions, setPayoutTransactions] = useState<PayoutTransaction[]>([]);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [earningsTab, setEarningsTab] = useState('all');
 
   const toggleCardExpand = (id: string) => {
     setExpandedCards(prev => {
@@ -591,8 +593,16 @@ export function AgencyPayoutsView() {
 
       {/* Earnings History */}
       <Card className="border-border/50 rounded-none sm:rounded-lg border-x-0 sm:border-x">
-        <CardHeader className="px-2 sm:px-6">
+        <CardHeader className="px-2 sm:px-6 pb-0">
           <CardTitle className="text-lg">Earnings History</CardTitle>
+          <Tabs value={earningsTab} onValueChange={setEarningsTab} className="mt-3">
+            <TabsList className="w-full">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="b2b">B2B Media Sales</TabsTrigger>
+              <TabsTrigger value="instant">Instant Publishing Sales</TabsTrigger>
+              <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
           {completedOrders.length === 0 && withdrawals.length === 0 && payoutTransactions.length === 0 ? (
@@ -633,7 +643,27 @@ export function AgencyPayoutsView() {
                 // Sort by event date descending (most recent first)
                 combinedItems.sort((a, b) => b.eventDate.getTime() - a.eventDate.getTime());
 
-                return combinedItems.map((item) => {
+                // Filter by active tab
+                const filteredItems = combinedItems.filter(item => {
+                  if (earningsTab === 'all') return true;
+                  if (earningsTab === 'b2b') return item.type === 'order';
+                  if (earningsTab === 'instant') return item.type === 'payout_tx';
+                  if (earningsTab === 'withdrawals') return item.type === 'withdrawal';
+                  return true;
+                });
+
+                if (filteredItems.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <DollarSign className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                      <p className="text-muted-foreground text-center">
+                        No transactions in this category yet.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return filteredItems.map((item) => {
                   if (item.type === 'withdrawal') {
                     const withdrawal = item.data;
                     const withdrawalAmount = withdrawal.amount_cents;
