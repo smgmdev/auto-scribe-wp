@@ -1493,24 +1493,40 @@ export function ChatListPanel() {
             return;
           }
           
+          // Check if chat dialog is open - use fresh state from store
+          const isDialogOpen = currentOpenChats.some(c => c.request.id === requestId);
+          
           // For received messages (not own), update last message and increment unread count
-          // Only increment if message is from counterparty
+          // Only increment if message is from counterparty AND the chat is NOT already open
           if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
-            setMyEngagements(prev => {
-              const updated = prev.map(e => 
-                e.id === requestId 
-                  ? { 
-                      ...e, 
-                      lastMessage: newMsg.message, 
-                      lastMessageTime: newMsg.created_at,
-                      unreadCount: e.unreadCount + 1,
-                      read: false
-                    }
-                  : e
-              );
-              myEngagementsRef.current = updated;
-              return updated;
-            });
+            if (isDialogOpen) {
+              // Chat is open - just update last message, don't increment unread
+              setMyEngagements(prev => {
+                const updated = prev.map(e => 
+                  e.id === requestId 
+                    ? { ...e, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    : e
+                );
+                myEngagementsRef.current = updated;
+                return updated;
+              });
+            } else {
+              setMyEngagements(prev => {
+                const updated = prev.map(e => 
+                  e.id === requestId 
+                    ? { 
+                        ...e, 
+                        lastMessage: newMsg.message, 
+                        lastMessageTime: newMsg.created_at,
+                        unreadCount: e.unreadCount + 1,
+                        read: false
+                      }
+                    : e
+                );
+                myEngagementsRef.current = updated;
+                return updated;
+              });
+            }
             // Sync effect will update minimized chat
             
             // Dispatch event to sync with MyRequestsView
@@ -1537,21 +1553,34 @@ export function ChatListPanel() {
           }
           
           if (isServiceRequest && senderType === 'client') {
-            setServiceRequests(prev => {
-              const updated = prev.map(r => 
-                r.id === requestId 
-                  ? { 
-                      ...r, 
-                      lastMessage: newMsg.message, 
-                      lastMessageTime: newMsg.created_at,
-                      unreadCount: r.unreadCount + 1,
-                      read: false
-                    }
-                  : r
-              );
-              serviceRequestsRef.current = updated;
-              return updated;
-            });
+            if (isDialogOpen) {
+              // Chat is open - just update last message, don't increment unread
+              setServiceRequests(prev => {
+                const updated = prev.map(r => 
+                  r.id === requestId 
+                    ? { ...r, lastMessage: newMsg.message, lastMessageTime: newMsg.created_at }
+                    : r
+                );
+                serviceRequestsRef.current = updated;
+                return updated;
+              });
+            } else {
+              setServiceRequests(prev => {
+                const updated = prev.map(r => 
+                  r.id === requestId 
+                    ? { 
+                        ...r, 
+                        lastMessage: newMsg.message, 
+                        lastMessageTime: newMsg.created_at,
+                        unreadCount: r.unreadCount + 1,
+                        read: false
+                      }
+                    : r
+                );
+                serviceRequestsRef.current = updated;
+                return updated;
+              });
+            }
             // Sync effect will update minimized chat
             
             // Dispatch event to sync with AgencyRequestsView
@@ -1587,9 +1616,6 @@ export function ChatListPanel() {
             });
           }
           
-          // Check if chat dialog is open - use fresh state from store
-          const isDialogOpen = currentOpenChats.some(c => c.request.id === requestId);
-          
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
           // Only increment unread for minimized chats when message is from counterparty
@@ -1608,14 +1634,11 @@ export function ChatListPanel() {
           
           // For minimized chats: the unread count was already synced from engagements/requests above
           // Just play the sound notification - no separate increment needed
-          // Note: isOwnMessage was already checked and returned early above, so we know this is from counterparty
           if (isMinimized && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is minimized, updating unread count');
             // Sound is handled exclusively by the broadcast handler to prevent double sounds
-            // postgres_changes and broadcast can fire with variable delays, so we centralize sound in broadcast only
           } else if (!isDialogOpen && isFromCounterparty) {
             console.log('[ChatListPanel] Chat is not open, playing sound (toast handled by broadcast)');
-            
             // Sound is handled exclusively by the broadcast handler to prevent double sounds
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
