@@ -334,8 +334,13 @@ export function ArticlesView() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => setCurrentView('compose')} 
+              className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+            >
+              New Article
+            </Button>
             <Button
-              size="sm"
               onClick={async () => {
                 setIsRefreshing(true);
                 await refreshArticles(false);
@@ -351,17 +356,16 @@ export function ArticlesView() {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
-            <Button 
-              onClick={() => setCurrentView('compose')} 
-              className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
-            >
-              New Article
-            </Button>
           </div>
         </div>
         <div className="flex md:hidden flex-col gap-2 mt-2">
+          <Button 
+            onClick={() => setCurrentView('compose')} 
+            className="w-full bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          >
+            New Article
+          </Button>
           <Button
-            size="sm"
             onClick={async () => {
               setIsRefreshing(true);
               await refreshArticles(false);
@@ -376,12 +380,6 @@ export function ArticlesView() {
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </Button>
-          <Button 
-            onClick={() => setCurrentView('compose')} 
-            className="w-full bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
-          >
-            New Article
           </Button>
         </div>
       </div>
