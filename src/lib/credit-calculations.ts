@@ -162,6 +162,8 @@ export interface AdminUserCredit {
   instantPublishDeliveryOrders: number;
   /** Credits spent on publishing articles */
   publishSpent: number;
+  /** Credits spent on usage (type === 'usage') */
+  usageSpent: number;
   totalSpent: number;
   /** Raw DB value for validation */
   dbCredits: number;
@@ -340,6 +342,7 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       instantPublishOrders,
       instantPublishDeliveryOrders,
       publishSpent,
+      usageSpent,
       totalSpent: (totalSpentMap.get(userId) || 0) + publishSpent + usageSpent,
       dbCredits: credit.credits,
       rawTxSum,

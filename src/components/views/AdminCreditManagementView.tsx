@@ -667,9 +667,43 @@ export const AdminCreditManagementView = () => {
                                               <span className="font-semibold text-white">{user.publishSpent.toLocaleString()}</span>
                                             </div>
                                           )}
+                                          {(user.usageSpent || 0) > 0 && (
+                                            <div className="flex justify-between gap-4">
+                                              <span className="text-white/70">Other Usage:</span>
+                                              <span className="font-semibold text-white">{(user.usageSpent || 0).toLocaleString()}</span>
+                                            </div>
+                                          )}
                                           <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                                             <span className="text-white/70">Total:</span>
                                             <span className="font-semibold text-white">{(user.totalSpent + user.deductions + user.publishSpent).toLocaleString()}</span>
+                                          </div>
+                                          {/* Profitability Ratio */}
+                                          <div className="pt-2 mt-1 border-t border-white/20 space-y-1">
+                                            <p className="font-medium mb-1">Profitability Ratio</p>
+                                            <div className="flex justify-between gap-4">
+                                              <span className="text-white/70">Total Purchased:</span>
+                                              <span className="font-semibold text-white">{user.purchased.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between gap-4">
+                                              <span className="text-white/70">Total Spent:</span>
+                                              <span className="font-semibold text-red-400">{(user.totalSpent + user.deductions + user.publishSpent) > 0 ? `-${(user.totalSpent + user.deductions + user.publishSpent).toLocaleString()}` : '0'}</span>
+                                            </div>
+                                            <div className="flex justify-between gap-4">
+                                              <span className="text-white/70">Total Earnings:</span>
+                                              <span className="font-semibold text-green-400">+{user.earned.toLocaleString()}</span>
+                                            </div>
+                                            {(() => {
+                                              const pl = user.earned - user.purchased;
+                                              const isPositive = pl >= 0;
+                                              return (
+                                                <div className="flex justify-between gap-4 pt-1 mt-1 border-t border-white/20">
+                                                  <span className="text-white/70 font-medium">P/L:</span>
+                                                  <span className={`font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                                    {isPositive ? '+' : ''}{pl.toLocaleString()}
+                                                  </span>
+                                                </div>
+                                              );
+                                            })()}
                                           </div>
                                         </div>
                                       </TooltipContent>
