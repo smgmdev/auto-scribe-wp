@@ -6791,6 +6791,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     onChange={handleInputChange}
                     disabled={sending}
                     className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base"
+                    onFocus={() => {
+                      // Mark as read immediately when user clicks the input field
+                      useAppStore.getState().setFocusedChatId(chat.request.id);
+                      clearUnreadMessageCount(globalChatRequest.id);
+                      clearMinimizedChatUnread(globalChatRequest.id);
+                      
+                      // Dispatch read events to clear notification badges in ChatListPanel
+                      if (globalChatType === 'my-request') {
+                        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+                          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+                        }));
+                      } else if (globalChatType === 'agency-request') {
+                        window.dispatchEvent(new CustomEvent('service-request-updated', {
+                          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+                        }));
+                      }
+                      
+                      // Also update database read status
+                      const now = new Date().toISOString();
+                      const updateField = actualSenderType === 'agency' 
+                        ? { agency_read: true, agency_last_read_at: now } 
+                        : actualSenderType === 'client'
+                          ? { client_read: true, client_last_read_at: now }
+                          : null;
+                      if (updateField) {
+                        supabase.from('service_requests').update(updateField).eq('id', globalChatRequest.id).then(() => {});
+                      }
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
                         e.preventDefault();
