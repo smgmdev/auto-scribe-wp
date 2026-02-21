@@ -1178,19 +1178,19 @@ export function CreditHistoryView() {
               <p className="font-medium">Number of completed orders:</p>
               <div className="space-y-1 pt-1 border-t border-muted-foreground/20">
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed B2B Media Purchase Orders:</span>
+                  <span className="text-muted-foreground">B2B Media Purchase Orders:</span>
                   <span className="font-medium">{completedPurchaseOrders}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed B2B Media Delivery Orders:</span>
+                  <span className="text-muted-foreground">B2B Media Delivery Orders:</span>
                   <span className="font-medium">{completedAgencyDeliveryOrders}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed Instant Publishing Purchase Orders:</span>
+                  <span className="text-muted-foreground">Instant Publishing Purchase Orders:</span>
                   <span className="font-medium">{completedInstantPublishOrders}</span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Completed Instant Publishing Delivery Orders:</span>
+                  <span className="text-muted-foreground">Instant Publishing Delivery Orders:</span>
                   <span className="font-medium">{completedInstantPublishDeliveryOrders}</span>
                 </div>
               </div>
