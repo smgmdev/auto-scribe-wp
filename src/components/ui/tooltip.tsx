@@ -5,48 +5,78 @@ import { cn } from "@/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
 
+// Shared context to allow trigger to toggle tooltip on touch
+const TouchToggleContext = React.createContext<{
+  toggle: () => void;
+} | null>(null);
+
 /**
  * Touch-friendly Tooltip wrapper.
- * On mobile (touch devices), Radix tooltips only trigger on hover which
- * doesn't exist. This wrapper adds open/onOpenChange state so a tap on
- * the trigger toggles the tooltip, and tapping elsewhere dismisses it.
+ * On mobile/touch, Radix tooltips only work on hover. This wrapper
+ * manages open state and lets the trigger toggle on tap.
  */
-const Tooltip = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>
->(({ children, delayDuration = 0, ...props }, _ref) => {
-  const [open, setOpen] = React.useState(props.defaultOpen ?? false);
+const Tooltip: React.FC<React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>> = ({
+  children,
+  delayDuration = 0,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  ...props
+}) => {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
 
-  // Merge external open/onOpenChange if provided
-  const isControlled = props.open !== undefined;
-  const isOpen = isControlled ? props.open : open;
-  const onOpenChange = (v: boolean) => {
-    if (!isControlled) setOpen(v);
-    props.onOpenChange?.(v);
-  };
+  const onOpenChange = React.useCallback((v: boolean) => {
+    if (!isControlled) setInternalOpen(v);
+    controlledOnOpenChange?.(v);
+  }, [isControlled, controlledOnOpenChange]);
+
+  const toggle = React.useCallback(() => {
+    onOpenChange(!open);
+  }, [open, onOpenChange]);
+
+  // Close on outside tap (for mobile)
+  React.useEffect(() => {
+    if (!open) return;
+    const handleTouch = () => {
+      // Small delay to let the trigger click fire first
+      setTimeout(() => onOpenChange(false), 150);
+    };
+    document.addEventListener('touchstart', handleTouch, { passive: true });
+    return () => document.removeEventListener('touchstart', handleTouch);
+  }, [open, onOpenChange]);
 
   return (
-    <TooltipPrimitive.Root
-      {...props}
-      open={isOpen}
-      onOpenChange={onOpenChange}
-      delayDuration={delayDuration}
-    >
-      {children}
-    </TooltipPrimitive.Root>
+    <TouchToggleContext.Provider value={{ toggle }}>
+      <TooltipPrimitive.Root
+        {...props}
+        open={open}
+        onOpenChange={onOpenChange}
+        delayDuration={delayDuration}
+      >
+        {children}
+      </TooltipPrimitive.Root>
+    </TouchToggleContext.Provider>
   );
-}) as React.FC<React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>>;
+};
 
 const TooltipTrigger = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
->(({ onClick, ...props }, ref) => {
+>(({ onClick, onTouchEnd, ...props }, ref) => {
+  const ctx = React.useContext(TouchToggleContext);
+
   return (
     <TooltipPrimitive.Trigger
       ref={ref}
       onClick={(e) => {
-        // On touch devices, ensure tooltip opens on tap
         onClick?.(e);
+      }}
+      onTouchEnd={(e) => {
+        // Toggle tooltip on tap for touch devices
+        e.stopPropagation();
+        ctx?.toggle();
+        onTouchEnd?.(e);
       }}
       {...props}
     />
