@@ -2002,84 +2002,73 @@ export function AdminAgenciesView() {
       </DraggablePopup>
 
       {/* Document Viewer Dialog */}
-      <Dialog open={documentDialogOpen} onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent" style={{ zIndex: 300 }}>
-          <DialogHeader className="px-2 md:px-3 pb-0">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setDocumentLoading(true);
-                    const iframe = document.querySelector('iframe[title="Document viewer"]') as HTMLIFrameElement;
-                    if (iframe) iframe.src = iframe.src;
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  disabled={documentLoading}
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
-                >
-                  <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
-                </Button>
-                <DialogTitle className="text-sm truncate">Incorporation Document</DialogTitle>
-                <Button
-                  onClick={() => setDocumentDialogOpen(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white md:hidden ml-auto flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => window.open(documentUrl!, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-                <Button
-                  onClick={() => window.open(documentUrl!, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Open in New Tab
-                </Button>
-                <Button
-                  onClick={() => setDocumentDialogOpen(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white hidden md:flex flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+      <DraggablePopup
+        open={documentDialogOpen}
+        onOpenChange={(open) => { setDocumentDialogOpen(open); if (!open) setDocumentLoading(true); }}
+        width={960}
+        maxHeight="90vh"
+        zIndex={300}
+        title={
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 px-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Button
+                onClick={() => {
+                  setDocumentLoading(true);
+                  const iframe = document.querySelector('iframe[title="Document viewer"]') as HTMLIFrameElement;
+                  if (iframe) iframe.src = iframe.src;
+                }}
+                variant="ghost"
+                size="sm"
+                disabled={documentLoading}
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
+              >
+                <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <span className="text-sm font-medium truncate">Incorporation Document</span>
             </div>
-          </DialogHeader>
-          {documentUrl && (
-            <div className="w-full h-[70vh] md:h-[75vh] relative">
-              {documentLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Loading document...</p>
-                  </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => window.open(documentUrl!, '_blank')}
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none hover:bg-black hover:text-white h-7 text-xs"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Download
+              </Button>
+              <Button
+                onClick={() => window.open(documentUrl!, '_blank')}
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none hover:bg-black hover:text-white h-7 text-xs"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Open in New Tab
+              </Button>
+            </div>
+          </div>
+        }
+        bodyClassName="p-0 !p-0"
+      >
+        {documentUrl && (
+          <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted">
+            {documentLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Loading document...</p>
                 </div>
-              )}
-              <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
-                className="w-full h-full border-0"
-                title="Document viewer"
-                onLoad={() => setDocumentLoading(false)}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+              </div>
+            )}
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`}
+              className="w-full h-full border-0"
+              title="Document viewer"
+              onLoad={() => setDocumentLoading(false)}
+            />
+          </div>
+        )}
+      </DraggablePopup>
 
       {/* WebView Dialog */}
       <WebViewDialog
@@ -2591,84 +2580,73 @@ export function AdminAgenciesView() {
       </DraggablePopup>
 
       {/* KYC Document Viewer Dialog */}
-      <Dialog open={docViewerOpen} onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}>
-        <DialogContent className="w-[95vw] md:w-[85vw] max-w-[95vw] md:max-w-[85vw] max-h-[90vh] md:max-h-[85vh] p-0 pt-2 gap-2 [&>button]:hidden overflow-hidden" overlayClassName="bg-transparent" style={{ zIndex: 300 }}>
-          <DialogHeader className="px-2 md:px-3 pb-0">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setDocumentLoading(true);
-                    const iframe = document.querySelector('iframe[title="KYC Document viewer"]') as HTMLIFrameElement;
-                    if (iframe) iframe.src = iframe.src;
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  disabled={documentLoading}
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
-                >
-                  <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
-                </Button>
-                <DialogTitle className="text-sm truncate">{docViewerTitle}</DialogTitle>
-                <Button
-                  onClick={() => setDocViewerOpen(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white md:hidden ml-auto flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => window.open(docViewerUrl, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-                <Button
-                  onClick={() => window.open(docViewerUrl, '_blank')}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 md:flex-none hover:bg-black hover:text-white h-7 text-xs"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Open in New Tab
-                </Button>
-                <Button
-                  onClick={() => setDocViewerOpen(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-black hover:text-white hidden md:flex flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+      <DraggablePopup
+        open={docViewerOpen}
+        onOpenChange={(open) => { setDocViewerOpen(open); if (!open) setDocumentLoading(true); }}
+        width={960}
+        maxHeight="90vh"
+        zIndex={300}
+        title={
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 px-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Button
+                onClick={() => {
+                  setDocumentLoading(true);
+                  const iframe = document.querySelector('iframe[title="KYC Document viewer"]') as HTMLIFrameElement;
+                  if (iframe) iframe.src = iframe.src;
+                }}
+                variant="ghost"
+                size="sm"
+                disabled={documentLoading}
+                className="h-7 w-7 p-0 hover:bg-black hover:text-white disabled:opacity-100 flex-shrink-0"
+              >
+                <RefreshCw className={`h-4 w-4 ${documentLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <span className="text-sm font-medium truncate">{docViewerTitle}</span>
             </div>
-          </DialogHeader>
-          {docViewerUrl && (
-            <div className="w-full h-[70vh] md:h-[75vh] relative">
-              {documentLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Loading document...</p>
-                  </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => window.open(docViewerUrl, '_blank')}
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none hover:bg-black hover:text-white h-7 text-xs"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Download
+              </Button>
+              <Button
+                onClick={() => window.open(docViewerUrl, '_blank')}
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none hover:bg-black hover:text-white h-7 text-xs"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Open in New Tab
+              </Button>
+            </div>
+          </div>
+        }
+        bodyClassName="p-0 !p-0"
+      >
+        {docViewerUrl && (
+          <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted">
+            {documentLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Loading document...</p>
                 </div>
-              )}
-              <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(docViewerUrl)}&embedded=true`}
-                className="w-full h-full border-0"
-                title="KYC Document viewer"
-                onLoad={() => setDocumentLoading(false)}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+              </div>
+            )}
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(docViewerUrl)}&embedded=true`}
+              className="w-full h-full border-0"
+              title="KYC Document viewer"
+              onLoad={() => setDocumentLoading(false)}
+            />
+          </div>
+        )}
+      </DraggablePopup>
 
       {/* Downgrade Agency Confirmation Dialog */}
       <DraggablePopup
