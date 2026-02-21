@@ -347,10 +347,10 @@ export function ArticlesView() {
                 setIsRefreshing(false);
               }}
               disabled={isRefreshing}
-              className={`hidden md:inline-flex gap-2 border border-foreground transition-all duration-200 ${
+              className={`hidden md:inline-flex gap-2 border border-black transition-all duration-200 ${
                 isRefreshing 
-                  ? 'bg-transparent text-foreground' 
-                  : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+                  ? 'bg-transparent text-black' 
+                  : 'bg-black text-white hover:bg-transparent hover:text-black'
               }`}
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -372,10 +372,10 @@ export function ArticlesView() {
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
-            className={`w-full gap-2 border border-foreground transition-all duration-200 ${
+            className={`w-full gap-2 border border-black transition-all duration-200 ${
               isRefreshing 
-                ? 'bg-transparent text-foreground' 
-                : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+                ? 'bg-transparent text-black' 
+                : 'bg-black text-white hover:bg-transparent hover:text-black'
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
