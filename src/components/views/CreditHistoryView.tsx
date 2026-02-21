@@ -1572,7 +1572,17 @@ export function CreditHistoryView() {
                               {(transaction as any).order_details?.media_sites?.name && (
                                 <div>
                                   <span className="text-muted-foreground">Media Site:</span>
-                                  <p className="font-medium">{(transaction as any).order_details.media_sites.name}</p>
+                                  <p className="font-medium flex items-center gap-2">
+                                    {(transaction as any).order_details.media_sites.favicon && (
+                                      <img 
+                                        src={(transaction as any).order_details.media_sites.favicon} 
+                                        alt="" 
+                                        className="h-4 w-4 rounded-sm object-contain"
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                      />
+                                    )}
+                                    {(transaction as any).order_details.media_sites.name}
+                                  </p>
                                 </div>
                               )}
                               {transaction.order_number && (
@@ -1600,16 +1610,16 @@ export function CreditHistoryView() {
                                 </div>
                               )}
                               <div>
-                                <span className="text-muted-foreground">Net Earnings:</span>
-                                <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
-                              </div>
-                              <div>
                                 <span className="text-muted-foreground">Platform Fee:</span>
                                 <p className="font-medium">{platformFee.toLocaleString()} credits</p>
                               </div>
+                              <div>
+                                <span className="text-muted-foreground">Net Earnings:</span>
+                                <p className="font-medium text-green-500">{transaction.amount.toLocaleString()} credits</p>
+                              </div>
                               {(transaction as any).order_details?.delivered_at && (
                                 <div>
-                                  <span className="text-muted-foreground">Delivered:</span>
+                                  <span className="text-muted-foreground">Delivery Time:</span>
                                   <p className="font-medium">{format(new Date((transaction as any).order_details.delivered_at), 'MMM d, yyyy h:mm a')}</p>
                                 </div>
                               )}
@@ -1635,7 +1645,7 @@ export function CreditHistoryView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
                                   >
-                                    View publication <ArrowRight className="h-3 w-3" />
+                                    View Publication <ArrowRight className="h-3 w-3" />
                                   </a>
                                 )}
                               </div>
@@ -2109,7 +2119,7 @@ export function CreditHistoryView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
                                   >
-                                    View publication <ArrowRight className="h-3 w-3" />
+                                    View Publication <ArrowRight className="h-3 w-3" />
                                   </a>
                                 </div>
                               )}
