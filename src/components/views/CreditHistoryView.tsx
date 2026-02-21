@@ -1381,7 +1381,7 @@ export function CreditHistoryView() {
 
       {/* Transactions List */}
       <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
-        <CardHeader className="px-2 sm:px-6 pb-0 space-y-0">
+        <CardHeader className="px-0 sm:px-0 pb-0 space-y-0">
           <CardTitle className="text-lg mb-3">Transaction History</CardTitle>
           {/* Tab filters */}
           <Tabs value={activeType} onValueChange={(val) => setActiveType(val)} className="mb-0">
@@ -1493,7 +1493,7 @@ export function CreditHistoryView() {
             </div>
           )}
         </CardHeader>
-        <CardContent className="px-2 sm:px-6 pt-0">
+        <CardContent className="px-0 sm:px-0 pt-0 pb-0">
           {/* Balance summary for All tab */}
           {activeType === 'all' && (
             <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
