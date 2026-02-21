@@ -3162,7 +3162,7 @@ export function AdminMediaManagementView() {
           </div>
         }
         footer={
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col md:flex-row md:justify-end gap-2 md:gap-3">
             <Button 
               type="button" 
               variant="outline" 
@@ -3171,15 +3171,16 @@ export function AdminMediaManagementView() {
                 setWpRejectReason('');
               }}
               disabled={isProcessing}
-              className="hover:bg-foreground hover:text-background"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background"
             >
               Cancel
             </Button>
             <Button 
               type="button" 
-              variant="destructive"
+              variant="outline"
               onClick={handleReject}
               disabled={isProcessing || !wpRejectReason.trim()}
+              className="w-full md:w-auto hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirm Rejection
