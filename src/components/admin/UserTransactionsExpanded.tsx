@@ -743,7 +743,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="bg-muted/30 max-w-full" style={{ overflowX: 'clip' }}>
+    <div className="bg-muted/30 max-w-full overflow-hidden">
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
         <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
         <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 w-max min-w-full">
@@ -753,7 +753,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               <TabsTrigger
                 key={type.key}
                 value={type.key}
-                className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap sm:flex-1"
+                className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-shrink-0 whitespace-nowrap"
               >
                 {type.label} ({count})
               </TabsTrigger>
