@@ -455,7 +455,7 @@ export const AdminCreditManagementView = () => {
             </Tooltip>
           </div>
 
-          <Card className="p-0 border-0 shadow-none">
+          <Card className="p-0 border-0 shadow-none overflow-hidden">
             <CardHeader className="pb-3 px-3 py-2 border-t border-white/20" style={{ backgroundColor: '#1d1d1f' }}>
               <CardTitle className="text-lg font-semibold text-white">User Credit Balances</CardTitle>
             </CardHeader>
@@ -486,8 +486,8 @@ export const AdminCreditManagementView = () => {
                   )}
                 </div>
               </div>
-              <div className="w-full">
-              <table className="w-full caption-bottom text-sm">
+              <div className="w-full overflow-x-hidden">
+              <table className="w-full caption-bottom text-sm table-fixed">
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
@@ -554,7 +554,7 @@ export const AdminCreditManagementView = () => {
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
                               <TableCell colSpan={3} className="p-0">
-                                <div className="bg-foreground" style={{ touchAction: 'auto' }}>
+                                <div className="bg-foreground overflow-x-hidden" style={{ touchAction: 'auto' }}>
                                   {/* Recalculate button + Stats row */}
                                   <div className="flex items-center justify-between pb-0">
                                     <Button
