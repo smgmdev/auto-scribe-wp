@@ -6,13 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -3027,9 +3021,12 @@ export function AdminMediaManagementView() {
       </Tabs>
 
       {/* Review Dialog */}
-      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader className="flex flex-row items-start gap-4">
+      <DraggablePopup
+        open={isReviewDialogOpen}
+        onOpenChange={setIsReviewDialogOpen}
+        width={520}
+        title={
+          <div className="flex items-start gap-4">
             {selectedSubmission?.logo_url && (
               <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0 bg-muted">
                 <img 
@@ -3040,667 +3037,676 @@ export function AdminMediaManagementView() {
               </div>
             )}
             <div>
-              <DialogTitle>Review WordPress Site Submission</DialogTitle>
-              <DialogDescription>
-                Review the submission details.
-              </DialogDescription>
-            </div>
-          </DialogHeader>
-
-          {selectedSubmission && (
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Site Name</p>
-                  <p className="font-medium">{selectedSubmission.name}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">SEO Plugin</p>
-                  <p className="font-medium">
-                    {selectedSubmission.seo_plugin === 'aioseo' ? 'AIOSEO Pro' : 'RankMath'}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">URL</p>
-                  <a 
-                    href={selectedSubmission.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="font-medium text-primary hover:underline flex items-center gap-1"
-                  >
-                    {selectedSubmission.url}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Username</p>
-                  <p className="font-medium">{selectedSubmission.username}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Submitted</p>
-                  <p className="font-medium">
-                    {new Date(selectedSubmission.created_at).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsReviewDialogOpen(false)}
-                  disabled={isProcessing}
-                  className="hover:bg-black hover:text-white"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={openTestArticleDialog}
-                  disabled={isProcessing}
-                  className="hover:bg-black hover:text-white"
-                >
-                  Test
-                </Button>
-                <Button 
-                  type="button"
-                  variant="outline"
-                  onClick={handleApprove}
-                  disabled={isProcessing}
-                  className="hover:bg-black hover:text-white"
-                >
-                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Approve
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="destructive"
-                  onClick={() => setIsWpRejectDialogOpen(true)}
-                  disabled={isProcessing}
-                >
-                  Reject
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* WP Reject Confirmation Dialog */}
-      <Dialog open={isWpRejectDialogOpen} onOpenChange={setIsWpRejectDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Reject WordPress Site</DialogTitle>
-            <DialogDescription>
-              Please provide a reason for rejecting this submission.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="wp-reject-reason">Rejection Reason</Label>
-              <Textarea
-                id="wp-reject-reason"
-                placeholder="Enter the reason for rejection..."
-                value={wpRejectReason}
-                onChange={(e) => setWpRejectReason(e.target.value)}
-                rows={3}
-              />
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setIsWpRejectDialogOpen(false);
-                  setWpRejectReason('');
-                }}
-                disabled={isProcessing}
-                className="hover:bg-black hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="button" 
-                variant="destructive"
-                onClick={handleReject}
-                disabled={isProcessing || !wpRejectReason.trim()}
-              >
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Confirm Rejection
-              </Button>
+              <h2 className="text-lg font-semibold">Review WordPress Site Submission</h2>
+              <p className="text-sm text-muted-foreground">Review the submission details.</p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reply Dialog for Media Submissions */}
-      <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Import Media Sites</DialogTitle>
-            <DialogDescription>
-              Enter the Google Sheet URL to import media sites for {selectedMediaSubmission?.agency_name}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="reply-sheet-url">Google Sheet URL</Label>
-              <Input
-                id="reply-sheet-url"
-                placeholder="https://docs.google.com/spreadsheets/d/..."
-                value={replySheetUrl}
-                onChange={(e) => setReplySheetUrl(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Make sure the sheet is published to the web (File → Share → Publish to web)
-              </p>
-            </div>
-
-            {selectedMediaSubmission && (
-              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                <p className="text-xs text-muted-foreground">Original submission sheet:</p>
-                <a
-                  href={selectedMediaSubmission.google_sheet_url}
-                  target="_blank"
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsReviewDialogOpen(false)}
+              disabled={isProcessing}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={openTestArticleDialog}
+              disabled={isProcessing}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Test
+            </Button>
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={handleApprove}
+              disabled={isProcessing}
+              className="hover:bg-foreground hover:text-background"
+            >
+              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Approve
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={() => setIsWpRejectDialogOpen(true)}
+              disabled={isProcessing}
+            >
+              Reject
+            </Button>
+          </div>
+        }
+      >
+        {selectedSubmission && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Site Name</p>
+                <p className="font-medium">{selectedSubmission.name}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">SEO Plugin</p>
+                <p className="font-medium">
+                  {selectedSubmission.seo_plugin === 'aioseo' ? 'AIOSEO Pro' : 'RankMath'}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-muted-foreground">URL</p>
+                <a 
+                  href={selectedSubmission.url} 
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                  className="font-medium text-primary hover:underline flex items-center gap-1"
                 >
-                  {selectedMediaSubmission.google_sheet_url.length > 50 
-                    ? `${selectedMediaSubmission.google_sheet_url.substring(0, 50)}...` 
-                    : selectedMediaSubmission.google_sheet_url}
+                  {selectedSubmission.url}
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
-            )}
+              <div>
+                <p className="text-muted-foreground">Username</p>
+                <p className="font-medium">{selectedSubmission.username}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Submitted</p>
+                <p className="font-medium">
+                  {new Date(selectedSubmission.created_at).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </DraggablePopup>
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setIsReplyDialogOpen(false);
-                  setSelectedMediaSubmission(null);
-                  setReplySheetUrl('');
-                }}
-                disabled={isImporting}
-                className="hover:!bg-foreground hover:!text-background"
+      {/* WP Reject Confirmation Dialog */}
+      <DraggablePopup
+        open={isWpRejectDialogOpen}
+        onOpenChange={setIsWpRejectDialogOpen}
+        width={440}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Reject WordPress Site</h2>
+            <p className="text-sm text-muted-foreground">Please provide a reason for rejecting this submission.</p>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setIsWpRejectDialogOpen(false);
+                setWpRejectReason('');
+              }}
+              disabled={isProcessing}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={handleReject}
+              disabled={isProcessing || !wpRejectReason.trim()}
+            >
+              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm Rejection
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-2">
+          <Label htmlFor="wp-reject-reason">Rejection Reason</Label>
+          <Textarea
+            id="wp-reject-reason"
+            placeholder="Enter the reason for rejection..."
+            value={wpRejectReason}
+            onChange={(e) => setWpRejectReason(e.target.value)}
+            rows={3}
+          />
+        </div>
+      </DraggablePopup>
+
+      {/* Reply Dialog for Media Submissions */}
+      <DraggablePopup
+        open={isReplyDialogOpen}
+        onOpenChange={setIsReplyDialogOpen}
+        width={520}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Import Media Sites</h2>
+            <p className="text-sm text-muted-foreground">Enter the Google Sheet URL to import media sites for {selectedMediaSubmission?.agency_name}</p>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setIsReplyDialogOpen(false);
+                setSelectedMediaSubmission(null);
+                setReplySheetUrl('');
+              }}
+              disabled={isImporting}
+              className="hover:!bg-foreground hover:!text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={handleMediaReply}
+              disabled={isImporting || !replySheetUrl.trim()}
+            >
+              {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import & Approve
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="reply-sheet-url">Google Sheet URL</Label>
+            <Input
+              id="reply-sheet-url"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+              value={replySheetUrl}
+              onChange={(e) => setReplySheetUrl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Make sure the sheet is published to the web (File → Share → Publish to web)
+            </p>
+          </div>
+
+          {selectedMediaSubmission && (
+            <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+              <p className="text-xs text-muted-foreground">Original submission sheet:</p>
+              <a
+                href={selectedMediaSubmission.google_sheet_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline flex items-center gap-1"
               >
-                Cancel
-              </Button>
-              <Button 
+                {selectedMediaSubmission.google_sheet_url.length > 50 
+                  ? `${selectedMediaSubmission.google_sheet_url.substring(0, 50)}...` 
+                  : selectedMediaSubmission.google_sheet_url}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
+        </div>
+      </DraggablePopup>
+
+      {/* Reject Dialog for Media Submissions */}
+      <DraggablePopup
+        open={isRejectDialogOpen}
+        onOpenChange={setIsRejectDialogOpen}
+        width={520}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Reject Submission</h2>
+            <p className="text-sm text-muted-foreground">Reject the media submission from {selectedMediaSubmission?.agency_name}</p>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setIsRejectDialogOpen(false);
+                setSelectedMediaSubmission(null);
+                setRejectReason('');
+              }}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              variant="destructive"
+              onClick={handleMediaReject}
+              disabled={isProcessing}
+            >
+              {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Reject
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-2">
+          <Label htmlFor="reject-reason">Reason (optional)</Label>
+          <Textarea
+            id="reject-reason"
+            placeholder="Provide a reason for rejection..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            rows={3}
+          />
+          <p className="text-xs text-muted-foreground">
+            This reason will be visible to the agency.
+          </p>
+        </div>
+      </DraggablePopup>
+
+      {/* Test Article Compose Dialog */}
+      <DraggablePopup
+        open={isTestArticleDialogOpen}
+        onOpenChange={setIsTestArticleDialogOpen}
+        width={720}
+        maxHeight="90vh"
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Test Article Publishing</h2>
+            <p className="text-sm text-muted-foreground">Create and publish a test article to {selectedSubmission?.name} to verify the WordPress connection</p>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setIsTestArticleDialogOpen(false);
+                resetTestArticleForm();
+              }}
+              disabled={isPublishingTestArticle}
+              className="hover:bg-foreground hover:text-background"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              onClick={handlePublishTestArticle}
+              disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim() || testSelectedCategories.length === 0 || testSelectedTagIds.length === 0 || !testFocusKeyword.trim() || (selectedSubmission?.seo_plugin === 'aioseo' && !testMetaDescription.trim()) || !testArticleImagePreview}
+            >
+              {isPublishingTestArticle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Publish Test Article
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {/* Tone Selector */}
+          <div className="space-y-2">
+            <Label htmlFor="test-tone">Tone</Label>
+            <Select value={testArticleTone} onValueChange={(v) => setTestArticleTone(v as ArticleTone)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select tone" />
+              </SelectTrigger>
+              <SelectContent>
+                {toneOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="test-title">Title</Label>
+            <div className="flex gap-2">
+              <Input
+                id="test-title"
+                placeholder="Enter article title..."
+                value={testArticleTitle}
+                onChange={(e) => setTestArticleTitle(e.target.value)}
+              />
+              <Button
                 type="button"
-                onClick={handleMediaReply}
-                disabled={isImporting || !replySheetUrl.trim()}
+                variant="outline"
+                onClick={handleGenerateTestArticle}
+                disabled={isGeneratingTestArticle || !testArticleTitle.trim()}
+                className="shrink-0"
               >
-                {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Import & Approve
+                {isGeneratingTestArticle ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                <span className="ml-2">Generate</span>
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Reject Dialog for Media Submissions */}
-      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Reject Submission</DialogTitle>
-            <DialogDescription>
-              Reject the media submission from {selectedMediaSubmission?.agency_name}
-            </DialogDescription>
-          </DialogHeader>
+          {/* Content */}
+          <div className="space-y-2">
+            <Label htmlFor="test-content">Content</Label>
+            <Textarea
+              id="test-content"
+              placeholder="Write or generate article content..."
+              value={testArticleContent}
+              onChange={(e) => setTestArticleContent(e.target.value)}
+              rows={8}
+              className="resize-none"
+            />
+            {testArticleContent && (
+              <p className="text-xs text-muted-foreground">
+                {testArticleContent.split(/\s+/).filter(Boolean).length} words
+              </p>
+            )}
+          </div>
 
-          <div className="space-y-4 mt-4">
+          {/* Categories */}
+          <div className="space-y-2">
+            <Label>Categories (select up to 2)</Label>
+            {isLoadingTestCategories ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading categories...
+              </div>
+            ) : testAvailableCategories.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {testAvailableCategories.map(cat => (
+                  <div key={cat.id} className="flex items-center gap-1.5">
+                    <Checkbox
+                      id={`test-cat-${cat.id}`}
+                      checked={testSelectedCategories.includes(cat.id)}
+                      onCheckedChange={() => toggleTestCategory(cat.id)}
+                      disabled={!testSelectedCategories.includes(cat.id) && testSelectedCategories.length >= 2}
+                    />
+                    <label htmlFor={`test-cat-${cat.id}`} className="text-sm cursor-pointer">
+                      {cat.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No categories found</p>
+            )}
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label>Tags (add up to 3)</Label>
+            {testSelectedTagIds.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {testAvailableTags
+                  .filter(tag => testSelectedTagIds.includes(tag.id))
+                  .map(tag => (
+                    <Badge
+                      key={tag.id}
+                      variant="default"
+                      className="cursor-pointer"
+                      onClick={() => toggleTestTag(tag.id)}
+                    >
+                      {tag.name}
+                      <X className="h-3 w-3 ml-1" />
+                    </Badge>
+                  ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add new tag..."
+                value={testNewTagInput}
+                onChange={(e) => setTestNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addNewTestTag();
+                  }
+                }}
+                className="max-w-xs"
+                disabled={testSelectedTagIds.length >= 3}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addNewTestTag}
+                disabled={isAddingTestTag || !testNewTagInput.trim() || testSelectedTagIds.length >= 3}
+                className="hover:bg-foreground hover:text-background"
+              >
+                {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
+              </Button>
+            </div>
+            {testSelectedTagIds.length >= 3 && (
+              <p className="text-xs text-muted-foreground">Maximum 3 tags reached</p>
+            )}
+          </div>
+
+          {/* SEO Settings */}
+          <div className="space-y-3 border-t pt-4">
+            <Label className="text-base font-semibold">SEO Settings ({selectedSubmission?.seo_plugin === 'aioseo' ? 'AIOSEO Pro' : 'RankMath'})</Label>
+            
             <div className="space-y-2">
-              <Label htmlFor="reject-reason">Reason (optional)</Label>
-              <Textarea
-                id="reject-reason"
-                placeholder="Provide a reason for rejection..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                rows={3}
+              <Label htmlFor="test-focus-keyword">Focus Keyword</Label>
+              <Input
+                id="test-focus-keyword"
+                placeholder="Enter focus keyword..."
+                value={testFocusKeyword}
+                onChange={(e) => setTestFocusKeyword(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                This reason will be visible to the agency.
+                {selectedSubmission?.seo_plugin === 'rankmath' 
+                  ? 'Title should contain the Focus Keyword to maximize SEO'
+                  : 'Title and Meta Description should contain the same Focus Keyword to maximize SEO'}
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setIsRejectDialogOpen(false);
-                  setSelectedMediaSubmission(null);
-                  setRejectReason('');
-                }}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="button"
-                variant="destructive"
-                onClick={handleMediaReject}
-                disabled={isProcessing}
-              >
-                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Reject
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Test Article Compose Dialog */}
-      <Dialog open={isTestArticleDialogOpen} onOpenChange={setIsTestArticleDialogOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Test Article Publishing</DialogTitle>
-            <DialogDescription>
-              Create and publish a test article to {selectedSubmission?.name} to verify the WordPress connection
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            {/* Tone Selector */}
-            <div className="space-y-2">
-              <Label htmlFor="test-tone">Tone</Label>
-              <Select value={testArticleTone} onValueChange={(v) => setTestArticleTone(v as ArticleTone)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {toneOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="test-title">Title</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="test-title"
-                  placeholder="Enter article title..."
-                  value={testArticleTitle}
-                  onChange={(e) => setTestArticleTitle(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGenerateTestArticle}
-                  disabled={isGeneratingTestArticle || !testArticleTitle.trim()}
-                  className="shrink-0"
-                >
-                  {isGeneratingTestArticle ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                  <span className="ml-2">Generate</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-2">
-              <Label htmlFor="test-content">Content</Label>
-              <Textarea
-                id="test-content"
-                placeholder="Write or generate article content..."
-                value={testArticleContent}
-                onChange={(e) => setTestArticleContent(e.target.value)}
-                rows={8}
-                className="resize-none"
-              />
-              {testArticleContent && (
-                <p className="text-xs text-muted-foreground">
-                  {testArticleContent.split(/\s+/).filter(Boolean).length} words
-                </p>
-              )}
-            </div>
-
-            {/* Categories */}
-            <div className="space-y-2">
-              <Label>Categories (select up to 2)</Label>
-              {isLoadingTestCategories ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading categories...
-                </div>
-              ) : testAvailableCategories.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {testAvailableCategories.map(cat => (
-                    <div key={cat.id} className="flex items-center gap-1.5">
-                      <Checkbox
-                        id={`test-cat-${cat.id}`}
-                        checked={testSelectedCategories.includes(cat.id)}
-                        onCheckedChange={() => toggleTestCategory(cat.id)}
-                        disabled={!testSelectedCategories.includes(cat.id) && testSelectedCategories.length >= 2}
-                      />
-                      <label htmlFor={`test-cat-${cat.id}`} className="text-sm cursor-pointer">
-                        {cat.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No categories found</p>
-              )}
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label>Tags (add up to 3)</Label>
-              {/* Show selected tags */}
-              {testSelectedTagIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {testAvailableTags
-                    .filter(tag => testSelectedTagIds.includes(tag.id))
-                    .map(tag => (
-                      <Badge
-                        key={tag.id}
-                        variant="default"
-                        className="cursor-pointer"
-                        onClick={() => toggleTestTag(tag.id)}
-                      >
-                        {tag.name}
-                        <X className="h-3 w-3 ml-1" />
-                      </Badge>
-                    ))}
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add new tag..."
-                  value={testNewTagInput}
-                  onChange={(e) => setTestNewTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addNewTestTag();
-                    }
-                  }}
-                  className="max-w-xs"
-                  disabled={testSelectedTagIds.length >= 3}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addNewTestTag}
-                  disabled={isAddingTestTag || !testNewTagInput.trim() || testSelectedTagIds.length >= 3}
-                  className="hover:bg-black hover:text-white"
-                >
-                  {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
-                </Button>
-              </div>
-              {testSelectedTagIds.length >= 3 && (
-                <p className="text-xs text-muted-foreground">Maximum 3 tags reached</p>
-              )}
-            </div>
-
-            {/* SEO Settings */}
-            <div className="space-y-3 border-t pt-4">
-              <Label className="text-base font-semibold">SEO Settings ({selectedSubmission?.seo_plugin === 'aioseo' ? 'AIOSEO Pro' : 'RankMath'})</Label>
-              
+            {selectedSubmission?.seo_plugin === 'aioseo' && (
               <div className="space-y-2">
-                <Label htmlFor="test-focus-keyword">Focus Keyword</Label>
-                <Input
-                  id="test-focus-keyword"
-                  placeholder="Enter focus keyword..."
-                  value={testFocusKeyword}
-                  onChange={(e) => setTestFocusKeyword(e.target.value)}
+                <Label htmlFor="test-meta-description">Meta Description</Label>
+                <Textarea
+                  id="test-meta-description"
+                  placeholder="Enter meta description..."
+                  value={testMetaDescription}
+                  onChange={(e) => setTestMetaDescription(e.target.value)}
+                  rows={2}
                 />
                 <p className="text-xs text-muted-foreground">
-                  {selectedSubmission?.seo_plugin === 'rankmath' 
-                    ? 'Title should contain the Focus Keyword to maximize SEO'
-                    : 'Title and Meta Description should contain the same Focus Keyword to maximize SEO'}
+                  {testMetaDescription.length}/160 characters
                 </p>
               </div>
-
-              {selectedSubmission?.seo_plugin === 'aioseo' && (
-                <div className="space-y-2">
-                  <Label htmlFor="test-meta-description">Meta Description</Label>
-                  <Textarea
-                    id="test-meta-description"
-                    placeholder="Enter meta description..."
-                    value={testMetaDescription}
-                    onChange={(e) => setTestMetaDescription(e.target.value)}
-                    rows={2}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {testMetaDescription.length}/160 characters
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Featured Image */}
-            <div className="space-y-2 border-t pt-4">
-              <Label>Featured Image</Label>
-              <input
-                ref={testArticleFileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleTestArticleImageUpload}
-              />
-              {testArticleImagePreview ? (
-                <div className="relative">
-                  <img
-                    src={testArticleImagePreview}
-                    alt="Preview"
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2"
-                    onClick={removeTestArticleImage}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDraggingTestImage ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'}`}
-                  onClick={() => testArticleFileInputRef.current?.click()}
-                  onDragOver={handleTestImageDragOver}
-                  onDragLeave={handleTestImageDragLeave}
-                  onDrop={handleTestImageDrop}
-                >
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Drag & drop or click to upload
-                  </p>
-                </div>
-              )}
-
-              {testArticleImagePreview && (
-                <div className="mt-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Caption</Label>
-                    <Input
-                      placeholder="Caption..."
-                      value={testFeaturedImage.caption}
-                      onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, caption: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setIsTestArticleDialogOpen(false);
-                  resetTestArticleForm();
-                }}
-                disabled={isPublishingTestArticle}
-                className="hover:bg-black hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="button"
-                onClick={handlePublishTestArticle}
-                disabled={isPublishingTestArticle || !testArticleTitle.trim() || !testArticleContent.trim() || testSelectedCategories.length === 0 || testSelectedTagIds.length === 0 || !testFocusKeyword.trim() || (selectedSubmission?.seo_plugin === 'aioseo' && !testMetaDescription.trim()) || !testArticleImagePreview}
-              >
-                {isPublishingTestArticle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Publish Test Article
-              </Button>
-            </div>
+            )}
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* Featured Image */}
+          <div className="space-y-2 border-t pt-4">
+            <Label>Featured Image</Label>
+            <input
+              ref={testArticleFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleTestArticleImageUpload}
+            />
+            {testArticleImagePreview ? (
+              <div className="relative">
+                <img
+                  src={testArticleImagePreview}
+                  alt="Preview"
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={removeTestArticleImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isDraggingTestImage ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'}`}
+                onClick={() => testArticleFileInputRef.current?.click()}
+                onDragOver={handleTestImageDragOver}
+                onDragLeave={handleTestImageDragLeave}
+                onDrop={handleTestImageDrop}
+              >
+                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Drag & drop or click to upload
+                </p>
+              </div>
+            )}
+
+            {testArticleImagePreview && (
+              <div className="mt-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption</Label>
+                  <Input
+                    placeholder="Caption..."
+                    value={testFeaturedImage.caption}
+                    onChange={(e) => setTestFeaturedImage(prev => ({ ...prev, caption: e.target.value }))}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </DraggablePopup>
 
       {/* Test Article Success Dialog */}
-      <Dialog open={isTestSuccessDialogOpen} onOpenChange={setIsTestSuccessDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <DraggablePopup
+        open={isTestSuccessDialogOpen}
+        onOpenChange={setIsTestSuccessDialogOpen}
+        width={440}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
               Test Article Published
-            </DialogTitle>
-            <DialogDescription>
-              The test article has been successfully published to {selectedSubmission?.name}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              You can now view the article on the WordPress site or delete it to clean up.
-            </p>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  if (testArticleResult?.wpLink) {
-                    window.open(testArticleResult.wpLink, '_blank');
-                  }
-                }}
-                disabled={!testArticleResult?.wpLink}
-                className="hover:bg-black hover:text-white"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Article
-              </Button>
-              <Button 
-                type="button"
-                variant="destructive"
-                onClick={handleDeleteTestArticle}
-                disabled={isDeletingTestArticle}
-              >
-                {isDeletingTestArticle ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="mr-2 h-4 w-4" />
-                )}
-                Delete
-              </Button>
-            </div>
+            </h2>
+            <p className="text-sm text-muted-foreground">The test article has been successfully published to {selectedSubmission?.name}</p>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                if (testArticleResult?.wpLink) {
+                  window.open(testArticleResult.wpLink, '_blank');
+                }
+              }}
+              disabled={!testArticleResult?.wpLink}
+              className="hover:bg-foreground hover:text-background"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View Article
+            </Button>
+            <Button 
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteTestArticle}
+              disabled={isDeletingTestArticle}
+            >
+              {isDeletingTestArticle ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          You can now view the article on the WordPress site or delete it to clean up.
+        </p>
+      </DraggablePopup>
 
       {/* Agency Details Dialog */}
-      <Dialog open={isAgencyDetailsDialogOpen} onOpenChange={(open) => {
-        setIsAgencyDetailsDialogOpen(open);
-        if (!open) {
-          setSelectedAgencyDetails(null);
-          setAgencyLogoSignedUrl(null);
+      <DraggablePopup
+        open={isAgencyDetailsDialogOpen}
+        onOpenChange={(open) => {
+          setIsAgencyDetailsDialogOpen(open);
+          if (!open) {
+            setSelectedAgencyDetails(null);
+            setAgencyLogoSignedUrl(null);
+          }
+        }}
+        width={440}
+        title={
+          <div className="flex items-center gap-3">
+            {agencyLogoSignedUrl && (
+              <div className="relative h-12 w-12 rounded-xl bg-muted overflow-hidden flex items-center justify-center">
+                <Loader2 className="h-4 w-4 text-muted-foreground animate-spin absolute" id="agency-popup-logo-loader" />
+                <img
+                  src={agencyLogoSignedUrl}
+                  alt={selectedAgencyDetails?.agency_name || 'Agency logo'}
+                  className="h-12 w-12 object-cover opacity-0 transition-opacity"
+                  onLoad={(e) => {
+                    e.currentTarget.classList.remove('opacity-0');
+                    const loader = document.getElementById('agency-popup-logo-loader');
+                    if (loader) loader.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            <h2 className="text-lg font-semibold">{selectedAgencyDetails?.agency_name}</h2>
+          </div>
         }
-      }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              {agencyLogoSignedUrl && (
-                <div className="relative h-12 w-12 rounded-xl bg-muted overflow-hidden flex items-center justify-center">
-                  <Loader2 className="h-4 w-4 text-muted-foreground animate-spin absolute" id="agency-popup-logo-loader" />
-                  <img
-                    src={agencyLogoSignedUrl}
-                    alt={selectedAgencyDetails?.agency_name || 'Agency logo'}
-                    className="h-12 w-12 object-cover opacity-0 transition-opacity"
-                    onLoad={(e) => {
-                      e.currentTarget.classList.remove('opacity-0');
-                      const loader = document.getElementById('agency-popup-logo-loader');
-                      if (loader) loader.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-              <span>{selectedAgencyDetails?.agency_name}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedAgencyDetails && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Website</p>
-                <div className="flex items-center gap-2">
-                  <a 
-                    href={ensureHttps(selectedAgencyDetails.agency_website)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline flex items-center gap-1"
-                  >
-                    {selectedAgencyDetails.agency_website.replace(/^https?:\/\//, '')}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(selectedAgencyDetails.agency_website);
-                      toast({ title: 'Copied to clipboard' });
-                    }}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Country</p>
-                <p className="text-foreground">{selectedAgencyDetails.country}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 mt-4">
+        footer={
+          <div className="flex justify-end">
             <Button 
               variant="outline"
               onClick={() => setIsAgencyDetailsDialogOpen(false)}
-              className="hover:bg-black hover:text-white transition-colors"
+              className="hover:bg-foreground hover:text-background transition-colors"
             >
               Close
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        {selectedAgencyDetails && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Website</p>
+              <div className="flex items-center gap-2">
+                <a 
+                  href={ensureHttps(selectedAgencyDetails.agency_website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline flex items-center gap-1"
+                >
+                  {selectedAgencyDetails.agency_website.replace(/^https?:\/\//, '')}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedAgencyDetails.agency_website);
+                    toast({ title: 'Copied to clipboard' });
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Country</p>
+              <p className="text-foreground">{selectedAgencyDetails.country}</p>
+            </div>
+          </div>
+        )}
+      </DraggablePopup>
 
       {/* Delete WP Site Confirmation Dialog */}
-      <Dialog open={isWpDeleteDialogOpen} onOpenChange={setIsWpDeleteDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete WordPress Site</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{wpSiteToDelete?.name}"? This will remove the site and all associated data. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3 mt-4">
+      <DraggablePopup
+        open={isWpDeleteDialogOpen}
+        onOpenChange={setIsWpDeleteDialogOpen}
+        width={440}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Delete WordPress Site</h2>
+            <p className="text-sm text-muted-foreground">Are you sure you want to delete "{wpSiteToDelete?.name}"? This will remove the site and all associated data. This action cannot be undone.</p>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end gap-3">
             <Button 
               variant="outline"
               onClick={() => setIsWpDeleteDialogOpen(false)}
@@ -3723,46 +3729,23 @@ export function AdminMediaManagementView() {
               )}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div />
+      </DraggablePopup>
 
       {/* Change WP Site Price Dialog */}
-      <Dialog open={isWpPriceDialogOpen} onOpenChange={setIsWpPriceDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Change Price</DialogTitle>
-            <DialogDescription>
-              Set the credit price for "{wpPriceEditSite?.name}"
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {isWpPriceLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <Label>Current Price</Label>
-                  <p className="text-sm text-muted-foreground">{currentWpSitePrice} credits</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="newWpPrice">New Price (credits)</Label>
-                  <Input
-                    id="newWpPrice"
-                    type="text"
-                    inputMode="numeric"
-                    value={newWpPrice}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^0-9]/g, '');
-                      setNewWpPrice(value);
-                    }}
-                    placeholder="Enter new price"
-                  />
-                </div>
-              </>
-            )}
+      <DraggablePopup
+        open={isWpPriceDialogOpen}
+        onOpenChange={setIsWpPriceDialogOpen}
+        width={440}
+        title={
+          <div>
+            <h2 className="text-lg font-semibold">Change Price</h2>
+            <p className="text-sm text-muted-foreground">Set the credit price for "{wpPriceEditSite?.name}"</p>
           </div>
+        }
+        footer={
           <div className="flex justify-end gap-3">
             <Button 
               variant="outline" 
@@ -3779,8 +3762,37 @@ export function AdminMediaManagementView() {
               Save Price
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="space-y-4">
+          {isWpPriceLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>Current Price</Label>
+                <p className="text-sm text-muted-foreground">{currentWpSitePrice} credits</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newWpPrice">New Price (credits)</Label>
+                <Input
+                  id="newWpPrice"
+                  type="text"
+                  inputMode="numeric"
+                  value={newWpPrice}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setNewWpPrice(value);
+                  }}
+                  placeholder="Enter new price"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </DraggablePopup>
 
       {/* Admin Manage Approved Media - Draggable Portal Popup */}
       {adminManageSubmission && createPortal(
