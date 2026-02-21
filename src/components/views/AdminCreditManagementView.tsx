@@ -356,7 +356,7 @@ export const AdminCreditManagementView = () => {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[360px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+              <TooltipContent side="bottom" sideOffset={8} className="max-w-[640px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
                 {(() => {
                   const totalPurchased = activeUsers.reduce((sum, user) => sum + user.purchased, 0);
                   const totalPurchasedOnline = activeUsers.reduce((sum, user) => sum + (user.purchasedOnline || 0), 0);
@@ -374,122 +374,154 @@ export const AdminCreditManagementView = () => {
                   const agencyAvailable = agencyUsers.reduce((sum, u) => sum + u.available, 0);
                   const regularAvailable = regularUsers.reduce((sum, u) => sum + u.available, 0);
 
-                  // Withdrawable = available minus locked
                   const agencyWithdrawable = agencyUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
                   const regularWithdrawable = regularUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
 
-                  // Commission: platform_fee_cents from completed orders
                   const totalCommission = Math.round(totalPlatformFees / 100);
-                  // Estimate B2B vs IP commission from earnings ratio
                   const totalEarnedSafe = totalEarned || 1;
                   const b2bCommission = totalEarned > 0 ? Math.round(totalCommission * (totalB2bEarnings / totalEarnedSafe)) : totalCommission;
                   const ipCommission = totalCommission - b2bCommission;
                   const b2bCommissionPct = totalB2bEarnings > 0 ? ((b2bCommission / (totalB2bEarnings + b2bCommission)) * 100).toFixed(1) : '0';
                   const ipCommissionPct = totalInstantEarnings > 0 ? ((ipCommission / (totalInstantEarnings + ipCommission)) * 100).toFixed(1) : '0';
 
+                  const totalLockedFromRequests = activeUsers.reduce((sum, u) => sum + (u.lockedFromRequests || 0), 0);
+                  const totalLockedFromOrders = activeUsers.reduce((sum, u) => sum + u.lockedFromOrders, 0);
+                  const totalLockedAll = Math.round(totalLockedFromRequests + totalLockedFromOrders);
+                  const totalDeductions = activeUsers.reduce((sum, u) => sum + (u.deductions || 0), 0);
+
                   const fmt = (n: number) => n.toLocaleString();
 
                   return (
-                    <div className="space-y-3 min-w-[300px]">
-                      {/* Purchased */}
-                      <div className="space-y-1">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Purchased by Users</div>
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50 text-xs">Online via Platform:</span>
-                          <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedOnline)}</span>
+                    <div className="flex gap-6">
+                      {/* Column 1 */}
+                      <div className="space-y-3 min-w-[240px]">
+                        {/* Purchased */}
+                        <div className="space-y-1">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Purchased by Users</div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Online via Platform:</span>
+                            <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedOnline)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Offline via Invoice:</span>
+                            <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedInvoice)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pt-1">
+                            <span className="text-white font-medium text-xs">Total:</span>
+                            <span className="font-semibold text-green-400 text-xs">{fmt(totalPurchased)}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50 text-xs">Offline via Invoice:</span>
-                          <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedInvoice)}</span>
+
+                        {/* Earned */}
+                        <div className="space-y-1 border-t border-white/20 pt-3">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Earned by Agencies</div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                            <span className="text-xs font-medium text-green-400">{fmt(totalB2bEarnings)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
+                            <span className="text-xs font-medium text-green-400">{fmt(totalInstantEarnings)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pt-1">
+                            <span className="text-white font-medium text-xs">Total:</span>
+                            <span className="font-semibold text-green-400 text-xs">{fmt(totalEarned)}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-4 pt-1">
-                          <span className="text-white font-medium text-xs">Total:</span>
-                          <span className="font-semibold text-green-400 text-xs">{fmt(totalPurchased)}</span>
+
+                        {/* Withdrawn */}
+                        <div className="space-y-1 border-t border-white/20 pt-3">
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white/70">Total Withdrawn:</span>
+                            <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${fmt(Math.round(totalWithdrawn))}` : '0'}</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white/70">Total Pending Withdrawal:</span>
+                            <span className="font-semibold text-amber-400">{totalPending > 0 ? fmt(totalPending) : '0'}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-3">
+                            <span className="text-white/50 text-xs">USDT:</span>
+                            <span className="text-xs font-medium text-amber-400/80">{totalPendingCrypto > 0 ? fmt(totalPendingCrypto) : '0'}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-3">
+                            <span className="text-white/50 text-xs">Bank Transfer:</span>
+                            <span className="text-xs font-medium text-amber-400/80">{totalPendingBank > 0 ? fmt(totalPendingBank) : '0'}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Earned */}
-                      <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Earned by Agencies</div>
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50 text-xs">B2B Media Sales:</span>
-                          <span className="text-xs font-medium text-green-400">{fmt(totalB2bEarnings)}</span>
+                      {/* Column 2 */}
+                      <div className="space-y-3 min-w-[240px] border-l border-white/20 pl-6">
+                        {/* Available within platform */}
+                        <div className="space-y-1">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Credits Available in Platform</div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white font-medium text-xs">Total:</span>
+                            <span className="font-semibold text-white text-xs">{fmt(totalCredits)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Agencies:</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(agencyAvailable)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Regular Users:</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(regularAvailable)}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
-                          <span className="text-xs font-medium text-green-400">{fmt(totalInstantEarnings)}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pt-1">
-                          <span className="text-white font-medium text-xs">Total:</span>
-                          <span className="font-semibold text-green-400 text-xs">{fmt(totalEarned)}</span>
-                        </div>
-                      </div>
 
-                      {/* Withdrawn */}
-                      <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Total Withdrawn:</span>
-                          <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${fmt(Math.round(totalWithdrawn))}` : '0'}</span>
+                        {/* Withdrawable */}
+                        <div className="space-y-1 border-t border-white/20 pt-3">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Withdrawable Credits</div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white font-medium text-xs">Total:</span>
+                            <span className="font-semibold text-white text-xs">{fmt(agencyWithdrawable + regularWithdrawable)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Agencies:</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(agencyWithdrawable)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Users:</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(regularWithdrawable)}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Total Pending Withdrawal:</span>
-                          <span className="font-semibold text-amber-400">{totalPending > 0 ? fmt(totalPending) : '0'}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">USDT:</span>
-                          <span className="text-xs font-medium text-amber-400/80">{totalPendingCrypto > 0 ? fmt(totalPendingCrypto) : '0'}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Bank Transfer:</span>
-                          <span className="text-xs font-medium text-amber-400/80">{totalPendingBank > 0 ? fmt(totalPendingBank) : '0'}</span>
-                        </div>
-                      </div>
 
-                      {/* Available within platform */}
-                      <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Credits Available in Platform:</span>
-                          <span className="font-semibold text-white">{fmt(totalCredits)}</span>
+                        {/* Platform Commission */}
+                        <div className="space-y-1 border-t border-white/20 pt-3">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Platform Commission Fees</div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white font-medium text-xs">Total:</span>
+                            <span className="font-semibold text-blue-400 text-xs">{fmt(totalCommission)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">B2B Media Buying:</span>
+                            <span className="text-xs font-medium text-blue-400/80">{fmt(b2bCommission)} ({b2bCommissionPct}%)</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Instant Publishing:</span>
+                            <span className="text-xs font-medium text-blue-400/80">{fmt(ipCommission)} ({ipCommissionPct}%)</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Agencies:</span>
-                          <span className="text-xs font-medium text-white/80">{fmt(agencyAvailable)}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Regular Users:</span>
-                          <span className="text-xs font-medium text-white/80">{fmt(regularAvailable)}</span>
-                        </div>
-                      </div>
 
-                      {/* Withdrawable */}
-                      <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Withdrawable Credits:</span>
-                          <span className="font-semibold text-white">{fmt(agencyWithdrawable + regularWithdrawable)}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Agencies:</span>
-                          <span className="text-xs font-medium text-white/80">{fmt(agencyWithdrawable)}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Users:</span>
-                          <span className="text-xs font-medium text-white/80">{fmt(regularWithdrawable)}</span>
-                        </div>
-                      </div>
-
-                      {/* Platform Commission */}
-                      <div className="space-y-1 border-t border-white/20 pt-3">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-white/70">Platform Commission Fees:</span>
-                          <span className="font-semibold text-blue-400">{fmt(totalCommission)}</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">B2B Media Buying:</span>
-                          <span className="text-xs font-medium text-blue-400/80">{fmt(b2bCommission)} ({b2bCommissionPct}%)</span>
-                        </div>
-                        <div className="flex justify-between gap-4 pl-3">
-                          <span className="text-white/50 text-xs">Instant Publishing:</span>
-                          <span className="text-xs font-medium text-blue-400/80">{fmt(ipCommission)} ({ipCommissionPct}%)</span>
+                        {/* System */}
+                        <div className="space-y-1 border-t border-white/20 pt-3">
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">System</div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-white/70">Locked in Orders:</span>
+                            <span className="font-semibold text-amber-400">{fmt(totalLockedAll)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Order Requests:</span>
+                            <span className="text-xs font-medium text-amber-400/80">{fmt(Math.round(totalLockedFromRequests))}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50 text-xs">Active Orders:</span>
+                            <span className="text-xs font-medium text-amber-400/80">{fmt(Math.round(totalLockedFromOrders))}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 pt-1">
+                            <span className="text-white/70">Deductions:</span>
+                            <span className="font-semibold text-red-400">{totalDeductions > 0 ? `-${fmt(totalDeductions)}` : '0'}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
