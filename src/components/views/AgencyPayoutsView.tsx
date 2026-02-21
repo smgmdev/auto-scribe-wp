@@ -771,16 +771,8 @@ export function AgencyPayoutsView() {
                                   <span className="text-muted-foreground">Your Earning:</span>
                                   <p className="font-medium text-green-600">${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
-                                {wpLink && (
-                                  <div>
-                                    <span className="text-muted-foreground">Publication:</span>
-                                    <a href={wpLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline">
-                                      View Article <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                  </div>
-                                )}
                               </div>
-                              <div className="pt-2 border-t border-border/30">
+                              <div className="pt-2 border-t border-border/30 space-y-1">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -791,6 +783,18 @@ export function AgencyPayoutsView() {
                                   View transaction details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
+                                {wpLink && (
+                                  <a
+                                    href={wpLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                  >
+                                    View publication
+                                    <ArrowRight className="h-3 w-3" />
+                                  </a>
+                                )}
                               </div>
                             </div>
                           </div>
