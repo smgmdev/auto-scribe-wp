@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await wpResponse.json();
-    const postId = data.id;
+    const wpPostId = data.id;
 
     // For Rank Math, try updating meta via a separate request
     if (site.seo_plugin === 'rankmath' && seo && (seo.focusKeyword || seo.metaDescription)) {
@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
             rank_math_description: seo.metaDescription || '',
           }
         };
-        await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postId}`, {
+        await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -273,12 +273,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('[wordpress-publish-article] Article published successfully:', postId);
+    console.log('[wordpress-publish-article] Article published successfully:', wpPostId);
 
     return new Response(
       JSON.stringify({
         success: true,
-        id: postId,
+        id: wpPostId,
         link: data.link,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

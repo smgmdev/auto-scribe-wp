@@ -131,7 +131,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.wordpress-publish-article]
-verify_jwt = true
+verify_jwt = false
 
 [functions.auto-publish]
 verify_jwt = false
