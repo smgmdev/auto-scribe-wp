@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import { useState, useEffect, useRef, useCallback, ReactNode, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { pushPopup, removePopup } from '@/lib/popup-stack';
 
 interface DraggablePopupProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function DraggablePopup({
   headerClassName = '',
 }: DraggablePopupProps) {
   const isMobile = useIsMobile();
+  const popupId = useId();
   const getCenteredPosition = useCallback(() => {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -56,18 +58,12 @@ export function DraggablePopup({
     }
   }, [open, isMobile, getCenteredPosition]);
 
-  // Escape key
+  // Register with popup stack for layered ESC handling
   useEffect(() => {
     if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onOpenChange(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, onOpenChange]);
+    pushPopup(popupId, () => onOpenChange(false));
+    return () => removePopup(popupId);
+  }, [open, popupId, onOpenChange]);
 
   // Mobile body scroll lock
   useEffect(() => {
