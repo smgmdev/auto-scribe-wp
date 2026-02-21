@@ -350,7 +350,7 @@ export default function Auth() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button variant="outline" onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white" disabled={isLoading}>Cancel</Button>
+            <Button variant="outline" onClick={handleActiveSessionCancel} className="hover:bg-black hover:text-white hover:border-black" disabled={isLoading}>Cancel</Button>
             <Button onClick={handleActiveSessionConfirm} className="bg-black text-white hover:bg-transparent hover:text-black border border-black" disabled={isLoading}>
               {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : 'Continue to Sign In'}
             </Button>
