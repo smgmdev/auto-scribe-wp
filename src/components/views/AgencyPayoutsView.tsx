@@ -654,7 +654,7 @@ export function AgencyPayoutsView() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-0">
               {/* Combined and sorted earnings history */}
               {(() => {
                 // Create combined list with type discriminator and event date
@@ -754,7 +754,7 @@ export function AgencyPayoutsView() {
                       <div 
                         key={`withdrawal-${withdrawal.id}`}
                         onClick={() => toggleCardExpand(`withdrawal-${withdrawal.id}`)}
-                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
+                        className={`rounded-none -mt-px border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
                       >
                         <div className="relative p-3">
                           <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
@@ -831,7 +831,7 @@ export function AgencyPayoutsView() {
                       <div 
                         key={`payout-${tx.id}`}
                         onClick={() => toggleCardExpand(`payout-${tx.id}`)}
-                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
+                        className={`rounded-none -mt-px border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
                       >
                         <div className="relative p-3">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
@@ -903,7 +903,7 @@ export function AgencyPayoutsView() {
                       <div 
                         key={`order-${order.id}`}
                         onClick={() => toggleCardExpand(`order-${order.id}`)}
-                        className={`rounded-lg border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
+                        className={`rounded-none -mt-px border border-border hover:border-[#4771d9] transition-colors cursor-pointer overflow-hidden ${isExpanded ? 'border-[#4771d9]' : ''}`}
                       >
                         <div className="relative p-3">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
