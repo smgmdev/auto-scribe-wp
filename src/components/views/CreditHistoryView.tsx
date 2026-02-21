@@ -1392,11 +1392,11 @@ export function CreditHistoryView() {
 
       {/* Transactions List */}
       <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
-        <CardHeader className="px-2 sm:px-6 pb-0">
+        <CardHeader className="px-2 sm:px-6 pb-0 space-y-0">
           <CardTitle className="text-lg mb-3">Transaction History</CardTitle>
           {/* Tab filters */}
-          <Tabs value={activeType} onValueChange={(val) => setActiveType(val)}>
-            <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+          <Tabs value={activeType} onValueChange={(val) => setActiveType(val)} className="mb-0">
+            <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full mb-0" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
               {transactionTypesTabs.map(type => {
                 const count = tabCounts[type.key] || 0;
                 return (
