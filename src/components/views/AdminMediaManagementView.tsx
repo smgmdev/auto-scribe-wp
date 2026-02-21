@@ -3472,7 +3472,7 @@ export function AdminMediaManagementView() {
                   ))}
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <Input
                 placeholder="Add new tag..."
                 value={testNewTagInput}
@@ -3483,7 +3483,7 @@ export function AdminMediaManagementView() {
                     addNewTestTag();
                   }
                 }}
-                className="max-w-xs"
+                className="w-full md:max-w-xs"
                 disabled={testSelectedTagIds.length >= 3}
               />
               <Button
@@ -3492,7 +3492,7 @@ export function AdminMediaManagementView() {
                 size="sm"
                 onClick={addNewTestTag}
                 disabled={isAddingTestTag || !testNewTagInput.trim() || testSelectedTagIds.length >= 3}
-                className="hover:bg-foreground hover:text-background"
+                className="w-full md:w-auto hover:bg-foreground hover:text-background"
               >
                 {isAddingTestTag ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
               </Button>
