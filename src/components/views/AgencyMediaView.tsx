@@ -1027,7 +1027,7 @@ export function AgencyMediaView() {
         <div className="relative md:pt-2 overflow-x-auto md:overflow-visible scrollbar-hide">
         <TabsList className="w-full p-0 h-auto bg-black rounded-none">
           <TabsTrigger value="media" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
-            Media Sites
+            Media Sites ({mediaSites.length})
             {(unreadAddedCount + unreadRejectedMediaCount) > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadAddedCount + unreadRejectedMediaCount}
@@ -1035,7 +1035,7 @@ export function AgencyMediaView() {
             )}
           </TabsTrigger>
           <TabsTrigger value="wordpress" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-white data-[state=active]:text-black rounded-none">
-            WordPress Sites
+            WordPress Sites ({wordpressSites.length})
             {(unreadConnectedWpCount + unreadRejectedWpCount) > 0 && (
               <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
                 {unreadConnectedWpCount + unreadRejectedWpCount}
