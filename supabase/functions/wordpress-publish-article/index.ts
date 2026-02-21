@@ -17,6 +17,7 @@ interface PublishRequest {
   categories: number[];
   tags: number[];
   featuredMediaId?: number;
+  postId?: number; // If provided, update existing post instead of creating new
   seo?: {
     focusKeyword?: string;
     metaDescription?: string;
@@ -92,9 +93,9 @@ Deno.serve(async (req) => {
 
   try {
     const body: PublishRequest = await req.json();
-    const { siteId, title, content, status, categories, tags, featuredMediaId, seo } = body;
+    const { siteId, title, content, status, categories, tags, featuredMediaId, postId, seo } = body;
 
-    console.log('[wordpress-publish-article] Request received:', { siteId, title: title?.substring(0, 50), status, callerUserId });
+    console.log('[wordpress-publish-article] Request received:', { siteId, title: title?.substring(0, 50), status, postId, callerUserId });
 
     if (!siteId || !title || !content) {
       console.error('[wordpress-publish-article] Missing required fields');
@@ -204,9 +205,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Publish to WordPress with retry logic
+    // Publish or update to WordPress with retry logic
+    const wpUrl = postId 
+      ? `${baseUrl}/wp-json/wp/v2/posts/${postId}`
+      : `${baseUrl}/wp-json/wp/v2/posts`;
     const wpResponse = await publishWithRetry(
-      `${baseUrl}/wp-json/wp/v2/posts`,
+      wpUrl,
       authHeader,
       postBody
     );

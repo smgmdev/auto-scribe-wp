@@ -369,6 +369,11 @@ export interface UpdateArticleParams {
 }
 
 export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
+  // If credentials are missing, use edge function (same as publishArticle)
+  if (!params.site.username || !params.site.applicationPassword) {
+    return updateArticleViaEdgeFunction(params);
+  }
+
   try {
     const baseUrl = normalizeUrl(params.site.url);
     
@@ -385,12 +390,10 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
     // Add SEO data based on plugin type
     if (params.seo) {
       if (params.site.seoPlugin === 'aioseo') {
-        // AIOSEO Pro uses specific meta structure for TruSEO
         body.meta = {
           _aioseo_description: params.seo.metaDescription || '',
           _aioseo_keywords: params.seo.focusKeyword || '',
         };
-        // Also include aioseo_meta_data for REST API compatibility
         body.aioseo_meta_data = {
           description: params.seo.metaDescription || '',
           keyphrases: {
@@ -403,7 +406,6 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
           },
         };
       } else if (params.site.seoPlugin === 'rankmath') {
-        // RankMath uses meta object
         body.meta = {
           rank_math_focus_keyword: params.seo.focusKeyword || '',
           rank_math_description: params.seo.metaDescription || '',
@@ -434,7 +436,6 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
         await updateRankMathMeta(params.site, params.postId, params.seo);
       } catch (seoError) {
         console.error('Failed to update Rank Math SEO meta, but article was updated:', seoError);
-        // Don't throw - the post was updated successfully, just SEO might not have saved
       }
     }
 
@@ -446,6 +447,42 @@ export async function updateArticle(params: UpdateArticleParams): Promise<{ id: 
     console.error('Error updating article:', error);
     throw error;
   }
+}
+
+// Update article via edge function (for users without direct credentials)
+async function updateArticleViaEdgeFunction(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
+  console.log('[updateArticleViaEdgeFunction] Starting update for site:', params.site.id, 'postId:', params.postId);
+  
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  const { data, error } = await supabase.functions.invoke('wordpress-publish-article', {
+    body: {
+      siteId: params.site.id,
+      title: params.title,
+      content: params.content,
+      status: params.status,
+      categories: params.categories,
+      tags: params.tags,
+      featuredMediaId: params.featuredMediaId,
+      postId: params.postId,
+      seo: params.seo,
+    },
+  });
+
+  if (error) {
+    console.error('[updateArticleViaEdgeFunction] Invoke error:', error);
+    throw new Error(error.message || 'Failed to update article');
+  }
+
+  if (data?.error) {
+    console.error('[updateArticleViaEdgeFunction] Edge function error:', data.error);
+    throw new Error(data.error);
+  }
+
+  return {
+    id: data.id,
+    link: data.link,
+  };
 }
 
 // Update existing media metadata
