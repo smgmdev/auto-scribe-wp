@@ -1828,6 +1828,13 @@ export type Database = {
         }[]
       }
       get_admin_online_status: { Args: never; Returns: boolean }
+      get_agency_info_by_payout_id: {
+        Args: { _payout_id: string }
+        Returns: {
+          agency_name: string
+          logo_url: string
+        }[]
+      }
       get_agency_payout_id_by_name: {
         Args: { _agency_name: string }
         Returns: string
