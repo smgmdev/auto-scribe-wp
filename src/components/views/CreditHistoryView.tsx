@@ -2100,6 +2100,19 @@ export function CreditHistoryView() {
                                   </button>
                                 </div>
                               )}
+                              {transaction.type === 'order_payout' && transaction.metadata?.wp_link && (
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  <a
+                                    href={transaction.metadata.wp_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
+                                  >
+                                    View publication <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              )}
                              </>
                            )}
                           
