@@ -22,6 +22,7 @@ export function AccountSettings() {
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -128,6 +129,9 @@ export function AccountSettings() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email"
+              autoComplete="off"
+              data-lpignore="true"
+              data-form-type="other"
               className="flex-1 text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
             />
             <Button 
@@ -185,52 +189,75 @@ export function AccountSettings() {
 
         {/* Password */}
         <div className="space-y-3">
-          <Label className="flex items-center gap-2">
-            <Lock className="h-4 w-4" />
-            Change Password
-          </Label>
-          <div className="space-y-3">
-            <input type="text" name="prevent_autofill" id="prevent_autofill" value="" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
-            <input type="password" name="prevent_autofill_pass" id="prevent_autofill_pass" value="" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password"
-              autoComplete="off"
-              data-lpignore="true"
-              data-form-type="other"
-              className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
-            />
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-              autoComplete="off"
-              data-lpignore="true"
-              data-form-type="other"
-              className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
-            />
-            <Button 
-              onClick={handleUpdatePassword} 
-              disabled={savingPassword || !newPassword || !confirmPassword}
-              variant="outline"
-              className="w-full hover:bg-transparent hover:text-accent hover:border-accent"
-            >
-              {savingPassword ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Lock className="mr-2 h-4 w-4" />
-                  Update Password
-                </>
-              )}
-            </Button>
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              Change Password
+            </Label>
+            {!showPasswordFields && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPasswordFields(true)}
+                className="hover:bg-transparent hover:text-accent hover:border-accent"
+              >
+                Change
+              </Button>
+            )}
           </div>
+          {showPasswordFields && (
+            <form autoComplete="off" data-form-type="other" onSubmit={(e) => e.preventDefault()} className="space-y-3">
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-form-type="other"
+                name="new-pwd-change"
+                className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
+              />
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-form-type="other"
+                name="confirm-pwd-change"
+                className="text-sm placeholder:text-sm bg-background text-foreground border-input placeholder:text-muted-foreground"
+              />
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleUpdatePassword} 
+                  disabled={savingPassword || !newPassword || !confirmPassword}
+                  variant="outline"
+                  className="flex-1 hover:bg-transparent hover:text-accent hover:border-accent"
+                >
+                  {savingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Update Password
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => { setShowPasswordFields(false); setNewPassword(''); setConfirmPassword(''); }}
+                  className="hover:bg-transparent hover:text-muted-foreground"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
 
         <Separator />
