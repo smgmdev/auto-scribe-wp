@@ -572,7 +572,7 @@ export const AdminCreditManagementView = () => {
                                   <div className="grid grid-cols-6 pt-2">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1a2744' }}>
                                           <p className="text-xs text-white/70">Available Credits</p>
                                           <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
@@ -594,7 +594,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1a2744' }}>
                                           <p className="text-xs text-white/70">Locked</p>
                                           <p className="font-semibold text-amber-400">{user.locked.toLocaleString()}</p>
                                         </div>
@@ -609,7 +609,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1a2744' }}>
                                           <p className="text-xs text-white/70">Purchased</p>
                                           <p className="font-semibold text-white">{user.purchased.toLocaleString()}</p>
                                         </div>
@@ -626,7 +626,7 @@ export const AdminCreditManagementView = () => {
                                     
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1a2744' }}>
                                           <p className="text-xs text-white/70">Orders</p>
                                           <p className="font-semibold text-white">{user.orders.toLocaleString()}</p>
                                         </div>
@@ -643,7 +643,7 @@ export const AdminCreditManagementView = () => {
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
+                                        <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959]" style={{ backgroundColor: '#1a2744' }}>
                                           <p className="text-xs text-white/70">Total Spent</p>
                                           <p className="font-semibold text-white">{(user.totalSpent + user.deductions).toLocaleString()}</p>
                                         </div>
