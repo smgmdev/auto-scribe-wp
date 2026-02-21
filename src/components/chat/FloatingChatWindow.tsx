@@ -6795,30 +6795,34 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       // Mark as read immediately when user clicks the input field
                       const store = useAppStore.getState();
                       store.setFocusedChatId(chat.request.id);
+                      
+                      // Check if this chat actually has unread messages before decrementing
+                      const currentUnread = store.unreadMessageCounts[globalChatRequest.id] || 0;
+                      const wasUnread = currentUnread > 0;
+                      
                       clearUnreadMessageCount(globalChatRequest.id);
                       clearMinimizedChatUnread(globalChatRequest.id);
                       
-                      // Dispatch read events to clear notification badges in ChatListPanel
-                      // AND decrement sidebar menu item counts
-                      if (globalChatType === 'my-request') {
-                        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
-                          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
-                        }));
-                        // Decrement sidebar "My Engagements" count if currently unread
-                        if (store.userUnreadEngagementsCount > 0) {
-                          store.setUserUnreadEngagementsCount(Math.max(0, store.userUnreadEngagementsCount - 1));
-                        }
-                      } else if (globalChatType === 'agency-request') {
-                        window.dispatchEvent(new CustomEvent('service-request-updated', {
-                          detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
-                        }));
-                        // Decrement sidebar "Service Requests" count if currently unread
-                        if (store.agencyUnreadServiceRequestsCount > 0) {
-                          store.setAgencyUnreadServiceRequestsCount(Math.max(0, store.agencyUnreadServiceRequestsCount - 1));
+                      // Only dispatch events and decrement sidebar counts if chat was actually unread
+                      if (wasUnread) {
+                        if (globalChatType === 'my-request') {
+                          window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+                            detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+                          }));
+                          if (store.userUnreadEngagementsCount > 0) {
+                            store.setUserUnreadEngagementsCount(Math.max(0, store.userUnreadEngagementsCount - 1));
+                          }
+                        } else if (globalChatType === 'agency-request') {
+                          window.dispatchEvent(new CustomEvent('service-request-updated', {
+                            detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
+                          }));
+                          if (store.agencyUnreadServiceRequestsCount > 0) {
+                            store.setAgencyUnreadServiceRequestsCount(Math.max(0, store.agencyUnreadServiceRequestsCount - 1));
+                          }
                         }
                       }
                       
-                      // Also update database read status
+                      // Always update database read status
                       const now = new Date().toISOString();
                       const updateField = actualSenderType === 'agency' 
                         ? { agency_read: true, agency_last_read_at: now } 
