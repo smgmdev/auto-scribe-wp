@@ -103,6 +103,8 @@ export function AgencyMediaView() {
     decrementAgencyUnreadWpSubmissionsCount, 
     agencyUnreadWpSubmissionsCount, 
     setAgencyUnreadWpSubmissionsCount,
+    agencyUnreadMediaSubmissionsCount,
+    setAgencyUnreadMediaSubmissionsCount,
     agencyMediaTargetTab,
     setAgencyMediaTargetTab,
     agencyMediaTargetSubTab,
@@ -597,6 +599,139 @@ export function AgencyMediaView() {
       supabase.removeChannel(channel);
     };
   }, [user]);
+
+  // Real-time subscription for wordpress_site_submissions status changes (admin approve/reject)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('agency-wp-submissions-status')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'wordpress_site_submissions',
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // Only process if status changed and belongs to this user
+          if (updated.status === old.status) return;
+          
+          // Verify this submission belongs to current user by checking our lists
+          const wasPending = pendingSubmissions.some(s => s.id === updated.id);
+          if (!wasPending) return;
+          
+          if (updated.status === 'approved') {
+            // Remove from pending
+            setPendingSubmissions(prev => prev.filter(s => s.id !== updated.id));
+            // Show notification
+            toast.success(`WordPress site "${updated.name}" has been approved!`);
+            // Refetch WP sites since a new one was added
+            const { data } = await supabase
+              .from('wordpress_sites')
+              .select('id, name, url, seo_plugin, favicon, connected, read, created_at')
+              .eq('user_id', user.id)
+              .order('created_at', { ascending: false });
+            if (data) setWordpressSites(data);
+            // Update sidebar badge
+            setAgencyUnreadWpSubmissionsCount(Math.max(0, agencyUnreadWpSubmissionsCount - 1) + 1); // -1 pending, +1 unread connected
+          } else if (updated.status === 'rejected') {
+            // Move from pending to rejected
+            setPendingSubmissions(prev => prev.filter(s => s.id !== updated.id));
+            setRejectedSubmissions(prev => [{
+              id: updated.id,
+              name: updated.name,
+              url: updated.url,
+              seo_plugin: updated.seo_plugin,
+              status: 'rejected',
+              created_at: updated.created_at,
+              reviewed_at: updated.reviewed_at,
+              admin_notes: updated.admin_notes,
+              read: false,
+              logo_url: updated.logo_url,
+            }, ...prev]);
+            // Show notification
+            toast.error(`WordPress site "${updated.name}" has been rejected.`);
+            // Switch to rejected tab
+            setWpSubTab('rejected');
+            // Update sidebar badge (remove from pending, but rejected unread adds)
+            setAgencyUnreadWpSubmissionsCount(agencyUnreadWpSubmissionsCount); // stays same: -1 pending count but +1 rejected unread
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, pendingSubmissions, agencyUnreadWpSubmissionsCount]);
+
+  // Real-time subscription for media_site_submissions status changes (admin approve/reject)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('agency-media-submissions-status')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'media_site_submissions',
+        },
+        async (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          
+          // Only process if status changed
+          if (updated.status === old.status) return;
+          
+          // Check if this was in our pending list
+          const wasPending = pendingMediaSubmissions.some(s => s.id === updated.id);
+          if (!wasPending) return;
+          
+          if (updated.status === 'approved') {
+            // Remove from pending
+            setPendingMediaSubmissions(prev => prev.filter(s => s.id !== updated.id));
+            // Show notification
+            toast.success('Your media site submission has been approved!');
+            // Refetch to get the approved data with imported sites
+            fetchData();
+            // Switch to approved tab
+            setMediaSubTab('added');
+            // Update sidebar badge
+            setAgencyUnreadMediaSubmissionsCount((agencyUnreadMediaSubmissionsCount || 0) + 1);
+          } else if (updated.status === 'rejected') {
+            // Move from pending to rejected
+            setPendingMediaSubmissions(prev => prev.filter(s => s.id !== updated.id));
+            setRejectedMediaSubmissions(prev => [{
+              id: updated.id,
+              google_sheet_url: updated.google_sheet_url,
+              status: 'rejected',
+              created_at: updated.created_at,
+              admin_notes: updated.admin_notes,
+              read: false,
+              reviewed_at: updated.reviewed_at,
+              rejected_media: updated.rejected_media as RejectedMediaItem[] | null,
+            }, ...prev]);
+            // Show notification
+            toast.error('Your media site submission has been rejected.');
+            // Switch to rejected tab
+            setMediaSubTab('rejected');
+            // Update sidebar badge
+            setAgencyUnreadMediaSubmissionsCount((agencyUnreadMediaSubmissionsCount || 0) + 1);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, pendingMediaSubmissions, agencyUnreadMediaSubmissionsCount]);
 
   const handleAddMedia = (type: 'wordpress' | 'media') => {
     if (type === 'wordpress') {
