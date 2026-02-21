@@ -1068,11 +1068,11 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {wordpressSites.map((site, index) => (
                     <Card 
                       key={site.id} 
-                      className="group hover:shadow-md hover:border-green-500 transition-all duration-300"
+                      className={`group hover:shadow-md hover:border-green-500 transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <CardContent className="p-3">
@@ -1216,11 +1216,11 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {pendingSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md hover:border-yellow-500 transition-all duration-300"
+                      className={`group hover:shadow-md hover:border-yellow-500 transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <CardContent className="p-3">
@@ -1294,11 +1294,11 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {rejectedSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer"
+                      className={`group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer rounded-none ${index > 0 ? '-mt-px' : ''}`}
                       style={{ animationDelay: `${index * 50}ms` }}
                       onClick={() => handleRejectedWpClick(submission.id)}
                     >
@@ -1411,14 +1411,14 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {sortedApprovedMediaSubmissions.map((submission, index) => {
                     const isExpanded = expandedApprovedSubmissions.has(submission.id);
                     
                     return (
                       <Card 
                         key={submission.id} 
-                        className="group hover:shadow-md hover:border-green-500 transition-all duration-300 cursor-pointer"
+                        className={`group hover:shadow-md hover:border-green-500 transition-all duration-300 cursor-pointer rounded-none ${index > 0 ? '-mt-px' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={() => toggleExpandedApprovedSubmission(submission.id)}
                       >
@@ -1710,11 +1710,11 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {pendingMediaSubmissions.map((submission, index) => (
                     <Card 
                       key={submission.id} 
-                      className="group hover:shadow-md hover:border-yellow-500 transition-all duration-300"
+                      className={`group hover:shadow-md hover:border-yellow-500 transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <CardContent className="p-3">
@@ -1776,14 +1776,14 @@ export function AgencyMediaView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {allRejectedSubmissions.map((submission, index) => {
                     if (submission.type === 'full') {
                       // Fully rejected submission
                       return (
                         <Card 
                           key={submission.id} 
-                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300"
+                          className={`group hover:shadow-md hover:border-red-500 transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                           style={{ animationDelay: `${index * 50}ms` }}
                         >
                           <CardContent className="p-3">
@@ -1841,7 +1841,7 @@ export function AgencyMediaView() {
                       return (
                         <Card 
                           key={`partial-${submission.id}`}
-                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer"
+                          className={`group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer rounded-none ${index > 0 ? '-mt-px' : ''}`}
                           style={{ animationDelay: `${index * 50}ms` }}
                           onClick={() => toggleExpandedRejectedSubmission(submission.id)}
                         >

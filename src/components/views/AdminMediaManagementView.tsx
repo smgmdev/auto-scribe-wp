@@ -1868,14 +1868,14 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {approvedSites.map((site, index) => {
                     const agencyName = site.user_id ? wpAgencyNames[site.user_id] : null;
                     
                     return (
                       <Card 
                         key={site.id} 
-                        className="group hover:shadow-md hover:border-green-500 transition-all duration-300"
+                        className={`group hover:shadow-md hover:border-green-500 transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <CardContent className="p-3">
@@ -2033,12 +2033,12 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {pendingSubmissions.map((submission, index) => {
                     return (
                       <Card 
                         key={submission.id} 
-                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : ''}`}
+                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer rounded-none ${index > 0 ? '-mt-px' : ''} ${!submission.read ? 'border-yellow-500' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={() => handleOpenReview(submission)}
                       >
@@ -2140,12 +2140,12 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {rejectedSubmissions.map((submission, index) => {
                     return (
                       <Card 
                         key={submission.id} 
-                        className="group hover:shadow-md transition-all duration-300"
+                        className={`group hover:shadow-md transition-all duration-300 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <CardContent className="p-3">
@@ -2269,7 +2269,7 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {sortedApprovedMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
@@ -2279,7 +2279,7 @@ export function AdminMediaManagementView() {
                     return (
                       <Card 
                         key={submission.id} 
-                        className="group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-green-500/50"
+                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer border-green-500/50 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={() => toggleExpandedApprovedSubmission(submission.id)}
                       >
@@ -2621,7 +2621,7 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {pendingMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
@@ -2630,7 +2630,7 @@ export function AdminMediaManagementView() {
                     return (
                       <Card 
                         key={submission.id} 
-                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer ${!submission.read ? 'border-yellow-500' : ''}`}
+                        className={`group hover:shadow-md hover:border-[#4771d9] transition-all duration-300 cursor-pointer rounded-none ${index > 0 ? '-mt-px' : ''} ${!submission.read ? 'border-yellow-500' : ''}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                         onClick={async () => {
                           if (!submission.read) {
@@ -2782,7 +2782,7 @@ export function AdminMediaManagementView() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {allRejectedMediaSubmissions.map((submission, index) => {
                     const logoUrl = agencyLogos[submission.agency_name];
                     const isLogoLoading = loadingLogos.has(submission.agency_name);
@@ -2796,7 +2796,7 @@ export function AdminMediaManagementView() {
                       return (
                         <Card 
                           key={submission.id} 
-                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer border-red-500/50"
+                          className={`group hover:shadow-md hover:border-red-500 transition-all duration-300 cursor-pointer border-red-500/50 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                           style={{ animationDelay: `${index * 50}ms` }}
                           onClick={() => toggleExpandedRejectedSubmission(submission.id)}
                         >
@@ -2931,7 +2931,7 @@ export function AdminMediaManagementView() {
                       return (
                         <Card 
                           key={submission.id} 
-                          className="group hover:shadow-md hover:border-red-500 transition-all duration-300 border-red-500/50"
+                          className={`group hover:shadow-md hover:border-red-500 transition-all duration-300 border-red-500/50 rounded-none ${index > 0 ? '-mt-px' : ''}`}
                           style={{ animationDelay: `${index * 50}ms` }}
                         >
                           <CardContent className="p-3">
