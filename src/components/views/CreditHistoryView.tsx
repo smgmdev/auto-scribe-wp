@@ -1129,14 +1129,32 @@ export function CreditHistoryView() {
                 )}
               </div>
               {isAgency && (
-                <div className="flex justify-between gap-4">
-                  <span className="text-white/70">Pending Withdrawals:</span>
-                  <span className="font-semibold text-amber-400">
-                    {(withdrawalsByBank + withdrawalsByCrypto) > 0
-                      ? `$${(withdrawalsByBank + withdrawalsByCrypto).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : '0'}
-                  </span>
-                </div>
+                <>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-white/70">Pending Withdrawals:</span>
+                    <span className="font-semibold text-amber-400">
+                      {(withdrawalsByBank + withdrawalsByCrypto) > 0
+                        ? `$${(withdrawalsByBank + withdrawalsByCrypto).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-4 pl-3">
+                    <span className="text-white/50 text-xs">USDT:</span>
+                    <span className="text-xs font-medium text-amber-400/80">
+                      {withdrawalsByCrypto > 0
+                        ? `$${withdrawalsByCrypto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-4 pl-3">
+                    <span className="text-white/50 text-xs">Bank Transfer:</span>
+                    <span className="text-xs font-medium text-amber-400/80">
+                      {withdrawalsByBank > 0
+                        ? `$${withdrawalsByBank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : '0'}
+                    </span>
+                  </div>
+                </>
               )}
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Locked in Offer Requests:</span>
