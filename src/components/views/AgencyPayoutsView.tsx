@@ -758,19 +758,9 @@ export function AgencyPayoutsView() {
                         {isExpanded && (
                           <div className="px-3 pb-3 pt-0 border-t border-border bg-muted/30">
                             <div className="pt-2 space-y-3 text-sm">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
-                                <div>
-                                  <span className="text-muted-foreground">Sale Amount:</span>
-                                  <p className="font-medium">${grossAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Platform Fee ({tx.metadata?.commission_percentage || 10}%):</span>
-                                  <p className="font-medium">${platformFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Your Earning:</span>
-                                  <p className="font-medium text-green-600">${earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                </div>
+                              <div>
+                                <span className="text-muted-foreground">Completed:</span>
+                                <p className="font-medium">{format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                               <div className="pt-2 border-t border-border/30 space-y-1">
                                 {wpLink && (
