@@ -869,7 +869,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           return (
             <>
               {activeType === 'all' && (
-                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
                   <p className="text-base font-bold text-foreground">
                     {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
@@ -877,7 +877,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 </div>
               )}
               {activeType === 'earnings' && (
-                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                     {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
                   </p>
@@ -887,7 +887,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 </div>
               )}
               {activeType === 'purchases' && (
-                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                     {purchasesSubTab === 'purchases_b2b' ? 'B2B Media Purchases' : purchasesSubTab === 'purchases_instant' ? 'Instant Publishing Purchases' : 'Total Purchases'}
                   </p>
@@ -897,7 +897,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 </div>
               )}
               {activeType === 'system' && (
-                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                     {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
                   </p>
@@ -907,7 +907,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 </div>
               )}
               {activeType === 'withdrawals' && (
-                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                     {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
                   </p>
@@ -925,7 +925,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <TableHeader>
               <TableRow className="h-6 !border-b border-border">
                 <TableHead className="w-10 py-0"></TableHead>
-                <TableHead className="py-0">Description</TableHead>
+                <TableHead className="py-0">Details</TableHead>
                 <TableHead className="text-right py-0 hidden md:table-cell">Amount</TableHead>
               </TableRow>
             </TableHeader>
