@@ -405,8 +405,8 @@ export function DashboardView() {
           {/* Badge on mobile - shown above description */}
           <div className="md:hidden mt-2 flex items-center gap-2">
             {isAdmin && (
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10">
-                {activeSessionCount} sessions
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
+                {activeSessionCount}&nbsp;sessions
               </Badge>
             )}
             {agencyStatusLoading ? (
@@ -429,8 +429,8 @@ export function DashboardView() {
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
           {isAdmin && (
-            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10">
-              {activeSessionCount} sessions
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
+              {activeSessionCount}&nbsp;sessions
             </Badge>
           )}
           {agencyStatusLoading ? (
