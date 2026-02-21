@@ -745,7 +745,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   return (
     <div className="bg-muted/30 overflow-hidden max-w-full">
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
-        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap max-w-full">
+        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 flex-wrap max-w-full">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             return (
@@ -762,7 +762,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Earnings */}
         {activeType === 'earnings' && (
-          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
             {earningsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -785,7 +785,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Purchases */}
         {activeType === 'purchases' && (
-          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
             {purchasesSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -808,7 +808,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for System */}
         {activeType === 'system' && (
-          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
             {systemSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -831,7 +831,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Withdrawals */}
         {activeType === 'withdrawals' && (
-          <div className="flex bg-foreground/90 border-t border-white/10 overflow-x-auto scrollbar-hide">
+          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
             {withdrawalsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
