@@ -484,7 +484,7 @@ export function DashboardView() {
               </button>
             )}
             {!isAdmin && userSessionStartedAt && (
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors">
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors px-3 py-1">
                 Online:&nbsp;{formatSessionDuration(userSessionStartedAt)}
               </Badge>
             )}
@@ -515,7 +515,7 @@ export function DashboardView() {
             </button>
           )}
           {!isAdmin && userSessionStartedAt && (
-            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors">
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default transition-colors px-3 py-1">
               Online:&nbsp;{formatSessionDuration(userSessionStartedAt)}
             </Badge>
           )}
