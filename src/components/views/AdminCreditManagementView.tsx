@@ -366,8 +366,8 @@ export const AdminCreditManagementView = () => {
                   const totalLockedFromWithdrawals = activeUsers.reduce((sum, user) => sum + user.lockedFromWithdrawals, 0);
                   const totalPendingBankWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingBankWithdrawals, 0);
                   const totalPendingCryptoWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingCryptoWithdrawals, 0);
-                  // Platform balance = Total Purchased + Total Earnings - Total Withdrawals - Total Platform Fees
-                  const platformBalance = Math.round(totalPurchased + totalEarned - totalWithdrawn - totalPlatformFees);
+                  // Platform balance = Earnings - Withdrawals - Platform Fees
+                  const platformBalance = Math.round(totalEarned - totalWithdrawn - totalPlatformFees);
                   return (
                     <div className="flex gap-6">
                       {/* Column 1: User Credit Breakdown */}
@@ -428,11 +428,11 @@ export const AdminCreditManagementView = () => {
                         <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Platform Summary</div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Total Purchased:</span>
-                          <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                          <span className="font-semibold text-white">{totalPurchased.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Total Earnings:</span>
-                          <span className="font-semibold text-green-400">{totalEarned.toLocaleString()}</span>
+                          <span className="font-semibold text-green-400">+{totalEarned.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Total Withdrawals:</span>
@@ -440,11 +440,11 @@ export const AdminCreditManagementView = () => {
                         </div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Total Platform Fees:</span>
-                          <span className="font-semibold text-green-400">{totalPlatformFees.toLocaleString()}</span>
+                          <span className="font-semibold text-red-400">{totalPlatformFees > 0 ? `-${totalPlatformFees.toLocaleString()}` : '0'}</span>
                         </div>
                         <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                           <span className="text-white/70">Balance:</span>
-                          <span className="font-semibold text-green-400">{platformBalance.toLocaleString()}</span>
+                          <span className={`font-semibold ${platformBalance >= 0 ? 'text-green-400' : 'text-red-400'}`}>{platformBalance.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
