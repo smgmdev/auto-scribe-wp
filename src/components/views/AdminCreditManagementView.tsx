@@ -569,7 +569,7 @@ export const AdminCreditManagementView = () => {
                                       </span>
                                     )}
                                   </div>
-                                  <div className="grid grid-cols-6 gap-3 px-3 py-2">
+                                  <div className="grid grid-cols-6 px-3 py-2">
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help rounded-lg px-3 py-2" style={{ backgroundColor: '#1a2744' }}>
