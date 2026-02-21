@@ -136,7 +136,8 @@ export default function Auth() {
   }, [dataPopupPos]);
 
   // Show loading screen while checking initial auth state
-  if (loading) {
+  // Also show loading if user is already logged in (will redirect shortly)
+  if (loading || (user && !isSigningUp)) {
     return <LoadingScreen />;
   }
 
@@ -664,7 +665,7 @@ export default function Auth() {
           </p>
 
           {/* Form */}
-          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} className="space-y-2">
+          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} autoComplete="off" data-form-type="other" className="space-y-2">
             {/* Email Input */}
             <div>
               <Input
