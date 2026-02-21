@@ -587,8 +587,8 @@ export function AgencyApplicationView() {
           style={{ zIndex: 0 }}
         >
           {!heroVideoLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f]">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <div className="absolute top-4 right-4 z-10">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
             </div>
           )}
           <video 
