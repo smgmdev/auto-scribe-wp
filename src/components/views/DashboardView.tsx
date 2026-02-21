@@ -404,6 +404,11 @@ export function DashboardView() {
           </h1>
           {/* Badge on mobile - shown above description */}
           <div className="md:hidden mt-2 flex items-center gap-2">
+            {isAdmin && (
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10">
+                {activeSessionCount} sessions
+              </Badge>
+            )}
             {agencyStatusLoading ? (
               <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
                 <Loader2 className="h-3 w-3 animate-spin text-white/40" />
@@ -418,17 +423,16 @@ export function DashboardView() {
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
-            {isAdmin && (
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {activeSessionCount} active
-              </Badge>
-            )}
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
+          {isAdmin && (
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10">
+              {activeSessionCount} sessions
+            </Badge>
+          )}
           {agencyStatusLoading ? (
             <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
               <Loader2 className="h-3 w-3 animate-spin text-white/40" />
@@ -441,12 +445,6 @@ export function DashboardView() {
           ) : (
             <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
-            </Badge>
-          )}
-          {isAdmin && (
-            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {activeSessionCount} active
             </Badge>
           )}
         </div>
