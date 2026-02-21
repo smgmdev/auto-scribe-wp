@@ -116,8 +116,19 @@ export function DashboardView() {
   useEffect(() => {
     fetchActiveSessions();
     if (!isAdmin) return;
-    const interval = setInterval(fetchActiveSessions, 30000);
-    return () => clearInterval(interval);
+    // Poll every 15s for freshness
+    const interval = setInterval(fetchActiveSessions, 15000);
+    // Real-time listener on profiles changes
+    const channel = supabase
+      .channel('active-sessions-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchActiveSessions();
+      })
+      .subscribe();
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, [fetchActiveSessions, isAdmin]);
 
   const availableCreditsData = useAvailableCredits();
@@ -421,13 +432,16 @@ export function DashboardView() {
                     <p className="text-xs text-white/60">No active sessions</p>
                   ) : (
                     <div className="space-y-1.5">
-                      <p className="text-xs font-medium text-white/60 mb-2">Recent active sessions</p>
+                      <p className="text-xs font-medium text-white/60 mb-2">Active sessions</p>
                       {recentSessions.map((s, i) => (
                         <div key={i} className="flex justify-between gap-3 text-xs">
                           <span className="truncate">{s.email}</span>
                           <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
                         </div>
                       ))}
+                      {activeSessionCount > 5 && (
+                        <p className="text-xs text-white/40 pt-1">More+</p>
+                      )}
                     </div>
                   )}
                 </TooltipContent>
@@ -464,13 +478,16 @@ export function DashboardView() {
                   <p className="text-xs text-white/60">No active sessions</p>
                 ) : (
                   <div className="space-y-1.5">
-                    <p className="text-xs font-medium text-white/60 mb-2">Recent active sessions</p>
+                    <p className="text-xs font-medium text-white/60 mb-2">Active sessions</p>
                     {recentSessions.map((s, i) => (
                       <div key={i} className="flex justify-between gap-3 text-xs">
                         <span className="truncate">{s.email}</span>
                         <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
                       </div>
                     ))}
+                    {activeSessionCount > 5 && (
+                      <p className="text-xs text-white/40 pt-1">More+</p>
+                    )}
                   </div>
                 )}
               </TooltipContent>
