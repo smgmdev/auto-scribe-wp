@@ -941,51 +941,9 @@ export function ChatListPanel() {
       request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isFromAdmin, isMyEngagement, isServiceRequest 
     });
     
-    // Update last message in local state immediately for UI responsiveness
-    // If dialog is open/targeted, also force unread to 0
-    if (isMyEngagement && (isFromAgency || isFromAdmin)) {
-      setMyEngagements(prev => {
-        const updated = prev.map(e => 
-          e.id === request_id 
-            ? { 
-                ...e, 
-                lastMessage: message, 
-                lastMessageTime: new Date().toISOString(),
-                ...(isDialogOpen ? { unreadCount: 0, read: true } : {})
-              }
-            : e
-        );
-        myEngagementsRef.current = updated;
-        return updated;
-      });
-    }
-    // For service requests - update on client OR admin messages
-    if (isServiceRequest && (isFromClient || isFromAdmin)) {
-      const messageTime = new Date().toISOString();
-      setServiceRequests(prev => {
-        const updated = prev.map(r => 
-          r.id === request_id 
-            ? { 
-                ...r, 
-                lastMessage: message, 
-                lastMessageTime: messageTime,
-                ...(isDialogOpen ? { unreadCount: 0, read: true } : {})
-              }
-            : r
-        );
-        serviceRequestsRef.current = updated;
-        return updated;
-      });
-      
-      // Dispatch event to sync with AgencyRequestsView (for last message only)
-      window.dispatchEvent(new CustomEvent('service-request-updated', {
-        detail: {
-          id: request_id,
-          lastMessage: message,
-          lastMessageTime: messageTime
-        }
-      }));
-    }
+    // Broadcast handler does NOT update engagement/service request state.
+    // All state updates (lastMessage, unreadCount, read) are handled exclusively
+    // by the postgres_changes INSERT handler to prevent double-update glitches.
     
     console.log('[ChatListPanel] Broadcast: isMinimized check', { 
       isMinimized, 
