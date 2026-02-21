@@ -991,6 +991,7 @@ export function DashboardView() {
           width={420}
           maxHeight="70vh"
           className="!bg-black !border-white/20"
+          headerClassName="!border-b-0"
           bodyClassName="!bg-black"
         >
           <div className="space-y-1 p-1">

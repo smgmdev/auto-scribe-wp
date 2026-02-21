@@ -16,6 +16,8 @@ interface DraggablePopupProps {
   className?: string;
   /** Extra class for the scrollable body wrapper */
   bodyClassName?: string;
+  /** Extra class for the drag bar / header */
+  headerClassName?: string;
 }
 
 export function DraggablePopup({
@@ -29,6 +31,7 @@ export function DraggablePopup({
   zIndex = 200,
   className = '',
   bodyClassName = '',
+  headerClassName = '',
 }: DraggablePopupProps) {
   const isMobile = useIsMobile();
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -125,7 +128,7 @@ export function DraggablePopup({
 
   const dragBar = (
     <div
-      className={`flex items-center justify-between border-b bg-muted/30 shrink-0 ${
+      className={`flex items-center justify-between border-b bg-muted/30 shrink-0 ${headerClassName} ${
         isMobile
           ? 'px-3 py-1.5'
           : `px-4 py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
