@@ -100,6 +100,8 @@ export function DashboardView() {
     walletBalance: 0,
     totalSales: 0,
     totalEarnings: 0,
+    b2bEarnings: 0,
+    instantPublishingEarnings: 0,
     pendingWithdrawals: 0,
     completedWithdrawals: 0,
     pendingBankWithdrawals: 0,
@@ -243,23 +245,36 @@ export function DashboardView() {
         `)
         .eq('agency_payout_id', agencyPayout.id);
 
-      let totalEarnings = 0;
-      let totalSales = 0;
+      let orderEarnings = 0;
+      let orderSales = 0;
       let lockedInOrders = 0;
       
       if (orders) {
         orders.forEach((req: any) => {
-          // 'accepted' means the client has confirmed delivery - this matches AgencyPayoutsView logic
           if (req.order?.delivery_status === 'accepted') {
-            totalEarnings += (req.order.agency_payout_cents || 0) / 100;
-            totalSales += (req.order.amount_cents || 0) / 100;
+            orderEarnings += (req.order.agency_payout_cents || 0) / 100;
+            orderSales += (req.order.amount_cents || 0) / 100;
           }
-          // In-progress orders (not yet accepted by client, not cancelled)
           if (req.order?.delivery_status !== 'accepted' && req.order?.status !== 'cancelled') {
             lockedInOrders += (req.order.agency_payout_cents || 0) / 100;
           }
         });
       }
+
+      // Fetch order_payout credit transactions (from instant publishing / WP site sales)
+      const { data: payoutTxData } = await supabase
+        .from('credit_transactions')
+        .select('id, amount, description, created_at, metadata')
+        .eq('user_id', user.id)
+        .eq('type', 'order_payout')
+        .order('created_at', { ascending: false });
+
+      const payoutTxs = payoutTxData || [];
+      const payoutTxEarnings = payoutTxs.reduce((sum: number, t: any) => sum + t.amount, 0);
+      const payoutTxSales = payoutTxs.reduce((sum: number, t: any) => sum + (t.metadata?.gross_amount || t.amount), 0);
+
+      const totalEarnings = orderEarnings + payoutTxEarnings;
+      const totalSales = orderSales + payoutTxSales;
 
       // Fetch pending order requests (service_requests without orders yet)
       let lockedInOrderRequests = 0;
@@ -317,6 +332,8 @@ export function DashboardView() {
         walletBalance,
         totalSales,
         totalEarnings,
+        b2bEarnings: orderEarnings,
+        instantPublishingEarnings: payoutTxEarnings,
         pendingWithdrawals: pendingWithdrawalsAmount,
         completedWithdrawals: completedWithdrawalsAmount,
         pendingBankWithdrawals,
@@ -725,6 +742,14 @@ export function DashboardView() {
                       <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
                         <span className="text-white/70">Total Earnings:</span>
                         <span className="font-semibold text-green-400">${agencySummary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-2">
+                        <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                        <span className="text-white/50 text-xs">${agencySummary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-2">
+                        <span className="text-white/50 text-xs">Instant Publishing:</span>
+                        <span className="text-white/50 text-xs">${agencySummary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </TooltipContent>
