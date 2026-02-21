@@ -404,7 +404,7 @@ export const AdminCreditManagementView = () => {
                       <div className="space-y-3 min-w-[240px]">
                         {/* Purchased */}
                         <div className="space-y-1">
-                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Purchased by Users</div>
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Credits Purchased by Users</div>
                           <div className="flex justify-between gap-4 pl-2">
                             <span className="text-white/50 text-xs">Online via Platform:</span>
                             <span className="text-xs font-medium text-green-400">{fmt(totalPurchasedOnline)}</span>
@@ -418,6 +418,30 @@ export const AdminCreditManagementView = () => {
                             <span className="font-semibold text-green-400 text-xs">{fmt(totalPurchased)}</span>
                           </div>
                         </div>
+
+                        {/* Spent */}
+                        {(() => {
+                          const totalB2bSpent = activeUsers.reduce((sum, u) => sum + (u.totalSpent - (u.publishSpent || 0) - (u.usageSpent || 0)), 0);
+                          const totalInstantSpent = activeUsers.reduce((sum, u) => sum + (u.publishSpent || 0), 0);
+                          const totalSpentAll = activeUsers.reduce((sum, u) => sum + u.totalSpent, 0);
+                          return (
+                            <div className="space-y-1 border-t border-white/20 pt-3">
+                              <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Credits Spent by Users</div>
+                              <div className="flex justify-between gap-4 pl-2">
+                                <span className="text-white/50 text-xs">B2B Media Buying:</span>
+                                <span className="text-xs font-medium text-red-400">{totalB2bSpent > 0 ? `-${fmt(Math.round(totalB2bSpent))}` : '0'}</span>
+                              </div>
+                              <div className="flex justify-between gap-4 pl-2">
+                                <span className="text-white/50 text-xs">Instant Publishing:</span>
+                                <span className="text-xs font-medium text-red-400">{totalInstantSpent > 0 ? `-${fmt(Math.round(totalInstantSpent))}` : '0'}</span>
+                              </div>
+                              <div className="flex justify-between gap-4 pt-1">
+                                <span className="text-white font-medium text-xs">Total:</span>
+                                <span className="font-semibold text-red-400 text-xs">{totalSpentAll > 0 ? `-${fmt(Math.round(totalSpentAll))}` : '0'}</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         {/* Earned */}
                         <div className="space-y-1 border-t border-white/20 pt-3">
