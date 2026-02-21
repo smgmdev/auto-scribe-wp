@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users, Info } from 'lucide-react';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -112,8 +113,19 @@ export function DashboardView() {
   
   // Real-time active sessions count (admin only)
   const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
-  const [recentSessions, setRecentSessions] = useState<{ email: string; session_started_at: string }[]>([]);
-  const [allSessions, setAllSessions] = useState<{ email: string; session_started_at: string }[]>([]);
+  const [recentSessions, setRecentSessions] = useState<{ id: string; email: string; session_started_at: string }[]>([]);
+  const [allSessions, setAllSessions] = useState<{ id: string; email: string; session_started_at: string }[]>([]);
+  const [sessionUserDetails, setSessionUserDetails] = useState<{
+    full_name: string | null;
+    email: string | null;
+    agency_name: string | null;
+    agency_whatsapp: string | null;
+    user_whatsapp: string | null;
+  } | null>(null);
+  const [sessionUserDetailsOpen, setSessionUserDetailsOpen] = useState(false);
+  const [sessionUserDetailsLoading, setSessionUserDetailsLoading] = useState<string | null>(null);
+  const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
+  const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
   // Ticker to force re-render of session durations every second
   const [, setSessionTick] = useState(0);
   useEffect(() => {
@@ -127,12 +139,12 @@ export function DashboardView() {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { data, count } = await supabase
       .from('profiles')
-      .select('email, session_started_at', { count: 'exact' })
+      .select('id, email, session_started_at', { count: 'exact' })
       .not('active_session_id', 'is', null)
       .gt('last_online_at', fiveMinAgo)
       .order('last_online_at', { ascending: false });
     setActiveSessionCount(count ?? 0);
-    const mapped = data?.map(d => ({ email: d.email || 'Unknown', session_started_at: d.session_started_at || '' })) ?? [];
+    const mapped = data?.map(d => ({ id: d.id, email: d.email || 'Unknown', session_started_at: d.session_started_at || '' })) ?? [];
     setAllSessions(mapped);
     setRecentSessions(mapped.slice(0, 5));
   }, [isAdmin]);
@@ -986,20 +998,96 @@ export function DashboardView() {
               <p className="text-sm text-white/50 text-center py-8">No active sessions</p>
             ) : (
               allSessions.map((s, i) => (
-                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+                <button
+                  key={i}
+                  type="button"
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-left"
+                  disabled={sessionUserDetailsLoading === s.id}
+                  onClick={async () => {
+                    setSessionUserDetailsLoading(s.id);
+                    try {
+                      const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('email, whatsapp_phone')
+                        .eq('id', s.id)
+                        .maybeSingle();
+                      const { data: applicationData } = await supabase
+                        .from('agency_applications')
+                        .select('full_name, agency_name, whatsapp_phone')
+                        .eq('user_id', s.id)
+                        .eq('status', 'approved')
+                        .maybeSingle();
+                      setSessionUserDetails({
+                        agency_name: applicationData?.agency_name || null,
+                        full_name: applicationData?.full_name || null,
+                        email: profileData?.email || s.email,
+                        agency_whatsapp: applicationData?.whatsapp_phone || null,
+                        user_whatsapp: profileData?.whatsapp_phone || null,
+                      });
+                      setSessionUserDetailsOpen(true);
+                    } catch {
+                      console.error('Failed to fetch user details');
+                    } finally {
+                      setSessionUserDetailsLoading(null);
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0 animate-pulse" />
+                    {sessionUserDetailsLoading === s.id ? (
+                      <Loader2 className="h-3 w-3 shrink-0 animate-spin text-white/50" />
+                    ) : (
+                      <div className="h-2 w-2 rounded-full bg-green-500 shrink-0 animate-pulse" />
+                    )}
                     <span className="text-sm text-white truncate">{s.email}</span>
                   </div>
                   <span className="text-sm text-white/50 whitespace-nowrap shrink-0 font-mono">
                     {formatSessionDuration(s.session_started_at)}
                   </span>
-                </div>
+                </button>
               ))
             )}
           </div>
         </DraggablePopup>
       )}
+
+      {/* Session User Details Popup */}
+      {isAdmin && (
+        <DraggablePopup
+          open={sessionUserDetailsOpen}
+          onOpenChange={setSessionUserDetailsOpen}
+          title={<h4 className="font-semibold text-foreground text-lg">User Details</h4>}
+          width={340}
+          zIndex={350}
+        >
+          {sessionUserDetails && (
+            <div className="space-y-4">
+              <div className="space-y-3 text-sm">
+                <div><span className="text-muted-foreground">Full Name:</span> <span className="text-foreground font-medium">{sessionUserDetails.agency_name ? (sessionUserDetails.full_name || 'N/A') : 'Not Agency Account'}</span></div>
+                <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{sessionUserDetails.email || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">User WhatsApp:</span> <span className="text-foreground font-medium">{sessionUserDetails.user_whatsapp || 'N/A'}</span></div>
+                <div><span className="text-muted-foreground">Agency WhatsApp:</span> <span className="text-foreground font-medium">{sessionUserDetails.agency_name ? (sessionUserDetails.agency_whatsapp || 'N/A') : 'Not Agency Account'}</span></div>
+                <div className="flex items-center gap-1"><span className="text-muted-foreground">Agency:</span> {sessionUserDetails.agency_name ? (
+                  <button className="text-accent hover:underline flex items-center gap-1" onClick={() => { setAgencyDetailsName(sessionUserDetails.agency_name); setAgencyDetailsOpen(true); }}>{sessionUserDetails.agency_name}<Info className="h-3.5 w-3.5" /></button>
+                ) : <span className="text-foreground font-medium">N/A</span>}</div>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  className="w-full bg-foreground text-background border border-foreground hover:bg-transparent hover:text-foreground hover:border-foreground"
+                  onClick={() => setSessionUserDetailsOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DraggablePopup>
+      )}
+
+      <AgencyDetailsDialog
+        open={agencyDetailsOpen}
+        onOpenChange={setAgencyDetailsOpen}
+        agencyName={agencyDetailsName}
+      />
 
       </div>
     </div>;
