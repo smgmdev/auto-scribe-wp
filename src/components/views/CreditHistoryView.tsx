@@ -1667,6 +1667,7 @@ export function CreditHistoryView() {
                 const isUnlocked = transaction.type === 'unlocked';
                 const matchedLocked = isUnlocked ? unlockToLockedMap.get(transaction.id) : null;
                 const orderInfo = orderDetails[transaction.id];
+                const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
                 
                 const displayDescription = (() => {
                   // Format locked/unlocked credit transactions with better labels
@@ -1720,6 +1721,16 @@ export function CreditHistoryView() {
                           [transaction.id]: order
                         }));
                       }
+                    }
+                    
+                    // Fetch site favicon for instant publishing payouts
+                    if (isInstantPublishingPayout && transaction.metadata?.site_name && !publishDetails[transaction.id]) {
+                      const { data: publicSites } = await supabase.rpc('get_public_sites');
+                      const wpSite = publicSites?.find((s: any) => s.name === transaction.metadata?.site_name);
+                      setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+                        site_favicon: wpSite?.favicon || null,
+                        site_name: transaction.metadata?.site_name,
+                      }}));
                     }
                     
                     // Fetch article details for publish transactions
@@ -1793,8 +1804,22 @@ export function CreditHistoryView() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
                       <div className="flex items-start gap-3">
                         {getTransactionIcon(transaction.type, transaction.amount)}
-                        <div className="flex-1">
-                          <p className="font-medium">{displayDescription}</p>
+                         <div className="flex-1">
+                          {isInstantPublishingPayout && transaction.metadata?.site_name ? (
+                            <p className="font-medium flex items-center gap-2">
+                              {publishDetails[transaction.id]?.site_favicon && (
+                                <img 
+                                  src={publishDetails[transaction.id].site_favicon} 
+                                  alt="" 
+                                  className="h-4 w-4 rounded-sm object-contain"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                              )}
+                              {displayDescription}
+                            </p>
+                          ) : (
+                            <p className="font-medium">{displayDescription}</p>
+                          )}
                           <div className={`text-lg md:hidden mt-1 ${
                          transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                               ? 'text-foreground'
@@ -1815,7 +1840,7 @@ export function CreditHistoryView() {
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            {isInstantPublishingPayout ? 'Published: ' : ''}{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         </div>
                       </div>
@@ -1844,9 +1869,72 @@ export function CreditHistoryView() {
                       <div className="px-3 pb-3 pt-0 border-t border-border/50 bg-muted/30">
                         <div className="pt-2 space-y-3 text-sm">
                           <div className="flex justify-end mb-2">
-                            {getTransactionBadge(transaction.type)}
+                            {isInstantPublishingPayout 
+                              ? <Badge className="bg-green-100 text-green-700">Instant Publishing</Badge>
+                              : getTransactionBadge(transaction.type)}
                           </div>
                           
+                          {/* Instant Publishing Payout - Show site, order value, platform fee, net earnings */}
+                          {isInstantPublishingPayout ? (
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                {transaction.metadata?.site_name && (
+                                  <div>
+                                    <span className="text-muted-foreground">Media Site:</span>
+                                    <p className="font-medium flex items-center gap-2">
+                                      {publishDetails[transaction.id]?.site_favicon && (
+                                        <img 
+                                          src={publishDetails[transaction.id].site_favicon} 
+                                          alt="" 
+                                          className="h-4 w-4 rounded-sm object-contain"
+                                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        />
+                                      )}
+                                      {transaction.metadata.site_name}
+                                    </p>
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="text-muted-foreground">Order Value:</span>
+                                  <p className="font-medium">
+                                    {transaction.metadata?.gross_amount 
+                                      ? Number(transaction.metadata.gross_amount).toLocaleString() 
+                                      : transaction.amount.toLocaleString()} credits
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Platform Fee:</span>
+                                  <p className="font-medium">
+                                    {transaction.metadata?.platform_fee 
+                                      ? `${Number(transaction.metadata.platform_fee).toLocaleString()} credits${transaction.metadata?.commission_percentage ? ` (${transaction.metadata.commission_percentage}%)` : ''}`
+                                      : '0 credits'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Net Earnings:</span>
+                                  <p className="font-medium text-green-500">+{transaction.amount.toLocaleString()} credits</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Published:</span>
+                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                </div>
+                              </div>
+                              {transaction.metadata?.wp_link && (
+                                <div className="mt-3 pt-3 border-t border-border/50">
+                                  <a
+                                    href={transaction.metadata.wp_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
+                                  >
+                                    View Publication <ArrowRight className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          ) : null}
+
                           {/* Order Completed - Show order details */}
                           {isOrderCompleted ? (
                             <>
