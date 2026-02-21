@@ -61,7 +61,9 @@ interface UserTransactionsExpandedProps {
 
 const transactionTypes = [
   { key: 'all', label: 'All' },
-  { key: 'order_payout', label: 'Earnings' },
+  { key: 'earnings', label: 'Earnings', isGroup: true },
+  { key: 'earnings_b2b', label: 'B2B Media Sales', parent: 'earnings' },
+  { key: 'earnings_instant', label: 'Instant Publishing Sales', parent: 'earnings' },
   { key: 'purchase', label: 'Purchase' },
   { key: 'gifted', label: 'Gifted' },
   { key: 'spent', label: 'Spent' },
@@ -69,7 +71,9 @@ const transactionTypes = [
   { key: 'unlocked', label: 'Unlocked' },
   { key: 'order_accepted', label: 'Order Accepted' },
   { key: 'offer_accepted', label: 'Credits Locked' },
-  { key: 'order_completed', label: 'Order Completed' },
+  { key: 'purchases', label: 'Purchases', isGroup: true },
+  { key: 'purchases_b2b', label: 'B2B Media Purchases', parent: 'purchases' },
+  { key: 'purchases_instant', label: 'Instant Publishing Purchases', parent: 'purchases' },
   { key: 'order_delivered', label: 'Delivered' },
   { key: 'refund', label: 'Refund' },
   { key: 'admin_deduct', label: 'Deduction' },
@@ -664,14 +668,40 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     return true;
   });
 
-  const filteredTransactions = activeType === 'all' 
-    ? processedTransactions 
-    : processedTransactions.filter(tx => tx.type === activeType);
+  // Helper to classify earnings/purchases
+  const isB2BEarning = (tx: Transaction) => tx.type === 'order_payout' && tx.description?.startsWith('Earnings from completed order');
+  const isInstantEarning = (tx: Transaction) => tx.type === 'order_payout' && !tx.description?.startsWith('Earnings from completed order');
+  const isB2BPurchase = (tx: Transaction) => tx.type === 'order_completed' && tx.description?.startsWith('Order completed:');
+  const isInstantPurchase = (tx: Transaction) => tx.type === 'order_completed' && !tx.description?.startsWith('Order completed:');
+
+  const filteredTransactions = (() => {
+    switch (activeType) {
+      case 'all': return processedTransactions;
+      case 'earnings': return processedTransactions.filter(tx => tx.type === 'order_payout');
+      case 'earnings_b2b': return processedTransactions.filter(isB2BEarning);
+      case 'earnings_instant': return processedTransactions.filter(isInstantEarning);
+      case 'purchases': return processedTransactions.filter(tx => tx.type === 'order_completed');
+      case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
+      case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
+      default: return processedTransactions.filter(tx => tx.type === activeType);
+    }
+  })();
 
   const getTransactionCounts = () => {
     const counts: Record<string, number> = { all: processedTransactions.length };
     processedTransactions.forEach(tx => {
       counts[tx.type] = (counts[tx.type] || 0) + 1;
+      // Virtual group counts
+      if (tx.type === 'order_payout') {
+        counts['earnings'] = (counts['earnings'] || 0) + 1;
+        if (isB2BEarning(tx)) counts['earnings_b2b'] = (counts['earnings_b2b'] || 0) + 1;
+        else counts['earnings_instant'] = (counts['earnings_instant'] || 0) + 1;
+      }
+      if (tx.type === 'order_completed') {
+        counts['purchases'] = (counts['purchases'] || 0) + 1;
+        if (isB2BPurchase(tx)) counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
+        else counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
+      }
     });
     return counts;
   };
@@ -685,11 +715,15 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             if (type.key !== 'all' && count === 0) return null;
+            const isChild = 'parent' in type && type.parent;
             return (
               <TabsTrigger
                 key={type.key}
                 value={type.key}
-                className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap sm:flex-1"
+                className={cn(
+                  "data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap sm:flex-1",
+                  isChild && "text-[10px] opacity-80"
+                )}
               >
                 {type.label} ({count})
               </TabsTrigger>
