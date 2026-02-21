@@ -358,7 +358,7 @@ export function ArticlesView() {
             </Button>
           </div>
         </div>
-        <div className="flex md:hidden flex-col gap-2 mt-2">
+        <div className="flex md:hidden flex-col mt-2">
           <Button 
             onClick={() => setCurrentView('compose')} 
             className="w-full bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
