@@ -128,8 +128,8 @@ export function AgencyPayoutsView() {
     .filter(w => (w.status === 'completed' || w.status === 'approved') && w.withdrawal_method === 'crypto')
     .reduce((sum, w) => sum + (w.amount_cents || 0), 0) / 100;
 
-  // Wallet balance = total earnings minus completed withdrawals (rejected ones stay in wallet)
-  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal - pendingWithdrawalsTotal - lockedInOrders - lockedInOrderRequests;
+  // Wallet balance = total earnings minus completed withdrawals minus locked credits (rejected withdrawals stay in wallet)
+  const walletBalance = summary.totalEarnings - completedWithdrawalsTotal - lockedInOrders - lockedInOrderRequests;
 
   // Available balance = wallet balance minus pending withdrawals
   const availableBalance = walletBalance - pendingWithdrawalsTotal;
