@@ -50,12 +50,14 @@ export function MainLayout({
   return <div className="min-h-screen bg-background">
       {/* Desktop: separate fixed banners */}
       <div className="hidden lg:block">
-        <QuickNavBanner inDashboard />
-        <div className="fixed top-[28px] left-64 right-0 z-40 bg-[#1d1d1f] border-b border-white/10 flex items-center h-8 px-6">
-          <p className="text-white/80 text-xs flex items-center">
-            <span>Get free credits by finding bugs on Arcana Mace</span>
-            <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
-          </p>
+        <div className="fixed top-0 left-64 right-0 z-50 h-16 flex flex-col">
+          <QuickNavBanner inDashboard />
+          <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
+            <p className="text-white/80 text-xs flex items-center">
+              <span>Get free credits by finding bugs on Arcana Mace</span>
+              <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -111,7 +113,7 @@ export function MainLayout({
       {/* Main Content */}
       <main 
         ref={mainRef}
-        className={`lg:pl-64 lg:pt-[56px] h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
+        className={`lg:pl-64 lg:pt-16 h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
         style={{ 
           paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
           WebkitOverflowScrolling: 'touch',
