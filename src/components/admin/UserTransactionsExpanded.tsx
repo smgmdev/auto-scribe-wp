@@ -862,55 +862,63 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
         )}
 
-        {/* Tab sum bars */}
-        {activeType === 'all' && (
-          <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
-            <p className="text-base font-bold text-foreground">
-              {filteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
-            </p>
-          </div>
-        )}
-        {activeType === 'earnings' && (
-          <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
-            </p>
-            <p className="text-base font-bold text-green-600">
-              +{filteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-            </p>
-          </div>
-        )}
-        {activeType === 'purchases' && (
-          <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {purchasesSubTab === 'purchases_b2b' ? 'B2B Media Purchases' : purchasesSubTab === 'purchases_instant' ? 'Instant Publishing Purchases' : 'Total Purchases'}
-            </p>
-            <p className="text-base font-bold text-foreground">
-              -{filteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-            </p>
-          </div>
-        )}
-        {activeType === 'system' && (
-          <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
-            </p>
-            <p className="text-base font-bold text-muted-foreground">
-              {filteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
-            </p>
-          </div>
-        )}
-        {activeType === 'withdrawals' && (
-          <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-              {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
-            </p>
-            <p className="text-base font-bold text-foreground">
-              -{filteredTransactions.filter(tx => tx.type === 'withdrawal_completed').reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-            </p>
-          </div>
-        )}
+        {/* Tab sum bars - exclude locked/unlocked types from calculations */}
+        {(() => {
+          const lockTypes = ['locked', 'unlocked', 'offer_accepted', 'withdrawal_locked', 'withdrawal_unlocked'];
+          const nonLockTxs = filteredTransactions.filter(tx => !lockTypes.includes(tx.type));
+          return (
+            <>
+              {activeType === 'all' && (
+                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
+                  <p className="text-base font-bold text-foreground">
+                    {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
+                  </p>
+                </div>
+              )}
+              {activeType === 'earnings' && (
+                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                    {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
+                  </p>
+                  <p className="text-base font-bold text-green-600">
+                    +{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+                  </p>
+                </div>
+              )}
+              {activeType === 'purchases' && (
+                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                    {purchasesSubTab === 'purchases_b2b' ? 'B2B Media Purchases' : purchasesSubTab === 'purchases_instant' ? 'Instant Publishing Purchases' : 'Total Purchases'}
+                  </p>
+                  <p className="text-base font-bold text-foreground">
+                    -{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+                  </p>
+                </div>
+              )}
+              {activeType === 'system' && (
+                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                    {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
+                  </p>
+                  <p className="text-base font-bold text-muted-foreground">
+                    {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
+                  </p>
+                </div>
+              )}
+              {activeType === 'withdrawals' && (
+                <div className="bg-muted/40 border border-border px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                    {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
+                  </p>
+                  <p className="text-base font-bold text-foreground">
+                    -{filteredTransactions.filter(tx => tx.type === 'withdrawal_completed').reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+                  </p>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         <div className="bg-background">
           <table className="w-full caption-bottom text-sm">
