@@ -15,6 +15,7 @@ interface Transaction {
   description: string | null;
   created_at: string;
   order_id: string | null;
+  metadata: unknown | null;
 }
 
 interface WithdrawalDetails {
@@ -111,7 +112,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     try {
       const { data, error } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type, description, created_at, order_id')
+        .select('id, amount, type, description, created_at, order_id, metadata')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -866,6 +867,20 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         {(() => {
           const lockTypes = ['locked', 'unlocked', 'offer_accepted', 'withdrawal_locked', 'withdrawal_unlocked'];
           const nonLockTxs = filteredTransactions.filter(tx => !lockTypes.includes(tx.type));
+          
+          // Commission helpers
+          const b2bCommission = Array.from(orders.values()).reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0);
+          const ipCommission = transactions
+            .filter(tx => tx.type === 'order_payout' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
+            .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
+          const totalCommission = b2bCommission + ipCommission;
+
+          const commissionSpan = (value: number) => (
+            <span className="ml-2 text-muted-foreground">
+              ({value.toLocaleString()} commission)
+            </span>
+          );
+
           return (
             <>
               {activeType === 'all' && (
@@ -873,9 +888,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
                   <p className="text-base font-bold text-foreground">
                     {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
-                    <span className="ml-2 text-muted-foreground">
-                      ({Array.from(orders.values()).reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0).toLocaleString()} commission)
-                    </span>
+                    {commissionSpan(totalCommission)}
                   </p>
                 </div>
               )}
@@ -886,6 +899,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   </p>
                   <p className="text-base font-bold text-green-600">
                     +{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+                    {commissionSpan(earningsSubTab === 'earnings_b2b' ? b2bCommission : earningsSubTab === 'earnings_instant' ? ipCommission : totalCommission)}
                   </p>
                 </div>
               )}
@@ -896,6 +910,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   </p>
                   <p className="text-base font-bold text-foreground">
                     -{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+                    {commissionSpan(purchasesSubTab === 'purchases_b2b' ? b2bCommission : purchasesSubTab === 'purchases_instant' ? ipCommission : totalCommission)}
                   </p>
                 </div>
               )}
