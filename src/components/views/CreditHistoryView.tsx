@@ -1831,21 +1831,7 @@ export function CreditHistoryView() {
                       <div className="flex items-start gap-3">
                         {getTransactionIcon(transaction.type, transaction.amount)}
                          <div className="flex-1">
-                          {isInstantPublishingPayout && transaction.metadata?.site_name ? (
-                            <p className="font-medium flex items-center gap-2">
-                              {(transaction.metadata?.site_favicon || publishDetails[transaction.id]?.site_favicon) && (
-                                <img 
-                                  src={(transaction.metadata?.site_favicon as string) || publishDetails[transaction.id]?.site_favicon} 
-                                  alt="" 
-                                  className="h-4 w-4 rounded-sm object-contain"
-                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                />
-                              )}
-                              {displayDescription}
-                            </p>
-                          ) : (
-                            <p className="font-medium">{displayDescription}</p>
-                          )}
+                          <p className="font-medium">{displayDescription}</p>
                           <div className={`text-lg md:hidden mt-1 ${
                          transaction.type === 'unlocked' || transaction.type === 'locked' || transaction.type === 'offer_accepted' || transaction.type === 'order_accepted'
                               ? 'text-foreground'
