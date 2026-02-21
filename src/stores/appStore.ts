@@ -80,6 +80,10 @@ interface AppState {
   agencyMediaTargetSubTab: string | null;
   setAgencyMediaTargetSubTab: (subTab: string | null) => void;
   
+  // Articles view targeting
+  articlesTargetTab: string | null;
+  setArticlesTargetTab: (tab: string | null) => void;
+  
   // Orders view targeting (for navigating from credit history)
   ordersTargetTab: string | null;
   setOrdersTargetTab: (tab: string | null) => void;
@@ -313,6 +317,10 @@ export const useAppStore = create<AppState>()((set) => ({
   setTargetTab: (tab) => set({ targetTab: tab }),
   targetSubcategory: null,
   setTargetSubcategory: (subcategory) => set({ targetSubcategory: subcategory }),
+  
+  // Articles view targeting
+  articlesTargetTab: null,
+  setArticlesTargetTab: (tab) => set({ articlesTargetTab: tab }),
   
   // Agency media view targeting
   agencyMediaTargetTab: null,

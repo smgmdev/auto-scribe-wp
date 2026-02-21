@@ -65,7 +65,8 @@ export function ComposeView() {
     setEditingArticle,
     preselectedSiteId,
     setPreselectedSiteId,
-    setCurrentView
+    setCurrentView,
+    setArticlesTargetTab
   } = useAppStore();
   const { sites, loading: sitesLoading } = useSites();
   const { addArticle, updateArticle } = useArticles();
@@ -1096,6 +1097,8 @@ export function ComposeView() {
         setShowDraftSuccess(true);
         setTimeout(() => {
           setShowDraftSuccess(false);
+          setArticlesTargetTab('drafts');
+          setCurrentView('articles');
         }, 2000);
       }
     } catch (error) {
