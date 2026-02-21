@@ -491,8 +491,8 @@ export const AdminCreditManagementView = () => {
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
-                    <TableHead>User Type</TableHead>
-                    <TableHead className="text-right">Available</TableHead>
+                    <TableHead className="hidden md:table-cell">User Type</TableHead>
+                    <TableHead className="text-right hidden md:table-cell">Available</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -537,13 +537,19 @@ export const AdminCreditManagementView = () => {
                                   </Tooltip>
                                 )}
                               </div>
+                              <div className="flex items-center gap-2 md:hidden mt-1">
+                                <Badge className={user.isAgency ? 'bg-foreground text-background hover:bg-foreground' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
+                                  {user.isAgency ? 'Agency' : 'Regular'}
+                                </Badge>
+                                <span className="text-sm text-muted-foreground">{user.available.toLocaleString()} credits</span>
+                              </div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="hidden md:table-cell">
                               <Badge className={user.isAgency ? 'bg-foreground text-background hover:bg-foreground' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}>
                                 {user.isAgency ? 'Agency' : 'Regular'}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right">{user.available.toLocaleString()}</TableCell>
+                            <TableCell className="text-right hidden md:table-cell">{user.available.toLocaleString()}</TableCell>
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
