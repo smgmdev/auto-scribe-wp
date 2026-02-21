@@ -555,6 +555,26 @@ export function AdminMediaManagementView() {
     }
   }, [adminEditingSite, adminEditForm]);
 
+  // Escape key for admin manage approved media popup
+  useEffect(() => {
+    if (!adminManageSubmission) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); setAdminManageSubmission(null); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [adminManageSubmission]);
+
+  // Escape key for admin edit media listing popup
+  useEffect(() => {
+    if (!adminEditingSite) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); setAdminEditingSite(null); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [adminEditingSite]);
+
   // Real-time monitoring of active engagements while admin edit popup is open
   useEffect(() => {
     if (!adminEditingSite) return;

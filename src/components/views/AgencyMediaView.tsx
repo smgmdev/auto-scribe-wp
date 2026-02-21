@@ -298,6 +298,26 @@ export function AgencyMediaView() {
     }
   }, [editingSite, editForm, manageMediaSubmission]);
 
+  // Escape key for manage approved media popup
+  useEffect(() => {
+    if (!manageMediaSubmission) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); setManageMediaSubmission(null); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [manageMediaSubmission]);
+
+  // Escape key for edit media listing popup
+  useEffect(() => {
+    if (!editingSite) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); setEditingSite(null); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [editingSite]);
+
   // Real-time monitoring of active engagements while edit popup is open
   useEffect(() => {
     if (!editingSite) return;
