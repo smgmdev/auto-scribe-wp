@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LatestGlobalArticles } from '@/components/dashboard/LatestGlobalArticles';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+import { AvailableCreditsTooltipContent } from '@/components/credits/AvailableCreditsTooltipContent';
+import { WalletTooltipContent } from '@/components/credits/WalletTooltipContent';
 import { supabase } from '@/integrations/supabase/client';
 import { isYesterday, format } from 'date-fns';
 
@@ -417,76 +419,20 @@ export function DashboardView() {
 
   // Custom tooltip content for Available Credits
   const renderAvailableCreditsTooltip = () => {
-    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent, creditsInOrders, creditsInPendingRequests, creditsInWithdrawals, withdrawalsByBank, withdrawalsByCrypto } = availableCreditsData;
-    const userIsAgency = isAgency === true;
-    
+    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent, creditsInOrders, creditsInPendingRequests, withdrawalsByBank, withdrawalsByCrypto } = availableCreditsData;
     return (
-      <div className="space-y-1">
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Earnings:</span>
-          {userIsAgency ? (
-            <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
-          ) : (
-            <span className="text-white/50 text-xs">available for agency only</span>
-          )}
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Withdrawals:</span>
-          {userIsAgency ? (
-            <span className="font-semibold text-red-400">{creditsWithdrawn > 0 ? `-${Math.round(creditsWithdrawn).toLocaleString()}` : '0'}</span>
-          ) : (
-            <span className="text-white/50 text-xs">available for agency only</span>
-          )}
-        </div>
-        {userIsAgency && (
-          <>
-            <div className="flex justify-between gap-4">
-              <span className="text-white/70">Pending Withdrawals:</span>
-              <span className="font-semibold text-amber-400">
-                {(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals) > 0
-                  ? `$${(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : '0'}
-              </span>
-            </div>
-            <div className="flex justify-between gap-4 pl-3">
-              <span className="text-white/50 text-xs">USDT:</span>
-              <span className="text-xs font-medium text-amber-400/80">
-                {agencySummary.pendingCryptoWithdrawals > 0
-                  ? `$${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : '0'}
-              </span>
-            </div>
-            <div className="flex justify-between gap-4 pl-3">
-              <span className="text-white/50 text-xs">Bank Transfer:</span>
-              <span className="text-xs font-medium text-amber-400/80">
-                {agencySummary.pendingBankWithdrawals > 0
-                  ? `$${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : '0'}
-              </span>
-            </div>
-          </>
-        )}
-        <div className="flex justify-between gap-4">
-           <span className="text-white/70">Locked in Offer Requests:</span>
-          <span className="font-semibold text-amber-400">{Math.round(creditsInPendingRequests).toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Locked in Orders:</span>
-          <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Total Purchased:</span>
-          <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-white/70">Total Spent:</span>
-          <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
-        </div>
-        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-          <span className="text-white/70">Total Available Credits:</span>
-          <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
-        </div>
-      </div>
+      <AvailableCreditsTooltipContent
+        earnedCredits={earnedCredits}
+        creditsWithdrawn={creditsWithdrawn}
+        withdrawalsByBank={withdrawalsByBank}
+        withdrawalsByCrypto={withdrawalsByCrypto}
+        creditsInPendingRequests={creditsInPendingRequests}
+        creditsInOrders={creditsInOrders}
+        totalPurchased={totalPurchased}
+        totalSpent={totalSpent}
+        availableCredits={availableCredits}
+        isAgency={isAgency === true}
+      />
     );
   };
   return <div className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
@@ -663,68 +609,17 @@ export function DashboardView() {
                     </Card>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-                    <div className="space-y-1">
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Earnings:</span>
-                        <span className="font-semibold text-green-400">${agencySummary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between gap-4 pl-2">
-                        <span className="text-white/50 text-xs">B2B Media Sales:</span>
-                        <span className="text-white/50 text-xs">${agencySummary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between gap-4 pl-2">
-                        <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
-                        <span className="text-white/50 text-xs">${agencySummary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Withdrawals:</span>
-                        <span className="font-semibold text-red-400">{agencySummary.completedWithdrawals > 0 ? `-$${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Pending Withdrawals:</span>
-                        <span className="font-semibold text-amber-400">
-                          {(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals) > 0
-                            ? `$${(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                            : '0'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-4 pl-3">
-                        <span className="text-white/50 text-xs">USDT:</span>
-                        <span className="text-xs font-medium text-amber-400/80">
-                          {agencySummary.pendingCryptoWithdrawals > 0
-                            ? `$${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                            : '0'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-4 pl-3">
-                        <span className="text-white/50 text-xs">Bank Transfer:</span>
-                        <span className="text-xs font-medium text-amber-400/80">
-                          {agencySummary.pendingBankWithdrawals > 0
-                            ? `$${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                            : '0'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Order Requests:</span>
-                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Orders:</span>
-                        <span className="font-semibold text-amber-400">${agencySummary.lockedInOrders.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Purchased:</span>
-                        <span className="text-white/50 text-xs">Not Included</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Spent:</span>
-                        <span className="text-white/50 text-xs">Not Included</span>
-                      </div>
-                      <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                        <span className="text-white/70">Wallet Balance:</span>
-                        <span className="font-semibold">${agencySummary.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                    </div>
+                    <WalletTooltipContent
+                      totalEarnings={agencySummary.totalEarnings}
+                      b2bEarnings={agencySummary.b2bEarnings}
+                      instantPublishingEarnings={agencySummary.instantPublishingEarnings}
+                      completedWithdrawals={agencySummary.completedWithdrawals}
+                      pendingBankWithdrawals={agencySummary.pendingBankWithdrawals}
+                      pendingCryptoWithdrawals={agencySummary.pendingCryptoWithdrawals}
+                      lockedInOrderRequests={agencySummary.lockedInOrderRequests}
+                      lockedInOrders={agencySummary.lockedInOrders}
+                      walletBalance={agencySummary.walletBalance}
+                    />
                   </TooltipContent>
                 </Tooltip>
 
