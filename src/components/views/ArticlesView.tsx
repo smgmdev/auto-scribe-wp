@@ -333,7 +333,7 @@ export function ArticlesView() {
               Manage your published and draft articles
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <Button 
               onClick={() => setCurrentView('compose')} 
               className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
