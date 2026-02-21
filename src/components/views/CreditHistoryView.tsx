@@ -1852,7 +1852,7 @@ export function CreditHistoryView() {
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground mt-1">
-                            {isInstantPublishingPayout ? 'Published: ' : ''}{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                            {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                           </span>
                         </div>
                       </div>
