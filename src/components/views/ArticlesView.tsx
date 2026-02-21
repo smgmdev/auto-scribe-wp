@@ -335,17 +335,21 @@ export function ArticlesView() {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="icon"
+              size="sm"
               onClick={async () => {
                 setIsRefreshing(true);
                 await refreshArticles(false);
                 setIsRefreshing(false);
               }}
               disabled={isRefreshing}
-              className="border-black text-black hover:bg-black hover:text-white rounded-none h-9 w-9"
+              className={`hidden md:inline-flex gap-2 border border-foreground transition-all duration-200 ${
+                isRefreshing 
+                  ? 'bg-transparent text-foreground' 
+                  : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+              }`}
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button 
               onClick={() => setCurrentView('compose')} 
@@ -355,12 +359,31 @@ export function ArticlesView() {
             </Button>
           </div>
         </div>
-        <Button 
-          onClick={() => setCurrentView('compose')} 
-          className="md:hidden w-full mt-2 bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
-        >
-          New Article
-        </Button>
+        <div className="flex md:hidden flex-col gap-2 mt-2">
+          <Button
+            size="sm"
+            onClick={async () => {
+              setIsRefreshing(true);
+              await refreshArticles(false);
+              setIsRefreshing(false);
+            }}
+            disabled={isRefreshing}
+            className={`w-full gap-2 border border-foreground transition-all duration-200 ${
+              isRefreshing 
+                ? 'bg-transparent text-foreground' 
+                : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+            }`}
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          <Button 
+            onClick={() => setCurrentView('compose')} 
+            className="w-full bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+          >
+            New Article
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
