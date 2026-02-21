@@ -995,10 +995,10 @@ export function AgencyMediaView() {
             Manage your listed media sites and channels
           </p>
         </div>
-        <div className="flex w-full md:w-auto">
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-2 md:gap-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="group flex-1 md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all rounded-r-none border-r-0">
+              <Button className="group w-full md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all md:rounded-r-none md:border-r-0">
                 Add Media
                 <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </Button>
@@ -1027,7 +1027,7 @@ export function AgencyMediaView() {
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
-            className={`gap-2 border border-black rounded-l-none transition-all duration-200 ${
+            className={`w-full md:w-auto gap-2 border border-black md:rounded-l-none transition-all duration-200 ${
               isRefreshing 
                 ? 'bg-transparent text-black' 
                 : 'bg-black text-white hover:bg-transparent hover:text-black'
