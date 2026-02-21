@@ -155,6 +155,9 @@ export interface AdminUserCredit {
   orders: number;
   purchaseOrders: number;
   deliveryOrders: number;
+  /** Instant publishing order counts */
+  instantPublishOrders: number;
+  instantPublishDeliveryOrders: number;
   /** Credits spent on publishing articles */
   publishSpent: number;
   totalSpent: number;
@@ -292,7 +295,8 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       if (tx.type === 'publish') publishSpent += Math.abs(tx.amount);
     });
 
-    const deliveryOrders = userTxs.filter(t => t.type === 'order_payout').length;
+    const b2bDeliveryOrders = userTxs.filter(t => t.type === 'order_payout' && t.description && t.description.startsWith('Earnings from completed order')).length;
+    const instantPublishDeliveryOrders = userTxs.filter(t => t.type === 'order_payout' && (!t.description || !t.description.startsWith('Earnings from completed order'))).length;
     const instantPublishOrders = userTxs.filter(t => t.type === 'publish').length;
     const purchaseOrders = purchaseOrdersMap.get(userId) || 0;
 
@@ -328,9 +332,11 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       lockedFromWithdrawals: creditsInWithdrawals,
       pendingBankWithdrawals: pendingBankMap.get(userId) || 0,
       pendingCryptoWithdrawals: pendingCryptoMap.get(userId) || 0,
-      orders: purchaseOrders + deliveryOrders + instantPublishOrders,
+      orders: purchaseOrders + b2bDeliveryOrders + instantPublishOrders + instantPublishDeliveryOrders,
       purchaseOrders,
-      deliveryOrders,
+      deliveryOrders: b2bDeliveryOrders,
+      instantPublishOrders,
+      instantPublishDeliveryOrders,
       publishSpent,
       totalSpent: (totalSpentMap.get(userId) || 0) + publishSpent + usageSpent,
       dbCredits: credit.credits,
