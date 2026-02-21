@@ -852,7 +852,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
         )}
 
-        <div className="bg-background max-h-[60vh] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="bg-background">
           <table className="w-full caption-bottom text-sm">
             <TableHeader>
               <TableRow className="h-6 !border-b border-border">
