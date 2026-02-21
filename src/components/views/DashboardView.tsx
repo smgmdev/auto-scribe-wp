@@ -440,24 +440,30 @@ export function DashboardView() {
         </div>
         {userIsAgency && (
           <>
-            <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-            {agencySummary.pendingBankWithdrawals > 0 && (
-              <div className="flex justify-between gap-4 pl-2">
-                <span className="text-white/70">Bank:</span>
-                <span className="font-semibold text-amber-400">${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-            )}
-            {agencySummary.pendingCryptoWithdrawals > 0 && (
-              <div className="flex justify-between gap-4 pl-2">
-                <span className="text-white/70">USDT:</span>
-                <span className="font-semibold text-amber-400">${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-            )}
-            {agencySummary.pendingBankWithdrawals === 0 && agencySummary.pendingCryptoWithdrawals === 0 && (
-              <div className="flex justify-between gap-4 pl-2">
-                <span className="text-white/50">None</span>
-              </div>
-            )}
+            <div className="flex justify-between gap-4">
+              <span className="text-white/70">Pending Withdrawals:</span>
+              <span className="font-semibold text-amber-400">
+                {(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals) > 0
+                  ? `$${(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : '0'}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4 pl-3">
+              <span className="text-white/50 text-xs">USDT:</span>
+              <span className="text-xs font-medium text-amber-400/80">
+                {agencySummary.pendingCryptoWithdrawals > 0
+                  ? `$${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : '0'}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4 pl-3">
+              <span className="text-white/50 text-xs">Bank Transfer:</span>
+              <span className="text-xs font-medium text-amber-400/80">
+                {agencySummary.pendingBankWithdrawals > 0
+                  ? `$${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : '0'}
+              </span>
+            </div>
           </>
         )}
         <div className="flex justify-between gap-4">
@@ -674,24 +680,30 @@ export function DashboardView() {
                         <span className="text-white/70">Total Withdrawals:</span>
                         <span className="font-semibold text-red-400">{agencySummary.completedWithdrawals > 0 ? `-$${agencySummary.completedWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
                       </div>
-                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-                      {agencySummary.pendingBankWithdrawals > 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/70">Bank:</span>
-                          <span className="font-semibold text-amber-400">${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                      )}
-                      {agencySummary.pendingCryptoWithdrawals > 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/70">USDT:</span>
-                          <span className="font-semibold text-amber-400">${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                      )}
-                      {agencySummary.pendingBankWithdrawals === 0 && agencySummary.pendingCryptoWithdrawals === 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50">None</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between gap-4">
+                        <span className="text-white/70">Pending Withdrawals:</span>
+                        <span className="font-semibold text-amber-400">
+                          {(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals) > 0
+                            ? `$${(agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            : '0'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-3">
+                        <span className="text-white/50 text-xs">USDT:</span>
+                        <span className="text-xs font-medium text-amber-400/80">
+                          {agencySummary.pendingCryptoWithdrawals > 0
+                            ? `$${agencySummary.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            : '0'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4 pl-3">
+                        <span className="text-white/50 text-xs">Bank Transfer:</span>
+                        <span className="text-xs font-medium text-amber-400/80">
+                          {agencySummary.pendingBankWithdrawals > 0
+                            ? `$${agencySummary.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            : '0'}
+                        </span>
+                      </div>
                       <div className="flex justify-between gap-4">
                         <span className="text-white/70">Locked in Order Requests:</span>
                         <span className="font-semibold text-amber-400">${agencySummary.lockedInOrderRequests.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
