@@ -123,6 +123,8 @@ export function useAvailableCredits(enabled = true) {
 
     let totalOrders = 0;
     let completedOrdersSpent = 0;
+    // Count instant publish orders from transactions
+    const instantPublishOrders = txs.filter(t => t.type === 'publish').length;
     if (completedOrders) {
       totalOrders = completedOrders.length;
       for (const order of completedOrders) {
@@ -131,7 +133,7 @@ export function useAvailableCredits(enabled = true) {
     }
 
     const deliveryOrdersCount = txs.filter(t => t.type === 'order_payout').length;
-    totalOrders += deliveryOrdersCount;
+    totalOrders += deliveryOrdersCount + instantPublishOrders;
 
     // Include admin deductions, publish spending, and usage spending in totalSpent
     const adminDeductions = txs

@@ -611,7 +611,11 @@ export function CreditHistoryView() {
     .filter(t => t.type === 'order_payout')
     .length;
 
-  const totalCompletedOrders = completedPurchaseOrders + completedAgencyDeliveryOrders;
+  const completedInstantPublishOrders = transactions
+    .filter(t => t.type === 'publish')
+    .length;
+
+  const totalCompletedOrders = completedPurchaseOrders + completedAgencyDeliveryOrders + completedInstantPublishOrders;
 
   const getTransactionIcon = (type: string, amount: number) => {
     if (type === 'order' || type === 'locked') {
@@ -1175,6 +1179,10 @@ export function CreditHistoryView() {
                 <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Completed Agency Delivery Orders:</span>
                   <span className="font-medium">{completedAgencyDeliveryOrders}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Instant Publishing Orders:</span>
+                  <span className="font-medium">{completedInstantPublishOrders}</span>
                 </div>
               </div>
             </div>
