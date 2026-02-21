@@ -1,0 +1,2 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.wordpress_site_submissions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.media_site_submissions;
