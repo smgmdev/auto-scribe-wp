@@ -1068,8 +1068,10 @@ export function ChatListPanel() {
               const clientReadChanged = old?.client_read !== updated.client_read;
               let newEngagements = prev.map(e => {
                 if (e.id === updated.id) {
-                  // If recently updated by INSERT handler, preserve local read state
-                  if (recentlyUpdatedByInsert && !updated.client_read) {
+                  // If recently updated by INSERT handler, preserve local read state entirely
+                  // This prevents ANY UPDATE (client_read true OR false) from overwriting
+                  // the unread state set by the INSERT handler during the guard window
+                  if (recentlyUpdatedByInsert) {
                     return { ...e, status: updated.status };
                   }
                   // Sync client_read to local read state
@@ -1128,8 +1130,8 @@ export function ChatListPanel() {
               const agencyReadChanged = old?.agency_read !== updated.agency_read;
               let newRequests = prev.map(r => {
                 if (r.id === updated.id) {
-                  // If recently updated by INSERT handler, preserve local read state
-                  if (recentlyUpdatedByInsert && !updated.agency_read) {
+                  // If recently updated by INSERT handler, preserve local read state entirely
+                  if (recentlyUpdatedByInsert) {
                     return { ...r, status: updated.status };
                   }
                   // Sync agency_read to local read state
