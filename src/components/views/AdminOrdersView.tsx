@@ -1037,17 +1037,17 @@ export function AdminOrdersView() {
                 <Clock className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-white">${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${activeOrdersValue.toLocaleString('en-US')}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="bg-foreground text-background px-3 py-2 text-sm">
             <div className="space-y-1">
               <p className="font-medium">Active Orders Breakdown:</p>
-              <p>Regular Active: {regularActiveOrdersCount} (${(regularActiveOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
-              <p className="text-orange-400">Open Disputes: {disputeOrdersCount} (${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
+              <p>Regular Active: {regularActiveOrdersCount} (${regularActiveOrdersValue.toLocaleString('en-US')})</p>
+              <p className="text-orange-400">Open Disputes: {disputeOrdersCount} (${disputeValue.toLocaleString('en-US')})</p>
               <hr className="border-background/30 my-1" />
-              <p className="font-medium">Total: {activeOrdersCount} orders (${(activeOrdersValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })})</p>
+              <p className="font-medium">Total: {activeOrdersCount} orders (${activeOrdersValue.toLocaleString('en-US')})</p>
             </div>
           </TooltipContent>
         </Tooltip>
@@ -1062,7 +1062,7 @@ export function AdminOrdersView() {
                 <AlertTriangle className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-white">${(disputeValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${disputeValue.toLocaleString('en-US')}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -1081,7 +1081,7 @@ export function AdminOrdersView() {
                 <CheckCircle className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-white">${(deliveredValue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${deliveredValue.toLocaleString('en-US')}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -1100,7 +1100,7 @@ export function AdminOrdersView() {
                 <DollarSign className="h-4 w-4 text-white/60" />
               </CardHeader>
               <CardContent className="pt-0 pb-0 px-3 md:px-4">
-                <div className="text-xl md:text-2xl font-semibold text-white">${(totalFeeEarnings / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                <div className="text-xl md:text-2xl font-semibold text-white">${totalFeeEarnings.toLocaleString('en-US')}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>
@@ -1470,9 +1470,9 @@ export function AdminOrdersView() {
                           <span className="text-xs text-muted-foreground capitalize">{order.media_sites.publication_format}</span>
                         )}
                         <p className="font-semibold text-sm">
-                          ${(order.amount_cents / 100).toFixed(2)}
+                          ${order.amount_cents.toLocaleString()}
                           <span className="text-xs text-green-600 font-normal ml-2">
-                            +${(calculatePlatformFee(order) / 100).toFixed(2)} fee
+                            +${calculatePlatformFee(order).toLocaleString()} fee
                           </span>
                         </p>
                       </div>
@@ -1506,9 +1506,9 @@ export function AdminOrdersView() {
                             <span className="text-xs text-muted-foreground capitalize">{order.media_sites.publication_format}</span>
                           )}
                           <p className="font-semibold text-sm">
-                            ${(order.amount_cents / 100).toFixed(2)}
+                            ${order.amount_cents.toLocaleString()}
                             <span className="text-xs text-green-600 font-normal ml-2">
-                              +${(calculatePlatformFee(order) / 100).toFixed(2)} fee
+                              +${calculatePlatformFee(order).toLocaleString()} fee
                             </span>
                           </p>
                         </div>
@@ -1548,7 +1548,7 @@ export function AdminOrdersView() {
               <div>
                 <h3 className="font-semibold">{selectedOrder?.media_sites?.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  ${((selectedOrder?.amount_cents || 0) / 100).toFixed(2)}
+                  ${(selectedOrder?.amount_cents || 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -1640,15 +1640,15 @@ export function AdminOrdersView() {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Paid</span>
-                  <span className="font-semibold">${(selectedOrder.amount_cents / 100).toFixed(2)}</span>
+                  <span className="font-semibold">${selectedOrder.amount_cents.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
                   <span className="text-muted-foreground">Platform Fee ({getCommissionPercentage(selectedOrder)}%)</span>
-                  <span className="text-green-600">${(calculatePlatformFee(selectedOrder) / 100).toFixed(2)}</span>
+                  <span className="text-green-600">${calculatePlatformFee(selectedOrder).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
                   <span className="text-muted-foreground">Agency Payout</span>
-                  <span>${(calculateAgencyPayout(selectedOrder) / 100).toFixed(2)}</span>
+                  <span>${calculateAgencyPayout(selectedOrder).toLocaleString()}</span>
                 </div>
               </div>
 
@@ -1718,7 +1718,7 @@ export function AdminOrdersView() {
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Order</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel this order? This will refund {selectedOrder ? Math.round(selectedOrder.amount_cents / 100) : 0} credits to the user's account.
+              Are you sure you want to cancel this order? This will refund {selectedOrder ? selectedOrder.amount_cents.toLocaleString() : 0} credits to the user's account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">

@@ -108,7 +108,7 @@ export const AdminCreditManagementView = () => {
       const userTxs = (txsRes.data || []).map(tx => ({ ...tx, description: tx.description || undefined }));
       const orders = (activeOrdersRes.data || []).map(o => ({
         user_id: userId,
-        media_sites: { price: Math.round((o.amount_cents || 0) / 100) },
+        media_sites: { price: o.amount_cents || 0 },
       }));
       const dbValue = dbCreditsRes.data?.credits ?? 0;
 
@@ -254,14 +254,14 @@ export const AdminCreditManagementView = () => {
 
       setUserCredits(combined);
 
-      // Compute total platform fees from completed B2B orders
+      // Compute total platform fees from completed B2B orders (values are credits, not cents)
       const b2bFeesSum = (completedOrdersRes.data || []).reduce((sum, o) => sum + ((o as any).platform_fee_cents || 0), 0);
       // Compute Instant Publishing platform fees from order_payout transactions with metadata.platform_fee
       const ipFeesSum = (transactionsRes.data || [])
         .filter(tx => tx.type === 'order_payout' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
         .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
-      setTotalPlatformFees(b2bFeesSum + ipFeesSum * 100);
-      setIpPlatformFees(ipFeesSum * 100);
+      setTotalPlatformFees(b2bFeesSum + ipFeesSum);
+      setIpPlatformFees(ipFeesSum);
     } catch (error) {
       console.error('Error fetching user credits:', error);
     } finally {
@@ -390,8 +390,8 @@ export const AdminCreditManagementView = () => {
                     return sum + Math.max(0, wallet);
                   }, 0);
 
-                  const totalCommission = Math.round(totalPlatformFees / 100);
-                  const ipCommission = Math.round(ipPlatformFees / 100);
+                  const totalCommission = totalPlatformFees;
+                  const ipCommission = ipPlatformFees;
                   const b2bCommission = totalCommission - ipCommission;
                   const b2bCommissionPct = totalB2bEarnings > 0 ? ((b2bCommission / (totalB2bEarnings + b2bCommission)) * 100).toFixed(1) : '0';
                   const ipCommissionPct = totalInstantEarnings > 0 ? ((ipCommission / (totalInstantEarnings + ipCommission)) * 100).toFixed(1) : '0';

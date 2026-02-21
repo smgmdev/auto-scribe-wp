@@ -254,11 +254,11 @@ export function DashboardView() {
       if (orders) {
         orders.forEach((req: any) => {
           if (req.order?.delivery_status === 'accepted') {
-            orderEarnings += (req.order.agency_payout_cents || 0) / 100;
-            orderSales += (req.order.amount_cents || 0) / 100;
+            orderEarnings += (req.order.agency_payout_cents || 0);
+            orderSales += (req.order.amount_cents || 0);
           }
           if (req.order?.delivery_status !== 'accepted' && req.order?.status !== 'cancelled') {
-            lockedInOrders += (req.order.agency_payout_cents || 0) / 100;
+            lockedInOrders += (req.order.agency_payout_cents || 0);
           }
         });
       }
@@ -289,7 +289,7 @@ export function DashboardView() {
 
       if (pendingRequests) {
         pendingRequests.forEach((req: any) => {
-          lockedInOrderRequests += (req.media_sites?.price || 0) / 100;
+          lockedInOrderRequests += (req.media_sites?.price || 0);
         });
       }
 
@@ -308,7 +308,7 @@ export function DashboardView() {
       
       if (withdrawals) {
         withdrawals.forEach(w => {
-          const amount = (w.amount_cents || 0) / 100;
+          const amount = (w.amount_cents || 0);
           if (w.status === 'completed' || w.status === 'approved') {
             completedWithdrawalsAmount += amount;
             if (w.withdrawal_method === 'bank') {

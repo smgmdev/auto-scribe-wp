@@ -250,7 +250,7 @@ export function AdminSystemView() {
                     <div key={o.id} className="flex gap-2 py-0.5 text-white/40">
                       <span className="text-white/20">{o.order_number || o.id.slice(0, 8)}</span>
                       <span className="text-white/50">{o.media_site_name}</span>
-                      <span className="text-cyan-400">${(o.amount_cents / 100).toFixed(2)}</span>
+                      <span className="text-cyan-400">${o.amount_cents.toLocaleString()}</span>
                       <span className={
                         o.status === 'completed' || o.status === 'released' ? 'text-green-400' :
                         o.status === 'cancelled' || o.status === 'refunded' ? 'text-red-400' :
