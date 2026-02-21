@@ -82,10 +82,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return newId;
   })());
   const sessionKickedRef = useRef(false);
+  // Track current access token to avoid unnecessary re-renders on TOKEN_REFRESHED
+  const accessTokenRef = useRef<string | null>(null);
 
   // Helper to fully reset auth state
   const resetAuthState = () => {
     setSession(null);
+    accessTokenRef.current = null;
     setUser(null);
     setRole(null);
     setCredits(0);
@@ -465,8 +468,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Ignore TOKEN_REFRESHED events - these happen when switching tabs
+        // Only update session ref silently; avoid setState if token hasn't changed
+        // to prevent unnecessary re-renders that cause content to "refresh"
         if (event === 'TOKEN_REFRESHED') {
-          setSession(newSession);
+          if (newSession && newSession.access_token !== accessTokenRef.current) {
+            accessTokenRef.current = newSession.access_token;
+            setSession(newSession);
+          }
           return;
         }
 
@@ -494,6 +502,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         isInitialLoadRef.current = false;
 
+        accessTokenRef.current = newSession?.access_token ?? null;
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
@@ -547,6 +556,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         previousUserIdRef.current = existingSession?.user?.id || null;
 
+        accessTokenRef.current = existingSession?.access_token ?? null;
         setSession(existingSession);
         setUser(existingSession?.user ?? null);
 
@@ -574,9 +584,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           
-          // Register this tab as the active session FIRST, then fetch data
+          // Only re-register if DB doesn't already have our session ID
+          // (e.g. first login). On page refresh, sessionStorage preserves our ID
+          // and the DB already has it, so skip to avoid resetting session_started_at.
           sessionKickedRef.current = false;
-          await registerActiveSession(existingSession.user.id);
+          if (dbSessionId !== localSessionIdRef.current) {
+            await registerActiveSession(existingSession.user.id);
+          } else {
+            console.log('[Auth] Session ID already matches DB, skipping re-registration');
+          }
           await fetchUserData(existingSession.user.id);
         }
       } finally {
