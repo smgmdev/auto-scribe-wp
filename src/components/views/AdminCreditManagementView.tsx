@@ -548,9 +548,9 @@ export const AdminCreditManagementView = () => {
                           {isExpanded && (
                             <TableRow key={`${user.user_id}-expanded`}>
                               <TableCell colSpan={3} className="p-0">
-                                <div className="bg-foreground py-1" style={{ touchAction: 'auto' }}>
+                                <div className="bg-foreground" style={{ touchAction: 'auto' }}>
                                   {/* Recalculate button + Stats row */}
-                                  <div className="flex items-center justify-between px-3 pt-2 pb-0">
+                                  <div className="flex items-center justify-between pb-0">
                                     <Button
                                       size="sm"
                                       variant="ghost"
