@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+import { cn } from '@/lib/utils';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,6 +57,12 @@ export function CreditHistoryView() {
   const [isAgency, setIsAgency] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Tab filter state (mirrors admin-side UserTransactionsExpanded)
+  const [activeType, setActiveType] = useState('all');
+  const [earningsSubTab, setEarningsSubTab] = useState('earnings');
+  const [purchasesSubTab, setPurchasesSubTab] = useState('purchases');
+  const [systemSubTab, setSystemSubTab] = useState('system');
+  const [withdrawalsSubTab, setWithdrawalsSubTab] = useState('withdrawals');
   // Use centralized available credits hook
   const creditData = useAvailableCredits();
   const { 
@@ -946,6 +954,98 @@ export function CreditHistoryView() {
     return true;
   });
 
+  // ── Tab definitions (same order as admin-side UserTransactionsExpanded) ──
+  const transactionTypesTabs = [
+    { key: 'all', label: 'All' },
+    { key: 'earnings', label: 'Earnings' },
+    { key: 'purchases', label: 'Purchases' },
+    { key: 'system', label: 'System' },
+    { key: 'withdrawals', label: 'Withdrawals' },
+  ];
+
+  const earningsSubTabsDef = [
+    { key: 'earnings', label: 'All Earnings' },
+    { key: 'earnings_b2b', label: 'B2B Media Sales' },
+    { key: 'earnings_instant', label: 'Instant Publishing Sales' },
+  ];
+
+  const purchasesSubTabsDef = [
+    { key: 'purchases', label: 'All Purchases' },
+    { key: 'purchases_b2b', label: 'B2B Media Purchases' },
+    { key: 'purchases_instant', label: 'Instant Publishing Purchases' },
+  ];
+
+  const systemSubTabsDef = [
+    { key: 'system', label: 'All System' },
+    { key: 'offer_accepted', label: 'Credits Locked' },
+    { key: 'unlocked', label: 'Unlocked' },
+    { key: 'gifted', label: 'Gifted' },
+    { key: 'admin_deduct', label: 'Deduction' },
+  ];
+
+  const withdrawalsSubTabsDef = [
+    { key: 'withdrawals', label: 'All Withdrawals' },
+    { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
+    { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
+    { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
+  ];
+
+  // ── Filter helpers ──
+  const isB2BEarning = (t: CreditTransaction) => t.type === 'order_payout' && t.order_id != null;
+  const isInstantEarning = (t: CreditTransaction) => t.type === 'order_payout' && t.order_id == null;
+
+  const systemTypes = ['gifted', 'unlocked', 'offer_accepted', 'admin_deduct', 'admin_credit'];
+
+  const effectiveFilter = (() => {
+    if (activeType === 'earnings') return earningsSubTab;
+    if (activeType === 'purchases') return purchasesSubTab;
+    if (activeType === 'system') return systemSubTab;
+    if (activeType === 'withdrawals') return withdrawalsSubTab;
+    return activeType;
+  })();
+
+  const tabFilteredTransactions = (() => {
+    switch (effectiveFilter) {
+      case 'all': return displayedTransactions;
+      case 'earnings': return displayedTransactions.filter(tx => tx.type === 'order_payout');
+      case 'earnings_b2b': return displayedTransactions.filter(isB2BEarning);
+      case 'earnings_instant': return displayedTransactions.filter(isInstantEarning);
+      case 'purchases': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish');
+      case 'purchases_b2b': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'purchase');
+      case 'purchases_instant': return displayedTransactions.filter(tx => tx.type === 'publish');
+      case 'system': return displayedTransactions.filter(tx => systemTypes.includes(tx.type));
+      case 'withdrawals': return displayedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
+      default: return displayedTransactions.filter(tx => tx.type === effectiveFilter);
+    }
+  })();
+
+  const getTabCounts = () => {
+    const counts: Record<string, number> = { all: displayedTransactions.length };
+    displayedTransactions.forEach(tx => {
+      if (tx.type === 'order_payout') {
+        counts['earnings'] = (counts['earnings'] || 0) + 1;
+        if (isB2BEarning(tx)) counts['earnings_b2b'] = (counts['earnings_b2b'] || 0) + 1;
+        else counts['earnings_instant'] = (counts['earnings_instant'] || 0) + 1;
+      }
+      if (tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish') {
+        counts['purchases'] = (counts['purchases'] || 0) + 1;
+        if (tx.type === 'order_completed' || tx.type === 'purchase') counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
+        if (tx.type === 'publish') counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
+      }
+      if (systemTypes.includes(tx.type)) {
+        counts['system'] = (counts['system'] || 0) + 1;
+        counts[tx.type] = (counts[tx.type] || 0) + 1;
+      }
+      if (['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type)) {
+        counts['withdrawals'] = (counts['withdrawals'] || 0) + 1;
+        counts[tx.type] = (counts[tx.type] || 0) + 1;
+      }
+    });
+    return counts;
+  };
+
+  const tabCounts = getTabCounts();
+
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0">
@@ -1292,23 +1392,132 @@ export function CreditHistoryView() {
 
       {/* Transactions List */}
       <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
-        <CardHeader className="px-2 sm:px-6">
-          <CardTitle className="text-lg">Transaction History</CardTitle>
+        <CardHeader className="px-2 sm:px-6 pb-0">
+          <CardTitle className="text-lg mb-3">Transaction History</CardTitle>
+          {/* Tab filters */}
+          <Tabs value={activeType} onValueChange={(val) => setActiveType(val)}>
+            <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+              {transactionTypesTabs.map(type => {
+                const count = tabCounts[type.key] || 0;
+                return (
+                  <TabsTrigger
+                    key={type.key}
+                    value={type.key}
+                    className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap"
+                  >
+                    {type.label} ({count})
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+
+          {/* Sub-tabs for Earnings */}
+          {activeType === 'earnings' && (
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+              {earningsSubTabsDef.map(sub => {
+                const count = tabCounts[sub.key] || 0;
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => setEarningsSubTab(sub.key)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                      earningsSubTab === sub.key
+                        ? "bg-[#ff6600]/80 text-white"
+                        : "text-white/50 hover:text-white/70"
+                    )}
+                  >
+                    {sub.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Sub-tabs for Purchases */}
+          {activeType === 'purchases' && (
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+              {purchasesSubTabsDef.map(sub => {
+                const count = tabCounts[sub.key] || 0;
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => setPurchasesSubTab(sub.key)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                      purchasesSubTab === sub.key
+                        ? "bg-[#ff6600]/80 text-white"
+                        : "text-white/50 hover:text-white/70"
+                    )}
+                  >
+                    {sub.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Sub-tabs for System */}
+          {activeType === 'system' && (
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+              {systemSubTabsDef.map(sub => {
+                const count = tabCounts[sub.key] || 0;
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => setSystemSubTab(sub.key)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                      systemSubTab === sub.key
+                        ? "bg-[#ff6600]/80 text-white"
+                        : "text-white/50 hover:text-white/70"
+                    )}
+                  >
+                    {sub.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Sub-tabs for Withdrawals */}
+          {activeType === 'withdrawals' && (
+            <div className="flex bg-foreground/90 overflow-x-auto scrollbar-hide -mx-2 sm:-mx-6 px-2 sm:px-6">
+              {withdrawalsSubTabsDef.map(sub => {
+                const count = tabCounts[sub.key] || 0;
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => setWithdrawalsSubTab(sub.key)}
+                    className={cn(
+                      "px-3 py-1.5 text-[11px] whitespace-nowrap transition-colors",
+                      withdrawalsSubTab === sub.key
+                        ? "bg-[#ff6600]/80 text-white"
+                        : "text-white/50 hover:text-white/70"
+                    )}
+                  >
+                    {sub.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : displayedTransactions.length === 0 ? (
+          ) : tabFilteredTransactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Coins className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p>No transactions found</p>
-              <p className="text-sm mt-1">Your credit history will appear here</p>
+              <p className="text-sm mt-1">{activeType === 'all' ? 'Your credit history will appear here' : 'No transactions in this category'}</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {displayedTransactions.map((transaction) => {
+              {tabFilteredTransactions.map((transaction) => {
                 const isClickable = transaction.type === 'order_completed' && transaction.order_id;
                 const isWithdrawalCompleted = transaction.type === 'withdrawal_completed';
                 const isWithdrawalRejected = transaction.type === 'withdrawal_unlocked';
