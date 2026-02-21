@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search } from 'lucide-react';
+import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useSites } from '@/hooks/useSites';
@@ -42,7 +42,10 @@ export function ArticlesView() {
     deleteArticle,
     loadMoreArticles,
     searchArticles,
+    refreshArticles,
   } = useArticles();
+  
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const [activeTab, setActiveTab] = useState('published');
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
@@ -330,12 +333,27 @@ export function ArticlesView() {
               Manage your published and draft articles
             </p>
           </div>
-          <Button 
-            onClick={() => setCurrentView('compose')} 
-            className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
-          >
-            New Article
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={async () => {
+                setIsRefreshing(true);
+                await refreshArticles(false);
+                setIsRefreshing(false);
+              }}
+              disabled={isRefreshing}
+              className="border-black text-black hover:bg-black hover:text-white rounded-none h-9 w-9"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button 
+              onClick={() => setCurrentView('compose')} 
+              className="hidden md:inline-flex bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+            >
+              New Article
+            </Button>
+          </div>
         </div>
         <Button 
           onClick={() => setCurrentView('compose')} 
