@@ -1129,26 +1129,14 @@ export function CreditHistoryView() {
                 )}
               </div>
               {isAgency && (
-                <>
-                  <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-                  {withdrawalsByBank > 0 && (
-                    <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-white/70">Bank:</span>
-                      <span className="font-semibold text-amber-400">${withdrawalsByBank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                  )}
-                  {withdrawalsByCrypto > 0 && (
-                    <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-white/70">USDT:</span>
-                      <span className="font-semibold text-amber-400">${withdrawalsByCrypto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                  )}
-                  {withdrawalsByBank === 0 && withdrawalsByCrypto === 0 && (
-                    <div className="flex justify-between gap-4 pl-2">
-                      <span className="text-white/50">None</span>
-                    </div>
-                  )}
-                </>
+                <div className="flex justify-between gap-4">
+                  <span className="text-white/70">Pending Withdrawals:</span>
+                  <span className="font-semibold text-amber-400">
+                    {(withdrawalsByBank + withdrawalsByCrypto) > 0
+                      ? `$${(withdrawalsByBank + withdrawalsByCrypto).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '0'}
+                  </span>
+                </div>
               )}
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Locked in Offer Requests:</span>
