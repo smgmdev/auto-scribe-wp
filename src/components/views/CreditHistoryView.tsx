@@ -1906,7 +1906,7 @@ export function CreditHistoryView() {
                                   <span className="text-muted-foreground">Platform Fee:</span>
                                   <p className="font-medium">
                                     {transaction.metadata?.platform_fee 
-                                      ? `${Number(transaction.metadata.platform_fee).toLocaleString()} credits${transaction.metadata?.commission_percentage ? ` (${transaction.metadata.commission_percentage}%)` : ''}`
+                                      ? `${Number(transaction.metadata.platform_fee).toLocaleString()} credits`
                                       : '0 credits'}
                                   </p>
                                 </div>
