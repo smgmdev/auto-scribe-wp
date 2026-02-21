@@ -616,7 +616,10 @@ export function ComposeView() {
     // This prevents: publish-then-fail-deduct exploits and race conditions.
     // Credits are reserved now; confirmed or refunded after WP publish result.
     let creditLockId: string | null = null;
-    const isNewPublish = !isAdmin && !editingArticle && user;
+    // Charge credits when: non-admin user publishes to a site they haven't already published this article to.
+    // If editingArticle exists and was already published to the same site, it's an update (no charge).
+    const isAlreadyPublishedToSameSite = editingArticle?.publishedTo === selectedSite && editingArticle?.wpPostId;
+    const isNewPublish = !isAdmin && user && !isAlreadyPublishedToSameSite;
 
     if (isNewPublish) {
       const { data: lockResult, error: lockError } = await supabase.functions.invoke('lock-publish-credits', {
