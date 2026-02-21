@@ -194,6 +194,10 @@ export function ArticlesView() {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
+                  })}{' '}
+                  {new Date(article.createdAt).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </span>
                 <span className="hidden md:inline">•</span>
