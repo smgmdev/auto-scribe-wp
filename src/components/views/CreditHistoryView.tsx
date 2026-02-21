@@ -974,21 +974,21 @@ export function CreditHistoryView() {
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Earnings:</span>
-                {isAgency ? (
+                {isAgency || earnedCredits > 0 ? (
                   <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
                 ) : (
-                  <span className="text-white/50 text-xs">available for agency only</span>
+                  <span className="text-white/50 text-xs">no earnings yet</span>
                 )}
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-white/70">Withdrawals:</span>
-                {isAgency ? (
+                {isAgency || creditsWithdrawn > 0 ? (
                   <span className="font-semibold text-red-400">{creditsWithdrawn > 0 ? `-${Math.round(creditsWithdrawn).toLocaleString()}` : '0'}</span>
                 ) : (
-                  <span className="text-white/50 text-xs">available for agency only</span>
+                  <span className="text-white/50 text-xs">no withdrawals yet</span>
                 )}
               </div>
-              {isAgency && (
+              {(isAgency || earnedCredits > 0) && (
                 <>
                   <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
                   {withdrawalsByBank > 0 && (
