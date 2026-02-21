@@ -598,13 +598,13 @@ export function AgencyPayoutsView() {
           <Tabs value={earningsTab} onValueChange={setEarningsTab} className="mt-3">
             <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 overflow-x-auto scrollbar-hide !flex-nowrap w-full mb-0" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
               <TabsTrigger value="all" className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap">
-                All ({completedOrders.length + payoutTransactions.length + withdrawals.length})
+                All ({completedOrders.length + payoutTransactions.filter(t => t.metadata?.site_name).length + withdrawals.length})
               </TabsTrigger>
               <TabsTrigger value="b2b" className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap">
                 B2B Media Sales ({completedOrders.length})
               </TabsTrigger>
               <TabsTrigger value="instant" className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap">
-                Instant Publishing Sales ({payoutTransactions.length})
+                Instant Publishing Sales ({payoutTransactions.filter(t => t.metadata?.site_name).length})
               </TabsTrigger>
               <TabsTrigger value="withdrawals" className="data-[state=active]:bg-[#ff6600] data-[state=active]:text-white text-white/70 px-3 py-2.5 text-xs !rounded-none flex-1 flex-shrink-0 whitespace-nowrap">
                 Withdrawals ({withdrawals.length})
@@ -674,7 +674,9 @@ export function AgencyPayoutsView() {
                     data: o,
                     eventDate: new Date(o.accepted_at || o.delivered_at || o.created_at)
                   })),
-                  ...payoutTransactions.map(t => ({
+                  ...payoutTransactions
+                    .filter(t => t.metadata?.site_name) // Only instant publishing (B2B orders already shown as 'order' type)
+                    .map(t => ({
                     type: 'payout_tx' as const,
                     data: t,
                     eventDate: new Date(t.created_at)
