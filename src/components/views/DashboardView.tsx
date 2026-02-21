@@ -581,13 +581,13 @@ export function DashboardView() {
       {isAgency && (
         <div className="grid gap-0 md:grid-cols-2">
           {/* Agency Summary - Modern Mini Dashboard */}
-           <Card className="border-0 bg-black rounded-none">
+           <Card className="border-0 bg-black rounded-none flex flex-col">
             <CardHeader className="px-0">
               <CardTitle className="text-xl text-white">Agency Summary</CardTitle>
             </CardHeader>
-            <CardContent className="px-0">
+            <CardContent className="px-0 flex-1 flex flex-col">
               {/* Financial Stats - Modern Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 flex-1">
                 {/* Wallet Card with Tooltip */}
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
@@ -792,24 +792,24 @@ export function DashboardView() {
           </Card>
 
           {/* Agency Management */}
-          <Card className="border-0 bg-black rounded-none">
+           <Card className="border-0 bg-black rounded-none flex flex-col">
             <CardHeader className="px-0">
               <CardTitle className="text-xl text-white">Agency Management</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-0 px-0">
-              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
+            <CardContent className="space-y-0 px-0 flex-1 flex flex-col">
+              <Button variant="outline" className="w-full flex-1 justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('my-agency')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 My Agency
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-media')}>
+              <Button variant="outline" className="w-full flex-1 justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-media')}>
                 <Library className="mr-2 h-4 w-4" />
                 My Media
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
+              <Button variant="outline" className="w-full flex-1 justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-payouts')}>
                 <Wallet className="mr-2 h-4 w-4" />
                 My Earnings
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-requests')}>
+              <Button variant="outline" className="w-full flex-1 justify-start bg-[#2a2a2a] text-white border-[#2a2a2a] hover:bg-[#f2a547] hover:border-[#f2a547] hover:text-black" onClick={() => setCurrentView('agency-requests')}>
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Client Requests
               </Button>
