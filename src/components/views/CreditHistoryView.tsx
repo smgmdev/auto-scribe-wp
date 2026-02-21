@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ interface CreditTransaction {
   created_at: string;
   order_id: string | null;
   order_number?: string | null;
+  metadata?: any;
 }
 
 interface LockedOrder {
@@ -1605,17 +1606,30 @@ export function CreditHistoryView() {
                                 </div>
                               )}
                             </div>
-                            {transaction.order_id && (
-                              <div className="mt-3 pt-3 border-t border-border/50">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOrderCompletedClick(transaction.order_id!, transaction.type);
-                                  }}
-                                  className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                >
-                                  View Order Details →
-                                </button>
+                            {(transaction.order_id || transaction.metadata?.wp_link) && (
+                              <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                                {transaction.order_id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOrderCompletedClick(transaction.order_id!, transaction.type);
+                                    }}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Order Details →
+                                  </button>
+                                )}
+                                {transaction.metadata?.wp_link && (
+                                  <a
+                                    href={transaction.metadata.wp_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
+                                  >
+                                    View publication <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
                               </div>
                             )}
                           </div>
