@@ -65,9 +65,6 @@ const transactionTypes = [
   { key: 'purchases', label: 'Purchases' },
   { key: 'system', label: 'System' },
   { key: 'withdrawals', label: 'Withdrawals' },
-  { key: 'spent', label: 'Spent' },
-  { key: 'locked', label: 'Locked' },
-  { key: 'order_accepted', label: 'Order Accepted' },
   { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
 ];
 
