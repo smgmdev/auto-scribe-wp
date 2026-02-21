@@ -542,6 +542,18 @@ export const AdminCreditManagementView = () => {
                                             <span className="text-white/70">Earnings:</span>
                                             <span className="font-semibold text-green-400">{(user.earned || 0).toLocaleString()}</span>
                                           </div>
+                                          {user.isAgency && (user.b2bEarnings > 0 || user.instantPublishingEarnings > 0) && (
+                                            <>
+                                              <div className="flex justify-between gap-4 pl-2">
+                                                <span className="text-white/50 text-xs">B2B Media Sales:</span>
+                                                <span className="text-white/50 text-xs">{user.b2bEarnings.toLocaleString()}</span>
+                                              </div>
+                                              <div className="flex justify-between gap-4 pl-2">
+                                                <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
+                                                <span className="text-white/50 text-xs">{user.instantPublishingEarnings.toLocaleString()}</span>
+                                              </div>
+                                            </>
+                                          )}
                                           <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Withdrawals:</span>
                                             <span className="font-semibold text-red-400">{user.withdrawn > 0 ? `-${Math.round(user.withdrawn).toLocaleString()}` : '0'}</span>

@@ -137,6 +137,10 @@ export interface AdminUserCredit {
   purchasedInvoice: number;
   /** Earned from agency payouts */
   earned: number;
+  /** Earned from B2B media orders */
+  b2bEarnings: number;
+  /** Earned from instant publishing sales */
+  instantPublishingEarnings: number;
   /** Admin deductions */
   deductions: number;
   /** Refunded credits */
@@ -292,6 +296,12 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     const instantPublishOrders = userTxs.filter(t => t.type === 'publish').length;
     const purchaseOrders = purchaseOrdersMap.get(userId) || 0;
 
+    // Split earnings into B2B vs Instant Publishing
+    const b2bEarnings = userTxs
+      .filter(t => t.type === 'order_payout' && t.description && t.description.startsWith('Earnings from completed order'))
+      .reduce((sum, t) => sum + t.amount, 0);
+    const instantPublishingEarnings = earnedCredits - b2bEarnings;
+
     // Usage spending (type === 'usage')
     const usageSpent = userTxs
       .filter(t => t.type === 'usage')
@@ -310,6 +320,8 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       purchasedOnline,
       purchasedInvoice: purchasedOffline,
       earned: earnedCredits,
+      b2bEarnings,
+      instantPublishingEarnings,
       deductions,
       refunded,
       withdrawn: creditsWithdrawn,
