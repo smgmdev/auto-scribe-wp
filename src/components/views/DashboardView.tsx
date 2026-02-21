@@ -97,15 +97,20 @@ export function DashboardView() {
   
   // Real-time active sessions count (admin only)
   const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
+  const [recentSessions, setRecentSessions] = useState<{ email: string; last_online_at: string }[]>([]);
 
   const fetchActiveSessions = useCallback(async () => {
     if (!isAdmin) return;
-    const { count } = await supabase
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { data, count } = await supabase
       .from('profiles')
-      .select('id', { count: 'exact', head: true })
+      .select('email, last_online_at', { count: 'exact' })
       .not('active_session_id', 'is', null)
-      .gt('last_online_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+      .gt('last_online_at', fiveMinAgo)
+      .order('last_online_at', { ascending: false })
+      .limit(5);
     setActiveSessionCount(count ?? 0);
+    setRecentSessions(data?.map(d => ({ email: d.email || 'Unknown', last_online_at: d.last_online_at || '' })) ?? []);
   }, [isAdmin]);
 
   useEffect(() => {
@@ -405,9 +410,28 @@ export function DashboardView() {
           {/* Badge on mobile - shown above description */}
           <div className="md:hidden mt-2 flex items-center gap-2">
             {isAdmin && (
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
-                {activeSessionCount}&nbsp;sessions
-              </Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default">
+                    {activeSessionCount}&nbsp;sessions
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
+                  {recentSessions.length === 0 ? (
+                    <p className="text-xs text-white/60">No active sessions</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-medium text-white/60 mb-2">Recent active sessions</p>
+                      {recentSessions.map((s, i) => (
+                        <div key={i} className="flex justify-between gap-3 text-xs">
+                          <span className="truncate">{s.email}</span>
+                          <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TooltipContent>
+              </Tooltip>
             )}
             {agencyStatusLoading ? (
               <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
@@ -429,9 +453,28 @@ export function DashboardView() {
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
           {isAdmin && (
-            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
-              {activeSessionCount}&nbsp;sessions
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap cursor-default">
+                  {activeSessionCount}&nbsp;sessions
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
+                {recentSessions.length === 0 ? (
+                  <p className="text-xs text-white/60">No active sessions</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-white/60 mb-2">Recent active sessions</p>
+                    {recentSessions.map((s, i) => (
+                      <div key={i} className="flex justify-between gap-3 text-xs">
+                        <span className="truncate">{s.email}</span>
+                        <span className="text-white/50 whitespace-nowrap shrink-0">{formatRelativeTime(s.last_online_at)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TooltipContent>
+            </Tooltip>
           )}
           {agencyStatusLoading ? (
             <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
