@@ -969,6 +969,7 @@ export function ComposeView() {
     }
 
     setIsSavingDraft(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     try {
       let wpPostId: number | undefined;
@@ -1116,39 +1117,41 @@ export function ComposeView() {
         </div>
       </div>
     )}
+
+    {/* Saving Draft Overlay - Same full-screen style as publishing */}
+    {isSavingDraft && (
+      <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
+        <div className="fixed top-20 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
+          <Loader2 className="h-10 w-10 animate-spin text-accent" />
+          <div className="text-center">
+            <p className="text-lg font-medium text-foreground">Saving Draft...</p>
+            <p className="text-sm text-muted-foreground mt-1">Please wait while your draft is being saved</p>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Draft Success Overlay - Same full-screen style as publish success */}
+    {showDraftSuccess && (
+      <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
+        <div className="fixed top-20 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
+              <CheckCircle2 className="h-10 w-10 text-green-500" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-semibold text-foreground">Draft Saved!</p>
+            <p className="text-sm text-muted-foreground mt-2">Your draft has been saved successfully</p>
+          </div>
+        </div>
+      </div>
+    )}
     
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-4 relative">
 
-      {/* Saving Draft Overlay */}
-      {isSavingDraft && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
-            <Loader2 className="h-10 w-10 animate-spin text-accent" />
-            <div className="text-center">
-              <p className="text-lg font-medium text-foreground">Saving Draft...</p>
-              <p className="text-sm text-muted-foreground mt-1">Please wait while your draft is being saved</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Draft Success Overlay */}
-      {showDraftSuccess && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-none bg-card border border-border shadow-lg animate-scale-in">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center animate-[pulse_1s_ease-in-out_2]">
-                <CheckCircle2 className="h-10 w-10 text-green-500" />
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-semibold text-foreground">Draft Saved!</p>
-              <p className="text-sm text-muted-foreground mt-2">Your draft has been saved successfully</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Saving Draft and Draft Success overlays moved outside content container */}
 
       {/* Publish Success Overlay */}
       {showPublishSuccess && (
