@@ -1087,6 +1087,7 @@ export function DashboardView() {
         open={agencyDetailsOpen}
         onOpenChange={setAgencyDetailsOpen}
         agencyName={agencyDetailsName}
+        zIndex={400}
       />
 
       </div>
