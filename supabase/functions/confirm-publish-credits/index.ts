@@ -90,6 +90,19 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Fetch site price (credits) and owner info for payout calculation
+      let siteOwnerId: string | null = null;
+      let creditCost = Math.abs(txData.amount); // use the locked amount as authoritative cost
+
+      if (siteName) {
+        const { data: wpSiteInfo } = await supabase
+          .from('wordpress_sites')
+          .select('user_id')
+          .eq('name', siteName)
+          .maybeSingle();
+        siteOwnerId = wpSiteInfo?.user_id || null;
+      }
+
       const updatePayload: Record<string, unknown> = {
           type: 'publish',
           description: `Published article to ${siteName || 'media site'}`,
@@ -114,6 +127,38 @@ Deno.serve(async (req) => {
       if (updateTxError) {
         console.error('[confirm-publish-credits] Failed to confirm transaction:', updateTxError);
         // Non-fatal: credits were already deducted, log but don't fail
+      }
+
+      // ── Credit the site owner (minus platform commission) ──
+      if (siteOwnerId && siteOwnerId !== userId) {
+        const commission = commissionPercentage ?? 10; // default 10%
+        const platformFee = Math.round(creditCost * (commission / 100));
+        const ownerPayout = creditCost - platformFee;
+
+        if (ownerPayout > 0) {
+          const { error: payoutError } = await supabase
+            .from('credit_transactions')
+            .insert({
+              user_id: siteOwnerId,
+              amount: ownerPayout,
+              type: 'order_payout',
+              description: `Payout for article published to ${siteName || 'media site'}`,
+              metadata: {
+                buyer_id: userId,
+                site_name: siteName,
+                gross_amount: creditCost,
+                commission_percentage: commission,
+                platform_fee: platformFee,
+                wp_link: wpLink || null,
+              },
+            });
+
+          if (payoutError) {
+            console.error('[confirm-publish-credits] Failed to credit site owner:', payoutError);
+          } else {
+            console.log(`[confirm-publish-credits] Credited site owner ${siteOwnerId} with ${ownerPayout} credits (gross: ${creditCost}, fee: ${platformFee})`);
+          }
+        }
       }
 
       console.log(`[confirm-publish-credits] Confirmed credit deduction for lock ${lockId}`);
