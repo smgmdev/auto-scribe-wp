@@ -27,6 +27,7 @@ import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
 import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getSignedAttachmentUrl } from '@/lib/attachment-urls';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 
 interface ServiceMessage {
   id: string;
@@ -8087,43 +8088,13 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       )}
 
       {/* Deliver Order Dialog */}
-      <Dialog open={deliverOrderDialogOpen} onOpenChange={setDeliverOrderDialogOpen}>
-        <DialogContent className="z-[9999] max-w-md">
-          <DialogHeader className="text-left">
-            <DialogTitle>
-              Deliver Order
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="delivery-link">Delivery Link <span className="text-destructive">*</span></Label>
-              <div className="flex">
-                <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-xs text-muted-foreground h-9">
-                  https://
-                </div>
-                <Input
-                  id="delivery-link"
-                  placeholder="example.com/article-link"
-                  value={deliveryLink}
-                  onChange={(e) => setDeliveryLink(e.target.value)}
-                  className="rounded-l-none h-9 text-sm"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                The published article link or proof of delivery
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="delivery-notes">Delivery Notes (optional)</Label>
-              <Textarea
-                id="delivery-notes"
-                placeholder="Any additional notes about the delivery..."
-                value={deliveryNotes}
-                onChange={(e) => setDeliveryNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
-          </div>
+      <DraggablePopup
+        open={deliverOrderDialogOpen}
+        onOpenChange={setDeliverOrderDialogOpen}
+        title="Deliver Order"
+        width={440}
+        zIndex={300}
+        footer={
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <Button
               variant="outline"
@@ -8144,20 +8115,16 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 
                 setSubmittingDelivery(true);
                 try {
-                  // Get the accepted order data - fallback to localOrder and globalChatRequest data if not found in messages
                   const acceptedOrderData = getLastAcceptedOrderRequestData();
                   
-                  // If no accepted order data from messages, use localOrder and media_site from request
                   if (!acceptedOrderData && !localOrder?.id) {
                     throw new Error('No accepted order found');
                   }
                   
-                  // Use media site info from acceptedOrderData, or fallback to globalChatRequest.media_site
                   const mediaSiteId = acceptedOrderData?.media_site_id || globalChatRequest.media_site?.id;
                   const mediaSiteName = acceptedOrderData?.media_site_name || globalChatRequest.media_site?.name || 'Unknown';
                   const mediaSiteFavicon = acceptedOrderData?.media_site_favicon || globalChatRequest.media_site?.favicon;
                   
-                  // Send ORDER_DELIVERED message
                   const deliveryData = {
                     type: 'order_delivered',
                     media_site_id: mediaSiteId,
@@ -8181,7 +8148,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (error) throw error;
                   
-                  // Update order delivery_status to 'delivered'
                   if (localOrder?.id) {
                     const { error: updateError } = await supabase
                       .from('orders')
@@ -8197,13 +8163,11 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       console.error('Error updating order delivery status:', updateError);
                       throw new Error(`Failed to update order: ${updateError.message}`);
                     } else {
-                      // Update local order state
                       setLocalOrder(prev => prev ? {
                         ...prev,
                         delivery_status: 'delivered'
                       } : null);
                       
-                      // Notify user about the delivery via broadcast
                       const { data: requestData } = await supabase
                         .from('service_requests')
                         .select('user_id')
@@ -8227,7 +8191,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     }
                   }
                   
-                  // Add to local messages
                   if (insertedMsg) {
                     setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
                   }
@@ -8255,8 +8218,39 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               )}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="delivery-link">Delivery Link <span className="text-destructive">*</span></Label>
+            <div className="flex">
+              <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-xs text-muted-foreground h-9">
+                https://
+              </div>
+              <Input
+                id="delivery-link"
+                placeholder="example.com/article-link"
+                value={deliveryLink}
+                onChange={(e) => setDeliveryLink(e.target.value)}
+                className="rounded-l-none h-9 text-sm"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              The published article link or proof of delivery
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="delivery-notes">Delivery Notes (optional)</Label>
+            <Textarea
+              id="delivery-notes"
+              placeholder="Any additional notes about the delivery..."
+              value={deliveryNotes}
+              onChange={(e) => setDeliveryNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+        </div>
+      </DraggablePopup>
 
       {/* Cancel Placed Order Dialog (Agency side) */}
       <AlertDialog open={cancelPlacedOrderDialogOpen} onOpenChange={setCancelPlacedOrderDialogOpen}>
