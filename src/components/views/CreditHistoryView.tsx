@@ -909,12 +909,12 @@ export function CreditHistoryView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0">
       {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between mb-0">
+      <div className="flex flex-col gap-1 md:gap-3 md:flex-row md:items-start md:justify-between mb-0">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Credit Management
           </h1>
-          <p className="mt-2 mb-4 text-muted-foreground">
+          <p className="mt-1 md:mt-2 mb-2 md:mb-4 text-muted-foreground">
             Manage your credits and view transaction history
           </p>
         </div>
