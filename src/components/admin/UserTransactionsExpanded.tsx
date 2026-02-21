@@ -743,9 +743,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="bg-muted/30 overflow-hidden max-w-full">
+    <div className="bg-muted/30 max-w-full" style={{ overflowX: 'clip' }}>
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
-        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 flex-wrap max-w-full">
+        <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 w-max min-w-full">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             return (
@@ -759,10 +760,12 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             );
           })}
         </TabsList>
+        </div>
 
         {/* Sub-tabs for Earnings */}
         {activeType === 'earnings' && (
-          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
+          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex w-max min-w-full">
             {earningsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -781,11 +784,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               );
             })}
           </div>
+          </div>
         )}
 
         {/* Sub-tabs for Purchases */}
         {activeType === 'purchases' && (
-          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
+          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex w-max min-w-full">
             {purchasesSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -804,11 +809,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               );
             })}
           </div>
+          </div>
         )}
 
         {/* Sub-tabs for System */}
         {activeType === 'system' && (
-          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
+          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex w-max min-w-full">
             {systemSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -827,11 +834,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               );
             })}
           </div>
+          </div>
         )}
 
         {/* Sub-tabs for Withdrawals */}
         {activeType === 'withdrawals' && (
-          <div className="flex flex-wrap bg-foreground/90 border-t border-white/10">
+          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex w-max min-w-full">
             {withdrawalsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
               return (
@@ -849,6 +858,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 </button>
               );
             })}
+          </div>
           </div>
         )}
 
