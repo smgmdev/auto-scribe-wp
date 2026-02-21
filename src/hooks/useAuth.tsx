@@ -486,10 +486,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // If the same user is already fully loaded, skip re-processing.
         // This prevents tab-switch SIGNED_IN events from causing full re-renders.
-        if (event === 'SIGNED_IN' && newUserId && newUserId === previousUserIdRef.current && user) {
+        // Use refs (not state) to avoid stale closure issues.
+        if (event === 'SIGNED_IN' && newUserId && newUserId === previousUserIdRef.current && initialLoadDoneRef.current) {
+          const oldToken = accessTokenRef.current;
           accessTokenRef.current = newSession?.access_token ?? null;
           // Only update session object if token actually changed
-          if (newSession && newSession.access_token !== session?.access_token) {
+          if (newSession && newSession.access_token !== oldToken) {
             setSession(newSession);
           }
           console.log('[Auth] Skipping redundant SIGNED_IN for same user on tab focus');
