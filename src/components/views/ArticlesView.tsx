@@ -29,7 +29,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function ArticlesView() {
-  const { setEditingArticle, setCurrentView } = useAppStore();
+  const { setEditingArticle, setCurrentView, articlesTargetTab, setArticlesTargetTab } = useAppStore();
   const { sites } = useSites();
   const { 
     articles, 
@@ -47,7 +47,15 @@ export function ArticlesView() {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  const [activeTab, setActiveTab] = useState('published');
+  const [activeTab, setActiveTab] = useState(articlesTargetTab || 'published');
+  
+  // Consume and clear target tab on mount
+  useEffect(() => {
+    if (articlesTargetTab) {
+      setActiveTab(articlesTargetTab);
+      setArticlesTargetTab(null);
+    }
+  }, [articlesTargetTab, setArticlesTargetTab]);
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
