@@ -1626,6 +1626,17 @@ export function CreditHistoryView() {
                             </div>
                             {(transaction.order_id || transaction.metadata?.wp_link) && (
                               <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                                {transaction.order_id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOrderCompletedClick(transaction.order_id!, transaction.type);
+                                    }}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
+                                  >
+                                    View Order Details →
+                                  </button>
+                                )}
                                 {transaction.metadata?.wp_link && (
                                   <a
                                     href={transaction.metadata.wp_link}
@@ -1636,17 +1647,6 @@ export function CreditHistoryView() {
                                   >
                                     View Publication <ArrowRight className="h-3 w-3" />
                                   </a>
-                                )}
-                                {transaction.order_id && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOrderCompletedClick(transaction.order_id!, transaction.type);
-                                    }}
-                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                  >
-                                    View Transaction Details <ArrowRight className="h-3 w-3" />
-                                  </button>
                                 )}
                               </div>
                             )}
@@ -1969,70 +1969,83 @@ export function CreditHistoryView() {
                             </div>
                            ) : transaction.type === 'publish' ? (
                            /* Instant Publishing - Show media channel and publication link */
-                             <>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
-                                <div>
-                                  <span className="text-muted-foreground">Media Channel:</span>
-                                  {publishDetails[transaction.id] ? (
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      {(publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon) && (
-                                        <img src={publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                      )}
-                                      <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                      <p className="font-medium">
-                                        {(() => {
-                                          const siteMatch = transaction.description?.match(/Published article to (.+)/);
-                                          return siteMatch ? siteMatch[1] : 'Unknown';
-                                        })()}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Amount:</span>
-                                  <p className="font-medium text-foreground">
-                                    {Math.abs(transaction.amount).toLocaleString()} credits
-                                  </p>
-                                </div>
-                                <div>
-                                   <span className="text-muted-foreground">Published:</span>
-                                   <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                              <>
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                                 <div>
+                                   <span className="text-muted-foreground">Media Site:</span>
+                                   {publishDetails[transaction.id] ? (
+                                     <div className="flex items-center gap-2 mt-0.5">
+                                       {(publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon) && (
+                                         <img src={publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                       )}
+                                       <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
+                                     </div>
+                                   ) : (
+                                     <div className="flex items-center gap-2 mt-0.5">
+                                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                       <p className="font-medium">
+                                         {(() => {
+                                           const siteMatch = transaction.description?.match(/Published article to (.+)/);
+                                           return siteMatch ? siteMatch[1] : 'Unknown';
+                                         })()}
+                                       </p>
+                                     </div>
+                                   )}
                                  </div>
                                  <div>
-                                    <span className="text-muted-foreground">Published URL:</span>
-                                    {publishDetails[transaction.id]?.site_url ? (
-                                      <a
-                                        href={publishDetails[transaction.id].site_url.startsWith('http') ? publishDetails[transaction.id].site_url : `https://${publishDetails[transaction.id].site_url}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="font-medium text-blue-500 hover:text-blue-600 hover:underline break-all block mt-0.5"
-                                      >
-                                        {publishDetails[transaction.id].site_url}
-                                      </a>
-                                    ) : (
-                                      <p className="font-medium text-muted-foreground mt-0.5">—</p>
-                                    )}
+                                   <span className="text-muted-foreground">Order Value:</span>
+                                   <p className="font-medium">
+                                     {(() => {
+                                       const commPct = transaction.metadata?.commission_percentage;
+                                       if (commPct != null && commPct > 0) {
+                                         const netAmount = Math.abs(transaction.amount);
+                                         const orderValue = Math.round(netAmount / (1 + commPct / 100));
+                                         return `${orderValue.toLocaleString()} credits`;
+                                       }
+                                       return `${Math.abs(transaction.amount).toLocaleString()} credits`;
+                                     })()}
+                                   </p>
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">Platform Fee:</span>
+                                   <p className="font-medium">
+                                     {(() => {
+                                       const commPct = transaction.metadata?.commission_percentage;
+                                       if (commPct != null && commPct > 0) {
+                                         const netAmount = Math.abs(transaction.amount);
+                                         const orderValue = Math.round(netAmount / (1 + commPct / 100));
+                                         const fee = netAmount - orderValue;
+                                         return `${fee.toLocaleString()} credits (${commPct}%)`;
+                                       }
+                                       return '0 credits';
+                                     })()}
+                                   </p>
+                                 </div>
+                                 <div>
+                                   <span className="text-muted-foreground">Net Amount:</span>
+                                   <p className="font-medium text-red-500">
+                                     -{Math.abs(transaction.amount).toLocaleString()} credits
+                                   </p>
+                                 </div>
+                                 <div>
+                                    <span className="text-muted-foreground">Published:</span>
+                                    <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                   </div>
                                </div>
-                               {publishDetails[transaction.id]?.wp_link && (
-                                 <div className="mt-3 pt-3 border-t border-border/50">
+                               <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                                 {publishDetails[transaction.id]?.wp_link && (
                                    <a
-                                     href={publishDetails[transaction.id].wp_link}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     onClick={(e) => e.stopPropagation()}
-                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1"
-                                   >
-                                     View Publication →
-                                   </a>
-                                 </div>
-                               )}
-                             </>
+                                      href={publishDetails[transaction.id].wp_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
+                                    >
+                                      View Publication <ArrowRight className="h-3 w-3" />
+                                    </a>
+                                 )}
+                                </div>
+                              </>
                            ) : (
                            /* Other transaction types - Show standard details */
                              <>
