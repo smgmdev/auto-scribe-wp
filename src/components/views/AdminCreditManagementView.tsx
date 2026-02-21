@@ -648,9 +648,11 @@ export const AdminCreditManagementView = () => {
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
                                         <div className="space-y-1">
-                                          <p className="font-medium mb-1">Completed orders</p>
-                                          <p><span className="opacity-70">Completed Purchase Orders:</span> {(user.purchaseOrders || 0).toLocaleString()}</p>
-                                          <p><span className="opacity-70">Completed Agency Delivery Orders:</span> {(user.deliveryOrders || 0).toLocaleString()}</p>
+                                          <p className="font-medium mb-1">Completed Orders</p>
+                                          <p><span className="opacity-70">B2B Media Purchase Orders:</span> {(user.purchaseOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">B2B Media Delivery Orders:</span> {(user.deliveryOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Instant Publishing Purchase Orders:</span> {(user.instantPublishOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Instant Publishing Delivery Orders:</span> {(user.instantPublishDeliveryOrders || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
