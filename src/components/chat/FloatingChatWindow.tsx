@@ -6793,19 +6793,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     className="rounded-none border-0 flex-1 h-10 text-sm sm:text-base"
                     onFocus={() => {
                       // Mark as read immediately when user clicks the input field
-                      useAppStore.getState().setFocusedChatId(chat.request.id);
+                      const store = useAppStore.getState();
+                      store.setFocusedChatId(chat.request.id);
                       clearUnreadMessageCount(globalChatRequest.id);
                       clearMinimizedChatUnread(globalChatRequest.id);
                       
                       // Dispatch read events to clear notification badges in ChatListPanel
+                      // AND decrement sidebar menu item counts
                       if (globalChatType === 'my-request') {
                         window.dispatchEvent(new CustomEvent('my-engagement-updated', {
                           detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
                         }));
+                        // Decrement sidebar "My Engagements" count if currently unread
+                        if (store.userUnreadEngagementsCount > 0) {
+                          store.setUserUnreadEngagementsCount(Math.max(0, store.userUnreadEngagementsCount - 1));
+                        }
                       } else if (globalChatType === 'agency-request') {
                         window.dispatchEvent(new CustomEvent('service-request-updated', {
                           detail: { id: globalChatRequest.id, read: true, unreadCount: 0 }
                         }));
+                        // Decrement sidebar "Service Requests" count if currently unread
+                        if (store.agencyUnreadServiceRequestsCount > 0) {
+                          store.setAgencyUnreadServiceRequestsCount(Math.max(0, store.agencyUnreadServiceRequestsCount - 1));
+                        }
                       }
                       
                       // Also update database read status
