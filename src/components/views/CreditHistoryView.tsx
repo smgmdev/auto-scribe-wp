@@ -1542,7 +1542,7 @@ export function CreditHistoryView() {
                 {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
               </p>
               <p className="text-lg font-bold text-foreground">
-                ${(tabFilteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                -${(tabFilteredTransactions.filter(tx => tx.type === 'withdrawal_completed').reduce((sum, tx) => sum + Math.abs(tx.amount), 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           )}
