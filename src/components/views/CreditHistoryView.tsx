@@ -1508,13 +1508,41 @@ export function CreditHistoryView() {
           {/* Earnings summary card */}
           {activeType === 'earnings' && (
             <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                  {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
+              </p>
               <p className="text-lg font-bold text-green-600">
                 +{tabFilteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+              </p>
+            </div>
+          )}
+          {activeType === 'purchases' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                {purchasesSubTab === 'purchases_b2b' ? 'B2B Media Purchases' : purchasesSubTab === 'purchases_instant' ? 'Instant Publishing Purchases' : 'Total Purchases'}
+              </p>
+              <p className="text-lg font-bold text-foreground">
+                -{tabFilteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
+              </p>
+            </div>
+          )}
+          {activeType === 'system' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
+              </p>
+              <p className="text-lg font-bold text-muted-foreground">
+                {tabFilteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
+              </p>
+            </div>
+          )}
+          {activeType === 'withdrawals' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                {withdrawalsSubTab === 'withdrawal_locked' ? 'Pending Withdrawals' : withdrawalsSubTab === 'withdrawal_completed' ? 'Completed Withdrawals' : withdrawalsSubTab === 'withdrawal_unlocked' ? 'Rejected Withdrawals' : 'Total Withdrawals'}
+              </p>
+              <p className="text-lg font-bold text-foreground">
+                {tabFilteredTransactions.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
               </p>
             </div>
           )}
