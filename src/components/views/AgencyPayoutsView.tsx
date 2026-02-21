@@ -782,7 +782,7 @@ export function AgencyPayoutsView() {
                             <div className="pt-2 space-y-3 text-sm">
                               <div>
                                 <span className="text-muted-foreground">Order:</span>
-                                <p className="font-semibold text-foreground">Instant Publishing</p>
+                                <p className="text-foreground">Instant Publishing</p>
                               </div>
                               <div className="pt-2 border-t border-border/30 space-y-1">
                                 {wpLink && (
