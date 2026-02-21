@@ -1380,7 +1380,7 @@ export function CreditHistoryView() {
 
 
       {/* Transactions List */}
-      <Card className="rounded-none sm:rounded-lg border-x-0 sm:border-x">
+      <Card className="rounded-none border-0 shadow-none">
         <CardHeader className="px-0 sm:px-0 pb-0 pt-0 space-y-0">
           <CardTitle className="text-lg bg-foreground text-background px-3 py-2">Transaction History</CardTitle>
           {/* Tab filters */}
