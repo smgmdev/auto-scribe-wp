@@ -743,7 +743,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="bg-muted/30 max-w-full">
+    <div className="bg-muted/30 w-0 min-w-full">
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
         <div className="overflow-x-auto scrollbar-hide overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
         <TabsList className="inline-flex justify-start h-auto gap-0 bg-foreground p-0 w-max min-w-full">

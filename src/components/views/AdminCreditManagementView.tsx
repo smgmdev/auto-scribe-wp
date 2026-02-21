@@ -487,7 +487,7 @@ export const AdminCreditManagementView = () => {
                 </div>
               </div>
               <div className="w-full">
-              <table className="w-full caption-bottom text-sm">
+              <table className="w-full caption-bottom text-sm table-fixed">
                 <TableHeader>
                 <TableRow>
                     <TableHead>Email</TableHead>
