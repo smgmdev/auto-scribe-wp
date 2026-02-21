@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X, GripHorizontal, Pencil } from 'lucide-react';
+import { Library, Loader2, Plus, Globe, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Copy, HelpCircle, MoreVertical, Unplug, Plug, Trash2, DollarSign, X, GripHorizontal, Pencil, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -125,6 +125,7 @@ export function AgencyMediaView() {
   const [mediaSubTab, setMediaSubTab] = useState('added');
   const [isWPDialogOpen, setIsWPDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Price change dialog state
   const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
@@ -994,10 +995,10 @@ export function AgencyMediaView() {
             Manage your listed media sites and channels
           </p>
         </div>
-        <div className="w-full md:w-auto">
+        <div className="flex w-full md:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="group w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all">
+              <Button className="group flex-1 md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all rounded-r-none border-r-0">
                 Add Media
                 <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </Button>
@@ -1019,6 +1020,22 @@ export function AgencyMediaView() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button
+            onClick={async () => {
+              setIsRefreshing(true);
+              await fetchData();
+              setIsRefreshing(false);
+            }}
+            disabled={isRefreshing}
+            className={`gap-2 border border-black rounded-l-none transition-all duration-200 ${
+              isRefreshing 
+                ? 'bg-transparent text-black' 
+                : 'bg-black text-white hover:bg-transparent hover:text-black'
+            }`}
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
       </div>
 
