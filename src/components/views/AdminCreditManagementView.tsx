@@ -645,7 +645,7 @@ export const AdminCreditManagementView = () => {
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
                                           <p className="text-xs text-white/70">Total Spent</p>
-                                          <p className="font-semibold text-white">{(user.totalSpent + user.deductions + user.publishSpent).toLocaleString()}</p>
+                                          <p className="font-semibold text-white">{(user.totalSpent + user.deductions).toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
@@ -653,7 +653,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-medium mb-1">Expenses Breakdown</p>
                                           <div className="flex justify-between gap-4">
                                             <span className="text-white/70">Media Orders:</span>
-                                            <span className="font-semibold text-white">{user.totalSpent.toLocaleString()}</span>
+                                            <span className="font-semibold text-white">{(user.totalSpent - user.publishSpent - (user.usageSpent || 0)).toLocaleString()}</span>
                                           </div>
                                           {user.deductions > 0 && (
                                             <div className="flex justify-between gap-4">
@@ -675,7 +675,7 @@ export const AdminCreditManagementView = () => {
                                           )}
                                           <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
                                             <span className="text-white/70">Total:</span>
-                                            <span className="font-semibold text-white">{(user.totalSpent + user.deductions + user.publishSpent).toLocaleString()}</span>
+                                            <span className="font-semibold text-white">{(user.totalSpent + user.deductions).toLocaleString()}</span>
                                           </div>
                                           {/* Profitability Ratio */}
                                           <div className="pt-2 mt-1 border-t border-white/20 space-y-1">
@@ -686,7 +686,7 @@ export const AdminCreditManagementView = () => {
                                             </div>
                                             <div className="flex justify-between gap-4">
                                               <span className="text-white/70">Total Spent:</span>
-                                              <span className="font-semibold text-red-400">{(user.totalSpent + user.deductions + user.publishSpent) > 0 ? `-${(user.totalSpent + user.deductions + user.publishSpent).toLocaleString()}` : '0'}</span>
+                                              <span className="font-semibold text-red-400">{(user.totalSpent + user.deductions) > 0 ? `-${(user.totalSpent + user.deductions).toLocaleString()}` : '0'}</span>
                                             </div>
                                             <div className="flex justify-between gap-4">
                                               <span className="text-white/70">Total Earnings:</span>
