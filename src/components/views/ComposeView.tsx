@@ -223,9 +223,10 @@ export function ComposeView() {
     return credits >= cost;
   };
 
-  // Get total credit cost
+  // Get total credit cost (editing a published article on the same site is free)
+  const isEditingPublishedArticle = editingArticle?.wpPostId && editingArticle?.publishedTo === selectedSite;
   const getTotalCreditCost = (): number => {
-    if (!selectedSite) return 0;
+    if (!selectedSite || isEditingPublishedArticle) return 0;
     return getSiteCreditCost(selectedSite);
   };
 
@@ -1224,7 +1225,21 @@ export function ComposeView() {
               </div>
             ) : sites.length === 0 ? <p className="text-sm text-muted-foreground">
                 No media sites connected. Add a site first.
-              </p> : <Select
+              </p> : editingArticle?.wpPostId && editingArticle?.publishedTo ? (
+                // Editing a published article — site is locked
+                <div className="flex items-center gap-2 px-3 h-9 w-full md:flex-1 border border-input bg-muted/50 text-sm text-muted-foreground cursor-not-allowed">
+                  {currentSite && (
+                    <>
+                      <img src={currentSite.favicon || getFaviconUrl(currentSite.url, 32)} alt="" className="h-4 w-4 rounded-sm" />
+                      <span className="text-foreground">{currentSite.name}</span>
+                    </>
+                  )}
+                  <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
+                    <Lock className="h-3 w-3" />
+                    <span>Editing is free</span>
+                  </span>
+                </div>
+              ) : <Select
                 value={selectedSite} 
                 onValueChange={(value) => {
                   if (canAffordSite(value)) {
