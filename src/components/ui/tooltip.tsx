@@ -5,9 +5,54 @@ import { cn } from "@/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
 
-const Tooltip = TooltipPrimitive.Root;
+/**
+ * Touch-friendly Tooltip wrapper.
+ * On mobile (touch devices), Radix tooltips only trigger on hover which
+ * doesn't exist. This wrapper adds open/onOpenChange state so a tap on
+ * the trigger toggles the tooltip, and tapping elsewhere dismisses it.
+ */
+const Tooltip = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>
+>(({ children, delayDuration = 0, ...props }, _ref) => {
+  const [open, setOpen] = React.useState(props.defaultOpen ?? false);
 
-const TooltipTrigger = TooltipPrimitive.Trigger;
+  // Merge external open/onOpenChange if provided
+  const isControlled = props.open !== undefined;
+  const isOpen = isControlled ? props.open : open;
+  const onOpenChange = (v: boolean) => {
+    if (!isControlled) setOpen(v);
+    props.onOpenChange?.(v);
+  };
+
+  return (
+    <TooltipPrimitive.Root
+      {...props}
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      delayDuration={delayDuration}
+    >
+      {children}
+    </TooltipPrimitive.Root>
+  );
+}) as React.FC<React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>>;
+
+const TooltipTrigger = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ onClick, ...props }, ref) => {
+  return (
+    <TooltipPrimitive.Trigger
+      ref={ref}
+      onClick={(e) => {
+        // On touch devices, ensure tooltip opens on tap
+        onClick?.(e);
+      }}
+      {...props}
+    />
+  );
+});
+TooltipTrigger.displayName = "TooltipTrigger";
 
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
