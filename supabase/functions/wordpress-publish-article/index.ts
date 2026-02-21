@@ -134,30 +134,8 @@ Deno.serve(async (req) => {
     const { data: approvedSite } = await approvedQuery.maybeSingle();
 
     if (approvedSite) {
-      // Verify ownership: site belongs to caller or caller's agency, or caller is admin
-      if (!isAdmin) {
-        const isGlobalSite = approvedSite.user_id === null;
-        const isDirectOwner = approvedSite.user_id === callerUserId;
-        let isAgencyOwner = false;
-        if (approvedSite.agency) {
-          const { data: agencyData } = await supabase
-            .from('agency_payouts')
-            .select('agency_name')
-            .eq('user_id', callerUserId)
-            .eq('agency_name', approvedSite.agency)
-            .eq('onboarding_complete', true)
-            .eq('downgraded', false)
-            .maybeSingle();
-          isAgencyOwner = !!agencyData;
-        }
-        if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
-          console.error('[wordpress-publish-article] Caller does not own site', { callerUserId, siteId });
-          return new Response(
-            JSON.stringify({ success: false, error: 'Unauthorized: you do not own this site' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      }
+      // All authenticated users can publish to any connected site
+      // (same access model as instant publishing — credits are checked separately)
       site = approvedSite;
     }
 
