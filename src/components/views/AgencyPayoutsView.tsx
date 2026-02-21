@@ -21,6 +21,7 @@ interface CompletedOrder {
   delivery_status: string;
   accepted_at: string | null;
   delivered_at: string | null;
+  delivery_url: string | null;
   created_at: string;
   media_site: {
     name: string;
@@ -244,6 +245,7 @@ export function AgencyPayoutsView() {
             accepted_at,
             delivered_at,
             created_at,
+            delivery_url,
             media_site:media_sites(name, favicon)
           `)
           .in('id', orderIds)
@@ -875,6 +877,18 @@ export function AgencyPayoutsView() {
                                   See transaction details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
+                                {order.delivery_url && (
+                                  <a
+                                    href={order.delivery_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                  >
+                                    View publication
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
                               </div>
                             </div>
                           </div>
