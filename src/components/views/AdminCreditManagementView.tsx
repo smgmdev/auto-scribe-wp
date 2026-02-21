@@ -627,7 +627,7 @@ export const AdminCreditManagementView = () => {
                             className="cursor-pointer hover:bg-muted/50"
                             onClick={() => toggleUserExpanded(user.user_id)}
                           >
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium w-full">
                               <div className="flex items-center gap-2">
                                 {user.email || <span className="text-muted-foreground italic">No email</span>}
                                 {user.validationStatus === 'valid' && (
