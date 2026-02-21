@@ -1408,13 +1408,13 @@ export function CreditHistoryView() {
                   const totalEarnings = transactions
                     .filter(t => t.type === 'order_payout')
                     .reduce((sum, t) => sum + t.amount, 0);
-                  const discrepancy = (totalPurchased + totalEarnings) - totalSpent;
-                  const isPositive = discrepancy >= 0;
+                  const pl = (totalEarnings - totalSpent) - totalPurchased;
+                  const isPositive = pl >= 0;
                   return (
                     <div className="flex justify-between gap-4 pt-1 mt-1 border-t border-background/20">
-                      <span className="text-background/70 font-medium">Discrepancy:</span>
+                      <span className="text-background/70 font-medium">P/L:</span>
                       <span className={`font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                        {isPositive ? '+' : ''}{discrepancy.toLocaleString()}
+                        {isPositive ? '+' : ''}{pl.toLocaleString()}
                       </span>
                     </div>
                   );
