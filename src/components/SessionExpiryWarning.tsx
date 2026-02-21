@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Shield, LogOut } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
@@ -22,8 +22,8 @@ export function SessionExpiryWarning() {
   const [secondsLeft, setSecondsLeft] = useState(60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const checkRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const warningShownForRef = useRef<string | null>(null);
-  const sessionStartRef = useRef<number | null>(null);
+  const warningShownRef = useRef(false);
+  const sessionStartedAtRef = useRef<number | null>(null);
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -32,14 +32,41 @@ export function SessionExpiryWarning() {
     }
   }, []);
 
+  // Fetch session_started_at from DB
+  const fetchSessionStart = useCallback(async () => {
+    if (!session?.user?.id) return null;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('session_started_at')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      if (data?.session_started_at) {
+        return new Date(data.session_started_at).getTime();
+      }
+    } catch (err) {
+      console.error('[SessionExpiry] Failed to fetch session_started_at:', err);
+    }
+    return null;
+  }, [session?.user?.id]);
+
   const handleStayLogged = useCallback(async () => {
     clearCountdown();
     setShowWarning(false);
-    warningShownForRef.current = null;
-    sessionStartRef.current = Date.now(); // Reset session timer
+    warningShownRef.current = false;
 
-    // Refresh the session
+    // Reset session_started_at in DB via the existing RPC
     try {
+      if (session?.user?.id) {
+        const sessionId = session.access_token?.slice(-12) || crypto.randomUUID().slice(0, 12);
+        await supabase.rpc('register_active_session', {
+          _user_id: session.user.id,
+          _session_id: sessionId,
+        });
+        // Update local cache
+        sessionStartedAtRef.current = Date.now();
+      }
+      // Also refresh the auth token
       const { error } = await supabase.auth.refreshSession();
       if (error) {
         console.error('[SessionExpiry] Failed to refresh session:', error);
@@ -49,7 +76,7 @@ export function SessionExpiryWarning() {
       console.error('[SessionExpiry] Error refreshing session:', err);
       await signOut();
     }
-  }, [signOut, clearCountdown]);
+  }, [session?.user?.id, session?.access_token, signOut, clearCountdown]);
 
   const handleLogOut = useCallback(async () => {
     clearCountdown();
@@ -57,25 +84,30 @@ export function SessionExpiryWarning() {
     await signOut();
   }, [signOut, clearCountdown]);
 
-  // Track session start and check expiry
+  // Main check loop - uses DB timestamp
   useEffect(() => {
-    if (!session) {
+    if (!session?.user?.id) {
       setShowWarning(false);
       clearCountdown();
-      sessionStartRef.current = null;
-      warningShownForRef.current = null;
+      sessionStartedAtRef.current = null;
+      warningShownRef.current = false;
       return;
     }
 
-    // Set session start time when session changes
-    if (!sessionStartRef.current || warningShownForRef.current !== session.access_token) {
-      sessionStartRef.current = Date.now();
-    }
+    // Initial fetch of session_started_at
+    fetchSessionStart().then((ts) => {
+      if (ts) sessionStartedAtRef.current = ts;
+    });
 
-    const checkExpiry = () => {
-      if (!sessionStartRef.current) return;
+    const checkExpiry = async () => {
+      // If we don't have a cached value yet, fetch from DB
+      if (!sessionStartedAtRef.current) {
+        const ts = await fetchSessionStart();
+        if (ts) sessionStartedAtRef.current = ts;
+        if (!sessionStartedAtRef.current) return;
+      }
 
-      const elapsed = Date.now() - sessionStartRef.current;
+      const elapsed = Date.now() - sessionStartedAtRef.current;
       const timeUntilExpiry = SESSION_DURATION_MS - elapsed;
 
       // If already expired, sign out immediately
@@ -86,9 +118,9 @@ export function SessionExpiryWarning() {
         return;
       }
 
-      // If within warning window and haven't shown for this session
-      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && warningShownForRef.current !== session.access_token) {
-        warningShownForRef.current = session.access_token;
+      // If within warning window and haven't shown yet for this cycle
+      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && !warningShownRef.current) {
+        warningShownRef.current = true;
         const secs = Math.ceil(timeUntilExpiry / 1000);
         setSecondsLeft(secs);
         setShowWarning(true);
@@ -116,7 +148,7 @@ export function SessionExpiryWarning() {
       if (checkRef.current) clearInterval(checkRef.current);
       clearCountdown();
     };
-  }, [session?.access_token, signOut, clearCountdown]);
+  }, [session?.user?.id, signOut, clearCountdown, fetchSessionStart]);
 
   // Cleanup on unmount
   useEffect(() => {
