@@ -109,6 +109,10 @@ export function ChatListPanel() {
   // Dedup set to prevent double-counting from broadcast + postgres_changes firing for same message
   const processedMessageIdsRef = useRef<Set<string>>(new Set());
   
+  // Track request IDs recently updated by INSERT handler to prevent UPDATE handler from overwriting
+  // Maps request_id -> timestamp of last INSERT-driven update
+  const recentInsertUpdatesRef = useRef<Map<string, number>>(new Map());
+  
   useEffect(() => {
     myEngagementsRef.current = myEngagements;
   }, [myEngagements]);
@@ -1035,6 +1039,12 @@ export function ChatListPanel() {
             const clientReadChanged = old?.client_read !== updated.client_read;
             const statusChanged = old?.status !== updated.status;
             
+            // Skip read-state updates if INSERT handler recently updated this request
+            // This prevents the DB write (client_read: false) from triggering UPDATE
+            // which would race with and overwrite the local state
+            const recentlyUpdatedByInsert = recentInsertUpdatesRef.current.has(updated.id) && 
+              (Date.now() - (recentInsertUpdatesRef.current.get(updated.id) || 0)) < 3000;
+            
             setMyEngagements(prev => {
               // Only close chat if status JUST CHANGED to cancelled (not already cancelled)
               if (statusChanged && updated.status === 'cancelled') {
@@ -1058,6 +1068,10 @@ export function ChatListPanel() {
               const clientReadChanged = old?.client_read !== updated.client_read;
               let newEngagements = prev.map(e => {
                 if (e.id === updated.id) {
+                  // If recently updated by INSERT handler, preserve local read state
+                  if (recentlyUpdatedByInsert && !updated.client_read) {
+                    return { ...e, status: updated.status };
+                  }
                   // Sync client_read to local read state
                   const newRead = clientReadChanged ? updated.client_read : e.read;
                   // If marked as read, also reset unread count to 0
@@ -1072,9 +1086,11 @@ export function ChatListPanel() {
             });
             
             // Recalculate user unread count
-            const currentEngagements = myEngagementsRef.current;
-            const unreadCount = currentEngagements.filter(e => !e.read && e.status !== 'cancelled').length;
-            setUserUnreadEngagementsCount(unreadCount);
+            if (!recentlyUpdatedByInsert) {
+              const currentEngagements = myEngagementsRef.current;
+              const unreadCount = currentEngagements.filter(e => !e.read && e.status !== 'cancelled').length;
+              setUserUnreadEngagementsCount(unreadCount);
+            }
           }
           
           // For service requests: sync agency_read and status
@@ -1084,6 +1100,10 @@ export function ChatListPanel() {
           
           if (isAgencyMatch || existsInServiceRequests) {
             const statusJustChanged = old?.status !== updated.status;
+            
+            // Skip read-state updates if INSERT handler recently updated this request
+            const recentlyUpdatedByInsert = recentInsertUpdatesRef.current.has(updated.id) && 
+              (Date.now() - (recentInsertUpdatesRef.current.get(updated.id) || 0)) < 3000;
             
             setServiceRequests(prev => {
               // Only close chat if status JUST CHANGED to cancelled (not already cancelled)
@@ -1108,6 +1128,10 @@ export function ChatListPanel() {
               const agencyReadChanged = old?.agency_read !== updated.agency_read;
               let newRequests = prev.map(r => {
                 if (r.id === updated.id) {
+                  // If recently updated by INSERT handler, preserve local read state
+                  if (recentlyUpdatedByInsert && !updated.agency_read) {
+                    return { ...r, status: updated.status };
+                  }
                   // Sync agency_read to local read state
                   const newRead = agencyReadChanged ? updated.agency_read : r.read;
                   // If marked as read, also reset unread count to 0
@@ -1122,9 +1146,11 @@ export function ChatListPanel() {
             });
             
             // Recalculate agency unread count
-            const currentRequests = serviceRequestsRef.current;
-            const unreadCount = currentRequests.filter(r => !r.read && r.status !== 'cancelled').length;
-            setAgencyUnreadServiceRequestsCount(unreadCount);
+            if (!recentlyUpdatedByInsert) {
+              const currentRequests = serviceRequestsRef.current;
+              const unreadCount = currentRequests.filter(r => !r.read && r.status !== 'cancelled').length;
+              setAgencyUnreadServiceRequestsCount(unreadCount);
+            }
           }
         }
       )
@@ -1449,6 +1475,10 @@ export function ChatListPanel() {
               // Also mark as read in database
               supabase.from('service_requests').update({ client_read: true, client_last_read_at: new Date().toISOString() }).eq('id', requestId).then(() => {});
             } else {
+              // Mark this request as recently updated by INSERT to prevent UPDATE handler race
+              recentInsertUpdatesRef.current.set(requestId, Date.now());
+              setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
+              
               setMyEngagements(prev => {
                 const updated = prev.map(e => 
                   e.id === requestId 
@@ -1507,6 +1537,10 @@ export function ChatListPanel() {
               // Also mark as read in database
               supabase.from('service_requests').update({ agency_read: true, agency_last_read_at: new Date().toISOString() }).eq('id', requestId).then(() => {});
             } else {
+              // Mark this request as recently updated by INSERT to prevent UPDATE handler race
+              recentInsertUpdatesRef.current.set(requestId, Date.now());
+              setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
+              
               setServiceRequests(prev => {
                 const updated = prev.map(r => 
                   r.id === requestId 

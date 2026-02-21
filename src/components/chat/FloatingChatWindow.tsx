@@ -70,7 +70,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   };
   
   // Debug log incoming order data
-  console.log('[FloatingChatWindow] globalChatRequest.order:', globalChatRequest.order, 'normalized:', normalizeOrder(globalChatRequest.order));
+  // Debug log removed to prevent per-render spam
   
   // Local order state - syncs with prop but can be updated immediately
   const [localOrder, setLocalOrder] = useState<{
