@@ -743,10 +743,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const counts = getTransactionCounts();
 
   return (
-    <div className="bg-muted/30 max-w-full overflow-hidden">
+    <div className="bg-muted/30 max-w-full">
       <Tabs value={activeType} onValueChange={(val) => { setActiveType(val); }}>
-        <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <TabsList className="flex justify-start h-auto gap-0 bg-foreground p-0 w-max min-w-full">
+        <div className="overflow-x-auto scrollbar-hide overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
+        <TabsList className="inline-flex justify-start h-auto gap-0 bg-foreground p-0 w-max min-w-full">
           {transactionTypes.map(type => {
             const count = counts[type.key] || 0;
             return (
@@ -764,7 +764,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Earnings */}
         {activeType === 'earnings' && (
-          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-x-auto scrollbar-hide overscroll-x-contain border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <div className="flex w-max min-w-full">
             {earningsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
@@ -789,7 +789,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Purchases */}
         {activeType === 'purchases' && (
-          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-x-auto scrollbar-hide overscroll-x-contain border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <div className="flex w-max min-w-full">
             {purchasesSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
@@ -814,7 +814,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for System */}
         {activeType === 'system' && (
-          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-x-auto scrollbar-hide overscroll-x-contain border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <div className="flex w-max min-w-full">
             {systemSubTabs.map(sub => {
               const count = counts[sub.key] || 0;
@@ -839,7 +839,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
         {/* Sub-tabs for Withdrawals */}
         {activeType === 'withdrawals' && (
-          <div className="overflow-x-auto scrollbar-hide border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="overflow-x-auto scrollbar-hide overscroll-x-contain border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <div className="flex w-max min-w-full">
             {withdrawalsSubTabs.map(sub => {
               const count = counts[sub.key] || 0;

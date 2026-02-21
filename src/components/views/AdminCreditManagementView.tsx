@@ -486,7 +486,7 @@ export const AdminCreditManagementView = () => {
                   )}
                 </div>
               </div>
-              <div className="w-full overflow-hidden">
+              <div className="w-full">
               <table className="w-full caption-bottom text-sm">
                 <TableHeader>
                 <TableRow>
