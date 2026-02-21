@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy, ExternalLink } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy, ExternalLink, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -1635,7 +1635,7 @@ export function CreditHistoryView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
                                   >
-                                    View publication <ExternalLink className="h-3 w-3" />
+                                    View publication <ArrowRight className="h-3 w-3" />
                                   </a>
                                 )}
                               </div>
@@ -2109,7 +2109,7 @@ export function CreditHistoryView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline transition-colors flex items-center gap-1 w-fit"
                                   >
-                                    View publication <ExternalLink className="h-3 w-3" />
+                                    View publication <ArrowRight className="h-3 w-3" />
                                   </a>
                                 </div>
                               )}
