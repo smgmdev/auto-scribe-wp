@@ -1408,8 +1408,9 @@ export function CreditHistoryView() {
                   const totalEarnings = transactions
                     .filter(t => t.type === 'order_payout')
                     .reduce((sum, t) => sum + t.amount, 0);
-                  const pl = (totalEarnings - totalSpent) - totalPurchased;
-                  const isPositive = pl >= 0;
+                  const netReturn = totalEarnings - totalSpent;
+                  const isPositive = netReturn >= totalPurchased;
+                  const pl = netReturn - totalPurchased;
                   return (
                     <div className="flex justify-between gap-4 pt-1 mt-1 border-t border-background/20">
                       <span className="text-background/70 font-medium">P/L:</span>
