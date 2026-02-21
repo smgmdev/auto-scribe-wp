@@ -307,8 +307,10 @@ export function AgencyPayoutsView() {
     // Calculate summary from completed orders + order_payout transactions
     const orderSales = typedOrders.reduce((sum, o) => sum + (o.amount_cents || 0), 0) / 100;
     const orderEarnings = typedOrders.reduce((sum, o) => sum + (o.agency_payout_cents || 0), 0) / 100;
-    const payoutTxEarnings = payoutTxs.reduce((sum, t) => sum + t.amount, 0);
-    const payoutTxSales = payoutTxs.reduce((sum, t) => sum + (t.metadata?.gross_amount || t.amount), 0);
+    // Only count instant publishing payouts (those with metadata.site_name) to avoid double-counting B2B order payouts
+    const instantPublishTxs = payoutTxs.filter(t => t.metadata?.site_name);
+    const payoutTxEarnings = instantPublishTxs.reduce((sum, t) => sum + t.amount, 0);
+    const payoutTxSales = instantPublishTxs.reduce((sum, t) => sum + (t.metadata?.gross_amount || t.amount), 0);
 
     const totalSales = orderSales + payoutTxSales;
     const totalEarnings = orderEarnings + payoutTxEarnings;
