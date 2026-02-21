@@ -791,7 +791,7 @@ export function AgencyPayoutsView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                   >
-                                    View publication
+                                    View Publication
                                     <ArrowRight className="h-3 w-3" />
                                   </a>
                                 )}
@@ -901,7 +901,7 @@ export function AgencyPayoutsView() {
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                   >
-                                    View publication
+                                    View Publication
                                     <ExternalLink className="h-3 w-3" />
                                   </a>
                                 )}
