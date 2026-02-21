@@ -925,12 +925,9 @@ export function ChatListPanel() {
     const currentMinimizedChats = useAppStore.getState().minimizedChats;
     const currentOpenChats = useAppStore.getState().openChats;
     const isMinimized = currentMinimizedChats.some(c => c.id === request_id);
-    // Check if the chat is actually focused/targeted (not just open in background)
-    // A chat is "targeted" if it's DOM-focused OR is the topmost (highest zIndex) open chat
+    // Only consider messages as "read" if the user has actively focused/clicked into the chat
     const focusedChatId = useAppStore.getState().focusedChatId;
-    const isDialogFocused = focusedChatId === request_id;
-    const isTopmost = currentOpenChats.length > 0 && currentOpenChats.some(c => c.request.id === request_id && c.zIndex === Math.max(...currentOpenChats.map(oc => oc.zIndex)));
-    const isDialogOpen = isDialogFocused || isTopmost;
+    const isDialogOpen = focusedChatId === request_id;
     
     // Determine message source type
     const isFromAgency = sender_type === 'agency';
@@ -1523,10 +1520,9 @@ export function ChatListPanel() {
             return;
           }
           
-          // Check if chat is actually focused/targeted - not just open in background
+          // Only consider messages as "read" if user has actively focused/clicked into chat
           const focusedChatId = useAppStore.getState().focusedChatId;
-          const isDialogFocused = focusedChatId === requestId;
-          const isDialogOpen = isDialogFocused || currentOpenChats.some(c => c.request.id === requestId && c.zIndex === Math.max(...currentOpenChats.map(oc => oc.zIndex)));
+          const isDialogOpen = focusedChatId === requestId;
           
           // For received messages (not own), update last message and increment unread count
           // Only increment if message is from counterparty AND the chat is NOT already open
