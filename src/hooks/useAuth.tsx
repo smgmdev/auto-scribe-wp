@@ -461,7 +461,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   if (expiredUserId) {
                     supabase
                       .from('profiles')
-                      .update({ active_session_id: null } as any)
+                      .update({ active_session_id: null, session_started_at: null } as any)
                       .eq('id', expiredUserId)
                       .then(() => console.log('[Auth] Cleared active_session_id for expired session'));
                   }
@@ -482,7 +482,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (expiredUserId) {
                 supabase
                   .from('profiles')
-                  .update({ active_session_id: null } as any)
+                  .update({ active_session_id: null, session_started_at: null } as any)
                   .eq('id', expiredUserId)
                   .then(() => console.log('[Auth] Cleared active_session_id after recovery error'));
               }
@@ -625,7 +625,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.log('[Auth] Stale active session detected (last online:', lastOnline, '), auto-clearing');
               await supabase
                 .from('profiles')
-                .update({ active_session_id: null } as any)
+                .update({ active_session_id: null, session_started_at: null } as any)
                 .eq('id', existingSession.user.id);
             } else {
               // Another device/browser is actively using this account — kick ourselves
@@ -705,7 +705,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const now = new Date().toISOString();
         await supabase
           .from('profiles')
-          .update({ last_online_at: now, active_session_id: null } as any)
+          .update({ last_online_at: now, active_session_id: null, session_started_at: null } as any)
           .eq('id', user.id);
         // Also update agency_payouts if user is an agency
         await supabase
@@ -773,7 +773,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       };
-      const body = JSON.stringify({ active_session_id: null, last_online_at: new Date().toISOString() });
+      const body = JSON.stringify({ active_session_id: null, session_started_at: null, last_online_at: new Date().toISOString() });
       // Try sendBeacon first (most reliable during unload)
       if (navigator.sendBeacon) {
         const blob = new Blob([body], { type: 'application/json' });
