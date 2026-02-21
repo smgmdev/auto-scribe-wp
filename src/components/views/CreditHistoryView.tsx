@@ -1392,7 +1392,7 @@ export function CreditHistoryView() {
                 <p className="font-medium mb-1">Profitability Ratio</p>
                 <div className="flex justify-between gap-4">
                   <span className="text-background/70">Total Purchased:</span>
-                  <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                  <span className="font-semibold">{totalPurchased.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-background/70">Total Spent:</span>
@@ -1401,7 +1401,7 @@ export function CreditHistoryView() {
                 <div className="flex justify-between gap-4">
                   <span className="text-background/70">Total Earnings:</span>
                   <span className="font-semibold text-green-400">
-                    {transactions.filter(t => t.type === 'order_payout').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
+                    +{transactions.filter(t => t.type === 'order_payout').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
                   </span>
                 </div>
                 {(() => {
