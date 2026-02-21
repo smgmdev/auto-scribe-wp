@@ -7283,7 +7283,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         width={440}
         zIndex={300}
         footer={
-          <div className="flex flex-col-reverse md:flex-row gap-2">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setRevisionDialogOpen(false)}
