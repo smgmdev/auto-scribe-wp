@@ -109,6 +109,7 @@ interface AppState {
   // Media management notifications for admin
   unreadMediaSubmissionsCount: number;
   setUnreadMediaSubmissionsCount: (count: number) => void;
+  incrementUnreadMediaSubmissionsCount: () => void;
   decrementUnreadMediaSubmissionsCount: () => void;
   
   // Admin order management notifications
@@ -348,6 +349,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // Media management notifications
   unreadMediaSubmissionsCount: 0,
   setUnreadMediaSubmissionsCount: (count) => set({ unreadMediaSubmissionsCount: count }),
+  incrementUnreadMediaSubmissionsCount: () => set((state) => ({ 
+    unreadMediaSubmissionsCount: state.unreadMediaSubmissionsCount + 1 
+  })),
   decrementUnreadMediaSubmissionsCount: () => set((state) => ({ 
     unreadMediaSubmissionsCount: Math.max(0, state.unreadMediaSubmissionsCount - 1) 
   })),

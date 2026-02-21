@@ -154,6 +154,7 @@ export function Sidebar({
     setUnreadCustomVerificationsCount,
     unreadMediaSubmissionsCount,
     setUnreadMediaSubmissionsCount,
+    incrementUnreadMediaSubmissionsCount,
     unreadOrdersCount,
     setUnreadOrdersCount,
     incrementUnreadOrdersCount,
@@ -878,7 +879,47 @@ export function Sidebar({
     };
   }, [user?.id, isAdmin]);
 
-  // Real-time subscription for admin orders notifications (new active orders)
+  // Real-time subscription for admin media management notifications (new WP + media site submissions)
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-media-submissions-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'wordpress_site_submissions'
+        },
+        (payload) => {
+          const newSub = payload.new as { status: string; read: boolean };
+          if (newSub.status === 'pending' && !newSub.read) {
+            incrementUnreadMediaSubmissionsCount();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'media_site_submissions'
+        },
+        (payload) => {
+          const newSub = payload.new as { status: string; read: boolean };
+          if (newSub.status === 'pending' && !newSub.read) {
+            incrementUnreadMediaSubmissionsCount();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isAdmin]);
+
   useEffect(() => {
     if (!user || !isAdmin) return;
 
