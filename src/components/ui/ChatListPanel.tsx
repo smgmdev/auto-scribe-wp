@@ -1707,8 +1707,8 @@ export function ChatListPanel() {
         } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
           // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
-          sonnerToast("Staff Action", {
-            description: message || "Staff has taken an action on this engagement.",
+          sonnerToast("Update", {
+            description: message || "There has been an update on this engagement.",
           });
         }
       })
@@ -1798,8 +1798,8 @@ export function ChatListPanel() {
         } else if (action === 'order-cancelled' || action === 'dispute-resolved') {
           // Handled by OrdersView / AgencyRequestsView - no duplicate toast
         } else {
-          sonnerToast("Staff Action", {
-            description: message || "Staff has taken an action on this engagement.",
+          sonnerToast("Update", {
+            description: message || "There has been an update on this engagement.",
           });
         }
       })
