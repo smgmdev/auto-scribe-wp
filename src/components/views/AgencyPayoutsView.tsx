@@ -681,7 +681,7 @@ export function AgencyPayoutsView() {
                       >
                         <div className="relative p-3">
                           <p className={`hidden md:block absolute bottom-3 right-3 text-lg ${getAmountColor()}`}>
-                            {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {withdrawal.status === 'rejected' ? '' : '-'}{withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
                             {getCardIcon()}
@@ -695,7 +695,7 @@ export function AgencyPayoutsView() {
                                 </p>
                               )}
                               <p className={`md:hidden mt-2 text-lg ${getAmountColor()}`}>
-                                {withdrawal.status === 'rejected' ? '' : '-'}{Number.isInteger(withdrawalAmount) ? withdrawalAmount.toLocaleString() : withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                {withdrawal.status === 'rejected' ? '' : '-'}{withdrawalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
@@ -758,7 +758,7 @@ export function AgencyPayoutsView() {
                       >
                         <div className="relative p-3">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
-                            +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            +{earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
                             <ArrowUpCircle className="h-5 w-5 text-green-500" />
@@ -770,7 +770,7 @@ export function AgencyPayoutsView() {
                                 Order: Instant Publishing
                               </p>
                               <p className="md:hidden mt-2 text-lg text-green-500">
-                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                +{earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
@@ -830,7 +830,7 @@ export function AgencyPayoutsView() {
                       >
                         <div className="relative p-3">
                           <p className="hidden md:block absolute bottom-3 right-3 text-lg text-green-500">
-                            +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            +{earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <div className="flex items-start gap-3 md:pr-24">
                             <ArrowUpCircle className="h-5 w-5 text-green-500" />
@@ -854,7 +854,7 @@ export function AgencyPayoutsView() {
                                 </button>
                               </div>
                               <p className="md:hidden mt-2 text-lg text-green-500">
-                                +{Number.isInteger(earningsAmount) ? earningsAmount.toLocaleString() : earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                +{earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
