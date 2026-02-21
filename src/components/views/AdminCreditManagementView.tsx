@@ -670,15 +670,7 @@ export const AdminCreditManagementView = () => {
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
-                                    <Tooltip delayDuration={100}>
-                                      <TooltipTrigger asChild>
-                                        <div className="text-left cursor-help">
-                                          <p className="text-xs text-white/70">Deductions</p>
-                                          <p className="font-semibold text-red-400">{user.deductions.toLocaleString()}</p>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Administration fees.</TooltipContent>
-                                    </Tooltip>
+                                    
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
