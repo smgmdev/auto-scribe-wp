@@ -132,27 +132,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (approvedSite) {
-      if (!isAdmin) {
-        const isGlobalSite = approvedSite.user_id === null;
-        const isDirectOwner = approvedSite.user_id === callerUserId;
-        let isAgencyOwner = false;
-        if (approvedSite.agency) {
-          const { data: agencyData } = await supabase
-            .from('agency_payouts')
-            .select('agency_name')
-            .eq('user_id', callerUserId)
-            .eq('agency_name', approvedSite.agency)
-            .eq('onboarding_complete', true)
-            .eq('downgraded', false)
-            .maybeSingle();
-          isAgencyOwner = !!agencyData;
-        }
-        if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
-          return new Response(JSON.stringify({ error: 'Unauthorized: you do not own this site' }), {
-            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-      }
+      // All authenticated users can upload media to any connected site
+      // (same access model as instant publishing — credits are checked at publish time)
       site = approvedSite;
     }
 
