@@ -925,8 +925,9 @@ export function ChatListPanel() {
     const currentMinimizedChats = useAppStore.getState().minimizedChats;
     const currentOpenChats = useAppStore.getState().openChats;
     const isMinimized = currentMinimizedChats.some(c => c.id === request_id);
-    // Check if any open chat matches this request_id
-    const isDialogOpen = currentOpenChats.some(c => c.request.id === request_id);
+    // Check if the chat is actually focused/targeted (not just open)
+    const focusedChatId = useAppStore.getState().focusedChatId;
+    const isDialogOpen = focusedChatId === request_id;
     
     // Determine message source type
     const isFromAgency = sender_type === 'agency';
@@ -1509,8 +1510,9 @@ export function ChatListPanel() {
             return;
           }
           
-          // Check if chat dialog is open - use fresh state from store
-          const isDialogOpen = currentOpenChats.some(c => c.request.id === requestId);
+          // Check if chat is actually focused/targeted - not just open
+          const focusedChatId = useAppStore.getState().focusedChatId;
+          const isDialogOpen = focusedChatId === requestId;
           
           // For received messages (not own), update last message and increment unread count
           // Only increment if message is from counterparty AND the chat is NOT already open

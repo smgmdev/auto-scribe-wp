@@ -260,6 +260,10 @@ interface AppState {
   updateChatPosition: (requestId: string, position: { x: number; y: number }) => void;
   updateGlobalChatRequest: (updates: Partial<GlobalChatRequest>, requestId?: string) => void;
   
+  // Focused/targeted chat (input focused - only this chat suppresses unread)
+  focusedChatId: string | null;
+  setFocusedChatId: (id: string | null) => void;
+  
   // Sound toggle
   soundEnabled: boolean;
   toggleSound: () => void;
@@ -651,7 +655,8 @@ export const useAppStore = create<AppState>()((set) => ({
           openChats: [],
           globalChatOpen: false,
           globalChatRequest: null,
-          globalChatType: null
+          globalChatType: null,
+          focusedChatId: null
         };
       }
       // Close the most recently focused chat
@@ -661,7 +666,8 @@ export const useAppStore = create<AppState>()((set) => ({
         openChats: remaining,
         globalChatOpen: remaining.length > 0,
         globalChatRequest: remaining.length > 0 ? remaining[remaining.length - 1].request : null,
-        globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null
+        globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null,
+        focusedChatId: state.focusedChatId === sorted[0].request.id ? null : state.focusedChatId
       };
     }
     // Close specific chat
@@ -670,14 +676,16 @@ export const useAppStore = create<AppState>()((set) => ({
       openChats: remaining,
       globalChatOpen: remaining.length > 0,
       globalChatRequest: remaining.length > 0 ? remaining[remaining.length - 1].request : null,
-      globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null
+      globalChatType: remaining.length > 0 ? remaining[remaining.length - 1].type : null,
+      focusedChatId: state.focusedChatId === requestId ? null : state.focusedChatId
     };
   }),
   closeAllChats: () => set({
     openChats: [],
     globalChatOpen: false,
     globalChatRequest: null,
-    globalChatType: null
+    globalChatType: null,
+    focusedChatId: null
   }),
   focusChat: (requestId) => set((state) => {
     const maxZ = Math.max(...state.openChats.map(c => c.zIndex), 0);
@@ -712,6 +720,10 @@ export const useAppStore = create<AppState>()((set) => ({
       globalChatRequest: updatedRequest
     };
   }),
+  
+  // Focused/targeted chat
+  focusedChatId: null,
+  setFocusedChatId: (id) => set({ focusedChatId: id }),
   
   // Support ticket notifications (admin)
   unreadSupportTicketsCount: 0,
