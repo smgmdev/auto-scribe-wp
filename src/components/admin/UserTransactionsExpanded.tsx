@@ -857,7 +857,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <TableHeader>
               <TableRow className="h-6 !border-b border-border">
                 <TableHead className="w-10 py-0"></TableHead>
-                <TableHead className="py-0">Type</TableHead>
                 <TableHead className="py-0">Description</TableHead>
                 <TableHead className="text-right py-0">Amount</TableHead>
               </TableRow>
@@ -867,14 +866,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                 Array.from({ length: 3 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : filteredTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                  <TableCell colSpan={3} className="text-center text-muted-foreground py-6">
                     No transactions found
                   </TableCell>
                 </TableRow>
@@ -905,9 +903,9 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                             <ArrowDownCircle className="h-4 w-4 text-destructive" />
                           )}
                         </TableCell>
-                        <TableCell>{getTypeBadge(tx.type)}</TableCell>
                         <TableCell className="max-w-md">
                           <div className="flex flex-col gap-0.5">
+                            <div>{getTypeBadge(tx.type)}</div>
                             <span className="text-muted-foreground break-words">
                               {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
                                 tx.description?.includes('Bank Transfer') 
@@ -969,7 +967,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                       </TableRow>
                       {isExpanded && (
                         <TableRow key={`${tx.id}-details`}>
-                          <TableCell colSpan={4} className="bg-muted/20 p-4">
+                          <TableCell colSpan={3} className="bg-muted/20 p-4">
                             {renderExpandedDetails(tx)}
                           </TableCell>
                         </TableRow>
