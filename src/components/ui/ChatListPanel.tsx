@@ -106,6 +106,9 @@ export function ChatListPanel() {
   const serviceRequestsRef = useRef<ChatItem[]>([]);
   const disputesRef = useRef<DisputeItem[]>([]);
   
+  // Dedup set to prevent double-counting from broadcast + postgres_changes firing for same message
+  const processedMessageIdsRef = useRef<Set<string>>(new Set());
+  
   useEffect(() => {
     myEngagementsRef.current = myEngagements;
   }, [myEngagements]);
@@ -1023,75 +1026,22 @@ export function ChatListPanel() {
       playMessageSound(request_id, message);
     }
     
-    // For minimized chats: update the engagement/request state which will sync to minimized chat
-    if (isMinimized && shouldNotify) {
-      console.log('[ChatListPanel] Broadcast: Chat is minimized, updating engagement/request');
-      
-      // Update the underlying engagement/request - the sync effect will update minimized chat
-      if (isMinimizedMyRequest || isMyEngagement) {
-        setMyEngagements(prev => {
-          const updated = prev.map(e => 
-            e.id === request_id 
-              ? { ...e, unreadCount: e.unreadCount + 1, read: false, lastMessage: message, lastMessageTime: new Date().toISOString() }
-              : e
-          );
-          myEngagementsRef.current = updated;
-          return updated;
-        });
-      }
-      if (isMinimizedAgencyRequest || isServiceRequest) {
-        setServiceRequests(prev => {
-          const updated = prev.map(r => 
-            r.id === request_id 
-              ? { ...r, unreadCount: r.unreadCount + 1, read: false, lastMessage: message, lastMessageTime: new Date().toISOString() }
-              : r
-          );
-          serviceRequestsRef.current = updated;
-          return updated;
-        });
-      }
-    } else if (!isDialogOpen && shouldNotify) {
-      // Mark request as unread for the appropriate party in database
+    // Broadcast handler is ONLY responsible for sound + toast notifications.
+    // Unread count increments are handled exclusively by the postgres_changes INSERT handler
+    // to prevent double-counting.
+    if (!isDialogOpen && shouldNotify) {
+      // Show toast for non-open chats
       if (isMyEngagement && (isFromAgency || isFromAdmin)) {
-        setMyEngagements(prev => {
-          const updated = prev.map(e => 
-            e.id === request_id 
-              ? { ...e, unreadCount: e.unreadCount + 1, read: false }
-              : e
-          );
-          myEngagementsRef.current = updated;
-          return updated;
-        });
-        
-        supabase
-          .from('service_requests')
-          .update({ client_read: false })
-          .eq('id', request_id);
-        
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
           description: `Message for "${media_site_name || title}"`,
         });
       } else if (isServiceRequest && (isFromClient || isFromAdmin)) {
-        setServiceRequests(prev => {
-          const updated = prev.map(r => 
-            r.id === request_id 
-              ? { ...r, unreadCount: r.unreadCount + 1, read: false }
-              : r
-          );
-          serviceRequestsRef.current = updated;
-          return updated;
-        });
-        
-        supabase
-          .from('service_requests')
-          .update({ agency_read: false })
-          .eq('id', request_id);
-        
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Client Message', {
           description: `Message for "${media_site_name || title}"`,
         });
       }
     }
+    
     // Refresh the lists to get latest data (non-blocking)
     if (!isMyEngagement && !isServiceRequest) {
       // Only refresh if we didn't already have this in our local state
@@ -1556,6 +1506,8 @@ export function ChatListPanel() {
                 myEngagementsRef.current = updated;
                 return updated;
               });
+              // Mark as unread in database
+              supabase.from('service_requests').update({ client_read: false }).eq('id', requestId).then(() => {});
             }
             // Sync effect will update minimized chat
             
@@ -1612,6 +1564,8 @@ export function ChatListPanel() {
                 serviceRequestsRef.current = updated;
                 return updated;
               });
+              // Mark as unread in database
+              supabase.from('service_requests').update({ agency_read: false }).eq('id', requestId).then(() => {});
             }
             // Sync effect will update minimized chat
             
