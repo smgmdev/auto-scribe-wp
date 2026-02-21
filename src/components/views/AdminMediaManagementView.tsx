@@ -3069,13 +3069,13 @@ export function AdminMediaManagementView() {
           </div>
         }
         footer={
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col md:flex-row md:justify-end gap-2 md:gap-3">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => setIsReviewDialogOpen(false)}
               disabled={isProcessing}
-              className="hover:bg-foreground hover:text-background"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background"
             >
               Cancel
             </Button>
@@ -3084,7 +3084,7 @@ export function AdminMediaManagementView() {
               variant="outline"
               onClick={openTestArticleDialog}
               disabled={isProcessing}
-              className="hover:bg-foreground hover:text-background"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background"
             >
               Test
             </Button>
@@ -3093,16 +3093,17 @@ export function AdminMediaManagementView() {
               variant="outline"
               onClick={handleApprove}
               disabled={isProcessing}
-              className="hover:bg-foreground hover:text-background"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background"
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Approve
             </Button>
             <Button 
               type="button" 
-              variant="destructive"
+              variant="outline"
               onClick={() => setIsWpRejectDialogOpen(true)}
               disabled={isProcessing}
+              className="w-full md:w-auto hover:!bg-transparent hover:!text-destructive hover:!border-destructive"
             >
               Reject
             </Button>
