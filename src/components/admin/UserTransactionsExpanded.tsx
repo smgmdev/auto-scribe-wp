@@ -65,11 +65,11 @@ const transactionTypes = [
   { key: 'purchases', label: 'Purchases' },
   { key: 'system', label: 'System' },
   { key: 'withdrawals', label: 'Withdrawals' },
-  { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
 ];
 
 const withdrawalsSubTabs = [
   { key: 'withdrawals', label: 'All Withdrawals' },
+  { key: 'withdrawal_locked', label: 'Withdrawal Pending' },
   { key: 'withdrawal_completed', label: 'Withdrawal Completed' },
   { key: 'withdrawal_unlocked', label: 'Withdrawal Rejected' },
 ];
@@ -711,7 +711,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
       case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
       case 'system': return processedTransactions.filter(tx => systemTypes.includes(tx.type));
-      case 'withdrawals': return processedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked'].includes(tx.type));
+      case 'withdrawals': return processedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
       default: return processedTransactions.filter(tx => tx.type === effectiveFilter);
     }
   })();
@@ -733,7 +733,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       if (systemTypes.includes(tx.type)) {
         counts['system'] = (counts['system'] || 0) + 1;
       }
-      if (['withdrawal_completed', 'withdrawal_unlocked'].includes(tx.type)) {
+      if (['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type)) {
         counts['withdrawals'] = (counts['withdrawals'] || 0) + 1;
       }
     });
