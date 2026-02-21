@@ -356,7 +356,7 @@ export const AdminCreditManagementView = () => {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[560px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+              <TooltipContent side="bottom" sideOffset={8} className="max-w-[340px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
                 {(() => {
                   const totalEarned = activeUsers.reduce((sum, user) => sum + user.earned, 0);
                   const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
@@ -382,9 +382,9 @@ export const AdminCreditManagementView = () => {
                   const expectedAvailable = totalInflows - totalOutflows;
                   const isAligned = expectedAvailable === totalAvailable;
                   return (
-                    <div className="flex gap-6">
-                      {/* Column 1: Inflows */}
-                      <div className="space-y-1 min-w-[200px]">
+                    <div className="space-y-3 min-w-[280px]">
+                      {/* Row 1: Inflows */}
+                      <div className="space-y-1">
                         <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Inflows</div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Purchased (Online):</span>
@@ -403,8 +403,8 @@ export const AdminCreditManagementView = () => {
                           <span className="font-semibold text-green-400">{totalInflows.toLocaleString()}</span>
                         </div>
                       </div>
-                      {/* Column 2: Outflows */}
-                      <div className="space-y-1 min-w-[200px] border-l border-white/20 pl-4">
+                      {/* Row 2: Outflows */}
+                      <div className="space-y-1 border-t border-white/20 pt-3">
                         <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Total Outflows</div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Media Orders:</span>
@@ -441,8 +441,8 @@ export const AdminCreditManagementView = () => {
                           <span className="font-semibold text-red-400">{totalOutflows.toLocaleString()}</span>
                         </div>
                       </div>
-                      {/* Column 3: Reconciliation */}
-                      <div className="space-y-1 min-w-[200px] border-l border-white/20 pl-4">
+                      {/* Row 3: Reconciliation */}
+                      <div className="space-y-1 border-t border-white/20 pt-3">
                         <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Reconciliation</div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Total In:</span>
@@ -463,8 +463,10 @@ export const AdminCreditManagementView = () => {
                         <div className={`flex items-center gap-2 pt-2 mt-1 border-t border-white/20 ${isAligned ? 'text-green-400' : 'text-red-400'}`}>
                           <span className="text-xs font-semibold">{isAligned ? '✓ Balanced' : `✗ Mismatch (${(totalAvailable - expectedAvailable > 0 ? '+' : '')}${(totalAvailable - expectedAvailable).toLocaleString()})`}</span>
                         </div>
-                        {/* Locked Breakdown */}
-                        <div className="text-white/70 text-xs uppercase tracking-wide pt-2">Locked Breakdown</div>
+                      </div>
+                      {/* Row 4: Locked Breakdown */}
+                      <div className="space-y-1 border-t border-white/20 pt-3">
+                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Locked Breakdown</div>
                         <div className="flex justify-between gap-4">
                           <span className="text-white/70">Order Requests:</span>
                           <span className="font-semibold text-amber-400">{Math.round(totalLockedFromRequests).toLocaleString()}</span>
