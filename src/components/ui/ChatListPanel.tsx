@@ -2090,8 +2090,8 @@ export function ChatListPanel() {
     );
   };
 
-  const myEngagementsUnreadChatsCount = myEngagements.filter(e => e.status !== 'cancelled' && (!e.read || (e.unreadCount || 0) > 0)).length;
-  const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => r.status !== 'cancelled' && (!r.read || (r.unreadCount || 0) > 0)).length;
+  const myEngagementsUnreadChatsCount = myEngagements.filter(e => e.status !== 'cancelled' && !e.read).length;
+  const serviceRequestsUnreadChatsCount = serviceRequests.filter(r => r.status !== 'cancelled' && !r.read).length;
   const totalUnread = isAdmin 
     ? disputes.filter(d => !(d as any).admin_read).length
     : myEngagementsUnreadChatsCount + serviceRequestsUnreadChatsCount;
@@ -2294,9 +2294,9 @@ export function ChatListPanel() {
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
                 >
                   Service Requests
-                  {agencyUnreadServiceRequestsCount > 0 && (
+                  {serviceRequestsUnreadChatsCount > 0 && (
                     <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                      {agencyUnreadServiceRequestsCount}
+                      {serviceRequestsUnreadChatsCount}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -2307,9 +2307,9 @@ export function ChatListPanel() {
                   className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=inactive]:text-foreground text-foreground py-2.5 text-sm font-medium"
                 >
                   My Engagements
-                  {userUnreadEngagementsCount > 0 && (
+                  {myEngagementsUnreadChatsCount > 0 && (
                     <Badge className="ml-1.5 h-4 min-w-[16px] text-[10px] bg-primary text-primary-foreground px-1 rounded-full">
-                      {userUnreadEngagementsCount}
+                      {myEngagementsUnreadChatsCount}
                     </Badge>
                   )}
                 </TabsTrigger>
