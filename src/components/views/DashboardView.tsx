@@ -98,6 +98,13 @@ export function DashboardView() {
   // Real-time active sessions count (admin only)
   const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
   const [recentSessions, setRecentSessions] = useState<{ email: string; last_online_at: string }[]>([]);
+  // Ticker to force re-render of relative times every 10s
+  const [, setSessionTick] = useState(0);
+  useEffect(() => {
+    if (!isAdmin) return;
+    const tickInterval = setInterval(() => setSessionTick(t => t + 1), 10000);
+    return () => clearInterval(tickInterval);
+  }, [isAdmin]);
 
   const fetchActiveSessions = useCallback(async () => {
     if (!isAdmin) return;
