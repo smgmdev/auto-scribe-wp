@@ -2105,6 +2105,8 @@ export function CreditHistoryView() {
                                  )}
                                 </div>
                               </>
+                           ) : isInstantPublishingPayout ? (
+                            null
                            ) : (
                            /* Other transaction types - Show standard details */
                              <>
