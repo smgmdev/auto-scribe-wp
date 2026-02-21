@@ -1408,13 +1408,13 @@ export function CreditHistoryView() {
                   const totalEarnings = transactions
                     .filter(t => t.type === 'order_payout')
                     .reduce((sum, t) => sum + t.amount, 0);
-                  const netProfit = totalEarnings - totalSpent;
-                  const isProfit = netProfit >= 0;
+                  const discrepancy = (totalPurchased + totalEarnings) - totalSpent;
+                  const isPositive = discrepancy >= 0;
                   return (
                     <div className="flex justify-between gap-4 pt-1 mt-1 border-t border-background/20">
-                      <span className="text-background/70 font-medium">{isProfit ? 'Profit:' : 'Loss:'}</span>
-                      <span className={`font-semibold ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
-                        {isProfit ? '+' : ''}{netProfit.toLocaleString()}
+                      <span className="text-background/70 font-medium">Discrepancy:</span>
+                      <span className={`font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                        {isPositive ? '+' : ''}{discrepancy.toLocaleString()}
                       </span>
                     </div>
                   );
