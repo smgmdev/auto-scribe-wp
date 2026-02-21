@@ -25,8 +25,11 @@ export function removePopup(id: string) {
 export function closeTopPopup(): boolean {
   if (stack.length === 0) return false;
   const top = stack[stack.length - 1];
-  top.close();
+  // Remove from stack BEFORE calling close(), because close() triggers
+  // React state updates whose cleanup effects also call removePopup().
+  // If we pop() after close(), we'd remove the NEXT popup in the stack.
   stack.pop();
+  top.close();
   return true;
 }
 
