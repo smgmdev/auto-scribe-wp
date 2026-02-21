@@ -498,7 +498,7 @@ export function DashboardView() {
                 Active Agency
               </Badge>
             ) : (
-            <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
+            <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547] px-3 py-1 whitespace-nowrap" : "bg-white/10 text-white/80 border-white/20 hover:bg-white/10 px-3 py-1 whitespace-nowrap"}>
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
@@ -529,7 +529,7 @@ export function DashboardView() {
               Active Agency
             </Badge>
           ) : (
-            <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547]" : "bg-black text-white border-black hover:bg-black"}>
+            <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547] px-3 py-1 whitespace-nowrap" : "bg-white/10 text-white/80 border-white/20 hover:bg-white/10 px-3 py-1 whitespace-nowrap"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
             </Badge>
           )}
