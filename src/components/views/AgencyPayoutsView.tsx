@@ -767,7 +767,7 @@ export function AgencyPayoutsView() {
                                 Credited: {siteName}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                Order: Instant Publishing
+                                {format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}
                               </p>
                               <p className="md:hidden mt-2 text-lg text-green-500">
                                 +{earningsAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -781,8 +781,7 @@ export function AgencyPayoutsView() {
                           <div className="px-3 pb-3 pt-0 border-t border-border bg-muted/30">
                             <div className="pt-2 space-y-3 text-sm">
                               <div>
-                                <span className="text-muted-foreground">Completed:</span>
-                                <p className="font-medium">{format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}</p>
+                                <span className="text-muted-foreground">Order: Instant Publishing</span>
                               </div>
                               <div className="pt-2 border-t border-border/30 space-y-1">
                                 {wpLink && (
