@@ -443,8 +443,8 @@ export const AdminCreditManagementView = () => {
                           <span className="font-semibold text-red-400">{totalPlatformFees > 0 ? `-${totalPlatformFees.toLocaleString()}` : '0'}</span>
                         </div>
                         <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                          <span className="text-white/70">Balance:</span>
-                          <span className={`font-semibold ${platformBalance >= 0 ? 'text-green-400' : 'text-red-400'}`}>{platformBalance.toLocaleString()}</span>
+                          <span className="text-white/70">Currently Locked Credits:</span>
+                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders + totalLockedFromRequests + totalLockedFromWithdrawals).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
