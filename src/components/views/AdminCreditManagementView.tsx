@@ -22,6 +22,7 @@ type UserCredit = AdminUserCredit;
 export const AdminCreditManagementView = () => {
   // Balances state
   const [userCredits, setUserCredits] = useState<UserCredit[]>([]);
+  const [totalPlatformFees, setTotalPlatformFees] = useState(0);
   const [balancesLoading, setBalancesLoading] = useState(true);
   const [balancesSearchTerm, setBalancesSearchTerm] = useState('');
   // Expanded user rows state
@@ -216,7 +217,7 @@ export const AdminCreditManagementView = () => {
         supabase.from('credit_transactions').select('user_id, amount, type, description'),
         supabase.from('orders').select('user_id, amount_cents')
           .neq('status', 'cancelled').neq('status', 'completed').neq('delivery_status', 'accepted'),
-        supabase.from('orders').select('user_id, amount_cents').eq('delivery_status', 'accepted'),
+        supabase.from('orders').select('user_id, amount_cents, platform_fee_cents').eq('delivery_status', 'accepted'),
         supabase.from('agency_withdrawals').select('user_id, amount_cents, withdrawal_method').eq('status', 'pending'),
       ]);
 
@@ -250,6 +251,10 @@ export const AdminCreditManagementView = () => {
       });
 
       setUserCredits(combined);
+
+      // Compute total platform fees from completed orders
+      const platformFeesSum = (completedOrdersRes.data || []).reduce((sum, o) => sum + ((o as any).platform_fee_cents || 0), 0);
+      setTotalPlatformFees(Math.round(platformFeesSum / 100));
     } catch (error) {
       console.error('Error fetching user credits:', error);
     } finally {
@@ -350,7 +355,7 @@ export const AdminCreditManagementView = () => {
                   </CardContent>
                 </Card>
               </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
+              <TooltipContent side="bottom" sideOffset={8} className="max-w-[560px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg">
                 {(() => {
                   const totalEarned = activeUsers.reduce((sum, user) => sum + user.earned, 0);
                   const totalWithdrawn = activeUsers.reduce((sum, user) => sum + user.withdrawn, 0);
@@ -361,57 +366,86 @@ export const AdminCreditManagementView = () => {
                   const totalLockedFromWithdrawals = activeUsers.reduce((sum, user) => sum + user.lockedFromWithdrawals, 0);
                   const totalPendingBankWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingBankWithdrawals, 0);
                   const totalPendingCryptoWithdrawals = activeUsers.reduce((sum, user) => sum + user.pendingCryptoWithdrawals, 0);
+                  // Platform balance = Total Purchased + Total Earnings - Total Withdrawals - Total Platform Fees
+                  const platformBalance = Math.round(totalPurchased + totalEarned - totalWithdrawn - totalPlatformFees);
                   return (
-                    <div className="space-y-1">
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Earnings:</span>
-                        <span className="font-semibold text-green-400">{totalEarned.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Withdrawals:</span>
-                        <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${Math.round(totalWithdrawn).toLocaleString()}` : '0'}</span>
-                      </div>
-                      <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-                      {totalPendingBankWithdrawals > 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/70">Bank:</span>
-                          <span className="font-semibold text-amber-400">${totalPendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex gap-6">
+                      {/* Column 1: User Credit Breakdown */}
+                      <div className="space-y-1 min-w-[220px]">
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Earnings:</span>
+                          <span className="font-semibold text-green-400">{totalEarned.toLocaleString()}</span>
                         </div>
-                      )}
-                      {totalPendingCryptoWithdrawals > 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/70">USDT:</span>
-                          <span className="font-semibold text-amber-400">${totalPendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Withdrawals:</span>
+                          <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${Math.round(totalWithdrawn).toLocaleString()}` : '0'}</span>
                         </div>
-                      )}
-                      {totalPendingBankWithdrawals === 0 && totalPendingCryptoWithdrawals === 0 && (
-                        <div className="flex justify-between gap-4 pl-2">
-                          <span className="text-white/50">None</span>
+                        <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
+                        {totalPendingBankWithdrawals > 0 && (
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/70">Bank:</span>
+                            <span className="font-semibold text-amber-400">${totalPendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                        )}
+                        {totalPendingCryptoWithdrawals > 0 && (
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/70">USDT:</span>
+                            <span className="font-semibold text-amber-400">${totalPendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                        )}
+                        {totalPendingBankWithdrawals === 0 && totalPendingCryptoWithdrawals === 0 && (
+                          <div className="flex justify-between gap-4 pl-2">
+                            <span className="text-white/50">None</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Purchased:</span>
+                          <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
                         </div>
-                      )}
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Purchased:</span>
-                        <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Spent:</span>
+                          <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Locked in Order Requests:</span>
+                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromRequests).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Locked in Orders:</span>
+                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Locked in Withdrawals:</span>
+                          <span className="font-semibold text-amber-400">{Math.round(totalLockedFromWithdrawals).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+                          <span className="text-white/70">Circulating Credits:</span>
+                          <span className="font-semibold text-green-400">{totalCredits.toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Total Spent:</span>
-                        <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Order Requests:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(totalLockedFromRequests).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Orders:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(totalLockedFromOrders).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/70">Locked in Withdrawals:</span>
-                        <span className="font-semibold text-amber-400">{Math.round(totalLockedFromWithdrawals).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                        <span className="text-white/70">Circulating Credits:</span>
-                        <span className="font-semibold text-green-400">{totalCredits.toLocaleString()}</span>
+                      {/* Column 2: Platform Summary */}
+                      <div className="space-y-1 min-w-[200px] border-l border-white/20 pl-4">
+                        <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Platform Summary</div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Purchased:</span>
+                          <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Earnings:</span>
+                          <span className="font-semibold text-green-400">{totalEarned.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Withdrawals:</span>
+                          <span className="font-semibold text-red-400">{totalWithdrawn > 0 ? `-${Math.round(totalWithdrawn).toLocaleString()}` : '0'}</span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-white/70">Total Platform Fees:</span>
+                          <span className="font-semibold text-green-400">{totalPlatformFees.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
+                          <span className="text-white/70">Balance:</span>
+                          <span className="font-semibold text-green-400">{platformBalance.toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
                   );
