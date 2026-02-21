@@ -2333,6 +2333,17 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             console.log('[FloatingChatWindow] Marked as read:', updateField);
           });
       }
+
+      // Also mark the associated order as read for agency when opening the chat
+      if (actualSenderType === 'agency' && globalChatRequest.order?.id) {
+        supabase
+          .from('orders')
+          .update({ agency_read: true })
+          .eq('id', globalChatRequest.order.id)
+          .then(() => {
+            console.log('[FloatingChatWindow] Marked order as agency_read:', globalChatRequest.order?.id);
+          });
+      }
     }
   }, [globalChatRequest?.id, actualSenderType, senderId]);
 
