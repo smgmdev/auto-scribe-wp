@@ -514,11 +514,14 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     senderIdRef.current = senderId;
   }, [senderId]);
   
-  // Auto-focus input when chat opens
+  // Auto-focus input when chat opens (but don't set focusedChatId - that requires user interaction)
+  const isAutoFocusingRef = useRef(false);
   useEffect(() => {
-    // Small delay to ensure the input is rendered
+    isAutoFocusingRef.current = true;
     const timer = setTimeout(() => {
       inputRef.current?.focus();
+      // Reset after focus event fires
+      setTimeout(() => { isAutoFocusingRef.current = false; }, 50);
     }, 100);
     return () => clearTimeout(timer);
   }, []);
@@ -527,7 +530,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [isChatFocused, setIsChatFocused] = useState(false);
   
   useEffect(() => {
+    isAutoFocusingRef.current = true;
     inputRef.current?.focus();
+    setTimeout(() => { isAutoFocusingRef.current = false; }, 50);
   }, [chat.zIndex]);
   
   // Lock body scroll when chat is focused
@@ -5252,7 +5257,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
         }}
         onFocus={() => {
           setIsChatFocused(true);
-          useAppStore.getState().setFocusedChatId(chat.request.id);
+          // Only set focusedChatId on genuine user interaction, not auto-focus
+          if (!isAutoFocusingRef.current) {
+            useAppStore.getState().setFocusedChatId(chat.request.id);
+          }
         }}
         onBlur={(e) => {
           // Only blur if the new focus target is outside the chat
