@@ -7172,40 +7172,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       )}
 
       {/* Open Dispute Dialog */}
-      <AlertDialog open={disputeDialogOpen} onOpenChange={(open) => {
-        setDisputeDialogOpen(open);
-        if (!open) setDisputeReason('');
-      }}>
-        <AlertDialogContent className="z-[250]">
-          <AlertDialogHeader className="text-left space-y-1 mb-0">
-            <AlertDialogTitle>Open Dispute</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p>
-                This will send a request to the dispute team of Arcana Mace. A staff member will join this chat to help resolve your issue.
-              </p>
-              <p className="text-foreground font-medium">
-                Estimated response time: 6-24 hours
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="pb-4">
-            <Textarea
-              placeholder="Please describe your reason for opening this dispute..."
-              value={disputeReason}
-              onChange={(e) => setDisputeReason(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
+      <DraggablePopup
+        open={disputeDialogOpen}
+        onOpenChange={(open) => {
+          setDisputeDialogOpen(open);
+          if (!open) setDisputeReason('');
+        }}
+        title={<h2 className="text-lg font-semibold leading-none tracking-tight">Open Dispute</h2>}
+        width={440}
+        zIndex={300}
+        footer={
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setDisputeDialogOpen(false); setDisputeReason(''); }}
               disabled={submittingDispute}
               className="transition-all duration-200 hover:bg-black hover:text-white hover:border-black"
             >
               Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
+            </Button>
+            <Button
               disabled={submittingDispute || !disputeReason.trim()}
-              className="bg-black text-white border border-black hover:!bg-transparent hover:text-black hover:border-black transition-all duration-200"
+              className="bg-black text-white border border-black hover:bg-transparent hover:text-black hover:border-black transition-all duration-200"
               onClick={async () => {
                 if (!globalChatRequest?.order?.id || !user || !disputeReason.trim()) return;
                 
@@ -7223,11 +7211,9 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                   
                   if (error) throw error;
                   
-                  // Determine sender type based on who is opening the dispute
                   const isAgencyOpening = globalChatType === 'agency-request';
                   const senderType = isAgencyOpening ? 'agency' : 'client';
                   
-                  // Send auto message with dispute reason
                   const disputeMessageData = {
                     type: 'dispute_opened',
                     reason: disputeReason.trim(),
@@ -7251,7 +7237,6 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     setMessages(prev => [...prev, insertedMsg as ServiceMessage]);
                   }
                   
-                  // If agency opened dispute, notify the client (user) side
                   if (isAgencyOpening) {
                     incrementUserUnreadDisputesCount();
                   }
@@ -7270,10 +7255,25 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             >
               {submittingDispute ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Submit Dispute Request
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            This will send a request to the dispute team of Arcana Mace. A staff member will join this chat to help resolve your issue.
+          </p>
+          <p className="text-sm text-foreground font-medium">
+            Estimated response time: 6-24 hours
+          </p>
+        </div>
+        <Textarea
+          placeholder="Please describe your reason for opening this dispute..."
+          value={disputeReason}
+          onChange={(e) => setDisputeReason(e.target.value)}
+          className="min-h-[100px] mt-3"
+        />
+      </DraggablePopup>
 
       {/* Request Revision Dialog */}
       <DraggablePopup
