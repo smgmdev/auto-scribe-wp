@@ -444,7 +444,7 @@ export function DashboardView() {
           </>
         )}
         <div className="flex justify-between gap-4">
-          <span className="text-white/70">Locked in Order Requests:</span>
+           <span className="text-white/70">Locked in Offer Requests:</span>
           <span className="font-semibold text-amber-400">{Math.round(creditsInPendingRequests).toLocaleString()}</span>
         </div>
         <div className="flex justify-between gap-4">
