@@ -55,7 +55,9 @@ export function ArticlesView() {
       setActiveTab(articlesTargetTab);
       setArticlesTargetTab(null);
     }
-  }, [articlesTargetTab, setArticlesTargetTab]);
+    // Always do a background refresh when this view mounts (e.g. after editing)
+    refreshArticles(false);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
