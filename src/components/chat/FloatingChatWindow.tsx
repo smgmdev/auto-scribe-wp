@@ -921,38 +921,29 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
           return;
         }
         
-        // Fetch agency name from agency_payouts
-        const { data: agencyData } = await supabase
-          .from('agency_payouts')
-          .select('agency_name')
-          .eq('id', requestData.agency_payout_id)
-          .maybeSingle();
+        // Use SECURITY DEFINER RPC to bypass RLS and fetch agency info
+        const { data: agencyInfo } = await supabase
+          .rpc('get_agency_info_by_payout_id', { _payout_id: requestData.agency_payout_id });
         
-        if (agencyData) {
-          // Try to get logo from agency_applications using the agency name
-          const { data: appData } = await supabase
-            .from('agency_applications')
-            .select('logo_url')
-            .eq('agency_name', agencyData.agency_name)
-            .eq('status', 'approved')
-            .maybeSingle();
-          
+        const agencyRow = Array.isArray(agencyInfo) ? agencyInfo[0] : agencyInfo;
+        
+        if (agencyRow?.agency_name) {
           let fullLogoUrl: string | null = null;
-          if (appData?.logo_url) {
+          if (agencyRow.logo_url) {
             // Check if it's already a full URL
-            if (appData.logo_url.startsWith('http')) {
-              fullLogoUrl = appData.logo_url;
+            if (agencyRow.logo_url.startsWith('http')) {
+              fullLogoUrl = agencyRow.logo_url;
             } else {
               // Get public URL from agency-logos bucket
               const { data: urlData } = supabase.storage
                 .from('agency-logos')
-                .getPublicUrl(appData.logo_url);
+                .getPublicUrl(agencyRow.logo_url);
               fullLogoUrl = urlData?.publicUrl || null;
             }
           }
           
           setCounterpartyAgencyInfo({
-            name: agencyData.agency_name,
+            name: agencyRow.agency_name,
             logo_url: fullLogoUrl
           });
         }
