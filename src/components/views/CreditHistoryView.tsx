@@ -1505,6 +1505,15 @@ export function CreditHistoryView() {
           )}
         </CardHeader>
         <CardContent className="px-2 sm:px-6 pt-0">
+          {/* Balance summary for All tab */}
+          {activeType === 'all' && (
+            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
+              <p className="text-lg font-bold text-foreground">
+                {tabFilteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
+              </p>
+            </div>
+          )}
           {/* Earnings summary card */}
           {activeType === 'earnings' && (
             <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
