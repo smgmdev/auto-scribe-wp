@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users } from 'lucide-react';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useArticles } from '@/hooks/useArticles';
@@ -91,6 +92,7 @@ export function DashboardView() {
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [sessionsPopupOpen, setSessionsPopupOpen] = useState(false);
   
   // Agency summary data
   const [agencySummary, setAgencySummary] = useState({
@@ -111,6 +113,7 @@ export function DashboardView() {
   // Real-time active sessions count (admin only)
   const [activeSessionCount, setActiveSessionCount] = useState<number>(0);
   const [recentSessions, setRecentSessions] = useState<{ email: string; session_started_at: string }[]>([]);
+  const [allSessions, setAllSessions] = useState<{ email: string; session_started_at: string }[]>([]);
   // Ticker to force re-render of session durations every second
   const [, setSessionTick] = useState(0);
   useEffect(() => {
@@ -127,10 +130,11 @@ export function DashboardView() {
       .select('email, session_started_at', { count: 'exact' })
       .not('active_session_id', 'is', null)
       .gt('last_online_at', fiveMinAgo)
-      .order('last_online_at', { ascending: false })
-      .limit(5);
+      .order('last_online_at', { ascending: false });
     setActiveSessionCount(count ?? 0);
-    setRecentSessions(data?.map(d => ({ email: d.email || 'Unknown', session_started_at: d.session_started_at || '' })) ?? []);
+    const mapped = data?.map(d => ({ email: d.email || 'Unknown', session_started_at: d.session_started_at || '' })) ?? [];
+    setAllSessions(mapped);
+    setRecentSessions(mapped.slice(0, 5));
   }, [isAdmin]);
 
   useEffect(() => {
@@ -441,33 +445,11 @@ export function DashboardView() {
           {/* Badge on mobile - shown above description */}
           <div className="md:hidden mt-2 flex items-center gap-2">
             {isAdmin && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="cursor-default">
-                    <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
-                      {activeSessionCount}&nbsp;sessions
-                    </Badge>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
-                  {recentSessions.length === 0 ? (
-                    <p className="text-xs text-white/60">No active sessions</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-medium text-white/60 mb-2">Active sessions</p>
-                      {recentSessions.map((s, i) => (
-                        <div key={i} className="flex justify-between gap-3 text-xs">
-                          <span className="truncate">{s.email}</span>
-                          <span className="text-white/50 whitespace-nowrap shrink-0">{formatSessionDuration(s.session_started_at)}</span>
-                        </div>
-                      ))}
-                      {activeSessionCount > 5 && (
-                        <p className="text-xs text-white/40 pt-1">More+</p>
-                      )}
-                    </div>
-                  )}
-                </TooltipContent>
-              </Tooltip>
+              <button type="button" onClick={() => setSessionsPopupOpen(true)}>
+                <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors">
+                  {activeSessionCount}&nbsp;sessions
+                </Badge>
+              </button>
             )}
             {agencyStatusLoading ? (
               <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
@@ -489,33 +471,11 @@ export function DashboardView() {
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
           {isAdmin && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button type="button" className="cursor-default">
-                  <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 whitespace-nowrap">
-                    {activeSessionCount}&nbsp;sessions
-                  </Badge>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black border-white/20 text-white p-3 max-w-[280px]">
-                {recentSessions.length === 0 ? (
-                  <p className="text-xs text-white/60">No active sessions</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-medium text-white/60 mb-2">Active sessions</p>
-                    {recentSessions.map((s, i) => (
-                      <div key={i} className="flex justify-between gap-3 text-xs">
-                        <span className="truncate">{s.email}</span>
-                        <span className="text-white/50 whitespace-nowrap shrink-0">{formatSessionDuration(s.session_started_at)}</span>
-                      </div>
-                    ))}
-                    {activeSessionCount > 5 && (
-                      <p className="text-xs text-white/40 pt-1">More+</p>
-                    )}
-                  </div>
-                )}
-              </TooltipContent>
-            </Tooltip>
+            <button type="button" onClick={() => setSessionsPopupOpen(true)}>
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors">
+                {activeSessionCount}&nbsp;sessions
+              </Badge>
+            </button>
           )}
           {agencyStatusLoading ? (
             <Badge className="bg-transparent text-transparent border-transparent hover:bg-transparent">
@@ -1001,6 +961,45 @@ export function DashboardView() {
         open={buyCreditsOpen} 
         onOpenChange={setBuyCreditsOpen} 
       />
+
+      {/* Active Sessions Popup */}
+      {isAdmin && (
+        <DraggablePopup
+          open={sessionsPopupOpen}
+          onOpenChange={setSessionsPopupOpen}
+          title={
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>Active Sessions</span>
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/10 ml-1">
+                {activeSessionCount}
+              </Badge>
+            </div>
+          }
+          width={420}
+          maxHeight="70vh"
+          className="!bg-black !border-white/20"
+          bodyClassName="!bg-black"
+        >
+          <div className="space-y-1 p-1">
+            {allSessions.length === 0 ? (
+              <p className="text-sm text-white/50 text-center py-8">No active sessions</p>
+            ) : (
+              allSessions.map((s, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0 animate-pulse" />
+                    <span className="text-sm text-white truncate">{s.email}</span>
+                  </div>
+                  <span className="text-sm text-white/50 whitespace-nowrap shrink-0 font-mono">
+                    {formatSessionDuration(s.session_started_at)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </DraggablePopup>
+      )}
 
       </div>
     </div>;
