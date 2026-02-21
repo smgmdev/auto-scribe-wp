@@ -587,16 +587,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single();
           
           const dbSessionId = (currentProfile as any)?.active_session_id;
+          const lastOnline = (currentProfile as any)?.last_online_at;
           
           if (dbSessionId && dbSessionId !== localSessionIdRef.current) {
-            // Another device/browser is actively using this account — kick ourselves
-            console.log('[Auth] Another active session detected on init, kicking this tab');
-            if (isMounted) {
-              initialLoadDoneRef.current = true;
-              setLoading(false);
+            // Check if the existing session is stale (last_online_at older than 35 minutes)
+            const SESSION_STALE_MS = 35 * 60 * 1000; // 35 min (30 min session + 5 min buffer)
+            const isStale = lastOnline && (Date.now() - new Date(lastOnline).getTime() > SESSION_STALE_MS);
+            
+            if (isStale) {
+              // Session is stale — auto-clear it and proceed with login
+              console.log('[Auth] Stale active session detected (last online:', lastOnline, '), auto-clearing');
+              await supabase
+                .from('profiles')
+                .update({ active_session_id: null } as any)
+                .eq('id', existingSession.user.id);
+            } else {
+              // Another device/browser is actively using this account — kick ourselves
+              console.log('[Auth] Another active session detected on init, kicking this tab');
+              if (isMounted) {
+                initialLoadDoneRef.current = true;
+                setLoading(false);
+              }
+              handleSessionKicked();
+              return;
             }
-            handleSessionKicked();
-            return;
           }
           
           // Only re-register if DB doesn't already have our session ID
