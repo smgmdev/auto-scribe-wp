@@ -6371,6 +6371,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                 
                 const showContactWarning = containsContactExchange(msg.message);
                 
+                // Pre-compute message content; skip rendering the bubble wrapper entirely if null
+                const messageContentNode = renderMessageContent(msg, isAdmin ? (msg.sender_type === 'agency' || msg.sender_type === 'admin') : isOwnMessage, quote);
+                if (messageContentNode === null) return null;
+                
                 return (
                   <div key={msg.id} className="w-full min-w-0">
                     <div
@@ -6560,7 +6564,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                           </DropdownMenuContent>
                         </DropdownMenu>
                         </div>
-                        {renderMessageContent(msg, isRightAligned, quote)}
+                        {messageContentNode}
                       </div>
                     </div>
                     {showContactWarning && (
