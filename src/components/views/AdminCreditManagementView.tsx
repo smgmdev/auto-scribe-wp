@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Search, CreditCard, Users, RefreshCw, X, AlertTriangle, CheckCircle2, RotateCw } from 'lucide-react';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
+import { AvailableCreditsTooltipContent } from '@/components/credits/AvailableCreditsTooltipContent';
 import { toast } from 'sonner';
 import {
   type AdminUserCredit,
@@ -572,71 +573,23 @@ export const AdminCreditManagementView = () => {
                                     <Tooltip delayDuration={100}>
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help">
-                                          <p className="text-xs text-white/70">Available Balance</p>
+                                          <p className="text-xs text-white/70">Available Credits</p>
                                           <p className="font-semibold text-green-400">{user.available.toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs max-w-[280px]">
-                                        <div className="space-y-1">
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Earnings:</span>
-                                            <span className="font-semibold text-green-400">{(user.earned || 0).toLocaleString()}</span>
-                                          </div>
-                                          {user.isAgency && (user.b2bEarnings > 0 || user.instantPublishingEarnings > 0) && (
-                                            <>
-                                              <div className="flex justify-between gap-4 pl-2">
-                                                <span className="text-white/50 text-xs">B2B Media Sales:</span>
-                                                <span className="text-white/50 text-xs">{user.b2bEarnings.toLocaleString()}</span>
-                                              </div>
-                                              <div className="flex justify-between gap-4 pl-2">
-                                                <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
-                                                <span className="text-white/50 text-xs">{user.instantPublishingEarnings.toLocaleString()}</span>
-                                              </div>
-                                            </>
-                                          )}
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Withdrawals:</span>
-                                            <span className="font-semibold text-red-400">{user.withdrawn > 0 ? `-${Math.round(user.withdrawn).toLocaleString()}` : '0'}</span>
-                                          </div>
-                                          <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-                                          {user.pendingBankWithdrawals > 0 && (
-                                            <div className="flex justify-between gap-4 pl-2">
-                                              <span className="text-white/70">Bank:</span>
-                                              <span className="font-semibold text-amber-400">${user.pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                            </div>
-                                          )}
-                                          {user.pendingCryptoWithdrawals > 0 && (
-                                            <div className="flex justify-between gap-4 pl-2">
-                                              <span className="text-white/70">USDT:</span>
-                                              <span className="font-semibold text-amber-400">${user.pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                            </div>
-                                          )}
-                                          {user.pendingBankWithdrawals === 0 && user.pendingCryptoWithdrawals === 0 && (
-                                            <div className="flex justify-between gap-4 pl-2">
-                                              <span className="text-white/50">None</span>
-                                            </div>
-                                          )}
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Locked in Order Requests:</span>
-                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromRequests || 0).toLocaleString()}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Locked in Orders:</span>
-                                            <span className="font-semibold text-amber-400">{Math.round(user.lockedFromOrders).toLocaleString()}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Total Purchased:</span>
-                                            <span className="font-semibold text-green-400">{user.purchased.toLocaleString()}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4">
-                                            <span className="text-white/70">Total Spent:</span>
-                                            <span className="font-semibold text-red-400">{user.totalSpent > 0 ? `-${user.totalSpent.toLocaleString()}` : '0'}</span>
-                                          </div>
-                                          <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                                            <span className="text-white/70">Available:</span>
-                                            <span className="font-semibold text-green-400">{user.available.toLocaleString()}</span>
-                                          </div>
-                                        </div>
+                                        <AvailableCreditsTooltipContent
+                                          earnedCredits={user.earned || 0}
+                                          creditsWithdrawn={user.withdrawn || 0}
+                                          withdrawalsByBank={user.pendingBankWithdrawals || 0}
+                                          withdrawalsByCrypto={user.pendingCryptoWithdrawals || 0}
+                                          creditsInPendingRequests={user.lockedFromRequests || 0}
+                                          creditsInOrders={user.lockedFromOrders || 0}
+                                          totalPurchased={user.purchased || 0}
+                                          totalSpent={user.totalSpent || 0}
+                                          availableCredits={user.available || 0}
+                                          isAgency={user.isAgency || false}
+                                        />
                                       </TooltipContent>
                                     </Tooltip>
                                     <Tooltip delayDuration={100}>
