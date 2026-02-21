@@ -2119,7 +2119,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
+                            <span className="font-semibold text-sm text-foreground">${order.amount_cents.toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2210,7 +2210,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
+                            <span className="font-semibold text-sm text-foreground">${order.amount_cents.toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2327,7 +2327,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-medium text-foreground text-sm">${(order.amount_cents / 100).toLocaleString()}</span>
+                            <span className="font-medium text-foreground text-sm">${order.amount_cents.toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -2403,7 +2403,7 @@ export function AgencyRequestsView() {
                             {order.media_site?.publication_format && (
                               <span className="text-xs text-muted-foreground capitalize">{order.media_site.publication_format}</span>
                             )}
-                            <span className="font-semibold text-sm text-foreground">${(order.amount_cents / 100).toLocaleString()}</span>
+                            <span className="font-semibold text-sm text-foreground">${order.amount_cents.toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>

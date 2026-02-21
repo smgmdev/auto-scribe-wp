@@ -198,7 +198,7 @@ export function AdminCreditsView() {
                   </div>
                   <div>
                     <span className="text-muted-foreground">Price: </span>
-                    <span className="font-medium">${(pack.price_cents / 100).toFixed(2)}</span>
+                    <span className="font-medium">${pack.price_cents.toLocaleString()}</span>
                   </div>
                   <div>
                     <span className={pack.active ? 'text-green-500' : 'text-muted-foreground'}>

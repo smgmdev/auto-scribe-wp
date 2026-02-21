@@ -551,7 +551,7 @@ export function AdminAgencyWithdrawalsView() {
           ) : (
             <div className="space-y-0">
               {filteredWithdrawals.map((withdrawal) => {
-                const amount = withdrawal.amount_cents / 100;
+                const amount = withdrawal.amount_cents;
                 
                   return (
                     <div 
@@ -800,7 +800,7 @@ export function AdminAgencyWithdrawalsView() {
                 <p className="font-medium">{selectedWithdrawal.agency_payout?.agency_name}</p>
                 <p className="text-sm text-muted-foreground mt-2">Amount</p>
                 <p className="font-medium text-lg">
-                  ${(selectedWithdrawal.amount_cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${selectedWithdrawal.amount_cents.toLocaleString()}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">Method</p>
                 <p className="font-medium">{selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>

@@ -1594,7 +1594,7 @@ export function AdminFloatingChat({
           const orderRequestData = orderRequestMsg ? parseOrderRequest(orderRequestMsg.message) : null;
           
           // Get credits from ORDER_PLACED, ORDER_REQUEST_ACCEPTED, or ORDER_REQUEST
-          const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || orderRequestData?.price || (orderDetails.amount_cents / 100);
+          const credits = orderPlacedData?.credits_used || orderAcceptedData?.price || orderRequestData?.price || orderDetails.amount_cents;
           // Get special terms from any message type
           const specialTerms = orderPlacedData?.special_terms || orderAcceptedData?.special_terms || orderRequestData?.special_terms;
           // Get media site name from messages or request
@@ -2111,7 +2111,7 @@ export function AdminFloatingChat({
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-semibold">${(orderDetails.amount_cents / 100).toFixed(2)}</span>
+                  <span className="font-semibold">${orderDetails.amount_cents.toLocaleString()}</span>
                 </div>
               </div>
 
