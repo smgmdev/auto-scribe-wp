@@ -12,6 +12,7 @@ import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { WithdrawDialog } from '@/components/agency/WithdrawDialog';
+import { WalletTooltipContent } from '@/components/credits/WalletTooltipContent';
 
 interface CompletedOrder {
   id: string;
@@ -444,46 +445,17 @@ export function AgencyPayoutsView() {
             </Card>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="center" sideOffset={8} className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg">
-            <div className="space-y-1">
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Earnings:</span>
-                <span className="font-semibold text-green-400">${summary.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4 pl-2">
-                <span className="text-white/50 text-xs">B2B Media Sales:</span>
-                <span className="text-white/50 text-xs">${summary.b2bEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4 pl-2">
-                <span className="text-white/50 text-xs">Instant Publishing Sales:</span>
-                <span className="text-white/50 text-xs">${summary.instantPublishingEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Withdrawals:</span>
-                <span className="font-semibold text-red-400">{completedWithdrawalsTotal > 0 ? `-$${completedWithdrawalsTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}</span>
-              </div>
-              <div className="text-white/70 text-xs uppercase tracking-wide pt-1">Pending Withdrawals</div>
-              {pendingBankWithdrawals > 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">Bank:</span>
-                  <span className="font-semibold text-amber-400">${pendingBankWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-              )}
-              {pendingCryptoWithdrawals > 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/70">USDT:</span>
-                  <span className="font-semibold text-amber-400">${pendingCryptoWithdrawals.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-              )}
-              {pendingBankWithdrawals === 0 && pendingCryptoWithdrawals === 0 && (
-                <div className="flex justify-between gap-4 pl-2">
-                  <span className="text-white/50">None</span>
-                </div>
-              )}
-              <div className="flex justify-between gap-4 pt-1 border-t border-white/20">
-                <span className="text-white/70">Wallet Balance:</span>
-                <span className="font-semibold">${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-            </div>
+            <WalletTooltipContent
+              totalEarnings={summary.totalEarnings}
+              b2bEarnings={summary.b2bEarnings}
+              instantPublishingEarnings={summary.instantPublishingEarnings}
+              completedWithdrawals={completedWithdrawalsTotal}
+              pendingBankWithdrawals={pendingBankWithdrawals}
+              pendingCryptoWithdrawals={pendingCryptoWithdrawals}
+              walletBalance={walletBalance}
+              showLocked={false}
+              showPurchasedSpent={false}
+            />
           </TooltipContent>
         </Tooltip>
 

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
+import { AvailableCreditsTooltipContent } from '@/components/credits/AvailableCreditsTooltipContent';
 import { cn } from '@/lib/utils';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -1111,72 +1112,18 @@ export function CreditHistoryView() {
             sideOffset={8}
             className="max-w-[280px] z-[9999] bg-foreground text-background px-4 py-3 text-sm shadow-lg"
           >
-            <div className="space-y-1">
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Earnings:</span>
-                {isAgency ? (
-                  <span className="font-semibold text-green-400">{earnedCredits.toLocaleString()}</span>
-                ) : (
-                  <span className="text-white/50 text-xs">available for agency only</span>
-                )}
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Withdrawals:</span>
-                {isAgency ? (
-                  <span className="font-semibold text-red-400">{creditsWithdrawn > 0 ? `-${Math.round(creditsWithdrawn).toLocaleString()}` : '0'}</span>
-                ) : (
-                  <span className="text-white/50 text-xs">available for agency only</span>
-                )}
-              </div>
-              {isAgency && (
-                <>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-white/70">Pending Withdrawals:</span>
-                    <span className="font-semibold text-amber-400">
-                      {(withdrawalsByBank + withdrawalsByCrypto) > 0
-                        ? `$${(withdrawalsByBank + withdrawalsByCrypto).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : '0'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4 pl-3">
-                    <span className="text-white/50 text-xs">USDT:</span>
-                    <span className="text-xs font-medium text-amber-400/80">
-                      {withdrawalsByCrypto > 0
-                        ? `$${withdrawalsByCrypto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : '0'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4 pl-3">
-                    <span className="text-white/50 text-xs">Bank Transfer:</span>
-                    <span className="text-xs font-medium text-amber-400/80">
-                      {withdrawalsByBank > 0
-                        ? `$${withdrawalsByBank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : '0'}
-                    </span>
-                  </div>
-                </>
-              )}
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked in Offer Requests:</span>
-                <span className="font-semibold text-amber-400">{Math.round(creditsInPendingRequests).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Locked in Orders:</span>
-                <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Purchased:</span>
-                <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-white/70">Total Spent:</span>
-                <span className="font-semibold text-red-400">{totalSpent > 0 ? `-${totalSpent.toLocaleString()}` : '0'}</span>
-              </div>
-              <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
-                <span className="text-white/70">Total Available Credits:</span>
-                <span className="font-semibold text-green-400">{availableCredits.toLocaleString()}</span>
-              </div>
-            </div>
+            <AvailableCreditsTooltipContent
+              earnedCredits={earnedCredits}
+              creditsWithdrawn={creditsWithdrawn}
+              withdrawalsByBank={withdrawalsByBank}
+              withdrawalsByCrypto={withdrawalsByCrypto}
+              creditsInPendingRequests={creditsInPendingRequests}
+              creditsInOrders={creditsInOrders}
+              totalPurchased={totalPurchased}
+              totalSpent={totalSpent}
+              availableCredits={availableCredits}
+              isAgency={isAgency}
+            />
           </TooltipContent>
         </Tooltip>
 
