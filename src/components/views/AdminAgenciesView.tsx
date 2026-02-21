@@ -124,6 +124,7 @@ export function AdminAgenciesView() {
   const [verificationRejectionReason, setVerificationRejectionReason] = useState('');
   const [showVerificationRejectDialog, setShowVerificationRejectDialog] = useState(false);
   const [processingVerification, setProcessingVerification] = useState(false);
+  const [loadingVerificationDocs, setLoadingVerificationDocs] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
   const [agencyToDowngrade, setAgencyToDowngrade] = useState<AgencyPayout | null>(null);
   const [downgradeReason, setDowngradeReason] = useState('');
@@ -580,6 +581,7 @@ export function AdminAgenciesView() {
   const handleOpenVerification = async (verification: CustomVerification, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedVerification(verification);
+    setLoadingVerificationDocs(true);
     
     // Mark as read if not already
     if (!verification.read) {
@@ -628,6 +630,7 @@ export function AdminAgenciesView() {
       }
     }
     setVerificationDocUrls(urls);
+    setLoadingVerificationDocs(false);
   };
   
   const handleViewKycDocument = async (url: string, title: string) => {
@@ -2183,7 +2186,15 @@ export function AdminAgenciesView() {
                       )}
                     </div>
                   </div>
-                  {verificationDocUrls.passport && (
+                  {loadingVerificationDocs && !verificationDocUrls.passport ? (
+                    <div>
+                      <p className="text-muted-foreground mb-1">Passport / ID</p>
+                      <Button variant="outline" size="sm" disabled className="w-full md:w-auto">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </Button>
+                    </div>
+                  ) : verificationDocUrls.passport ? (
                     <div>
                       <p className="text-muted-foreground mb-1">Passport / ID</p>
                       <Button
@@ -2196,7 +2207,7 @@ export function AdminAgenciesView() {
                         View Document
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -2276,7 +2287,15 @@ export function AdminAgenciesView() {
                       )}
                     </div>
                   </div>
-                  {(verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) && (
+                  {loadingVerificationDocs && !verificationDocUrls.company_incorporation && !verificationDocUrls.license && !verificationDocUrls.memorandum && !verificationDocUrls.additional ? (
+                    <div className="md:col-span-2">
+                      <p className="text-muted-foreground mb-1">Company Uploads</p>
+                      <Button variant="outline" size="sm" disabled>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading documents...
+                      </Button>
+                    </div>
+                  ) : (verificationDocUrls.company_incorporation || verificationDocUrls.license || verificationDocUrls.memorandum || verificationDocUrls.additional) ? (
                     <div className="md:col-span-2">
                       <p className="text-muted-foreground mb-1">Company Uploads</p>
                       <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
@@ -2326,7 +2345,7 @@ export function AdminAgenciesView() {
                         )}
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
