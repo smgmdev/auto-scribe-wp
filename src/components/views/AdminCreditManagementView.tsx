@@ -374,8 +374,15 @@ export const AdminCreditManagementView = () => {
                   const agencyAvailable = agencyUsers.reduce((sum, u) => sum + u.available, 0);
                   const regularAvailable = regularUsers.reduce((sum, u) => sum + u.available, 0);
 
-                  const agencyWithdrawable = agencyUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
-                  const regularWithdrawable = regularUsers.reduce((sum, u) => sum + Math.max(0, u.available - u.lockedFromOrders - u.lockedFromRequests), 0);
+                  // Withdraw-able Wallet = Earnings - Withdrawn - Pending Withdrawals - Locked (orders/requests)
+                  const agencyWallet = agencyUsers.reduce((sum, u) => {
+                    const wallet = u.earned - u.withdrawn - u.pendingBankWithdrawals - u.pendingCryptoWithdrawals - u.lockedFromWithdrawals;
+                    return sum + Math.max(0, wallet);
+                  }, 0);
+                  const regularWallet = regularUsers.reduce((sum, u) => {
+                    const wallet = u.earned - u.withdrawn - u.pendingBankWithdrawals - u.pendingCryptoWithdrawals - u.lockedFromWithdrawals;
+                    return sum + Math.max(0, wallet);
+                  }, 0);
 
                   const totalCommission = Math.round(totalPlatformFees / 100);
                   const totalEarnedSafe = totalEarned || 1;
@@ -469,20 +476,20 @@ export const AdminCreditManagementView = () => {
                           </div>
                         </div>
 
-                        {/* Withdrawable */}
+                        {/* Withdraw-able Wallet Credits */}
                         <div className="space-y-1 border-t border-white/20 pt-3">
-                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Withdrawable Credits</div>
+                          <div className="text-white/70 text-xs uppercase tracking-wide pb-1">Withdraw-able Wallet Credits</div>
                           <div className="flex justify-between gap-4">
                             <span className="text-white font-medium text-xs">Total:</span>
-                            <span className="font-semibold text-white text-xs">{fmt(agencyWithdrawable + regularWithdrawable)}</span>
+                            <span className="font-semibold text-white text-xs">{fmt(Math.round(agencyWallet + regularWallet))}</span>
                           </div>
                           <div className="flex justify-between gap-4 pl-2">
                             <span className="text-white/50 text-xs">Agencies:</span>
-                            <span className="text-xs font-medium text-white/80">{fmt(agencyWithdrawable)}</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(Math.round(agencyWallet))}</span>
                           </div>
                           <div className="flex justify-between gap-4 pl-2">
                             <span className="text-white/50 text-xs">Users:</span>
-                            <span className="text-xs font-medium text-white/80">{fmt(regularWithdrawable)}</span>
+                            <span className="text-xs font-medium text-white/80">{fmt(Math.round(regularWallet))}</span>
                           </div>
                         </div>
 
