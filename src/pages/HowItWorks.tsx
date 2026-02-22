@@ -733,7 +733,6 @@ const ScrollColorSection = ({
             <a href="/help/ai-security-supervision#overview" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d2218]">
               <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
                 <div className="flex items-center gap-3">
-                  <Shield className="w-10 h-10 text-[#30d158] flex-shrink-0" />
                   <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Security<br />Supervision</h3>
                 </div>
               </div>
