@@ -269,7 +269,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Single-session enforcement: watch for active_session_id changes
   useEffect(() => {
     if (!user) {
-      sessionKickedRef.current = false;
+      // Don't reset sessionKickedRef here — handleSessionKicked sets user to null
+      // which would immediately clear the guard and allow duplicate toasts.
+      // It's reset on SIGNED_IN instead.
       return;
     }
 
