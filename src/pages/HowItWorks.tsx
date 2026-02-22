@@ -430,14 +430,14 @@ const ScrollColorSection = ({
           
           {/* Links */}
           <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6">
-            <a href="/media-buying" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+            <a href="/media-buying" className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
               Discover Media Buying <span className="text-xl">↗</span>
             </a>
-            <button onClick={() => scrollToSection(localLibraryRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              Learn about Local Library <span className="text-xl">↑</span>
+            <button onClick={() => scrollToSection(localLibraryRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+              Learn about Local Library
             </button>
-            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
-              For Agencies <span className="text-xl">↓</span>
+            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+              For Agencies
             </button>
           </div>
           
