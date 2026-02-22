@@ -140,7 +140,7 @@ export function MainLayout({
             </div>
           </div>
         </footer>
-        <div className="footer-widget-clearance w-full flex-shrink-0 bg-transparent" />
+        
         
       </main>
     </div>;
