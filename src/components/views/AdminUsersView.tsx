@@ -1584,10 +1584,13 @@ export function AdminUsersView() {
                                       className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-colors"
                                       onClick={() => handleDeliveryClick(delivery)}
                                     >
-                                      <div className="flex items-center gap-2">
-                                        <Truck className="h-3 w-3 text-muted-foreground" />
+                                      <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2">
+                                        <Truck className="h-3 w-3 text-muted-foreground hidden md:block" />
                                         <span>{delivery.media_sites?.name || 'Unknown'}</span>
-                                        <Badge className="bg-green-600 text-[10px] py-0">
+                                        <span className="text-muted-foreground md:hidden">
+                                          {delivery.delivered_at ? formatDateTime(delivery.delivered_at) : formatDateTime(delivery.created_at)}
+                                        </span>
+                                        <Badge className="bg-green-600 text-[10px] py-0 w-fit">
                                           <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
                                           Completed
                                         </Badge>
@@ -1596,7 +1599,7 @@ export function AdminUsersView() {
                                         <span className="font-medium text-green-600">
                                           +${delivery.agency_payout_cents.toLocaleString()}
                                         </span>
-                                        <span className="text-muted-foreground">
+                                        <span className="text-muted-foreground hidden md:inline">
                                           {delivery.delivered_at ? formatDateTime(delivery.delivered_at) : formatDateTime(delivery.created_at)}
                                         </span>
                                         <ExternalLink className="h-3 w-3 text-muted-foreground" />
