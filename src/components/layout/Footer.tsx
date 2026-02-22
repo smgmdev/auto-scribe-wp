@@ -59,6 +59,16 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
   return (
     <footer className={`${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'} ${narrow ? '' : 'mt-12'}`}>
       <div className={containerClass}>
+        {/* Disclaimer text */}
+        <div className={`pt-8 pb-6 ${showTopBorder ? '' : ''}`}>
+          <p className={`text-xs ${dark ? 'text-white/40' : 'text-muted-foreground'} mb-3`}>
+            *Arcana Mace is not affiliated with, endorsed by, or officially connected to any media organizations or magazines whose logos may appear on the platform. Arcana Mace operates solely as a marketplace platform that connects global PR agencies with clients worldwide, specializing in the safe and secure facilitation of media buying transactions. Arcana Mace does not offer direct publishing or media services to clients by itself.
+          </p>
+          <p className={`text-xs ${dark ? 'text-white/40' : 'text-muted-foreground'}`}>
+            *Arcana Mace is a Progressive Web App (PWA), you can add it to your phone's home screen and it will work perfectly and smoothly.
+          </p>
+        </div>
+        <div className={`border-t ${dark ? 'border-white/20' : 'border-[#d2d2d7]'}`} />
         <div className={`${showTopBorder ? (dark ? 'border-t border-white/20' : 'border-t border-[#d2d2d7]') : ''} pt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8`}>
           {/* Media Buying */}
           <div>
