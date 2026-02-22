@@ -7,6 +7,7 @@ interface WalletTooltipContentProps {
   pendingCryptoWithdrawals: number;
   lockedInOrderRequests?: number;
   lockedInOrders?: number;
+  lockedInWithdrawals?: number;
   walletBalance: number;
   showLocked?: boolean;
   showPurchasedSpent?: boolean;
@@ -23,6 +24,7 @@ export const WalletTooltipContent = ({
   pendingCryptoWithdrawals,
   lockedInOrderRequests = 0,
   lockedInOrders = 0,
+  lockedInWithdrawals = 0,
   walletBalance,
   showLocked = true,
   showPurchasedSpent = true,
@@ -74,6 +76,10 @@ export const WalletTooltipContent = ({
           <div className="flex justify-between gap-4">
             <span className="text-white/70">Locked in Orders:</span>
             <span className="font-semibold text-amber-400">{fmt(lockedInOrders)}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-white/70">Locked in Withdrawals:</span>
+            <span className="font-semibold text-amber-400">{fmt(lockedInWithdrawals)}</span>
           </div>
         </>
       )}
