@@ -24,6 +24,8 @@ export interface AvailableCreditsData {
   withdrawalsByCrypto: number;
   totalOrders: number;
   totalSpent: number;
+  b2bSpent: number;
+  publishSpent: number;
   loading: boolean;
 }
 
@@ -42,6 +44,8 @@ const initialData: AvailableCreditsData = {
   withdrawalsByCrypto: 0,
   totalOrders: 0,
   totalSpent: 0,
+  b2bSpent: 0,
+  publishSpent: 0,
   loading: true,
 };
 
@@ -170,6 +174,8 @@ export function useAvailableCredits(enabled = true) {
       withdrawalsByCrypto: withdrawals.cryptoLocked,
       totalOrders,
       totalSpent,
+      b2bSpent: completedOrdersSpent,
+      publishSpent: publishSpending,
       loading: false,
     });
   }, [user]);
