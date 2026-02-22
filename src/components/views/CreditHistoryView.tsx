@@ -2144,10 +2144,16 @@ export function CreditHistoryView() {
                   setExpandedWithdrawals(newExpanded);
                 };
                 
+                const isHighlighted = highlightedOrderId === transaction.id || (transaction.order_id != null && transaction.order_id === highlightedOrderId);
                 return (
                   <div
                     key={transaction.id}
-                    className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer border-border hover:border-[#4771d9]`}
+                    ref={isHighlighted ? highlightedTransactionRef : undefined}
+                    className={`rounded-none -mt-px border transition-colors overflow-hidden cursor-pointer ${
+                      isHighlighted 
+                        ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
+                        : 'border-border hover:border-[#4771d9]'
+                    }`}
                     onClick={handleCardClick}
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3 gap-2 md:gap-0">
