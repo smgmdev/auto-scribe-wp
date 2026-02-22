@@ -549,6 +549,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         previousUserIdRef.current = newUserId;
+        // Update known user ID for reload identity verification
+        if (newUserId) {
+          sessionStorage.setItem('auth_known_user_id', newUserId);
+        } else {
+          sessionStorage.removeItem('auth_known_user_id');
+        }
 
         if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current && !isInitialLoadRef.current) {
           hasShownWelcomeRef.current = true;
@@ -610,6 +616,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const refreshToken = params.get('refresh_token');
           if (accessToken && refreshToken) {
             console.log('[Auth] Shadow mode: setting session from URL tokens');
+            // Stop auto-refresh BEFORE setting session to prevent the shadow
+            // iframe from making token refresh HTTP requests that could
+            // interfere with the parent window's admin session
+            supabase.auth.stopAutoRefresh();
             const { data: shadowSession, error: shadowError } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
@@ -633,6 +643,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!isMounted) return;
 
         console.log('[Auth] Initial session check, user:', existingSession?.user?.id);
+
+        // Identity verification: if we had a known user before reload and the
+        // session now belongs to a DIFFERENT user, something went wrong
+        // (e.g. shadow tokens leaked into localStorage). Force sign-out.
+        const previousKnownUserId = sessionStorage.getItem('auth_known_user_id');
+        if (previousKnownUserId && existingSession?.user?.id && 
+            previousKnownUserId !== existingSession.user.id) {
+          console.error('[Auth] CRITICAL: User identity changed on reload! Expected:', previousKnownUserId, 'Got:', existingSession.user.id);
+          console.error('[Auth] Forcing sign-out to prevent account crossing');
+          await supabase.auth.signOut({ scope: 'local' });
+          sessionStorage.removeItem('auth_known_user_id');
+          resetAuthState();
+          return;
+        }
+        // Store current user ID for future reload verification
+        if (existingSession?.user?.id) {
+          sessionStorage.setItem('auth_known_user_id', existingSession.user.id);
+        } else {
+          sessionStorage.removeItem('auth_known_user_id');
+        }
 
         previousUserIdRef.current = existingSession?.user?.id || null;
 
@@ -759,6 +789,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     userInitiatedSignOutRef.current = true;
+    sessionStorage.removeItem('auth_known_user_id');
     const store = useAppStore.getState();
     
     // Clear all notifications and chat state
