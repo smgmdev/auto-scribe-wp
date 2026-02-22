@@ -216,146 +216,146 @@ export function DashboardView() {
   }, [user, isAdmin]);
 
   // Fetch agency summary data (wallet balance and total sales)
-  useEffect(() => {
-    const fetchAgencySummary = async () => {
-      if (!user || !isAgency) {
-        setAgencySummary(prev => ({ ...prev, loading: false }));
-        return;
-      }
-      
-      // Get the agency_payout_id for this user
-      const { data: agencyPayout } = await supabase
-        .from('agency_payouts')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('onboarding_complete', true)
-        .maybeSingle();
-      
-      if (!agencyPayout) {
-        setAgencySummary(prev => ({ ...prev, loading: false }));
-        return;
-      }
+  const fetchAgencySummary = useCallback(async () => {
+    if (!user || !isAgency) {
+      setAgencySummary(prev => ({ ...prev, loading: false }));
+      return;
+    }
+    
+    // Get the agency_payout_id for this user
+    const { data: agencyPayout } = await supabase
+      .from('agency_payouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('onboarding_complete', true)
+      .maybeSingle();
+    
+    if (!agencyPayout) {
+      setAgencySummary(prev => ({ ...prev, loading: false }));
+      return;
+    }
 
-      // Fetch accepted orders for this agency (delivery_status = 'accepted' means client confirmed)
-      const { data: orders } = await supabase
-        .from('service_requests')
-        .select(`
-          order:orders!inner(
-            amount_cents,
-            agency_payout_cents,
-            delivery_status,
-            status
-          )
-        `)
-        .eq('agency_payout_id', agencyPayout.id);
+    // Fetch accepted orders for this agency (delivery_status = 'accepted' means client confirmed)
+    const { data: orders } = await supabase
+      .from('service_requests')
+      .select(`
+        order:orders!inner(
+          amount_cents,
+          agency_payout_cents,
+          delivery_status,
+          status
+        )
+      `)
+      .eq('agency_payout_id', agencyPayout.id);
 
-      let orderEarnings = 0;
-      let orderSales = 0;
-      let lockedInOrders = 0;
-      
-      if (orders) {
-        orders.forEach((req: any) => {
-          if (req.order?.delivery_status === 'accepted') {
-            orderEarnings += (req.order.agency_payout_cents || 0);
-            orderSales += (req.order.amount_cents || 0);
-          }
-          if (req.order?.delivery_status !== 'accepted' && req.order?.status !== 'cancelled') {
-            lockedInOrders += (req.order.agency_payout_cents || 0);
-          }
-        });
-      }
-
-      // Fetch order_payout credit transactions (from instant publishing / WP site sales)
-      const { data: payoutTxData } = await supabase
-        .from('credit_transactions')
-        .select('id, amount, description, created_at, metadata')
-        .eq('user_id', user.id)
-        .eq('type', 'order_payout')
-        .order('created_at', { ascending: false });
-
-      const payoutTxs = payoutTxData || [];
-      // Only count instant publishing payouts (those with metadata.site_name) to avoid double-counting B2B order payouts
-      const instantPublishTxs = payoutTxs.filter((t: any) => t.metadata?.site_name);
-      const payoutTxEarnings = instantPublishTxs.reduce((sum: number, t: any) => sum + t.amount, 0);
-      const payoutTxSales = instantPublishTxs.reduce((sum: number, t: any) => sum + (t.metadata?.gross_amount || t.amount), 0);
-
-      const totalEarnings = orderEarnings + payoutTxEarnings;
-      const totalSales = orderSales + payoutTxSales;
-
-      // Fetch pending order requests (service_requests without orders yet)
-      let lockedInOrderRequests = 0;
-      const { data: pendingRequests } = await supabase
-        .from('service_requests')
-        .select('media_site_id, media_sites!inner(price)')
-        .eq('agency_payout_id', agencyPayout.id)
-        .is('order_id', null)
-        .not('status', 'in', '("cancelled","completed")');
-
-      if (pendingRequests) {
-        pendingRequests.forEach((req: any) => {
-          lockedInOrderRequests += (req.media_sites?.price || 0);
-        });
-      }
-
-      // Fetch withdrawals to calculate wallet balance and withdrawal stats
-      const { data: withdrawals } = await supabase
-        .from('agency_withdrawals')
-        .select('amount_cents, status, withdrawal_method')
-        .eq('user_id', user.id);
-
-      let completedWithdrawalsAmount = 0;
-      let pendingWithdrawalsAmount = 0;
-      let pendingBankWithdrawals = 0;
-      let pendingCryptoWithdrawals = 0;
-      let completedBankWithdrawals = 0;
-      let completedCryptoWithdrawals = 0;
-      
-      if (withdrawals) {
-        withdrawals.forEach(w => {
-          const amount = (w.amount_cents || 0);
-          if (w.status === 'completed' || w.status === 'approved') {
-            completedWithdrawalsAmount += amount;
-            if (w.withdrawal_method === 'bank') {
-              completedBankWithdrawals += amount;
-            } else if (w.withdrawal_method === 'crypto') {
-              completedCryptoWithdrawals += amount;
-            }
-          }
-          if (w.status === 'pending') {
-            pendingWithdrawalsAmount += amount;
-            if (w.withdrawal_method === 'bank') {
-              pendingBankWithdrawals += amount;
-            } else if (w.withdrawal_method === 'crypto') {
-              pendingCryptoWithdrawals += amount;
-            }
-          }
-        });
-      }
-
-      const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount - lockedInOrders - lockedInOrderRequests;
-
-      setAgencySummary({
-        walletBalance,
-        totalSales,
-        totalEarnings,
-        b2bEarnings: orderEarnings,
-        instantPublishingEarnings: payoutTxEarnings,
-        pendingWithdrawals: pendingWithdrawalsAmount,
-        completedWithdrawals: completedWithdrawalsAmount,
-        pendingBankWithdrawals,
-        pendingCryptoWithdrawals,
-        completedBankWithdrawals,
-        completedCryptoWithdrawals,
-        lockedInOrders,
-        lockedInOrderRequests,
-        loading: false
+    let orderEarnings = 0;
+    let orderSales = 0;
+    let lockedInOrders = 0;
+    
+    if (orders) {
+      orders.forEach((req: any) => {
+        if (req.order?.delivery_status === 'accepted') {
+          orderEarnings += (req.order.agency_payout_cents || 0);
+          orderSales += (req.order.amount_cents || 0);
+        }
+        if (req.order?.delivery_status !== 'accepted' && req.order?.status !== 'cancelled') {
+          lockedInOrders += (req.order.agency_payout_cents || 0);
+        }
       });
-    };
+    }
 
+    // Fetch order_payout credit transactions (from instant publishing / WP site sales)
+    const { data: payoutTxData } = await supabase
+      .from('credit_transactions')
+      .select('id, amount, description, created_at, metadata')
+      .eq('user_id', user.id)
+      .eq('type', 'order_payout')
+      .order('created_at', { ascending: false });
+
+    const payoutTxs = payoutTxData || [];
+    // Only count instant publishing payouts (those with metadata.site_name) to avoid double-counting B2B order payouts
+    const instantPublishTxs = payoutTxs.filter((t: any) => t.metadata?.site_name);
+    const payoutTxEarnings = instantPublishTxs.reduce((sum: number, t: any) => sum + t.amount, 0);
+    const payoutTxSales = instantPublishTxs.reduce((sum: number, t: any) => sum + (t.metadata?.gross_amount || t.amount), 0);
+
+    const totalEarnings = orderEarnings + payoutTxEarnings;
+    const totalSales = orderSales + payoutTxSales;
+
+    // Fetch pending order requests (service_requests without orders yet)
+    let lockedInOrderRequests = 0;
+    const { data: pendingRequests } = await supabase
+      .from('service_requests')
+      .select('media_site_id, media_sites!inner(price)')
+      .eq('agency_payout_id', agencyPayout.id)
+      .is('order_id', null)
+      .not('status', 'in', '("cancelled","completed")');
+
+    if (pendingRequests) {
+      pendingRequests.forEach((req: any) => {
+        lockedInOrderRequests += (req.media_sites?.price || 0);
+      });
+    }
+
+    // Fetch withdrawals to calculate wallet balance and withdrawal stats
+    const { data: withdrawals } = await supabase
+      .from('agency_withdrawals')
+      .select('amount_cents, status, withdrawal_method')
+      .eq('user_id', user.id);
+
+    let completedWithdrawalsAmount = 0;
+    let pendingWithdrawalsAmount = 0;
+    let pendingBankWithdrawals = 0;
+    let pendingCryptoWithdrawals = 0;
+    let completedBankWithdrawals = 0;
+    let completedCryptoWithdrawals = 0;
+    
+    if (withdrawals) {
+      withdrawals.forEach(w => {
+        const amount = (w.amount_cents || 0);
+        if (w.status === 'completed' || w.status === 'approved') {
+          completedWithdrawalsAmount += amount;
+          if (w.withdrawal_method === 'bank') {
+            completedBankWithdrawals += amount;
+          } else if (w.withdrawal_method === 'crypto') {
+            completedCryptoWithdrawals += amount;
+          }
+        }
+        if (w.status === 'pending') {
+          pendingWithdrawalsAmount += amount;
+          if (w.withdrawal_method === 'bank') {
+            pendingBankWithdrawals += amount;
+          } else if (w.withdrawal_method === 'crypto') {
+            pendingCryptoWithdrawals += amount;
+          }
+        }
+      });
+    }
+
+    const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount - lockedInOrders - lockedInOrderRequests;
+
+    setAgencySummary({
+      walletBalance,
+      totalSales,
+      totalEarnings,
+      b2bEarnings: orderEarnings,
+      instantPublishingEarnings: payoutTxEarnings,
+      pendingWithdrawals: pendingWithdrawalsAmount,
+      completedWithdrawals: completedWithdrawalsAmount,
+      pendingBankWithdrawals,
+      pendingCryptoWithdrawals,
+      completedBankWithdrawals,
+      completedCryptoWithdrawals,
+      lockedInOrders,
+      lockedInOrderRequests,
+      loading: false
+    });
+  }, [user, isAgency]);
+
+  useEffect(() => {
     if (isAgency !== null) {
       fetchAgencySummary();
     }
-  }, [user, isAgency]);
+  }, [isAgency, fetchAgencySummary]);
 
   const fetchGlobalLibraryCount = useCallback(async () => {
     setGlobalLibraryLoading(true);
@@ -373,6 +373,38 @@ export function DashboardView() {
   useEffect(() => {
     fetchGlobalLibraryCount();
   }, [fetchGlobalLibraryCount]);
+
+  // Real-time: global library count (media_sites changes)
+  useEffect(() => {
+    const channel = supabase
+      .channel('dashboard-media-sites-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'media_sites' }, () => {
+        fetchGlobalLibraryCount();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchGlobalLibraryCount]);
+
+  // Real-time: agency summary (orders, withdrawals, credit_transactions, service_requests)
+  useEffect(() => {
+    if (!user || !isAgency) return;
+    const channel = supabase
+      .channel('dashboard-agency-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        fetchAgencySummary();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_withdrawals', filter: `user_id=eq.${user.id}` }, () => {
+        fetchAgencySummary();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` }, () => {
+        fetchAgencySummary();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
+        fetchAgencySummary();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, isAgency, fetchAgencySummary]);
 
   const getSiteInfo = (article: { publishedTo?: string; publishedToName?: string | null; publishedToFavicon?: string | null }): { name: string; favicon: string | null } | null => {
     // Use stored article data first (persists after site deletion)
@@ -450,9 +482,10 @@ export function DashboardView() {
       fetchGlobalLibraryCount(),
       availableCreditsData.refresh(),
       fetchActiveSessions(),
+      fetchAgencySummary(),
     ]);
     setIsRefreshing(false);
-  }, [refreshArticles, refetchSites, fetchGlobalLibraryCount, availableCreditsData.refresh, fetchActiveSessions]);
+  }, [refreshArticles, refetchSites, fetchGlobalLibraryCount, availableCreditsData.refresh, fetchActiveSessions, fetchAgencySummary]);
 
   return <div className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0">
