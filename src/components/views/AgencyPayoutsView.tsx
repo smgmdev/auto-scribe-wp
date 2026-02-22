@@ -834,7 +834,7 @@ export function AgencyPayoutsView() {
                                   </div>
                                 )}
                               </div>
-                              {withdrawal.status !== 'rejected' && (
+                              {withdrawal.status !== 'rejected' && withdrawal.status !== 'pending' && (
                                 <div className="pt-2 border-t border-border/30">
                                   <button
                                     onClick={(e) => {
