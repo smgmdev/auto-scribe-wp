@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { SliderPuzzleCaptcha } from '@/components/auth/SliderPuzzleCaptcha';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ export default function Auth() {
   const pendingSignInRef = useRef<{ email: string; password: string } | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const dataPopupRef = useRef<HTMLDivElement>(null);
@@ -163,6 +165,12 @@ export default function Auth() {
     e.preventDefault();
     if (!validateForm()) return;
     
+    // Show captcha before proceeding
+    setShowCaptcha(true);
+  };
+
+  const handleCaptchaVerified = async () => {
+    setShowCaptcha(false);
     setIsLoading(true);
 
     // Capture login attempt (before any checks)
@@ -723,11 +731,18 @@ export default function Auth() {
               </button>
             </p>
 
+            {/* Slider Puzzle Captcha - shown on sign in */}
+            {mode === 'signin' && showCaptcha && (
+              <div className="py-2">
+                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} />
+              </div>
+            )}
+
             {/* Submit Button */}
             <Button 
               type="submit" 
               className="group w-full h-9 md:h-10 text-[14px] md:text-[15px] font-medium bg-foreground text-background rounded-none border border-foreground transition-all hover:!bg-transparent hover:!text-foreground"
-              disabled={isLoading}
+              disabled={isLoading || (mode === 'signin' && showCaptcha)}
             >
               {isLoading ? (
                 <>
