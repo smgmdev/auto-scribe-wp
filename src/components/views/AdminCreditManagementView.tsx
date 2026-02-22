@@ -716,7 +716,7 @@ export const AdminCreditManagementView = () => {
                                       <TooltipTrigger asChild>
                                         <div className="text-left cursor-help rounded-lg px-3 py-2 border border-transparent transition-colors hover:border-[#e7a959] bg-foreground text-background">
                                           <p className="text-xs text-white/70">Locked</p>
-                                          <p className="font-semibold text-amber-400">{user.locked.toLocaleString()}</p>
+                                          <p className="font-semibold text-amber-400">{(user.locked + (user.lockedFromWithdrawals || 0)).toLocaleString()}</p>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent side="bottom" className="z-[9999] bg-foreground text-background px-3 py-2 text-xs">
@@ -724,6 +724,7 @@ export const AdminCreditManagementView = () => {
                                           <p className="font-medium mb-1">Locked Credits</p>
                                           <p><span className="opacity-70">Locked in Order Requests:</span> {(user.lockedFromRequests || 0).toLocaleString()}</p>
                                           <p><span className="opacity-70">Locked in Orders:</span> {(user.lockedFromOrders || 0).toLocaleString()}</p>
+                                          <p><span className="opacity-70">Locked in Withdrawals:</span> {(user.lockedFromWithdrawals || 0).toLocaleString()}</p>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
