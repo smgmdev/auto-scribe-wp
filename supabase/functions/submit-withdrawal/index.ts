@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -221,6 +223,99 @@ serve(async (req) => {
         JSON.stringify({ error: "Failed to create withdrawal request", details: insertError.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // ─── Send admin notification email ──────────────────────────────────────
+    try {
+      let adminEmail = "admin@arcanamace.com";
+      const { data: admins } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin")
+        .limit(1);
+
+      if (admins && admins.length > 0) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("id", admins[0].user_id)
+          .single();
+        if (profile?.email) adminEmail = profile.email;
+      }
+
+      // Fetch agency name
+      let agencyName = "Unknown Agency";
+      if (agency_payout_id) {
+        const { data: agencyData } = await supabase
+          .from("agency_payouts")
+          .select("agency_name")
+          .eq("id", agency_payout_id)
+          .single();
+        if (agencyData?.agency_name) agencyName = agencyData.agency_name;
+      }
+
+      // Fetch user email
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", userId)
+        .single();
+
+      const methodLabel = withdrawal_method === "bank" ? "Bank Transfer" : "USDT (Crypto)";
+      const amountFormatted = amount_cents.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "Arcana Mace <noreply@arcanamace.com>",
+          to: [adminEmail],
+          subject: `New Withdrawal Request: $${amountFormatted}`,
+          headers: {
+            "X-Entity-Ref-ID": `withdrawal-${withdrawalData.id}`,
+          },
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 20px;">New Withdrawal Request</h1>
+              
+              <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; width: 140px;">Amount:</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-weight: 600; font-size: 18px;">$${amountFormatted}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Method:</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">${methodLabel}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Agency:</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">${agencyName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">User Email:</td>
+                    <td style="padding: 8px 0; color: #1a1a1a; font-weight: 500;">${userProfile?.email || "N/A"}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <p style="color: #666; font-size: 14px;">
+                Please review and process this withdrawal in the Admin Dashboard.
+              </p>
+              
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="color: #999; font-size: 12px;">This is an automated notification from Arcana Mace.</p>
+            </div>
+          `,
+        }),
+      });
+      console.log("Admin withdrawal notification email sent to:", adminEmail);
+    } catch (emailErr) {
+      // Don't fail the withdrawal if email fails
+      console.error("Failed to send admin withdrawal notification:", emailErr);
     }
 
     return new Response(
