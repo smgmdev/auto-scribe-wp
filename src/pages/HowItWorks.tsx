@@ -578,7 +578,7 @@ const ScrollColorSection = ({
         <div
           id="ai-section"
           ref={aiSectionRef}
-          className="mt-16 bg-[#d88b57] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#d88b57] rounded-none px-4 py-10 md:px-6 md:py-16 lg:px-8 lg:py-20 text-center"
         >
 
           {/* Title */}
@@ -592,7 +592,7 @@ const ScrollColorSection = ({
           </p>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 text-left max-w-[1400px] mx-auto md:auto-rows-[400px] px-4 md:px-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 text-left mx-auto md:auto-rows-[400px] px-4 md:px-0">
             {/* Card 1 - AI Article Generation */}
             <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
               <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
