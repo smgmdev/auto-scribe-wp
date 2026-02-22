@@ -934,8 +934,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                     {purchasesSubTab === 'purchases_b2b' ? 'B2B Media Purchases' : purchasesSubTab === 'purchases_instant' ? 'Instant Publishing Purchases' : 'Total Purchases'}
                   </p>
                   <p className="text-base font-bold text-foreground">
-                    -{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-                    {commissionSpan(purchasesSubTab === 'purchases_b2b' ? b2bPurchaseCommission : purchasesSubTab === 'purchases_instant' ? ipPurchaseCommission : totalPurchaseCommission, nonLockTxs.length > 0)}
+                    {(() => { const total = nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0); return total === 0 ? '0' : `-${total.toLocaleString()}`; })()} credits
                   </p>
                 </div>
               )}
