@@ -1222,7 +1222,7 @@ export function CreditHistoryView() {
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (
-                    (creditsInOrders + creditsInPendingRequests).toLocaleString()
+                    (creditsInOrders + creditsInPendingRequests + creditsInWithdrawals).toLocaleString()
                   )}
                 </div>
               </CardContent>
@@ -1244,9 +1244,13 @@ export function CreditHistoryView() {
                   <span className="text-muted-foreground">Locked in Orders:</span>
                   <span className="font-medium text-amber-400">{creditsInOrders.toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between gap-4 text-xs">
+                  <span className="text-muted-foreground">Locked in Withdrawals:</span>
+                  <span className="font-medium text-amber-400">{creditsInWithdrawals.toLocaleString()}</span>
+                </div>
                 <div className="border-t border-muted-foreground/20 pt-1 mt-1 flex justify-between gap-4 text-xs">
                   <span className="text-muted-foreground">Total Locked:</span>
-                  <span className="font-medium">{(creditsInOrders + creditsInPendingRequests).toLocaleString()}</span>
+                  <span className="font-medium">{(creditsInOrders + creditsInPendingRequests + creditsInWithdrawals).toLocaleString()}</span>
                 </div>
               </div>
 
