@@ -15,8 +15,8 @@ import { toast } from 'sonner';
 import { init as airwallexInit } from '@airwallex/components-sdk';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
-const MIN_CREDITS = 5;
-const QUICK_AMOUNTS = [5, 10, 50, 100, 500];
+const MIN_CREDITS = 1;
+const QUICK_AMOUNTS = [1, 5, 10, 50, 100, 500];
 
 interface BuyCreditsDialogProps {
   open: boolean;
