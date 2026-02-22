@@ -142,15 +142,15 @@ export function CreditHistoryView() {
     if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current && currentView === 'credit-history') {
       // Handle order_payout highlight
       if (highlightedOrderId) {
-        // Try matching by order_id first, then by transaction id directly
-        const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout')
-          || transactions.find(t => t.id === highlightedOrderId);
+        // Match broadly: by transaction id, by order_id on any type, or by order_payout with matching order_id
+        const transaction = transactions.find(t => t.id === highlightedOrderId)
+          || transactions.find(t => t.order_id === highlightedOrderId)
+          || transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
         if (transaction) {
+          // Always add to expanded set (don't replace) so other open cards stay open
           setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
-          // Normalize highlightedOrderId to the transaction id for consistent highlighting
-          if (highlightedOrderId !== transaction.id && highlightedOrderId !== transaction.order_id) {
-            setHighlightedOrderId(transaction.id);
-          }
+          // Normalize highlightedOrderId to the transaction id for consistent ref matching
+          setHighlightedOrderId(transaction.id);
           hasScrolledToTransaction.current = true;
 
           // For instant publishing payouts, fetch site details so expanded content renders
@@ -163,6 +163,20 @@ export function CreditHistoryView() {
                 site_url: wpSite?.url || null,
               }}));
             });
+          }
+
+          // For order-based transactions, fetch order details if needed
+          if (transaction.order_id && !orderDetails[transaction.id]) {
+            supabase
+              .from('orders')
+              .select('*, media_sites(name, favicon, price, link)')
+              .eq('id', transaction.order_id)
+              .single()
+              .then(({ data: order }) => {
+                if (order) {
+                  setOrderDetails(prev => ({ ...prev, [transaction.id]: order }));
+                }
+              });
           }
 
           scrollToHighlighted();
