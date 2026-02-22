@@ -1013,6 +1013,9 @@ export function AdminUsersView() {
     fetchUsers();
   };
 
+  // Store admin session tokens before shadow access so we can recover after
+  const adminSessionBackupRef = useRef<{ access_token: string; refresh_token: string } | null>(null);
+
   const handleShadowAccess = async (targetUser: UserData, e: React.MouseEvent) => {
     e.stopPropagation();
     if (targetUser.id === currentUser?.id) {
@@ -1021,14 +1024,24 @@ export function AdminUsersView() {
     }
     setShadowLoading(targetUser.id);
     try {
+      // Save admin's current session tokens BEFORE opening shadow
+      const { data: { session: adminSession } } = await supabase.auth.getSession();
+      if (adminSession) {
+        adminSessionBackupRef.current = {
+          access_token: adminSession.access_token,
+          refresh_token: adminSession.refresh_token,
+        };
+      }
+
       const { data, error } = await supabase.functions.invoke('shadow-access', {
         body: { targetUserId: targetUser.id },
       });
       if (error || !data?.success) {
         sonnerToast.error(data?.error || error?.message || 'Failed to create shadow session');
+        adminSessionBackupRef.current = null;
         return;
       }
-      // Build URL with shadow tokens as hash params (not query params to avoid server logging)
+      // Build URL with shadow tokens as query params
       const baseUrl = window.location.origin;
       const shadowUrl = `${baseUrl}/?shadow=1&access_token=${encodeURIComponent(data.access_token)}&refresh_token=${encodeURIComponent(data.refresh_token)}`;
       setShadowAccessUrl(shadowUrl);
@@ -1036,8 +1049,45 @@ export function AdminUsersView() {
       setShadowAccessOpen(true);
     } catch (err: any) {
       sonnerToast.error(err.message || 'Shadow access failed');
+      adminSessionBackupRef.current = null;
     } finally {
       setShadowLoading(null);
+    }
+  };
+
+  // When shadow popup closes, verify admin session and recover if needed
+  const handleShadowClose = async (open: boolean) => {
+    setShadowAccessOpen(open);
+    if (!open && adminSessionBackupRef.current) {
+      const backup = adminSessionBackupRef.current;
+      adminSessionBackupRef.current = null;
+
+      // Check if admin session is still alive
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession?.user?.id === currentUser?.id) {
+        // Session still valid, try a refresh to ensure tokens are fresh
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn('[Shadow] Session refresh failed after shadow close, restoring backup');
+          await supabase.auth.setSession(backup);
+        }
+        return;
+      }
+
+      // Session lost — restore from backup
+      console.warn('[Shadow] Admin session lost during shadow mode, restoring from backup');
+      try {
+        const { error } = await supabase.auth.setSession(backup);
+        if (error) {
+          console.error('[Shadow] Failed to restore admin session:', error);
+          sonnerToast.error('Session expired during shadow view. Please refresh the page to log back in.');
+        } else {
+          sonnerToast.success('Session restored');
+        }
+      } catch (err) {
+        console.error('[Shadow] Error restoring session:', err);
+        sonnerToast.error('Session expired. Please refresh the page.');
+      }
     }
   };
 
@@ -1895,7 +1945,7 @@ export function AdminUsersView() {
       {/* Shadow Access WebView */}
       <WebViewDialog
         open={shadowAccessOpen}
-        onOpenChange={setShadowAccessOpen}
+        onOpenChange={handleShadowClose}
         url={shadowAccessUrl}
         title={`Shadow View — ${shadowAccessEmail}`}
         isWebsite
