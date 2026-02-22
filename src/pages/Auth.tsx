@@ -430,7 +430,7 @@ export default function Auth() {
 
       {/* Main Content - Centered */}
       <div className="flex-1 flex items-center justify-center px-4 pt-16 sm:pt-20 pb-12">
-        <div className="w-full max-w-[400px]">
+        <div className="w-full max-w-[400px] relative">
           {/* Logo with 3D orbital rings animation - Atom style */}
           <div className="flex justify-center mb-2 sm:mb-4">
             <style>{`
@@ -673,13 +673,16 @@ export default function Auth() {
           </p>
 
           {/* Form */}
-          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} autoComplete="off" data-form-type="other" className="space-y-2">
-            {/* Slider Puzzle Captcha - shown on sign in, above inputs */}
-            {mode === 'signin' && showCaptcha && (
-              <div className="py-2">
+          {/* Slider Puzzle Captcha - overlay popup on sign in */}
+          {mode === 'signin' && showCaptcha && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-2xl">
+              <div className="w-full max-w-sm mx-4">
                 <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} />
               </div>
-            )}
+            </div>
+          )}
+
+          <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} autoComplete="off" data-form-type="other" className="space-y-2">
 
             {/* Email Input */}
             <div>
