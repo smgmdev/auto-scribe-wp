@@ -4,6 +4,14 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
+function Loader() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
+    </div>
+  );
+}
+
 function DragonModel() {
   const { scene } = useGLTF("/models/dragon_emblem.glb");
   const ref = useRef<THREE.Group>(null);
@@ -18,7 +26,7 @@ function DragonModel() {
     <primitive
       ref={ref}
       object={scene}
-      scale={2.5}
+      scale={2}
       position={[0, -0.5, 0]}
     />
   );
@@ -34,12 +42,12 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-4">
-      <div className="w-[320px] h-[320px] sm:w-[420px] sm:h-[420px]">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-1">
+      <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
         <Canvas camera={{ position: [0, 1, 5], fov: 45 }}>
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
-          <Suspense fallback={null}>
+          <Suspense fallback={<Loader />}>
             <DragonModel />
             <Environment preset="studio" />
           </Suspense>
