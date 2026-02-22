@@ -674,6 +674,13 @@ export default function Auth() {
 
           {/* Form */}
           <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} autoComplete="off" data-form-type="other" className="space-y-2">
+            {/* Slider Puzzle Captcha - shown on sign in, above inputs */}
+            {mode === 'signin' && showCaptcha && (
+              <div className="py-2">
+                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} />
+              </div>
+            )}
+
             {/* Email Input */}
             <div>
               <Input
@@ -731,12 +738,8 @@ export default function Auth() {
               </button>
             </p>
 
-            {/* Slider Puzzle Captcha - shown on sign in */}
-            {mode === 'signin' && showCaptcha && (
-              <div className="py-2">
-                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} />
-              </div>
-            )}
+
+
 
             {/* Submit Button */}
             <Button 
