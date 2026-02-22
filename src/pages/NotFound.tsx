@@ -28,8 +28,8 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
     <primitive
       ref={ref}
       object={scene}
-      scale={2}
-      position={[0, -1.5, 0]}
+      scale={3.5}
+      position={[0, -2.5, 0]}
     />
   );
 }
