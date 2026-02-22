@@ -1482,7 +1482,7 @@ export function AdminUsersView() {
                           </div>
                         ) : (
                           <>
-                            <TabsContent value="logs" className="mt-0 px-4 pt-4 pb-4">
+                            <TabsContent value="logs" className="mt-0 px-0 md:px-4 pt-4 pb-4">
                               <div className="grid gap-3 text-xs">
                                 <div>
                                   <span className="text-muted-foreground">Account created:</span>
@@ -1517,7 +1517,7 @@ export function AdminUsersView() {
                               <UserTransactionsExpanded userId={user.id} />
                             </TabsContent>
                             
-                            <TabsContent value="orders" className="mt-0 px-4 pb-4">
+                            <TabsContent value="orders" className="mt-0 px-0 md:px-4 pb-4">
                               {(userOrders[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders</p>
                               ) : (
@@ -1545,7 +1545,7 @@ export function AdminUsersView() {
                               )}
                             </TabsContent>
                             
-                            <TabsContent value="engagements" className="mt-0 px-4 pb-4">
+                            <TabsContent value="engagements" className="mt-0 px-0 md:px-4 pb-4">
                               {(userEngagements[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No engagements</p>
                               ) : (
@@ -1571,7 +1571,7 @@ export function AdminUsersView() {
                               )}
                             </TabsContent>
                             
-                            <TabsContent value="deliveries" className="mt-0 px-4 pb-4">
+                            <TabsContent value="deliveries" className="mt-0 px-0 md:px-4 pb-4">
                               {!user.isAgency ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders completed</p>
                               ) : (userDeliveries[user.id] || []).length === 0 ? (
