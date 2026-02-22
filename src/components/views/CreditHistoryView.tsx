@@ -40,11 +40,12 @@ interface LockedOrder {
 export function CreditHistoryView() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId, setAgencyRequestsTargetOrderId, openGlobalChat } = useAppStore();
+  const { currentView, setCurrentView, setOrdersTargetTab, setOrdersTargetOrderId, setAgencyRequestsTargetOrderId, openGlobalChat } = useAppStore();
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
   const hasScrolledToTransaction = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
@@ -103,9 +104,27 @@ export function CreditHistoryView() {
     }
   }, [searchParams, setSearchParams]);
 
-  // Scroll to and expand the highlighted transaction once data is loaded
+  // Helper to robustly scroll to the highlighted ref, retrying until visible
+  const scrollToHighlighted = useCallback(() => {
+    let attempts = 0;
+    const tryScroll = () => {
+      attempts++;
+      const el = highlightedTransactionRef.current;
+      if (el && el.offsetParent !== null) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (attempts < 20) {
+        setTimeout(tryScroll, 100);
+      }
+    };
+    // Start after a small delay to let React render
+    setTimeout(tryScroll, 50);
+  }, []);
+
+  // Scroll to and expand the highlighted transaction once data is loaded AND view is visible
   useEffect(() => {
-    if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current) {
+    if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current && currentView === 'credit-history') {
       // Handle order_payout highlight
       if (highlightedOrderId) {
         // Try matching by order_id first, then by transaction id directly
@@ -118,9 +137,7 @@ export function CreditHistoryView() {
             setHighlightedOrderId(transaction.id);
           }
           hasScrolledToTransaction.current = true;
-          setTimeout(() => {
-            highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 100);
+          scrollToHighlighted();
         }
       }
       
@@ -158,16 +175,14 @@ export function CreditHistoryView() {
               hasScrolledToTransaction.current = true;
               // Store the transaction id for highlighting
               setHighlightedOrderId(matchingTransaction.id);
-              setTimeout(() => {
-                highlightedTransactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 100);
+              scrollToHighlighted();
             }
           }
         };
         matchWithdrawal();
       }
     }
-  }, [highlightedOrderId, highlightedWithdrawalId, loading, transactions]);
+  }, [highlightedOrderId, highlightedWithdrawalId, loading, transactions, currentView, scrollToHighlighted]);
 
   // Auto-fetch order details for order_accepted transactions so the credit amount shows immediately
   useEffect(() => {
