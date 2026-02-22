@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy, ExternalLink, ArrowRight, TrendingUp } from 'lucide-react';
+import { CreditCard, Lock, LockOpen, ArrowUpCircle, ArrowDownCircle, Loader2, Calendar, Wallet, ShoppingBag, Coins, CheckCircle, Package, HandCoins, ChevronDown, ChevronUp, RefreshCw, Copy, ExternalLink, ArrowRight, TrendingUp, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { BuyCreditsDialog } from '@/components/credits/BuyCreditsDialog';
 import { AvailableCreditsTooltipContent } from '@/components/credits/AvailableCreditsTooltipContent';
@@ -57,6 +58,7 @@ export function CreditHistoryView() {
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [creditSearchTerm, setCreditSearchTerm] = useState('');
 
   // Tab filter state (mirrors admin-side UserTransactionsExpanded)
   const [activeType, setActiveType] = useState('all');
@@ -1021,7 +1023,13 @@ export function CreditHistoryView() {
       case 'withdrawals': return displayedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
       default: return displayedTransactions.filter(tx => tx.type === effectiveFilter);
     }
-  })();
+  })().filter(tx => {
+    if (!creditSearchTerm.trim()) return true;
+    const term = creditSearchTerm.toLowerCase();
+    return (tx.description?.toLowerCase().includes(term)) ||
+           (tx.type.toLowerCase().includes(term)) ||
+           (String(Math.abs(tx.amount)).includes(term));
+  });
 
   const getTabCounts = () => {
     const counts: Record<string, number> = { all: displayedTransactions.length };
@@ -1407,6 +1415,28 @@ export function CreditHistoryView() {
               })}
             </TabsList>
           </Tabs>
+
+          {/* Search input */}
+          <div className="relative bg-foreground">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+            <Input
+              placeholder="Search transactions..."
+              value={creditSearchTerm}
+              onChange={(e) => setCreditSearchTerm(e.target.value)}
+              autoComplete="off"
+              className="w-full pl-10 h-9 text-sm rounded-none border-0 border-t border-white/10 text-white placeholder:text-white/50 bg-foreground focus-visible:ring-0"
+            />
+            {creditSearchTerm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
+                onClick={() => setCreditSearchTerm('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
           {/* Sub-tabs for Earnings */}
           {activeType === 'earnings' && (
