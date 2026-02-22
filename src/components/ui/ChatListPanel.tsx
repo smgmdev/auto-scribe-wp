@@ -1457,6 +1457,11 @@ export function ChatListPanel() {
           if (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) {
             if (isDialogOpen) {
               // Chat is targeted - update last message AND ensure read state is clean
+              // Set the INSERT guard to prevent UPDATE handler from overwriting read state
+              // (the sender side writes client_read: false which would race with our client_read: true)
+              recentInsertUpdatesRef.current.set(requestId, Date.now());
+              setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
+              
               setMyEngagements(prev => {
                 const updated = prev.map(e => 
                   e.id === requestId 
@@ -1519,6 +1524,10 @@ export function ChatListPanel() {
           if (isServiceRequest && senderType === 'client') {
             if (isDialogOpen) {
               // Chat is targeted - update last message AND ensure read state is clean
+              // Set the INSERT guard to prevent UPDATE handler from overwriting read state
+              recentInsertUpdatesRef.current.set(requestId, Date.now());
+              setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
+              
               setServiceRequests(prev => {
                 const updated = prev.map(r => 
                   r.id === requestId 
@@ -1591,6 +1600,7 @@ export function ChatListPanel() {
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
           // Play sound for ALL roles (client, agency, admin) when message is not from self
+          // BUT only if the chat is NOT currently targeted/focused (user is actively reading)
           const msgSenderId = newMsg.sender_id;
           const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency' && msgSenderId === agencyPayoutIdRef.current;
           const isOwnInsertMessage = isAgencySendingAsAgency || msgSenderId === user?.id;
@@ -1598,15 +1608,16 @@ export function ChatListPanel() {
             isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isDisputedChat
           );
           
-          console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isOwnMessage, senderType, isAgencyUser });
+          console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isOwnInsertMessage, senderType, isAgencyUser, isDialogOpen });
           
-          // Play sound for counterparty messages from postgres_changes as primary source
-          // playMessageSound has built-in per-message dedup (1.5s window) so if broadcast also fires, it won't double-play
-          if (isFromCounterparty) {
-            console.log('[ChatListPanel] INSERT: counterparty message, playing sound', { requestId, senderType, isMinimized, isDialogOpen });
+          // Only play sound if counterparty message AND chat is NOT targeted
+          if (isFromCounterparty && !isDialogOpen) {
+            console.log('[ChatListPanel] INSERT: counterparty message, chat not targeted, playing sound', { requestId, senderType });
             playMessageSound(newMsg.id || requestId, newMsg.message?.substring(0, 30));
+          } else if (isFromCounterparty && isDialogOpen) {
+            console.log('[ChatListPanel] INSERT: counterparty message but chat is targeted, suppressing sound');
           } else {
-            console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
+            console.log('[ChatListPanel] Own message or not in any list, no notification');
           }
         }
       )
