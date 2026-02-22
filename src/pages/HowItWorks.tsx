@@ -800,7 +800,16 @@ const AutoPublishArticles = () => {
                 <span className="text-white/40 text-[11px]">{article.wordpress_site_name}</span>
               )}
               <span className="text-white/30 text-[11px]">
-                {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {(() => {
+                  const diff = Date.now() - new Date(article.published_at).getTime();
+                  const mins = Math.floor(diff / 60000);
+                  if (mins < 1) return 'just now';
+                  if (mins < 60) return `${mins}min ago`;
+                  const hrs = Math.floor(mins / 60);
+                  if (hrs < 24) return `${hrs}h ago`;
+                  const days = Math.floor(hrs / 24);
+                  return `${days}d ago`;
+                })()}
               </span>
             </div>
           </div>
