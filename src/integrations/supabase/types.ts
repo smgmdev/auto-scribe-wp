@@ -1846,6 +1846,17 @@ export type Database = {
           last_online_at: string
         }[]
       }
+      get_latest_auto_published: {
+        Args: never
+        Returns: {
+          ai_title: string
+          id: string
+          published_at: string
+          source_title: string
+          wordpress_site_favicon: string
+          wordpress_site_name: string
+        }[]
+      }
       get_my_wp_submissions: {
         Args: { _user_id: string }
         Returns: {
