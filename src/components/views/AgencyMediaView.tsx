@@ -984,7 +984,7 @@ export function AgencyMediaView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4">
+      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
@@ -995,7 +995,7 @@ export function AgencyMediaView() {
             Manage your listed media sites and channels
           </p>
         </div>
-        <div className="flex flex-col md:flex-row w-full md:w-auto gap-0">
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-0 shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="group w-full md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all md:rounded-r-none md:border-r-0">
