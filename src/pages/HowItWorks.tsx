@@ -527,41 +527,38 @@ const ScrollColorSection = ({
           {/* Feature grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto">
             {/* Card 1: Self Publish */}
-            <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-              style={{ background: 'linear-gradient(135deg, #0d2a4a 0%, #1a1a3e 60%, #2d1b4e 100%)' }}>
+            <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-white border border-[#d2d2d7]">
               <div>
-                <p className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">Local Library</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">Connect your own<br />WordPress site.</h3>
-                <span className="text-white/70 text-sm group-hover:text-white transition-colors">Learn how ›</span>
+                <p className="text-sm font-semibold text-[#86868b] mb-3 uppercase tracking-wide">Local Library</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] leading-tight mb-4">Connect your own<br />WordPress site.</h3>
+                <span className="text-[#06c] text-sm transition-colors">Learn how ›</span>
               </div>
             </a>
 
             {/* Card 2: Media Buying Guide */}
-            <a href="/help/for-agencies#managing-sites" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-              style={{ background: 'linear-gradient(160deg, #0a1f2e 0%, #0d2d3a 50%, #0a1a2e 100%)' }}>
+            <a href="/help/for-agencies#managing-sites" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-white border border-[#d2d2d7]">
               <div>
-                <p className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">Global Media Library</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">Add your own<br />media sites.</h3>
-                <span className="text-white/70 text-sm group-hover:text-white transition-colors">Learn how ›</span>
+                <p className="text-sm font-semibold text-[#86868b] mb-3 uppercase tracking-wide">Global Media Library</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] leading-tight mb-4">Add your own<br />media sites.</h3>
+                <span className="text-[#06c] text-sm transition-colors">Learn how ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <Globe className="w-10 h-10 text-white/80" />
+                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-[#f5f5f7]">
+                  <Globe className="w-10 h-10 text-[#86868b]" />
                 </div>
               </div>
             </a>
 
             {/* Card 3: Arcana Mace for agencies */}
-            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-              style={{ background: 'linear-gradient(135deg, #2d1b5e 0%, #3b1f6b 50%, #4a2080 100%)' }}>
+            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-[#f2a547]">
               <div>
-                <p className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">Agency Account</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">Control pricing<br />and close deals.</h3>
-                <span className="text-white/70 text-sm group-hover:text-white transition-colors">Upgrade to agency ›</span>
+                <p className="text-sm font-semibold text-black/50 mb-3 uppercase tracking-wide">Agency Account</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">Control pricing<br />and close deals.</h3>
+                <span className="text-black/70 text-sm group-hover:text-black transition-colors">Upgrade to agency ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(124, 58, 237, 0.5)' }}>
-                  <Shield className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-black/10">
+                  <Shield className="w-10 h-10 text-black/60" />
                 </div>
               </div>
             </a>
