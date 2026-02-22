@@ -185,8 +185,27 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         dropIn.on('error', (event: any) => {
           console.error('[Airwallex] Payment error:', event);
-          if (mounted) setPaymentSubmitted(false);
-          toast.error(event?.message || 'Payment failed. Please try again.');
+          if (mounted) {
+            setPaymentSubmitted(false);
+            setConfirming(false);
+            const code = event?.code || event?.detail?.code || '';
+            const rawMsg = event?.message || event?.detail?.message || '';
+            let userMessage = 'Payment failed. Please try again.';
+            if (/decline|declined/i.test(rawMsg) || /decline/i.test(code)) {
+              userMessage = 'Your card was declined. Please check your card details or try a different card.';
+            } else if (/cvv|cvc|security.code/i.test(rawMsg) || /cvv/i.test(code)) {
+              userMessage = 'Incorrect CVV/security code. Please check and try again.';
+            } else if (/expir/i.test(rawMsg) || /expir/i.test(code)) {
+              userMessage = 'Your card has expired or the expiry date is incorrect. Please try a different card.';
+            } else if (/insufficient.funds/i.test(rawMsg) || /insufficient/i.test(code)) {
+              userMessage = 'Insufficient funds. Please try a different card.';
+            } else if (/3ds|authentication|authenticate/i.test(rawMsg)) {
+              userMessage = 'Card authentication failed. Please try again or use a different card.';
+            } else if (rawMsg) {
+              userMessage = rawMsg;
+            }
+            toast.error(userMessage, { duration: 6000 });
+          }
         });
 
         dropIn.on('cancel', () => {
