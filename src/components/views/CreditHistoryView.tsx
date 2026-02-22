@@ -141,12 +141,11 @@ export function CreditHistoryView() {
   useEffect(() => {
     if (deepLinkKey === 0) return; // skip initial mount
     if (loading || transactions.length === 0 || currentView !== 'credit-history') return;
+    // Use a local copy of deepLinkMode so we don't depend on stale closures
+    const mode = deepLinkMode;
+    if (!mode) return;
 
-    // Clear previous highlight before processing new deep-link
-    // This prevents stale highlights from interfering
-    if (deepLinkMode === 'transaction') {
-      // Process order/payout highlight
-      if (!highlightedOrderId) return;
+    if (mode === 'transaction' && highlightedOrderId) {
       const transaction = highlightedTxType
         ? (transactions.find(t => t.order_id === highlightedOrderId && t.type === highlightedTxType)
           || transactions.find(t => t.id === highlightedOrderId && t.type === highlightedTxType))
@@ -182,10 +181,8 @@ export function CreditHistoryView() {
 
         scrollToHighlighted();
       }
-    } else if (deepLinkMode === 'withdrawal') {
-      // Process withdrawal highlight
-      if (!highlightedWithdrawalId) return;
-      const matchWithdrawal = async () => {
+    } else if (mode === 'withdrawal' && highlightedWithdrawalId) {
+      const doMatch = async () => {
         const { data: withdrawal } = await supabase
           .from('agency_withdrawals')
           .select('*')
@@ -215,11 +212,8 @@ export function CreditHistoryView() {
           }
         }
       };
-      matchWithdrawal();
+      doMatch();
     }
-    
-    // Reset deepLinkMode after processing to prevent re-runs
-    setDeepLinkMode(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deepLinkKey, loading, transactions, currentView]);
 
