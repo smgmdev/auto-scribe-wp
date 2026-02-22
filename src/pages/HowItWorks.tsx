@@ -342,10 +342,10 @@ const ScrollColorSection = ({
           
           {/* Links */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
-            <a href="/self-publishing" className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+            <a href="/self-publishing" className="bg-[#2997ff] text-white text-lg px-6 py-3 rounded-full hover:bg-[#0077ed] transition-colors inline-flex items-center gap-1 font-medium">
               Discover Self Publishing <span className="text-xl">↗</span>
             </a>
-            <button onClick={() => scrollToSection(globalLibraryRef)} className="text-[#2997ff] text-lg hover:text-white transition-colors inline-flex items-center gap-1">
+            <button onClick={() => scrollToSection(globalLibraryRef)} className="bg-[#2997ff] text-white text-lg px-6 py-3 rounded-full hover:bg-[#0077ed] transition-colors inline-flex items-center gap-1 font-medium">
               Learn about Global Library <span className="text-xl">↓</span>
             </button>
           </div>
