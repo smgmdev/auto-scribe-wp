@@ -293,9 +293,9 @@ const ScrollColorSection = ({
                 </h3>
                 <button 
                   onClick={() => scrollToSection(localLibraryRef)}
-                  className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
+                  className="mt-2 px-6 py-2.5 bg-white text-[#1d1d1f] text-sm font-medium hover:bg-white/90 transition-colors"
                 >
-                  Learn more <span className="text-xl">›</span>
+                  Learn more
                 </button>
               </div>
             </div>
@@ -311,9 +311,9 @@ const ScrollColorSection = ({
                 </h3>
                 <button 
                   onClick={() => scrollToSection(globalLibraryRef)}
-                  className="text-[#7f1d1d] text-lg hover:text-white transition-colors inline-flex items-center gap-1"
+                  className="mt-2 px-6 py-2.5 bg-white text-[#1d1d1f] text-sm font-medium hover:bg-white/90 transition-colors"
                 >
-                  Learn more <span className="text-xl">›</span>
+                  Learn more
                 </button>
               </div>
             </div>
