@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users, Info } from 'lucide-react';
+import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users, Info, RefreshCw } from 'lucide-react';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { useAppStore } from '@/stores/appStore';
@@ -475,6 +475,14 @@ export function DashboardView() {
                 {isAdmin ? 'Corporate' : 'Regular user'}
               </Badge>
             )}
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              title="Refresh dashboard"
+            >
+              <RefreshCw className="h-3.5 w-3.5 text-white/60 hover:text-white/90" />
+            </button>
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
         </div>
@@ -505,7 +513,15 @@ export function DashboardView() {
             <Badge className={isAdmin ? "bg-[#f2a547] text-black border-[#f2a547] hover:bg-[#f2a547] px-3 py-1 whitespace-nowrap" : "bg-white/10 text-white/80 border-white/20 hover:bg-white/10 px-3 py-1 whitespace-nowrap"}>
               {isAdmin ? 'Corporate' : 'Regular user'}
             </Badge>
-          )}
+           )}
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+            title="Refresh dashboard"
+          >
+            <RefreshCw className="h-3.5 w-3.5 text-white/60 hover:text-white/90" />
+          </button>
         </div>
       </div>
 
