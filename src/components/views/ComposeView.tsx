@@ -816,6 +816,7 @@ export function ComposeView() {
         if (editingArticle) {
           setEditingArticle(null);
         }
+        setArticlesTargetTab('published');
         setCurrentView('articles');
       }, 2500);
 
@@ -954,6 +955,8 @@ export function ComposeView() {
       setShowDraftSuccess(true);
       setTimeout(() => {
         setShowDraftSuccess(false);
+        setArticlesTargetTab('drafts');
+        setCurrentView('articles');
       }, 2000);
     } catch (error) {
       console.error('Save error:', error);
