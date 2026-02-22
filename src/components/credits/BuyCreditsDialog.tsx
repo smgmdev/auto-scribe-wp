@@ -15,8 +15,8 @@ import { toast } from 'sonner';
 import { init as airwallexInit, createElement } from '@airwallex/components-sdk';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
-const MIN_CREDITS = 10;
-const QUICK_AMOUNTS = [10, 50, 100, 500];
+const MIN_CREDITS = 5;
+const QUICK_AMOUNTS = [5, 10, 50, 100, 500];
 
 interface BuyCreditsDialogProps {
   open: boolean;
@@ -26,7 +26,7 @@ interface BuyCreditsDialogProps {
 type Step = 'select' | 'payment';
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
-  const [creditAmount, setCreditAmount] = useState<string>('10');
+  const [creditAmount, setCreditAmount] = useState<string>('5');
   const [purchasing, setPurchasing] = useState(false);
   const [step, setStep] = useState<Step>('select');
   const [cardReady, setCardReady] = useState(false);
