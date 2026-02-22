@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Globe, Newspaper, ExternalLink, Plus, FileText, Loader2, Library, Package, MessageSquare, ArrowRight, CheckCircle, Wallet, Coins, Building2, ClipboardList, TrendingUp, Clock, Lock, ArrowUpCircle, ShoppingBag, ArrowDownCircle, Users, Info, RefreshCw } from 'lucide-react';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
@@ -309,16 +309,21 @@ export function DashboardView() {
       .is('order_id', null)
       .neq('status', 'cancelled');
 
-    if (buyerPendingRequests) {
-      for (const request of buyerPendingRequests) {
-        const { data: orderRequestMessages } = await supabase
-          .from('service_messages')
-          .select('id')
-          .eq('request_id', request.id)
-          .like('message', '%CLIENT_ORDER_REQUEST%')
-          .limit(1);
+    if (buyerPendingRequests && buyerPendingRequests.length > 0) {
+      // Batch: fetch all CLIENT_ORDER_REQUEST messages in one query
+      const requestIds = buyerPendingRequests.map(r => r.id);
+      const { data: orderRequestMessages } = await supabase
+        .from('service_messages')
+        .select('request_id')
+        .in('request_id', requestIds)
+        .like('message', '%CLIENT_ORDER_REQUEST%');
 
-        if (orderRequestMessages && orderRequestMessages.length > 0) {
+      const requestsWithOrderRequest = new Set(
+        (orderRequestMessages || []).map(m => m.request_id)
+      );
+
+      for (const request of buyerPendingRequests) {
+        if (requestsWithOrderRequest.has(request.id)) {
           const ms = request.media_sites as { price: number } | null;
           if (ms?.price) lockedInOrderRequests += ms.price;
         }
@@ -414,26 +419,33 @@ export function DashboardView() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchGlobalLibraryCount]);
 
+  // Debounced agency summary refresh to prevent rapid re-fetches
+  const agencyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedFetchAgencySummary = useCallback(() => {
+    if (agencyDebounceRef.current) clearTimeout(agencyDebounceRef.current);
+    agencyDebounceRef.current = setTimeout(() => fetchAgencySummary(), 500);
+  }, [fetchAgencySummary]);
+
   // Real-time: agency summary (orders, withdrawals, credit_transactions, service_requests)
   useEffect(() => {
     if (!user || !isAgency) return;
     const channel = supabase
       .channel('dashboard-agency-rt')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchAgencySummary();
+        debouncedFetchAgencySummary();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_withdrawals', filter: `user_id=eq.${user.id}` }, () => {
-        fetchAgencySummary();
+        debouncedFetchAgencySummary();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` }, () => {
-        fetchAgencySummary();
+        debouncedFetchAgencySummary();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
-        fetchAgencySummary();
+        debouncedFetchAgencySummary();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, isAgency, fetchAgencySummary]);
+  }, [user, isAgency, debouncedFetchAgencySummary]);
 
   // Real-time: articles (published count + recent articles list)
   useEffect(() => {
