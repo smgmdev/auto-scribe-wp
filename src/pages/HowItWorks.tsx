@@ -789,7 +789,7 @@ const AutoPublishArticles = () => {
   return (
     <div className="flex flex-col h-full">
       {articles.map((article, i) => (
-        <div key={article.id} className={`flex items-center gap-3 px-5 ${i < articles.length - 1 ? 'border-b border-white/5' : ''} flex-1`}>
+        <div key={article.id} className={`flex items-center gap-3 px-5 py-4 ${i < articles.length - 1 ? 'border-b border-white/5' : ''} flex-1`}>
           {article.wordpress_site_favicon && (
             <img src={article.wordpress_site_favicon} alt="" className="w-5 h-5 rounded-sm flex-shrink-0 mt-0.5 object-contain" />
           )}
