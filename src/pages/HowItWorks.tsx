@@ -740,7 +740,7 @@ const ScrollColorSection = ({
                 </div>
               </div>
               {/* Atom orbital animation */}
-              <div className="flex-1 flex items-center justify-center relative">
+              <div className="flex-1 flex flex-col items-center justify-center relative">
                 <div className="relative w-48 h-48">
                   {/* Glow background */}
                   <div className="absolute inset-0 rounded-full bg-[#30d158]/10 blur-2xl animate-pulse" />
@@ -774,6 +774,8 @@ const ScrollColorSection = ({
                     <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/50 shadow-[0_0_6px_rgba(48,209,88,0.4)]" />
                   </div>
                 </div>
+                {/* Cycling fade text */}
+                <SecurityFadeText />
               </div>
             </a>
           </div>
@@ -781,6 +783,33 @@ const ScrollColorSection = ({
         </div>
       </div>
     </section>
+  );
+};
+
+// Security fade text component
+const securityTexts = ['Transaction security.', 'Communication security.', 'Anti fraud supervision.'];
+const SecurityFadeText = () => {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex(prev => (prev + 1) % securityTexts.length);
+        setVisible(true);
+      }, 600);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <p
+      className="text-[#30d158]/80 text-sm font-medium mt-4 h-6 transition-opacity duration-500 ease-in-out"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
+      {securityTexts[index]}
+    </p>
   );
 };
 
