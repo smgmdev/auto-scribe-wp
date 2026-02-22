@@ -2003,7 +2003,7 @@ export function AdminMediaManagementView() {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0 ml-[52px] md:ml-0">
+                            <div className="flex flex-wrap items-center gap-2 flex-shrink-0 ml-[52px] md:ml-0">
                               <Badge variant="outline" className="text-xs">
                                 {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
@@ -2016,6 +2016,7 @@ export function AdminMediaManagementView() {
                                   Disconnected
                                 </Badge>
                               )}
+                              <div className="w-full md:w-auto md:hidden" />
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-foreground hover:text-background">
