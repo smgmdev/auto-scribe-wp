@@ -140,12 +140,25 @@ export function CreditHistoryView() {
         const transaction = transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout')
           || transactions.find(t => t.id === highlightedOrderId);
         if (transaction) {
-          setExpandedWithdrawals(new Set([transaction.id]));
+          setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
           // Normalize highlightedOrderId to the transaction id for consistent highlighting
           if (highlightedOrderId !== transaction.id && highlightedOrderId !== transaction.order_id) {
             setHighlightedOrderId(transaction.id);
           }
           hasScrolledToTransaction.current = true;
+
+          // For instant publishing payouts, fetch site details so expanded content renders
+          const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
+          if (isInstantPublishingPayout && transaction.metadata?.site_name) {
+            supabase.rpc('get_public_sites').then(({ data: publicSites }) => {
+              const wpSite = publicSites?.find((s: any) => s.name === transaction.metadata?.site_name);
+              setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+                site_favicon: wpSite?.favicon || null,
+                site_url: wpSite?.url || null,
+              }}));
+            });
+          }
+
           scrollToHighlighted();
         }
       }
