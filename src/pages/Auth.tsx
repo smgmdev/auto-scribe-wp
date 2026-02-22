@@ -675,7 +675,7 @@ export default function Auth() {
           {/* Form */}
           {/* Slider Puzzle Captcha - overlay popup on sign in */}
           {mode === 'signin' && showCaptcha && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center">
+            <div className="relative z-50 flex items-center justify-center py-4">
               <div className="w-full max-w-sm mx-4">
                 <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} onCancel={() => setShowCaptcha(false)} />
               </div>
