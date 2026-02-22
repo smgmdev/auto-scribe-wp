@@ -805,6 +805,45 @@ export function AdminAgencyWithdrawalsView() {
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">Method</p>
                 <p className="font-medium">{selectedWithdrawal.withdrawal_method === 'bank' ? 'Bank Transfer' : 'USDT (Crypto)'}</p>
+                
+                {selectedWithdrawal.withdrawal_method === 'bank' && selectedWithdrawal.bank_details && (
+                  <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                    <p className="text-sm text-muted-foreground">Bank Details</p>
+                    {selectedWithdrawal.bank_details.bank_name && (
+                      <p className="text-sm"><span className="text-muted-foreground">Bank:</span> {selectedWithdrawal.bank_details.bank_name}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_account_holder && (
+                      <p className="text-sm"><span className="text-muted-foreground">Holder:</span> {selectedWithdrawal.bank_details.bank_account_holder}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_account_number && (
+                      <p className="text-sm"><span className="text-muted-foreground">Account:</span> {selectedWithdrawal.bank_details.bank_account_number}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_iban && (
+                      <p className="text-sm"><span className="text-muted-foreground">IBAN:</span> {selectedWithdrawal.bank_details.bank_iban}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_swift_code && (
+                      <p className="text-sm"><span className="text-muted-foreground">SWIFT:</span> {selectedWithdrawal.bank_details.bank_swift_code}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_country && (
+                      <p className="text-sm"><span className="text-muted-foreground">Country:</span> {selectedWithdrawal.bank_details.bank_country}</p>
+                    )}
+                    {selectedWithdrawal.bank_details.bank_address && (
+                      <p className="text-sm"><span className="text-muted-foreground">Address:</span> {selectedWithdrawal.bank_details.bank_address}</p>
+                    )}
+                  </div>
+                )}
+
+                {selectedWithdrawal.withdrawal_method === 'crypto' && selectedWithdrawal.crypto_details && (
+                  <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                    <p className="text-sm text-muted-foreground">USDT Details</p>
+                    {selectedWithdrawal.crypto_details.usdt_network && (
+                      <p className="text-sm"><span className="text-muted-foreground">Network:</span> {selectedWithdrawal.crypto_details.usdt_network}</p>
+                    )}
+                    {selectedWithdrawal.crypto_details.usdt_wallet_address && (
+                      <p className="text-sm"><span className="text-muted-foreground">Wallet:</span> <span className="break-all">{selectedWithdrawal.crypto_details.usdt_wallet_address}</span></p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {actionType === 'approve' && (
