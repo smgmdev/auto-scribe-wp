@@ -368,7 +368,7 @@ export function SliderPuzzleCaptcha({ onVerified, onCancel }: SliderPuzzleCaptch
           <button
             type="button"
             onClick={onCancel}
-            className="w-full py-2.5 bg-black text-white text-sm font-medium hover:bg-black/90 transition-colors"
+            className="w-full py-2.5 bg-white text-black text-sm font-medium border border-border hover:bg-black hover:text-white transition-colors"
           >
             Cancel
           </button>
