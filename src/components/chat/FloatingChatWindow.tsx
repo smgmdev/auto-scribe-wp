@@ -2627,7 +2627,50 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       tracker.join();
       presenceTrackerRef.current = tracker;
 
+      // Polling fallback: check counterparty's last_online_at every 10s
+      // This ensures status is correct even if presence channel fails silently
+      const pollOnlineStatus = async () => {
+        if (!globalChatRequest) return;
+        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+        
+        // Fetch request metadata to find counterparty
+        const { data: reqData } = await supabase
+          .from('service_requests')
+          .select('user_id, agency_payout_id')
+          .eq('id', globalChatRequest.id)
+          .maybeSingle();
+        if (!reqData) return;
+
+        if (actualSenderType === 'client' && reqData.agency_payout_id) {
+          // Client is viewing → check agency's last_online_at
+          const { data } = await supabase
+            .from('agency_payouts')
+            .select('last_online_at')
+            .eq('id', reqData.agency_payout_id)
+            .maybeSingle();
+          if (data?.last_online_at && data.last_online_at > twoMinutesAgo) {
+            setIsCounterpartyOnline(true);
+          }
+        } else if (actualSenderType === 'agency' && reqData.user_id) {
+          // Agency is viewing → check client's last_online_at
+          const { data } = await supabase
+            .from('profiles')
+            .select('last_online_at')
+            .eq('id', reqData.user_id)
+            .maybeSingle();
+          if (data?.last_online_at && data.last_online_at > twoMinutesAgo) {
+            setIsCounterpartyOnline(true);
+          }
+        }
+      };
+
+      // Initial poll after 3s (give presence time to connect first)
+      const initialPollTimeout = setTimeout(pollOnlineStatus, 3000);
+      const pollInterval = setInterval(pollOnlineStatus, 10000);
+
       return () => {
+        clearTimeout(initialPollTimeout);
+        clearInterval(pollInterval);
         tracker.leave();
         presenceTrackerRef.current = null;
         setIsCounterpartyOnline(false);
