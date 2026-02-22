@@ -246,7 +246,6 @@ export function MyAgencyView() {
           </p>
         </div>
         <Badge variant="secondary" className="bg-[#f2a547] text-black border-[#f2a547]">
-          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
           Valid
         </Badge>
       </div>
