@@ -594,8 +594,8 @@ const ScrollColorSection = ({
                 <span className="text-[#06c] text-sm transition-colors">Learn how ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-[#f5f5f7]">
-                  <Library className="w-10 h-10 text-[#86868b]" />
+                <div className="w-20 h-20 rounded-none flex items-center justify-center">
+                  <Library className="w-full h-full text-[#1d1d1f]" />
                 </div>
               </div>
             </a>
