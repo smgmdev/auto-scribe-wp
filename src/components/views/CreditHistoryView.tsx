@@ -1194,6 +1194,7 @@ export function CreditHistoryView() {
               withdrawalsByCrypto={withdrawalsByCrypto}
               creditsInPendingRequests={creditsInPendingRequests}
               creditsInOrders={creditsInOrders}
+              creditsInWithdrawals={creditsInWithdrawals}
               totalPurchased={totalPurchased}
               purchasedOnline={onlinePurchased}
               purchasedOffline={offlineInvoice}

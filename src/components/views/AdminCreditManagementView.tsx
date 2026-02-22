@@ -702,6 +702,7 @@ export const AdminCreditManagementView = () => {
                                           withdrawalsByCrypto={user.pendingCryptoWithdrawals || 0}
                                           creditsInPendingRequests={user.lockedFromRequests || 0}
                                           creditsInOrders={user.lockedFromOrders || 0}
+                                          creditsInWithdrawals={user.lockedFromWithdrawals || 0}
                                           totalPurchased={user.purchased || 0}
                                           totalSpent={user.totalSpent || 0}
                                           b2bSpent={(user.totalSpent || 0) - (user.publishSpent || 0) - (user.usageSpent || 0)}
