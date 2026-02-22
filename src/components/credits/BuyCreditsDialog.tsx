@@ -118,7 +118,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     if (step !== 'payment' || !intentData) return;
 
     let mounted = true;
-
+    let pollIntervalId: ReturnType<typeof setInterval> | null = null;
     const initDropIn = async () => {
       try {
         const { payments } = await airwallexInit({
@@ -143,28 +143,71 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           if (mounted) setCardReady(true);
         });
 
-        dropIn.on('success', async () => {
-          console.log('[Airwallex] Payment success event fired');
+        const handlePaymentSuccess = async () => {
           if (!mounted) return;
           setConfirming(true);
           try {
-            await supabase.functions.invoke('airwallex-webhook', {
+            const { data: result, error } = await supabase.functions.invoke('airwallex-webhook', {
               body: { intent_id: intentData.intent_id },
             });
-            toast.success(`${parsedAmount} credits added to your account!`);
-            refreshCredits?.();
-            onOpenChange(false);
+            if (error) throw error;
+            if (result?.success) {
+              if (result.already_processed) {
+                toast.info('This payment was already processed.');
+              } else {
+                toast.success(`${parsedAmount} credits added to your account!`);
+              }
+              refreshCredits?.();
+              onOpenChange(false);
+            } else {
+              toast.error(result?.message || 'Payment not yet completed. Please wait a moment.');
+            }
           } catch (err: any) {
+            console.error('[Airwallex] Credit update error:', err);
             toast.error('Payment succeeded but credit update failed. Please contact support.');
           } finally {
             setConfirming(false);
           }
+        };
+
+        dropIn.on('success', () => {
+          console.log('[Airwallex] Payment success event fired');
+          handlePaymentSuccess();
         });
 
         dropIn.on('error', (event: any) => {
           console.error('[Airwallex] Payment error:', event);
           toast.error(event?.message || 'Payment failed. Please try again.');
         });
+
+        // Polling fallback: check intent status every 5s in case Drop-in events don't fire
+        let pollCount = 0;
+        const maxPolls = 24; // 2 minutes max
+        pollIntervalId = setInterval(async () => {
+          if (!mounted || pollCount >= maxPolls) {
+            clearInterval(pollIntervalId!);
+            return;
+          }
+          pollCount++;
+          try {
+            const { data: result } = await supabase.functions.invoke('airwallex-webhook', {
+              body: { intent_id: intentData.intent_id },
+            });
+            if (result?.success) {
+              clearInterval(pollIntervalId!);
+              if (!mounted) return;
+              if (result.already_processed) {
+                toast.info('Payment processed!');
+              } else {
+                toast.success(`${parsedAmount} credits added to your account!`);
+              }
+              refreshCredits?.();
+              onOpenChange(false);
+            }
+          } catch {
+            // Silently retry
+          }
+        }, 5000);
 
         // Wait a tick for the container to be in the DOM
         setTimeout(() => {
@@ -198,6 +241,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
     return () => {
       mounted = false;
+      if (pollIntervalId) clearInterval(pollIntervalId);
       if (cardElementRef.current) {
         try {
           cardElementRef.current.unmount?.();
