@@ -6,6 +6,8 @@ interface AvailableCreditsTooltipContentProps {
   creditsInPendingRequests: number;
   creditsInOrders: number;
   totalPurchased: number;
+  purchasedOnline?: number;
+  purchasedOffline?: number;
   totalSpent: number;
   b2bSpent?: number;
   publishSpent?: number;
@@ -21,6 +23,8 @@ export const AvailableCreditsTooltipContent = ({
   creditsInPendingRequests,
   creditsInOrders,
   totalPurchased,
+  purchasedOnline,
+  purchasedOffline,
   totalSpent,
   b2bSpent = 0,
   publishSpent = 0,
@@ -84,6 +88,14 @@ export const AvailableCreditsTooltipContent = ({
       <div className="flex justify-between gap-4">
         <span className="text-white/70">Total Purchased:</span>
         <span className="font-semibold text-green-400">{totalPurchased.toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between gap-4 pl-3">
+        <span className="text-white/50 text-xs">Online via platform:</span>
+        <span className="text-xs font-medium text-green-400/80">{(purchasedOnline ?? totalPurchased).toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between gap-4 pl-3">
+        <span className="text-white/50 text-xs">Offline via invoice:</span>
+        <span className="text-xs font-medium text-green-400/80">{(purchasedOffline ?? 0).toLocaleString()}</span>
       </div>
       <div className="flex justify-between gap-4">
         <span className="text-white/70">Total Spent:</span>

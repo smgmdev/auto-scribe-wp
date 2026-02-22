@@ -1175,6 +1175,8 @@ export function CreditHistoryView() {
               creditsInPendingRequests={creditsInPendingRequests}
               creditsInOrders={creditsInOrders}
               totalPurchased={totalPurchased}
+              purchasedOnline={onlinePurchased}
+              purchasedOffline={offlineInvoice}
               totalSpent={totalSpent}
               b2bSpent={completedOrdersSpent}
               publishSpent={publishSpending}
