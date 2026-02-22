@@ -406,6 +406,63 @@ export function DashboardView() {
     return () => { supabase.removeChannel(channel); };
   }, [user, isAgency, fetchAgencySummary]);
 
+  // Real-time: articles (published count + recent articles list)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('dashboard-articles-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles', filter: `user_id=eq.${user.id}` }, () => {
+        refreshArticles(false);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, refreshArticles]);
+
+  // Real-time: wordpress_sites (local library count)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('dashboard-wp-sites-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wordpress_sites', filter: `user_id=eq.${user.id}` }, () => {
+        refetchSites(false);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, refetchSites]);
+
+  // Real-time: agency_payouts (agency status / downgrade changes)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('dashboard-agency-payouts-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_payouts', filter: `user_id=eq.${user.id}` }, () => {
+        // Re-check agency status
+        (async () => {
+          const { data } = await supabase
+            .from('agency_payouts')
+            .select('id, onboarding_complete')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          const isOnboarded = data?.onboarding_complete === true;
+          setIsAgency(isOnboarded);
+        })();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  // Real-time: user_credits (available credits)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('dashboard-user-credits-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_credits', filter: `user_id=eq.${user.id}` }, () => {
+        availableCreditsData.refresh();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, availableCreditsData.refresh]);
+
   const getSiteInfo = (article: { publishedTo?: string; publishedToName?: string | null; publishedToFavicon?: string | null }): { name: string; favicon: string | null } | null => {
     // Use stored article data first (persists after site deletion)
     if (article.publishedToName) {
