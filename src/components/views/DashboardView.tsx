@@ -281,8 +281,49 @@ export function DashboardView() {
     const totalEarnings = orderEarnings + payoutTxEarnings;
     const totalSales = orderSales + payoutTxSales;
 
-    // Sellers don't lock credits - locked credits are buyer-side only
-    // Open chats without actual order requests don't lock any credits
+    // Fetch buyer-side locked credits (seller may also be a buyer)
+    let lockedInOrderRequests = 0;
+    
+    // Locked in active orders (as buyer)
+    const { data: buyerActiveOrders } = await supabase
+      .from('orders')
+      .select('id, media_sites(price)')
+      .eq('user_id', user.id)
+      .neq('status', 'cancelled')
+      .neq('status', 'completed')
+      .neq('delivery_status', 'accepted');
+
+    let buyerLockedInOrders = 0;
+    if (buyerActiveOrders) {
+      for (const order of buyerActiveOrders) {
+        const ms = order.media_sites as { price: number } | null;
+        if (ms?.price) buyerLockedInOrders += ms.price;
+      }
+    }
+
+    // Locked in pending requests (as buyer, only with CLIENT_ORDER_REQUEST)
+    const { data: buyerPendingRequests } = await supabase
+      .from('service_requests')
+      .select('id, media_sites!inner(price)')
+      .eq('user_id', user.id)
+      .is('order_id', null)
+      .neq('status', 'cancelled');
+
+    if (buyerPendingRequests) {
+      for (const request of buyerPendingRequests) {
+        const { data: orderRequestMessages } = await supabase
+          .from('service_messages')
+          .select('id')
+          .eq('request_id', request.id)
+          .like('message', '%CLIENT_ORDER_REQUEST%')
+          .limit(1);
+
+        if (orderRequestMessages && orderRequestMessages.length > 0) {
+          const ms = request.media_sites as { price: number } | null;
+          if (ms?.price) lockedInOrderRequests += ms.price;
+        }
+      }
+    }
 
     // Fetch withdrawals to calculate wallet balance and withdrawal stats
     const { data: withdrawals } = await supabase
@@ -319,7 +360,7 @@ export function DashboardView() {
       });
     }
 
-    const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount;
+    const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount - buyerLockedInOrders - lockedInOrderRequests;
 
     setAgencySummary({
       walletBalance,
@@ -333,8 +374,8 @@ export function DashboardView() {
       pendingCryptoWithdrawals,
       completedBankWithdrawals,
       completedCryptoWithdrawals,
-      lockedInOrders: 0,
-      lockedInOrderRequests: 0,
+      lockedInOrders: buyerLockedInOrders,
+      lockedInOrderRequests,
       loading: false
     });
   }, [user, isAgency]);
@@ -731,8 +772,9 @@ export function DashboardView() {
                       completedWithdrawals={agencySummary.completedWithdrawals}
                       pendingBankWithdrawals={agencySummary.pendingBankWithdrawals}
                       pendingCryptoWithdrawals={agencySummary.pendingCryptoWithdrawals}
+                      lockedInOrderRequests={agencySummary.lockedInOrderRequests}
+                      lockedInOrders={agencySummary.lockedInOrders}
                       walletBalance={agencySummary.walletBalance}
-                      showLocked={false}
                     />
                   </TooltipContent>
                 </Tooltip>
