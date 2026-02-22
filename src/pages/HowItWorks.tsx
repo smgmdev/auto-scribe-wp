@@ -674,7 +674,7 @@ const ScrollColorSection = ({
           {/* Feature grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto">
             {/* Card 1 - AI Article Generation */}
-            <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[420px] flex flex-col cursor-pointer bg-[#1a1a2e]">
+            <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
               <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article Generation</h3>
               </div>
