@@ -763,15 +763,11 @@ const ScrollColorSection = ({
 
 // Auto Publish Articles component for the AI Auto Publishing card
 const AutoPublishArticles = () => {
-  const [articles, setArticles] = useState<{ id: string; ai_title: string | null; source_title: string; wordpress_post_link: string | null; wordpress_site_name: string | null; wordpress_site_favicon: string | null; published_at: string }[]>([]);
+  const [articles, setArticles] = useState<{ id: string; ai_title: string | null; source_title: string; wordpress_site_name: string | null; wordpress_site_favicon: string | null; published_at: string }[]>([]);
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const { data } = await supabase
-        .from('ai_published_sources')
-        .select('id, ai_title, source_title, wordpress_post_link, wordpress_site_name, wordpress_site_favicon, published_at')
-        .order('published_at', { ascending: false })
-        .limit(3);
+      const { data } = await supabase.rpc('get_latest_auto_published');
       if (data) setArticles(data);
     };
     fetchArticles();
