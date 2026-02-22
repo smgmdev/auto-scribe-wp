@@ -813,6 +813,9 @@ const Landing = () => {
       {!isInstalled && (
         <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-6">
           <p className="text-xs text-muted-foreground mb-3">
+            *Arcana Mace is not affiliated with, endorsed by, or officially connected to any media organizations or magazines whose logos may appear on the platform. Arcana Mace operates solely as a marketplace platform that connects global PR agencies with clients worldwide, specializing in the safe and secure facilitation of media buying transactions.
+          </p>
+          <p className="text-xs text-muted-foreground mb-3">
             *Arcana Mace is a Progressive Web App (PWA), you can add it to your phone's home screen and it will work perfectly and smoothly.
           </p>
           <div className="flex flex-col md:flex-row items-stretch md:items-center">
