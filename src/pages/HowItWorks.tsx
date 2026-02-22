@@ -763,8 +763,20 @@ const AutoPublishArticles = () => {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const { data } = await supabase.rpc('get_latest_auto_published');
-      if (data) setArticles(data);
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from('ai_published_sources')
+        .select('id, ai_title, source_title, wordpress_site_name, wordpress_site_favicon, published_at')
+        .gte('published_at', oneHourAgo)
+        .order('published_at', { ascending: false })
+        .limit(20);
+      if (data && data.length > 0) {
+        setArticles(data);
+      } else {
+        // Fallback to latest 3 if none in last hour
+        const { data: fallback } = await supabase.rpc('get_latest_auto_published');
+        if (fallback) setArticles(fallback);
+      }
     };
     fetchArticles();
 
@@ -785,8 +797,6 @@ const AutoPublishArticles = () => {
       </div>
     );
   }
-
-  const displayArticles = articles.slice(0, 4);
 
   const renderArticle = (article: typeof articles[0], i: number, total: number) => (
     <div key={`${article.id}-${i}`} className={`flex items-center gap-3 px-5 py-3 ${i < total - 1 ? 'border-b border-white/5' : ''}`}>
@@ -818,9 +828,9 @@ const AutoPublishArticles = () => {
 
   return (
     <div className="h-full overflow-hidden relative">
-      <div className="animate-scroll-up">
-        {displayArticles.map((a, i) => renderArticle(a, i, displayArticles.length))}
-        {displayArticles.map((a, i) => renderArticle(a, i + displayArticles.length, displayArticles.length))}
+      <div className="animate-scroll-up" style={{ animationDuration: `${Math.max(articles.length * 4, 12)}s` }}>
+        {articles.map((a, i) => renderArticle(a, i, articles.length))}
+        {articles.map((a, i) => renderArticle(a, i + articles.length, articles.length))}
       </div>
     </div>
   );
