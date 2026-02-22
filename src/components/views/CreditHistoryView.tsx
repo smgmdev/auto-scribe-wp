@@ -2055,6 +2055,9 @@ export function CreditHistoryView() {
                   if (hasReason) {
                     return transaction.description?.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff');
                   }
+                  if (transaction.type === 'purchase' && transaction.description?.startsWith('Airwallex payment:')) {
+                    return 'Account top up with card';
+                  }
                   if (transaction.type === 'withdrawal_locked') {
                     return transaction.description?.includes('Bank Transfer') 
                       ? 'Withdrawal via Bank Transfer' 
@@ -2465,8 +2468,40 @@ export function CreditHistoryView() {
                               </>
                            ) : isInstantPublishingPayout ? (
                             null
-                           ) : (
-                           /* Other transaction types - Show standard details */
+                           ) : (transaction.type === 'purchase' && transaction.description?.startsWith('Airwallex payment:')) ? (
+                           /* Card Purchase - Show Payment ID, type, and processed date */
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                               <div>
+                                 <span className="text-muted-foreground">Payment ID:</span>
+                                 <div className="flex items-center gap-1.5">
+                                   <p className="font-medium text-sm break-all">{transaction.description.replace('Airwallex payment: ', '')}</p>
+                                   <button
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       navigator.clipboard.writeText(transaction.description!.replace('Airwallex payment: ', ''));
+                                       toast.success('Payment ID copied');
+                                     }}
+                                     className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                                   >
+                                     <Copy className="h-3.5 w-3.5" />
+                                   </button>
+                                 </div>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Transaction Type:</span>
+                                 <p className="font-medium">Card Purchase</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Amount:</span>
+                                 <p className="font-medium text-green-500">+{transaction.amount.toLocaleString()} credits</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Processed:</span>
+                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                               </div>
+                             </div>
+                            ) : (
+                            /* Other transaction types - Show standard details */
                              <>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                <div>
