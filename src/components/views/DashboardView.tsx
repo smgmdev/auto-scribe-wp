@@ -272,8 +272,10 @@ export function DashboardView() {
         .order('created_at', { ascending: false });
 
       const payoutTxs = payoutTxData || [];
-      const payoutTxEarnings = payoutTxs.reduce((sum: number, t: any) => sum + t.amount, 0);
-      const payoutTxSales = payoutTxs.reduce((sum: number, t: any) => sum + (t.metadata?.gross_amount || t.amount), 0);
+      // Only count instant publishing payouts (those with metadata.site_name) to avoid double-counting B2B order payouts
+      const instantPublishTxs = payoutTxs.filter((t: any) => t.metadata?.site_name);
+      const payoutTxEarnings = instantPublishTxs.reduce((sum: number, t: any) => sum + t.amount, 0);
+      const payoutTxSales = instantPublishTxs.reduce((sum: number, t: any) => sum + (t.metadata?.gross_amount || t.amount), 0);
 
       const totalEarnings = orderEarnings + payoutTxEarnings;
       const totalSales = orderSales + payoutTxSales;
