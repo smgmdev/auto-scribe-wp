@@ -142,9 +142,11 @@ export function CreditHistoryView() {
     if (deepLinkKey === 0) return; // skip initial mount
     if (loading || transactions.length === 0 || currentView !== 'credit-history') return;
 
-    // Handle order/payout highlight (only if no withdrawal is being targeted)
-    if (deepLinkMode === 'transaction' && highlightedOrderId) {
-      // When txType is provided, prefer matching by type to avoid ambiguity (e.g. order_payout vs order_completed for same order)
+    // Clear previous highlight before processing new deep-link
+    // This prevents stale highlights from interfering
+    if (deepLinkMode === 'transaction') {
+      // Process order/payout highlight
+      if (!highlightedOrderId) return;
       const transaction = highlightedTxType
         ? (transactions.find(t => t.order_id === highlightedOrderId && t.type === highlightedTxType)
           || transactions.find(t => t.id === highlightedOrderId && t.type === highlightedTxType))
@@ -152,9 +154,7 @@ export function CreditHistoryView() {
           || transactions.find(t => t.order_id === highlightedOrderId));
       if (transaction) {
         setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
-        if (highlightedOrderId !== transaction.id) {
-          setHighlightedOrderId(transaction.id);
-        }
+        setHighlightedOrderId(transaction.id);
 
         const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
         if (isInstantPublishingPayout && transaction.metadata?.site_name) {
@@ -182,10 +182,9 @@ export function CreditHistoryView() {
 
         scrollToHighlighted();
       }
-    }
-    
-    // Handle withdrawal highlight
-    if (deepLinkMode === 'withdrawal' && highlightedWithdrawalId) {
+    } else if (deepLinkMode === 'withdrawal') {
+      // Process withdrawal highlight
+      if (!highlightedWithdrawalId) return;
       const matchWithdrawal = async () => {
         const { data: withdrawal } = await supabase
           .from('agency_withdrawals')
@@ -218,6 +217,9 @@ export function CreditHistoryView() {
       };
       matchWithdrawal();
     }
+    
+    // Reset deepLinkMode after processing to prevent re-runs
+    setDeepLinkMode(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deepLinkKey, loading, transactions, currentView]);
 
