@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 
 interface WithdrawalRequest {
   id: string;
@@ -76,6 +77,7 @@ export function AdminAgencyWithdrawalsView() {
   const [loadingUserDetailsId, setLoadingUserDetailsId] = useState<string | null>(null);
   const [loadingLogos, setLoadingLogos] = useState<Record<string, boolean>>({});
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+  const [agencyDetailsName, setAgencyDetailsName] = useState<string | null>(null);
 
   const toggleCardExpansion = (id: string) => {
     setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
@@ -892,7 +894,13 @@ export function AdminAgencyWithdrawalsView() {
           <div className="space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">Agency Name</p>
-              <p className="font-medium">{userDetailsDialog.agency_name}</p>
+              <button
+                onClick={() => setAgencyDetailsName(userDetailsDialog.agency_name)}
+                className="font-medium text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 transition-colors"
+              >
+                {userDetailsDialog.agency_name}
+                <Info className="h-3.5 w-3.5" />
+              </button>
             </div>
             {userDetailsDialog.full_name && (
               <div>
@@ -915,6 +923,14 @@ export function AdminAgencyWithdrawalsView() {
           </div>
         )}
       </DraggablePopup>
+
+      {/* Agency Details Popup */}
+      <AgencyDetailsDialog
+        open={!!agencyDetailsName}
+        onOpenChange={(open) => { if (!open) setAgencyDetailsName(null); }}
+        agencyName={agencyDetailsName}
+        zIndex={350}
+      />
       </div>
     </div>
   );
