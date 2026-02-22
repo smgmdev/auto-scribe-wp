@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png"],
       manifest: false, // use existing site.webmanifest
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
           {

@@ -813,7 +813,7 @@ const Landing = () => {
       {!isInstalled && (
         <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-6">
           <p className="text-xs text-muted-foreground mb-3">
-            Arcana Mace is a Progressive Web App (PWA) — you can add it to your phone's home screen and it will work perfectly and smoothly.
+            Arcana Mace is a Progressive Web App (PWA), you can add it to your phone's home screen and it will work perfectly and smoothly.
           </p>
           <div className="flex flex-col md:flex-row items-stretch md:items-center">
             {/* Android / Chrome install */}
