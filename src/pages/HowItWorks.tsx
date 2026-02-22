@@ -721,7 +721,7 @@ const ScrollColorSection = ({
 
             {/* Card 2 - AI Auto Publishing */}
             <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d1b33]">
-              <div className="p-7 pb-4 min-h-[100px] flex items-start">
+              <div className="p-7 pb-4 min-h-[100px] flex items-start relative z-10 bg-black/70 backdrop-blur-sm">
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto Publishing</h3>
               </div>
               <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden">
