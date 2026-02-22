@@ -525,7 +525,7 @@ const ScrollColorSection = ({
           </p>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto">
             {/* Card 1: Self Publish */}
             <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
               style={{ background: 'linear-gradient(135deg, #0d2a4a 0%, #1a1a3e 60%, #2d1b4e 100%)' }}>
