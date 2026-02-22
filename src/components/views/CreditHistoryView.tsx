@@ -45,6 +45,7 @@ export function CreditHistoryView() {
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
   const [deepLinkKey, setDeepLinkKey] = useState(0); // incremented to force re-trigger
+  const [deepLinkMode, setDeepLinkMode] = useState<'transaction' | 'withdrawal' | null>(null);
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
@@ -86,11 +87,16 @@ export function CreditHistoryView() {
     if (transactionOrderId) {
       setHighlightedOrderId(transactionOrderId);
       setHighlightedTxType(txType);
+      setHighlightedWithdrawalId(null);
+      setDeepLinkMode('transaction');
       setActiveType('all');
       setDeepLinkKey(k => k + 1);
     }
     if (withdrawalId) {
       setHighlightedWithdrawalId(withdrawalId);
+      setHighlightedOrderId(null);
+      setHighlightedTxType(null);
+      setDeepLinkMode('withdrawal');
       setActiveType('all');
       setDeepLinkKey(k => k + 1);
     }
@@ -136,8 +142,8 @@ export function CreditHistoryView() {
     if (deepLinkKey === 0) return; // skip initial mount
     if (loading || transactions.length === 0 || currentView !== 'credit-history') return;
 
-    // Handle order/payout highlight
-    if (highlightedOrderId) {
+    // Handle order/payout highlight (only if no withdrawal is being targeted)
+    if (deepLinkMode === 'transaction' && highlightedOrderId) {
       // When txType is provided, prefer matching by type to avoid ambiguity (e.g. order_payout vs order_completed for same order)
       const transaction = highlightedTxType
         ? (transactions.find(t => t.order_id === highlightedOrderId && t.type === highlightedTxType)
@@ -145,14 +151,11 @@ export function CreditHistoryView() {
         : (transactions.find(t => t.id === highlightedOrderId)
           || transactions.find(t => t.order_id === highlightedOrderId));
       if (transaction) {
-        // Add to expanded set (preserving already-open cards)
         setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
-        // Normalize to transaction.id for ref matching
         if (highlightedOrderId !== transaction.id) {
           setHighlightedOrderId(transaction.id);
         }
 
-        // For instant publishing payouts, fetch site details
         const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
         if (isInstantPublishingPayout && transaction.metadata?.site_name) {
           supabase.rpc('get_public_sites').then(({ data: publicSites }) => {
@@ -164,7 +167,6 @@ export function CreditHistoryView() {
           });
         }
 
-        // For order-based transactions, fetch order details
         if (transaction.order_id && !orderDetails[transaction.id]) {
           supabase
             .from('orders')
@@ -183,7 +185,7 @@ export function CreditHistoryView() {
     }
     
     // Handle withdrawal highlight
-    if (highlightedWithdrawalId) {
+    if (deepLinkMode === 'withdrawal' && highlightedWithdrawalId) {
       const matchWithdrawal = async () => {
         const { data: withdrawal } = await supabase
           .from('agency_withdrawals')
