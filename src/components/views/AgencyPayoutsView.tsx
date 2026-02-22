@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle, ArrowRight } from 'lucide-react';
+import { Wallet, Loader2, DollarSign, CheckCircle, TrendingUp, ArrowDownLeft, ArrowUpRight, ExternalLink, Clock, Copy, RefreshCw, XCircle, ArrowUpCircle, ArrowRight, Search, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +89,7 @@ export function AgencyPayoutsView() {
   const [payoutTransactions, setPayoutTransactions] = useState<PayoutTransaction[]>([]);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [earningsTab, setEarningsTab] = useState('all');
+  const [earningsSearchTerm, setEarningsSearchTerm] = useState('');
 
   const toggleCardExpand = (id: string) => {
     setExpandedCards(prev => {
@@ -600,6 +602,28 @@ export function AgencyPayoutsView() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          {/* Search input */}
+          <div className="relative bg-foreground">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+            <Input
+              placeholder="Search earnings..."
+              value={earningsSearchTerm}
+              onChange={(e) => setEarningsSearchTerm(e.target.value)}
+              autoComplete="off"
+              className="w-full pl-10 h-9 text-sm rounded-none border-0 border-t border-white/10 text-white placeholder:text-white/50 bg-foreground focus-visible:ring-0"
+            />
+            {earningsSearchTerm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
+                onClick={() => setEarningsSearchTerm('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="px-0 sm:px-0 pt-0 pb-0">
           {/* Tab summary */}
@@ -681,6 +705,27 @@ export function AgencyPayoutsView() {
                   if (earningsTab === 'b2b') return item.type === 'order';
                   if (earningsTab === 'instant') return item.type === 'payout_tx';
                   if (earningsTab === 'withdrawals') return item.type === 'withdrawal';
+                  return true;
+                }).filter(item => {
+                  if (!earningsSearchTerm.trim()) return true;
+                  const term = earningsSearchTerm.toLowerCase();
+                  if (item.type === 'order') {
+                    const o = item.data as CompletedOrder;
+                    return o.media_site?.name?.toLowerCase().includes(term) ||
+                           o.order_number?.toLowerCase().includes(term) ||
+                           String(o.agency_payout_cents / 100).includes(term);
+                  }
+                  if (item.type === 'payout_tx') {
+                    const t = item.data as PayoutTransaction;
+                    return t.metadata?.site_name?.toLowerCase().includes(term) ||
+                           String(t.amount / 100).includes(term);
+                  }
+                  if (item.type === 'withdrawal') {
+                    const w = item.data as WithdrawalRequest;
+                    return w.withdrawal_method?.toLowerCase().includes(term) ||
+                           w.status?.toLowerCase().includes(term) ||
+                           String(w.amount_cents / 100).includes(term);
+                  }
                   return true;
                 });
 
