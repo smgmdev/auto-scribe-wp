@@ -5592,7 +5592,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               <div className="flex items-center gap-2">
                 <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
                   <span className={`w-2 h-2 rounded-full shrink-0 ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {renderLastSeenStatus()}
+                  {counterpartyLabel} · {renderLastSeenStatus()}
                 </span>
               </div>
             </div>
