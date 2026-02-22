@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag, GripHorizontal, X, Eye } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag, GripHorizontal, X, Monitor } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits, recalculateSingleUser } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1375,7 +1375,7 @@ export function AdminUsersView() {
                                   {shadowLoading === user.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Eye className="h-4 w-4" />
+                                    <Monitor className="h-4 w-4" />
                                   )}
                                 </Button>
                               </TooltipTrigger>
@@ -1429,7 +1429,7 @@ export function AdminUsersView() {
                                 {shadowLoading === user.id ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
-                                  <Eye className="h-3.5 w-3.5" />
+                                  <Monitor className="h-3.5 w-3.5" />
                                 )}
                               </Button>
                             </>
