@@ -24,7 +24,7 @@ interface BuyCreditsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type Step = 'select' | 'payment' | 'processing' | 'success';
+type Step = 'select' | 'payment' | 'success';
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
   const [creditAmount, setCreditAmount] = useState<string>('5');
@@ -148,7 +148,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         const handlePaymentSuccess = async () => {
           if (!mounted) return;
-          setStep('processing');
           setConfirming(true);
           try {
             const { data: result, error } = await supabase.functions.invoke('airwallex-webhook', {
@@ -197,9 +196,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             if (result?.success) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
-              setStep('processing');
+              setConfirming(true);
               await refreshCredits?.();
               setStep('success');
+              setConfirming(false);
             }
           } catch {
             // Silently retry
@@ -356,7 +356,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
 
         {/* Header */}
-        {step !== 'success' && step !== 'processing' && (
+        {step !== 'success' && !confirming && (
         <div className="flex items-center gap-2 mb-1">
           {step === 'payment' && (
             <button
@@ -473,11 +473,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               )}
             </div>
           </>
-        ) : step === 'processing' ? (
-          <div className="flex flex-col items-center justify-center text-center gap-3 py-16">
-            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Processing your payment...</p>
-          </div>
         ) : step === 'success' ? (
           <div className="flex flex-col items-center text-center gap-4 py-8">
             <CheckCircle2 className="h-14 w-14 text-green-500" />
@@ -490,16 +485,15 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             <Button
               onClick={() => {
                 const intentId = intentData?.intent_id;
-                // Set view and search params BEFORE closing dialog
-                setCurrentView('credit-history');
+                // Set view param so Index.tsx useEffect picks it up correctly
+                const params = new URLSearchParams();
+                params.set('view', 'credit-history');
                 if (intentId) {
-                  setSearchParams(prev => {
-                    prev.set('purchaseIntentId', intentId);
-                    return prev;
-                  }, { replace: true });
+                  params.set('purchaseIntentId', intentId);
                 }
-                // Close dialog after a tick to let navigation settle
-                setTimeout(() => onOpenChange(false), 50);
+                // Close dialog first, then navigate
+                onOpenChange(false);
+                setSearchParams(params, { replace: true });
               }}
               className="min-w-[160px] rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             >
@@ -507,7 +501,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </Button>
           </div>
         ) : (
-          <>
+          <div className="relative">
             <p className="text-sm text-muted-foreground mt-1">
               Choose a payment method to complete your purchase.
             </p>
@@ -550,18 +544,19 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain" />
               </div>
 
-              <p className="text-xs text-center text-gray-500">
-                If you want to top up your account by invoice through a wire transfer, <button onClick={() => { onOpenChange(false); useAppStore.getState().setCurrentView('support'); }} className="underline hover:text-gray-700">contact support</button>.
+              <p className="text-xs text-center text-muted-foreground">
+                If you want to top up your account by invoice through a wire transfer, <button onClick={() => { onOpenChange(false); useAppStore.getState().setCurrentView('support'); }} className="underline hover:text-foreground">contact support</button>.
               </p>
-
-              {confirming && (
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifying payment...
-                </div>
-              )}
             </div>
-          </>
+
+            {/* Full overlay spinner when payment is being verified */}
+            {confirming && (
+              <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center gap-3">
+                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Processing your payment...</p>
+              </div>
+            )}
+          </div>
         )}
         </div>
       </div>
