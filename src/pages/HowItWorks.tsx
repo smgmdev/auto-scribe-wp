@@ -677,15 +677,12 @@ const ScrollColorSection = ({
             <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
               <div className="p-7 pb-4">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #ff6b35, #f7931e)' }}>
-                  <PenTool className="w-6 h-6 text-white" />
-                </div>
+                <PenTool className="w-10 h-10 text-[#f7931e] flex-shrink-0" />
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article<br />Generation</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
                 Generate unique, high-quality articles in seconds using live news sources and AI. Choose your tone, keyword, and target site.
               </p>
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn how</span>
               </div>
               <div className="mt-auto w-full border-t border-white/10 bg-white/5 overflow-hidden">
                 <div className="flex animate-slide-articles" style={{ width: `${(slidingArticles.length > 0 ? slidingArticles.length * 2 : 2) * 100}%` }}>
@@ -731,15 +728,12 @@ const ScrollColorSection = ({
             {/* Card 2 - AI Auto Publishing */}
             <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col p-7 cursor-pointer bg-[#0d1b33]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0071e3, #34aadc)' }}>
-                  <Globe className="w-6 h-6 text-white" />
-                </div>
+                <Send className="w-10 h-10 text-[#34aadc] flex-shrink-0" />
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto<br />Publishing</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
                 Set up automated publishing pipelines that fetch, rewrite, and publish articles to your WordPress sites on a schedule.
               </p>
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn how</span>
               <div className="flex-1 flex items-end justify-center mt-6 opacity-80">
                 <div className="flex flex-col gap-2 w-full">
                   {['Fetch headlines', 'Rewrite with AI', 'Auto-publish'].map((step, i) => (
@@ -758,15 +752,12 @@ const ScrollColorSection = ({
             {/* Card 3 - AI Security Supervision */}
             <a href="/help/ai-security-supervision#overview" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col p-7 cursor-pointer bg-[#0d2218]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #30d158, #25a244)' }}>
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+                <Shield className="w-10 h-10 text-[#30d158] flex-shrink-0" />
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Security<br />Supervision</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
                 AI monitors all chat messages in real-time, flagging off-platform contact attempts and policy violations automatically.
               </p>
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20 bg-white/10 w-fit group-hover:bg-white/20 transition-colors">Learn more</span>
               <div className="flex-1 flex items-end justify-center mt-6 opacity-80">
                 <div className="flex flex-col gap-2 w-full">
                   {['Off-platform contact detected', 'Policy violation flagged', 'Message under review'].map((alert, i) => (
