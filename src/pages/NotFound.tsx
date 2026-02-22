@@ -46,7 +46,6 @@ const NotFound = () => {
           <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
         </Canvas>
       </div>
-      <p className="text-xl text-muted-foreground">Oops! Page not found</p>
       <a href="/" className="text-primary underline hover:text-primary/90">
         Return to Home
       </a>
