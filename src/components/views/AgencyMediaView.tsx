@@ -1148,7 +1148,7 @@ export function AgencyMediaView() {
                                 </div>
                                 <h3 className="text-sm leading-tight">{site.name}</h3>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                  <span className="text-xs text-muted-foreground break-all md:truncate md:max-w-[200px]">
                                     {site.url.replace(/^https?:\/\//, '')}
                                   </span>
                                   <button
@@ -1233,7 +1233,7 @@ export function AgencyMediaView() {
                             </div>
                           </div>
                           {/* Mobile badges + action row */}
-                          <div className="flex md:hidden items-center gap-2 pl-[52px]">
+                          <div className="flex md:hidden flex-wrap items-center gap-1 pl-[52px]">
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
@@ -1246,9 +1246,10 @@ export function AgencyMediaView() {
                                 Disconnected
                               </Badge>
                             )}
+                            <div className="basis-full h-0" />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all ml-auto">
+                                <Button variant="outline" size="sm" className="h-8 w-full px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all">
                                   Action
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
