@@ -635,7 +635,7 @@ export function DashboardView() {
               </Badge>
             </button>
           </div>
-          <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
+          <p className="mt-2 text-white/60">You're logged in as {user?.email}</p>
         </div>
         {/* Badge on desktop - shown to the right */}
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
