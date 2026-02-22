@@ -877,10 +877,26 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           const b2bCommission = Array.from(orders.entries())
             .filter(([id]) => b2bPayoutOrderIds.has(id))
             .reduce((sum, [, o]) => sum + (o.platform_fee_cents || 0), 0);
+          // IP commission (from order_payout with metadata.platform_fee)
           const ipCommission = transactions
             .filter(tx => tx.type === 'order_payout' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
             .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
           const totalCommission = b2bCommission + ipCommission;
+
+          // Purchases commission: from orders where this user is the BUYER
+          const b2bPurchaseOrderIds = new Set(
+            transactions
+              .filter(tx => tx.type === 'order_completed' && tx.order_id)
+              .map(tx => tx.order_id!)
+          );
+          const b2bPurchaseCommission = Array.from(orders.entries())
+            .filter(([id]) => b2bPurchaseOrderIds.has(id))
+            .reduce((sum, [, o]) => sum + (o.platform_fee_cents || 0), 0);
+          // IP purchase commission: from 'publish' transactions with metadata
+          const ipPurchaseCommission = transactions
+            .filter(tx => tx.type === 'publish' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
+            .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
+          const totalPurchaseCommission = b2bPurchaseCommission + ipPurchaseCommission;
 
           const commissionSpan = (value: number, hasTxs: boolean) => (
             hasTxs && value > 0 ? (
@@ -919,7 +935,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   </p>
                   <p className="text-base font-bold text-foreground">
                     -{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-                    {commissionSpan(purchasesSubTab === 'purchases_b2b' ? b2bCommission : purchasesSubTab === 'purchases_instant' ? ipCommission : totalCommission, nonLockTxs.length > 0)}
+                    {commissionSpan(purchasesSubTab === 'purchases_b2b' ? b2bPurchaseCommission : purchasesSubTab === 'purchases_instant' ? ipPurchaseCommission : totalPurchaseCommission, nonLockTxs.length > 0)}
                   </p>
                 </div>
               )}
