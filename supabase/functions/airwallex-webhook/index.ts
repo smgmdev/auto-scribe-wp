@@ -158,11 +158,11 @@ async function processPaymentIntent(
 
   const { error: updateError } = await supabase
     .from("user_credits")
-    .upsert({
-      user_id: userId,
+    .update({
       credits: newCredits,
       updated_at: new Date().toISOString(),
-    });
+    })
+    .eq("user_id", userId);
 
   if (updateError) {
     throw new Error(`Failed to update credits: ${updateError.message}`);
