@@ -70,6 +70,30 @@
 
   <body>
     <div id="root"></div>
+    <!-- Shadow mode: isolate localStorage so iframe sessions don't overwrite parent -->
+    <script>
+      (function() {
+        try {
+          if (new URLSearchParams(window.location.search).get('shadow') !== '1') return;
+          var mem = {};
+          var origSet = localStorage.setItem.bind(localStorage);
+          var origGet = localStorage.getItem.bind(localStorage);
+          var origRem = localStorage.removeItem.bind(localStorage);
+          localStorage.setItem = function(k, v) {
+            if (k.indexOf('sb-') === 0) { mem[k] = v; return; }
+            origSet(k, v);
+          };
+          localStorage.getItem = function(k) {
+            if (k.indexOf('sb-') === 0) return mem[k] || null;
+            return origGet(k);
+          };
+          localStorage.removeItem = function(k) {
+            if (k.indexOf('sb-') === 0) { delete mem[k]; return; }
+            origRem(k);
+          };
+        } catch(e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
