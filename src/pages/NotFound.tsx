@@ -1,20 +1,26 @@
 import { useLocation } from "react-router-dom";
 import { useEffect, useRef, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, OrbitControls, Environment } from "@react-three/drei";
+import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 
-function DragonModel({ onLoaded }: { onLoaded: () => void }) {
-  const { scene } = useGLTF("/models/dragon_emblem.glb");
+function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
+  const { scene, animations } = useGLTF("/models/anime_girl.glb");
   const ref = useRef<THREE.Group>(null);
+  const { actions } = useAnimations(animations, ref);
 
   useEffect(() => {
     onLoaded();
-  }, [scene, onLoaded]);
+    // Play the first animation if available
+    const firstAction = Object.values(actions)[0];
+    if (firstAction) {
+      firstAction.reset().fadeIn(0.5).play();
+    }
+  }, [scene, onLoaded, actions]);
 
   useFrame((_, delta) => {
     if (ref.current) {
-      ref.current.rotation.y += delta * 0.4;
+      ref.current.rotation.y += delta * 0.3;
     }
   });
 
@@ -23,12 +29,12 @@ function DragonModel({ onLoaded }: { onLoaded: () => void }) {
       ref={ref}
       object={scene}
       scale={2}
-      position={[0, -0.5, 0]}
+      position={[0, -1.5, 0]}
     />
   );
 }
 
-useGLTF.preload("/models/dragon_emblem.glb");
+useGLTF.preload("/models/anime_girl.glb");
 
 const NotFound = () => {
   const location = useLocation();
@@ -60,7 +66,7 @@ const NotFound = () => {
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 5, 5]} intensity={1} />
             <Suspense fallback={null}>
-              <DragonModel onLoaded={() => setLoading(false)} />
+              <AnimeModel onLoaded={() => setLoading(false)} />
               <Environment preset="studio" />
             </Suspense>
             <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
