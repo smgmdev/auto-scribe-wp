@@ -20,23 +20,11 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
     }
   }, [scene, onLoaded, actions]);
 
-  return (
-    <primitive ref={ref} object={scene} scale={3.5} position={[0, -2.5, 0]} />
-  );
-}
-
-function AngelModel({ onLoaded }: { onLoaded: () => void }) {
-  const { scene, animations } = useGLTF("/models/winged_angel.glb");
-  const ref = useRef<THREE.Group>(null);
-  const { actions } = useAnimations(animations, ref);
-
-  useEffect(() => {
-    onLoaded();
-    const firstAction = Object.values(actions)[0];
-    if (firstAction) {
-      firstAction.reset().fadeIn(0.5).play();
+  useFrame((_, delta) => {
+    if (ref.current) {
+      ref.current.rotation.y += delta * 0.3;
     }
-  }, [scene, onLoaded, actions]);
+  });
 
   return (
     <primitive ref={ref} object={scene} scale={3.5} position={[0, -2.5, 0]} />
@@ -44,13 +32,11 @@ function AngelModel({ onLoaded }: { onLoaded: () => void }) {
 }
 
 useGLTF.preload("/models/anime_girl.glb");
-useGLTF.preload("/models/winged_angel.glb");
 
 const NotFound = () => {
   const location = useLocation();
-  const [loading1, setLoading1] = useState(true);
-  const [loading2, setLoading2] = useState(true);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -99,47 +85,27 @@ const NotFound = () => {
           <SkipForward className="h-5 w-5" />
         </Button>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
-          {loading1 && !error && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
-            </div>
-          )}
-          {error ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-4xl font-bold text-muted-foreground">404</p>
-            </div>
-          ) : (
-            <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
-              <ambientLight intensity={0.6} />
-              <directionalLight position={[5, 5, 5]} intensity={1} />
-              <Suspense fallback={null}>
-                <AnimeModel onLoaded={() => setLoading1(false)} />
-                <Environment preset="studio" />
-              </Suspense>
-              <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
-            </Canvas>
-          )}
-        </div>
-        <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
-          {loading2 && !error && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
-            </div>
-          )}
-          {!error && (
-            <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
-              <ambientLight intensity={0.6} />
-              <directionalLight position={[5, 5, 5]} intensity={1} />
-              <Suspense fallback={null}>
-                <AngelModel onLoaded={() => setLoading2(false)} />
-                <Environment preset="studio" />
-              </Suspense>
-              <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
-            </Canvas>
-          )}
-        </div>
+      <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
+        {loading && !error && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
+          </div>
+        )}
+        {error ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-4xl font-bold text-muted-foreground">404</p>
+          </div>
+        ) : (
+          <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
+            <Suspense fallback={null}>
+              <AnimeModel onLoaded={() => setLoading(false)} />
+              <Environment preset="studio" />
+            </Suspense>
+            <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+          </Canvas>
+        )}
       </div>
     </div>
   );
