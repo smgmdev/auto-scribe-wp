@@ -786,35 +786,42 @@ const AutoPublishArticles = () => {
     );
   }
 
-  return (
-    <div className="flex flex-col h-full">
-      {articles.slice(0, 4).map((article, i) => (
-        <div key={article.id} className={`flex items-center gap-3 px-5 py-2 ${i < articles.length - 1 ? 'border-b border-white/5' : ''} flex-1`}>
-          {article.wordpress_site_favicon && (
-            <img src={article.wordpress_site_favicon} alt="" className="w-5 h-5 rounded-sm flex-shrink-0 mt-0.5 object-contain" />
+  const displayArticles = articles.slice(0, 4);
+
+  const renderArticle = (article: typeof articles[0], i: number, total: number) => (
+    <div key={`${article.id}-${i}`} className={`flex items-center gap-3 px-5 py-3 ${i < total - 1 ? 'border-b border-white/5' : ''}`}>
+      {article.wordpress_site_favicon && (
+        <img src={article.wordpress_site_favicon} alt="" className="w-5 h-5 rounded-sm flex-shrink-0 mt-0.5 object-contain" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-white/90 text-sm font-medium leading-snug line-clamp-2">{article.ai_title || article.source_title}</p>
+        <div className="flex items-center gap-2 mt-1">
+          {article.wordpress_site_name && (
+            <span className="text-white/40 text-[11px]">{article.wordpress_site_name}</span>
           )}
-          <div className="min-w-0 flex-1">
-            <p className="text-white/90 text-sm font-medium leading-snug line-clamp-2">{article.ai_title || article.source_title}</p>
-            <div className="flex items-center gap-2 mt-1">
-              {article.wordpress_site_name && (
-                <span className="text-white/40 text-[11px]">{article.wordpress_site_name}</span>
-              )}
-              <span className="text-white/30 text-[11px]">
-                {(() => {
-                  const diff = Date.now() - new Date(article.published_at).getTime();
-                  const mins = Math.floor(diff / 60000);
-                  if (mins < 1) return 'just now';
-                  if (mins < 60) return `${mins}min ago`;
-                  const hrs = Math.floor(mins / 60);
-                  if (hrs < 24) return `${hrs}h ago`;
-                  const days = Math.floor(hrs / 24);
-                  return `${days}d ago`;
-                })()}
-              </span>
-            </div>
-          </div>
+          <span className="text-white/30 text-[11px]">
+            {(() => {
+              const diff = Date.now() - new Date(article.published_at).getTime();
+              const mins = Math.floor(diff / 60000);
+              if (mins < 1) return 'just now';
+              if (mins < 60) return `${mins}min ago`;
+              const hrs = Math.floor(mins / 60);
+              if (hrs < 24) return `${hrs}h ago`;
+              const days = Math.floor(hrs / 24);
+              return `${days}d ago`;
+            })()}
+          </span>
         </div>
-      ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full overflow-hidden relative">
+      <div className="animate-scroll-up">
+        {displayArticles.map((a, i) => renderArticle(a, i, displayArticles.length))}
+        {displayArticles.map((a, i) => renderArticle(a, i + displayArticles.length, displayArticles.length))}
+      </div>
     </div>
   );
 };
