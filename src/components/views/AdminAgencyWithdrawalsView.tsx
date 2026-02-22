@@ -617,7 +617,7 @@ export function AdminAgencyWithdrawalsView() {
                       
                       {/* Action Buttons for pending - full width on mobile */}
                       {withdrawal.status === 'pending' && (
-                        <div className="flex flex-col md:flex-row gap-2 px-3 pb-3">
+                        <div className="flex flex-col md:flex-row md:justify-end gap-0 px-3 pb-3">
                           <Button
                             size="sm"
                             onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
