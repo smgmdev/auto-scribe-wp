@@ -1113,69 +1113,127 @@ export function AgencyMediaView() {
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <CardContent className="p-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 min-w-0 flex-1">
-                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
-                              {site.favicon ? (
-                                <img 
-                                  src={site.favicon} 
-                                  alt={`${site.name} logo`} 
-                                  className="h-10 w-10 object-cover"
-                                />
-                              ) : (
-                                <CheckCircle className="h-5 w-5 text-green-500" />
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1 space-y-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="font-medium text-sm truncate leading-tight">Approved WordPress Site</p>
-                                <Tooltip delayDuration={100}>
-                                  <TooltipTrigger asChild>
-                                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
-                                  </TooltipTrigger>
-                                  <TooltipContent 
-                                    side="right" 
-                                    align="start"
-                                    sideOffset={8}
-                                    collisionPadding={16}
-                                    avoidCollisions={true}
-                                    className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
+                              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-green-500/10 mt-0.5">
+                                {site.favicon ? (
+                                  <img 
+                                    src={site.favicon} 
+                                    alt={`${site.name} logo`} 
+                                    className="h-10 w-10 object-cover"
+                                  />
+                                ) : (
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1 space-y-0">
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-medium text-sm truncate leading-tight">Approved WordPress Site</p>
+                                  <Tooltip delayDuration={100}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help shrink-0" />
+                                    </TooltipTrigger>
+                                    <TooltipContent 
+                                      side="right" 
+                                      align="start"
+                                      sideOffset={8}
+                                      collisionPadding={16}
+                                      avoidCollisions={true}
+                                      className="max-w-[280px] z-[9999] bg-foreground text-background px-3 py-2 text-sm shadow-lg break-words"
+                                    >
+                                      <p>Approved WordPress site is now available in Instant Publishing Library under Media Network.</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                                <h3 className="text-sm leading-tight">{site.name}</h3>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                    {site.url.replace(/^https?:\/\//, '')}
+                                  </span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(site.url);
+                                      toast.success('URL copied to clipboard');
+                                    }}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
                                   >
-                                    <p>Approved WordPress site is now available in Instant Publishing Library under Media Network.</p>
-                                  </TooltipContent>
-                                </Tooltip>
+                                    <Copy className="h-3 w-3" />
+                                  </button>
+                                  <a
+                                    href={ensureHttps(site.url)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-muted-foreground hover:text-foreground transition-colors"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-tight">
+                                  {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                </p>
                               </div>
-                              <h3 className="text-sm leading-tight">{site.name}</h3>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                  {site.url.replace(/^https?:\/\//, '')}
-                                </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigator.clipboard.writeText(site.url);
-                                    toast.success('URL copied to clipboard');
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </button>
-                                <a
-                                  href={ensureHttps(site.url)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="text-muted-foreground hover:text-foreground transition-colors"
-                                >
-                                  <ExternalLink className="h-3 w-3" />
-                                </a>
-                              </div>
-                              <p className="text-xs text-muted-foreground leading-tight block">
-                                {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                              </p>
+                            </div>
+                            <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                              <Badge variant="outline" className="text-xs">
+                                {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
+                              </Badge>
+                              {site.connected ? (
+                                <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-600 border-green-500/30">
+                                  Connected
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
+                                  Disconnected
+                                </Badge>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all">
+                                    Action
+                                    <ChevronDown className="h-3 w-3 ml-1" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="min-w-[120px] bg-background">
+                                  {site.connected ? (
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDisconnectSite(site.id)}
+                                      className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
+                                    >
+                                      <Unplug className="h-4 w-4 mr-2" />
+                                      Disconnect
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem 
+                                      onClick={() => handleConnectSite(site.id)}
+                                      className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
+                                    >
+                                      <Plug className="h-4 w-4 mr-2" />
+                                      Connect
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem 
+                                    onClick={() => handleOpenPriceDialog(site)}
+                                    className="cursor-pointer hover:bg-black hover:text-white focus:bg-black focus:text-white transition-colors"
+                                  >
+                                    <DollarSign className="h-4 w-4 mr-2" />
+                                    Change Price
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteSite(site)}
+                                    className="cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground transition-colors"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Mobile badges + action row */}
+                          <div className="flex md:hidden items-center gap-2 pl-[52px]">
                             <Badge variant="outline" className="text-xs">
                               {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                             </Badge>
@@ -1190,7 +1248,7 @@ export function AgencyMediaView() {
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all">
+                                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-border hover:bg-black hover:text-white hover:border-black data-[state=open]:bg-black data-[state=open]:text-white data-[state=open]:border-black transition-all ml-auto">
                                   Action
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
