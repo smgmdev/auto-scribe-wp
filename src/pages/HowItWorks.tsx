@@ -171,6 +171,34 @@ const ScrollColorSection = ({
   const whatYouCanDoRef = useRef<HTMLDivElement>(null);
   const aiSectionRef = useRef<HTMLDivElement>(null);
 
+  const [wpSiteFavicons, setWpSiteFavicons] = useState<string[]>([]);
+  const [wpSitesLoading, setWpSitesLoading] = useState(true);
+  const [activeWpLogoIndex, setActiveWpLogoIndex] = useState(0);
+
+  // Fetch WP site favicons for the Local Library card
+  useEffect(() => {
+    const fetchWpSites = async () => {
+      const { data } = await supabase.rpc('get_public_sites');
+      if (data) {
+        const favicons = data
+          .filter((s: any) => s.favicon)
+          .map((s: any) => s.favicon as string);
+        setWpSiteFavicons(favicons);
+      }
+      setWpSitesLoading(false);
+    };
+    fetchWpSites();
+  }, []);
+
+  // Rotate WP site logos every 2s
+  useEffect(() => {
+    if (wpSiteFavicons.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveWpLogoIndex(prev => (prev + 1) % wpSiteFavicons.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [wpSiteFavicons.length]);
+
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     const container = scrollContainerRef.current;
     const target = ref.current;
@@ -526,12 +554,31 @@ const ScrollColorSection = ({
 
           {/* Feature grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto">
-            {/* Card 1: Self Publish */}
+            {/* Card 1: Self Publish - rotating WP site logos */}
             <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-white border border-[#d2d2d7]">
               <div>
                 <p className="text-sm font-semibold text-[#86868b] mb-3 uppercase tracking-wide">Local Library</p>
                 <h3 className="text-2xl md:text-3xl font-bold text-[#1d1d1f] leading-tight mb-4">Connect your own<br />WordPress site.</h3>
                 <span className="text-[#06c] text-sm transition-colors">Learn how ›</span>
+              </div>
+              <div className="flex justify-end">
+                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-[#f5f5f7] relative overflow-hidden">
+                  {wpSitesLoading ? (
+                    <Loader2 className="w-8 h-8 text-[#86868b] animate-spin" />
+                  ) : wpSiteFavicons.length > 0 ? (
+                    wpSiteFavicons.map((favicon, i) => (
+                      <img
+                        key={favicon}
+                        src={favicon}
+                        alt="WP site"
+                        className="absolute w-10 h-10 object-contain transition-opacity duration-500"
+                        style={{ opacity: i === activeWpLogoIndex ? 1 : 0 }}
+                      />
+                    ))
+                  ) : (
+                    <Globe className="w-10 h-10 text-[#86868b]" />
+                  )}
+                </div>
               </div>
             </a>
 
@@ -544,7 +591,10 @@ const ScrollColorSection = ({
               </div>
               <div className="flex justify-end">
                 <div className="w-20 h-20 rounded-none flex items-center justify-center bg-[#f5f5f7]">
-                  <Globe className="w-10 h-10 text-[#86868b]" />
+                  <FileText className="w-8 h-8 text-[#86868b] absolute" />
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#06c] flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">+</span>
+                  </div>
                 </div>
               </div>
             </a>
@@ -1094,6 +1144,8 @@ const HowItWorks = () => {
       navigate('/auth');
     }
   };
+
+
 
 
   const features = [
