@@ -44,8 +44,8 @@ export function CreditHistoryView() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
-  const [deepLinkKey, setDeepLinkKey] = useState(0); // incremented to force re-trigger
-  const [deepLinkMode, setDeepLinkMode] = useState<'transaction' | 'withdrawal' | null>(null);
+  const [deepLinkKey, setDeepLinkKey] = useState(0);
+  const deepLinkRef = useRef<{ mode: 'transaction' | 'withdrawal'; id: string; txType?: string | null } | null>(null);
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
@@ -55,9 +55,7 @@ export function CreditHistoryView() {
   const [withdrawalDetails, setWithdrawalDetails] = useState<Record<string, any>>({});
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [publishDetails, setPublishDetails] = useState<Record<string, any>>({});
-  const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
-  const [highlightedTxType, setHighlightedTxType] = useState<string | null>(null);
-  const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
+  const [highlightedTransactionId, setHighlightedTransactionId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [creditSearchTerm, setCreditSearchTerm] = useState('');
@@ -85,23 +83,17 @@ export function CreditHistoryView() {
     const txType = searchParams.get('txType');
     
     if (transactionOrderId) {
-      setHighlightedOrderId(transactionOrderId);
-      setHighlightedTxType(txType);
-      setHighlightedWithdrawalId(null);
-      setDeepLinkMode('transaction');
+      deepLinkRef.current = { mode: 'transaction', id: transactionOrderId, txType };
+      setHighlightedTransactionId(null);
       setActiveType('all');
       setDeepLinkKey(k => k + 1);
-    }
-    if (withdrawalId) {
-      setHighlightedWithdrawalId(withdrawalId);
-      setHighlightedOrderId(null);
-      setHighlightedTxType(null);
-      setDeepLinkMode('withdrawal');
+    } else if (withdrawalId) {
+      deepLinkRef.current = { mode: 'withdrawal', id: withdrawalId };
+      setHighlightedTransactionId(null);
       setActiveType('all');
       setDeepLinkKey(k => k + 1);
     }
     
-    // Clear the query params after reading
     if (transactionOrderId || withdrawalId) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('transaction');
@@ -136,24 +128,25 @@ export function CreditHistoryView() {
     setTimeout(tryScroll, 400);
   }, []);
 
-  // Scroll to and expand the highlighted transaction once data is loaded AND view is visible
-  // deepLinkKey increments on every new deep-link, guaranteeing this effect re-runs
+  // Process deep-link: find matching transaction, expand it, highlight it, scroll to it
   useEffect(() => {
-    if (deepLinkKey === 0) return; // skip initial mount
+    if (deepLinkKey === 0) return;
     if (loading || transactions.length === 0 || currentView !== 'credit-history') return;
-    // Use a local copy of deepLinkMode so we don't depend on stale closures
-    const mode = deepLinkMode;
-    if (!mode) return;
+    const target = deepLinkRef.current;
+    if (!target) return;
+    // Consume immediately so it won't re-process
+    deepLinkRef.current = null;
 
-    if (mode === 'transaction' && highlightedOrderId) {
-      const transaction = highlightedTxType
-        ? (transactions.find(t => t.order_id === highlightedOrderId && t.type === highlightedTxType)
-          || transactions.find(t => t.id === highlightedOrderId && t.type === highlightedTxType))
-        : (transactions.find(t => t.id === highlightedOrderId)
-          || transactions.find(t => t.order_id === highlightedOrderId));
+    if (target.mode === 'transaction') {
+      const { id: targetId, txType } = target;
+      const transaction = txType
+        ? (transactions.find(t => t.order_id === targetId && t.type === txType)
+          || transactions.find(t => t.id === targetId && t.type === txType))
+        : (transactions.find(t => t.id === targetId)
+          || transactions.find(t => t.order_id === targetId));
       if (transaction) {
         setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
-        setHighlightedOrderId(transaction.id);
+        setHighlightedTransactionId(transaction.id);
 
         const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
         if (isInstantPublishingPayout && transaction.metadata?.site_name) {
@@ -181,12 +174,12 @@ export function CreditHistoryView() {
 
         scrollToHighlighted();
       }
-    } else if (mode === 'withdrawal' && highlightedWithdrawalId) {
+    } else if (target.mode === 'withdrawal') {
       const doMatch = async () => {
         const { data: withdrawal } = await supabase
           .from('agency_withdrawals')
           .select('*')
-          .eq('id', highlightedWithdrawalId)
+          .eq('id', target.id)
           .single();
         
         if (withdrawal) {
@@ -207,7 +200,7 @@ export function CreditHistoryView() {
               [matchingTransaction.id]: withdrawal
             }));
             setExpandedWithdrawals(prev => new Set([...prev, matchingTransaction.id]));
-            setHighlightedOrderId(matchingTransaction.id);
+            setHighlightedTransactionId(matchingTransaction.id);
             scrollToHighlighted();
           }
         }
@@ -1658,7 +1651,7 @@ export function CreditHistoryView() {
                 
                 // Expandable card for completed withdrawals
                 if (isWithdrawalCompleted) {
-                  const isHighlighted = highlightedOrderId === transaction.id;
+                  const isHighlighted = highlightedTransactionId === transaction.id;
                   return (
                     <div
                       key={transaction.id}
@@ -1773,7 +1766,7 @@ export function CreditHistoryView() {
                 
                 // Expandable card for rejected withdrawals
                 if (isWithdrawalRejected) {
-                  const isHighlighted = highlightedOrderId === transaction.id;
+                  const isHighlighted = highlightedTransactionId === transaction.id;
                   return (
                     <div
                       key={transaction.id}
@@ -1897,7 +1890,7 @@ export function CreditHistoryView() {
                 
                 // Expandable card for earnings with platform fee
                 if (isEarnings && platformFee !== null) {
-                  const isHighlighted = transaction.order_id === highlightedOrderId || transaction.id === highlightedOrderId;
+                  const isHighlighted = transaction.id === highlightedTransactionId || (transaction.order_id != null && transaction.order_id === highlightedTransactionId);
                   return (
                     <div
                       key={transaction.id}
@@ -2168,7 +2161,7 @@ export function CreditHistoryView() {
                   setExpandedWithdrawals(newExpanded);
                 };
                 
-                const isHighlighted = highlightedOrderId === transaction.id || (transaction.order_id != null && transaction.order_id === highlightedOrderId);
+                const isHighlighted = highlightedTransactionId === transaction.id || (transaction.order_id != null && transaction.order_id === highlightedTransactionId);
                 return (
                   <div
                     key={transaction.id}
