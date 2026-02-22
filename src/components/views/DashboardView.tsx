@@ -88,14 +88,16 @@ export function DashboardView() {
     articles,
     loading: articlesLoading,
     publishedCount,
-    draftsCount
+    draftsCount,
+    refreshArticles
   } = useArticles();
-  const { sites, loading: sitesLoading } = useSites();
+  const { sites, loading: sitesLoading, refetchSites } = useSites();
   const [isAgency, setIsAgency] = useState<boolean | null>(null);
   const [globalLibraryCount, setGlobalLibraryCount] = useState(0);
   const [globalLibraryLoading, setGlobalLibraryLoading] = useState(true);
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [sessionsPopupOpen, setSessionsPopupOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Agency summary data
   const [agencySummary, setAgencySummary] = useState({
@@ -355,22 +357,22 @@ export function DashboardView() {
     }
   }, [user, isAgency]);
 
-  useEffect(() => {
-    const fetchGlobalLibraryCount = async () => {
-      setGlobalLibraryLoading(true);
-      const { count, error } = await supabase
-        .from('media_sites')
-        .select('*', { count: 'exact', head: true })
-        .neq('category', 'Agencies/People');
-      
-      if (!error && count !== null) {
-        setGlobalLibraryCount(count);
-      }
-      setGlobalLibraryLoading(false);
-    };
-
-    fetchGlobalLibraryCount();
+  const fetchGlobalLibraryCount = useCallback(async () => {
+    setGlobalLibraryLoading(true);
+    const { count, error } = await supabase
+      .from('media_sites')
+      .select('*', { count: 'exact', head: true })
+      .neq('category', 'Agencies/People');
+    
+    if (!error && count !== null) {
+      setGlobalLibraryCount(count);
+    }
+    setGlobalLibraryLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchGlobalLibraryCount();
+  }, [fetchGlobalLibraryCount]);
 
   const getSiteInfo = (article: { publishedTo?: string; publishedToName?: string | null; publishedToFavicon?: string | null }): { name: string; favicon: string | null } | null => {
     // Use stored article data first (persists after site deletion)
@@ -439,6 +441,19 @@ export function DashboardView() {
       />
     );
   };
+
+  const refreshDashboard = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      refreshArticles(false),
+      refetchSites(false),
+      fetchGlobalLibraryCount(),
+      availableCreditsData.refresh(),
+      fetchActiveSessions(),
+    ]);
+    setIsRefreshing(false);
+  }, [refreshArticles, refetchSites, fetchGlobalLibraryCount, availableCreditsData.refresh, fetchActiveSessions]);
+
   return <div className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0">
       {/* Header */}
@@ -477,11 +492,12 @@ export function DashboardView() {
             )}
             <button
               type="button"
-              onClick={() => window.location.reload()}
-              className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              onClick={refreshDashboard}
+              disabled={isRefreshing}
+              className="p-1.5 rounded-md hover:bg-white/10 transition-colors disabled:opacity-50"
               title="Refresh dashboard"
             >
-              <RefreshCw className="h-3.5 w-3.5 text-white/60 hover:text-white/90" />
+              <RefreshCw className={`h-3.5 w-3.5 text-white/60 hover:text-white/90 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
@@ -516,11 +532,12 @@ export function DashboardView() {
            )}
           <button
             type="button"
-            onClick={() => window.location.reload()}
-            className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+            onClick={refreshDashboard}
+            disabled={isRefreshing}
+            className="p-1.5 rounded-md hover:bg-white/10 transition-colors disabled:opacity-50"
             title="Refresh dashboard"
           >
-            <RefreshCw className="h-3.5 w-3.5 text-white/60 hover:text-white/90" />
+            <RefreshCw className={`h-3.5 w-3.5 text-white/60 hover:text-white/90 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
