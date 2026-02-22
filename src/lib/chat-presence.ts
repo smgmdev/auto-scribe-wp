@@ -81,6 +81,7 @@ export class ChatPresenceTracker {
   private onlineUsers: Set<string> = new Set();
   private onPresenceChange?: (onlineUsers: string[]) => void;
   private agencyPayoutId?: string;
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     requestId: string, 
@@ -110,17 +111,10 @@ export class ChatPresenceTracker {
       .on('presence', { event: 'sync' }, () => {
         const state = this.channel?.presenceState() || {};
         this.onlineUsers.clear();
-        const now = Date.now();
-        Object.entries(state).forEach(([key, presences]: [string, any[]]) => {
-          // Only consider users with a recent online_at timestamp (within 2 minutes)
-          const isRecent = presences.some((p: any) => {
-            if (!p.online_at) return false;
-            const onlineAt = new Date(p.online_at).getTime();
-            return now - onlineAt < 2 * 60 * 1000; // 2 minutes
-          });
-          if (isRecent) {
-            this.onlineUsers.add(key);
-          }
+        // Trust Supabase presence - if a user is in state, they're online
+        // Leave events automatically remove them when they disconnect
+        Object.keys(state).forEach((key) => {
+          this.onlineUsers.add(key);
         });
         this.onPresenceChange?.(Array.from(this.onlineUsers));
       })
@@ -162,6 +156,30 @@ export class ChatPresenceTracker {
       }
     });
 
+    // Heartbeat: re-track presence every 60s to keep online status fresh
+    this.heartbeatInterval = setInterval(async () => {
+      if (this.channel) {
+        const heartbeatNow = new Date().toISOString();
+        // Update last_online_at in DB
+        if (this.userType === 'client') {
+          await supabase
+            .from('profiles')
+            .update({ last_online_at: heartbeatNow })
+            .eq('id', this.userId);
+        } else if (this.userType === 'agency' && this.agencyPayoutId) {
+          await supabase
+            .from('agency_payouts')
+            .update({ last_online_at: heartbeatNow })
+            .eq('id', this.agencyPayoutId);
+        }
+        await this.channel.track({
+          user_id: this.userId,
+          user_type: this.userType,
+          online_at: heartbeatNow,
+        });
+      }
+    }, 60_000);
+
     return this;
   }
 
@@ -176,6 +194,12 @@ export class ChatPresenceTracker {
   }
 
   async leave() {
+    // Clear heartbeat
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+
     const now = new Date().toISOString();
     
     // Update last_online_at in database based on user type
