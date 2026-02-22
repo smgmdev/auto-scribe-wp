@@ -772,6 +772,28 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         </TabsList>
         </div>
 
+        {/* Search input */}
+        <div className="relative bg-foreground">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+          <Input
+            placeholder="Search transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            autoComplete="off"
+            className="w-full pl-10 h-9 text-sm rounded-none border-0 border-t border-white/10 text-white placeholder:text-white/50 bg-foreground focus-visible:ring-0"
+          />
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={() => setSearchTerm('')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
         {/* Sub-tabs for Earnings */}
         {activeType === 'earnings' && (
           <div className="overflow-x-auto scrollbar-hide overscroll-x-contain border-t border-white/10 bg-foreground/90" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
@@ -871,28 +893,6 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
           </div>
         )}
-
-        {/* Search input */}
-        <div className="relative bg-foreground">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
-          <Input
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            autoComplete="off"
-            className="w-full pl-10 h-9 text-sm rounded-none border-0 border-t border-white/10 text-white placeholder:text-white/50 bg-foreground focus-visible:ring-0"
-          />
-          {searchTerm && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
-              onClick={() => setSearchTerm('')}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
 
         {/* Tab sum bars - exclude locked/unlocked types from calculations */}
         {(() => {
