@@ -122,6 +122,7 @@ serve(async (req) => {
         amount: totalDollars,
         currency: "USD",
         merchant_order_id: `credits_${userId}_${Date.now()}`,
+        auto_capture: true,
         metadata: {
           user_id: userId,
           credit_amount: credits.toString(),
