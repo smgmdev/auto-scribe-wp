@@ -1544,31 +1544,33 @@ export function AdminAgenciesView() {
                                   <CheckCircle className="h-4 w-4 text-green-500" />
                                 </div>
                                 {application && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {application.country}
-                                  </p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">
+                                      {application.country}
+                                    </p>
+                                    <div className="md:hidden">
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Badge 
+                                              className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenCommissionDialog(agency);
+                                              }}
+                                            >
+                                              {agency.commission_percentage}%
+                                            </Badge>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>Click to edit commission</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  </div>
                                 )}
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2 md:hidden justify-end">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Badge 
-                                      className="bg-muted text-foreground cursor-pointer hover:bg-muted/80 h-6 rounded-none"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenCommissionDialog(agency);
-                                      }}
-                                    >
-                                      {agency.commission_percentage}%
-                                    </Badge>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Click to edit commission</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
                             </div>
 
                             <div className="hidden md:flex items-center gap-2 flex-wrap">
