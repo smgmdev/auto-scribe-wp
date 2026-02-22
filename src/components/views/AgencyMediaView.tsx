@@ -1170,7 +1170,7 @@ export function AgencyMediaView() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
-                              <p className="text-xs text-muted-foreground leading-tight">
+                              <p className="text-xs text-muted-foreground leading-tight block">
                                 {new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {new Date(site.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                               </p>
                             </div>
