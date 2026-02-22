@@ -807,127 +807,41 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return 'Offline';
   };
 
-  // Helper to determine if counterparty is online based on active_session_id and last_online_at
-  const checkIsOnline = (activeSessionId: string | null, lastOnlineAt: string | null): boolean => {
-    if (!activeSessionId) return false;
-    if (!lastOnlineAt) return false;
-    // Consider online if last_online_at is within 2 minutes
-    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    return lastOnlineAt > twoMinutesAgo;
-  };
-
-  // Fetch counterparty's session status + last seen, and subscribe to realtime changes
+  // Fetch counterparty's online status via secure RPC and poll every 10s
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
     let isMounted = true;
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
 
-    const setup = async () => {
-      if (!globalChatRequest || !senderId) return;
+    const fetchStatus = async () => {
+      if (!globalChatRequest?.id) return;
       
-      setLoadingLastSeen(true);
+      const { data, error } = await supabase.rpc('get_counterparty_online_status', {
+        _request_id: globalChatRequest.id
+      });
       
-      // Get the service request to find the counterparty
-      const { data: requestData } = await supabase
-        .from('service_requests')
-        .select('user_id, agency_payout_id')
-        .eq('id', globalChatRequest.id)
-        .maybeSingle();
+      if (!isMounted) return;
       
-      if (!requestData || !isMounted) {
-        setLoadingLastSeen(false);
-        return;
+      if (data && data.length > 0) {
+        const row = data[0];
+        setIsCounterpartyOnline(row.is_online ?? false);
+        setCounterpartyLastSeen(row.last_online_at ?? null);
       }
       
-      if (actualSenderType === 'client' && requestData.agency_payout_id) {
-        // Client viewing → counterparty is agency
-        const { data } = await supabase
-          .from('agency_payouts')
-          .select('last_online_at, last_login_at')
-          .eq('id', requestData.agency_payout_id)
-          .maybeSingle();
-        
-        if (isMounted && data) {
-          setCounterpartyLastSeen(data.last_online_at || null);
-          // Agencies don't have active_session_id, use last_online_at within 2 min
-          const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-          setIsCounterpartyOnline(!!data.last_online_at && data.last_online_at > twoMinutesAgo);
-        }
-        
-        // Subscribe to agency_payouts realtime changes
-        channel = supabase
-          .channel(`session-agency-${requestData.agency_payout_id}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'agency_payouts',
-              filter: `id=eq.${requestData.agency_payout_id}`
-            },
-            (payload) => {
-              if (!isMounted) return;
-              const newData = payload.new as any;
-              if ('last_online_at' in newData) {
-                setCounterpartyLastSeen(newData.last_online_at);
-                const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-                setIsCounterpartyOnline(!!newData.last_online_at && newData.last_online_at > twoMinutesAgo);
-              }
-            }
-          )
-          .subscribe();
-          
-      } else if ((actualSenderType === 'agency' || actualSenderType === 'admin') && requestData.user_id) {
-        // Agency/Admin viewing → counterparty is client
-        const { data } = await supabase
-          .from('profiles')
-          .select('last_online_at, active_session_id')
-          .eq('id', requestData.user_id)
-          .maybeSingle();
-        
-        if (isMounted && data) {
-          setCounterpartyLastSeen(data.last_online_at || null);
-          setIsCounterpartyOnline(checkIsOnline(data.active_session_id, data.last_online_at));
-        }
-        
-        // Subscribe to profiles realtime changes
-        channel = supabase
-          .channel(`session-client-${requestData.user_id}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'profiles',
-              filter: `id=eq.${requestData.user_id}`
-            },
-            (payload) => {
-              if (!isMounted) return;
-              const newData = payload.new as any;
-              if ('last_online_at' in newData || 'active_session_id' in newData) {
-                const lastOnline = 'last_online_at' in newData ? newData.last_online_at : null;
-                const sessionId = 'active_session_id' in newData ? newData.active_session_id : null;
-                if ('last_online_at' in newData) {
-                  setCounterpartyLastSeen(lastOnline);
-                }
-                setIsCounterpartyOnline(checkIsOnline(sessionId, lastOnline));
-              }
-            }
-          )
-          .subscribe();
-      }
-      
-      if (isMounted) setLoadingLastSeen(false);
+      setLoadingLastSeen(false);
     };
-    
-    setup();
-    
+
+    if (globalChatRequest?.id) {
+      setLoadingLastSeen(true);
+      fetchStatus();
+      // Poll every 10 seconds for real-time-like updates
+      pollInterval = setInterval(fetchStatus, 10_000);
+    }
+
     return () => {
       isMounted = false;
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      if (pollInterval) clearInterval(pollInterval);
     };
-  }, [globalChatRequest?.id, actualSenderType, senderId]);
+  }, [globalChatRequest?.id]);
 
   // Fetch counterparty agency info (for client view to show agency name and logo)
   useEffect(() => {

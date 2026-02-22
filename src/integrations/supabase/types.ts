@@ -1839,6 +1839,13 @@ export type Database = {
         Args: { _agency_name: string }
         Returns: string
       }
+      get_counterparty_online_status: {
+        Args: { _request_id: string }
+        Returns: {
+          is_online: boolean
+          last_online_at: string
+        }[]
+      }
       get_my_wp_submissions: {
         Args: { _user_id: string }
         Returns: {
