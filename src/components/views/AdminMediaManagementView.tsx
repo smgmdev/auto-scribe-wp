@@ -2003,7 +2003,7 @@ export function AdminMediaManagementView() {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0 ml-[52px] md:ml-0 md:gap-2">
+                            <div className="flex flex-wrap items-center gap-1 flex-shrink-0 ml-[52px] md:ml-0 md:gap-2">
                               <Badge variant="outline" className="text-xs">
                                 {site.seo_plugin === 'aioseo' ? 'AIO SEO' : 'Rank Math'}
                               </Badge>
