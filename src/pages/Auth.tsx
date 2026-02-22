@@ -673,14 +673,15 @@ export default function Auth() {
           </p>
 
           {/* Form */}
-          {/* Slider Puzzle Captcha - overlay popup on sign in */}
-          {mode === 'signin' && showCaptcha && (
-            <div className="relative z-50 flex items-center justify-center py-4">
-              <div className="w-full max-w-sm mx-4">
-                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} onCancel={() => setShowCaptcha(false)} />
+          <div className="relative">
+            {/* Slider Puzzle Captcha - overlay popup on sign in */}
+            {mode === 'signin' && showCaptcha && (
+              <div className="absolute inset-x-0 top-0 z-50 flex items-start justify-center pt-2">
+                <div className="w-full max-w-sm mx-4">
+                  <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} onCancel={() => setShowCaptcha(false)} />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} autoComplete="off" data-form-type="other" className="space-y-2">
 
@@ -852,6 +853,7 @@ export default function Auth() {
               </div>
             )}
           </form>
+          </div>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-8">
