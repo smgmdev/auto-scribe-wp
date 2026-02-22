@@ -226,6 +226,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       offer_accepted: { className: 'bg-amber-100 text-amber-700 hover:bg-amber-100', label: 'Credits Locked' },
       order_completed: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Completed' },
       order_delivered: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Order Delivered' },
+      publish: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Instant Publishing' },
       order_payout: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Earnings' },
       refund: { className: 'bg-orange-100 text-orange-700 hover:bg-orange-100', label: 'Refund' },
       adjustment: { className: 'bg-slate-100 text-slate-700 hover:bg-slate-100', label: 'Adjustment' },
@@ -692,7 +693,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const isB2BEarning = (tx: Transaction) => tx.type === 'order_payout' && tx.description?.startsWith('Earnings from completed order');
   const isInstantEarning = (tx: Transaction) => tx.type === 'order_payout' && !tx.description?.startsWith('Earnings from completed order');
   const isB2BPurchase = (tx: Transaction) => tx.type === 'order_completed' && tx.description?.startsWith('Order completed:');
-  const isInstantPurchase = (tx: Transaction) => tx.type === 'order_completed' && !tx.description?.startsWith('Order completed:');
+  const isInstantPurchase = (tx: Transaction) => tx.type === 'publish' || (tx.type === 'order_completed' && !tx.description?.startsWith('Order completed:'));
 
   // Determine the effective filter key based on active tab + sub-tab
   const effectiveFilter = (() => {
@@ -711,7 +712,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'earnings': return processedTransactions.filter(tx => tx.type === 'order_payout');
       case 'earnings_b2b': return processedTransactions.filter(isB2BEarning);
       case 'earnings_instant': return processedTransactions.filter(isInstantEarning);
-      case 'purchases': return processedTransactions.filter(tx => tx.type === 'order_completed');
+      case 'purchases': return processedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'publish');
       case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
       case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
       case 'system': return processedTransactions.filter(tx => systemTypes.includes(tx.type));
@@ -735,10 +736,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
         if (isB2BEarning(tx)) counts['earnings_b2b'] = (counts['earnings_b2b'] || 0) + 1;
         else counts['earnings_instant'] = (counts['earnings_instant'] || 0) + 1;
       }
-      if (tx.type === 'order_completed') {
+      if (tx.type === 'order_completed' || tx.type === 'publish') {
         counts['purchases'] = (counts['purchases'] || 0) + 1;
         if (isB2BPurchase(tx)) counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
-        else counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
+        if (isInstantPurchase(tx)) counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
       }
       if (systemTypes.includes(tx.type)) {
         counts['system'] = (counts['system'] || 0) + 1;
