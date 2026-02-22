@@ -787,7 +787,7 @@ const ScrollColorSection = ({
 };
 
 // Security fade text component
-const securityTexts = ['Transaction security.', 'Communication security.', 'Anti fraud supervision.', 'Data protection.', 'Prioritized privacy.'];
+const securityTexts = ['Transaction security.', 'Communication supervision.', 'Anti fraud supervision.', 'Data protection.', 'Prioritized privacy.'];
 const SecurityFadeText = () => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
