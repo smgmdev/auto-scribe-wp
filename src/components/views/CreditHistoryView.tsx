@@ -44,8 +44,7 @@ export function CreditHistoryView() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const highlightedTransactionRef = useRef<HTMLDivElement>(null);
-  const hasScrolledToTransaction = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [deepLinkKey, setDeepLinkKey] = useState(0); // incremented to force re-trigger
   
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [lockedOrders, setLockedOrders] = useState<LockedOrder[]>([]);
@@ -83,22 +82,14 @@ export function CreditHistoryView() {
     const withdrawalId = searchParams.get('withdrawalId');
     
     if (transactionOrderId) {
-      // Reset scroll flag and clear previous highlight so new deep-link always works
-      hasScrolledToTransaction.current = false;
-      // Force a state cycle: clear first, then set new value to ensure re-trigger
-      setHighlightedOrderId(null as any);
-      setTimeout(() => {
-        setHighlightedOrderId(transactionOrderId);
-        setActiveType('all');
-      }, 0);
+      setHighlightedOrderId(transactionOrderId);
+      setActiveType('all');
+      setDeepLinkKey(k => k + 1);
     }
     if (withdrawalId) {
-      hasScrolledToTransaction.current = false;
-      setHighlightedWithdrawalId(null as any);
-      setTimeout(() => {
-        setHighlightedWithdrawalId(withdrawalId);
-        setActiveType('all');
-      }, 0);
+      setHighlightedWithdrawalId(withdrawalId);
+      setActiveType('all');
+      setDeepLinkKey(k => k + 1);
     }
     
     // Clear the query params after reading
@@ -117,7 +108,6 @@ export function CreditHistoryView() {
       attempts++;
       const el = highlightedTransactionRef.current;
       if (el && el.offsetParent !== null) {
-        // Find the scrollable main container and scroll within it
         const scrollContainer = el.closest('main') || el.closest('[class*="overflow-y-auto"]');
         if (scrollContainer) {
           const containerRect = scrollContainer.getBoundingClientRect();
@@ -133,98 +123,93 @@ export function CreditHistoryView() {
         setTimeout(tryScroll, 150);
       }
     };
-    // Delay enough to run AFTER MainLayout's scroll-to-top on view change
     setTimeout(tryScroll, 400);
   }, []);
 
   // Scroll to and expand the highlighted transaction once data is loaded AND view is visible
+  // deepLinkKey increments on every new deep-link, guaranteeing this effect re-runs
   useEffect(() => {
-    if (!loading && transactions.length > 0 && !hasScrolledToTransaction.current && currentView === 'credit-history') {
-      // Handle order_payout highlight
-      if (highlightedOrderId) {
-        // Match broadly: by transaction id, by order_id on any type, or by order_payout with matching order_id
-        const transaction = transactions.find(t => t.id === highlightedOrderId)
-          || transactions.find(t => t.order_id === highlightedOrderId)
-          || transactions.find(t => t.order_id === highlightedOrderId && t.type === 'order_payout');
-        if (transaction) {
-          // Always add to expanded set (don't replace) so other open cards stay open
-          setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
-          // Normalize highlightedOrderId to the transaction id for consistent ref matching
+    if (deepLinkKey === 0) return; // skip initial mount
+    if (loading || transactions.length === 0 || currentView !== 'credit-history') return;
+
+    // Handle order/payout highlight
+    if (highlightedOrderId) {
+      const transaction = transactions.find(t => t.id === highlightedOrderId)
+        || transactions.find(t => t.order_id === highlightedOrderId);
+      if (transaction) {
+        // Add to expanded set (preserving already-open cards)
+        setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
+        // Normalize to transaction.id for ref matching
+        if (highlightedOrderId !== transaction.id) {
           setHighlightedOrderId(transaction.id);
-          hasScrolledToTransaction.current = true;
-
-          // For instant publishing payouts, fetch site details so expanded content renders
-          const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
-          if (isInstantPublishingPayout && transaction.metadata?.site_name) {
-            supabase.rpc('get_public_sites').then(({ data: publicSites }) => {
-              const wpSite = publicSites?.find((s: any) => s.name === transaction.metadata?.site_name);
-              setPublishDetails(prev => ({ ...prev, [transaction.id]: {
-                site_favicon: wpSite?.favicon || null,
-                site_url: wpSite?.url || null,
-              }}));
-            });
-          }
-
-          // For order-based transactions, fetch order details if needed
-          if (transaction.order_id && !orderDetails[transaction.id]) {
-            supabase
-              .from('orders')
-              .select('*, media_sites(name, favicon, price, link)')
-              .eq('id', transaction.order_id)
-              .single()
-              .then(({ data: order }) => {
-                if (order) {
-                  setOrderDetails(prev => ({ ...prev, [transaction.id]: order }));
-                }
-              });
-          }
-
-          scrollToHighlighted();
         }
-      }
-      
-      // Handle withdrawal highlight - find matching withdrawal transaction by fetching withdrawal details
-      if (highlightedWithdrawalId) {
-        // We need to find the credit_transaction that matches this withdrawal
-        // Withdrawals create transactions with types: withdrawal_locked, withdrawal_completed, withdrawal_unlocked
-        const matchWithdrawal = async () => {
-          const { data: withdrawal } = await supabase
-            .from('agency_withdrawals')
-            .select('*')
-            .eq('id', highlightedWithdrawalId)
-            .single();
-          
-          if (withdrawal) {
-            const type = withdrawal.status === 'completed' || withdrawal.status === 'approved' 
-              ? 'withdrawal_completed' 
-              : withdrawal.status === 'rejected' 
-                ? 'withdrawal_unlocked' 
-                : 'withdrawal_locked';
-            
-            // Find matching transaction by amount and type
-            const matchingTransaction = transactions.find(t => 
-              t.type === type && 
-              Math.abs(t.amount) === withdrawal.amount_cents
-            );
-            
-            if (matchingTransaction) {
-              // Store the withdrawal details so it doesn't show "Loading..."
-              setWithdrawalDetails(prev => ({
-                ...prev,
-                [matchingTransaction.id]: withdrawal
-              }));
-              setExpandedWithdrawals(new Set([matchingTransaction.id]));
-              hasScrolledToTransaction.current = true;
-              // Store the transaction id for highlighting
-              setHighlightedOrderId(matchingTransaction.id);
-              scrollToHighlighted();
-            }
-          }
-        };
-        matchWithdrawal();
+
+        // For instant publishing payouts, fetch site details
+        const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
+        if (isInstantPublishingPayout && transaction.metadata?.site_name) {
+          supabase.rpc('get_public_sites').then(({ data: publicSites }) => {
+            const wpSite = publicSites?.find((s: any) => s.name === transaction.metadata?.site_name);
+            setPublishDetails(prev => ({ ...prev, [transaction.id]: {
+              site_favicon: wpSite?.favicon || null,
+              site_url: wpSite?.url || null,
+            }}));
+          });
+        }
+
+        // For order-based transactions, fetch order details
+        if (transaction.order_id && !orderDetails[transaction.id]) {
+          supabase
+            .from('orders')
+            .select('*, media_sites(name, favicon, price, link)')
+            .eq('id', transaction.order_id)
+            .single()
+            .then(({ data: order }) => {
+              if (order) {
+                setOrderDetails(prev => ({ ...prev, [transaction.id]: order }));
+              }
+            });
+        }
+
+        scrollToHighlighted();
       }
     }
-  }, [highlightedOrderId, highlightedWithdrawalId, loading, transactions, currentView, scrollToHighlighted]);
+    
+    // Handle withdrawal highlight
+    if (highlightedWithdrawalId) {
+      const matchWithdrawal = async () => {
+        const { data: withdrawal } = await supabase
+          .from('agency_withdrawals')
+          .select('*')
+          .eq('id', highlightedWithdrawalId)
+          .single();
+        
+        if (withdrawal) {
+          const type = withdrawal.status === 'completed' || withdrawal.status === 'approved' 
+            ? 'withdrawal_completed' 
+            : withdrawal.status === 'rejected' 
+              ? 'withdrawal_unlocked' 
+              : 'withdrawal_locked';
+          
+          const matchingTransaction = transactions.find(t => 
+            t.type === type && 
+            Math.abs(t.amount) === withdrawal.amount_cents
+          );
+          
+          if (matchingTransaction) {
+            setWithdrawalDetails(prev => ({
+              ...prev,
+              [matchingTransaction.id]: withdrawal
+            }));
+            setExpandedWithdrawals(prev => new Set([...prev, matchingTransaction.id]));
+            setHighlightedOrderId(matchingTransaction.id);
+            scrollToHighlighted();
+          }
+        }
+      };
+      matchWithdrawal();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkKey, loading, transactions, currentView]);
 
   // Auto-fetch order details for order_accepted transactions so the credit amount shows immediately
   useEffect(() => {
