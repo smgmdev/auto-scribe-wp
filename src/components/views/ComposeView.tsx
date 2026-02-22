@@ -1575,6 +1575,8 @@ export function ComposeView() {
                 !title.trim() || 
                 !content.trim() || 
                 !selectedSite || 
+                isLoadingCategories ||
+                isLoadingTags ||
                 selectedCategories.length === 0 || 
                 selectedTagIds.length === 0 || 
                 !focusKeyword.trim() || 
@@ -1713,6 +1715,8 @@ export function ComposeView() {
                 !title.trim() || 
                 !content.trim() || 
                 !selectedSite || 
+                isLoadingCategories ||
+                isLoadingTags ||
                 selectedCategories.length === 0 || 
                 selectedTagIds.length === 0 || 
                 !focusKeyword.trim() || 
