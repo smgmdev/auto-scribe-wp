@@ -82,6 +82,19 @@ export function ComposeView() {
   const [title, setTitle] = useState(editingArticle?.title || selectedHeadline?.title || '');
   const [content, setContent] = useState(editingArticle?.content || '');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Sync title when selectedHeadline changes (user picks a new source)
+  const prevHeadlineRef = useRef(selectedHeadline);
+  useEffect(() => {
+    if (selectedHeadline && selectedHeadline !== prevHeadlineRef.current) {
+      setTitle(selectedHeadline.title || '');
+      // Clear content so user can regenerate with new source
+      if (!editingArticle) {
+        setContent('');
+      }
+    }
+    prevHeadlineRef.current = selectedHeadline;
+  }, [selectedHeadline, editingArticle]);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [showDraftSuccess, setShowDraftSuccess] = useState(false);
