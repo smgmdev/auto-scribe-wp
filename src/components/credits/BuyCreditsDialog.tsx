@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
@@ -24,7 +24,7 @@ interface BuyCreditsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type Step = 'select' | 'payment' | 'success';
+type Step = 'select' | 'payment' | 'processing' | 'success';
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
   const [creditAmount, setCreditAmount] = useState<string>('5');
@@ -36,7 +36,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const cardElementRef = useRef<any>(null);
   const { refreshCredits } = useAuth();
   const { setCurrentView } = useAppStore();
-  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
 
   // Drag state
@@ -148,6 +148,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         const handlePaymentSuccess = async () => {
           if (!mounted) return;
+          setStep('processing');
           setConfirming(true);
           try {
             const { data: result, error } = await supabase.functions.invoke('airwallex-webhook', {
@@ -155,14 +156,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             });
             if (error) throw error;
             if (result?.success) {
-              refreshCredits?.();
+              await refreshCredits?.();
               setStep('success');
             } else {
               toast.error(result?.message || 'Payment not yet completed. Please wait a moment.');
+              setStep('payment');
             }
           } catch (err: any) {
             console.error('[Airwallex] Credit update error:', err);
             toast.error('Payment succeeded but credit update failed. Please contact support.');
+            setStep('payment');
           } finally {
             setConfirming(false);
           }
@@ -194,7 +197,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             if (result?.success) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
-              refreshCredits?.();
+              await refreshCredits?.();
               setStep('success');
             }
           } catch {
@@ -352,7 +355,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
 
         {/* Header */}
-        {step !== 'success' && (
+        {step !== 'success' && step !== 'processing' && (
         <div className="flex items-center gap-2 mb-1">
           {step === 'payment' && (
             <button
@@ -469,6 +472,11 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               )}
             </div>
           </>
+        ) : step === 'processing' ? (
+          <div className="flex flex-col items-center justify-center text-center gap-3 py-16">
+            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Processing your payment...</p>
+          </div>
         ) : step === 'success' ? (
           <div className="flex flex-col items-center text-center gap-4 py-8">
             <CheckCircle2 className="h-14 w-14 text-green-500" />
@@ -482,12 +490,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               onClick={() => {
                 onOpenChange(false);
                 setCurrentView('credit-history');
-                // Navigate with deep-link param to open the transaction card
-                const params = new URLSearchParams();
+                // Set search params to trigger deep-link in CreditHistoryView
                 if (intentData?.intent_id) {
-                  params.set('purchaseIntentId', intentData.intent_id);
+                  setSearchParams({ purchaseIntentId: intentData.intent_id }, { replace: true });
                 }
-                navigate(`/account?${params.toString()}`, { replace: true });
               }}
               className="min-w-[160px] rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             >
