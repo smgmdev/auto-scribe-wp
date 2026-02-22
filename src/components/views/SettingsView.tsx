@@ -123,7 +123,7 @@ export function SettingsView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-8">
+      <div className="max-w-[980px] mx-auto space-y-4">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
