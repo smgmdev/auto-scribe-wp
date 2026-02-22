@@ -865,12 +865,16 @@ export function ComposeView() {
           featuredImageUrl = mediaResult.source_url;
         } else if (featuredMediaId) {
           // Update existing image metadata if no new file uploaded
-          await updateMediaMetadata(currentSite, featuredMediaId, {
-            title: featuredImage.title,
-            alt_text: featuredImage.altText,
-            caption: featuredImage.caption,
-            description: featuredImage.description
-          });
+          try {
+            await updateMediaMetadata(currentSite, featuredMediaId, {
+              title: featuredImage.title,
+              alt_text: featuredImage.altText,
+              caption: featuredImage.caption,
+              description: featuredImage.description
+            });
+          } catch (mediaErr) {
+            console.warn('Could not update media metadata (may lack permissions), continuing save:', mediaErr);
+          }
         }
         await updateWPArticle({
           site: currentSite,
