@@ -571,8 +571,12 @@ const ScrollColorSection = ({
                         key={favicon}
                         src={favicon}
                         alt="WP site"
-                        className="absolute w-10 h-10 object-contain transition-opacity duration-500"
-                        style={{ opacity: i === activeWpLogoIndex ? 1 : 0 }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{
+                          opacity: i === activeWpLogoIndex ? 1 : 0,
+                          transform: i === activeWpLogoIndex ? 'scale(1)' : 'scale(1.1)',
+                          transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out',
+                        }}
                       />
                     ))
                   ) : (
