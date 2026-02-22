@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -821,15 +821,16 @@ export function AdminAIArticlesView() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingArticle} onOpenChange={(open) => !open && setEditingArticle(null)}>
-        <DialogContent className="bg-background max-w-xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Article</DialogTitle>
-            <DialogDescription>
-              Update the article details and sync to WordPress.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
+      <DraggablePopup
+        open={!!editingArticle}
+        onOpenChange={(open) => !open && setEditingArticle(null)}
+        title="Edit Article"
+        width={560}
+      >
+        <p className="text-sm text-muted-foreground mb-4">
+          Update the article details and sync to WordPress.
+        </p>
+        <div className="space-y-4">
 
             {/* Title */}
             <div className="space-y-2">
@@ -839,7 +840,7 @@ export function AdminAIArticlesView() {
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Article title"
-                className="min-h-[40px] max-h-[80px] resize-none overflow-hidden"
+                className="min-h-[40px] max-h-[80px] resize-none overflow-hidden !text-sm"
                 rows={1}
                 style={{ height: editTitle.length > 60 ? '80px' : '40px' }}
               />
@@ -853,6 +854,7 @@ export function AdminAIArticlesView() {
                 value={editFocusKeyword}
                 onChange={(e) => setEditFocusKeyword(e.target.value)}
                 placeholder={editingArticle?.focus_keyword || "SEO focus keyword"}
+                className="!text-sm"
               />
               {editingArticle?.focus_keyword && !editFocusKeyword && (
                 <p className="text-xs text-muted-foreground">Current: {editingArticle.focus_keyword}</p>
@@ -887,7 +889,7 @@ export function AdminAIArticlesView() {
                   value={editMetaDescription}
                   onChange={(e) => setEditMetaDescription(e.target.value)}
                   placeholder={isGeneratingDescription ? "Generating description..." : "SEO meta description (150-160 characters)"}
-                  className="min-h-[80px] resize-none"
+                  className="min-h-[80px] resize-none !text-sm"
                   rows={3}
                   disabled={isGeneratingDescription}
                 />
@@ -910,6 +912,7 @@ export function AdminAIArticlesView() {
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
                 placeholder={editingArticle?.tags?.join(', ') || "Comma-separated tags"}
+                className="!text-sm"
               />
               {editingArticle?.tags && editingArticle.tags.length > 0 && !editTags && (
                 <p className="text-xs text-muted-foreground">Current: {editingArticle.tags.join(', ')}</p>
@@ -925,7 +928,7 @@ export function AdminAIArticlesView() {
               </div>
             )}
           </div>
-          <DialogFooter>
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 mt-6">
             <Button 
               variant="outline" 
               onClick={() => setEditingArticle(null)}
@@ -943,9 +946,8 @@ export function AdminAIArticlesView() {
               ) : null}
               Save
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+      </DraggablePopup>
       </div>
     </div>
   );
