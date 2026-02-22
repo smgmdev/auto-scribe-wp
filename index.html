@@ -115,8 +115,6 @@
 
           // Stub navigator.locks so the iframe's Supabase client doesn't
           // compete with the parent window for token-refresh locks.
-          // Without this, lock contention can stall the parent's refresh
-          // and cause the admin to be kicked from active sessions.
           if (navigator.locks) {
             navigator.locks.request = function(_name, optionsOrCb, cb) {
               var fn = typeof optionsOrCb === 'function' ? optionsOrCb : cb;
@@ -130,6 +128,27 @@
           // Suppress storage events so the parent window's Supabase client
           // doesn't react to any writes that leak past the localStorage patch
           window.addEventListener('storage', function(e) { e.stopImmediatePropagation(); }, true);
+
+          // Block ALL auth token refresh requests from the shadow iframe.
+          // Despite stopAutoRefresh(), Supabase's setSession() can restart
+          // auto-refresh internally. Blocking fetch to /token?grant_type=refresh_token
+          // is the nuclear option that guarantees no server-side token revocation.
+          var origFetch = window.fetch;
+          window.fetch = function(input, init) {
+            var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+            // Block refresh_token grant requests to auth endpoints
+            if (url.indexOf('/auth/v1/token') !== -1 && init && init.body) {
+              var bodyStr = typeof init.body === 'string' ? init.body : '';
+              if (bodyStr.indexOf('refresh_token') !== -1) {
+                // Return a fake successful response so the client doesn't error
+                return Promise.resolve(new Response(JSON.stringify({ error: 'blocked_in_shadow' }), {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' }
+                }));
+              }
+            }
+            return origFetch.apply(this, arguments);
+          };
         } catch(e) {}
       })();
     </script>
