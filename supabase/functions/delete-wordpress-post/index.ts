@@ -91,8 +91,22 @@ serve(async (req) => {
           .maybeSingle();
         isAgencyOwner = !!agencyData;
       }
+
+      // Allow if user owns the article that was published to this site
+      let isArticleOwner = false;
       if (!isGlobalSite && !isDirectOwner && !isAgencyOwner) {
-        console.error('[delete-wordpress-post] Caller does not own site', { callerUserId, siteId });
+        const { data: articleData } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('user_id', callerUserId)
+          .eq('wp_post_id', wpPostId)
+          .eq('published_to', siteId)
+          .maybeSingle();
+        isArticleOwner = !!articleData;
+      }
+
+      if (!isGlobalSite && !isDirectOwner && !isAgencyOwner && !isArticleOwner) {
+        console.error('[delete-wordpress-post] Caller does not own site or article', { callerUserId, siteId });
         return new Response(
           JSON.stringify({ error: 'Unauthorized: you do not own this site', deleted: false }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
