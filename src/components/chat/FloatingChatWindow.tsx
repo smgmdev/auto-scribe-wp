@@ -6780,7 +6780,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     disabled={sending || sendCooldown > 0 || (!newMessage.trim() && !selectedFile)}
                     onClick={uploadFileAndSendMessage}
                   >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : sendCooldown > 0 ? <span className="text-xs font-mono font-semibold">{sendCooldown}</span> : <Send className="h-4 w-4" />}
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : sendCooldown > 0 ? <span className="text-xs font-mono font-normal">{sendCooldown}s</span> : <Send className="h-4 w-4" />}
                   </Button>
                   {isAdmin && adminJoined && (
                     <button
