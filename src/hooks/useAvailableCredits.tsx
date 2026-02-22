@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -97,16 +97,21 @@ export function useAvailableCredits(enabled = true) {
       .neq('status', 'cancelled');
 
     let creditsInPendingRequests = 0;
-    if (pendingRequests) {
-      for (const request of pendingRequests) {
-        const { data: orderRequestMessages } = await supabase
-          .from('service_messages')
-          .select('id')
-          .eq('request_id', request.id)
-          .like('message', '%CLIENT_ORDER_REQUEST%')
-          .limit(1);
+    if (pendingRequests && pendingRequests.length > 0) {
+      // Batch: fetch all CLIENT_ORDER_REQUEST messages for these requests in one query
+      const requestIds = pendingRequests.map(r => r.id);
+      const { data: orderRequestMessages } = await supabase
+        .from('service_messages')
+        .select('request_id')
+        .in('request_id', requestIds)
+        .like('message', '%CLIENT_ORDER_REQUEST%');
 
-        if (orderRequestMessages && orderRequestMessages.length > 0) {
+      const requestsWithOrderRequest = new Set(
+        (orderRequestMessages || []).map(m => m.request_id)
+      );
+
+      for (const request of pendingRequests) {
+        if (requestsWithOrderRequest.has(request.id)) {
           const ms = request.media_sites as { name: string; price: number } | null;
           if (ms?.price) creditsInPendingRequests += ms.price;
         }
@@ -184,6 +189,13 @@ export function useAvailableCredits(enabled = true) {
     if (enabled) refresh();
   }, [enabled, refresh]);
 
+  // Debounced refresh to prevent rapid re-fetches from realtime events
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefresh = useCallback(() => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => refresh(), 500);
+  }, [refresh]);
+
   // Auto-refresh when credit-related tables change
   useEffect(() => {
     if (!enabled || !user) return;
@@ -191,13 +203,13 @@ export function useAvailableCredits(enabled = true) {
     const channel = supabase
       .channel('user-credits-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'credit_transactions', filter: `user_id=eq.${user.id}` }, () => {
-        refresh();
+        debouncedRefresh();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, () => {
-        refresh();
+        debouncedRefresh();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests', filter: `user_id=eq.${user.id}` }, () => {
-        refresh();
+        debouncedRefresh();
       })
       .subscribe();
 
