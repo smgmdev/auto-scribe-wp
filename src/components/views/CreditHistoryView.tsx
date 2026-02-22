@@ -55,6 +55,7 @@ export function CreditHistoryView() {
   const [orderDetails, setOrderDetails] = useState<Record<string, any>>({});
   const [publishDetails, setPublishDetails] = useState<Record<string, any>>({});
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
+  const [highlightedTxType, setHighlightedTxType] = useState<string | null>(null);
   const [highlightedWithdrawalId, setHighlightedWithdrawalId] = useState<string | null>(null);
   const [isAgency, setIsAgency] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,9 +81,11 @@ export function CreditHistoryView() {
   useEffect(() => {
     const transactionOrderId = searchParams.get('transaction');
     const withdrawalId = searchParams.get('withdrawalId');
+    const txType = searchParams.get('txType');
     
     if (transactionOrderId) {
       setHighlightedOrderId(transactionOrderId);
+      setHighlightedTxType(txType);
       setActiveType('all');
       setDeepLinkKey(k => k + 1);
     }
@@ -97,6 +100,7 @@ export function CreditHistoryView() {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('transaction');
       newParams.delete('withdrawalId');
+      newParams.delete('txType');
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -134,8 +138,12 @@ export function CreditHistoryView() {
 
     // Handle order/payout highlight
     if (highlightedOrderId) {
-      const transaction = transactions.find(t => t.id === highlightedOrderId)
-        || transactions.find(t => t.order_id === highlightedOrderId);
+      // When txType is provided, prefer matching by type to avoid ambiguity (e.g. order_payout vs order_completed for same order)
+      const transaction = highlightedTxType
+        ? (transactions.find(t => t.order_id === highlightedOrderId && t.type === highlightedTxType)
+          || transactions.find(t => t.id === highlightedOrderId && t.type === highlightedTxType))
+        : (transactions.find(t => t.id === highlightedOrderId)
+          || transactions.find(t => t.order_id === highlightedOrderId));
       if (transaction) {
         // Add to expanded set (preserving already-open cards)
         setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
