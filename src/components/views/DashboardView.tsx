@@ -527,7 +527,7 @@ export function DashboardView() {
               type="button"
               onClick={refreshDashboard}
               disabled={isRefreshing}
-              className="inline-flex items-center justify-center border bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-3 py-1 text-xs font-semibold whitespace-nowrap cursor-pointer"
+              className="inline-flex items-center justify-center border bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-2.5 h-[22px] text-xs font-semibold whitespace-nowrap cursor-pointer"
               title="Refresh dashboard"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -567,7 +567,7 @@ export function DashboardView() {
             type="button"
             onClick={refreshDashboard}
             disabled={isRefreshing}
-            className="inline-flex items-center justify-center border bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-3 py-1 text-xs font-semibold whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center justify-center border bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-2.5 h-[22px] text-xs font-semibold whitespace-nowrap cursor-pointer"
             title="Refresh dashboard"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
