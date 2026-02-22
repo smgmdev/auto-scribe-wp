@@ -515,7 +515,6 @@ export function DashboardView() {
               </Badge>
             ) : isAgency ? (
               <Badge className="bg-[#f2a547] text-black border-[#f2a547] flex items-center gap-1 px-3 py-1 hover:bg-[#f2a547] w-fit whitespace-nowrap">
-                <CheckCircle className="h-3 w-3 shrink-0" />
                 Active Agency
               </Badge>
             ) : (
@@ -556,7 +555,6 @@ export function DashboardView() {
             </Badge>
           ) : isAgency ? (
             <Badge className="bg-[#f2a547] text-black border-[#f2a547] flex items-center gap-1 px-3 py-1 hover:bg-[#f2a547] whitespace-nowrap">
-              <CheckCircle className="h-3 w-3 shrink-0" />
               Active Agency
             </Badge>
           ) : (
