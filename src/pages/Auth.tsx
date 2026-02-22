@@ -677,7 +677,7 @@ export default function Auth() {
           {mode === 'signin' && showCaptcha && (
             <div className="absolute inset-0 z-50 flex items-center justify-center">
               <div className="w-full max-w-sm mx-4">
-                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} />
+                <SliderPuzzleCaptcha onVerified={handleCaptchaVerified} onCancel={() => setShowCaptcha(false)} />
               </div>
             </div>
           )}
