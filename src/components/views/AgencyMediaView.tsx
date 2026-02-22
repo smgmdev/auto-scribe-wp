@@ -1066,9 +1066,9 @@ export function AgencyMediaView() {
         <TabsContent value="wordpress" className="mt-0 space-y-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide">
-            <TabsList className="w-full p-0 h-auto md:overflow-visible rounded-none bg-black">
-              <TabsTrigger value="connected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none">
+            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <TabsList className="flex w-full md:overflow-visible rounded-none gap-0 p-0 h-auto">
+              <TabsTrigger value="connected" className="flex-1 min-w-0 truncate rounded-none py-2.5 relative overflow-visible data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
@@ -1076,10 +1076,10 @@ export function AgencyMediaView() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="pending" className="flex-1 py-2.5 shrink-0 whitespace-nowrap text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="pending" className="flex-1 min-w-0 truncate rounded-none py-2.5 data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Pending Review ({pendingSubmissions.length})
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none">
+              <TabsTrigger value="rejected" className="flex-1 min-w-0 truncate rounded-none py-2.5 relative overflow-visible data-[state=inactive]:bg-black data-[state=inactive]:text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black">
                 Rejected ({rejectedSubmissions.length})
                 {unreadRejectedWpCount > 0 && (
                   <span className="md:absolute md:-top-2 md:-right-1 md:z-20 min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center pointer-events-none">
