@@ -764,7 +764,7 @@ export function CreditHistoryView() {
   const getTransactionBadge = (type: string) => {
     // Match admin-side badge styling with bg-*-100 text-*-700 format
     const config: Record<string, { className: string; label: string }> = {
-      purchase: { className: 'bg-green-100 text-green-700', label: 'Purchase' },
+      purchase: { className: 'bg-green-100 text-green-700', label: 'Online Purchase' },
       locked: { className: 'bg-amber-100 text-amber-700', label: 'Locked' },
       order: { className: 'bg-amber-100 text-amber-700', label: 'Locked' }, // Legacy type
       unlocked: { className: 'bg-blue-100 text-blue-700', label: 'Unlocked' },
@@ -2488,12 +2488,12 @@ export function CreditHistoryView() {
                                  </div>
                                </div>
                                <div>
-                                 <span className="text-muted-foreground">Transaction Type:</span>
-                                 <p className="font-medium">Card Purchase</p>
-                               </div>
-                               <div>
                                  <span className="text-muted-foreground">Amount:</span>
                                  <p className="font-medium text-green-500">+{transaction.amount.toLocaleString()} credits</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Transaction Type:</span>
+                                 <p className="font-medium">Card Purchase</p>
                                </div>
                                <div>
                                  <span className="text-muted-foreground">Processed:</span>
