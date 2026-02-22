@@ -1697,6 +1697,18 @@ export function Sidebar({
             console.log('[Sidebar] Skipping agency message refetch - notification guard active');
             return;
           }
+          // If the chat for this message is currently open, delay the refetch
+          // to allow mark-as-read to complete first (prevents stuck notifications)
+          const isChatOpen = useAppStore.getState().openChats.some(c => c.request.id === msg.request_id);
+          if (isChatOpen) {
+            console.log('[Sidebar] Chat is open for this message, delaying agency refetch');
+            setTimeout(() => {
+              if (!isNotificationGuarded()) {
+                refetchAgencyNotificationCounts();
+              }
+            }, 3000);
+            return;
+          }
           console.log('[Sidebar] New client/admin message, refetching agency counts');
           refetchAgencyNotificationCounts();
         }
