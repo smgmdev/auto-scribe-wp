@@ -100,6 +100,19 @@
             if (k.indexOf('sb-') === 0) { delete mem[k]; return; }
             origRem(k);
           };
+          // Block BroadcastChannel so Supabase auth changes in the iframe
+          // don't propagate to the parent window and hijack the admin session
+          var OrigBC = window.BroadcastChannel;
+          window.BroadcastChannel = function(name) {
+            this.name = name;
+            this.postMessage = function() {};
+            this.close = function() {};
+            this.onmessage = null;
+            this.onmessageerror = null;
+            this.addEventListener = function() {};
+            this.removeEventListener = function() {};
+            this.dispatchEvent = function() { return true; };
+          };
         } catch(e) {}
       })();
     </script>
