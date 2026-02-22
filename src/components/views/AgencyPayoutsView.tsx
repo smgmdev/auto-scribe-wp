@@ -915,7 +915,7 @@ export function AgencyPayoutsView() {
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
-                                  View Transaction Details
+                                  See Transaction Details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                               </div>
