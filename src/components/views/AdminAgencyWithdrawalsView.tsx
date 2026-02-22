@@ -603,35 +603,6 @@ export function AdminAgencyWithdrawalsView() {
                             <div className="text-lg text-foreground md:hidden mt-1">
                               ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
-                            
-                            {/* Action Buttons for pending */}
-                            {withdrawal.status === 'pending' && (
-                              <div className="flex flex-col md:flex-row gap-2 mt-3">
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
-                                  disabled={processingId === withdrawal.id}
-                                  className="w-full md:w-auto bg-blue-600 text-white hover:bg-transparent hover:text-blue-600 border border-blue-600 transition-colors"
-                                >
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'reject'); }}
-                                  disabled={processingId === withdrawal.id}
-                                  className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
-                                >
-                                  Reject
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
-                                  className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
-                                >
-                                  Credit History
-                                </Button>
-                              </div>
-                            )}
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -643,6 +614,36 @@ export function AdminAgencyWithdrawalsView() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Action Buttons for pending - full width on mobile */}
+                      {withdrawal.status === 'pending' && (
+                        <div className="flex flex-col md:flex-row gap-2 px-3 pb-3">
+                          <Button
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'approve'); }}
+                            disabled={processingId === withdrawal.id}
+                            className="w-full md:w-auto bg-blue-600 text-white hover:bg-transparent hover:text-blue-600 border border-blue-600 transition-colors"
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleAction(withdrawal, 'reject'); }}
+                            disabled={processingId === withdrawal.id}
+                            className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                          >
+                            Reject
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleViewCreditHistory(withdrawal.user_id); }}
+                            className="w-full md:w-auto rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-colors"
+                          >
+                            Credit History
+                          </Button>
+                        </div>
+                      )}
+
                       
                       {/* Expanded Details */}
                       {expandedCards[withdrawal.id] && (
