@@ -3,6 +3,7 @@ import { Check, RefreshCw, ShieldCheck } from 'lucide-react';
 
 interface SliderPuzzleCaptchaProps {
   onVerified: () => void;
+  onCancel?: () => void;
 }
 
 const PUZZLE_WIDTH = 280;
@@ -10,7 +11,7 @@ const PUZZLE_HEIGHT = 160;
 const PIECE_SIZE = 40;
 const TOLERANCE = 5;
 
-export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
+export function SliderPuzzleCaptcha({ onVerified, onCancel }: SliderPuzzleCaptchaProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pieceCanvasRef = useRef<HTMLCanvasElement>(null);
   const [targetX, setTargetX] = useState(0);
@@ -361,6 +362,17 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
             </div>
           </div>
         </div>
+
+        {/* Cancel button */}
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="w-full py-2.5 bg-black text-white text-sm font-medium hover:bg-black/90 transition-colors"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
