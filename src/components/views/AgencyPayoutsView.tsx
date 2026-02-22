@@ -842,7 +842,7 @@ export function AgencyPayoutsView() {
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
-                                  See transaction details
+                                   See Transaction Details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                               </div>
@@ -1003,7 +1003,7 @@ export function AgencyPayoutsView() {
                                   {openingChat === order.id ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />
                                   ) : null}
-                                  View order details
+                                  View Order Details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                                 <button
@@ -1013,7 +1013,7 @@ export function AgencyPayoutsView() {
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
-                                  See transaction details
+                                  See Transaction Details
                                   <ArrowRight className="h-3.5 w-3.5" />
                                 </button>
                                 {order.delivery_url && (
