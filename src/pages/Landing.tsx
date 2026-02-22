@@ -809,7 +809,7 @@ const Landing = () => {
 
       {/* Download App Buttons */}
       <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-6">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
