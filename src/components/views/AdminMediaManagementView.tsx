@@ -1975,7 +1975,7 @@ export function AdminMediaManagementView() {
                                   <ArrowUpRight className="h-3 w-3 flex-shrink-0" />
                                 </button>
                                 <div className="flex items-center gap-2 -mt-0.5">
-                                  <span className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[200px]">
+                                  <span className="text-xs text-muted-foreground break-all md:truncate md:max-w-[200px]">
                                     {site.url.replace(/^https?:\/\//, '')}
                                   </span>
                                   <button
