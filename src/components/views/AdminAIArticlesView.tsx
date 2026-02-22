@@ -777,7 +777,7 @@ export function AdminAIArticlesView() {
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-background">
-                          <AlertDialogHeader>
+                          <AlertDialogHeader className="text-left">
                             <AlertDialogTitle>Delete article permanently?</AlertDialogTitle>
                             <AlertDialogDescription>
                               This will permanently delete the article and its featured image from both the database and WordPress. This action cannot be undone.
