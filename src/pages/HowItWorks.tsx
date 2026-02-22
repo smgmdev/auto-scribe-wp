@@ -677,11 +677,11 @@ const ScrollColorSection = ({
             <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
               <div className="p-7 pb-4">
               <div className="flex items-center gap-3 mb-4">
-                <Newspaper className="w-10 h-10 text-[#f7931e] flex-shrink-0" />
+                <Newspaper className="w-10 h-10 text-white flex-shrink-0" />
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article<br />Generation</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
-                Generate unique, high-quality articles in seconds using live news sources and AI. Choose your tone, keyword, and target site.
+                Generate unique, high-quality articles in seconds using live news sources and Arcana Mace AI.
               </p>
               </div>
               <div className="mt-auto w-full border-t border-white/10 bg-white/5 overflow-hidden">
