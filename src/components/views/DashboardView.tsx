@@ -569,6 +569,7 @@ export function DashboardView() {
         totalSpent={totalSpent}
         b2bSpent={b2bSpent}
         publishSpent={publishSpent}
+        deductions={0}
         availableCredits={availableCredits}
         isAgency={isAgency === true}
       />

@@ -707,6 +707,7 @@ export const AdminCreditManagementView = () => {
                                           totalSpent={user.totalSpent || 0}
                                           b2bSpent={(user.totalSpent || 0) - (user.publishSpent || 0) - (user.usageSpent || 0)}
                                           publishSpent={user.publishSpent || 0}
+                                          deductions={user.deductions || 0}
                                           availableCredits={user.available || 0}
                                           isAgency={user.isAgency || false}
                                         />

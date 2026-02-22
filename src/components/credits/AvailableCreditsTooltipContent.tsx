@@ -6,6 +6,7 @@ interface AvailableCreditsTooltipContentProps {
   creditsInPendingRequests: number;
   creditsInOrders: number;
   creditsInWithdrawals?: number;
+  deductions?: number;
   totalPurchased: number;
   purchasedOnline?: number;
   purchasedOffline?: number;
@@ -24,6 +25,7 @@ export const AvailableCreditsTooltipContent = ({
   creditsInPendingRequests,
   creditsInOrders,
   creditsInWithdrawals = 0,
+  deductions = 0,
   totalPurchased,
   purchasedOnline,
   purchasedOffline,
@@ -114,6 +116,10 @@ export const AvailableCreditsTooltipContent = ({
       <div className="flex justify-between gap-4 pl-3">
         <span className="text-white/50 text-xs">Instant Publishing:</span>
         <span className="text-xs font-medium text-red-400/80">{publishSpent > 0 ? `-${publishSpent.toLocaleString()}` : '0'}</span>
+      </div>
+      <div className="flex justify-between gap-4 pl-3">
+        <span className="text-white/50 text-xs">Deductions:</span>
+        <span className="text-xs font-medium text-red-400/80">{deductions > 0 ? `-${deductions.toLocaleString()}` : '0'}</span>
       </div>
       <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-white/20">
         <span className="text-white/70">Total Available Credits:</span>
