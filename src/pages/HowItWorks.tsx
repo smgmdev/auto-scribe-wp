@@ -1278,7 +1278,7 @@ const HowItWorks = () => {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-12">
             More to explore.
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Card 1 - Account */}
             <a 
               href="/auth"
