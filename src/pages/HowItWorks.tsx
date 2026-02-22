@@ -503,7 +503,7 @@ const ScrollColorSection = ({
         <div
           id="what-you-can-do"
           ref={whatYouCanDoRef}
-          className="mt-16 bg-[#0d1b4b] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center"
+          className="mt-16 bg-[#0d1b4b] rounded-none px-0 py-10 md:py-16 lg:py-20 text-center"
         >
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
