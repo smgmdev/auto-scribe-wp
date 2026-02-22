@@ -1528,7 +1528,7 @@ export function AdminUsersView() {
                                       className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-colors"
                                       onClick={() => handleOrderClick(order)}
                                     >
-                                      <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2">
+                                      <div className="flex flex-col items-start md:flex-row md:items-center gap-0.5 md:gap-2">
                                         <ShoppingCart className="h-3 w-3 text-muted-foreground hidden md:block" />
                                         <span>{order.media_sites?.name || 'Unknown'}</span>
                                         <span className="text-muted-foreground md:hidden">{formatDateTime(order.created_at)}</span>
