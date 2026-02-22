@@ -24,7 +24,7 @@ import { useAvailableCredits } from '@/hooks/useAvailableCredits';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest, OpenChat } from '@/stores/appStore';
-import { ChatPresenceTracker, playMessageSound } from '@/lib/chat-presence';
+import { playMessageSound } from '@/lib/chat-presence';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getSignedAttachmentUrl } from '@/lib/attachment-urls';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
@@ -507,7 +507,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const presenceTrackerRef = useRef<ChatPresenceTracker | null>(null);
+  // presenceTrackerRef removed — session-based online status used instead
   const senderIdRef = useRef<string | null>(null);
   
   // Keep senderIdRef in sync
@@ -807,71 +807,55 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     return 'Offline';
   };
 
-  // Fetch counterparty's last seen - use actualSenderType for correct counterparty
+  // Helper to determine if counterparty is online based on active_session_id and last_online_at
+  const checkIsOnline = (activeSessionId: string | null, lastOnlineAt: string | null): boolean => {
+    if (!activeSessionId) return false;
+    if (!lastOnlineAt) return false;
+    // Consider online if last_online_at is within 2 minutes
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    return lastOnlineAt > twoMinutesAgo;
+  };
+
+  // Fetch counterparty's session status + last seen, and subscribe to realtime changes
   useEffect(() => {
-    const fetchLastSeen = async () => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
+
+    const setup = async () => {
       if (!globalChatRequest || !senderId) return;
       
       setLoadingLastSeen(true);
-      try {
-        // First get the service request to find the counterparty
-        const { data: requestData } = await supabase
-          .from('service_requests')
-          .select('user_id, agency_payout_id')
-          .eq('id', globalChatRequest.id)
-          .maybeSingle();
-        
-        if (!requestData) {
-          setLoadingLastSeen(false);
-          return;
-        }
-        
-        if (actualSenderType === 'client') {
-          // Client viewing - counterparty is agency, get from agency_payouts
-          if (requestData.agency_payout_id) {
-            const { data } = await supabase
-              .from('agency_payouts')
-              .select('last_online_at')
-              .eq('id', requestData.agency_payout_id)
-              .maybeSingle();
-            setCounterpartyLastSeen(data?.last_online_at || null);
-          }
-        } else if (actualSenderType === 'agency' || actualSenderType === 'admin') {
-          // Agency/Admin viewing - counterparty is client, get from profiles
-          const { data } = await supabase
-            .from('profiles')
-            .select('last_online_at')
-            .eq('id', requestData.user_id)
-            .maybeSingle();
-          setCounterpartyLastSeen(data?.last_online_at || null);
-        }
-      } catch (error) {
-        console.error('Error fetching last seen:', error);
-      } finally {
-        setLoadingLastSeen(false);
-      }
-    };
-    
-    fetchLastSeen();
-    
-    // Subscribe to real-time changes for counterparty's last_online_at
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    
-    const setupRealtimeSubscription = async () => {
-      if (!globalChatRequest) return;
       
+      // Get the service request to find the counterparty
       const { data: requestData } = await supabase
         .from('service_requests')
         .select('user_id, agency_payout_id')
         .eq('id', globalChatRequest.id)
         .maybeSingle();
       
-      if (!requestData) return;
+      if (!requestData || !isMounted) {
+        setLoadingLastSeen(false);
+        return;
+      }
       
       if (actualSenderType === 'client' && requestData.agency_payout_id) {
-        // Client viewing - subscribe to agency_payouts changes
+        // Client viewing → counterparty is agency
+        const { data } = await supabase
+          .from('agency_payouts')
+          .select('last_online_at, last_login_at')
+          .eq('id', requestData.agency_payout_id)
+          .maybeSingle();
+        
+        if (isMounted && data) {
+          setCounterpartyLastSeen(data.last_online_at || null);
+          // Agencies don't have active_session_id, use last_online_at within 2 min
+          const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+          setIsCounterpartyOnline(!!data.last_online_at && data.last_online_at > twoMinutesAgo);
+        }
+        
+        // Subscribe to agency_payouts realtime changes
         channel = supabase
-          .channel(`agency-presence-${requestData.agency_payout_id}`)
+          .channel(`session-agency-${requestData.agency_payout_id}`)
           .on(
             'postgres_changes',
             {
@@ -881,16 +865,33 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               filter: `id=eq.${requestData.agency_payout_id}`
             },
             (payload) => {
-              if (payload.new && 'last_online_at' in payload.new) {
-                setCounterpartyLastSeen(payload.new.last_online_at as string | null);
+              if (!isMounted) return;
+              const newData = payload.new as any;
+              if ('last_online_at' in newData) {
+                setCounterpartyLastSeen(newData.last_online_at);
+                const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+                setIsCounterpartyOnline(!!newData.last_online_at && newData.last_online_at > twoMinutesAgo);
               }
             }
           )
           .subscribe();
-      } else if (actualSenderType === 'agency' || actualSenderType === 'admin') {
-        // Agency/Admin viewing - subscribe to profiles changes
+          
+      } else if ((actualSenderType === 'agency' || actualSenderType === 'admin') && requestData.user_id) {
+        // Agency/Admin viewing → counterparty is client
+        const { data } = await supabase
+          .from('profiles')
+          .select('last_online_at, active_session_id')
+          .eq('id', requestData.user_id)
+          .maybeSingle();
+        
+        if (isMounted && data) {
+          setCounterpartyLastSeen(data.last_online_at || null);
+          setIsCounterpartyOnline(checkIsOnline(data.active_session_id, data.last_online_at));
+        }
+        
+        // Subscribe to profiles realtime changes
         channel = supabase
-          .channel(`client-presence-${requestData.user_id}`)
+          .channel(`session-client-${requestData.user_id}`)
           .on(
             'postgres_changes',
             {
@@ -900,18 +901,28 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
               filter: `id=eq.${requestData.user_id}`
             },
             (payload) => {
-              if (payload.new && 'last_online_at' in payload.new) {
-                setCounterpartyLastSeen(payload.new.last_online_at as string | null);
+              if (!isMounted) return;
+              const newData = payload.new as any;
+              if ('last_online_at' in newData || 'active_session_id' in newData) {
+                const lastOnline = 'last_online_at' in newData ? newData.last_online_at : null;
+                const sessionId = 'active_session_id' in newData ? newData.active_session_id : null;
+                if ('last_online_at' in newData) {
+                  setCounterpartyLastSeen(lastOnline);
+                }
+                setIsCounterpartyOnline(checkIsOnline(sessionId, lastOnline));
               }
             }
           )
           .subscribe();
       }
+      
+      if (isMounted) setLoadingLastSeen(false);
     };
     
-    setupRealtimeSubscription();
+    setup();
     
     return () => {
+      isMounted = false;
       if (channel) {
         supabase.removeChannel(channel);
       }
@@ -2600,83 +2611,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     };
   }, [globalChatRequest?.id, senderType, actualSenderType]);
 
-  // Presence tracking - use actualSenderType to determine agencyPayoutId
-  useEffect(() => {
-    if (globalChatRequest && senderId) {
-      // For agency type, senderId IS the agencyPayoutId
-      const agencyPayoutId = actualSenderType === 'agency' ? senderId : undefined;
-      
-      const tracker = new ChatPresenceTracker(
-        globalChatRequest.id,
-        senderId,
-        senderType,
-        (onlineUsers) => {
-          // Use ref to get current senderId to avoid stale closure
-          const currentSenderId = senderIdRef.current;
-          if (!currentSenderId) {
-            setIsCounterpartyOnline(false);
-            return;
-          }
-          // Check if there's any user online that isn't the current user
-          const hasOtherUser = onlineUsers.some(id => id !== currentSenderId);
-          setIsCounterpartyOnline(hasOtherUser);
-        },
-        agencyPayoutId
-      );
-      
-      tracker.join();
-      presenceTrackerRef.current = tracker;
-
-      // Polling fallback: check counterparty's last_online_at every 10s
-      // This ensures status is correct even if presence channel fails silently
-      const pollOnlineStatus = async () => {
-        if (!globalChatRequest) return;
-        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-        
-        // Fetch request metadata to find counterparty
-        const { data: reqData } = await supabase
-          .from('service_requests')
-          .select('user_id, agency_payout_id')
-          .eq('id', globalChatRequest.id)
-          .maybeSingle();
-        if (!reqData) return;
-
-        if (actualSenderType === 'client' && reqData.agency_payout_id) {
-          // Client is viewing → check agency's last_online_at
-          const { data } = await supabase
-            .from('agency_payouts')
-            .select('last_online_at')
-            .eq('id', reqData.agency_payout_id)
-            .maybeSingle();
-          if (data?.last_online_at && data.last_online_at > twoMinutesAgo) {
-            setIsCounterpartyOnline(true);
-          }
-        } else if (actualSenderType === 'agency' && reqData.user_id) {
-          // Agency is viewing → check client's last_online_at
-          const { data } = await supabase
-            .from('profiles')
-            .select('last_online_at')
-            .eq('id', reqData.user_id)
-            .maybeSingle();
-          if (data?.last_online_at && data.last_online_at > twoMinutesAgo) {
-            setIsCounterpartyOnline(true);
-          }
-        }
-      };
-
-      // Initial poll after 3s (give presence time to connect first)
-      const initialPollTimeout = setTimeout(pollOnlineStatus, 3000);
-      const pollInterval = setInterval(pollOnlineStatus, 10000);
-
-      return () => {
-        clearTimeout(initialPollTimeout);
-        clearInterval(pollInterval);
-        tracker.leave();
-        presenceTrackerRef.current = null;
-        setIsCounterpartyOnline(false);
-      };
-    }
-  }, [globalChatRequest?.id, senderId, senderType, actualSenderType]);
+  // Session-based online status is now handled by the realtime subscription above (lines ~810-930)
+  // No separate presence tracker needed — active_session_id + last_online_at drive isCounterpartyOnline
 
   // Typing indicator with presence
   useEffect(() => {
