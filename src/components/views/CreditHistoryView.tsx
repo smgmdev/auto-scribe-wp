@@ -81,11 +81,17 @@ export function CreditHistoryView() {
     const transactionOrderId = searchParams.get('transaction');
     const withdrawalId = searchParams.get('withdrawalId');
     
-    if (transactionOrderId && !hasScrolledToTransaction.current) {
+    if (transactionOrderId) {
+      // Reset scroll flag so deep-link works even if component was previously visited
+      hasScrolledToTransaction.current = false;
       setHighlightedOrderId(transactionOrderId);
+      // Switch to 'all' tab to ensure the transaction is visible
+      setActiveType('all');
     }
-    if (withdrawalId && !hasScrolledToTransaction.current) {
+    if (withdrawalId) {
+      hasScrolledToTransaction.current = false;
       setHighlightedWithdrawalId(withdrawalId);
+      setActiveType('all');
     }
     
     // Clear the query params after reading
