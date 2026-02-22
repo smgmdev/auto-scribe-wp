@@ -553,7 +553,7 @@ export function DashboardView() {
 
   // Custom tooltip content for Available Credits
   const renderAvailableCreditsTooltip = () => {
-    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, totalSpent, b2bSpent, publishSpent, creditsInOrders, creditsInPendingRequests, withdrawalsByBank, withdrawalsByCrypto } = availableCreditsData;
+    const { availableCredits, earnedCredits, creditsWithdrawn, totalPurchased, purchasedOnline, purchasedOffline, totalSpent, b2bSpent, publishSpent, creditsInOrders, creditsInPendingRequests, withdrawalsByBank, withdrawalsByCrypto } = availableCreditsData;
     return (
       <AvailableCreditsTooltipContent
         earnedCredits={earnedCredits}
@@ -563,6 +563,8 @@ export function DashboardView() {
         creditsInPendingRequests={creditsInPendingRequests}
         creditsInOrders={creditsInOrders}
         totalPurchased={totalPurchased}
+        purchasedOnline={purchasedOnline}
+        purchasedOffline={purchasedOffline}
         totalSpent={totalSpent}
         b2bSpent={b2bSpent}
         publishSpent={publishSpent}
