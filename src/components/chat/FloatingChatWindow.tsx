@@ -261,6 +261,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [sendCooldown, setSendCooldown] = useState(0);
+  const cooldownRef = useRef<NodeJS.Timeout | null>(null);
   const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [senderId, setSenderId] = useState<string | null>(null);
@@ -3171,6 +3173,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
       toast.error(error.message || "Failed to send message.");
     } finally {
       setSending(false);
+      // Start 2s cooldown to prevent spam
+      setSendCooldown(2);
+      cooldownRef.current = setInterval(() => {
+        setSendCooldown(prev => {
+          if (prev <= 1) {
+            if (cooldownRef.current) clearInterval(cooldownRef.current);
+            cooldownRef.current = null;
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
   };
 
@@ -3414,6 +3428,18 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     } finally {
       setSending(false);
       setUploadingFile(false);
+      // Start 2s cooldown to prevent spam
+      setSendCooldown(2);
+      cooldownRef.current = setInterval(() => {
+        setSendCooldown(prev => {
+          if (prev <= 1) {
+            if (cooldownRef.current) clearInterval(cooldownRef.current);
+            cooldownRef.current = null;
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
   };
 
@@ -6741,7 +6767,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                       }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile)) {
+                      if (e.key === 'Enter' && !e.shiftKey && (newMessage.trim() || selectedFile) && !sendCooldown) {
                         e.preventDefault();
                         uploadFileAndSendMessage();
                       }
@@ -6751,10 +6777,10 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10 shrink-0 rounded-none hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
-                    disabled={sending || (!newMessage.trim() && !selectedFile)}
+                    disabled={sending || sendCooldown > 0 || (!newMessage.trim() && !selectedFile)}
                     onClick={uploadFileAndSendMessage}
                   >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : sendCooldown > 0 ? <span className="text-xs font-mono font-semibold">{sendCooldown}</span> : <Send className="h-4 w-4" />}
                   </Button>
                   {isAdmin && adminJoined && (
                     <button
