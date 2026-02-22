@@ -1066,8 +1066,8 @@ export function AgencyMediaView() {
         <TabsContent value="wordpress" className="mt-0 space-y-0">
           {/* WordPress Sub-tabs */}
           <Tabs value={wpSubTab} onValueChange={handleWpSubTabChange} className="w-full">
-            <div className="relative overflow-x-auto md:overflow-visible scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            <TabsList className="w-max md:w-full min-w-full p-0 h-auto md:overflow-visible rounded-none bg-black">
+            <div className="relative overflow-hidden md:overflow-visible">
+            <TabsList className="w-full p-0 h-auto md:overflow-visible rounded-none bg-black">
               <TabsTrigger value="connected" className="flex-1 py-2.5 shrink-0 whitespace-nowrap relative overflow-visible text-white data-[state=active]:bg-[#f2a547] data-[state=active]:text-black rounded-none">
                 Approved ({wordpressSites.length})
                 {unreadConnectedWpCount > 0 && (
