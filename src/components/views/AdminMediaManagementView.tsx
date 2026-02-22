@@ -2019,7 +2019,7 @@ export function AdminMediaManagementView() {
                               <div className="w-full md:w-auto md:hidden" />
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="sm" className="h-6 px-2 text-xs hover:bg-foreground hover:text-background">
+                                  <Button variant="outline" size="sm" className="h-8 w-full md:w-auto md:h-6 px-2 text-xs hover:bg-foreground hover:text-background">
                                     Action
                                     <ChevronDown className="h-3 w-3 ml-1" />
                                   </Button>
