@@ -197,6 +197,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             if (result?.success) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
+              setStep('processing');
               await refreshCredits?.();
               setStep('success');
             }
@@ -488,12 +489,17 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </div>
             <Button
               onClick={() => {
-                onOpenChange(false);
+                const intentId = intentData?.intent_id;
+                // Set view and search params BEFORE closing dialog
                 setCurrentView('credit-history');
-                // Set search params to trigger deep-link in CreditHistoryView
-                if (intentData?.intent_id) {
-                  setSearchParams({ purchaseIntentId: intentData.intent_id }, { replace: true });
+                if (intentId) {
+                  setSearchParams(prev => {
+                    prev.set('purchaseIntentId', intentId);
+                    return prev;
+                  }, { replace: true });
                 }
+                // Close dialog after a tick to let navigation settle
+                setTimeout(() => onOpenChange(false), 50);
               }}
               className="min-w-[160px] rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
             >
