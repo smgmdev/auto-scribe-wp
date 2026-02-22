@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2, Newspaper, Building2, PenTool, BarChart3, Send, Clock, CheckCircle2, ArrowUpRight, BookOpen } from 'lucide-react';
+import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2, Newspaper, Building2, PenTool, BarChart3, Send, Clock, CheckCircle2, ArrowUpRight, BookOpen, Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -595,10 +595,7 @@ const ScrollColorSection = ({
               </div>
               <div className="flex justify-end">
                 <div className="w-20 h-20 rounded-none flex items-center justify-center bg-[#f5f5f7]">
-                  <FileText className="w-8 h-8 text-[#86868b] absolute" />
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#06c] flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">+</span>
-                  </div>
+                  <Library className="w-10 h-10 text-[#86868b]" />
                 </div>
               </div>
             </a>
