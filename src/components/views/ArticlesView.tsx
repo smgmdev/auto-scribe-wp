@@ -49,13 +49,21 @@ export function ArticlesView() {
   
   const [activeTab, setActiveTab] = useState(articlesTargetTab || 'published');
   
-  // Consume and clear target tab on mount
+  // Consume and clear target tab — runs on mount AND whenever the store value changes
   useEffect(() => {
     if (articlesTargetTab) {
       setActiveTab(articlesTargetTab);
       setArticlesTargetTab(null);
+      // Clear any active search so the user sees the full list
+      setSearchQuery('');
+      setSearchResults(null);
+      // Force a fresh fetch so new data appears immediately
+      refreshArticles(false);
     }
-    // Always do a background refresh when this view mounts (e.g. after editing)
+  }, [articlesTargetTab]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Also refresh on initial mount
+  useEffect(() => {
     refreshArticles(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
