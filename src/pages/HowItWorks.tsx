@@ -787,7 +787,7 @@ const ScrollColorSection = ({
 };
 
 // Security fade text component
-const securityTexts = ['Transaction security.', 'Communication security.', 'Anti fraud supervision.'];
+const securityTexts = ['Transaction security.', 'Communication security.', 'Anti fraud supervision.', 'Data protection.', 'Prioritized privacy.'];
 const SecurityFadeText = () => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -805,7 +805,7 @@ const SecurityFadeText = () => {
 
   return (
     <p
-      className="text-[#30d158]/80 text-sm font-medium mt-4 h-6 transition-opacity duration-500 ease-in-out"
+      className="text-[#30d158]/80 text-2xl font-bold mt-4 text-center leading-tight transition-opacity duration-500 ease-in-out"
       style={{ opacity: visible ? 1 : 0 }}
     >
       {securityTexts[index]}
