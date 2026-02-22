@@ -1521,7 +1521,7 @@ export function AdminUsersView() {
                               {(userOrders[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders</p>
                               ) : (
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                <div className="space-y-2">
                                   {(userOrders[user.id] || []).map((order) => (
                                     <div 
                                       key={order.id} 
@@ -1548,7 +1548,7 @@ export function AdminUsersView() {
                               {(userEngagements[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No engagements</p>
                               ) : (
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                <div className="space-y-2">
                                   {(userEngagements[user.id] || []).map((engagement) => (
                                     <div 
                                       key={engagement.id} 
@@ -1576,7 +1576,7 @@ export function AdminUsersView() {
                               ) : (userDeliveries[user.id] || []).length === 0 ? (
                                 <p className="text-xs text-muted-foreground py-2">No orders completed</p>
                               ) : (
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                <div className="space-y-2">
                                   {(userDeliveries[user.id] || []).map((delivery) => (
                                     <div 
                                       key={delivery.id} 
