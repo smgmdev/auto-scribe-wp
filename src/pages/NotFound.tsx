@@ -14,7 +14,6 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
 
   useEffect(() => {
     onLoaded();
-    // Play the first animation if available
     const firstAction = Object.values(actions)[0];
     if (firstAction) {
       firstAction.reset().fadeIn(0.5).play();
@@ -28,21 +27,43 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
   });
 
   return (
-    <primitive
-      ref={ref}
-      object={scene}
-      scale={3.5}
-      position={[0, -2.5, 0]}
-    />
+    <primitive ref={ref} object={scene} scale={3.5} position={[-2.5, -2.5, 0]} />
+  );
+}
+
+function AngelModel({ onLoaded }: { onLoaded: () => void }) {
+  const { scene, animations } = useGLTF("/models/winged_angel.glb");
+  const ref = useRef<THREE.Group>(null);
+  const { actions } = useAnimations(animations, ref);
+
+  useEffect(() => {
+    onLoaded();
+    const firstAction = Object.values(actions)[0];
+    if (firstAction) {
+      firstAction.reset().fadeIn(0.5).play();
+    }
+  }, [scene, onLoaded, actions]);
+
+  useFrame((_, delta) => {
+    if (ref.current) {
+      ref.current.rotation.y += delta * 0.3;
+    }
+  });
+
+  return (
+    <primitive ref={ref} object={scene} scale={3.5} position={[2.5, -2.5, 0]} />
   );
 }
 
 useGLTF.preload("/models/anime_girl.glb");
+useGLTF.preload("/models/winged_angel.glb");
 
 const NotFound = () => {
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
+  const [loading1, setLoading1] = useState(true);
+  const [loading2, setLoading2] = useState(true);
   const [error, setError] = useState(false);
+  const loading = loading1 || loading2;
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -90,7 +111,7 @@ const NotFound = () => {
           <SkipForward className="h-5 w-5" />
         </Button>
       </div>
-      <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
+      <div className="relative w-[500px] h-[260px] sm:w-[680px] sm:h-[340px]">
         {loading && !error && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
@@ -102,14 +123,15 @@ const NotFound = () => {
           </div>
         ) : (
           <Canvas
-            camera={{ position: [0, 1, 5], fov: 45 }}
+            camera={{ position: [0, 1, 8], fov: 45 }}
             onCreated={() => {}}
             onError={() => setError(true)}
           >
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 5, 5]} intensity={1} />
             <Suspense fallback={null}>
-              <AnimeModel onLoaded={() => setLoading(false)} />
+              <AnimeModel onLoaded={() => setLoading1(false)} />
+              <AngelModel onLoaded={() => setLoading2(false)} />
               <Environment preset="studio" />
             </Suspense>
             <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
