@@ -5,6 +5,7 @@ interface AvailableCreditsTooltipContentProps {
   withdrawalsByCrypto: number;
   creditsInPendingRequests: number;
   creditsInOrders: number;
+  creditsInWithdrawals?: number;
   totalPurchased: number;
   purchasedOnline?: number;
   purchasedOffline?: number;
@@ -22,6 +23,7 @@ export const AvailableCreditsTooltipContent = ({
   withdrawalsByCrypto,
   creditsInPendingRequests,
   creditsInOrders,
+  creditsInWithdrawals = 0,
   totalPurchased,
   purchasedOnline,
   purchasedOffline,
@@ -84,6 +86,10 @@ export const AvailableCreditsTooltipContent = ({
       <div className="flex justify-between gap-4">
         <span className="text-white/70">Locked in Orders:</span>
         <span className="font-semibold text-amber-400">{Math.round(creditsInOrders).toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-white/70">Locked in Withdrawal:</span>
+        <span className="font-semibold text-amber-400">{Math.round(creditsInWithdrawals).toLocaleString()}</span>
       </div>
       <div className="flex justify-between gap-4">
         <span className="text-white/70">Total Purchased:</span>
