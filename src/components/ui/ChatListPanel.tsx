@@ -968,14 +968,11 @@ export function ChatListPanel() {
     const isAgencySendingAsAgency = isOwnAgencyMessage || (sender_type === 'agency' && sender_id === agencyPayoutIdRef.current);
     
     // Notification conditions:
-    // - Client engagement receives agency OR admin message
-    // - Agency service request receives client OR admin message
-    // - Admin does NOT get engagement sounds (only support chat sounds via Sidebar)
-    const shouldNotify = !isAgencySendingAsAgency && !isAdmin && (
-      (isMyEngagement && (isFromAgency || isFromAdmin)) || 
-      (isServiceRequest && (isFromClient || isFromAdmin)) ||
-      (isMinimizedMyRequest && (isFromAgency || isFromAdmin)) || 
-      (isMinimizedAgencyRequest && (isFromClient || isFromAdmin))
+    // ALL roles (client, agency, admin) receive sound for counterparty messages in engagement chats
+    // The only condition is that the message must NOT be from the current user themselves
+    const isOwnMessage = isAgencySendingAsAgency || sender_id === user?.id;
+    const shouldNotify = !isOwnMessage && (
+      isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest
     );
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
