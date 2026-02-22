@@ -790,6 +790,7 @@ export function DashboardView() {
                       pendingCryptoWithdrawals={agencySummary.pendingCryptoWithdrawals}
                       lockedInOrderRequests={agencySummary.lockedInOrderRequests}
                       lockedInOrders={agencySummary.lockedInOrders}
+                      lockedInWithdrawals={agencySummary.pendingBankWithdrawals + agencySummary.pendingCryptoWithdrawals}
                       walletBalance={agencySummary.walletBalance}
                     />
                   </TooltipContent>
