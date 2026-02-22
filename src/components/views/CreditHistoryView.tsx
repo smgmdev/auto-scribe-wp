@@ -1201,6 +1201,7 @@ export function CreditHistoryView() {
               totalSpent={totalSpent}
               b2bSpent={completedOrdersSpent}
               publishSpent={publishSpending}
+              deductions={adminDeductions}
               availableCredits={availableCredits}
               isAgency={isAgency}
             />
