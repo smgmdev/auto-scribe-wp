@@ -3288,11 +3288,19 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
     'image/png',
     'image/jpeg'
   ];
+  const BLOCKED_EXTENSIONS = ['.exe', '.bat', '.cmd', '.com', '.msi', '.scr', '.ps1', '.vbs', '.js', '.wsh', '.wsf', '.jar', '.sh', '.app', '.dmg', '.dll', '.sys', '.lnk', '.pif', '.reg', '.inf', '.hta', '.cpl'];
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+    if (BLOCKED_EXTENSIONS.includes(ext)) {
+      toast.error('Executable files are not allowed for security reasons.');
+      e.target.value = '';
+      return;
+    }
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       toast.error('Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.');

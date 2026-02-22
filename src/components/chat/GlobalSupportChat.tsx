@@ -481,11 +481,35 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
     }, 2000);
   }, [broadcastTyping]);
 
+  const ALLOWED_FILE_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/png',
+    'image/jpeg'
+  ];
+  const BLOCKED_EXTENSIONS = ['.exe', '.bat', '.cmd', '.com', '.msi', '.scr', '.ps1', '.vbs', '.js', '.wsh', '.wsf', '.jar', '.sh', '.app', '.dmg', '.dll', '.sys', '.lnk', '.pif', '.reg', '.inf', '.hta', '.cpl'];
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+    if (BLOCKED_EXTENSIONS.includes(ext)) {
+      toast.error('Executable files are not allowed for security reasons.');
+      e.target.value = '';
+      return;
+    }
+
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      toast.error('Only Word (.doc, .docx), PDF, PNG, and JPG files are allowed.');
+      e.target.value = '';
+      return;
+    }
+
     if (file.size > 2 * 1024 * 1024) {
       toast.error('File must be under 2MB');
+      e.target.value = '';
       return;
     }
     setSelectedFile(file);
