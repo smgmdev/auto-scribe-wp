@@ -16,6 +16,60 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 22, 2026',
+    title: 'PWA Buttons Alignment & Page Layout Consistency',
+    changes: [
+      'Fixed PWA download/install buttons alignment on the About, How It Works, Self Publishing, Media Buying, AI Article Generation, and Help Center pages — buttons now consistently align to the left matching the landing page layout',
+      'Added explicit left-alignment overrides to the PWAInstallButtons component to prevent parent flex containers from centering the buttons',
+      'Wrapped PWA button container in a full-width wrapper to isolate it from inherited text-center and flex-center styles on certain pages',
+    ],
+  },
+  {
+    date: 'February 21, 2026',
+    title: 'Chat Window Enhancements & Popup Improvements',
+    changes: [
+      'Improved floating chat window drag behavior with smoother repositioning and boundary constraints',
+      'Chat windows now remember their position within the viewport after minimizing and restoring',
+      'Fixed an issue where dragging a chat window near the screen edge could cause it to become unreachable',
+      'Updated popup stack z-index management to correctly layer multiple open chat windows and dialogs',
+      'Improved chat message rendering performance for threads with hundreds of messages',
+    ],
+  },
+  {
+    date: 'February 20, 2026',
+    title: 'Credit Display & Wallet Tooltip Refinements',
+    changes: [
+      'Redesigned the credit balance display in the sidebar with a cleaner layout showing available vs locked credits',
+      'Updated wallet tooltip to display a detailed breakdown of credit balance, pending withdrawals, and locked order credits',
+      'Added available credits tooltip content showing usable balance after subtracting all locks and holds',
+      'Improved credit calculation logic to correctly exclude withdrawal_locked and withdrawal_completed transactions from the available balance',
+      'Credit display now updates in real-time when transactions are added or modified',
+    ],
+  },
+  {
+    date: 'February 19, 2026',
+    title: 'Session Security & Login Flow Hardening',
+    changes: [
+      'Improved active session detection to automatically clear stale sessions older than 35 minutes without recent activity',
+      'Added cross-check against auth sessions to detect and clear orphaned profile sessions from environment rebuilds or technical logouts',
+      'Session expiry warning dialog now shows remaining time and allows users to extend their session before automatic logout',
+      'Login attempt capture now records IP address for security monitoring and suspicious activity detection',
+      'Fixed edge case where concurrent logins from different tabs could create conflicting session states',
+    ],
+  },
+  {
+    date: 'February 18, 2026',
+    title: 'Agency Media Submissions & Site Management',
+    changes: [
+      'Improved media site submission flow for agencies with clearer form validation and error messaging',
+      'Added WordPress site submission status tracking with pending, approved, and rejected states visible to the submitting agency',
+      'Agencies can now mark rejected submissions as read to dismiss notification badges',
+      'Updated site management view with improved loading states and empty state messaging',
+      'Added favicon auto-detection for newly connected WordPress sites during the submission review process',
+      'Improved Google Sheets URL validation in the media site bulk submission form',
+    ],
+  },
+  {
     date: 'February 17, 2026',
     title: 'Support Icon & Footer Safe Area',
     changes: [
@@ -450,7 +504,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 17, 2026
+            Last update: February 22, 2026
           </p>
         </div>
 
