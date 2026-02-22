@@ -819,19 +819,10 @@ const AutoPublishArticles = () => {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from('ai_published_sources')
-        .select('id, ai_title, source_title, wordpress_site_name, wordpress_site_favicon, published_at')
-        .gte('published_at', oneDayAgo)
-        .order('published_at', { ascending: false })
-        .limit(20);
+      // Use SECURITY DEFINER RPC to bypass RLS (table has no direct SELECT policy)
+      const { data } = await supabase.rpc('get_latest_auto_published');
       if (data && data.length > 0) {
         setArticles(data);
-      } else {
-        // Fallback to latest 3 if none in last hour
-        const { data: fallback } = await supabase.rpc('get_latest_auto_published');
-        if (fallback) setArticles(fallback);
       }
     };
     fetchArticles();
