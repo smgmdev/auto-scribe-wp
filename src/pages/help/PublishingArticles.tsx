@@ -23,6 +23,7 @@ const sections: HelpSection[] = [
           <p>
             Local Library publishing requires sufficient credits.
             Articles go live immediately without waiting for an agency review.
+            Please note that the owner or administration of the media site reserves the right to remove published content if it is deemed inappropriate or does not meet their guidelines, moral standards, or ethical policies.
           </p>
         </div>
 
