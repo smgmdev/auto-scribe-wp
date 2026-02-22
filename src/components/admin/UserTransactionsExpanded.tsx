@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface Transaction {
@@ -107,6 +109,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
   const [systemSubTab, setSystemSubTab] = useState('system');
   const [withdrawalsSubTab, setWithdrawalsSubTab] = useState('withdrawals');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchTransactions = async () => {
     try {
@@ -715,7 +718,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'withdrawals': return processedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
       default: return processedTransactions.filter(tx => tx.type === effectiveFilter);
     }
-  })();
+  })().filter(tx => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase();
+    return (tx.description?.toLowerCase().includes(term)) ||
+           (tx.type.toLowerCase().includes(term)) ||
+           (String(Math.abs(tx.amount)).includes(term));
+  });
 
   const getTransactionCounts = () => {
     const counts: Record<string, number> = { all: processedTransactions.length };
@@ -862,6 +871,28 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           </div>
           </div>
         )}
+
+        {/* Search input */}
+        <div className="relative bg-foreground">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+          <Input
+            placeholder="Search transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            autoComplete="off"
+            className="w-full pl-10 h-9 text-sm rounded-none border-0 border-t border-white/10 text-white placeholder:text-white/50 bg-foreground focus-visible:ring-0"
+          />
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={() => setSearchTerm('')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
 
         {/* Tab sum bars - exclude locked/unlocked types from calculations */}
         {(() => {
