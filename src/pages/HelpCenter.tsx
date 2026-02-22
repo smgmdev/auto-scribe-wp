@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronUp, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 
@@ -401,6 +402,7 @@ export default function HelpCenter() {
         </section>
       </main>
 
+      <PWAInstallButtons />
       <Footer narrow />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </div>

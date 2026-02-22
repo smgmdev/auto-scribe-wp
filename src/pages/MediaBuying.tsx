@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -772,6 +773,7 @@ export default function MediaBuying() {
         </div>
       </section>
 
+      <PWAInstallButtons />
       <Footer narrow showTopBorder />
 
       {/* Media Site Dialog */}
