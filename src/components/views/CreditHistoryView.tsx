@@ -81,8 +81,14 @@ export function CreditHistoryView() {
     const transactionOrderId = searchParams.get('transaction');
     const withdrawalId = searchParams.get('withdrawalId');
     const txType = searchParams.get('txType');
+    const purchaseIntentId = searchParams.get('purchaseIntentId');
     
-    if (transactionOrderId) {
+    if (purchaseIntentId) {
+      deepLinkRef.current = { mode: 'transaction', id: purchaseIntentId, txType: 'purchase_intent' };
+      setHighlightedTransactionId(null);
+      setActiveType('all');
+      setDeepLinkKey(k => k + 1);
+    } else if (transactionOrderId) {
       deepLinkRef.current = { mode: 'transaction', id: transactionOrderId, txType };
       setHighlightedTransactionId(null);
       setActiveType('all');
@@ -94,11 +100,12 @@ export function CreditHistoryView() {
       setDeepLinkKey(k => k + 1);
     }
     
-    if (transactionOrderId || withdrawalId) {
+    if (transactionOrderId || withdrawalId || purchaseIntentId) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('transaction');
       newParams.delete('withdrawalId');
       newParams.delete('txType');
+      newParams.delete('purchaseIntentId');
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -139,11 +146,24 @@ export function CreditHistoryView() {
 
     if (target.mode === 'transaction') {
       const { id: targetId, txType } = target;
-      const transaction = txType
-        ? (transactions.find(t => t.order_id === targetId && t.type === txType)
-          || transactions.find(t => t.id === targetId && t.type === txType))
-        : (transactions.find(t => t.id === targetId)
-          || transactions.find(t => t.order_id === targetId));
+      let transaction: CreditTransaction | undefined;
+      
+      if (txType === 'purchase_intent') {
+        // Match purchase transactions by Airwallex intent ID in description
+        transaction = transactions.find(t => 
+          t.type === 'purchase' && t.description?.includes(targetId)
+        );
+        // Fallback: find the most recent purchase transaction
+        if (!transaction) {
+          transaction = transactions.find(t => t.type === 'purchase');
+        }
+      } else if (txType) {
+        transaction = transactions.find(t => t.order_id === targetId && t.type === txType)
+          || transactions.find(t => t.id === targetId && t.type === txType);
+      } else {
+        transaction = transactions.find(t => t.id === targetId)
+          || transactions.find(t => t.order_id === targetId);
+      }
       if (transaction) {
         setExpandedWithdrawals(prev => new Set([...prev, transaction.id]));
         setHighlightedTransactionId(transaction.id);
