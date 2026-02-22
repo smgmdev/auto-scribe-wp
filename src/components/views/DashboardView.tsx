@@ -530,7 +530,7 @@ export function DashboardView() {
               title="Refresh dashboard"
             >
               <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1 disabled:opacity-50">
-                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />&zwj;
               </Badge>
             </button>
           </div>
@@ -571,7 +571,7 @@ export function DashboardView() {
             title="Refresh dashboard"
           >
             <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1 disabled:opacity-50">
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />&zwj;
             </Badge>
           </button>
         </div>
