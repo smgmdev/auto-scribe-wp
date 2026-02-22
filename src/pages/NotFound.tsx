@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
@@ -43,10 +43,12 @@ const NotFound = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tracks = ["/sounds/404.mp3", "/sounds/404-2.mp3"];
 
   useEffect(() => {
-    const audio = new Audio("/sounds/404.mp3");
+    const audio = new Audio(tracks[0]);
     audio.loop = true;
     audioRef.current = audio;
     return () => { audio.pause(); audio.src = ""; };
@@ -59,20 +61,30 @@ const NotFound = () => {
     setPlaying(!playing);
   }, [playing]);
 
+  const nextTrack = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const nextIdx = (trackIndex + 1) % tracks.length;
+    audio.src = tracks[nextIdx];
+    audio.loop = true;
+    if (playing) audio.play();
+    setTrackIndex(nextIdx);
+  }, [trackIndex, playing, tracks]);
+
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={togglePlay}
-        className="rounded-full h-12 w-12"
-      >
-        {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-12 w-12">
+          {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+        </Button>
+        <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-full h-10 w-10">
+          <SkipForward className="h-5 w-5" />
+        </Button>
+      </div>
       <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
         {loading && !error && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
