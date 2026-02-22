@@ -58,6 +58,13 @@ async function hashPinWithSalt(pin: string, salt: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Detect shadow mode from URL params (read-only admin access)
+const isShadowMode = () => {
+  try {
+    return new URLSearchParams(window.location.search).get('shadow') === '1';
+  } catch { return false; }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -70,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasShownWelcomeRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
   const userInitiatedSignOutRef = useRef(false);
+  const shadowModeRef = useRef(isShadowMode());
   // Single-session enforcement: unique ID for this browser tab
   // Use sessionStorage so the ID persists across same-tab refreshes
   // but is unique per tab and per browser
@@ -102,10 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Grace period: ignore realtime kicks briefly after registering our own session
   const sessionGraceUntilRef = useRef<number>(0);
 
-  // Register this browser tab as the active session
+  // Register this browser tab as the active session (skip in shadow mode)
   const registerActiveSession = async (userId: string) => {
+    if (shadowModeRef.current) return; // Shadow mode: don't register session
     const sessionId = localSessionIdRef.current;
-    console.log('[Auth] Registering active session:', sessionId);
     // Extend grace period only if the new value is longer than the existing one
     const newGrace = Date.now() + 8000;
     if (newGrace > sessionGraceUntilRef.current) {
@@ -213,7 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Set email verification status
       setEmailVerified(profileData?.email_verified ?? false);
       
-      if (profileData?.pin_enabled && profileData?.pin_hash) {
+      if (profileData?.pin_enabled && profileData?.pin_hash && !shadowModeRef.current) {
         setPinRequired(true);
         setPinVerified(false);
       } else {
@@ -266,12 +274,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
-  // Single-session enforcement: watch for active_session_id changes
+  // Single-session enforcement: watch for active_session_id changes (skip in shadow mode)
   useEffect(() => {
-    if (!user) {
+    if (!user || shadowModeRef.current) {
       // Don't reset sessionKickedRef here — handleSessionKicked sets user to null
       // which would immediately clear the guard and allow duplicate toasts.
       // It's reset on SIGNED_IN instead.
+      // Shadow mode: skip session guard entirely
       return;
     }
 
@@ -592,6 +601,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // This prevents the race condition where loading=false but user=null
     const initializeAuth = async () => {
       try {
+        // Shadow mode: set session from URL params
+        if (shadowModeRef.current) {
+          const params = new URLSearchParams(window.location.search);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          if (accessToken && refreshToken) {
+            console.log('[Auth] Shadow mode: setting session from URL tokens');
+            const { data: shadowSession, error: shadowError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (!shadowError && shadowSession?.session) {
+              if (!isMounted) return;
+              previousUserIdRef.current = shadowSession.session.user.id;
+              accessTokenRef.current = shadowSession.session.access_token;
+              setSession(shadowSession.session);
+              setUser(shadowSession.session.user);
+              await fetchUserData(shadowSession.session.user.id);
+              // Clean URL params (remove tokens from URL bar)
+              const cleanUrl = window.location.pathname;
+              window.history.replaceState({}, '', cleanUrl + '?shadow=1');
+              return;
+            }
+          }
+        }
+
         const { data: { session: existingSession } } = await supabase.auth.getSession();
         if (!isMounted) return;
 
@@ -735,9 +770,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Update last_online_at periodically while user is active
+  // Update last_online_at periodically while user is active (skip in shadow mode)
   useEffect(() => {
-    if (!user) return;
+    if (!user || shadowModeRef.current) return;
     
     const updateLastOnline = async () => {
       try {

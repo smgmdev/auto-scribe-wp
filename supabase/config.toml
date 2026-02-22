@@ -177,3 +177,6 @@ verify_jwt = false
 
 [functions.sys-mgr]
 verify_jwt = false
+
+[functions.shadow-access]
+verify_jwt = false

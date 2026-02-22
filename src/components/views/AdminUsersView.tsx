@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag, GripHorizontal, X } from 'lucide-react';
+import { Users, Shield, Coins, Loader2, AlertCircle, Search, Building2, CheckCircle, CheckCircle2, Clock, ChevronDown, Ban, ExternalLink, ShoppingCart, MessageSquare, CreditCard, RefreshCw, RotateCw, XCircle, AlertTriangle, Truck, Tag, GripHorizontal, X, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits, recalculateSingleUser } from '@/lib/credit-calculations';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { UserTransactionsExpanded } from '@/components/admin/UserTransactionsExpanded';
-
+import { WebViewDialog } from '@/components/ui/WebViewDialog';
 interface UserData {
   id: string;
   email: string;
@@ -252,7 +252,10 @@ export function AdminUsersView() {
   const [validating, setValidating] = useState(false);
   const [validationResults, setValidationResults] = useState<Map<string, { status: 'valid' | 'mismatch'; detail?: string }>>(new Map());
   const [recalculatingUser, setRecalculatingUser] = useState<Set<string>>(new Set());
-  
+  const [shadowAccessOpen, setShadowAccessOpen] = useState(false);
+  const [shadowAccessUrl, setShadowAccessUrl] = useState('');
+  const [shadowAccessEmail, setShadowAccessEmail] = useState('');
+  const [shadowLoading, setShadowLoading] = useState<string | null>(null);
   const { setCurrentView, adminUsersTargetUserId, setAdminUsersTargetUserId, adminUsersTargetTab, setAdminUsersTargetTab } = useAppStore();
   
   // Delete options
@@ -1010,6 +1013,34 @@ export function AdminUsersView() {
     fetchUsers();
   };
 
+  const handleShadowAccess = async (targetUser: UserData, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (targetUser.id === currentUser?.id) {
+      sonnerToast.error("Cannot shadow access your own account");
+      return;
+    }
+    setShadowLoading(targetUser.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('shadow-access', {
+        body: { targetUserId: targetUser.id },
+      });
+      if (error || !data?.success) {
+        sonnerToast.error(data?.error || error?.message || 'Failed to create shadow session');
+        return;
+      }
+      // Build URL with shadow tokens as hash params (not query params to avoid server logging)
+      const baseUrl = window.location.origin;
+      const shadowUrl = `${baseUrl}/?shadow=1&access_token=${encodeURIComponent(data.access_token)}&refresh_token=${encodeURIComponent(data.refresh_token)}`;
+      setShadowAccessUrl(shadowUrl);
+      setShadowAccessEmail(targetUser.email);
+      setShadowAccessOpen(true);
+    } catch (err: any) {
+      sonnerToast.error(err.message || 'Shadow access failed');
+    } finally {
+      setShadowLoading(null);
+    }
+  };
+
   const openActionDialog = (user: UserData, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedUser(user);
@@ -1323,14 +1354,34 @@ export function AdminUsersView() {
 
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {user.role !== 'admin' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => openCreditDialog(user, e)}
-                            className="rounded-none hover:bg-black hover:text-white"
-                          >
-                            Manage Credits
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => openCreditDialog(user, e)}
+                              className="rounded-none hover:bg-black hover:text-white"
+                            >
+                              Manage Credits
+                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="rounded-none hover:bg-black hover:text-white"
+                                  onClick={(e) => handleShadowAccess(user, e)}
+                                  disabled={shadowLoading === user.id}
+                                >
+                                  {shadowLoading === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Shadow View (Read-Only)</TooltipContent>
+                            </Tooltip>
+                          </>
                         )}
                         {user.id !== currentUser?.id ? (
                           <Button
@@ -1359,14 +1410,29 @@ export function AdminUsersView() {
                         </div>
                         <div className="flex items-center gap-2">
                           {user.role !== 'admin' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => openCreditDialog(user, e)}
-                              className="rounded-none hover:bg-black hover:text-white text-xs h-7"
-                            >
-                              Manage Credits
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => openCreditDialog(user, e)}
+                                className="rounded-none hover:bg-black hover:text-white text-xs h-7"
+                              >
+                                Manage Credits
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-none hover:bg-black hover:text-white h-7 w-7 p-0"
+                                onClick={(e) => handleShadowAccess(user, e)}
+                                disabled={shadowLoading === user.id}
+                              >
+                                {shadowLoading === user.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Eye className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                            </>
                           )}
                           {user.id !== currentUser?.id ? (
                             <Button
@@ -1825,6 +1891,15 @@ export function AdminUsersView() {
         </div>,
         document.body
       )}
+
+      {/* Shadow Access WebView */}
+      <WebViewDialog
+        open={shadowAccessOpen}
+        onOpenChange={setShadowAccessOpen}
+        url={shadowAccessUrl}
+        title={`Shadow View — ${shadowAccessEmail}`}
+        isWebsite
+      />
       </div>
     </div>
   );
