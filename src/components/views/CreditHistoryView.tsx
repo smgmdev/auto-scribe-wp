@@ -111,15 +111,24 @@ export function CreditHistoryView() {
       attempts++;
       const el = highlightedTransactionRef.current;
       if (el && el.offsetParent !== null) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Find the scrollable main container and scroll within it
+        const scrollContainer = el.closest('main') || el.closest('[class*="overflow-y-auto"]');
+        if (scrollContainer) {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const scrollTop = scrollContainer.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+          scrollContainer.scrollTo({ top: scrollTop, behavior: 'smooth' });
+        } else {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return;
       }
-      if (attempts < 20) {
-        setTimeout(tryScroll, 100);
+      if (attempts < 30) {
+        setTimeout(tryScroll, 150);
       }
     };
-    // Start after a small delay to let React render
-    setTimeout(tryScroll, 50);
+    // Delay enough to run AFTER MainLayout's scroll-to-top on view change
+    setTimeout(tryScroll, 400);
   }, []);
 
   // Scroll to and expand the highlighted transaction once data is loaded AND view is visible
