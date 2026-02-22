@@ -337,7 +337,7 @@ export function AgencyApplicationView() {
   if (isDowngraded) {
     return (
       <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-        <div className="max-w-[980px] mx-auto space-y-8">
+        <div className="max-w-[980px] mx-auto space-y-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Agency Verification
@@ -549,7 +549,7 @@ export function AgencyApplicationView() {
   // CASE 3: Fully verified (either Stripe or Custom)
   if (agencyPayout?.onboarding_complete) {
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
             Agency Account
@@ -668,7 +668,7 @@ export function AgencyApplicationView() {
           style={{ zIndex: 1 }}
         >
         
-        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-8 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled' ? 'pt-8 pb-8' : 'pt-5'}`}>
+        <div className={`max-w-[980px] mx-auto px-4 lg:px-8 space-y-4 ${existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled' ? 'pt-8 pb-8' : 'pt-5'}`}>
           
           {/* Application Summary Cards - shown when there are pending/rejected applications */}
           {allApplications.length > 0 && (existingApplication?.status === 'pending' || existingApplication?.status === 'rejected' || existingApplication?.status === 'cancelled') && (
@@ -943,7 +943,7 @@ export function AgencyApplicationView() {
           )}
         </div>
 
-        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 space-y-8">
+        <div className="max-w-[980px] mx-auto px-4 lg:px-8 pb-8 space-y-4">
           {/* Promo Video - only shown when application is pending */}
           {existingApplication?.status === 'pending' && (
             <div className="w-full overflow-hidden relative">
@@ -975,7 +975,7 @@ export function AgencyApplicationView() {
 
         <ConnectEarnCarousel />
 
-          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 space-y-8">
+          <div className="max-w-[980px] mx-auto px-4 lg:px-8 pt-8 space-y-4">
 
             <AgencyFAQ dark />
 
