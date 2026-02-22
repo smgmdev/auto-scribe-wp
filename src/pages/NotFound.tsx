@@ -78,6 +78,9 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6">
+      <a href="/" className="text-primary underline hover:text-primary/90">
+        Return to Home
+      </a>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-12 w-12 hover:bg-black hover:text-white">
           {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
@@ -113,9 +116,6 @@ const NotFound = () => {
           </Canvas>
         )}
       </div>
-      <a href="/" className="text-primary underline hover:text-primary/90">
-        Return to Home
-      </a>
     </div>
   );
 };
