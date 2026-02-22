@@ -790,11 +790,11 @@ const AutoPublishArticles = () => {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from('ai_published_sources')
         .select('id, ai_title, source_title, wordpress_site_name, wordpress_site_favicon, published_at')
-        .gte('published_at', oneHourAgo)
+        .gte('published_at', oneDayAgo)
         .order('published_at', { ascending: false })
         .limit(20);
       if (data && data.length > 0) {
