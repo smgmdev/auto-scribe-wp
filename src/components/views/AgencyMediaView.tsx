@@ -986,19 +986,19 @@ export function AgencyMediaView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div className="min-w-0">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4">
+        <div>
           <h1 className="text-3xl font-bold text-foreground">
             My Media
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 md:mb-4 text-muted-foreground">
             Manage your listed media sites and channels
           </p>
         </div>
-        <div className="flex flex-col md:flex-row w-full md:w-auto gap-0 shrink-0">
+        <div className="flex flex-col md:flex-row gap-0 w-full md:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="group w-full md:flex-none bg-black text-white hover:bg-transparent hover:text-black hover:border-black hover:shadow-none data-[state=open]:bg-transparent data-[state=open]:text-black data-[state=open]:border-black border border-transparent transition-all md:rounded-r-none md:border-r-0">
+              <Button className="group w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground data-[state=open]:bg-transparent data-[state=open]:text-foreground">
                 Add Media
                 <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </Button>
@@ -1027,10 +1027,10 @@ export function AgencyMediaView() {
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
-            className={`w-full md:w-auto gap-2 border border-black md:rounded-l-none transition-all duration-200 ${
+            className={`w-full md:w-auto gap-2 border border-foreground transition-all duration-200 ${
               isRefreshing 
-                ? 'bg-transparent text-black' 
-                : 'bg-black text-white hover:bg-transparent hover:text-black'
+                ? 'bg-transparent text-foreground' 
+                : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
