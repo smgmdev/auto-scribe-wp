@@ -675,10 +675,10 @@ const ScrollColorSection = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto">
             {/* Card 1 - AI Article Generation */}
             <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
-              <div className="p-7 pb-0 min-h-[72px] flex items-start">
+              <div className="p-7 pb-4 min-h-[100px] flex items-start">
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article Generation</h3>
               </div>
-              <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden mt-4">
+              <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden">
                 <div className="flex animate-slide-articles h-full" style={{ width: `${(slidingArticles.length > 0 ? slidingArticles.length * 2 : 2) * 100}%` }}>
                   {[...slidingArticles, ...slidingArticles].map((article, i) => (
                     <div key={`${article.id}-${i}`} className="flex-shrink-0 flex flex-col" style={{ width: `${100 / (slidingArticles.length > 0 ? slidingArticles.length * 2 : 2)}%` }}>
@@ -721,10 +721,10 @@ const ScrollColorSection = ({
 
             {/* Card 2 - AI Auto Publishing */}
             <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d1b33]">
-              <div className="p-7 pb-0 min-h-[72px] flex items-start">
+              <div className="p-7 pb-4 min-h-[100px] flex items-start">
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto Publishing</h3>
               </div>
-              <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden mt-4">
+              <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden">
                 <AutoPublishArticles />
               </div>
             </a>
