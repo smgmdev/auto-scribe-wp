@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -274,6 +275,117 @@ Deno.serve(async (req) => {
     }
 
     console.log('[wordpress-publish-article] Article published successfully:', wpPostId);
+
+    // ── Notify site owner via email ──────────────────────────────────────
+    if (site.user_id && status === 'publish') {
+      try {
+        // Fetch owner email
+        const { data: ownerProfile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', site.user_id)
+          .maybeSingle();
+
+        if (ownerProfile?.email) {
+          // Fetch earnings info from site_credits
+          const { data: siteCredit } = await supabase
+            .from('site_credits')
+            .select('credits_required')
+            .eq('site_id', site.id)
+            .maybeSingle();
+
+          const creditsEarned = siteCredit?.credits_required ?? 0;
+
+          // Get agency commission to calculate net payout
+          let commissionPct = 10;
+          if (site.agency) {
+            const { data: agencyData } = await supabase
+              .from('agency_payouts')
+              .select('commission_percentage')
+              .eq('agency_name', site.agency)
+              .maybeSingle();
+            if (agencyData) commissionPct = Number(agencyData.commission_percentage);
+          }
+
+          const netEarnings = Math.round(creditsEarned * (1 - commissionPct / 100));
+          const articleLink = data.link || '#';
+          const safeSiteName = String(site.name || site.url).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const safeTitle = String(title).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+          await resend.emails.send({
+            from: "Arcana Mace <noreply@arcanamace.com>",
+            to: [ownerProfile.email],
+            subject: `New Publication on ${safeSiteName}`,
+            headers: {
+              'X-Entity-Ref-ID': `wp-publish-${wpPostId}-${Date.now()}`,
+            },
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #000000;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                  <div style="background-color: #1c1c1c; border-radius: 12px; padding: 40px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                      <div style="display: inline-block; background-color: #22c55e; color: white; padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 13px;">
+                        ✅ Article Published
+                      </div>
+                    </div>
+
+                    <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 8px 0; text-align: center;">
+                      New article on your site!
+                    </h1>
+                    <p style="color: #888888; font-size: 14px; margin: 0 0 28px 0; text-align: center;">
+                      Someone just published an article on <strong style="color: #ffffff;">${safeSiteName}</strong>.
+                    </p>
+
+                    <div style="background-color: #111111; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                      <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                          <td style="padding: 8px 0; color: #888888; font-size: 14px;">Article</td>
+                          <td style="padding: 8px 0; color: #ffffff; font-size: 14px; font-weight: 600; text-align: right; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${safeTitle}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 8px 0; color: #888888; font-size: 14px;">Credits Earned</td>
+                          <td style="padding: 8px 0; color: #22c55e; font-size: 14px; font-weight: 600; text-align: right;">${creditsEarned} credits</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 8px 0; color: #888888; font-size: 14px;">Your Net Earnings</td>
+                          <td style="padding: 8px 0; color: #22c55e; font-size: 16px; font-weight: 700; text-align: right;">${netEarnings} credits</td>
+                        </tr>
+                      </table>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 16px;">
+                      <a href="${articleLink}" style="display: inline-block; background-color: #3872e0; color: #ffffff; padding: 13px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                        View Published Article
+                      </a>
+                    </div>
+
+                    <p style="color: #555555; font-size: 12px; text-align: center; margin: 24px 0 0 0;">
+                      You received this email because your WordPress site is connected to Arcana Mace.
+                    </p>
+                  </div>
+
+                  <p style="color: #444444; font-size: 12px; text-align: center; margin-top: 20px;">
+                    © ${new Date().getFullYear()} Arcana Mace. All rights reserved.
+                  </p>
+                </div>
+              </body>
+              </html>
+            `,
+          });
+          console.log('[wordpress-publish-article] Publication notification email sent to:', ownerProfile.email);
+        }
+      } catch (emailError) {
+        // Don't fail the publish if email fails
+        console.error('[wordpress-publish-article] Failed to send publication notification email:', emailError);
+      }
+    }
 
     return new Response(
       JSON.stringify({
