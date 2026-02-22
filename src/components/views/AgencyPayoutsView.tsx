@@ -1011,7 +1011,7 @@ export function AgencyPayoutsView() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(`/account?view=credit-history&transaction=${order.id}`);
+                                    navigate(`/account?view=credit-history&transaction=${order.id}&txType=order_payout`);
                                   }}
                                   className="text-sm text-blue-500 hover:text-blue-600 hover:underline flex items-center gap-1 w-fit"
                                 >
