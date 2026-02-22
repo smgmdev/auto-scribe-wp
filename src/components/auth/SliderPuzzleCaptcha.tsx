@@ -20,11 +20,63 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
   const [failed, setFailed] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [seed, setSeed] = useState(0);
+  const [shapeType, setShapeType] = useState(0);
   const dragStartRef = useRef(0);
   const sliderStartRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const targetY = 40 + Math.floor((seed * 7 + 3) % 80);
+  const SHAPE_COUNT = 5; // number of different piece shapes
+
+  // Draw a puzzle piece path based on shapeType
+  const drawPiecePath = useCallback((context: CanvasRenderingContext2D, x: number, y: number, size: number, shape: number) => {
+    context.beginPath();
+    switch (shape % SHAPE_COUNT) {
+      case 0: // Classic jigsaw with tab on right
+        context.moveTo(x, y);
+        context.lineTo(x + size * 0.4, y);
+        context.arc(x + size * 0.5, y, size * 0.1, Math.PI, 0, false);
+        context.lineTo(x + size, y);
+        context.lineTo(x + size, y + size * 0.4);
+        context.arc(x + size, y + size * 0.5, size * 0.1, -Math.PI / 2, Math.PI / 2, false);
+        context.lineTo(x + size, y + size);
+        context.lineTo(x, y + size);
+        context.closePath();
+        break;
+      case 1: // Circle
+        context.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+        break;
+      case 2: // Diamond
+        context.moveTo(x + size / 2, y);
+        context.lineTo(x + size, y + size / 2);
+        context.lineTo(x + size / 2, y + size);
+        context.lineTo(x, y + size / 2);
+        context.closePath();
+        break;
+      case 3: // Rounded square
+        const r = size * 0.2;
+        context.moveTo(x + r, y);
+        context.arcTo(x + size, y, x + size, y + size, r);
+        context.arcTo(x + size, y + size, x, y + size, r);
+        context.arcTo(x, y + size, x, y, r);
+        context.arcTo(x, y, x + size, y, r);
+        context.closePath();
+        break;
+      case 4: // Jigsaw with tabs on top and right
+        context.moveTo(x, y);
+        context.lineTo(x + size * 0.35, y);
+        context.arc(x + size * 0.5, y, size * 0.12, Math.PI, 0, false);
+        context.lineTo(x + size, y);
+        context.lineTo(x + size, y + size * 0.35);
+        context.arc(x + size, y + size * 0.5, size * 0.12, -Math.PI / 2, Math.PI / 2, false);
+        context.lineTo(x + size, y + size);
+        context.lineTo(x + size * 0.65, y + size);
+        context.arc(x + size * 0.5, y + size, size * 0.12, 0, Math.PI, false);
+        context.lineTo(x, y + size);
+        context.closePath();
+        break;
+    }
+  }, []);
 
   const generatePuzzle = useCallback(() => {
     const newTarget = 120 + Math.floor(Math.random() * (PUZZLE_WIDTH - PIECE_SIZE - 140));
@@ -34,6 +86,7 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
     setFailed(false);
     setImageLoaded(false);
     setSeed(Math.floor(Math.random() * 1000));
+    setShapeType(Math.floor(Math.random() * SHAPE_COUNT));
   }, []);
 
   useEffect(() => {
@@ -123,12 +176,15 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
     ctx.clearRect(0, 0, PUZZLE_WIDTH, PUZZLE_HEIGHT);
     ctx.drawImage(img, 0, 0, PUZZLE_WIDTH, PUZZLE_HEIGHT);
 
-    // Draw cutout shadow
+    // Draw cutout shadow using shape path
+    ctx.save();
+    drawPiecePath(ctx, targetX, py, PIECE_SIZE, shapeType);
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.fillRect(targetX, py, PIECE_SIZE, PIECE_SIZE);
+    ctx.fill();
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(targetX, py, PIECE_SIZE, PIECE_SIZE);
+    ctx.stroke();
+    ctx.restore();
 
     // Draw puzzle piece
     pieceCtx.canvas.width = PIECE_SIZE + 4;
@@ -141,19 +197,21 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
     pieceCtx.shadowOffsetX = 2;
     pieceCtx.shadowOffsetY = 2;
 
-    // Clip and draw the piece from the source image
+    // Clip and draw the piece from the source image using shape path
     pieceCtx.save();
-    pieceCtx.beginPath();
-    pieceCtx.rect(2, py, PIECE_SIZE, PIECE_SIZE);
+    drawPiecePath(pieceCtx, 2, py, PIECE_SIZE, shapeType);
     pieceCtx.clip();
     pieceCtx.drawImage(img, -targetX + 2, 0, PUZZLE_WIDTH, PUZZLE_HEIGHT);
     pieceCtx.restore();
 
-    // Border around piece
+    // Border around piece using shape path
     pieceCtx.shadowColor = 'transparent';
+    pieceCtx.save();
+    drawPiecePath(pieceCtx, 2, py, PIECE_SIZE, shapeType);
     pieceCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
     pieceCtx.lineWidth = 2;
-    pieceCtx.strokeRect(2, py, PIECE_SIZE, PIECE_SIZE);
+    pieceCtx.stroke();
+    pieceCtx.restore();
   };
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
