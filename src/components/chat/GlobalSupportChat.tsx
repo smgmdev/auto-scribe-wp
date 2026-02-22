@@ -693,7 +693,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
                           if (!replyMatch) return null;
                           const replyText = replyMatch[1];
                           return (
-                            <div className={`text-[10px] mb-1.5 pb-1.5 border-b ${isMine ? 'border-background/20 text-background/50' : 'border-border text-muted-foreground'} italic truncate`}>
+                            <div className={`text-[10px] mb-1.5 pb-1.5 border-b ${isMine ? 'border-background/20 text-background/50' : 'border-border text-muted-foreground'} truncate`}>
                               ↩ {replyText}
                             </div>
                           );
@@ -763,7 +763,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
           {replyingTo && (
             <div className="flex items-center gap-2 px-3 pt-2 pb-1 border-t border-border">
               <Reply className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              <p className="text-xs text-muted-foreground truncate flex-1 italic">
+              <p className="text-xs text-muted-foreground truncate flex-1">
                 {replyingTo.message.replace(/\[ATTACHMENT\].*?\[\/ATTACHMENT\]/, '').replace(/^\[REPLY:.*?\]\s*/, '').trim() || 'Attachment'}
               </p>
               <button onClick={() => setReplyingTo(null)} className="text-muted-foreground hover:text-foreground shrink-0">
