@@ -977,13 +977,8 @@ export function ChatListPanel() {
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
     
-    // SINGLE SOURCE OF TRUTH for sound: broadcast handler is the ONLY place that plays sound.
-    // FloatingChatWindow and postgres_changes listeners do NOT play sound.
-    if (shouldNotify) {
-      // Always play sound for counterparty messages regardless of chat open/minimized state
-      // Pass message snippet for per-message dedup (allows rapid messages to same request)
-      playMessageSound(request_id, message);
-    }
+    // Sound is now handled by the postgres_changes INSERT handler (single source of truth).
+    // Broadcast handler is only responsible for toast notifications.
     
     // Broadcast handler is ONLY responsible for sound + toast notifications.
     // Unread count increments are handled exclusively by the postgres_changes INSERT handler
