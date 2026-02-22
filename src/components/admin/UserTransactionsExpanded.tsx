@@ -901,7 +901,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   </p>
                   <p className="text-base font-bold text-green-600">
                     +{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
-                    {commissionSpan(earningsSubTab === 'earnings_b2b' ? b2bCommission : earningsSubTab === 'earnings_instant' ? ipCommission : totalCommission, nonLockTxs.length > 0)}
+                    {commissionSpan(earningsSubTab === 'earnings_b2b' ? b2bCommission : earningsSubTab === 'earnings_instant' ? ipCommission : 0, earningsSubTab !== 'all_earnings' && nonLockTxs.length > 0)}
                   </p>
                 </div>
               )}
