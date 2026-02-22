@@ -492,7 +492,7 @@ export function ArticlesView() {
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!articleToDelete} onOpenChange={(open) => !open && setArticleToDelete(null)}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Delete Article</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{articleToDelete?.title}"?
