@@ -1483,32 +1483,32 @@ export function AdminUsersView() {
                         ) : (
                           <>
                             <TabsContent value="logs" className="mt-0 px-4 pt-4 pb-4">
-                              <div className="grid gap-1 text-xs">
-                                <div className="flex gap-2">
+                              <div className="grid gap-3 text-xs">
+                                <div>
                                   <span className="text-muted-foreground">Account created:</span>
-                                  <span>{formatDateTime(user.createdAt)}</span>
+                                  <p className="font-medium mt-0.5">{formatDateTime(user.createdAt)}</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div>
                                   <span className="text-muted-foreground">Last login:</span>
-                                  <span>{formatLoginDateTime(user.lastSignInAt)}</span>
+                                  <p className="font-medium mt-0.5">{formatLoginDateTime(user.lastSignInAt)}</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div>
                                   <span className="text-muted-foreground">Last login IP:</span>
-                                  <span>
+                                  <p className="font-medium mt-0.5">
                                     {user.lastSignInIp || 'Not available'}
                                     {user.lastSignInLocation && ` (${user.lastSignInLocation})`}
-                                  </span>
+                                  </p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div>
                                   <span className="text-muted-foreground">Last login attempt:</span>
-                                  <span>{formatLoginDateTime(user.lastAttemptAt)}</span>
+                                  <p className="font-medium mt-0.5">{formatLoginDateTime(user.lastAttemptAt)}</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div>
                                   <span className="text-muted-foreground">Last login attempt IP:</span>
-                                  <span>
+                                  <p className="font-medium mt-0.5">
                                     {user.lastAttemptIp || 'Not available'}
                                     {user.lastAttemptLocation && ` (${user.lastAttemptLocation})`}
-                                  </span>
+                                  </p>
                                 </div>
                               </div>
                             </TabsContent>
