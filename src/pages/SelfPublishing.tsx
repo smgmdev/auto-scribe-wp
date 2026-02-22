@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2, ExternalLink, ArrowRight, Info, X, GripHorizontal } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -612,6 +613,7 @@ export default function SelfPublishing() {
         </div>
       </div>
 
+      <PWAInstallButtons />
       <Footer narrow showTopBorder />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 

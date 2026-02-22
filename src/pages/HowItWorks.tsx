@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
 
@@ -1340,6 +1341,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Footer */}
+      <PWAInstallButtons />
       <Footer narrow showTopBorder />
     </div>
   );

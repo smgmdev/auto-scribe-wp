@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2 } from 'lucide-react';
 
 function SliderImage({ src, alt }: { src: string; alt: string }) {
@@ -613,6 +614,7 @@ export default function AIArticleGeneration() {
       </section>
 
 
+      <PWAInstallButtons />
       <Footer narrow showTopBorder />
     </div>
   );
