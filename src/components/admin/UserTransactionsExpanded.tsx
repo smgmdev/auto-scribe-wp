@@ -868,8 +868,15 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
           const lockTypes = ['locked', 'unlocked', 'offer_accepted', 'withdrawal_locked', 'withdrawal_unlocked'];
           const nonLockTxs = filteredTransactions.filter(tx => !lockTypes.includes(tx.type));
           
-          // Commission helpers
-          const b2bCommission = Array.from(orders.values()).reduce((sum, o) => sum + (o.platform_fee_cents || 0), 0);
+          // B2B commission: only from orders where this user EARNED (order_payout with order_id, excluding IP payouts with metadata)
+          const b2bPayoutOrderIds = new Set(
+            transactions
+              .filter(tx => tx.type === 'order_payout' && tx.order_id && !(tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>)))
+              .map(tx => tx.order_id!)
+          );
+          const b2bCommission = Array.from(orders.entries())
+            .filter(([id]) => b2bPayoutOrderIds.has(id))
+            .reduce((sum, [, o]) => sum + (o.platform_fee_cents || 0), 0);
           const ipCommission = transactions
             .filter(tx => tx.type === 'order_payout' && tx.metadata && typeof tx.metadata === 'object' && 'platform_fee' in (tx.metadata as Record<string, unknown>))
             .reduce((sum, tx) => sum + (Number((tx.metadata as Record<string, unknown>).platform_fee) || 0), 0);
