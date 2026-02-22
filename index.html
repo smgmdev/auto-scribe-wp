@@ -129,23 +129,26 @@
           // doesn't react to any writes that leak past the localStorage patch
           window.addEventListener('storage', function(e) { e.stopImmediatePropagation(); }, true);
 
-          // Block ALL auth token refresh requests from the shadow iframe.
-          // Despite stopAutoRefresh(), Supabase's setSession() can restart
-          // auto-refresh internally. Blocking fetch to /token?grant_type=refresh_token
-          // is the nuclear option that guarantees no server-side token revocation.
+          // Block ALL auth token requests from the shadow iframe.
+          // Supabase's setSession() internally restarts auto-refresh despite
+          // stopAutoRefresh(). Block every POST to /auth/v1/token to prevent
+          // the shadow session from revoking any tokens server-side.
           var origFetch = window.fetch;
           window.fetch = function(input, init) {
-            var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
-            // Block refresh_token grant requests to auth endpoints
-            if (url.indexOf('/auth/v1/token') !== -1 && init && init.body) {
-              var bodyStr = typeof init.body === 'string' ? init.body : '';
-              if (bodyStr.indexOf('refresh_token') !== -1) {
-                // Return a fake successful response so the client doesn't error
-                return Promise.resolve(new Response(JSON.stringify({ error: 'blocked_in_shadow' }), {
-                  status: 400,
-                  headers: { 'Content-Type': 'application/json' }
-                }));
-              }
+            var url = '';
+            if (typeof input === 'string') { url = input; }
+            else if (input instanceof Request) { url = input.url; }
+            else if (input && input.url) { url = input.url; }
+            // Block ALL token endpoint requests (refresh, password, etc.)
+            if (url.indexOf('/auth/v1/token') !== -1) {
+              return Promise.resolve(new Response(JSON.stringify({ error: 'blocked_in_shadow' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+              }));
+            }
+            // Also block session logout to prevent revoking shared tokens
+            if (url.indexOf('/auth/v1/logout') !== -1) {
+              return Promise.resolve(new Response(null, { status: 204 }));
             }
             return origFetch.apply(this, arguments);
           };

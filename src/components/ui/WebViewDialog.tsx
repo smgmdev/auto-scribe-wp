@@ -5,10 +5,10 @@ import { toast } from 'sonner';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-type ViewportMode = 'desktop' | 'tablet' | 'mobile';
+type ViewportMode = 'fullscreen' | 'tablet' | 'mobile';
 
 const VIEWPORT_SIZES: Record<ViewportMode, { width: number; label: string }> = {
-  desktop: { width: 0, label: 'Desktop (Full)' },   // 0 = 100% width
+  fullscreen: { width: 0, label: 'Fullscreen' },     // 0 = 100% of screen
   tablet: { width: 768, label: 'Tablet (768px)' },
   mobile: { width: 375, label: 'Mobile (375px)' },
 };
@@ -26,7 +26,7 @@ interface WebViewDialogProps {
 
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website', downloadUrl, downloadName, isWebsite = false }: WebViewDialogProps) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
-  const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
+  const [viewportMode, setViewportMode] = useState<ViewportMode>('fullscreen');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadedRef = useRef<boolean>(false);
@@ -120,7 +120,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-0.5 border rounded-md p-0.5 bg-muted/30">
               {([
-                { mode: 'desktop' as ViewportMode, icon: Monitor },
+                { mode: 'fullscreen' as ViewportMode, icon: Monitor },
                 { mode: 'tablet' as ViewportMode, icon: Tablet },
                 { mode: 'mobile' as ViewportMode, icon: Smartphone },
               ]).map(({ mode, icon: Icon }) => (
@@ -172,13 +172,14 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
     <DraggablePopup
       open={open}
       onOpenChange={handleOpenChange}
-      width={viewportMode === 'desktop' ? 960 : Math.min(960, VIEWPORT_SIZES[viewportMode].width + 48)}
-      maxHeight="90vh"
+      width={viewportMode === 'fullscreen' ? window.innerWidth : Math.min(960, VIEWPORT_SIZES[viewportMode].width + 48)}
+      maxHeight={viewportMode === 'fullscreen' ? '100vh' : '90vh'}
       zIndex={300}
       title={titleBar}
       bodyClassName="p-0 !p-0"
+      className={viewportMode === 'fullscreen' ? '!rounded-none !inset-0 !transform-none !top-0 !left-0 !w-screen !h-screen !max-h-screen' : ''}
     >
-      <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted flex justify-center">
+      <div className={`w-full relative bg-muted flex justify-center ${viewportMode === 'fullscreen' ? 'h-[calc(100vh-44px)]' : 'h-[60vh] sm:h-[70vh]'}`}>
         {status === 'loading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
             <div className="flex flex-col items-center gap-2">
