@@ -1595,28 +1595,21 @@ export function ChatListPanel() {
           
           console.log('[ChatListPanel] Notification check:', { requestId, isMinimized, isDialogOpen, isMyEngagement, isServiceRequest, isMinimizedAgencyRequest, isMinimizedMyRequest, senderType });
           
-          // Only increment unread for minimized chats when message is from counterparty
-          // Check both local lists AND minimized chat type
-          // CRITICAL: Only suppress for THIS user's own agency messages, not messages from OTHER agencies
+          // Play sound for ALL roles (client, agency, admin) when message is not from self
           const msgSenderId = newMsg.sender_id;
           const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency' && msgSenderId === agencyPayoutIdRef.current;
-          const isFromCounterparty = !isAgencySendingAsAgency && (
-            (isMyEngagement && (senderType === 'agency' || senderType === 'admin')) || 
-            (isServiceRequest && senderType === 'client') ||
-            (isMinimizedMyRequest && (senderType === 'agency' || senderType === 'admin')) ||
-            (isMinimizedAgencyRequest && senderType === 'client')
+          const isOwnInsertMessage = isAgencySendingAsAgency || msgSenderId === user?.id;
+          const isFromCounterparty = !isOwnInsertMessage && (
+            isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isDisputedChat
           );
           
-          console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isAgencySendingAsAgency, senderType, isAgencyUser });
+          console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isOwnMessage, senderType, isAgencyUser });
           
-          // For minimized chats: the unread count was already synced from engagements/requests above
-          // Just play the sound notification - no separate increment needed
-          if (isMinimized && isFromCounterparty) {
-            console.log('[ChatListPanel] Chat is minimized, updating unread count');
-            // Sound is handled exclusively by the broadcast handler to prevent double sounds
-          } else if (!isDialogOpen && isFromCounterparty) {
-            console.log('[ChatListPanel] Chat is not open, playing sound (toast handled by broadcast)');
-            // Sound is handled exclusively by the broadcast handler to prevent double sounds
+          // Play sound for counterparty messages from postgres_changes as primary source
+          // playMessageSound has built-in per-message dedup (1.5s window) so if broadcast also fires, it won't double-play
+          if (isFromCounterparty) {
+            console.log('[ChatListPanel] INSERT: counterparty message, playing sound', { requestId, senderType, isMinimized, isDialogOpen });
+            playMessageSound(newMsg.id || requestId, newMsg.message?.substring(0, 30));
           } else {
             console.log('[ChatListPanel] Chat is already open or not from counterparty, not showing notification');
           }
