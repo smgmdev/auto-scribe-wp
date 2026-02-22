@@ -427,13 +427,13 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Order Value</p>
             <p className="font-medium">{order.amount_cents.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
           </div>
-          {order.platform_fee_cents > 0 && (
+          {activeType !== 'purchases' && order.platform_fee_cents > 0 && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Platform Fee</p>
               <p className="font-medium">{order.platform_fee_cents.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
             </div>
           )}
-          {netEarnings !== null && (
+          {activeType !== 'purchases' && netEarnings !== null && (
             <div>
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Net Earnings</p>
               <p className="font-medium">{netEarnings.toLocaleString(undefined, { minimumFractionDigits: 0 })} credits</p>
