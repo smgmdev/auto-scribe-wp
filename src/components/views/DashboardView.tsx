@@ -281,20 +281,8 @@ export function DashboardView() {
     const totalEarnings = orderEarnings + payoutTxEarnings;
     const totalSales = orderSales + payoutTxSales;
 
-    // Fetch pending order requests (service_requests without orders yet)
-    let lockedInOrderRequests = 0;
-    const { data: pendingRequests } = await supabase
-      .from('service_requests')
-      .select('media_site_id, media_sites!inner(price)')
-      .eq('agency_payout_id', agencyPayout.id)
-      .is('order_id', null)
-      .not('status', 'in', '("cancelled","completed")');
-
-    if (pendingRequests) {
-      pendingRequests.forEach((req: any) => {
-        lockedInOrderRequests += (req.media_sites?.price || 0);
-      });
-    }
+    // Sellers don't lock credits - locked credits are buyer-side only
+    // Open chats without actual order requests don't lock any credits
 
     // Fetch withdrawals to calculate wallet balance and withdrawal stats
     const { data: withdrawals } = await supabase
@@ -331,7 +319,7 @@ export function DashboardView() {
       });
     }
 
-    const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount - lockedInOrders - lockedInOrderRequests;
+    const walletBalance = totalEarnings - completedWithdrawalsAmount - pendingWithdrawalsAmount;
 
     setAgencySummary({
       walletBalance,
@@ -345,8 +333,8 @@ export function DashboardView() {
       pendingCryptoWithdrawals,
       completedBankWithdrawals,
       completedCryptoWithdrawals,
-      lockedInOrders,
-      lockedInOrderRequests,
+      lockedInOrders: 0,
+      lockedInOrderRequests: 0,
       loading: false
     });
   }, [user, isAgency]);
@@ -743,9 +731,8 @@ export function DashboardView() {
                       completedWithdrawals={agencySummary.completedWithdrawals}
                       pendingBankWithdrawals={agencySummary.pendingBankWithdrawals}
                       pendingCryptoWithdrawals={agencySummary.pendingCryptoWithdrawals}
-                      lockedInOrderRequests={agencySummary.lockedInOrderRequests}
-                      lockedInOrders={agencySummary.lockedInOrders}
                       walletBalance={agencySummary.walletBalance}
+                      showLocked={false}
                     />
                   </TooltipContent>
                 </Tooltip>
