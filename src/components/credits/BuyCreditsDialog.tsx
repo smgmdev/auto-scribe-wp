@@ -150,6 +150,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         const handlePaymentSuccess = async () => {
           if (!mounted) return;
+          setPaymentSubmitted(true);
           setConfirming(true);
           try {
             const { data: result, error } = await supabase.functions.invoke('airwallex-webhook', {
@@ -175,6 +176,11 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         dropIn.on('success', () => {
           console.log('[Airwallex] Payment success event fired');
           handlePaymentSuccess();
+        });
+
+        (dropIn as any).on('pending', () => {
+          console.log('[Airwallex] Payment pending event fired');
+          if (mounted) setPaymentSubmitted(true);
         });
 
         dropIn.on('error', (event: any) => {
@@ -223,16 +229,22 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               dropIn.mount(container);
               cardElementRef.current = dropIn;
 
-              // Detect Pay button click via DOM listener to show processing overlay
-              container.addEventListener('click', (e) => {
-                const target = e.target as HTMLElement;
-                const button = target.closest('button[type="submit"], button.cko-pay-button, [role="button"]') || 
-                               (target.tagName === 'BUTTON' && target.textContent?.toLowerCase().includes('pay') ? target : null);
-                if (button) {
-                  console.log('[Airwallex] Pay button click detected');
-                  setPaymentSubmitted(true);
-                }
-              }, true);
+              // Detect when iframe height changes significantly (Airwallex shows loading after Pay click)
+              const iframe = container.querySelector('iframe');
+              if (iframe) {
+                let lastHeight = iframe.clientHeight;
+                const heightObserver = setInterval(() => {
+                  if (!mounted) { clearInterval(heightObserver); return; }
+                  const newHeight = iframe.clientHeight;
+                  // If height shrinks significantly, the drop-in is processing payment
+                  if (lastHeight > 0 && newHeight < lastHeight * 0.5) {
+                    console.log('[Airwallex] Iframe height change detected - payment processing');
+                    setPaymentSubmitted(true);
+                    clearInterval(heightObserver);
+                  }
+                  lastHeight = newHeight;
+                }, 300);
+              }
               
               // Fallback: if ready event doesn't fire in 4s, show the form anyway
               setTimeout(() => {
