@@ -83,16 +83,22 @@ export function CreditHistoryView() {
     const withdrawalId = searchParams.get('withdrawalId');
     
     if (transactionOrderId) {
-      // Reset scroll flag so deep-link works even if component was previously visited
+      // Reset scroll flag and clear previous highlight so new deep-link always works
       hasScrolledToTransaction.current = false;
-      setHighlightedOrderId(transactionOrderId);
-      // Switch to 'all' tab to ensure the transaction is visible
-      setActiveType('all');
+      // Force a state cycle: clear first, then set new value to ensure re-trigger
+      setHighlightedOrderId(null as any);
+      setTimeout(() => {
+        setHighlightedOrderId(transactionOrderId);
+        setActiveType('all');
+      }, 0);
     }
     if (withdrawalId) {
       hasScrolledToTransaction.current = false;
-      setHighlightedWithdrawalId(withdrawalId);
-      setActiveType('all');
+      setHighlightedWithdrawalId(null as any);
+      setTimeout(() => {
+        setHighlightedWithdrawalId(withdrawalId);
+        setActiveType('all');
+      }, 0);
     }
     
     // Clear the query params after reading
