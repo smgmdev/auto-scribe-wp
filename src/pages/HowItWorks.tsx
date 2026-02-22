@@ -722,26 +722,14 @@ const ScrollColorSection = ({
             </a>
 
             {/* Card 2 - AI Auto Publishing */}
-            <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col p-7 cursor-pointer bg-[#0d1b33]">
-              <div className="flex items-center gap-3 mb-4">
-                <Send className="w-10 h-10 text-[#34aadc] flex-shrink-0" />
-                <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto<br />Publishing</h3>
-              </div>
-              <p className="text-white/60 text-sm leading-relaxed mb-4">
-                Set up automated publishing pipelines that fetch, rewrite, and publish articles to your WordPress sites on a schedule.
-              </p>
-              <div className="flex-1 flex items-end justify-center mt-6 opacity-80">
-                <div className="flex flex-col gap-2 w-full">
-                  {['Fetch headlines', 'Rewrite with AI', 'Auto-publish'].map((step, i) => (
-                    <div key={i} className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2.5">
-                      <div className="w-6 h-6 rounded-full bg-[#0071e3]/40 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[10px] text-white font-bold">{i + 1}</span>
-                      </div>
-                      <span className="text-white/70 text-sm">{step}</span>
-                      <CheckCircle2 className="w-4 h-4 text-[#34aadc] ml-auto" />
-                    </div>
-                  ))}
+            <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d1b33]">
+              <div className="p-7 pb-0">
+                <div className="flex items-center gap-3 mb-0">
+                  <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto Publishing</h3>
                 </div>
+              </div>
+              <div className="flex-1 w-full border-t border-white/10 bg-white/5 overflow-hidden mt-4">
+                <AutoPublishArticles />
               </div>
             </a>
 
@@ -770,6 +758,63 @@ const ScrollColorSection = ({
         </div>
       </div>
     </section>
+  );
+};
+
+// Auto Publish Articles component for the AI Auto Publishing card
+const AutoPublishArticles = () => {
+  const [articles, setArticles] = useState<{ id: string; ai_title: string | null; source_title: string; wordpress_post_link: string | null; wordpress_site_name: string | null; wordpress_site_favicon: string | null; published_at: string }[]>([]);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const { data } = await supabase
+        .from('ai_published_sources')
+        .select('id, ai_title, source_title, wordpress_post_link, wordpress_site_name, wordpress_site_favicon, published_at')
+        .order('published_at', { ascending: false })
+        .limit(3);
+      if (data) setArticles(data);
+    };
+    fetchArticles();
+
+    const channel = supabase
+      .channel('auto-publish-card')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_published_sources' }, () => {
+        fetchArticles();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  if (articles.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full p-4">
+        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {articles.map((article, i) => (
+        <div key={article.id} className={`flex items-start gap-3 px-5 py-3.5 ${i < articles.length - 1 ? 'border-b border-white/5' : ''} flex-1`}>
+          {article.wordpress_site_favicon && (
+            <img src={article.wordpress_site_favicon} alt="" className="w-5 h-5 rounded-sm flex-shrink-0 mt-0.5 object-contain" />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-white/90 text-sm font-medium leading-snug line-clamp-2">{article.ai_title || article.source_title}</p>
+            <div className="flex items-center gap-2 mt-1">
+              {article.wordpress_site_name && (
+                <span className="text-white/40 text-[11px]">{article.wordpress_site_name}</span>
+              )}
+              <span className="text-white/30 text-[11px]">
+                {new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 
