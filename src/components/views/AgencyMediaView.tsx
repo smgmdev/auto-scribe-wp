@@ -998,7 +998,7 @@ export function AgencyMediaView() {
         <div className="flex flex-col md:flex-row gap-0 w-full md:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="group w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground data-[state=open]:bg-transparent data-[state=open]:text-foreground">
+              <Button className="group w-full md:w-auto bg-black text-white hover:bg-transparent hover:text-foreground border border-black data-[state=open]:bg-transparent data-[state=open]:text-foreground">
                 Add Media
                 <ChevronDown className="h-4 w-4 ml-2 transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </Button>
@@ -1027,10 +1027,10 @@ export function AgencyMediaView() {
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
-            className={`w-full md:w-auto gap-2 border border-foreground transition-all duration-200 ${
+            className={`w-full md:w-auto gap-2 border border-black transition-all duration-200 ${
               isRefreshing 
                 ? 'bg-transparent text-foreground' 
-                : 'bg-foreground text-background hover:bg-transparent hover:text-foreground'
+                : 'bg-black text-white hover:bg-transparent hover:text-foreground'
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
