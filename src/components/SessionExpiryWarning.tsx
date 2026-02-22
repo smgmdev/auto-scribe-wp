@@ -17,7 +17,7 @@ const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
 const CHECK_INTERVAL_MS = 10 * 1000;
 
 export function SessionExpiryWarning() {
-  const { session, signOut } = useAuth();
+  const { session, signOut, extendSession } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -55,30 +55,22 @@ export function SessionExpiryWarning() {
     setShowWarning(false);
     warningShownRef.current = false;
 
-    // Reset session_started_at in DB via the existing RPC
-    // IMPORTANT: use the same local session ID that useAuth registered,
-    // otherwise the session-guard will detect a mismatch and kick the user out
     try {
-      if (session?.user?.id) {
-        const sessionId = sessionStorage.getItem('auth_local_session_id') || session.access_token?.slice(-12) || crypto.randomUUID().slice(0, 12);
-        await supabase.rpc('register_active_session', {
-          _user_id: session.user.id,
-          _session_id: sessionId,
-        });
+      // Use the auth context's extendSession which properly handles
+      // grace periods, session re-registration, and token refresh
+      const success = await extendSession();
+      if (success) {
         // Update local cache
         sessionStartedAtRef.current = Date.now();
-      }
-      // Also refresh the auth token
-      const { error } = await supabase.auth.refreshSession();
-      if (error) {
-        console.error('[SessionExpiry] Failed to refresh session:', error);
+      } else {
+        console.error('[SessionExpiry] extendSession failed, signing out');
         await signOut();
       }
     } catch (err) {
-      console.error('[SessionExpiry] Error refreshing session:', err);
+      console.error('[SessionExpiry] Error extending session:', err);
       await signOut();
     }
-  }, [session?.user?.id, session?.access_token, signOut, clearCountdown]);
+  }, [extendSession, signOut, clearCountdown]);
 
   const handleLogOut = useCallback(async () => {
     clearCountdown();
