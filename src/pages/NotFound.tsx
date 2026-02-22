@@ -5,6 +5,7 @@ import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three
 import * as THREE from "three";
 import { Play, Pause, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import amBlackLogo from "@/assets/amblack.png";
 
 function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
   const { scene, animations } = useGLTF("/models/anime_girl.glb");
@@ -77,11 +78,12 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-12 w-12">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-12 w-12 hover:bg-black hover:text-white">
           {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
         </Button>
-        <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-full h-10 w-10">
+        <img src={amBlackLogo} alt="Arcana Mace" className="h-8 w-8" />
+        <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-full h-10 w-10 hover:bg-black hover:text-white">
           <SkipForward className="h-5 w-5" />
         </Button>
       </div>
