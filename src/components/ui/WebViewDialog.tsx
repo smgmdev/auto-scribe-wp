@@ -1,8 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2, AlertCircle, Download, ExternalLink } from 'lucide-react';
+import { RefreshCw, Loader2, AlertCircle, Download, ExternalLink, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+type ViewportMode = 'desktop' | 'tablet' | 'mobile';
+
+const VIEWPORT_SIZES: Record<ViewportMode, { width: number; label: string }> = {
+  desktop: { width: 0, label: 'Desktop (Full)' },   // 0 = 100% width
+  tablet: { width: 768, label: 'Tablet (768px)' },
+  mobile: { width: 375, label: 'Mobile (375px)' },
+};
 
 interface WebViewDialogProps {
   open: boolean;
@@ -17,6 +26,7 @@ interface WebViewDialogProps {
 
 export function WebViewDialog({ open, onOpenChange, url, title = 'Website', downloadUrl, downloadName, isWebsite = false }: WebViewDialogProps) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
+  const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadedRef = useRef<boolean>(false);
@@ -89,6 +99,8 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
     }
   };
 
+  const viewportWidth = VIEWPORT_SIZES[viewportMode].width;
+
   const titleBar = (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 px-3">
       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -103,7 +115,34 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
         </Button>
         <span className="text-sm font-medium truncate">{title}</span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        {isWebsite && (
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-0.5 border rounded-md p-0.5 bg-muted/30">
+              {([
+                { mode: 'desktop' as ViewportMode, icon: Monitor },
+                { mode: 'tablet' as ViewportMode, icon: Tablet },
+                { mode: 'mobile' as ViewportMode, icon: Smartphone },
+              ]).map(({ mode, icon: Icon }) => (
+                <Tooltip key={mode}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setViewportMode(mode)}
+                      className={`h-6 w-6 p-0 ${viewportMode === mode ? 'bg-foreground text-background' : 'hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'}`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    {VIEWPORT_SIZES[mode].label}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TooltipProvider>
+        )}
         {isWebsite ? (
           <Button
             onClick={() => window.open(normalizedUrl, '_blank')}
@@ -133,13 +172,13 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
     <DraggablePopup
       open={open}
       onOpenChange={handleOpenChange}
-      width={960}
+      width={viewportMode === 'desktop' ? 960 : Math.min(960, VIEWPORT_SIZES[viewportMode].width + 48)}
       maxHeight="90vh"
       zIndex={300}
       title={titleBar}
       bodyClassName="p-0 !p-0"
     >
-      <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted">
+      <div className="w-full h-[60vh] sm:h-[70vh] relative bg-muted flex justify-center">
         {status === 'loading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted z-50">
             <div className="flex flex-col items-center gap-2">
@@ -173,7 +212,8 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
           ref={iframeRef}
           key={normalizedUrl}
           src={normalizedUrl}
-          className={`w-full h-full border-0 transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+          className={`h-full border-0 transition-all duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'} ${viewportWidth > 0 ? 'border-x border-border shadow-inner' : ''}`}
+          style={{ width: viewportWidth > 0 ? `${viewportWidth}px` : '100%' }}
           title="WebView"
           sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
           onLoad={handleIframeLoad}
