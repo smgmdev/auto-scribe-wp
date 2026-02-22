@@ -386,6 +386,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
 
     let isActive = true;
     let timeoutId: ReturnType<typeof setTimeout>;
+    let adminId: string | null = null;
 
     const checkAdminStatus = async () => {
       if (!isActive) return;
@@ -396,7 +397,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
       if (isActive) timeoutId = setTimeout(checkAdminStatus, 15000);
     };
 
-    // Also fetch admin user_id for other features
+    // Also fetch admin user_id for other features + real-time listener
     const fetchAdminId = async () => {
       const { data: roleData } = await supabase
         .from('user_roles')
@@ -404,15 +405,44 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
         .eq('role', 'admin')
         .limit(1)
         .maybeSingle();
-      if (roleData?.user_id) setAdminUserId(roleData.user_id);
+      if (roleData?.user_id) {
+        setAdminUserId(roleData.user_id);
+        adminId = roleData.user_id;
+      }
     };
 
     checkAdminStatus();
     fetchAdminId();
 
+    // Real-time listener on profiles table for admin last_online_at changes
+    const profileChannel = supabase
+      .channel('admin-online-status-rt')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+        },
+        (payload) => {
+          // Only react to admin profile updates
+          if (adminId && payload.new?.id === adminId) {
+            const lastOnline = payload.new?.last_online_at;
+            if (lastOnline) {
+              const diff = Date.now() - new Date(lastOnline).getTime();
+              setAdminOnline(diff < 2 * 60 * 1000);
+            } else {
+              setAdminOnline(false);
+            }
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isActive = false;
       clearTimeout(timeoutId);
+      supabase.removeChannel(profileChannel);
     };
   }, [isAdmin]);
 
