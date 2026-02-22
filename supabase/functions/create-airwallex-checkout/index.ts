@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const AIRWALLEX_API_URL = "https://api.airwallex.com";
 const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
-const MIN_CREDITS = 10;
+const MIN_CREDITS = 5;
 const MAX_CREDITS = 10000; // $10,000 maximum per transaction
 
 function decodeJwt(token: string): Record<string, unknown> {
