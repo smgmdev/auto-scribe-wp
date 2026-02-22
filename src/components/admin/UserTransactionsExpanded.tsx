@@ -900,7 +900,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
 
           const commissionSpan = (value: number, hasTxs: boolean) => (
             hasTxs && value > 0 ? (
-              <span className="ml-2 text-muted-foreground">
+              <span className="md:ml-2 block md:inline text-xs md:text-base text-muted-foreground">
                 ({value.toLocaleString()} commission)
               </span>
             ) : null
@@ -911,7 +911,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
               {activeType === 'all' && (
                 <div className="bg-muted border border-border px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Balance</p>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="text-sm md:text-base font-bold text-foreground">
                     {nonLockTxs.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
                     {commissionSpan(totalCommission, nonLockTxs.length > 0)}
                   </p>
@@ -922,7 +922,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                   <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                     {earningsSubTab === 'earnings_b2b' ? 'B2B Media Earnings' : earningsSubTab === 'earnings_instant' ? 'Instant Publishing Earnings' : 'Total Earnings'}
                   </p>
-                  <p className="text-base font-bold text-green-600">
+                  <p className="text-sm md:text-base font-bold text-green-600">
                     +{nonLockTxs.reduce((sum, tx) => sum + Math.abs(tx.amount), 0).toLocaleString()} credits
                     {commissionSpan(earningsSubTab === 'earnings_b2b' ? b2bCommission : earningsSubTab === 'earnings_instant' ? ipCommission : totalCommission, nonLockTxs.length > 0)}
                   </p>
