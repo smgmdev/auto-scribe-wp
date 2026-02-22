@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, User, Loader2, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -446,6 +447,7 @@ export default function PressNews() {
         </div>
       </main>
 
+      <PWAInstallButtons />
       <Footer narrow />
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>

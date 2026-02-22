@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, User, Plus, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import {
@@ -288,6 +289,7 @@ const PrivacyPolicy = () => {
         </Accordion>
       </main>
 
+      <PWAInstallButtons />
       <Footer narrow />
     </div>
   );

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import amblack from '@/assets/amblack.png';
 
 const SITEMAP_SECTIONS = [
@@ -199,6 +200,7 @@ const SiteMap = () => {
       </main>
 
       {/* Footer */}
+      <PWAInstallButtons />
       <Footer narrow />
     </div>
   );
