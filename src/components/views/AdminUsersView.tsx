@@ -1557,12 +1557,12 @@ export function AdminUsersView() {
                                       onClick={() => handleEngagementClick(engagement.id)}
                                     >
                                       <div className="flex items-center gap-2">
-                                        <MessageSquare className="h-3 w-3 text-muted-foreground" />
+                                        <MessageSquare className="h-3 w-3 text-muted-foreground hidden md:block" />
                                         <span className="truncate max-w-[200px]">{engagement.title}</span>
                                         {getEngagementStatusBadge(engagement)}
                                       </div>
                                       <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">{engagement.media_sites?.name}</span>
+                                        <span className="text-muted-foreground hidden md:inline">{engagement.media_sites?.name}</span>
                                         <ExternalLink className="h-3 w-3 text-muted-foreground" />
                                       </div>
                                     </div>
