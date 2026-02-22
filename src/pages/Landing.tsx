@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info, GripHorizontal } from 'lucide-react';
+import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info, GripHorizontal, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import { LatestPublishedCarousel } from '@/components/landing/LatestPublishedCar
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
-import androidIcon from '@/assets/android-icon.png';
+
 import amblack from '@/assets/amblack.png';
 import bugReportBg from '@/assets/bug-report-bg.mp4';
 import mediaBuyingBg from '@/assets/media-buying-bg.mp4';
@@ -815,7 +815,7 @@ const Landing = () => {
             onClick={(e) => e.preventDefault()}
             className="inline-flex items-center gap-2 bg-black text-[#f2a547] px-5 py-3 rounded-lg text-sm font-semibold hover:text-white transition-colors"
           >
-            <img src={androidIcon} alt="Android" className="w-5 h-5" />
+            <Smartphone className="w-5 h-5" />
             Download & Install on Android
           </a>
           <a
