@@ -751,18 +751,18 @@ export function AdminAgencyWithdrawalsView() {
           </h4>
         }
         footer={
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 md:gap-3">
             <Button 
               variant="outline" 
               onClick={() => { setSelectedWithdrawal(null); setActionType(null); setAdminNotes(''); setPayoutMode('manual'); }}
-              className="hover:bg-foreground hover:text-background hover:border-foreground"
+              className="w-full md:w-auto hover:bg-foreground hover:text-background hover:border-foreground"
             >
               Cancel
             </Button>
             <Button 
               onClick={confirmAction}
               disabled={processingId !== null || autoPayoutProcessing}
-              className={
+              className={`w-full md:w-auto ${
                 actionType === 'approve' && payoutMode === 'auto' 
                   ? 'bg-blue-500 text-white border border-blue-500 hover:!bg-transparent hover:!text-blue-500'
                   : actionType === 'approve' 
@@ -770,7 +770,7 @@ export function AdminAgencyWithdrawalsView() {
                     : actionType === 'reject' 
                       ? 'bg-destructive text-destructive-foreground border border-destructive hover:!bg-transparent hover:!text-destructive'
                       : 'bg-green-500 hover:bg-green-600'
-              }
+              }`}
             >
               {processingId || autoPayoutProcessing ? (
                 <>
