@@ -537,9 +537,7 @@ export function AdminAgencyWithdrawalsView() {
 
         {/* Withdrawals List */}
         <Card className="border-0 rounded-none shadow-none">
-        <CardHeader className="px-0">
-          <CardTitle className="text-lg">Withdrawal Requests</CardTitle>
-        </CardHeader>
+        <p className="text-sm bg-black text-white px-3 py-2">Withdrawal Requests</p>
         <CardContent className="px-0">
           {filteredWithdrawals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
