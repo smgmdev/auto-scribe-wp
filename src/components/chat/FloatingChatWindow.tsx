@@ -5590,9 +5590,8 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
             <div className="flex flex-col min-w-0">
               <h3 className="font-semibold text-sm">{globalChatRequest.media_site?.name || globalChatRequest.title}</h3>
               <div className="flex items-center gap-2">
-                <span className={`flex items-center gap-1 text-xs ${isCounterpartyOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} />
-                  {counterpartyLabel} · {renderLastSeenStatus()}
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  {counterpartyLabel} · <span className={`w-2 h-2 rounded-full shrink-0 ${isCounterpartyOnline ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'}`} /> <span className={isCounterpartyOnline ? 'text-green-500' : ''}>{renderLastSeenStatus()}</span>
                 </span>
               </div>
             </div>
