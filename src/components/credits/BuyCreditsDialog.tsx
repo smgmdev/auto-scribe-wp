@@ -32,6 +32,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [step, setStep] = useState<Step>('select');
   const [cardReady, setCardReady] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [intentData, setIntentData] = useState<{ intent_id: string; client_secret: string } | null>(null);
   const cardElementRef = useRef<any>(null);
   const { refreshCredits } = useAuth();
@@ -51,6 +52,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       setStep('select');
       setCardReady(false);
       setConfirming(false);
+      setPaymentSubmitted(false);
       setIntentData(null);
       cardElementRef.current = null;
     } else {
@@ -177,7 +179,13 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         dropIn.on('error', (event: any) => {
           console.error('[Airwallex] Payment error:', event);
+          if (mounted) setPaymentSubmitted(false);
           toast.error(event?.message || 'Payment failed. Please try again.');
+        });
+
+        dropIn.on('cancel', () => {
+          console.log('[Airwallex] Payment cancelled');
+          if (mounted) setPaymentSubmitted(false);
         });
 
         // Polling fallback: check intent status every 5s in case Drop-in events don't fire
@@ -214,6 +222,17 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               console.log('[Airwallex] Mounting drop-in to container');
               dropIn.mount(container);
               cardElementRef.current = dropIn;
+
+              // Detect Pay button click via DOM listener to show processing overlay
+              container.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement;
+                const button = target.closest('button[type="submit"], button.cko-pay-button, [role="button"]') || 
+                               (target.tagName === 'BUTTON' && target.textContent?.toLowerCase().includes('pay') ? target : null);
+                if (button) {
+                  console.log('[Airwallex] Pay button click detected');
+                  setPaymentSubmitted(true);
+                }
+              }, true);
               
               // Fallback: if ready event doesn't fire in 4s, show the form anyway
               setTimeout(() => {
@@ -549,11 +568,13 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               </p>
             </div>
 
-            {/* Full overlay spinner when payment is being verified */}
-            {confirming && (
+            {/* Full overlay spinner when payment is submitted or being verified */}
+            {(paymentSubmitted || confirming) && (
               <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center gap-3">
                 <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Processing your payment...</p>
+                <p className="text-sm text-muted-foreground">
+                  {confirming ? 'Verifying your payment...' : 'Processing your payment...'}
+                </p>
               </div>
             )}
           </div>
