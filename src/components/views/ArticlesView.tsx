@@ -304,7 +304,7 @@ export function ArticlesView() {
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-6 relative">
+      <div className="max-w-[980px] mx-auto space-y-0 md:space-y-4 relative">
       {/* Deleting Overlay */}
       {isDeleting && createPortal(
         <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex items-start justify-center pt-32">
@@ -337,7 +337,7 @@ export function ArticlesView() {
         document.body
       )}
       {/* Header */}
-      <div className="mb-0 md:mb-6">
+      <div className="mb-0 md:mb-4">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground">
