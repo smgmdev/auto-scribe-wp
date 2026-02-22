@@ -681,7 +681,7 @@ const ScrollColorSection = ({
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article<br />Generation</h3>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-4">
-                Generate unique, high-quality articles in seconds using live news sources and Arcana Mace AI.
+                Generate unique, high-quality articles in seconds using live news sources with AI.
               </p>
               </div>
               <div className="mt-auto w-full border-t border-white/10 bg-white/5 overflow-hidden">
