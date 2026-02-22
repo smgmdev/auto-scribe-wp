@@ -1086,7 +1086,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                               tx.type === 'order_accepted' ? 'text-foreground' :
                               tx.type === 'locked' ? 'text-foreground' :
                               tx.type === 'unlocked' ? 'text-foreground' :
-                              tx.type === 'order_completed' ? 'text-destructive' : 
+                              tx.type === 'order_completed' ? 'text-destructive' :
+                              tx.type === 'publish' ? 'text-destructive' : 
                               tx.amount > 0 ? 'text-green-600' : 'text-destructive'
                             )}>
                               {tx.type === 'withdrawal_unlocked' ? (
@@ -1095,7 +1096,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                                 <>{tx.amount > 0 ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()}</>
                               ) : (
                                 <>
-                                  {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
+                                  {tx.type === 'order_completed' ? '-' : tx.type === 'publish' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
                                   {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
                                     ? orders.get(tx.order_id)!.amount_cents.toLocaleString()
                                     : Math.abs(tx.amount).toLocaleString()}
@@ -1112,7 +1113,8 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                           tx.type === 'order_accepted' ? 'text-foreground' :
                           tx.type === 'locked' ? 'text-foreground' :
                           tx.type === 'unlocked' ? 'text-foreground' :
-                          tx.type === 'order_completed' ? 'text-destructive' : 
+                          tx.type === 'order_completed' ? 'text-destructive' :
+                          tx.type === 'publish' ? 'text-destructive' : 
                           tx.amount > 0 ? 'text-green-600' : 'text-destructive'
                         )}>
                           {tx.type === 'withdrawal_unlocked' ? (
@@ -1123,7 +1125,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                             </>
                           ) : (
                             <>
-                              {tx.type === 'order_completed' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
+                              {tx.type === 'order_completed' ? '-' : tx.type === 'publish' ? '-' : tx.type === 'order_accepted' ? '-' : tx.type === 'locked' ? '-' : tx.amount > 0 ? '+' : ''}
                               {tx.type === 'order_accepted' && tx.order_id && orders.has(tx.order_id) 
                                 ? orders.get(tx.order_id)!.amount_cents.toLocaleString()
                                 : Math.abs(tx.amount).toLocaleString()}
