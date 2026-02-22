@@ -23,6 +23,7 @@ interface AuthContextType {
   refreshCredits: () => Promise<void>;
   verifyPin: (pin: string) => Promise<boolean>;
   setPinVerified: (verified: boolean) => void;
+  extendSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -727,6 +728,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
+  // Extend the session: set grace period, re-register session, refresh auth token.
+  // Used by SessionExpiryWarning's "Stay Logged In" button.
+  const extendSession = async (): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      // 1. Set grace period FIRST to prevent session-guard from kicking us
+      sessionGraceUntilRef.current = Date.now() + 15000;
+
+      // 2. Refresh the auth token first (most likely to fail)
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.error('[Auth] extendSession: refreshSession failed:', refreshError);
+        return false;
+      }
+
+      // 3. Re-register active session (resets session_started_at)
+      await registerActiveSession(user.id);
+
+      // 4. Extend grace period after registration
+      sessionGraceUntilRef.current = Date.now() + 10000;
+
+      console.log('[Auth] extendSession: success');
+      return true;
+    } catch (err) {
+      console.error('[Auth] extendSession error:', err);
+      return false;
+    }
+  };
+
   const signOut = async () => {
     userInitiatedSignOutRef.current = true;
     const store = useAppStore.getState();
@@ -853,7 +883,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         refreshCredits,
         verifyPin,
-        setPinVerified
+        setPinVerified,
+        extendSession
       }}
     >
       {children}
@@ -878,6 +909,7 @@ const defaultAuthContext: AuthContextType = {
   refreshCredits: async () => {},
   verifyPin: async () => false,
   setPinVerified: () => {},
+  extendSession: async () => false,
 };
 
 export function useAuth() {
