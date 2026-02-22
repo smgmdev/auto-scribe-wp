@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
 import { toast } from 'sonner';
-import { init as airwallexInit, createElement } from '@airwallex/components-sdk';
+import { init as airwallexInit } from '@airwallex/components-sdk';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 5;
@@ -121,32 +121,29 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
     const initDropIn = async () => {
       try {
-        await airwallexInit({
+        const { payments } = await airwallexInit({
           env: 'prod',
           origin: window.location.origin,
           enabledElements: ['payments'],
         });
 
-        const dropIn = await createElement('dropIn' as any, {
+        const dropIn = payments.createElement('dropIn', {
           intent_id: intentData.intent_id,
           client_secret: intentData.client_secret,
           currency: 'USD',
-          methods: ['card', 'googlepay'],
+          country_code: 'US',
+          methods: ['card'],
           layout: {
             type: 'accordion',
-            defaultCollapsed: false,
-          },
-          googlePayRequestOptions: {
-            countryCode: 'US',
-          },
+          } as any,
         });
 
-        dropIn.on('ready' as any, () => {
+        dropIn.on('ready', () => {
           console.log('[Airwallex] Drop-in ready event fired');
           if (mounted) setCardReady(true);
         });
 
-        dropIn.on('success' as any, async () => {
+        dropIn.on('success', async () => {
           console.log('[Airwallex] Payment success event fired');
           if (!mounted) return;
           setConfirming(true);
@@ -164,7 +161,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           }
         });
 
-        dropIn.on('error' as any, (event: any) => {
+        dropIn.on('error', (event: any) => {
           console.error('[Airwallex] Payment error:', event);
           toast.error(event?.message || 'Payment failed. Please try again.');
         });
