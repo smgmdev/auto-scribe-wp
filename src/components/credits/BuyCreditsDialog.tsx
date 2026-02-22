@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Coins, GripHorizontal, X, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Loader2, Coins, GripHorizontal, X, ArrowLeft, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import amBlackLogo from '@/assets/amblack-2.png';
 import airwallexLogo from '@/assets/airwallex-logo.png';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,7 +24,7 @@ interface BuyCreditsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type Step = 'select' | 'payment';
+type Step = 'select' | 'payment' | 'success';
 
 export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) {
   const [creditAmount, setCreditAmount] = useState<string>('5');
@@ -34,6 +35,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [intentData, setIntentData] = useState<{ intent_id: string; client_secret: string } | null>(null);
   const cardElementRef = useRef<any>(null);
   const { refreshCredits } = useAuth();
+  const { setCurrentView } = useAppStore();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   // Drag state
@@ -152,13 +155,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             });
             if (error) throw error;
             if (result?.success) {
-              if (result.already_processed) {
-                toast.info('This payment was already processed.');
-              } else {
-                toast.success(`${parsedAmount} credits added to your account!`);
-              }
               refreshCredits?.();
-              onOpenChange(false);
+              setStep('success');
             } else {
               toast.error(result?.message || 'Payment not yet completed. Please wait a moment.');
             }
@@ -196,13 +194,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             if (result?.success) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
-              if (result.already_processed) {
-                toast.info('Payment processed!');
-              } else {
-                toast.success(`${parsedAmount} credits added to your account!`);
-              }
               refreshCredits?.();
-              onOpenChange(false);
+              setStep('success');
             }
           } catch {
             // Silently retry
@@ -359,6 +352,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
 
         {/* Header */}
+        {step !== 'success' && (
         <div className="flex items-center gap-2 mb-1">
           {step === 'payment' && (
             <button
@@ -383,6 +377,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             )}
           </h2>
         </div>
+        )}
 
         {step === 'select' ? (
           <>
@@ -474,6 +469,31 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               )}
             </div>
           </>
+        ) : step === 'success' ? (
+          <div className="flex flex-col items-center text-center gap-4 py-8">
+            <CheckCircle2 className="h-14 w-14 text-green-500" />
+            <div className="space-y-1">
+              <h3 className="text-xl font-semibold">Purchase Successful!</h3>
+              <p className="text-muted-foreground">
+                You have successfully purchased <span className="font-semibold text-foreground">{parsedAmount.toLocaleString()}</span> credits.
+              </p>
+            </div>
+            <Button
+              onClick={() => {
+                onOpenChange(false);
+                setCurrentView('credit-history');
+                // Navigate with deep-link param to open the transaction card
+                const params = new URLSearchParams();
+                if (intentData?.intent_id) {
+                  params.set('purchaseIntentId', intentData.intent_id);
+                }
+                navigate(`/account?${params.toString()}`, { replace: true });
+              }}
+              className="min-w-[160px] rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200"
+            >
+              View Transaction
+            </Button>
+          </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground mt-1">
