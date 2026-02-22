@@ -212,7 +212,7 @@ export function SliderPuzzleCaptcha({ onVerified }: SliderPuzzleCaptchaProps) {
 
   return (
     <div ref={containerRef} className="w-full max-w-[320px] mx-auto select-none">
-      <div className="border border-border rounded-sm overflow-hidden bg-muted/30">
+      <div className="border border-border rounded-sm overflow-hidden bg-white">
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
           <div className="flex items-center gap-1.5">
