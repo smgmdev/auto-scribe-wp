@@ -268,7 +268,7 @@ const ScrollColorSection = ({
       className="py-24 md:py-32 transition-colors duration-700 ease-out"
       style={{ backgroundColor: bgColor }}
     >
-      <div className="max-w-[980px] mx-auto px-4 md:px-6">
+        <div className="max-w-[980px] mx-auto px-0 md:px-6">
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
