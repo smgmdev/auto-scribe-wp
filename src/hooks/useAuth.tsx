@@ -177,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     toast.error('You have been logged out because your account was signed in on another device or browser.', {
+      id: 'session-kicked',
       duration: 8000,
     });
   };
