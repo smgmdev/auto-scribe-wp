@@ -1639,13 +1639,21 @@ export function CreditHistoryView() {
             </div>
           )}
           {activeType === 'system' && (
-            <div className="bg-muted/40 border border-border px-4 py-3 flex items-center justify-between mb-0">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
-              </p>
-              <p className="text-lg font-bold text-muted-foreground">
-                {tabFilteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
-              </p>
+            <div className="bg-muted/40 border border-border px-4 py-3 mb-0">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {systemSubTab === 'offer_accepted' ? 'Credits Locked' : systemSubTab === 'gifted' ? 'Admin Gifted' : systemSubTab === 'admin_deduct' ? 'Admin Deducted' : systemSubTab === 'unlocked' ? 'Credits Unlocked' : 'System Transactions'}
+                </p>
+                <p className="text-lg font-bold text-muted-foreground">
+                  {tabFilteredTransactions.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()} credits
+                </p>
+              </div>
+              {systemSubTab === 'offer_accepted' && creditsInWithdrawals > 0 && (
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-muted-foreground">+ Locked in Withdrawals</p>
+                  <p className="text-sm font-semibold text-amber-500">{creditsInWithdrawals.toLocaleString()} credits</p>
+                </div>
+              )}
             </div>
           )}
           {activeType === 'withdrawals' && (
