@@ -704,6 +704,8 @@ export const AdminCreditManagementView = () => {
                                           creditsInOrders={user.lockedFromOrders || 0}
                                           totalPurchased={user.purchased || 0}
                                           totalSpent={user.totalSpent || 0}
+                                          b2bSpent={(user.totalSpent || 0) - (user.publishSpent || 0) - (user.usageSpent || 0)}
+                                          publishSpent={user.publishSpent || 0}
                                           availableCredits={user.available || 0}
                                           isAgency={user.isAgency || false}
                                         />
