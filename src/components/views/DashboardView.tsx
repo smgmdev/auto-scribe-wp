@@ -527,10 +527,11 @@ export function DashboardView() {
               type="button"
               onClick={refreshDashboard}
               disabled={isRefreshing}
-              className="inline-flex items-center justify-center border rounded-none bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-3 py-1 text-xs font-semibold whitespace-nowrap cursor-pointer"
               title="Refresh dashboard"
             >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1 disabled:opacity-50">
+                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Badge>
             </button>
           </div>
           <p className="mt-2 text-white/60">You're logged in as {user?.email}. Monitor your media publishing workflow</p>
@@ -567,10 +568,11 @@ export function DashboardView() {
             type="button"
             onClick={refreshDashboard}
             disabled={isRefreshing}
-            className="inline-flex items-center justify-center border rounded-none bg-white/10 text-white/80 border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 px-3 py-1 text-xs font-semibold whitespace-nowrap cursor-pointer"
             title="Refresh dashboard"
           >
-            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1 disabled:opacity-50">
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Badge>
           </button>
         </div>
       </div>
