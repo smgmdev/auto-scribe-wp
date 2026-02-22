@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ExternalLink, RefreshCw, User, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -427,6 +428,7 @@ export default function SystemStatus() {
           </div>
         </main>
 
+        <PWAInstallButtons />
         <Footer narrow />
       </div>
     </div>

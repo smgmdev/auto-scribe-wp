@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
@@ -184,6 +185,7 @@ const TermsOfService = () => {
         </div>
       </main>
 
+      <PWAInstallButtons />
       <Footer narrow />
     </div>
   );
