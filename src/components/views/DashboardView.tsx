@@ -499,7 +499,7 @@ export function DashboardView() {
           <div className="md:hidden mt-2 flex items-center gap-2">
             {isAdmin && (
               <button type="button" onClick={() => setSessionsPopupOpen(true)}>
-                <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors">
+                <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1">
                   {activeSessionCount}&nbsp;sessions
                 </Badge>
               </button>
@@ -539,7 +539,7 @@ export function DashboardView() {
         <div className="hidden md:flex md:items-center md:gap-2 order-1 md:order-2">
           {isAdmin && (
             <button type="button" onClick={() => setSessionsPopupOpen(true)}>
-              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors">
+              <Badge className="bg-white/10 text-white/80 border-white/20 hover:bg-white/20 whitespace-nowrap cursor-pointer transition-colors px-3 py-1">
                 {activeSessionCount}&nbsp;sessions
               </Badge>
             </button>
