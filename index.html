@@ -102,7 +102,6 @@
           };
           // Block BroadcastChannel so Supabase auth changes in the iframe
           // don't propagate to the parent window and hijack the admin session
-          var OrigBC = window.BroadcastChannel;
           window.BroadcastChannel = function(name) {
             this.name = name;
             this.postMessage = function() {};
@@ -113,6 +112,24 @@
             this.removeEventListener = function() {};
             this.dispatchEvent = function() { return true; };
           };
+
+          // Stub navigator.locks so the iframe's Supabase client doesn't
+          // compete with the parent window for token-refresh locks.
+          // Without this, lock contention can stall the parent's refresh
+          // and cause the admin to be kicked from active sessions.
+          if (navigator.locks) {
+            navigator.locks.request = function(_name, optionsOrCb, cb) {
+              var fn = typeof optionsOrCb === 'function' ? optionsOrCb : cb;
+              if (typeof fn === 'function') {
+                return Promise.resolve(fn({ name: _name, mode: 'exclusive' }));
+              }
+              return Promise.resolve();
+            };
+          }
+
+          // Suppress storage events so the parent window's Supabase client
+          // doesn't react to any writes that leak past the localStorage patch
+          window.addEventListener('storage', function(e) { e.stopImmediatePropagation(); }, true);
         } catch(e) {}
       })();
     </script>
