@@ -546,9 +546,7 @@ export default function UpdateLog() {
         </Accordion>
       </main>
 
-      <div className="max-w-[980px] mx-auto px-4 md:px-6">
-        <div className="border-t border-[#424245]" />
-      </div>
+      <div className="border-t border-[#424245]" />
       <div className="bg-black">
         <PWAInstallButtons />
       </div>
