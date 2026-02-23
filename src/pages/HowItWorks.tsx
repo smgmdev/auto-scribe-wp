@@ -257,7 +257,7 @@ const ScrollColorSection = ({
   }, []);
 
   return (
-    <section className="py-24 md:py-32">
+    <section>
         <div className="max-w-[980px] mx-auto px-0 md:px-6">
         <div 
           id="media-libraries-section"
@@ -310,7 +310,7 @@ const ScrollColorSection = ({
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -398,7 +398,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Global Media Library Section */}
-        <div id="global-media-library" ref={globalLibraryRef} className="mt-16 bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="global-media-library" ref={globalLibraryRef} className="bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -437,7 +437,7 @@ const ScrollColorSection = ({
         <div
           id="what-you-can-do"
           ref={whatYouCanDoRef}
-          className="mt-16 bg-[#0d1b4b] rounded-none px-0 py-10 md:py-16 lg:py-20 text-center"
+          className="bg-[#0d1b4b] rounded-none px-0 py-10 md:py-16 lg:py-20 text-center"
         >
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
@@ -541,7 +541,7 @@ const ScrollColorSection = ({
         <div
           id="ai-section"
           ref={aiSectionRef}
-          className="mt-16 bg-[#d88b57] rounded-none px-0 py-10 md:py-16 lg:py-20 text-center"
+          className="bg-[#d88b57] rounded-none px-0 py-10 md:py-16 lg:py-20 text-center"
         >
 
           {/* Title */}
