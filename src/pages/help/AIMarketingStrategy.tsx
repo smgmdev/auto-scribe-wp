@@ -123,38 +123,6 @@ export default function AIMarketingStrategy() {
             </>
           ),
         },
-        {
-          id: 'summary',
-          title: 'Summary',
-          content: (
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="text-[#06c] font-bold mt-0.5">•</span>
-                <span className="text-[17px] text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Publish frequently</strong> — every article creates a new link that AI systems can discover and reference.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#06c] font-bold mt-0.5">•</span>
-                <span className="text-[17px] text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Enable Auto Publishing</strong> — daily automated content keeps your pipeline active and signals consistency to AI crawlers.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#06c] font-bold mt-0.5">•</span>
-                <span className="text-[17px] text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Use Media Buying</strong> — publishing on well-known media channels gives your content more authority in the eyes of AI.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#06c] font-bold mt-0.5">•</span>
-                <span className="text-[17px] text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Combine quantity with quality</strong> — AI rewards consistent, high-quality content from trusted sources.
-                </span>
-              </li>
-            </ul>
-          ),
-        },
       ]}
     />
   );
