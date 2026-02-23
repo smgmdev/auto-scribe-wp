@@ -278,7 +278,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Say something... (/models for list)"
+          placeholder="Say something... (available commands: /models for list, /rules)"
           className="h-8 text-xs bg-transparent border-none shadow-none ring-0 focus-visible:ring-0 focus-visible:border-none text-left placeholder:text-left rounded-r-none"
           maxLength={200}
         />
