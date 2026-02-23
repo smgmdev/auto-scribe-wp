@@ -38,6 +38,10 @@ interface SearchModalProps {
   onSiteClick?: (site: MediaSite) => void;
   /** When provided, called instead of opening the internal AgencyDetailsDialog */
   onAgencyClick?: (agencyName: string) => void;
+  /** Pre-select a tab when opening */
+  initialTab?: string;
+  /** Pre-select a subcategory when opening */
+  initialSubcategory?: string | null;
 }
 
 const CATEGORY_TABS = ['Global', 'Focused', 'Epic', 'Agencies/People'];
@@ -67,7 +71,7 @@ function MediaLogo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: SearchModalProps) {
+export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick, initialTab, initialSubcategory }: SearchModalProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
@@ -75,8 +79,8 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
   const [agencyLogos, setAgencyLogos] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('Global');
-  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(initialTab || 'Global');
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(initialSubcategory || null);
   
   // Media site dialog state
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
@@ -84,6 +88,14 @@ export function SearchModal({ open, onOpenChange, onSiteClick, onAgencyClick }: 
   // Agency details popup state
   const [agencyDetailsOpen, setAgencyDetailsOpen] = useState(false);
   const [selectedAgencyName, setSelectedAgencyName] = useState<string | null>(null);
+
+  // Sync initial tab/subcategory when modal opens
+  useEffect(() => {
+    if (open) {
+      if (initialTab) setActiveTab(initialTab);
+      setActiveSubcategory(initialSubcategory || null);
+    }
+  }, [open, initialTab, initialSubcategory]);
 
   // Register on popup stack for layered Esc handling
   useEffect(() => {
