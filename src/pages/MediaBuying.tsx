@@ -287,17 +287,15 @@ export default function MediaBuying() {
 
       {/* Built for growth and scale - Dark section */}
       <section className="bg-black py-20 md:py-28">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+        <div className="max-w-[980px] mx-auto px-0 md:px-6 text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-8">
             Built for growth and scale
           </h2>
           <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-4xl mx-auto">
-            We built Arcana Mace to make it easy for everyone — from individuals to large 
-            teams — to publish content across premium media outlets and successfully run and 
+            We built Arcana Mace to make it easy for everyone from individuals to large 
+            teams, to publish content across global media channels and successfully run and 
             grow a global brand. Arcana Mace empowers you to scale your media distribution 
-            worldwide using a variety of publication formats. And with access to 
-            extensive media management tools and analytics, you can turn your content 
-            into incredible opportunities.
+            worldwide using our platform.
           </p>
         </div>
         
@@ -346,7 +344,7 @@ export default function MediaBuying() {
 
       {/* Main headline section */}
       <section className="bg-white pt-16 pb-16 md:pb-24">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+        <div className="max-w-[980px] mx-auto px-0 md:px-6 text-center">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-4 leading-tight">
             The reach you need.
           </h1>
@@ -358,7 +356,7 @@ export default function MediaBuying() {
 
       {/* Intro paragraph */}
       <section className="pb-20">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+        <div className="max-w-[980px] mx-auto px-0 md:px-6">
           <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
             For years, media buying meant navigating complex relationships and opaque pricing. 
             Arcana Mace changes that — providing direct access to premium publications worldwide. 
@@ -370,7 +368,7 @@ export default function MediaBuying() {
 
       {/* Take your brand to the next level section - Apple style */}
       <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #f5f5f7 0%, #e8f4fc 50%, #d6e8f5 100%)' }}>
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+        <div className="max-w-[980px] mx-auto px-0 md:px-6">
           {/* Icon grid - 3 rows x 5 columns */}
           <div className="flex flex-col items-center gap-4 md:gap-6 mb-16">
             {/* Row 1 */}
