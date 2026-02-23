@@ -390,7 +390,7 @@ export default function MediaBuying() {
 
       {/* Take your brand to the next level section - Apple style */}
       <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #f5f5f7 0%, #e8f4fc 50%, #d6e8f5 100%)' }}>
-        <div className="max-w-[980px] mx-auto px-0 md:px-6">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {/* Icon grid - 3 rows x 5 columns */}
           <div className="flex flex-col items-center gap-4 md:gap-6 mb-16">
             {/* Row 1 */}
