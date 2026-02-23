@@ -99,25 +99,19 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     if (!trimmed) return;
     setInput("");
 
-    // Handle /models command
+    // Handle /models command - broadcast publicly
     if (trimmed.toLowerCase() === "/models") {
       const modelList = MODELS.map((m, i) => `${i + 1}. ${m.name}`).join("\n");
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `system-${Date.now()}`,
-          nickname: "Arcana Mace",
-          message: `Model List:\n\n${modelList}\n\nChoose a number to display.`,
-          created_at: new Date().toISOString(),
-          is_system: true,
-        },
-      ]);
+      // Insert the user's /models command publicly
+      await supabase.from("lost_chat_messages").insert({ nickname, message: "/models" });
+      // Insert Arcana Mace's response publicly
+      await supabase.from("lost_chat_messages").insert({ nickname: "Arcana Mace", message: `Model List:\n\n${modelList}\n\nChoose a number to display.` });
       setAwaitingModelChoice(true);
       return;
     }
 
-    // Handle number selection when awaiting model choice
-    if (awaitingModelChoice && /^\d+$/.test(trimmed)) {
+    // Handle number selection when awaiting model choice (first responder wins, visible to all)
+    if (/^\d+$/.test(trimmed)) {
       const idx = parseInt(trimmed, 10) - 1;
       if (idx >= 0 && idx < MODELS.length) {
         const model = MODELS[idx];
@@ -125,16 +119,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
         onSelectModel(model.id);
         await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
       } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `system-${Date.now()}`,
-            nickname: "Arcana Mace",
-            message: `Invalid number. Please choose between 1 and ${MODELS.length}.`,
-            created_at: new Date().toISOString(),
-            is_system: true,
-          },
-        ]);
+        await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
       }
       return;
     }
@@ -171,11 +156,18 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
             <p className="text-xs text-muted-foreground/50 text-center py-4">No one here yet... say hi!</p>
           ) : null}
           {messages.map((msg) => (
-            <div key={msg.id} className={`text-xs ${msg.is_system ? "text-center" : msg.nickname === nickname ? "text-right" : ""}`}>
+            <div key={msg.id} className={`text-xs ${msg.is_system ? "" : msg.nickname === "Arcana Mace" ? "" : msg.nickname === nickname ? "text-right" : ""}`}>
               {msg.is_system ? (
                 <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono bg-white/5 rounded px-2 py-1.5 inline-block text-left">
                   {msg.message}
                 </pre>
+              ) : msg.nickname === "Arcana Mace" ? (
+                <div className="text-left">
+                  <span className="font-semibold text-[#f2a547]/80">{msg.nickname}: </span>
+                  <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono bg-white/5 rounded px-2 py-1.5 mt-0.5 text-left">
+                    {msg.message}
+                  </pre>
+                </div>
               ) : (
                 <>
                   <span className="font-semibold text-muted-foreground/80">{msg.nickname === nickname ? "You" : msg.nickname}: </span>
@@ -193,7 +185,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Say something... (/models for list)"
-          className="h-8 text-xs bg-transparent border-white/10"
+          className="h-8 text-xs bg-transparent border-white/10 text-left placeholder:text-left"
           maxLength={200}
         />
         <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-white/10">
