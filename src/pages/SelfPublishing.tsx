@@ -553,32 +553,22 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Business Section - Contained Image */}
-        <section className="pt-4 md:pt-6 pb-4 md:pb-6 bg-white">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div 
-              className="relative min-h-[450px] md:min-h-[550px] bg-cover bg-center overflow-hidden"
-              style={{ backgroundImage: `url(${businessHero})` }}
-            >
-              {/* Dark overlay for text readability */}
-              <div className="absolute inset-0 bg-black/30" />
-              
-              <div className="relative z-10 h-full flex items-center px-8 md:px-16 py-16 md:py-24">
-                <div className="max-w-lg">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
-                    Arcana Mace for Business
-                  </h2>
-                  <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
-                    Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
-                  </p>
-                    <a
-                      href="/media-buying"
-                      className="inline-flex items-center bg-[#0071e3] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-8 py-3 transition-colors"
-                    >
-                      Learn more
-                    </a>
-                </div>
-              </div>
+        {/* Business Section - Full Width Black */}
+        <section className="bg-black border-t border-[#424245]">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
+            <div className="max-w-lg">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
+                Arcana Mace for Business
+              </h2>
+              <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
+                Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
+              </p>
+              <a
+                href="/media-buying"
+                className="inline-flex items-center bg-[#0071e3] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-8 py-3 transition-colors"
+              >
+                Learn more
+              </a>
             </div>
           </div>
         </section>
