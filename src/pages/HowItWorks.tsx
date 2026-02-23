@@ -620,13 +620,13 @@ const ScrollColorSection = ({
               <div className="flex justify-end">
                 <div className="w-20 h-20 rounded-none bg-black/10 relative overflow-hidden">
                   <div
-                    className="flex items-center h-full whitespace-nowrap"
+                    className="flex items-center h-full whitespace-nowrap w-max"
                     style={{
-                      animation: 'marquee 6s linear infinite',
+                      animation: 'marquee 3s linear infinite',
                     }}
                   >
-                    <span className="text-4xl font-bold text-black/80 px-4">EUR USD JPY USDT CNY</span>
-                    <span className="text-4xl font-bold text-black/80 px-4">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-black/80 pr-6">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-black/80 pr-6">EUR USD JPY USDT CNY</span>
                   </div>
                 </div>
               </div>
