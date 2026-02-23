@@ -427,83 +427,93 @@ export default function About() {
               </span>
             </button>
           </div>
+        </AnimatedSection>
+      </section>
 
-          <div className="mt-16 md:mt-20 text-left">
+      {/* FAQ Section */}
+      <section id="faq" className="bg-black py-20 md:py-32">
+        <div className="max-w-3xl mx-auto px-4 md:px-6">
+          <AnimatedSection>
+            <h2 className="text-4xl md:text-6xl font-semibold text-white tracking-tight leading-tight mb-12 md:mb-16">
+              Frequently Asked Questions.
+            </h2>
+          </AnimatedSection>
+          <AnimatedSection delay={100}>
             <Accordion type="multiple" className="w-full">
-              <AccordionItem value="q1" className="border-t border-border">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q1" className="border-t border-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">How do I use Arcana Mace?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Simply create an account, browse a network of global media channels, choose your target outlet, and start a conversation with the PR agency. Discuss your content, agree on terms, set a delivery timeline, and place your order. Then sit back while the agency prepares and delivers your article.
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q2" className="border-t border-border">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q2" className="border-t border-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">How secure is Arcana Mace?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Credit and debit card top-ups are processed securely through Airwallex, a globally licensed payment institution. Your card details are never stored on our servers or shared with any third party. Additionally, all account credits and payment activity are continuously monitored by Arcana Mace AI to detect and prevent any suspicious or unauthorized transactions.
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q3" className="border-t border-border">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q3" className="border-t border-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">How do I set up an account?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Click 'Get Started' or 'Sign In' to create your account. You'll need to verify your email address, and then you can immediately start browsing media network and placing orders.
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q4" className="border-t border-border">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q4" className="border-t border-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">Which payment methods are supported?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Account credits can be topped up using any major credit or debit card, or via Google Pay for a seamless checkout experience. For larger transactions or corporate procurement, you may contact our support team to have an invoice issued for a bank wire transfer.
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q5" className="border-t border-border">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q5" className="border-t border-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">Can I track my order status?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Absolutely. Once an order is placed, you can monitor its progress in real-time from the My Orders section of your dashboard. Each order also has a dedicated engagement chat between you and the agency, updated in real-time, where you can follow up on deliverables, share feedback, or raise any concerns directly.
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q6" className="border-t border-border border-b">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-foreground hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem value="q6" className="border-t border-white/20 border-b border-b-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">What if I need to cancel an order?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Orders can be cancelled at no cost before they are accepted by the agency. Once accepted, cancellation is available only if the delivery does not meet the requirements outlined in the agreed special terms. If those terms have been breached, you may open a dispute and have Arcana Mace staff investigate the matter. Should the delivery be found faulty, the order will be cancelled through the dispute process by Arcana Mace staff. Please note that a revision request must be submitted before a dispute can be opened — resolving the delivery directly with the agency remains the first priority.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </div>
-        </AnimatedSection>
+          </AnimatedSection>
+        </div>
       </section>
 
       {/* Footer */}
