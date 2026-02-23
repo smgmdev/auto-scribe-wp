@@ -508,12 +508,12 @@ export default function MediaBuying() {
                 <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-semibold text-[#1d1d1f]">Verified Publishers</span>
+                <span className="text-lg font-semibold text-[#1d1d1f]">Real Media Network</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
                 Every publication in our network is vetted for authenticity, audience reach, and editorial standards. No bots. No spam sites.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => navigate('/help/media-buying#available-publications')}>
                 Learn more
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
