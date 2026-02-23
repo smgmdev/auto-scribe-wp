@@ -319,7 +319,7 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section */}
-      <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden py-20 md:py-28">
+      <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
         {!heroVideoLoaded && (
           <div className="absolute bottom-4 right-4 z-20">
             <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
