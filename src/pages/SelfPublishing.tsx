@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import paymentsImg from '@/assets/payments.png';
+import creditManagementPreview from '@/assets/credit-management-preview.png';
 import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
 import businessHero from '@/assets/business-hero.jpg';
@@ -462,6 +463,13 @@ export default function SelfPublishing() {
                   >
                     <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
                   </a>
+                </div>
+                <div className="mt-8">
+                  <img 
+                    src={creditManagementPreview} 
+                    alt="Credit Management dashboard showing available credits, locked credits, total purchased, total orders and total spent" 
+                    className="w-full rounded-xl shadow-2xl border border-[#424245]"
+                  />
                 </div>
               </div>
               
