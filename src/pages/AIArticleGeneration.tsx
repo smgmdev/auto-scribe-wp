@@ -442,8 +442,8 @@ export default function AIArticleGeneration() {
                 Media Buying marketplace
               </h3>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-4">
-                Browse hundreds of media sites across categories including Business, Technology, Finance, Lifestyle, and more. 
-                Each site displays pricing, publication times, and content requirements so you can make informed decisions.
+                Browse media sites across categories including Business, Technology, Finance and more. 
+                Each site displays relative details so you can make informed decisions.
               </p>
               <Link to="/media-buying" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
                 Explore Media Buying <ChevronRight className="w-4 h-4" />
