@@ -465,7 +465,7 @@ export default function SelfPublishing() {
                     href="/help/credits-pricing" 
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    <span className="group-hover:underline">View pricing</span> <span>↗</span>
+                    <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
                   </a>
                 </div>
               </div>
