@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
 import paymentsImg from '@/assets/payments.png';
-import creditManagementPreview from '@/assets/credit-management-preview.png';
+import creditManagementVideo from '@/assets/credit-management-video.mp4';
 import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
 import businessHero from '@/assets/business-hero.jpg';
@@ -463,11 +463,21 @@ export default function SelfPublishing() {
                     <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
                   </a>
                 </div>
-                <div>
-                  <img 
-                    src={creditManagementPreview} 
-                    alt="Credit Management dashboard showing available credits, locked credits, total purchased, total orders and total spent" 
-                    className="w-full rounded-none shadow-2xl border border-[#424245]"
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] border border-[#424245] z-10 transition-opacity duration-300" id="cm-video-loader">
+                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <video 
+                    src={creditManagementVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full rounded-none shadow-2xl border border-[#424245] relative z-0"
+                    onLoadedData={(e) => {
+                      const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#cm-video-loader');
+                      if (loader) (loader as HTMLElement).style.display = 'none';
+                    }}
                   />
                 </div>
               </div>
