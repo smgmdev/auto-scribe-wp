@@ -248,20 +248,33 @@ export default function AIArticleGeneration() {
         className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-black transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3 flex-shrink-0">
             <img src={amlogo} alt="Arcana Mace" className="h-10 w-10" />
             <span className="text-lg font-semibold text-white">Arcana Mace</span>
           </button>
           
-          {/* Right side buttons */}
-          <div className="flex items-center gap-2">
+          {/* Search Trigger - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setSearchOpen(true)}
-              className="p-2 text-white/70 hover:text-white transition-colors"
-              aria-label="Search"
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-white/10 border border-white/20 text-white/50 hover:bg-white/15 transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
+            </button>
+          </div>
+          
+          {/* Right side buttons */}
+          <div className="flex items-center gap-2">
+            {/* Mobile Search Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-white/70 hover:bg-white/10 hover:text-white"
+              onClick={() => setSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
-            </button>
+            </Button>
             {user ? (
               <Button 
                 onClick={() => navigate('/account')}
