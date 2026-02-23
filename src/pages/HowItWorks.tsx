@@ -555,67 +555,8 @@ const ScrollColorSection = ({
           </p>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-10 text-left mx-auto md:auto-rows-[400px] px-4 md:px-0">
-            {/* Card 1 - AI Article Generation */}
-            <a href="/help/ai-generation#using-ai" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#1a1a2e]">
-              <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
-                <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Article Generation</h3>
-              </div>
-              <div className="flex-1 w-full overflow-hidden">
-                <div className="flex animate-slide-articles h-full" style={{ width: `${(slidingArticles.length > 0 ? slidingArticles.length * 2 : 2) * 100}%` }}>
-                  {[...slidingArticles, ...slidingArticles].map((article, i) => (
-                    <div key={`${article.id}-${i}`} className="flex-shrink-0 flex flex-col" style={{ width: `${100 / (slidingArticles.length > 0 ? slidingArticles.length * 2 : 2)}%` }}>
-                      <div className="relative w-full flex-1 overflow-hidden bg-white/5">
-                        {article.featured_image?.url ? (
-                          <img
-                            src={article.featured_image.url}
-                            alt={article.featured_image.alt || article.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#ff6b35]/20 to-[#f7931e]/10">
-                            <FileText className="w-10 h-10 text-[#f7931e]/40" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      </div>
-                      <div className="p-3">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          {article.published_to_favicon ? (
-                            <img src={article.published_to_favicon} alt="" className="w-4 h-4 rounded-sm object-contain" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-sm bg-[#f7931e]/40 flex items-center justify-center">
-                              <FileText className="w-2.5 h-2.5 text-[#f7931e]" />
-                            </div>
-                          )}
-                          <span className="text-[10px] text-[#f7931e] font-semibold uppercase tracking-wide truncate">
-                            {article.published_to_name || 'Published'}
-                          </span>
-                        </div>
-                        <p className="text-white/85 text-xs font-medium leading-snug line-clamp-2">
-                          {article.title}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </a>
-
-            {/* Card 2 - AI Auto Publishing */}
-            <a href="/help/ai-auto-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d1b33]">
-              {/* Scrolling articles behind */}
-              <div className="absolute inset-0 w-full h-full overflow-hidden">
-                <AutoPublishArticles />
-              </div>
-              {/* Semi-transparent title overlay */}
-              <div className="p-7 pb-4 min-h-[100px] flex items-start relative z-10 bg-[#0d1b33]/70">
-                <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Auto Publishing</h3>
-              </div>
-              <div className="flex-1" />
-            </a>
-
-            {/* Card 3 - AI Security Supervision */}
+          <div className="grid grid-cols-1 max-w-md mx-auto gap-5 mt-10 text-left px-4 md:px-0">
+            {/* AI Security Supervision */}
             <a href="/help/ai-security-supervision#overview" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d2218]">
               <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
                 <div className="flex items-center gap-3">
