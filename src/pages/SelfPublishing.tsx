@@ -498,7 +498,7 @@ export default function SelfPublishing() {
         <section className="bg-black border-t border-[#424245]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-              {/* Left - Phone Mockup */}
+              {/* Left - Phone Mockup - Airwallex Checkout */}
               <div className="flex justify-center md:justify-start">
                 <div className="relative">
                   {/* Phone Frame */}
@@ -508,22 +508,49 @@ export default function SelfPublishing() {
                       <div className="h-8 bg-[#f5f5f7] flex items-center justify-center">
                         <div className="w-20 h-5 bg-black rounded-full" />
                       </div>
-                      {/* Content */}
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-xs text-[#6e6e73]">Add Credits</span>
-                          <div className="w-6 h-6 rounded-full bg-[#0071e3] flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
+                      {/* Content - Payment Checkout */}
+                      <div className="p-5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs text-[#6e6e73]">←</span>
+                          <span className="text-sm font-semibold text-[#1d1d1f]">Payment</span>
+                        </div>
+                        <p className="text-[9px] text-[#6e6e73] mb-3">Choose a payment method</p>
+                        
+                        {/* Amount */}
+                        <div className="border border-[#d2d2d7] rounded-lg p-2.5 flex items-center justify-between mb-3">
+                          <span className="text-[10px] text-[#1d1d1f]">500 credits</span>
+                          <span className="text-sm font-semibold text-[#1d1d1f]">$500</span>
+                        </div>
+
+                        {/* Card Info */}
+                        <p className="text-[9px] font-medium text-[#1d1d1f] mb-1">Card information</p>
+                        <div className="border border-[#d2d2d7] rounded-lg overflow-hidden mb-3">
+                          <div className="p-2 flex items-center justify-between border-b border-[#d2d2d7]">
+                            <span className="text-[9px] text-[#a0a0a5]">1234 1234 1234 1234</span>
+                            <div className="flex gap-0.5">
+                              <div className="w-4 h-2.5 bg-[#1a1f71] rounded-[1px]" />
+                              <div className="w-4 h-2.5 bg-[#ff5f00] rounded-[1px]" />
+                            </div>
+                          </div>
+                          <div className="flex">
+                            <div className="flex-1 p-2 border-r border-[#d2d2d7]">
+                              <span className="text-[9px] text-[#a0a0a5]">MM / YY</span>
+                            </div>
+                            <div className="flex-1 p-2">
+                              <span className="text-[9px] text-[#a0a0a5]">CVC</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-center mb-4">
-                          <p className="text-4xl font-light text-[#1d1d1f]">100</p>
-                          <p className="text-sm text-[#6e6e73]">New Balance: 600</p>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 mb-4">
-                          <div className="py-2 text-center text-sm border border-[#d2d2d7] rounded-lg">25</div>
-                          <div className="py-2 text-center text-sm border border-[#d2d2d7] rounded-lg">50</div>
-                          <div className="py-2 text-center text-sm border border-[#0071e3] bg-[#0071e3]/10 rounded-lg text-[#0071e3]">100</div>
+                        
+                        {/* Pay Button */}
+                        <button className="w-full py-2.5 bg-[#635bff] rounded-full text-white text-[10px] font-medium">
+                          Pay 500.00 USD
+                        </button>
+                        
+                        {/* Airwallex */}
+                        <div className="flex items-center justify-center gap-1 mt-2">
+                          <span className="text-[7px] text-[#a0a0a5]">Securely processed by</span>
+                          <span className="text-[8px] font-semibold text-[#1d1d1f]">Airwallex</span>
                         </div>
                       </div>
                     </div>
