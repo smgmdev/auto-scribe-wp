@@ -466,60 +466,29 @@ const ScrollColorSection = ({
             Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
           </p>
           
-          {/* Circular Media Site Icons - Apple Floating Style */}
-          <div className="relative h-52 md:h-72 mt-8 md:max-w-md mx-auto">
-            {/* Purple glow effect behind center icon */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-4 w-36 h-36 md:w-60 md:h-60 rounded-full bg-gradient-to-t from-[#bf5af2]/40 via-[#bf5af2]/20 to-transparent blur-3xl" />
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-6 md:bottom-10 w-28 h-28 md:w-48 md:h-48 rounded-full bg-[#bf5af2]/30 blur-2xl" />
+          {/* Media Site Icons - Inline Row */}
+          <div className="flex items-center justify-center gap-4 mt-10">
+            {/* Purple glow effect */}
+            <div className="absolute w-60 h-20 rounded-full bg-[#bf5af2]/20 blur-3xl" />
             
             {mediaSites.slice(0, 3).length > 0 ? (
-              <>
-                {/* Left icon - bottom left, overlapping center */}
-                <div className="absolute left-[15%] md:left-[20%] bottom-2 md:bottom-4 w-[20vw] h-[20vw] md:w-24 md:h-24 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse z-20">
-                  {mediaSites[0]?.favicon ? (
-                    <img src={mediaSites[0].favicon} alt={mediaSites[0].name} className="w-full h-full object-cover" />
+              mediaSites.slice(0, 3).map((site, i) => (
+                <div key={site.id || i} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse relative" style={{ animationDelay: `${i * 0.5}s` }}>
+                  {site.favicon ? (
+                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
                   ) : (
                     <Newspaper className="w-1/2 h-1/2 text-[#2997ff]" />
                   )}
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
-                {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[38vw] h-[38vw] md:w-48 md:h-48 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse-intense z-10">
-                  {mediaSites[2]?.favicon ? (
-                    <img src={mediaSites[2].favicon} alt={mediaSites[2].name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Building2 className="w-1/2 h-1/2 text-[#bf5af2]" />
-                  )}
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.4)]" />
-                </div>
-                {/* Right icon - top right */}
-                <div className="absolute right-[15%] md:right-[18%] top-2 md:top-4 w-[16vw] h-[16vw] md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse z-20" style={{ animationDelay: '1s' }}>
-                  {mediaSites[1]?.favicon ? (
-                    <img src={mediaSites[1].favicon} alt={mediaSites[1].name} className="w-full h-full object-cover" />
-                  ) : (
-                    <TrendingUp className="w-1/2 h-1/2 text-[#30d158]" />
-                  )}
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
-                </div>
-              </>
+              ))
             ) : (
-              <>
-                {/* Left icon */}
-                <div className="absolute left-[15%] md:left-[20%] bottom-2 md:bottom-4 w-[20vw] h-[20vw] md:w-24 md:h-24 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse z-20">
-                  <Newspaper className="w-1/2 h-1/2 text-[#2997ff]" />
+              [Newspaper, Building2, TrendingUp].map((Icon, i) => (
+                <div key={i} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse relative" style={{ animationDelay: `${i * 0.5}s` }}>
+                  <Icon className="w-1/2 h-1/2 text-[#bf5af2]" />
                   <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
                 </div>
-                {/* Center icon - biggest */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[38vw] h-[38vw] md:w-48 md:h-48 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#6a4a7c] flex items-center justify-center animate-purple-glow-pulse-intense z-10">
-                  <Building2 className="w-1/2 h-1/2 text-[#bf5af2]" />
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_25px_rgba(191,90,242,0.4)]" />
-                </div>
-                {/* Right icon */}
-                <div className="absolute right-[15%] md:right-[18%] top-2 md:top-4 w-[16vw] h-[16vw] md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse z-20" style={{ animationDelay: '1s' }}>
-                  <TrendingUp className="w-1/2 h-1/2 text-[#30d158]" />
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
-                </div>
-              </>
+              ))
             )}
           </div>
 
