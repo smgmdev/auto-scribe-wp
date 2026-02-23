@@ -22,7 +22,8 @@ export default defineConfig(({ mode }) => ({
         clientsClaim: true,
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
-        navigateFallbackDenylist: [/^\/~oauth/],
+        navigateFallback: "index.html",
+        navigateFallbackDenylist: [/^\/~oauth/, /sitemap\.xml$/, /robots\.txt$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
