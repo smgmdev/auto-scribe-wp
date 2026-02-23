@@ -909,18 +909,21 @@ export type Database = {
         Row: {
           active_model_id: string
           id: string
+          model_selection_active: boolean
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           active_model_id?: string
           id?: string
+          model_selection_active?: boolean
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           active_model_id?: string
           id?: string
+          model_selection_active?: boolean
           updated_at?: string
           updated_by?: string | null
         }

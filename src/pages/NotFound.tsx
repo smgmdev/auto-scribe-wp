@@ -91,30 +91,67 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const [awaitingModelChoice, setAwaitingModelChoice] = useState(false);
+  const [modelSelectionActive, setModelSelectionActive] = useState(false);
+
+  // Load and subscribe to global model selection state
+  useEffect(() => {
+    supabase
+      .from("lost_chat_global_state")
+      .select("model_selection_active")
+      .eq("id", "singleton")
+      .single()
+      .then(({ data }) => {
+        if (data) setModelSelectionActive(data.model_selection_active);
+      });
+
+    const channel = supabase
+      .channel("model-selection-state")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "lost_chat_global_state" },
+        (payload) => {
+          const active = (payload.new as any).model_selection_active;
+          if (typeof active === "boolean") setModelSelectionActive(active);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
     setInput("");
 
-    // Handle /models command - broadcast publicly
+    // Handle /models command - broadcast publicly & activate selection globally
     if (trimmed.toLowerCase() === "/models") {
       const modelList = MODELS.map((m, i) => `${i + 1}. ${m.name}`).join("\n");
       await supabase.from("lost_chat_messages").insert({ nickname, message: "/models" });
       await supabase.from("lost_chat_messages").insert({ nickname: "Arcana Mace", message: `Model List:\n\n${modelList}\n\nChoose a number to display.` });
-      setAwaitingModelChoice(true);
+      await supabase.from("lost_chat_global_state").update({ model_selection_active: true }).eq("id", "singleton");
       return;
     }
 
-    // Handle number selection only after /models was used
-    if (awaitingModelChoice && /^\d+$/.test(trimmed)) {
+    // Handle number selection only when global selection is active (first responder wins)
+    if (modelSelectionActive && /^\d+$/.test(trimmed)) {
       const idx = parseInt(trimmed, 10) - 1;
       if (idx >= 0 && idx < MODELS.length) {
         const model = MODELS[idx];
-        setAwaitingModelChoice(false);
-        onSelectModel(model.id);
-        await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
+        // Atomically deactivate selection and switch model
+        const { error } = await supabase
+          .from("lost_chat_global_state")
+          .update({ model_selection_active: false, active_model_id: model.id, updated_at: new Date().toISOString() })
+          .eq("id", "singleton")
+          .eq("model_selection_active", true); // Only succeeds if still active (first responder wins)
+        
+        if (!error) {
+          onSelectModel(model.id);
+          await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
+        } else {
+          // Someone else already picked - treat as normal message
+          await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
+        }
       } else {
         await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
       }
@@ -133,9 +170,8 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       return;
     }
 
-    setAwaitingModelChoice(false);
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
-  }, [input, nickname, onSelectModel, awaitingModelChoice]);
+  }, [input, nickname, onSelectModel, modelSelectionActive]);
 
   return (
     <div className="w-full h-full bg-transparent flex flex-col">

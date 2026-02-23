@@ -1,0 +1,1 @@
+ALTER TABLE public.lost_chat_global_state ADD COLUMN IF NOT EXISTS model_selection_active boolean NOT NULL DEFAULT false;
