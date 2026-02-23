@@ -262,7 +262,7 @@ const ScrollColorSection = ({
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
-          className="bg-[#f87171] rounded-none px-4 md:px-6 lg:px-16 py-12 md:py-16"
+          className="bg-[#f87171] rounded-none px-4 md:px-6 lg:px-0 py-12 md:py-16"
         >
           <div className="min-h-[200px] flex flex-col justify-center items-center text-center">
             <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d] leading-snug">
@@ -291,7 +291,7 @@ const ScrollColorSection = ({
 
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-4 md:px-6 lg:px-0 py-10 md:py-16 lg:py-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -379,7 +379,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Global Media Library Section */}
-        <div id="global-media-library" ref={globalLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="global-media-library" ref={globalLibraryRef} className="bg-black rounded-none px-4 md:px-6 lg:px-0 py-10 md:py-16 lg:py-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
