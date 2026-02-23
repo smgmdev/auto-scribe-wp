@@ -419,23 +419,11 @@ details[open] .details-open-rotate {
 
 @keyframes trace-full {
   0% {
-    border-color: transparent;
-    clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%);
-  }
-  25% {
     border-color: #f2a547;
-    clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 100% 100%, 0% 100%);
-  }
-  50% {
-    border-color: #f2a547;
-    clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 100% 0%, 0% 100%);
-  }
-  75% {
-    border-color: #f2a547;
-    clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%, 0% 0%);
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
   }
   100% {
     border-color: #f2a547;
-    clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%, 0% 100%);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
   }
 }
