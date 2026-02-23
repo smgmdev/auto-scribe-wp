@@ -37,6 +37,43 @@ function LoadingFavicon({ src, alt, className }: { src: string; alt: string; cla
   );
 }
 
+function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const sitesWithFavicon = useMemo(() => sites.filter(s => s.favicon), [sites]);
+
+  useEffect(() => {
+    if (sitesWithFavicon.length < 2) return;
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex(prev => (prev + 1) % sitesWithFavicon.length);
+        setIsTransitioning(false);
+      }, 200);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [sitesWithFavicon.length]);
+
+  const current = sitesWithFavicon[currentIndex];
+  if (!current) {
+    return (
+      <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
+        <Shield className="w-5 h-5 text-white" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-10 h-10 rounded-none overflow-hidden shadow-lg flex-shrink-0">
+      <img
+        src={current.favicon!}
+        alt={current.name}
+        className={`w-full h-full object-cover transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+      />
+    </div>
+  );
+}
+
 interface MediaSite {
   id: string;
   favicon: string | null;
@@ -505,9 +542,7 @@ export default function MediaBuying() {
             {/* Card 1 - Verified Publishers (Light gradient) */}
             <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
+                <RotatingMediaLogo sites={shuffledSites} />
                 <span className="text-lg font-semibold text-[#1d1d1f]">Real Media Network</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
