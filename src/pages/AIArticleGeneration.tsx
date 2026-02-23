@@ -318,7 +318,7 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section - Apple Open Source style */}
-      <section className="relative bg-[#1d1d1f] pt-36 md:pt-40 pb-24 md:pb-32 overflow-hidden">
+      <section className="relative bg-[#1d1d1f] pt-36 md:pt-40 pb-28 md:pb-36 overflow-hidden">
         <video
           autoPlay
           loop
