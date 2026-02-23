@@ -101,7 +101,7 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
           }}
         >
           {doubled.map((site, i) => (
-            <div key={`top-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white/10`}>
+            <div key={`top-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white p-1`}>
               <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
             </div>
           ))}
@@ -118,7 +118,7 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
           }}
         >
           {doubled.map((site, i) => (
-            <div key={`bot-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white/10`}>
+            <div key={`bot-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white p-1`}>
               <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
             </div>
           ))}
@@ -661,18 +661,18 @@ export default function MediaBuying() {
               </div>
             </div>
 
-            {/* Card 3 - China Market (Dark) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
+            {/* Card 3 - China Market (Red) */}
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#cc0000]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-none bg-white/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-white/20 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-white">China Market</span>
               </div>
-              <p className="text-[15px] text-white/70 leading-relaxed mb-4">
+              <p className="text-[15px] text-white/90 leading-relaxed mb-6">
                 We are proud to provide media access to the Chinese market. Expand your brand presence in Asia and beyond with localized branding.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent" onClick={() => {
+              <Button variant="outline" className="w-fit rounded-none px-6 py-2 text-sm border-white/50 text-white hover:bg-white hover:text-[#cc0000] bg-transparent font-medium" onClick={() => {
                 if (user) {
                   navigate('/account', { state: { targetView: 'sites', targetTab: 'custom', subcategory: 'China' } });
                 } else {
@@ -685,8 +685,8 @@ export default function MediaBuying() {
                 <ChinaLogoSlider sites={mediaSites} />
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-xs text-white/50 font-medium">您的内容可以翻译成中文。</p>
-                <p className="text-xs text-white/70">以制胜之势开拓中国市场</p>
+                <p className="text-xs text-white/60 font-medium">您的内容可以翻译成中文。</p>
+                <p className="text-xs text-white/80">以制胜之势开拓中国市场</p>
               </div>
             </div>
 
