@@ -92,6 +92,8 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const [awaitingModelChoice, setAwaitingModelChoice] = useState(false);
+
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -104,31 +106,31 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
         ...prev,
         {
           id: `system-${Date.now()}`,
-          nickname: "System",
-          message: `Available models:\n${modelList}\n\nType /play <number> to switch.`,
+          nickname: "Arcana Mace",
+          message: `Model List:\n\n${modelList}\n\nChoose a number to display.`,
           created_at: new Date().toISOString(),
           is_system: true,
         },
       ]);
+      setAwaitingModelChoice(true);
       return;
     }
 
-    // Handle /play <number> command
-    const playMatch = trimmed.match(/^\/play\s+(\d+)$/i);
-    if (playMatch) {
-      const idx = parseInt(playMatch[1], 10) - 1;
+    // Handle number selection when awaiting model choice
+    if (awaitingModelChoice && /^\d+$/.test(trimmed)) {
+      const idx = parseInt(trimmed, 10) - 1;
       if (idx >= 0 && idx < MODELS.length) {
         const model = MODELS[idx];
+        setAwaitingModelChoice(false);
         onSelectModel(model.id);
-        // Send a public chat message about the switch
         await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
       } else {
         setMessages((prev) => [
           ...prev,
           {
             id: `system-${Date.now()}`,
-            nickname: "System",
-            message: `Invalid model number. Type /models to see available options.`,
+            nickname: "Arcana Mace",
+            message: `Invalid number. Please choose between 1 and ${MODELS.length}.`,
             created_at: new Date().toISOString(),
             is_system: true,
           },
@@ -137,6 +139,19 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       return;
     }
 
+    // Also still support /play <number> directly
+    const playMatch = trimmed.match(/^\/play\s+(\d+)$/i);
+    if (playMatch) {
+      const idx = parseInt(playMatch[1], 10) - 1;
+      if (idx >= 0 && idx < MODELS.length) {
+        const model = MODELS[idx];
+        onSelectModel(model.id);
+        await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
+      }
+      return;
+    }
+
+    setAwaitingModelChoice(false);
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
   }, [input, nickname, onSelectModel]);
 
