@@ -4,10 +4,10 @@ import { useAppStore } from '@/stores/appStore';
 
 export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean }) {
   const location = useLocation();
-  const { soundEnabled, toggleSound } = useAppStore();
+  const { soundEnabled, toggleSound, is404Page } = useAppStore();
   
   const hiddenPaths = ['/auth'];
-  const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path));
+  const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path)) || is404Page;
   
   // Global instance hides on account page; account instance only shows on account page
   if (!inDashboard && (location.pathname.startsWith('/account') || location.pathname.startsWith('/dashboard'))) return null;
