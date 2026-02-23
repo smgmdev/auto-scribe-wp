@@ -774,7 +774,7 @@ export default function MediaBuying() {
           
           {/* Grid of favicons */}
           <div className="grid grid-cols-4 md:grid-cols-7 gap-3 md:gap-4">
-            {shuffledSites.slice(0, 44).map((site) => (
+            {shuffledSites.slice(0, 47).map((site) => (
               <button
                 key={site.id}
                 onClick={() => setSelectedSite(site)}
