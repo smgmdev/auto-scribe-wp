@@ -340,7 +340,7 @@ const ScrollColorSection = ({
                         ${isCenter ? 'w-[18vw] h-[18vw] max-w-[112px] max-h-[112px] md:w-36 md:h-36 shadow-2xl z-10' : ''}
                         ${isNearCenter ? 'w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 shadow-xl opacity-90' : ''}
                         ${isEdge ? 'w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 shadow-lg opacity-50' : ''}
-                        rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
+                        rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center overflow-hidden transition-all duration-300 flex-shrink-0
                       `}
                     >
                       {site.favicon ? (
@@ -357,19 +357,19 @@ const ScrollColorSection = ({
                 })
               ) : (
                 <>
-                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
                     <FileText className="w-1/2 h-1/2 text-[#64d2ff]" />
                   </div>
-                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
                     <Globe className="w-1/2 h-1/2 text-[#bf5af2]" />
                   </div>
-                  <div className="w-[18vw] h-[18vw] max-w-[112px] max-h-[112px] md:w-36 md:h-36 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
+                  <div className="w-[18vw] h-[18vw] max-w-[112px] max-h-[112px] md:w-36 md:h-36 rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-2xl z-10 flex-shrink-0">
                     <Zap className="w-1/2 h-1/2 text-[#ff6b6b]" />
                   </div>
-                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
+                  <div className="w-[15vw] h-[15vw] max-w-[96px] max-h-[96px] md:w-32 md:h-32 rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-xl opacity-90 flex-shrink-0">
                     <BarChart3 className="w-1/2 h-1/2 text-[#30d158]" />
                   </div>
-                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-[16px] md:rounded-[20px] bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
+                  <div className="w-[13vw] h-[13vw] max-w-[80px] max-h-[80px] md:w-28 md:h-28 rounded-none bg-gradient-to-b from-[#3a3a3c] to-[#1d1d1f] border border-[#3d3d3d] flex items-center justify-center shadow-lg opacity-50 flex-shrink-0">
                     <PenTool className="w-1/2 h-1/2 text-[#ffd60a]" />
                   </div>
                 </>
