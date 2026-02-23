@@ -70,19 +70,10 @@ function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
 }
 
 function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
-  const [offset, setOffset] = useState(0);
   const chinaSites = useMemo(
     () => sites.filter(s => s.favicon && s.subcategory?.includes('China')),
     [sites]
   );
-
-  useEffect(() => {
-    if (chinaSites.length < 2) return;
-    const interval = setInterval(() => {
-      setOffset(prev => prev + 1);
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [chinaSites.length]);
 
   if (chinaSites.length === 0) {
     return (
@@ -92,23 +83,57 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
     );
   }
 
-  // Show 4 logos in a 2x2 grid, cycling through
-  const getIndex = (i: number) => (offset + i) % chinaSites.length;
+  // Duplicate list for seamless loop
+  const doubled = [...chinaSites, ...chinaSites];
+  const logoSize = 'w-14 h-14 md:w-16 md:h-16';
+  const totalWidth = chinaSites.length * 64; // approx px per logo + gap
+  const duration = chinaSites.length * 2; // seconds
 
   return (
-    <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 grid grid-cols-2 grid-rows-2 gap-1 p-2 overflow-hidden">
-      {[0, 1, 2, 3].map(i => {
-        const site = chinaSites[getIndex(i)];
-        return (
-          <div key={`${i}-${getIndex(i)}`} className="rounded-none overflow-hidden bg-white/10">
-            <img
-              src={site.favicon!}
-              alt={site.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        );
-      })}
+    <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 overflow-hidden flex flex-col justify-center gap-1">
+      {/* Top row - slides left */}
+      <div className="overflow-hidden">
+        <div
+          className="flex gap-1"
+          style={{
+            animation: `slideLeft ${duration}s linear infinite`,
+            width: `${totalWidth * 2}px`,
+          }}
+        >
+          {doubled.map((site, i) => (
+            <div key={`top-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white/10`}>
+              <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Bottom row - slides right */}
+      <div className="overflow-hidden">
+        <div
+          className="flex gap-1"
+          style={{
+            animation: `slideRight ${duration}s linear infinite`,
+            width: `${totalWidth * 2}px`,
+            transform: `translateX(-${totalWidth}px)`,
+          }}
+        >
+          {doubled.map((site, i) => (
+            <div key={`bot-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white/10`}>
+              <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <style>{`
+        @keyframes slideLeft {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-${totalWidth}px); }
+        }
+        @keyframes slideRight {
+          0% { transform: translateX(-${totalWidth}px); }
+          100% { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 }
