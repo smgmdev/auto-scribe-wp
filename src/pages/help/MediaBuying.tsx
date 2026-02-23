@@ -79,7 +79,7 @@ const sections: HelpSection[] = [
         </ul>
         <p>
           A delivery countdown is visible inside the order chat once an order is accepted.
-          If a deadline passes without delivery, the order shows as overdue. If the order is in an overdue status you can open a dispute. Note that some publications can take longer timeframes. The timeframes mentioned above are only an average estimate. Talk to an agency about delivery time before placing an order.
+          If a deadline passes without delivery, the order shows as overdue. If the order is in an overdue status you can open a dispute. Note that some publications can take longer time to deliver. The timeframes mentioned above are only an average estimate. Talk to an agency about delivery time before placing an order.
         </p>
       </div>
     ),
