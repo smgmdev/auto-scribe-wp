@@ -734,7 +734,7 @@ export default function MediaBuying() {
           
           <p className="text-lg md:text-xl text-[#86868b] leading-relaxed max-w-3xl mx-auto mb-10">
             Explore the Arcana Mace marketplace, featuring a wide range of international media channels. 
-            Every agency offering placements on our platform is fully KYC-verified by Arcana Mace staff. 
+            Every agency offering placements on our platform is KYC-verified. 
             We uphold strict standards for quality, authenticity, and audience reach.
           </p>
           
