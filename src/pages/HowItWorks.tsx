@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2, Newspaper, Building2, PenTool, BarChart3, Send, Clock, CheckCircle2, ArrowUpRight, BookOpen, Library, CornerDownRight } from 'lucide-react';
+import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2, Newspaper, Building2, PenTool, BarChart3, Send, Clock, CheckCircle2, ArrowUpRight, BookOpen, Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -273,7 +273,7 @@ const ScrollColorSection = ({
                 onClick={() => scrollToSection(localLibraryRef)}
                 className="px-5 py-1.5 bg-black text-white text-lg font-medium border-trace-btn"
               >
-                GO <CornerDownRight className="w-4 h-4 inline ml-1" />
+                GO
               </button>
               <span className="text-[#7f1d1d]">&</span>
               <span className="text-white">Global Library</span>
@@ -281,7 +281,7 @@ const ScrollColorSection = ({
                 onClick={() => scrollToSection(globalLibraryRef)}
                 className="px-5 py-1.5 bg-black text-white text-lg font-medium border-trace-btn"
               >
-                GO <CornerDownRight className="w-4 h-4 inline ml-1" />
+                GO
               </button>
               <span className="text-[#7f1d1d]">for content publishing.</span>
             </p>
