@@ -1273,15 +1273,6 @@ const HowItWorks = () => {
               index={index}
             />
           ))}
-          
-          <div className="text-center mt-12">
-            <Button 
-              onClick={() => document.getElementById('media-libraries-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-6 text-lg"
-            >
-              Next
-            </Button>
-          </div>
         </div>
       </section>
 
