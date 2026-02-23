@@ -258,7 +258,7 @@ const ScrollColorSection = ({
 
   return (
     <section>
-        <div className="max-w-[980px] mx-auto px-0 md:px-6">
+        <div className="mx-auto px-0">
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
