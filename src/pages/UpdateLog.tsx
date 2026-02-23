@@ -541,7 +541,7 @@ export default function UpdateLog() {
         </div>
 
         {/* Introduction */}
-        <div className="mb-10">
+        <div className="mb-0">
           <p className="text-white/50 leading-relaxed mb-4">
             A chronological list of platform updates, improvements, and new features shipped to Arcana Mace.
           </p>
