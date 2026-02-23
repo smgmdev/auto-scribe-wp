@@ -337,9 +337,9 @@ export default function SelfPublishing() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="pt-28 md:pt-36 pb-16 md:pb-24 text-center">
+        <section className="pt-28 md:pt-36 pb-16 md:pb-24 text-center bg-black">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <h1 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] leading-tight mb-14">
+            <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-14">
               Publish your story.<br />
               Reach the world.
             </h1>
@@ -358,14 +358,14 @@ export default function SelfPublishing() {
               Start Writing
             </Button>
 
-            <p className="text-lg md:text-xl text-[#1d1d1f] mt-16 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-white/70 mt-16 max-w-2xl mx-auto leading-relaxed">
               Write, edit, and publish articles directly to media outlets. Self publishing puts you in control of your content and your reach.
             </p>
           </div>
         </section>
 
         {/* Media Sites - Dynamic from Local Library */}
-        <section className="pt-0 pb-10 md:pb-12 overflow-hidden">
+        <section className="pt-0 pb-10 md:pb-12 overflow-hidden bg-black">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             {isLoadingSites ? (
               <div className="flex items-center justify-center py-4 min-h-[80px]">
@@ -374,8 +374,8 @@ export default function SelfPublishing() {
             ) : mediaSites.length > 0 ? (
               <div className="relative overflow-hidden py-4">
                 {/* Fade edges */}
-                <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
                 
                 <div className="flex animate-marquee w-max items-center">
                   {/* Duplicate the list twice for seamless loop */}
