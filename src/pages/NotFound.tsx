@@ -309,7 +309,7 @@ function MiniModelPreview({ modelPath, scale, positionY }: { modelPath: string; 
     if (ref.current) ref.current.rotation.y += delta * 0.5;
   });
 
-  return <primitive ref={ref} object={clonedScene} scale={scale * 0.8} position={[0, positionY * 0.8, 0]} />;
+  return <primitive ref={ref} object={clonedScene} scale={scale} position={[0, positionY * 0.8, 0]} />;
 }
 
 function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boolean; onClose: () => void; onSelect: (id: string) => void; currentModelId: string }) {
@@ -353,7 +353,7 @@ function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boo
                 }`}
               >
                 <div className="aspect-square bg-black/60">
-                  <Canvas camera={{ position: [0, 0.5, 5], fov: 50 }}>
+                  <Canvas camera={{ position: [0, 0.5, 3.5], fov: 50 }}>
                     <ambientLight intensity={0.7} />
                     <directionalLight position={[3, 3, 3]} intensity={0.8} />
                     <Suspense fallback={null}>
