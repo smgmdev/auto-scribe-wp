@@ -605,24 +605,28 @@ export default function SelfPublishing() {
         </section>
       </main>
 
-      {/* Disclaimer Section */}
-      <div className="bg-[#f5f5f7]">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-6 pb-4">
-          <p className="text-xs font-semibold text-[#6e6e73] mb-3">
-            Beware of publishing scams. Do not share your account credentials.
-          </p>
-          <p className="text-xs text-[#6e6e73] mb-4 leading-normal">
-            For assistance, visit{' '}
-            <a href="/help" className="text-[#06c] hover:underline">our Help Center</a>{' '}
-            or <a href="/account?view=support" className="text-[#06c] hover:underline">Contact Support</a>. Credits are non-refundable and non-transferable.
-          </p>
-          <p className="text-xs text-[#6e6e73] leading-normal">
-            For security purposes, we approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
-          </p>
-        </div>
-      </div>
-
       <PWAInstallButtons />
+
+      {/* Disclaimers Section - matches How It Works style */}
+      <section className="bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
+          <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
+            <p>
+              Beware of publishing scams. Do not share your account credentials.
+            </p>
+            <p>
+              For assistance, visit{' '}
+              <a href="/help" className="text-[#06c] hover:underline">our Help Center</a>{' '}
+              or <a href="/account?view=support" className="text-[#06c] hover:underline">Contact Support</a>. Credits are non-refundable and non-transferable.
+            </p>
+            <p>
+              For security purposes, we approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="bg-[#f5f5f7]"><div className="max-w-[980px] mx-auto px-4 md:px-6"><div className="border-t border-[#d2d2d7]" /></div></div>
       <Footer narrow showTopBorder />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
