@@ -622,6 +622,9 @@ export default function SelfPublishing() {
             <p>
               For security purposes, we approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
             </p>
+            <p>
+              Content published on media channels via the Local Library must comply with each publication's editorial guidelines. The owner/administrator, as well as Arcana Mace staff, reserve the right to remove articles or suspend accounts that violate platform policies. When publishing directly via the Local Library, you are responsible for ensuring that your content adheres to moral and ethical standards. Inappropriate content will be removed, no refunds will be issued, and your account may be suspended.
+            </p>
           </div>
         </div>
       </section>
