@@ -556,7 +556,7 @@ export default function SelfPublishing() {
 
         {/* Business Section - Full Width Black */}
         <section className="bg-black border-t border-[#424245]">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8 md:py-24">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-8 pb-4 md:pt-24 md:pb-8">
             <div className="flex flex-col md:flex-row md:items-center md:gap-12">
               <div className="max-w-lg flex-1">
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
