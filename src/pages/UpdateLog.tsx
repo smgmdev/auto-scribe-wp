@@ -549,9 +549,7 @@ export default function UpdateLog() {
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <div className="border-t border-[#424245]" />
       </div>
-      <div className="[&_div]:pt-0 [&_div]:md:pt-0">
-        <PWAInstallButtons />
-      </div>
+      <PWAInstallButtons />
       <Footer narrow dark />
     </div>
   );
