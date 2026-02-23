@@ -265,10 +265,8 @@ const ScrollColorSection = ({
           className="bg-[#f87171] rounded-none p-12 md:p-16 pb-0 md:pb-0"
         >
           <div className="min-h-[200px] flex flex-col justify-center items-center text-center">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
-              You should also know
-            </h2>
             <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d] flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span className="text-white">You should also know</span>
               <span>Arcana Mace has 2 media libraries:</span>
               <span className="text-white">Local Library</span>
               <button 
