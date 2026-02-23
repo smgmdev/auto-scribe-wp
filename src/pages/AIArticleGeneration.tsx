@@ -508,7 +508,7 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Get Started Section */}
-      <section className="pt-16 md:pt-20 pb-0 bg-black">
+      <section className="pt-16 md:pt-20 pb-10 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-3xl md:text-[40px] font-semibold text-white tracking-tight mb-4">
             Get Started
