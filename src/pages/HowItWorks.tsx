@@ -283,7 +283,7 @@ const ScrollColorSection = ({
                 </h3>
                 <button 
                   onClick={() => scrollToSection(localLibraryRef)}
-                  className="mt-2 px-6 py-2.5 bg-white text-[#1d1d1f] text-sm font-medium hover:bg-white/90 transition-colors"
+                  className="mt-2 px-6 py-2.5 bg-[#0077ed] text-white text-sm font-medium hover:bg-[#2997ff] transition-colors"
                 >
                   Learn more
                 </button>
@@ -301,7 +301,7 @@ const ScrollColorSection = ({
                 </h3>
                 <button 
                   onClick={() => scrollToSection(globalLibraryRef)}
-                  className="mt-2 px-6 py-2.5 bg-white text-[#1d1d1f] text-sm font-medium hover:bg-white/90 transition-colors"
+                  className="mt-2 px-6 py-2.5 bg-[#0077ed] text-white text-sm font-medium hover:bg-[#2997ff] transition-colors"
                 >
                   Learn more
                 </button>
