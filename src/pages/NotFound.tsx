@@ -202,23 +202,23 @@ const NotFound = () => {
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
         {/* Top controls */}
         <div className="bg-black text-white pointer-events-auto leading-none">
-          <div className="flex items-center px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
-            <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center justify-center px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
+            <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-none h-9 w-9 text-white hover:bg-white/20 hover:text-white">
                 {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
-            </div>
-            <a href="/" className="flex items-center">
-              <img src={amLogo} alt="Arcana Mace" className="h-7 w-7 hover:opacity-80 transition-opacity" />
-            </a>
-            <div className="flex items-center gap-2 flex-1 justify-end">
+              <a href="/" className="flex items-center mx-2">
+                <img src={amLogo} alt="Arcana Mace" className="h-7 w-7 hover:opacity-80 transition-opacity" />
+              </a>
               <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-none h-8 w-8 text-white hover:bg-white/20 hover:text-white">
                 <SkipForward className="h-4 w-4" />
               </Button>
-              <a href="/" className="text-[#f2a547] text-xs font-bold hover:text-[#f2a547]/80 transition-colors">
-                Exit
-              </a>
             </div>
+            <a href="/" className="ml-auto">
+              <Button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] rounded-md px-5 h-8 text-xs font-bold transition-all">
+                Exit
+              </Button>
+            </a>
           </div>
         </div>
 
