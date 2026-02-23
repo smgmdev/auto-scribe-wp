@@ -559,9 +559,9 @@ export default function SelfPublishing() {
                     onClick={(e) => {
                       e.preventDefault();
                       if (user) {
-                        navigate('/account', { state: { targetView: 'credits' } });
+                        navigate('/account', { state: { targetView: 'credit-history' } });
                       } else {
-                        navigate('/auth', { state: { redirectTo: '/account', targetView: 'credits' } });
+                        navigate('/auth', { state: { redirectTo: '/account', targetView: 'credit-history' } });
                       }
                     }}
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
