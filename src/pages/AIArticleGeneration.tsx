@@ -629,7 +629,7 @@ export default function AIArticleGeneration() {
               Generated content is original but should be verified for factual accuracy, especially for news-related topics. Arcana Mace is not responsible for errors in AI-generated content.
             </p>
             <p>
-              AI features are subject to fair usage policies. Heavy automated usage or abuse may result in temporary rate limiting. Standard publishing credits apply for article submission.
+              AI features are subject to fair usage policies. Heavy automated usage or abuse may result in temporary rate limiting. Standard credit rates apply for article publishing.
             </p>
           </div>
         </div>
