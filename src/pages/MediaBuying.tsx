@@ -321,7 +321,7 @@ export default function MediaBuying() {
           {(shuffledSites.length > 0 ? shuffledSites.slice(0, 6) : Array(6).fill(null)).map((site, index) => (
             <div
               key={site?.id || `placeholder-left-${index}`}
-              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
+              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-none border border-[#2d2d2d]"
             >
               {site?.favicon ? (
                 <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
@@ -334,7 +334,7 @@ export default function MediaBuying() {
           ))}
           
           {/* Arcana Mace logo - centered and largest */}
-          <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-xl md:rounded-2xl border border-[#2d2d2d]">
+          <div className="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden shadow-xl rounded-none border border-[#2d2d2d]">
             <img src={amlogo} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
           
@@ -342,7 +342,7 @@ export default function MediaBuying() {
           {(shuffledSites.length > 0 ? shuffledSites.slice(6, 12) : Array(6).fill(null)).map((site, index) => (
             <div
               key={site?.id || `placeholder-right-${index}`}
-              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-xl md:rounded-2xl border border-[#2d2d2d]"
+              className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden bg-white shadow-lg rounded-none border border-[#2d2d2d]"
             >
               {site?.favicon ? (
                 <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
@@ -392,7 +392,7 @@ export default function MediaBuying() {
               {shuffledSites.slice(0, 5).map((site) => (
                 <div
                   key={site.id}
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-none overflow-hidden bg-white shadow-lg"
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
@@ -410,7 +410,7 @@ export default function MediaBuying() {
               {shuffledSites.slice(5, 10).map((site) => (
                 <div
                   key={site.id}
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-none overflow-hidden bg-white shadow-lg"
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
@@ -428,7 +428,7 @@ export default function MediaBuying() {
               {shuffledSites.slice(10, 15).map((site) => (
                 <div
                   key={site.id}
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-none overflow-hidden bg-white shadow-lg"
                   style={{ transform: 'perspective(500px) rotateX(5deg)' }}
                 >
                   {site.favicon ? (
@@ -499,9 +499,9 @@ export default function MediaBuying() {
             }}
           >
             {/* Card 1 - Verified Publishers (Light gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-[#1d1d1f]">Verified Publishers</span>
@@ -509,11 +509,11 @@ export default function MediaBuying() {
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
                 Every publication in our network is vetted for authenticity, audience reach, and editorial standards. No bots. No spam sites.
               </p>
-              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
                 Learn more
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
                   <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
                 </div>
               </div>
@@ -524,9 +524,9 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 2 - Instant Quotes (Blue) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-white">Instant Quotes</span>
@@ -535,7 +535,7 @@ export default function MediaBuying() {
                 See transparent pricing instantly. No back-and-forth negotiations. No hidden fees. Just clear, upfront costs for every placement.
               </p>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="rounded-full px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent">
+                <Button variant="outline" className="rounded-none px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent">
                   Browse Sites
                 </Button>
                 <button className="text-white text-sm hover:underline">
@@ -544,7 +544,7 @@ export default function MediaBuying() {
               </div>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1 relative">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-none bg-white/10 flex items-center justify-center">
                     <div className="text-4xl md:text-5xl font-bold text-white">$</div>
                   </div>
                 </div>
@@ -556,9 +556,9 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 3 - Global Reach (Dark) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-white/10 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-white">Global Reach</span>
@@ -566,11 +566,11 @@ export default function MediaBuying() {
               <p className="text-[15px] text-white/70 leading-relaxed mb-4">
                 Access publications across 50+ countries and every major language. Expand your brand presence worldwide with local expertise.
               </p>
-              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent">
                 Explore regions
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
                   <Globe className="w-16 h-16 md:w-20 md:h-20 text-[#2997ff]" />
                 </div>
               </div>
@@ -581,9 +581,9 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 4 - Fast Turnaround (Green gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f0fff0 0%, #d4edda 50%, #a8e6cf 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f0fff0 0%, #d4edda 50%, #a8e6cf 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34c759] to-[#30d158] flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#34c759] to-[#30d158] flex items-center justify-center shadow-lg">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-[#1d1d1f]">Fast Turnaround</span>
@@ -591,11 +591,11 @@ export default function MediaBuying() {
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
                 Most publications deliver within 24-72 hours. Track your order in real-time and get notified the moment your article goes live.
               </p>
-              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
                 View timelines
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
                   <Clock className="w-16 h-16 md:w-20 md:h-20 text-[#34c759]" />
                 </div>
               </div>
@@ -606,9 +606,9 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 5 - Trusted Agencies (Purple gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-3xl p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f8f0ff 0%, #e8d5f9 50%, #d4a5ff 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f8f0ff 0%, #e8d5f9 50%, #d4a5ff 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#af52de] to-[#5856d6] flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#af52de] to-[#5856d6] flex items-center justify-center shadow-lg">
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-lg font-semibold text-[#1d1d1f]">Trusted Agencies</span>
@@ -616,11 +616,11 @@ export default function MediaBuying() {
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
                 Work with vetted media agencies who understand editorial standards. Every agency is reviewed and monitored for quality.
               </p>
-              <Button variant="outline" className="w-fit rounded-full px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
                 Meet agencies
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
                   <Users className="w-16 h-16 md:w-20 md:h-20 text-[#af52de]" />
                 </div>
               </div>
@@ -650,7 +650,7 @@ export default function MediaBuying() {
               <button
                 key={site.id}
                 onClick={() => setSelectedSite(site)}
-                className="aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 border border-[#d2d2d7]"
+                className="aspect-square rounded-none overflow-hidden bg-white shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 border border-[#d2d2d7]"
               >
                 {site.favicon ? (
                   <LoadingFavicon src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
@@ -707,7 +707,7 @@ export default function MediaBuying() {
                   <span className="text-lg md:text-xl font-medium text-white group-hover:text-[#2997ff] group-open:text-[#2997ff] transition-colors pr-8 text-left">
                     {faq.question}
                   </span>
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full border-2 border-white/40 group-hover:border-[#2997ff] group-open:border-[#2997ff] flex items-center justify-center transition-all group-open:rotate-45">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-none border-2 border-white/40 group-hover:border-[#2997ff] group-open:border-[#2997ff] flex items-center justify-center transition-all group-open:rotate-45">
                     <svg className="w-4 h-4 text-white/60 group-hover:text-[#2997ff] group-open:text-[#2997ff] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
@@ -728,7 +728,7 @@ export default function MediaBuying() {
       <section className="py-24 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Arcana Mace Icon */}
-          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-[22px] md:rounded-[28px] overflow-hidden">
+          <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-none overflow-hidden">
             <img src={amblack} alt="Arcana Mace" className="w-full h-full object-cover" />
           </div>
           
@@ -747,7 +747,7 @@ export default function MediaBuying() {
           <Button 
             onClick={handleGetStarted}
             size="lg"
-            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-10 py-6 text-lg font-medium"
+            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-none px-10 py-6 text-lg font-medium"
           >
             Browse Media Network
           </Button>
