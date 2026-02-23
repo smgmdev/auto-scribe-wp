@@ -9,7 +9,7 @@ export function PWAInstallButtons() {
 
   return (
     <div className="w-full">
-      <div className="max-w-[980px] mx-auto px-0 md:px-6 pt-6">
+      <div className="max-w-[980px] mx-auto px-0 md:px-6 pt-2 md:pt-6">
         <div className="flex flex-col md:flex-row items-start justify-start gap-0">
         {/* Android / Chrome install */}
         <button
