@@ -1,9 +1,9 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
-import { Play, Pause, SkipForward, Send } from "lucide-react";
+import { Play, Pause, SkipForward, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,8 +11,17 @@ import amLogo from "@/assets/amlogo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppStore } from "@/stores/appStore";
 
-function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
-  const { scene, animations } = useGLTF("/models/anime_girl.glb");
+const MODELS = [
+  { id: "anime_girl", name: "Anime Girl", path: "/models/anime_girl.glb", scale: 3.5, positionY: -2.5 },
+  { id: "dragon_emblem", name: "Dragon Emblem", path: "/models/dragon_emblem.glb", scale: 3, positionY: -2 },
+  { id: "winged_angel", name: "Winged Angel", path: "/models/winged_angel.glb", scale: 3, positionY: -2 },
+];
+
+// Preload all models
+MODELS.forEach((m) => useGLTF.preload(m.path));
+
+function ModelViewer({ modelPath, scale, positionY, onLoaded }: { modelPath: string; scale: number; positionY: number; onLoaded: () => void }) {
+  const { scene, animations } = useGLTF(modelPath);
   const ref = useRef<THREE.Group>(null);
   const { actions } = useAnimations(animations, ref);
 
@@ -31,11 +40,9 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
   });
 
   return (
-    <primitive ref={ref} object={scene} scale={3.5} position={[0, -2.5, 0]} />
+    <primitive ref={ref} object={scene} scale={scale} position={[0, positionY, 0]} />
   );
 }
-
-useGLTF.preload("/models/anime_girl.glb");
 
 interface ChatMessage {
   id: string;
@@ -56,7 +63,6 @@ function LostChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch existing messages
     supabase
       .from("lost_chat_messages")
       .select("*")
@@ -67,7 +73,6 @@ function LostChat() {
         setChatLoading(false);
       });
 
-    // Subscribe to new messages
     const channel = supabase
       .channel("lost-chat")
       .on(
@@ -134,17 +139,67 @@ function LostChat() {
   );
 }
 
+function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boolean; onClose: () => void; onSelect: (id: string) => void; currentModelId: string }) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="bg-black border border-white/10 rounded-lg w-[90vw] max-w-sm p-0 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <span className="text-sm font-medium text-white">Model List</span>
+          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-2">
+          {MODELS.map((model) => (
+            <button
+              key={model.id}
+              onClick={() => { onSelect(model.id); onClose(); }}
+              className={`w-full text-left px-4 py-3 rounded text-sm transition-all ${
+                currentModelId === model.id
+                  ? "bg-[#f2a547] text-black font-medium"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {model.name}
+              {currentModelId === model.id && <span className="float-right text-xs opacity-70">Active</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const setIs404Page = useAppStore((s) => s.setIs404Page);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [modelListOpen, setModelListOpen] = useState(false);
+  const [activeModelId, setActiveModelId] = useState("anime_girl");
+
+  const activeModel = MODELS.find((m) => m.id === activeModelId) || MODELS[0];
 
   useEffect(() => {
     setIs404Page(true);
     return () => setIs404Page(false);
   }, [setIs404Page]);
-  
+
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -174,6 +229,23 @@ const NotFound = () => {
     setTrackIndex(nextIdx);
   }, [trackIndex, playing, tracks]);
 
+  // Global keyboard shortcuts: ESC to exit, Ctrl+K / Cmd+K for model list
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (modelListOpen) return; // popup handles its own ESC
+      if (e.key === "Escape") {
+        e.preventDefault();
+        navigate("/");
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setModelListOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [navigate, modelListOpen]);
+
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
@@ -192,11 +264,16 @@ const NotFound = () => {
             <p className="text-4xl font-bold text-muted-foreground">404</p>
           </div>
         ) : (
-          <Canvas camera={{ position: [0, 0.5, 5], fov: 50 }} onError={() => setError(true)}>
+          <Canvas key={activeModelId} camera={{ position: [0, 0.5, 5], fov: 50 }} onError={() => setError(true)}>
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 5, 5]} intensity={1} />
             <Suspense fallback={null}>
-              <AnimeModel onLoaded={() => setLoading(false)} />
+              <ModelViewer
+                modelPath={activeModel.path}
+                scale={activeModel.scale}
+                positionY={activeModel.positionY}
+                onLoaded={() => setLoading(false)}
+              />
               <Environment preset="studio" />
             </Suspense>
             <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
@@ -206,10 +283,19 @@ const NotFound = () => {
 
       {/* Overlay UI */}
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
-        {/* Top controls */}
-        <div className="bg-black text-white pointer-events-auto leading-none">
-          <div className="relative flex items-center justify-end px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full h-10">
-            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+        {/* Quick Nav Banner */}
+        <div className="bg-black text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight pointer-events-auto">
+          <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap overflow-hidden max-w-[980px] mx-auto">
+            <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
+            <span><span className="font-bold">Model List</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
+            <span><span className="font-bold">Exit</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
+          </div>
+        </div>
+
+        {/* Playback controls banner */}
+        <div className="bg-black text-white pointer-events-auto leading-none border-t border-white/5">
+          <div className="flex items-center justify-center px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full h-10">
+            <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-none h-10 w-10 text-white hover:bg-white/20 hover:text-white">
                 {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
               </Button>
@@ -220,11 +306,6 @@ const NotFound = () => {
                 <SkipForward className="h-5 w-5" />
               </Button>
             </div>
-            <a href="/">
-              <button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] px-6 text-sm font-normal transition-all py-1.5">
-                Exit
-              </button>
-            </a>
           </div>
         </div>
 
@@ -236,6 +317,14 @@ const NotFound = () => {
           <LostChat />
         </div>
       </div>
+
+      {/* Model List Popup */}
+      <ModelListPopup
+        open={modelListOpen}
+        onClose={() => setModelListOpen(false)}
+        onSelect={setActiveModelId}
+        currentModelId={activeModelId}
+      />
     </div>
   );
 };
