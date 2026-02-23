@@ -493,10 +493,10 @@ export default function AIArticleGeneration() {
                 Access international media sites and expand your content's reach to global audiences.
               </p>
               <div className="space-y-3">
-                <Link to="/media-buying" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                <button onClick={() => setSearchOpen(true)} className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                   <Globe className="w-4 h-4" />
                   Browse media sites
-                </Link>
+                </button>
                 <Link to="/help/media-buying" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                   <FileCode className="w-4 h-4" />
                   Media buying guide
