@@ -447,9 +447,8 @@ export default function SelfPublishing() {
               Publish with your<br />Arcana Mace credits.
             </h2>
             
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center pb-16 md:pb-24">
-              {/* Left Content */}
-              <div className="order-2 md:order-1">
+            <div className="pb-16 md:pb-24">
+              <div>
                 <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-6">
                   Your credits. Your wallet.
                 </h3>
@@ -470,33 +469,6 @@ export default function SelfPublishing() {
                     alt="Credit Management dashboard showing available credits, locked credits, total purchased, total orders and total spent" 
                     className="w-full rounded-xl shadow-2xl border border-[#424245]"
                   />
-                </div>
-              </div>
-              
-              {/* Right - Phone Mockup */}
-              <div className="order-1 md:order-2 flex justify-center md:justify-end">
-                <div className="relative">
-                  {/* Phone Frame */}
-                  <div className="w-[220px] md:w-[280px] bg-[#1d1d1f] rounded-[40px] p-3 shadow-2xl">
-                    <div className="bg-white rounded-[32px] overflow-hidden">
-                      {/* Status Bar */}
-                      <div className="h-8 bg-[#f5f5f7] flex items-center justify-center">
-                        <div className="w-20 h-5 bg-black rounded-full" />
-                      </div>
-                      {/* Content */}
-                      <div className="p-6 text-center">
-                        <p className="text-xs text-[#6e6e73] mb-2">Account Balance</p>
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#0071e3] to-[#00c7be] flex items-center justify-center">
-                          <Zap className="w-8 h-8 text-white" />
-                        </div>
-                        <p className="text-3xl font-semibold text-[#1d1d1f] mb-1">500</p>
-                        <p className="text-sm text-[#6e6e73]">Credits</p>
-                        <button className="mt-4 px-4 py-2 bg-[#1d1d1f] text-white text-sm rounded-full">
-                          Add Credits
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
