@@ -423,7 +423,7 @@ export default function SelfPublishing() {
         {/* Credits Balance Section - Dark */}
         <section className="bg-black">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-white text-center pt-10 md:pt-12 pb-12 md:pb-16">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-white text-center pt-6 md:pt-8 pb-12 md:pb-16">
               Publish with your<br />Arcana Mace credits.
             </h2>
             
