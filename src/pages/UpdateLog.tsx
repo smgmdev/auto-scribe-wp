@@ -16,6 +16,27 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 24, 2026',
+    title: 'Media Buying Page & Layout Refinements',
+    changes: [
+      'Increased the number of publication logos displayed in the Media Buying page network grid — now showing 49 logos on desktop (7×7) and 40 logos on mobile (4×10) for better coverage of available publications',
+      'Full-width separator lines now consistently appear above the PWA download buttons on the AI Article Generation, Self Publishing, and Changelog pages for a cleaner visual break',
+      'Improved visual consistency of the download/install button row across all public-facing pages',
+    ],
+  },
+  {
+    date: 'February 23, 2026',
+    title: 'Explore Network Grid & Help Center Updates',
+    changes: [
+      'Added real-time synchronization to the Explore Network publication grid on the landing page — new media sites, updates, and removals now appear instantly without page refresh',
+      'The Explore Network grid now listens for INSERT, UPDATE, and DELETE events on media sites for a live, always-current display of available publications',
+      'Added a new Media Buying help article to the Help Center covering how media buying works, available publications, service requests & briefs, delivery times, quality guarantees, and order management',
+      'Help Center Media Buying article includes detailed guidance on express, standard, and extended delivery timeframes with tips on communicating with agencies about timelines',
+      'Added separator line above the download buttons row on the Self Publishing page matching the AI Article Generation page layout',
+      'Improved page layout consistency across all public-facing product pages with unified section spacing and divider styling',
+    ],
+  },
+  {
     date: 'February 22, 2026',
     title: 'PWA Buttons Alignment & Page Layout Consistency',
     changes: [
