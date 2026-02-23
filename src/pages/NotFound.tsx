@@ -47,6 +47,7 @@ interface ChatMessage {
 function LostChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(true);
   const [nickname] = useState(() => {
     const adjectives = ["Lost", "Wandering", "Drifting", "Stray", "Roaming", "Ghost", "Phantom", "Shadow"];
     const nouns = ["Traveler", "Soul", "Spirit", "Visitor", "Explorer", "Stranger", "Nomad", "Drifter"];
@@ -63,6 +64,7 @@ function LostChat() {
       .limit(50)
       .then(({ data }) => {
         if (data) setMessages(data);
+        setChatLoading(false);
       });
 
     // Subscribe to new messages
@@ -99,9 +101,13 @@ function LostChat() {
       </div>
       <ScrollArea className="flex-1 px-3 py-2">
         <div className="space-y-1.5">
-          {messages.length === 0 && (
+          {chatLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+            </div>
+          ) : messages.length === 0 ? (
             <p className="text-xs text-muted-foreground/50 text-center py-4">No one here yet... say hi!</p>
-          )}
+          ) : null}
           {messages.map((msg) => (
             <div key={msg.id} className={`text-xs ${msg.nickname === nickname ? "text-right" : ""}`}>
               <span className="font-semibold text-muted-foreground/80">{msg.nickname === nickname ? "You" : msg.nickname}: </span>
