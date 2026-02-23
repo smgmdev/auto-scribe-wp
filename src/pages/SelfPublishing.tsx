@@ -576,7 +576,7 @@ export default function SelfPublishing() {
 
         {/* Business Section - Contained Image */}
         <section className="pt-4 md:pt-6 pb-4 md:pb-6 bg-white">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-12">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div 
               className="relative min-h-[450px] md:min-h-[550px] bg-cover bg-center overflow-hidden"
               style={{ backgroundImage: `url(${businessHero})` }}
