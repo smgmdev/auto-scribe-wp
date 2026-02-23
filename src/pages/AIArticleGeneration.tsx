@@ -317,8 +317,8 @@ export default function AIArticleGeneration() {
         </div>
       </div>
 
-      {/* Hero Text Section - Apple Open Source style */}
-      <section className="relative bg-[#1d1d1f] pt-36 md:pt-40 pb-28 md:pb-36 overflow-hidden">
+      {/* Hero Text Section */}
+      <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden py-20 md:py-28">
         <video
           autoPlay
           loop
@@ -328,7 +328,7 @@ export default function AIArticleGeneration() {
         >
           <source src={bgaiVideo} type="video/mp4" />
         </video>
-        <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
+        <div className="relative z-10 max-w-[980px] mx-auto px-6 md:px-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
             AI Article Generation.
           </h1>
