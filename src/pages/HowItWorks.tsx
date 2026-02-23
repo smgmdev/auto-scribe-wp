@@ -455,7 +455,7 @@ const ScrollColorSection = ({
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 leading-tight">
-            From self-publishing to global media placements, AI-generated articles to PR agency partnerships — everything you need to amplify your brand's voice is in one place.
+            Connect with Arcana Mace to expand your circle of opportunities. Engage with global clients and elevate your business to the next level.
           </p>
 
           {/* Feature grid */}
