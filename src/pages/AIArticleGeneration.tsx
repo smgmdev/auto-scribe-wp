@@ -132,9 +132,20 @@ export default function AIArticleGeneration() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
+  const [heroPhase, setHeroPhase] = useState(0); // 0=title, 1=sparkles, 2=wand, then back to 0
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Hero title/icon cycling animation
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % 3;
+      setHeroPhase(index);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-play slider - always running
   useEffect(() => {
@@ -336,9 +347,41 @@ export default function AIArticleGeneration() {
           <source src={bgaiVideo} type="video/mp4" />
         </video>
         <div className="relative z-10 max-w-[980px] mx-auto px-6 md:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
-            AI Article Generation.
-          </h1>
+          <div className="relative h-[60px] md:h-[72px] lg:h-[84px] mb-6 flex items-center justify-center overflow-hidden">
+            {/* Title */}
+            <h1
+              className="absolute inset-0 flex items-center justify-center text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight transition-all duration-700 ease-in-out"
+              style={{
+                opacity: heroPhase === 0 ? 1 : 0,
+                transform: heroPhase === 0 ? 'scale(1) rotateX(0deg)' : 'scale(0.6) rotateX(90deg)',
+                filter: heroPhase === 0 ? 'blur(0px)' : 'blur(8px)',
+              }}
+            >
+              AI Article Generation.
+            </h1>
+            {/* Icon 1 - Sparkles */}
+            <div
+              className="absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out"
+              style={{
+                opacity: heroPhase === 1 ? 1 : 0,
+                transform: heroPhase === 1 ? 'scale(1) rotateY(0deg)' : heroPhase === 0 ? 'scale(0.3) rotateY(-180deg)' : 'scale(0.3) rotateY(180deg)',
+                filter: heroPhase === 1 ? 'blur(0px)' : 'blur(8px)',
+              }}
+            >
+              <Sparkles className="w-16 h-16 md:w-20 md:h-20 text-[#f2a547]" strokeWidth={1.5} />
+            </div>
+            {/* Icon 2 - PenTool */}
+            <div
+              className="absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out"
+              style={{
+                opacity: heroPhase === 2 ? 1 : 0,
+                transform: heroPhase === 2 ? 'scale(1) rotateY(0deg)' : heroPhase === 1 ? 'scale(0.3) rotateY(-180deg)' : 'scale(0.3) rotateY(180deg)',
+                filter: heroPhase === 2 ? 'blur(0px)' : 'blur(8px)',
+              }}
+            >
+              <Wand2 className="w-16 h-16 md:w-20 md:h-20 text-[#0071e3]" strokeWidth={1.5} />
+            </div>
+          </div>
           <p className="text-base md:text-xl text-white/70 leading-tight max-w-3xl mx-auto">
             Artificial intelligence is at the heart of modern content creation. Arcana Mace works with 
             advanced language models to help you create, refine, and publish professional articles in seconds.
