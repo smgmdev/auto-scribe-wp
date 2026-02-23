@@ -27,6 +27,7 @@ function SliderImage({ src, alt }: { src: string; alt: string }) {
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
+import bgaiVideo from '@/assets/bgai.mp4';
 import amblack from '@/assets/amblack.png';
 
 // Fallback gradients for articles without featured images
@@ -317,8 +318,17 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section - Apple Open Source style */}
-      <section className="bg-[#1d1d1f] pt-36 md:pt-36 pb-20 md:pb-28">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+      <section className="relative bg-[#1d1d1f] pt-36 md:pt-36 pb-20 md:pb-28 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src={bgaiVideo} type="video/mp4" />
+        </video>
+        <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
             AI Article Generation.
           </h1>
