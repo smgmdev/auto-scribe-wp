@@ -617,7 +617,7 @@ export default function SelfPublishing() {
             or contact support. Credits are non-refundable and non-transferable.
           </p>
           <p className="text-xs text-[#6e6e73] leading-normal">
-            We approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
+            For security purposes, we approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
           </p>
         </div>
       </div>
