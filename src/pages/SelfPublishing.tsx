@@ -453,7 +453,7 @@ export default function SelfPublishing() {
                     muted
                     loop
                     playsInline
-                    className="w-full md:w-[90%] md:mx-auto md:block rounded-none shadow-2xl border border-[#424245] relative z-0"
+                    className="w-full rounded-none shadow-2xl border border-[#424245] relative z-0"
                     onLoadedData={(e) => {
                       const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#cm-video-loader');
                       if (loader) (loader as HTMLElement).style.display = 'none';
