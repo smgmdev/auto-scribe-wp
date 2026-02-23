@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
+import amlogo from '@/assets/amlogo.png';
 import mediaLibraryBgVideo from '@/assets/media-library-bg.mp4';
 
 interface FeaturedImage {
@@ -1207,26 +1208,26 @@ const HowItWorks = () => {
 
 
       {/* Hero Section */}
-      <section className="pt-28 md:pt-32 pb-16 bg-white">
+      <section className="pt-28 md:pt-32 pb-16 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6 relative flex items-center justify-center">
             {!logoLoaded && (
-              <Loader2 className="h-8 w-8 animate-spin text-[#86868b] absolute" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#a1a1a6] absolute" />
             )}
             <img 
-              src={amblack} 
+              src={amlogo}
               alt="Arcana Mace" 
               className={`w-20 h-20 transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setLogoLoaded(true)}
             />
           </div>
           
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight mb-6">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tight mb-6">
             How to use Arcana Mace?
           </h1>
           
-          <p className="text-xl md:text-2xl text-[#86868b] max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl md:text-2xl text-[#a1a1a6] max-w-3xl mx-auto mb-8 leading-relaxed">
             Discover an incredibly diverse network of media outlets worldwide. 
             Publish your content where it matters most, from self-publishing to agency partnerships.
             And enjoy it all on a platform designed for publishers and global brands.
