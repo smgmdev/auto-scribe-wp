@@ -516,7 +516,7 @@ export default function AIArticleGeneration() {
           <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6 max-w-[680px]">
             Start creating AI-powered articles today. Sign up for free to begin publishing professional content in seconds.
           </p>
-          <Link to="/auth">
+          <Link to="/account?view=compose">
             <Button
               className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-none px-8 py-3 text-base font-medium"
             >
