@@ -365,49 +365,44 @@ export default function SelfPublishing() {
         </section>
 
         {/* Media Sites - Dynamic from Local Library */}
-        <section className="pt-0 pb-10 md:pb-12">
+        <section className="pt-0 pb-10 md:pb-12 overflow-hidden">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             {isLoadingSites ? (
               <div className="flex items-center justify-center py-4 min-h-[80px]">
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
-            ) : (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
-                {mediaSites.map((site, i) => {
-                  // First 3 items span larger on desktop
-                  const isFeatured = i < 3;
-                  return (
-                    <div 
-                      key={site.id} 
-                      className={`group cursor-pointer relative overflow-hidden rounded-xl bg-[#1d1d1f] ${
-                        isFeatured ? 'aspect-[4/3] md:col-span-1 lg:row-span-1' : 'aspect-square'
-                      }`}
+            ) : mediaSites.length > 0 ? (
+              <div className="relative w-screen -ml-[50vw] left-1/2">
+                {/* Fade edges */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+                
+                <div className="flex animate-marquee w-max">
+                  {/* Duplicate the list twice for seamless loop */}
+                  {[...mediaSites, ...mediaSites].map((site, i) => (
+                    <div
+                      key={`${site.id}-${i}`}
+                      className="flex-shrink-0 mx-3 md:mx-4 cursor-pointer group"
                       onClick={() => setSelectedSite(site)}
                     >
-                      {site.favicon ? (
-                        <img 
-                          src={site.favicon} 
-                          alt={site.name} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[#2d2d2f]">
-                          <Globe className="w-8 h-8 md:w-10 md:h-10 text-white/30" />
-                        </div>
-                      )}
-                      {/* Gradient overlay with name */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                        <span className="text-white text-xs md:text-sm font-semibold leading-tight">{site.name}</span>
-                      </div>
-                      {/* Always-visible name on mobile */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 md:hidden">
-                        <span className="text-white text-[10px] font-medium leading-tight line-clamp-1">{site.name}</span>
+                      <div className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden bg-[#1d1d1f] shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        {site.favicon ? (
+                          <img
+                            src={site.favicon}
+                            alt={site.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Globe className="w-7 h-7 md:w-9 md:h-9 text-white/30" />
+                          </div>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            )}
+            ) : null}
             
             {/* Info text - Apple style */}
             <div className="text-center mt-16 md:mt-24 max-w-3xl mx-auto">
