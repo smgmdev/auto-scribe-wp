@@ -508,12 +508,12 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Get Started Section */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="py-16 md:py-20 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-[40px] font-semibold text-[#1d1d1f] tracking-tight mb-4">
+          <h2 className="text-3xl md:text-[40px] font-semibold text-white tracking-tight mb-4">
             Get Started
           </h2>
-          <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6 max-w-[680px]">
+          <p className="text-[17px] text-white/90 leading-relaxed mb-6 max-w-[680px]">
             Start creating AI-powered articles today. Sign up for free to begin publishing professional content in seconds.
           </p>
           <Link to="/account?view=compose">
