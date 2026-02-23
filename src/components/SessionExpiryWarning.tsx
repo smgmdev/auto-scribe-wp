@@ -24,8 +24,8 @@ export function SessionExpiryWarning() {
   const checkRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const warningShownRef = useRef(false);
   const sessionStartedAtRef = useRef<number | null>(null);
-  // Guard: when true, skip the next DB fetch so the local Date.now() isn't overwritten
-  const skipNextFetchRef = useRef(false);
+  // Grace window: skip DB fetches until this timestamp passes
+  const skipUntilRef = useRef<number>(0);
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -56,8 +56,10 @@ export function SessionExpiryWarning() {
     clearCountdown();
     setShowWarning(false);
     warningShownRef.current = false;
-    // Prevent the effect re-run from overwriting our fresh timestamp with a stale DB value
-    skipNextFetchRef.current = true;
+    // Set a grace window: ignore any DB-fetched timestamps for 5 seconds
+    // This prevents stale DB reads from overwriting our fresh local timestamp
+    // even if the effect re-runs multiple times due to auth events
+    skipUntilRef.current = Date.now() + 5000;
 
     try {
       const success = await extendSession();
@@ -89,22 +91,25 @@ export function SessionExpiryWarning() {
       return;
     }
 
-    // Initial fetch — skip if we just extended the session locally
-    if (skipNextFetchRef.current) {
-      skipNextFetchRef.current = false;
-    } else {
+    // Skip DB fetch if we're within the grace window after extending session
+    const inGrace = Date.now() < skipUntilRef.current;
+    if (!inGrace) {
       fetchSessionStart().then((ts) => {
-        if (ts) sessionStartedAtRef.current = ts;
+        // Only update if we're still outside the grace window
+        if (ts && Date.now() >= skipUntilRef.current) {
+          sessionStartedAtRef.current = ts;
+        }
       });
     }
 
     const checkExpiry = async () => {
-      // If we don't have a cached value yet, fetch from DB
-      if (!sessionStartedAtRef.current) {
+      // If we don't have a cached value yet, fetch from DB (but respect grace window)
+      if (!sessionStartedAtRef.current && Date.now() >= skipUntilRef.current) {
         const ts = await fetchSessionStart();
-        if (ts) sessionStartedAtRef.current = ts;
+        if (ts && Date.now() >= skipUntilRef.current) sessionStartedAtRef.current = ts;
         if (!sessionStartedAtRef.current) return;
       }
+      if (!sessionStartedAtRef.current) return;
 
       const elapsed = Date.now() - sessionStartedAtRef.current;
       const timeUntilExpiry = SESSION_DURATION_MS - elapsed;
