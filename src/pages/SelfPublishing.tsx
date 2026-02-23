@@ -614,7 +614,7 @@ export default function SelfPublishing() {
           <p className="text-xs text-[#6e6e73] mb-4 leading-normal">
             For assistance, visit{' '}
             <a href="/help" className="text-[#06c] hover:underline">our Help Center</a>{' '}
-            or <a href="/index?view=support" className="text-[#06c] hover:underline">Contact Support</a>. Credits are non-refundable and non-transferable.
+            or <a href="/account?view=support" className="text-[#06c] hover:underline">Contact Support</a>. Credits are non-refundable and non-transferable.
           </p>
           <p className="text-xs text-[#6e6e73] leading-normal">
             For security purposes, we approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
