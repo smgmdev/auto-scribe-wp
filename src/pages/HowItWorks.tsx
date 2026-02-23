@@ -618,20 +618,20 @@ const SecurityFadeText = () => {
   const isEntering = phase === 'entering';
 
   return (
-    <div className="relative mt-4 text-center">
+    <div className="relative mt-8 text-center px-4">
       <p
-        className="text-2xl font-bold leading-tight relative inline-block"
+        className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight relative inline-block"
         style={{
           opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.95)',
+          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.92)',
           transition: isEntering
             ? 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
             : 'opacity 0.4s ease-out, transform 0.4s ease-out',
           color: '#f2a547',
           textShadow: isEntering
-            ? '0 0 40px rgba(242,165,71,0.8), 0 0 80px rgba(242,165,71,0.4), 0 0 120px rgba(242,165,71,0.2)'
+            ? '0 0 60px rgba(242,165,71,0.9), 0 0 120px rgba(242,165,71,0.5), 0 0 200px rgba(242,165,71,0.3)'
             : isVisible
-              ? '0 0 20px rgba(242,165,71,0.4), 0 0 40px rgba(242,165,71,0.15)'
+              ? '0 0 40px rgba(242,165,71,0.5), 0 0 80px rgba(242,165,71,0.2)'
               : 'none',
         }}
       >
