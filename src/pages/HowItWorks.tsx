@@ -1164,7 +1164,7 @@ const HowItWorks = () => {
         </div>
 
         {/* Video */}
-        <div className="mt-12 max-w-4xl mx-auto px-0 md:px-4 pb-16 relative">
+        <div className="mt-12 max-w-4xl mx-auto px-0 md:px-4 relative">
           {!videoLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-black rounded-lg mx-4">
               <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
