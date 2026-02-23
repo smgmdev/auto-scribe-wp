@@ -131,6 +131,7 @@ export default function AIArticleGeneration() {
   const [sliderArticles, setSliderArticles] = useState<SliderArticle[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -319,12 +320,18 @@ export default function AIArticleGeneration() {
 
       {/* Hero Text Section */}
       <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden py-20 md:py-28">
+        {!heroVideoLoaded && (
+          <div className="absolute bottom-4 right-4 z-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+          </div>
+        )}
         <video
           autoPlay
           loop
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
+          onCanPlayThrough={() => setHeroVideoLoaded(true)}
         >
           <source src={bgaiVideo} type="video/mp4" />
         </video>
