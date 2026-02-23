@@ -478,8 +478,8 @@ export default function AIArticleGeneration() {
                 Combine AI article generation with media placement for comprehensive content marketing campaigns. 
                 Generate professional articles and distribute them across multiple premium sites in a single workflow.
               </p>
-              <Link to="/help/media-buying" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
-                Learn about media buying <ChevronRight className="w-4 h-4" />
+              <Link to="/help/ai-marketing-strategy" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
+                Learn about AI Marketing Strategy <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
