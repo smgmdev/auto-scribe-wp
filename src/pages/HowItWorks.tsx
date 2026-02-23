@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { supabase } from '@/integrations/supabase/client';
 import amblack from '@/assets/amblack.png';
+import mediaLibraryBgVideo from '@/assets/media-library-bg.mp4';
 
 interface FeaturedImage {
   url?: string;
@@ -478,6 +479,18 @@ const ScrollColorSection = ({
             <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
               For Agencies
             </button>
+          </div>
+
+          {/* Video */}
+          <div className="mt-12 max-w-4xl mx-auto px-4">
+            <video
+              src={mediaLibraryBgVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full rounded-lg"
+            />
           </div>
         </div>
 
