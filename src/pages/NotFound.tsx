@@ -215,9 +215,9 @@ const NotFound = () => {
               </Button>
             </div>
             <a href="/">
-              <Button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] rounded-md px-5 h-8 text-xs font-bold transition-all">
+              <button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] px-5 text-xs font-bold transition-all leading-none py-1">
                 Exit
-              </Button>
+              </button>
             </a>
           </div>
         </div>
