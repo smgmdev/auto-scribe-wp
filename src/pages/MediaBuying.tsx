@@ -246,6 +246,7 @@ export default function MediaBuying() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchInitialSubcategory, setSearchInitialSubcategory] = useState<string | null>(null);
+  const [searchInitialTab, setSearchInitialTab] = useState<string>("Global");
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [selectedSite, setSelectedSite] = useState<MediaSite | null>(null);
@@ -375,7 +376,7 @@ export default function MediaBuying() {
       </header>
 
       {/* Search Modal */}
-      <SearchModal open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setSearchInitialSubcategory(null); }} initialTab="Global" initialSubcategory={searchInitialSubcategory} />
+      <SearchModal open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) { setSearchInitialSubcategory(null); setSearchInitialTab("Global"); } }} initialTab={searchInitialTab} initialSubcategory={searchInitialSubcategory} />
 
       {/* Spacer */}
       <div className="h-[92px]" />
@@ -739,7 +740,7 @@ export default function MediaBuying() {
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
                 Work with KYC verified media agencies who understand professional standards. Every agency is reviewed and monitored for quality.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => { setSearchInitialSubcategory('Agencies/People'); setSearchOpen(true); }}>
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => { setSearchInitialTab('Agencies/People'); setSearchOpen(true); }}>
                 Meet agencies
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
