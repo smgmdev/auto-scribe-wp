@@ -91,7 +91,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const [awaitingModelChoice, setAwaitingModelChoice] = useState(false);
+  
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
@@ -105,16 +105,14 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       await supabase.from("lost_chat_messages").insert({ nickname, message: "/models" });
       // Insert Arcana Mace's response publicly
       await supabase.from("lost_chat_messages").insert({ nickname: "Arcana Mace", message: `Model List:\n\n${modelList}\n\nChoose a number to display.` });
-      setAwaitingModelChoice(true);
       return;
     }
 
-    // Handle number selection when awaiting model choice (first responder wins, visible to all)
+    // Handle number selection (any user can pick a model at any time)
     if (/^\d+$/.test(trimmed)) {
       const idx = parseInt(trimmed, 10) - 1;
       if (idx >= 0 && idx < MODELS.length) {
         const model = MODELS[idx];
-        setAwaitingModelChoice(false);
         onSelectModel(model.id);
         await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
       } else {
@@ -135,7 +133,6 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       return;
     }
 
-    setAwaitingModelChoice(false);
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
   }, [input, nickname, onSelectModel]);
 
@@ -157,13 +154,13 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           {messages.map((msg) => (
             <div key={msg.id} className={`text-xs ${msg.is_system ? "" : msg.nickname === "Arcana Mace" ? "" : msg.nickname === nickname ? "text-right" : ""}`}>
               {msg.is_system ? (
-                <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono bg-white/5 rounded px-2 py-1.5 inline-block text-left">
+                <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono px-2 py-1.5 inline-block text-left">
                   {msg.message}
                 </pre>
               ) : msg.nickname === "Arcana Mace" ? (
                 <div className="text-left">
                   <span className="font-semibold text-[#f2a547]/80">{msg.nickname}: </span>
-                  <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono bg-white/5 rounded px-2 py-1.5 mt-0.5 text-left">
+                  <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono px-2 py-1.5 mt-0.5 text-left">
                     {msg.message}
                   </pre>
                 </div>
