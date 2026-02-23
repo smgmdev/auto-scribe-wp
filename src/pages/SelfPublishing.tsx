@@ -554,15 +554,15 @@ export default function SelfPublishing() {
           </div>
         </section>
 
-        {/* Business Section - Full Width White */}
-        <section className="bg-white border-t border-[#d2d2d7]">
+        {/* Business Section - Full Width Black */}
+        <section className="bg-black border-t border-[#424245]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
             <div className="flex flex-col md:flex-row md:items-center md:gap-12">
               <div className="max-w-lg flex-1">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#1d1d1f] mb-6 leading-tight">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
                   Arcana Mace for Business
                 </h2>
-                <p className="text-base md:text-lg text-[#424245] mb-6 leading-relaxed">
+                <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
                   Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
                 </p>
                 <a
@@ -574,7 +574,7 @@ export default function SelfPublishing() {
               </div>
               <div className="mt-10 md:mt-0 flex-1">
                 <div className="relative w-full max-w-[440px] md:ml-auto">
-                  <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-white z-10 transition-opacity duration-300 rounded-none">
+                  <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-black z-10 transition-opacity duration-300 rounded-none">
                     <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
                   </div>
                   <video 
