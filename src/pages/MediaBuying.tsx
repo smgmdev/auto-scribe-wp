@@ -457,19 +457,16 @@ export default function MediaBuying() {
             free to focus on your story.
           </p>
           
-          {/* Categories list - 3 columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-3">
-            {(() => {
-              const cols = 3;
-              const perCol = Math.ceil(subcategories.length / cols);
-              return Array.from({ length: cols }, (_, colIdx) => (
-                <ul key={colIdx} className="space-y-3">
-                  {subcategories.slice(colIdx * perCol, (colIdx + 1) * perCol).map((cat) => (
-                    <li key={cat} className="text-[#0066cc] hover:underline cursor-pointer">• {cat}</li>
-                  ))}
-                </ul>
-              ));
-            })()}
+          {/* Categories - modern pill tags */}
+          <div className="flex flex-wrap gap-3">
+            {subcategories.map((cat) => (
+              <span
+                key={cat}
+                className="px-5 py-2.5 bg-white/80 backdrop-blur border border-[#1d1d1f]/10 text-[#1d1d1f] text-sm font-medium hover:bg-[#0071e3] hover:text-white hover:border-[#0071e3] cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                {cat}
+              </span>
+            ))}
           </div>
         </div>
       </section>
