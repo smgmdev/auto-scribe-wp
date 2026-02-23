@@ -318,13 +318,13 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section - Apple Open Source style */}
-      <section className="relative bg-[#1d1d1f] pt-36 md:pt-36 pb-20 md:pb-28 overflow-hidden">
+      <section className="relative bg-[#1d1d1f] pt-44 md:pt-52 pb-32 md:pb-40 overflow-hidden">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          className="absolute inset-0 w-full h-full object-cover"
         >
           <source src={bgaiVideo} type="video/mp4" />
         </video>
