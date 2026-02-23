@@ -387,11 +387,11 @@ details[open] .details-open-rotate {
   }
 }
 
-/* Sliding border trace animation */
+/* Sliding border trace animation - starts from bottom-left */
 .border-trace-btn {
   position: relative;
   border: 2px solid transparent;
-  transition: color 0.2s, text-shadow 0.2s;
+  transition: color 0.15s, text-shadow 0.15s;
 }
 
 .border-trace-btn::before,
@@ -403,21 +403,21 @@ details[open] .details-open-rotate {
 }
 
 .border-trace-btn::before {
-  top: -2px;
-  left: -2px;
-  width: 0;
-  height: 0;
-  border-top: 2px solid transparent;
-  border-right: 2px solid transparent;
-}
-
-.border-trace-btn::after {
   bottom: -2px;
-  right: -2px;
+  left: -2px;
   width: 0;
   height: 0;
   border-bottom: 2px solid transparent;
   border-left: 2px solid transparent;
+}
+
+.border-trace-btn::after {
+  top: -2px;
+  right: -2px;
+  width: 0;
+  height: 0;
+  border-top: 2px solid transparent;
+  border-right: 2px solid transparent;
 }
 
 .border-trace-btn:hover {
@@ -426,35 +426,14 @@ details[open] .details-open-rotate {
 }
 
 .border-trace-btn:hover::before {
-  animation: trace-top-right 0.25s ease-out forwards;
+  animation: trace-bl 0.15s ease-out forwards;
 }
 
 .border-trace-btn:hover::after {
-  animation: trace-bottom-left 0.25s ease-out 0.25s forwards;
+  animation: trace-tr 0.15s ease-out 0.15s forwards;
 }
 
-@keyframes trace-top-right {
-  0% {
-    width: 0;
-    height: 0;
-    border-top-color: #f2a547;
-    border-right-color: transparent;
-  }
-  50% {
-    width: calc(100% + 4px);
-    height: 0;
-    border-top-color: #f2a547;
-    border-right-color: transparent;
-  }
-  100% {
-    width: calc(100% + 4px);
-    height: calc(100% + 4px);
-    border-top-color: #f2a547;
-    border-right-color: #f2a547;
-  }
-}
-
-@keyframes trace-bottom-left {
+@keyframes trace-bl {
   0% {
     width: 0;
     height: 0;
@@ -472,5 +451,26 @@ details[open] .details-open-rotate {
     height: calc(100% + 4px);
     border-bottom-color: #f2a547;
     border-left-color: #f2a547;
+  }
+}
+
+@keyframes trace-tr {
+  0% {
+    width: 0;
+    height: 0;
+    border-top-color: #f2a547;
+    border-right-color: transparent;
+  }
+  50% {
+    width: calc(100% + 4px);
+    height: 0;
+    border-top-color: #f2a547;
+    border-right-color: transparent;
+  }
+  100% {
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    border-top-color: #f2a547;
+    border-right-color: #f2a547;
   }
 }
