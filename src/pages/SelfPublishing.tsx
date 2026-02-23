@@ -380,7 +380,7 @@ export default function SelfPublishing() {
                       className="flex flex-col items-center gap-2 group cursor-pointer"
                       onClick={() => setSelectedSite(site)}
                     >
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-none bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
                         {site.favicon ? (
                           <img 
                             src={site.favicon} 
@@ -405,7 +405,7 @@ export default function SelfPublishing() {
                       className="flex flex-col items-center gap-2 group cursor-pointer"
                       onClick={() => setSelectedSite(site)}
                     >
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[14px] bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-none bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
                         {site.favicon ? (
                           <img 
                             src={site.favicon} 
@@ -467,7 +467,7 @@ export default function SelfPublishing() {
                   <img 
                     src={creditManagementPreview} 
                     alt="Credit Management dashboard showing available credits, locked credits, total purchased, total orders and total spent" 
-                    className="w-full rounded-xl shadow-2xl border border-[#424245]"
+                    className="w-full rounded-none shadow-2xl border border-[#424245]"
                   />
                 </div>
               </div>
@@ -484,7 +484,7 @@ export default function SelfPublishing() {
                 <img 
                   src={paymentsImg} 
                   alt="Airwallex payment checkout showing 500 credits for $500 with card payment form" 
-                  className="w-[280px] md:w-[340px] rounded-2xl shadow-2xl"
+                  className="w-[280px] md:w-[340px] rounded-none shadow-2xl"
                 />
               </div>
               
@@ -612,7 +612,7 @@ export default function SelfPublishing() {
                     <img
                       src={selectedSite.favicon || getFaviconUrl(selectedSite.url)}
                       alt={selectedSite.name}
-                      className="h-12 w-12 rounded-xl object-cover shrink-0"
+                      className="h-12 w-12 rounded-none object-cover shrink-0"
                     />
                     <span className="font-semibold text-lg">{selectedSite.name}</span>
                   </div>
@@ -698,7 +698,7 @@ export default function SelfPublishing() {
                     <img
                       src={selectedSite.favicon || getFaviconUrl(selectedSite.url)}
                       alt={selectedSite.name}
-                      className="h-12 w-12 rounded-xl object-cover shrink-0"
+                      className="h-12 w-12 rounded-none object-cover shrink-0"
                     />
                     <span className="font-semibold text-lg">{selectedSite.name}</span>
                   </div>
