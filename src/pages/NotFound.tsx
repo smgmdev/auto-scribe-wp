@@ -76,7 +76,9 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(true);
   const [cooldown, setCooldown] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const lastSentRef = useRef<number>(0);
+  const cooldownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [nickname] = useState(() => {
     const adjectives = ["Lost", "Wandering", "Drifting", "Stray", "Roaming", "Ghost", "Phantom", "Shadow"];
     const nouns = ["Traveler", "Soul", "Spirit", "Visitor", "Explorer", "Stranger", "Nomad", "Drifter"];
@@ -148,8 +150,20 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     // Rate limiting
     const now = Date.now();
     if (now - lastSentRef.current < RATE_LIMIT_MS) {
+      const remaining = Math.ceil((RATE_LIMIT_MS - (now - lastSentRef.current)) / 1000);
       setCooldown(true);
-      setTimeout(() => setCooldown(false), RATE_LIMIT_MS - (now - lastSentRef.current));
+      setCooldownSeconds(remaining);
+      if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+      cooldownIntervalRef.current = setInterval(() => {
+        setCooldownSeconds((prev) => {
+          if (prev <= 1) {
+            setCooldown(false);
+            if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
       return;
     }
 
@@ -162,7 +176,18 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     setInput("");
     lastSentRef.current = Date.now();
     setCooldown(true);
-    setTimeout(() => setCooldown(false), RATE_LIMIT_MS);
+    setCooldownSeconds(3);
+    if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+    cooldownIntervalRef.current = setInterval(() => {
+      setCooldownSeconds((prev) => {
+        if (prev <= 1) {
+          setCooldown(false);
+          if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     // Handle /models command - broadcast publicly & activate selection globally
     if (trimmed.toLowerCase() === "/models") {
@@ -251,7 +276,11 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           maxLength={200}
         />
         <Button variant="ghost" size="icon" onClick={sendMessage} disabled={cooldown} className={`h-8 w-8 shrink-0 hover:bg-black rounded-l-none ${cooldown ? 'opacity-40' : ''}`}>
-          <Send className="h-3.5 w-3.5" />
+          {cooldown ? (
+            <span className="text-[10px] font-bold text-muted-foreground">{cooldownSeconds}</span>
+          ) : (
+            <Send className="h-3.5 w-3.5" />
+          )}
         </Button>
       </div>
     </div>
