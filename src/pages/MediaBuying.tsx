@@ -137,6 +137,7 @@ export default function MediaBuying() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
   const [selectedSite, setSelectedSite] = useState<MediaSite | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -150,7 +151,7 @@ export default function MediaBuying() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fetch media sites on mount (excluding Agencies/People category)
+  // Fetch media sites and subcategories on mount
   useEffect(() => {
     const fetchMediaSites = async () => {
       const { data } = await supabase
@@ -161,6 +162,14 @@ export default function MediaBuying() {
       
       if (data) {
         setMediaSites(shuffleArray(data));
+        // Extract unique subcategories
+        const uniqueSubs = [...new Set(
+          data
+            .map(s => s.subcategory)
+            .filter((s): s is string => !!s)
+            .flatMap(s => s.split(',').map(part => part.trim()))
+        )].sort();
+        setSubcategories(uniqueSubs);
       }
     };
     fetchMediaSites();
@@ -448,26 +457,19 @@ export default function MediaBuying() {
             free to focus on your story.
           </p>
           
-          {/* Features list - 3 columns */}
+          {/* Categories list - 3 columns */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-3">
-            <ul className="space-y-3">
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Business News</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Technology</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Finance</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Crypto & Blockchain</li>
-            </ul>
-            <ul className="space-y-3">
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Lifestyle</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Entertainment</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Health & Wellness</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Travel</li>
-            </ul>
-            <ul className="space-y-3">
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Regional News</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• International</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Industry Specific</li>
-              <li className="text-[#0066cc] hover:underline cursor-pointer">• Premium Outlets</li>
-            </ul>
+            {(() => {
+              const cols = 3;
+              const perCol = Math.ceil(subcategories.length / cols);
+              return Array.from({ length: cols }, (_, colIdx) => (
+                <ul key={colIdx} className="space-y-3">
+                  {subcategories.slice(colIdx * perCol, (colIdx + 1) * perCol).map((cat) => (
+                    <li key={cat} className="text-[#0066cc] hover:underline cursor-pointer">• {cat}</li>
+                  ))}
+                </ul>
+              ));
+            })()}
           </div>
         </div>
       </section>
