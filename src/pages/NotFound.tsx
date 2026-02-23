@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState, useCallback, Suspense } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
@@ -193,6 +193,24 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
   );
 }
 
+function MiniModelPreview({ modelPath, scale, positionY }: { modelPath: string; scale: number; positionY: number }) {
+  const { scene, animations } = useGLTF(modelPath);
+  const ref = useRef<THREE.Group>(null);
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+  const { actions } = useAnimations(animations, ref);
+
+  useEffect(() => {
+    const firstAction = Object.values(actions)[0];
+    if (firstAction) firstAction.reset().fadeIn(0.3).play();
+  }, [actions]);
+
+  useFrame((_, delta) => {
+    if (ref.current) ref.current.rotation.y += delta * 0.5;
+  });
+
+  return <primitive ref={ref} object={clonedScene} scale={scale * 0.8} position={[0, positionY * 0.8, 0]} />;
+}
+
 function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boolean; onClose: () => void; onSelect: (id: string) => void; currentModelId: string }) {
   useEffect(() => {
     if (!open) return;
@@ -206,32 +224,51 @@ function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boo
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
       <div
-        className="bg-black border border-white/10 rounded-lg w-[90vw] max-w-sm p-0 overflow-hidden"
+        className="bg-black/90 border border-white/10 rounded-xl w-[95vw] max-w-3xl p-0 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <span className="text-sm font-medium text-white">Model List</span>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div>
+            <span className="text-sm font-semibold text-white">Select Model</span>
+            <p className="text-[10px] text-white/40 mt-0.5">Click to switch the global 3D model</p>
+          </div>
           <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-2">
-          {MODELS.map((model) => (
-            <button
-              key={model.id}
-              onClick={() => { onSelect(model.id); onClose(); }}
-              className={`w-full text-left px-4 py-3 rounded text-sm transition-all ${
-                currentModelId === model.id
-                  ? "bg-[#f2a547] text-black font-medium"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              {model.name}
-              {currentModelId === model.id && <span className="float-right text-xs opacity-70">Active</span>}
-            </button>
-          ))}
+        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {MODELS.map((model) => {
+            const isActive = currentModelId === model.id;
+            return (
+              <button
+                key={model.id}
+                onClick={() => { onSelect(model.id); onClose(); }}
+                className={`relative group rounded-lg overflow-hidden transition-all duration-200 border ${
+                  isActive
+                    ? "border-[#f2a547] ring-1 ring-[#f2a547]/40"
+                    : "border-white/10 hover:border-white/30"
+                }`}
+              >
+                <div className="aspect-square bg-black/60">
+                  <Canvas camera={{ position: [0, 0.5, 5], fov: 50 }}>
+                    <ambientLight intensity={0.7} />
+                    <directionalLight position={[3, 3, 3]} intensity={0.8} />
+                    <Suspense fallback={null}>
+                      <MiniModelPreview modelPath={model.path} scale={model.scale} positionY={model.positionY} />
+                      <Environment preset="studio" />
+                    </Suspense>
+                    <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} autoRotate={false} />
+                  </Canvas>
+                </div>
+                <div className={`px-3 py-2.5 text-left ${isActive ? "bg-[#f2a547]" : "bg-white/5 group-hover:bg-white/10"}`}>
+                  <span className={`text-xs font-medium ${isActive ? "text-black" : "text-white/90"}`}>{model.name}</span>
+                  {isActive && <span className="float-right text-[10px] text-black/60 font-medium">Active</span>}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
