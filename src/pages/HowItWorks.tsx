@@ -466,21 +466,8 @@ const ScrollColorSection = ({
             Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
           </p>
           
-          {/* Links */}
-          <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6">
-            <a href="/media-buying" className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
-              Discover Media Buying <span className="text-xl">↗</span>
-            </a>
-            <button onClick={() => scrollToSection(localLibraryRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
-              Learn about Local Library
-            </button>
-            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
-              For Agencies
-            </button>
-          </div>
-          
           {/* Circular Media Site Icons - Apple Floating Style */}
-          <div className="relative h-44 md:h-80 mt-12 md:max-w-xl mx-auto">
+          <div className="relative h-44 md:h-64 mt-8 md:max-w-md mx-auto">
             {/* Purple glow effect behind center icon */}
             <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-36 h-36 md:w-72 md:h-72 rounded-full bg-gradient-to-t from-[#bf5af2]/40 via-[#bf5af2]/20 to-transparent blur-3xl" />
             <div className="absolute left-1/2 -translate-x-1/2 bottom-4 md:bottom-8 w-28 h-28 md:w-60 md:h-60 rounded-full bg-[#bf5af2]/30 blur-2xl" />
@@ -534,6 +521,19 @@ const ScrollColorSection = ({
                 </div>
               </>
             )}
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6 mt-10">
+            <a href="/media-buying" className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+              Discover Media Buying <span className="text-xl">↗</span>
+            </a>
+            <button onClick={() => scrollToSection(localLibraryRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+              Learn about Local Library
+            </button>
+            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+              For Agencies
+            </button>
           </div>
         </div>
 
