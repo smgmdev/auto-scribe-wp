@@ -372,7 +372,7 @@ const NotFound = () => {
         <div className="bg-black text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight pointer-events-auto">
           <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap overflow-hidden max-w-[980px] mx-auto">
             <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
-            <span><span className="font-bold">Model List</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
+            <span><span className="font-bold">Model List</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd> / in-chat: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">/models</kbd></span>
             <span><span className="font-bold">Exit</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
           </div>
         </div>
