@@ -595,7 +595,7 @@ export default function MediaBuying() {
           {/* Slider Container */}
           <div 
             id="features-slider"
-            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 snap-x snap-mandatory"
+            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 md:snap-x md:snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
             onWheel={(e) => {
               const isHorizontalScroll = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
@@ -607,7 +607,7 @@ export default function MediaBuying() {
             }}
           >
             {/* Card 1 - Verified Publishers (Light gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col md:snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-white" />
@@ -630,7 +630,7 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 2 - Instant Quotes (Blue) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col md:snap-start min-h-[520px] md:min-h-[580px] bg-[#0071e3]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
@@ -669,7 +669,7 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 3 - China Market (Red) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#cc0000]">
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col md:snap-start min-h-[520px] md:min-h-[580px] bg-[#cc0000]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none overflow-hidden flex items-center justify-center">
                   <img src={chinaDragonIcon} alt="Dragon" className="w-full h-full object-contain" />
@@ -698,7 +698,7 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 4 - Fast Turnaround (Green gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f0fff0 0%, #d4edda 50%, #a8e6cf 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col md:snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f0fff0 0%, #d4edda 50%, #a8e6cf 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#34c759] to-[#30d158] flex items-center justify-center shadow-lg">
                   <Clock className="w-5 h-5 text-white" />
@@ -734,7 +734,7 @@ export default function MediaBuying() {
             </div>
 
             {/* Card 5 - Trusted Agencies (Purple gradient) */}
-            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f8f0ff 0%, #e8d5f9 50%, #d4a5ff 100%)' }}>
+            <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col md:snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #f8f0ff 0%, #e8d5f9 50%, #d4a5ff 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#af52de] to-[#5856d6] flex items-center justify-center shadow-lg">
                   <Users className="w-5 h-5 text-white" />
