@@ -405,7 +405,7 @@ export default function SelfPublishing() {
             ) : null}
             
             {/* Info text - Apple style */}
-            <div className="text-center mt-16 md:mt-24 max-w-3xl mx-auto">
+            <div className="text-center mt-8 md:mt-12 max-w-3xl mx-auto">
               <p className="text-sm text-white/60 leading-relaxed mb-4">
                 Arcana Mace credits are required to publish articles. If anyone asks you to share your account credentials or use credits outside the Arcana Mace platform, you may be the target of a scam.
               </p>
