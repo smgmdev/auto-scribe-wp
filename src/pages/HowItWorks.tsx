@@ -1360,6 +1360,9 @@ const HowItWorks = () => {
       </section>
 
 
+      {/* Footer */}
+      <PWAInstallButtons />
+
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
@@ -1383,8 +1386,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <PWAInstallButtons />
+      <hr className="border-[#d2d2d7]" />
       <Footer narrow showTopBorder />
     </div>
   );
