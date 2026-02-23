@@ -543,7 +543,7 @@ export default function SelfPublishing() {
                   Need more? Add more.
                 </h3>
                 <p className="text-base md:text-lg text-[#86868b] mb-4 leading-relaxed">
-                  Add credits to your Arcana Mace account anytime. It's fast, secure, and easy to do directly from the credit management section in your account dashboard using a credit or debit card. You can also request an invoice for a bank transfer top-up — contact support to submit an invoice request.
+                  Add credits to your Arcana Mace account anytime. It's fast, secure, and easy to do directly from the Credit Management section in your Account Dashboard using a credit or debit card. You can also request an invoice for a bank transfer top-up — contact support to submit an invoice request.
                 </p>
                 <div className="flex flex-wrap gap-6">
                   <a 
