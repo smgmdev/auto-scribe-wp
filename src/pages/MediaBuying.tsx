@@ -40,7 +40,7 @@ function LoadingFavicon({ src, alt, className }: { src: string; alt: string; cla
 
 function RotatingMediaLogo({ sites, large }: { sites: MediaSite[]; large?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const sitesWithFavicon = useMemo(() => sites.filter(s => s.favicon), [sites]);
+  const sitesWithFavicon = useMemo(() => sites.filter(s => s.favicon && !s.subcategory?.includes('China')), [sites]);
 
   useEffect(() => {
     if (sitesWithFavicon.length < 2) return;
