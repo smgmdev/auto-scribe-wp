@@ -372,57 +372,40 @@ export default function SelfPublishing() {
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
             ) : (
-              <div className="flex flex-col gap-6 md:gap-10">
-                {/* Top row - 3 featured media */}
-                <div className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10">
-                  {mediaSites.slice(0, 3).map((site) => (
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+                {mediaSites.map((site, i) => {
+                  // First 3 items span larger on desktop
+                  const isFeatured = i < 3;
+                  return (
                     <div 
                       key={site.id} 
-                      className="flex flex-col items-center gap-3 group cursor-pointer"
+                      className={`group cursor-pointer relative overflow-hidden rounded-xl bg-[#1d1d1f] ${
+                        isFeatured ? 'aspect-[4/3] md:col-span-1 lg:row-span-1' : 'aspect-square'
+                      }`}
                       onClick={() => setSelectedSite(site)}
                     >
-                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-none bg-white shadow-md overflow-hidden group-hover:scale-110 group-hover:shadow-xl transition-all duration-300">
-                        {site.favicon ? (
-                          <img 
-                            src={site.favicon} 
-                            alt={site.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7]">
-                            <Globe className="w-8 h-8 md:w-10 md:h-10 text-[#6e6e73]" />
-                          </div>
-                        )}
+                      {site.favicon ? (
+                        <img 
+                          src={site.favicon} 
+                          alt={site.name} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-[#2d2d2f]">
+                          <Globe className="w-8 h-8 md:w-10 md:h-10 text-white/30" />
+                        </div>
+                      )}
+                      {/* Gradient overlay with name */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                        <span className="text-white text-xs md:text-sm font-semibold leading-tight">{site.name}</span>
                       </div>
-                      <span className="text-xs md:text-sm text-[#1d1d1f] font-semibold text-center max-w-[120px]">{site.name}</span>
-                    </div>
-                  ))}
-                </div>
-                {/* Bottom rows - remaining media */}
-                <div className="flex flex-wrap justify-center gap-5 md:gap-8 lg:gap-10">
-                  {mediaSites.slice(3).map((site) => (
-                    <div 
-                      key={site.id} 
-                      className="flex flex-col items-center gap-3 group cursor-pointer"
-                      onClick={() => setSelectedSite(site)}
-                    >
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-white shadow-md overflow-hidden group-hover:scale-110 group-hover:shadow-xl transition-all duration-300">
-                        {site.favicon ? (
-                          <img 
-                            src={site.favicon} 
-                            alt={site.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7]">
-                            <Globe className="w-7 h-7 md:w-8 md:h-8 text-[#6e6e73]" />
-                          </div>
-                        )}
+                      {/* Always-visible name on mobile */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 md:hidden">
+                        <span className="text-white text-[10px] font-medium leading-tight line-clamp-1">{site.name}</span>
                       </div>
-                      <span className="text-[11px] md:text-sm text-[#1d1d1f] font-semibold text-center max-w-[110px]">{site.name}</span>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             )}
             
