@@ -456,12 +456,6 @@ export default function SelfPublishing() {
                 </p>
                 <div className="flex flex-wrap gap-6">
                   <a 
-                    href="/account" 
-                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
-                  >
-                    <span className="group-hover:underline">Buy credits</span> <span>↗</span>
-                  </a>
-                  <a 
                     href="/help/credits-pricing" 
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
@@ -551,6 +545,12 @@ export default function SelfPublishing() {
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
                     <span className="group-hover:underline">Learn more</span> <span>↗</span>
+                  </a>
+                  <a 
+                    href="/account" 
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
+                  >
+                    <span className="group-hover:underline">Add credits</span> <span>↗</span>
                   </a>
                 </div>
               </div>
