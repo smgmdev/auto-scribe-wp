@@ -415,8 +415,7 @@ export default function AIArticleGeneration() {
               <div className="bg-[#f5f5f7] rounded-xl p-5">
                 <h4 className="text-lg font-semibold text-[#1d1d1f] mb-3">Requirements</h4>
                 <p className="text-[14px] text-[#1d1d1f] leading-relaxed">
-                  To publish articles, you'll need a WordPress site with REST API enabled and an application password. 
-                  Sites must be accessible via HTTPS. Credits are required for each publication — 
+                  To publish articles, you'll need credits for each publication — 
                   <Link to="/help/credits-pricing" className="text-[#06c] hover:underline"> learn about credits</Link>.
                 </p>
               </div>
