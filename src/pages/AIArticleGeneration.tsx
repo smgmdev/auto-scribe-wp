@@ -388,10 +388,10 @@ export default function AIArticleGeneration() {
               </p>
 
               <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] tracking-tight mb-4 mt-10">
-                Publishing to WordPress
+                Publishing to WordPress as an owner/administrator
               </h3>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-4">
-                <strong>Connected sites.</strong> It's easy to publish articles to your connected WordPress sites. 
+                <strong>Connected sites.</strong> If you have an agency account and you have connected your WordPress site to Arcana Mace, it's easy to publish articles to your own connected WordPress sites at no cost. 
                 Select your target site, choose categories and tags, and click publish. The article will be live on your site within seconds.
               </p>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-4">
