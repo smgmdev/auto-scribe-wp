@@ -101,7 +101,7 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
           }}
         >
           {doubled.map((site, i) => (
-            <div key={`top-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white p-1`}>
+            <div key={`top-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white`}>
               <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
             </div>
           ))}
@@ -118,7 +118,7 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
           }}
         >
           {doubled.map((site, i) => (
-            <div key={`bot-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white p-1`}>
+            <div key={`bot-${i}`} className={`${logoSize} flex-shrink-0 rounded-none overflow-hidden bg-white`}>
               <img src={site.favicon!} alt={site.name} className="w-full h-full object-cover" />
             </div>
           ))}
@@ -665,7 +665,16 @@ export default function MediaBuying() {
             <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#cc0000]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-white/20 flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-white" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white">
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1.5 0 3-.3 4.3-.9" />
+                    <path d="M17 3c-1 2-1 4 0 6s3 4 5 4" />
+                    <path d="M22 7c-2 0-4 1-5 3" />
+                    <path d="M17 9c1 2 0 5-2 6" />
+                    <path d="M14 13c-1 1-3 2-5 1" />
+                    <path d="M20 15c-1 1-2 3-1 5" />
+                    <path d="M19 20l2-1" />
+                    <path d="M15 15c0 2 1 4 3 5" />
+                  </svg>
                 </div>
                 <span className="text-lg font-semibold text-white">China Market</span>
               </div>
