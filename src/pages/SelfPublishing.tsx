@@ -612,10 +612,9 @@ export default function SelfPublishing() {
             Beware of publishing scams. Do not share your account credentials.
           </p>
           <p className="text-xs text-[#6e6e73] mb-4 leading-normal">
-            Valid only for authorized transactions on Arcana Mace. For assistance, visit{' '}
+            For assistance, visit{' '}
             <a href="/help" className="text-[#06c] hover:underline">our Help Center</a>{' '}
-            or contact support. Credits are non-refundable and non-transferable, except as required by law. Arcana Mace is not responsible for unauthorized use. Terms apply; see{' '}
-            <a href="/terms-of-service" className="text-[#06c] hover:underline">Terms of Service</a>. © 2025 Arcana Mace. All rights reserved.
+            or contact support. Credits are non-refundable and non-transferable.
           </p>
           <p className="text-xs text-[#6e6e73] leading-normal">
             We approximate your location from your internet IP address by matching it to a geographic region or from the location entered during your previous visit to Arcana Mace.
