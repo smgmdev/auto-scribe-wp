@@ -699,19 +699,30 @@ export default function MediaBuying() {
                 <span className="text-lg font-semibold text-[#1d1d1f]">Fast Turnaround</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
-                Most publications deliver within 24-72 hours. Track your order in real-time and get notified the moment your article goes live.
+                Most publications deliver within 48-72 hours.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => navigate('/help/orders-delivery')}>
                 View timelines
               </Button>
-              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+              <div className="mt-auto pt-8 flex items-center justify-end flex-1">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
-                  <Clock className="w-16 h-16 md:w-20 md:h-20 text-[#34c759]" />
+                  <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#34c759" strokeWidth="4" />
+                    {/* Hour hand */}
+                    <line x1="50" y1="50" x2="50" y2="25" stroke="#34c759" strokeWidth="4" strokeLinecap="round">
+                      <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="12s" repeatCount="indefinite" />
+                    </line>
+                    {/* Minute hand */}
+                    <line x1="50" y1="50" x2="50" y2="18" stroke="#34c759" strokeWidth="2.5" strokeLinecap="round">
+                      <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="3s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="50" cy="50" r="3" fill="#34c759" />
+                  </svg>
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
                 <p className="text-xs text-[#1d1d1f]/60 font-medium">Speed</p>
-                <p className="text-xs text-[#1d1d1f]/80">24-72 hour delivery</p>
+                <p className="text-xs text-[#1d1d1f]/80">Average 48-72 hour delivery</p>
               </div>
             </div>
 
