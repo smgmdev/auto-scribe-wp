@@ -593,7 +593,9 @@ export default function SelfPublishing() {
         </section>
       </main>
 
-      <PWAInstallButtons />
+      <div className="-mt-6">
+        <PWAInstallButtons />
+      </div>
 
       {/* Disclaimers Section - matches How It Works style */}
       <section className="bg-[#f5f5f7]">
