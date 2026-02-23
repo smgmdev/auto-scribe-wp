@@ -341,7 +341,7 @@ export default function SelfPublishing() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-14">
               Publish your story.<br />
-              Reach the world.
+              In seconds. 1 click.
             </h1>
             
             <Button 
