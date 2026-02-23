@@ -468,7 +468,7 @@ export default function AIArticleGeneration() {
               </div>
               <h4 className="text-xl font-semibold text-[#1d1d1f] mb-2">Media Buying</h4>
               <p className="text-[15px] text-[#1d1d1f] leading-relaxed mb-4">
-                Access premium media sites and expand your content's reach to global audiences.
+                Access international media sites and expand your content's reach to global audiences.
               </p>
               <div className="space-y-3">
                 <Link to="/media-buying" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
