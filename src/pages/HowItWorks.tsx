@@ -310,7 +310,7 @@ const ScrollColorSection = ({
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -549,9 +549,35 @@ const ScrollColorSection = ({
             Arcana Mace is fully built, powered, and supervised by AI. Operating continuously in the background and running 24/7 to ensure seamless performance and automation.
           </p>
 
-          {/* Security icon */}
+          {/* Security animation inline */}
           <div className="flex flex-col items-center justify-center mt-10">
-            <Shield className="w-10 h-10 text-[#f2a547] drop-shadow-[0_0_15px_rgba(242,165,71,0.5)]" />
+            <div className="relative w-32 h-32 md:w-40 md:h-40">
+              <div className="absolute inset-0 rounded-full bg-[#f2a547]/10 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+                <div className="w-full h-full rounded-full border border-[#f2a547]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
+              </div>
+              <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full border border-[#f2a547]/25" style={{ transform: 'rotateX(70deg) rotateZ(60deg)' }} />
+              </div>
+              <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                <div className="w-full h-full rounded-full border border-[#f2a547]/20" style={{ transform: 'rotateX(70deg) rotateZ(120deg)' }} />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative">
+                  <div className="absolute inset-0 -m-3 rounded-full bg-[#f2a547]/20 blur-xl animate-pulse" />
+                  <Shield className="w-10 h-10 text-[#f2a547] drop-shadow-[0_0_15px_rgba(242,165,71,0.5)] relative z-10" />
+                </div>
+              </div>
+              <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#f2a547] shadow-[0_0_8px_rgba(242,165,71,0.8)]" />
+              </div>
+              <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#f2a547]/70 shadow-[0_0_6px_rgba(242,165,71,0.6)]" />
+              </div>
+              <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#f2a547]/50 shadow-[0_0_6px_rgba(242,165,71,0.4)]" />
+              </div>
+            </div>
           </div>
           <SecurityFadeText />
         </div>
