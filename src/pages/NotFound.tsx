@@ -92,7 +92,7 @@ function LostChat() {
 
   return (
     <div className="w-full h-full bg-transparent flex flex-col">
-      <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
+      <div className="px-3 py-2 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">Lost Souls Chat</span>
         <span className="text-[10px] text-muted-foreground/60">You: {nickname}</span>
       </div>
