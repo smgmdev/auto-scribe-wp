@@ -405,8 +405,8 @@ export default function AIArticleGeneration() {
                 Viewing your articles
               </h3>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed">
-                Track all your generated and published articles in the Articles view. You can see publication status, 
-                target sites, and direct links to your live content. Filter by status to manage drafts and published pieces.
+                 Track all your generated and published articles in the My Articles view. You can see publication status, 
+                 target sites, and direct links to your live content. Filter by tabs to manage drafts and published pieces.
               </p>
             </div>
 
