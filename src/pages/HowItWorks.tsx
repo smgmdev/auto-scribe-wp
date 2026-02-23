@@ -521,8 +521,8 @@ const ScrollColorSection = ({
                       animation: 'marquee 3s linear infinite',
                     }}
                   >
-                    <span className="text-4xl font-bold text-black pr-6">EUR USD JPY USDT CNY</span>
-                    <span className="text-4xl font-bold text-black pr-6">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-gray-700 pr-6">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-gray-700 pr-6">EUR USD JPY USDT CNY</span>
                   </div>
                 </div>
               </div>
