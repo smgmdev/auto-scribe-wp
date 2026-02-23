@@ -635,7 +635,7 @@ const ScrollColorSection = ({
 
           {/* CTA */}
           <div className="flex items-center justify-center mt-10">
-            <button onClick={() => scrollToSection(aiSectionRef)} className="px-6 py-2.5 bg-[#06c] text-white text-sm font-medium hover:bg-[#06c]/90 transition-colors">
+            <button onClick={() => scrollToSection(aiSectionRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors font-medium">
               There is more! Check out Arcana Mace AI
             </button>
           </div>
