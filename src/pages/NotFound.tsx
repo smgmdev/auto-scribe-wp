@@ -189,6 +189,13 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       });
     }, 1000);
 
+    // Handle /rules command
+    if (trimmed.toLowerCase() === "/rules") {
+      await supabase.from("lost_chat_messages").insert({ nickname, message: "/rules" });
+      await supabase.from("lost_chat_messages").insert({ nickname: "Arcana Mace", message: "No link spam. No bots. Watch your language." });
+      return;
+    }
+
     // Handle /models command - broadcast publicly & activate selection globally
     if (trimmed.toLowerCase() === "/models") {
       const modelList = MODELS.map((m, i) => `${i + 1}. ${m.name}`).join("\n");
