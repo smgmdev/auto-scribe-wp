@@ -1241,7 +1241,10 @@ const HowItWorks = () => {
 
 
       {/* Footer */}
-      <PWAInstallButtons />
+      <div className="border-t border-[#424245]" />
+      <div className="bg-black">
+        <PWAInstallButtons />
+      </div>
 
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
