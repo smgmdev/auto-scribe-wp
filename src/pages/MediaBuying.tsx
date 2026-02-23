@@ -618,7 +618,7 @@ export default function MediaBuying() {
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-xs text-white/50 font-medium">Coverage · 您的内容可以翻译成中文。</p>
+                <p className="text-xs text-white/50 font-medium">您的内容可以翻译成中文。</p>
                 <p className="text-xs text-white/70">以制胜之势开拓中国市场</p>
               </div>
             </div>
