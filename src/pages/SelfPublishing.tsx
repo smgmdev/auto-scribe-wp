@@ -552,12 +552,6 @@ export default function SelfPublishing() {
                   >
                     <span className="group-hover:underline">Learn more</span> <span>↗</span>
                   </a>
-                  <a 
-                    href="/account" 
-                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
-                  >
-                    <span className="group-hover:underline">Add credits</span> <span>↗</span>
-                  </a>
                 </div>
               </div>
             </div>
