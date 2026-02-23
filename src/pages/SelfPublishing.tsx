@@ -611,7 +611,7 @@ export default function SelfPublishing() {
       <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
-            <p>
+            <p className="font-semibold text-[#1d1d1f]">
               Beware of publishing scams. Do not share your account credentials.
             </p>
             <p>
