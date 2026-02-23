@@ -119,6 +119,17 @@ const helpCategories = [
     slug: 'ai-security-supervision',
   },
   {
+    title: 'AI Marketing Strategy',
+    topics: [
+      'Why Frequent Publishing Matters',
+      'The Power of AI Auto Publishing',
+      'Getting Discovered by AI Search Engines',
+      'Media Buying for AI Visibility',
+      'Quantity and Quality Combined',
+    ],
+    slug: 'ai-marketing-strategy',
+  },
+  {
     title: 'Troubleshooting',
     topics: [
       'Common Issues',
