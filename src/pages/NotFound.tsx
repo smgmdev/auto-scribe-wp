@@ -91,7 +91,7 @@ function LostChat() {
   }, [input, nickname]);
 
   return (
-    <div className="w-full max-w-sm bg-black/20 backdrop-blur-md rounded-lg border border-white/10 flex flex-col" style={{ height: 280 }}>
+    <div className="w-full max-w-sm h-full bg-black/20 backdrop-blur-md rounded-lg border border-white/10 flex flex-col">
       <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">Lost Souls Chat</span>
         <span className="text-[10px] text-muted-foreground/60">You: {nickname}</span>
@@ -166,42 +166,49 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6 px-4">
-      <a href="/" className="text-primary underline hover:text-primary/90">
-        Return to Home
-      </a>
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-12 w-12 hover:bg-black hover:text-white">
-          {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-        </Button>
-        <img src={amBlackLogo} alt="Arcana Mace" className="h-8 w-8" />
-        <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-full h-10 w-10 hover:bg-black hover:text-white">
-          <SkipForward className="h-5 w-5" />
-        </Button>
+    <div className="flex flex-col h-[100dvh] bg-muted">
+      {/* Top half: 3D model + controls */}
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 px-4 pt-4">
+        <a href="/" className="text-primary underline hover:text-primary/90 text-sm">
+          Return to Home
+        </a>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-full h-10 w-10 hover:bg-black hover:text-white">
+            {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          </Button>
+          <img src={amBlackLogo} alt="Arcana Mace" className="h-7 w-7" />
+          <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-full h-9 w-9 hover:bg-black hover:text-white">
+            <SkipForward className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="relative w-full max-w-[340px] flex-1 min-h-0">
+          {loading && !error && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
+            </div>
+          )}
+          {error ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-4xl font-bold text-muted-foreground">404</p>
+            </div>
+          ) : (
+            <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
+              <ambientLight intensity={0.6} />
+              <directionalLight position={[5, 5, 5]} intensity={1} />
+              <Suspense fallback={null}>
+                <AnimeModel onLoaded={() => setLoading(false)} />
+                <Environment preset="studio" />
+              </Suspense>
+              <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+            </Canvas>
+          )}
+        </div>
       </div>
-      <div className="relative w-[260px] h-[260px] sm:w-[340px] sm:h-[340px]">
-        {loading && !error && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground/30 border-t-muted-foreground" />
-          </div>
-        )}
-        {error ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-4xl font-bold text-muted-foreground">404</p>
-          </div>
-        ) : (
-          <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 5, 5]} intensity={1} />
-            <Suspense fallback={null}>
-              <AnimeModel onLoaded={() => setLoading(false)} />
-              <Environment preset="studio" />
-            </Suspense>
-            <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
-          </Canvas>
-        )}
+
+      {/* Bottom half: Chat */}
+      <div className="h-[45dvh] sm:h-[40dvh] flex items-center justify-center px-4 pb-4">
+        <LostChat />
       </div>
-      <LostChat />
     </div>
   );
 };
