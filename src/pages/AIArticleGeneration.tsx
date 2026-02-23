@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper, Plus } from 'lucide-react';
 
 function SliderImage({ src, alt }: { src: string; alt: string }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -355,7 +355,7 @@ export default function AIArticleGeneration() {
               </p>
               <div className="space-y-3">
                 <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'compose' } : { redirectTo: '/account', targetView: 'compose' }} className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
+                  <Plus className="w-4 h-4" />
                   New Article
                 </Link>
                 <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'headlines' } : { redirectTo: '/account', targetView: 'headlines' }} className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
