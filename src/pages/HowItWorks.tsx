@@ -269,8 +269,28 @@ const ScrollColorSection = ({
               You should also know
             </h2>
             <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-              Arcana Mace has 2 media libraries.
+              Arcana Mace has 2 media libraries:
             </p>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-8">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white">Local Media Library</span>
+                <button 
+                  onClick={() => scrollToSection(localLibraryRef)}
+                  className="px-6 py-2 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+                >
+                  GO
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white">Global Media Library</span>
+                <button 
+                  onClick={() => scrollToSection(globalLibraryRef)}
+                  className="px-6 py-2 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+                >
+                  GO
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>
