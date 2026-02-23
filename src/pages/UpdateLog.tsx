@@ -554,7 +554,7 @@ export default function UpdateLog() {
               placeholder="Search updates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 rounded-none bg-black border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-colors"
+              className="w-full px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-colors"
             />
           </div>
         </div>
