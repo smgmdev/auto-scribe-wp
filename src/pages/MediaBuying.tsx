@@ -392,7 +392,7 @@ export default function MediaBuying() {
       <section className="py-20 md:py-28" style={{ background: 'linear-gradient(180deg, #f5f5f7 0%, #e8f4fc 50%, #d6e8f5 100%)' }}>
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           {/* Icon grid - 3 rows x 5 columns */}
-          <div className="flex flex-col items-center gap-4 md:gap-6 mb-16">
+          <div className="flex flex-col items-center gap-4 md:gap-6 mb-16 px-4 md:px-0">
             {/* Row 1 */}
             <div className="flex items-center justify-center gap-4 md:gap-6">
               {shuffledSites.slice(0, 5).map((site) => (
