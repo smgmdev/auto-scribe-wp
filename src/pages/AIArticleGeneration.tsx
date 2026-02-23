@@ -317,7 +317,7 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section - Apple Open Source style */}
-      <section className="bg-[#1d1d1f] pt-28 md:pt-36 pb-20 md:pb-28">
+      <section className="bg-[#1d1d1f] pt-36 md:pt-36 pb-20 md:pb-28">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
             AI Article Generation.
