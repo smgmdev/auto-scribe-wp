@@ -38,7 +38,7 @@ function LoadingFavicon({ src, alt, className }: { src: string; alt: string; cla
   );
 }
 
-function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
+function RotatingMediaLogo({ sites, large }: { sites: MediaSite[]; large?: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const sitesWithFavicon = useMemo(() => sites.filter(s => s.favicon), [sites]);
 
@@ -50,17 +50,18 @@ function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
     return () => clearInterval(interval);
   }, [sitesWithFavicon.length]);
 
+  const sizeClass = large ? 'w-32 h-32 md:w-40 md:h-40' : 'w-10 h-10';
   const current = sitesWithFavicon[currentIndex];
   if (!current) {
     return (
-      <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg">
-        <Shield className="w-5 h-5 text-white" />
+      <div className={`${sizeClass} rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center shadow-lg`}>
+        <Shield className={large ? 'w-12 h-12' : 'w-5 h-5'} />
       </div>
     );
   }
 
   return (
-    <div className="w-10 h-10 rounded-none overflow-hidden shadow-lg flex-shrink-0">
+    <div className={`${sizeClass} rounded-none overflow-hidden shadow-lg flex-shrink-0`}>
       <img
         src={current.favicon!}
         alt={current.name}
@@ -607,7 +608,9 @@ export default function MediaBuying() {
             {/* Card 1 - Verified Publishers (Light gradient) */}
             <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px]" style={{ background: 'linear-gradient(180deg, #fbfbfd 0%, #f5e6e0 50%, #ffe5c8 100%)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <RotatingMediaLogo sites={shuffledSites} />
+                <div className="w-10 h-10 rounded-none bg-gradient-to-br from-[#ff6b6b] to-[#ee5a5a] flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white" />
+                </div>
                 <span className="text-lg font-semibold text-[#1d1d1f]">Real Media Network</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
@@ -617,9 +620,7 @@ export default function MediaBuying() {
                 Learn more
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
-                  <CheckCircle className="w-16 h-16 md:w-20 md:h-20 text-[#ff6b6b]" />
-                </div>
+                <RotatingMediaLogo sites={shuffledSites} large />
               </div>
               <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
                 <p className="text-xs text-[#1d1d1f]/60 font-medium">Compatibility</p>
