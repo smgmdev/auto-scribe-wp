@@ -797,9 +797,9 @@ export default function MediaBuying() {
       />
 
 
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[#0071e3]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-semibold text-white text-center mb-16">
             Questions? Answers.
           </h2>
 
@@ -826,14 +826,14 @@ export default function MediaBuying() {
                 answer: "Both options are available. You can submit your own finished article, provide a detailed brief for agencies to write, or collaborate with our agencies to create content that meets publication standards."
               },
             ].map((faq, index) => (
-              <AccordionItem key={index} value={`faq-${index}`} className="border-t border-border first:border-t-0">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-[#1d1d1f] hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
+              <AccordionItem key={index} value={`faq-${index}`} className="border-t border-white/20 first:border-t-0">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-white/80 data-[state=open]:text-white transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">{faq.question}</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-[#06c] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#06c]" />
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/60 transition-all duration-300 group-hover:text-white group-data-[state=open]:rotate-45 group-data-[state=open]:text-white" />
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base md:text-lg">
+                <AccordionContent className="text-white/80 leading-relaxed pb-6 text-base md:text-lg">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
