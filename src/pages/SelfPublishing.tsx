@@ -592,12 +592,12 @@ export default function SelfPublishing() {
                   <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
                     Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
                   </p>
-                  <a 
-                    href="/media-buying" 
-                    className="inline-flex items-center gap-1 bg-[#2997ff] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-5 py-2.5 transition-colors"
-                  >
-                    Learn more <ChevronRight className="w-4 h-4" />
-                  </a>
+                    <a
+                      href="/media-buying"
+                      className="inline-flex items-center bg-[#0071e3] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-8 py-3 transition-colors"
+                    >
+                      Learn more
+                    </a>
                 </div>
               </div>
             </div>
