@@ -427,7 +427,7 @@ export default function SelfPublishing() {
               Publish with your<br />Arcana Mace credits.
             </h2>
             
-            <div className="pb-8 md:pb-24">
+            <div className="pb-0 md:pb-24">
               <div>
                 <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-6">
                   Your credits. Your wallet.
