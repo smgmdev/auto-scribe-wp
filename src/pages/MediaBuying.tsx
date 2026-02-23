@@ -268,14 +268,20 @@ export default function MediaBuying() {
           <span className="text-xl font-semibold text-white">Media Buying</span>
           <nav className="hidden md:flex items-center gap-6">
             <button 
-              onClick={() => navigate('/self-publishing')}
+              onClick={() => navigate('/help/media-buying')}
               className="text-xs text-white/60 hover:text-white transition-colors"
             >
-              Self Publishing
+              Learn More
             </button>
             <Button
               size="sm"
-              onClick={handleGetStarted}
+              onClick={() => {
+                if (user) {
+                  navigate('/account', { state: { targetView: 'sites', targetTab: 'global' } });
+                } else {
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'global' } });
+                }
+              }}
               className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-black transition-all duration-200"
             >
               Browse Global Media Library
