@@ -317,7 +317,7 @@ export default function AIArticleGeneration() {
                 Prepare for publishing
               </h2>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                AI-generated content lets you publish professional articles to <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'sites', targetTab: 'local' } : { redirectTo: '/account', targetView: 'sites', targetTab: 'local' }} className="text-[#06c] hover:underline">Local Media Library</Link> sites instantly. 
+                AI-generated content lets you publish professional articles to <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'sites', targetTab: 'instant' } : { redirectTo: '/account', targetView: 'sites', targetTab: 'instant' }} className="text-[#06c] hover:underline">Local Media Library</Link> sites instantly. 
                 Articles created with Arcana Mace AI are optimized for SEO and can take advantage of advanced features such as meta tags and focus keywords.
               </p>
 
