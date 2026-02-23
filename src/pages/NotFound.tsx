@@ -57,10 +57,25 @@ interface ChatMessage {
   is_system?: boolean;
 }
 
+// Spam prevention: blocked words and link patterns
+const BLOCKED_PATTERNS = [
+  /https?:\/\//i, /www\./i, /\.com\b/i, /\.net\b/i, /\.org\b/i, /\.io\b/i,
+  /t\.me\//i, /wa\.me\//i, /discord\.(gg|com)/i, /bit\.ly/i, /tinyurl/i,
+  /\b(fuck|shit|ass|bitch|damn|cunt|dick|pussy|nigger|faggot)\b/i,
+];
+
+const isSpamMessage = (msg: string): boolean => {
+  return BLOCKED_PATTERNS.some((pattern) => pattern.test(msg));
+};
+
+const RATE_LIMIT_MS = 3000; // 3 seconds between messages
+
 function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(true);
+  const [cooldown, setCooldown] = useState(false);
+  const lastSentRef = useRef<number>(0);
   const [nickname] = useState(() => {
     const adjectives = ["Lost", "Wandering", "Drifting", "Stray", "Roaming", "Ghost", "Phantom", "Shadow"];
     const nouns = ["Traveler", "Soul", "Spirit", "Visitor", "Explorer", "Stranger", "Nomad", "Drifter"];
@@ -127,8 +142,26 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || cooldown) return;
+
+    // Rate limiting
+    const now = Date.now();
+    if (now - lastSentRef.current < RATE_LIMIT_MS) {
+      setCooldown(true);
+      setTimeout(() => setCooldown(false), RATE_LIMIT_MS - (now - lastSentRef.current));
+      return;
+    }
+
+    // Content filtering
+    if (isSpamMessage(trimmed)) {
+      setInput("");
+      return; // Silently reject
+    }
+
     setInput("");
+    lastSentRef.current = Date.now();
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), RATE_LIMIT_MS);
 
     // Handle /models command - broadcast publicly & activate selection globally
     if (trimmed.toLowerCase() === "/models") {
@@ -166,7 +199,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
 
 
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
-  }, [input, nickname, onSelectModel, modelSelectionActive]);
+  }, [input, nickname, onSelectModel, modelSelectionActive, cooldown]);
 
   return (
     <div className="w-full h-full bg-transparent flex flex-col">
@@ -216,7 +249,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           className="h-8 text-xs bg-transparent border-none shadow-none ring-0 focus-visible:ring-0 focus-visible:border-none text-left placeholder:text-left rounded-r-none"
           maxLength={200}
         />
-        <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-black rounded-l-none">
+        <Button variant="ghost" size="icon" onClick={sendMessage} disabled={cooldown} className={`h-8 w-8 shrink-0 hover:bg-black rounded-l-none ${cooldown ? 'opacity-40' : ''}`}>
           <Send className="h-3.5 w-3.5" />
         </Button>
       </div>
