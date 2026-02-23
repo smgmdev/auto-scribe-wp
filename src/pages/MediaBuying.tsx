@@ -90,7 +90,7 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
   const duration = chinaSites.length * 2; // seconds
 
   return (
-    <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 overflow-hidden flex flex-col justify-center gap-1">
+    <div className="w-full rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 overflow-hidden flex flex-col justify-center gap-1 py-6">
       {/* Top row - slides left */}
       <div className="overflow-hidden">
         <div
