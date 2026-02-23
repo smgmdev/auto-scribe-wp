@@ -1259,16 +1259,6 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* Phone Carousel - Recently Published Articles */}
-      <section className="bg-white">
-        {loadingArticles ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[#86868b]" />
-          </div>
-        ) : articles.length > 0 ? (
-          <ArticleCarousel articles={articles} scrollContainerRef={scrollContainerRef} />
-        ) : null}
-      </section>
 
       <section id="first-to-know" className="py-24 md:py-32 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
