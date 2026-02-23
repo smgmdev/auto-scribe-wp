@@ -271,7 +271,7 @@ const ScrollColorSection = ({
               <span className="text-white">Local Library</span>
               <button 
                 onClick={() => scrollToSection(localLibraryRef)}
-                className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+                className="px-5 py-1.5 bg-black text-white text-lg font-medium border-2 border-transparent hover:border-[#f2a547] hover:text-[#f2a547] hover:shadow-[0_0_12px_rgba(242,165,71,0.5)] transition-all duration-300"
               >
                 GO
               </button>
@@ -279,7 +279,7 @@ const ScrollColorSection = ({
               <span className="text-white">Global Library</span>
               <button 
                 onClick={() => scrollToSection(globalLibraryRef)}
-                className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+                className="px-5 py-1.5 bg-black text-white text-lg font-medium border-2 border-transparent hover:border-[#f2a547] hover:text-[#f2a547] hover:shadow-[0_0_12px_rgba(242,165,71,0.5)] transition-all duration-300"
               >
                 GO
               </button>
