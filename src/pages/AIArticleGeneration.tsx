@@ -434,7 +434,7 @@ export default function AIArticleGeneration() {
                 Expand your reach
               </h2>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                Go beyond your own sites with our Media Buying marketplace. Distribute your AI-generated content across premium media outlets 
+                Go beyond your own sites with our Media Buying marketplace. Distribute your AI-generated content across international media outlets 
                 to reach new audiences and build brand authority.
               </p>
 
