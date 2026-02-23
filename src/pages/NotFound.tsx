@@ -207,13 +207,13 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
-      <div className="px-0 py-2 border-t border-white/10 flex gap-0">
+      <div className="px-0 py-2 flex gap-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Say something... (/models for list)"
-          className="h-8 text-xs bg-transparent border-white/10 text-left placeholder:text-left rounded-r-none"
+          className="h-8 text-xs bg-transparent border-none shadow-none ring-0 focus-visible:ring-0 focus-visible:border-none text-left placeholder:text-left rounded-r-none"
           maxLength={200}
         />
         <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-black rounded-l-none">
