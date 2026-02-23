@@ -737,8 +737,9 @@ export default function MediaBuying() {
           </h2>
           
           <p className="text-lg md:text-xl text-[#86868b] leading-relaxed max-w-3xl mx-auto mb-10">
-            The Arcana Mace marketplace has hundreds of publications that bring you premium exposure. 
-            And every one of them meets our standards for quality, authenticity, and reach.
+            Explore the Arcana Mace marketplace, featuring a wide range of international media channels. 
+            Every agency offering placements on our platform is fully KYC-verified by Arcana Mace staff. 
+            We uphold strict standards for quality, authenticity, and audience reach.
           </p>
           
           <Button 
