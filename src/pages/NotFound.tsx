@@ -17,6 +17,7 @@ const MODELS = [
   { id: "xiexie_shanghai", name: "谢谢上海", path: "/models/xiexie_shanghai.glb", scale: 3, positionY: -2 },
   { id: "fox_girl", name: "Fox Girl", path: "/models/fox_girl.glb", scale: 3, positionY: -2 },
   { id: "dude", name: "Dude", path: "/models/dude.glb", scale: 3, positionY: -2 },
+  { id: "spiderman", name: "Spiderman", path: "/models/spiderman.glb", scale: 3, positionY: -2 },
 ];
 
 // Preload all models
