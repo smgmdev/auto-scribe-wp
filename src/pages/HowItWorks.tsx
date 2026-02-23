@@ -1365,7 +1365,7 @@ const HowItWorks = () => {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
             <p>
-              * AI Article Generation is available on all Arcana Mace plans. Generated content quality may vary depending on source material, selected tone, and target publication. Users are solely responsible for reviewing and verifying AI-generated content before publishing.
+              AI generated content quality may vary depending on source material, selected tone, and target publication. Users are solely responsible for reviewing and verifying AI-generated content before publishing.
             </p>
             <p>
               Self-Publishing via the Local Media Library requires a connected WordPress site with application password access enabled. Publishing availability depends on your WordPress site configuration, installed SEO plugins, and server response. Arcana Mace is not responsible for downtime or errors originating from third-party WordPress hosting providers.
