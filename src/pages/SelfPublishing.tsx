@@ -443,7 +443,7 @@ export default function SelfPublishing() {
                     <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
                   </a>
                 </div>
-                <div className="relative">
+                <div className="relative -mx-4 md:mx-0">
                   <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] border border-[#424245] z-10 transition-opacity duration-300" id="cm-video-loader">
                     <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
                   </div>
@@ -453,7 +453,7 @@ export default function SelfPublishing() {
                     muted
                     loop
                     playsInline
-                    className="w-[90%] mx-auto block rounded-none shadow-2xl border border-[#424245] relative z-0"
+                    className="w-full md:w-[90%] md:mx-auto md:block rounded-none shadow-2xl border border-[#424245] relative z-0"
                     onLoadedData={(e) => {
                       const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#cm-video-loader');
                       if (loader) (loader as HTMLElement).style.display = 'none';
