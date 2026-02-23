@@ -3,10 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
-import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Globe, Shield, Clock, Zap, Users, TrendingUp, CheckCircle, Star, FileText, Award, Search, User, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import { MediaSiteDialog } from '@/components/media/MediaSiteDialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
@@ -450,9 +456,11 @@ export default function MediaBuying() {
           
           {/* Description */}
           <p className="text-lg md:text-xl text-[#1d1d1f]/80 leading-relaxed mb-12 max-w-4xl">
-            Reach your audience through a network of publications and services that connect your content 
-            with the right people. Access each outlet's unique audience and maximize your market reach, 
-            backed by industry-leading verification and quality standards. Explore available media categories on Arcana Mace:
+            Reach your audience with a comprehensive network of publications and services that let you 
+            deliver your message to the right people. Access each outlet's unique audience so 
+            you can seamlessly integrate your content with the optimal reach for each market. 
+            And with industry-leading verification and quality protections built in, you're 
+            free to focus on your story.
           </p>
           
           {/* Categories - modern pill tags */}
@@ -674,7 +682,7 @@ export default function MediaBuying() {
             Questions? Answers.
           </h2>
 
-          <div className="space-y-0">
+          <Accordion type="multiple" className="w-full">
             {[
               {
                 question: "How do I get started with media buying?",
@@ -697,25 +705,19 @@ export default function MediaBuying() {
                 answer: "Both options are available. You can submit your own finished article, provide a detailed brief for agencies to write, or collaborate with our agencies to create content that meets publication standards."
               },
             ].map((faq, index) => (
-              <details key={index} className="group border-t border-white/20 first:border-t-0">
-                <summary className="flex items-center justify-between py-6 cursor-pointer list-none">
-                  <span className="text-lg md:text-xl font-medium text-white group-hover:text-[#2997ff] group-open:text-[#2997ff] transition-colors pr-8 text-left">
-                    {faq.question}
+              <AccordionItem key={index} value={`faq-${index}`} className="border-t border-white/20 first:border-t-0">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">{faq.question}</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/60 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
                   </span>
-                  <span className="flex-shrink-0 w-8 h-8 rounded-none border-2 border-white/40 group-hover:border-[#2997ff] group-open:border-[#2997ff] flex items-center justify-center transition-all group-open:rotate-45">
-                    <svg className="w-4 h-4 text-white/60 group-hover:text-[#2997ff] group-open:text-[#2997ff] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </span>
-                </summary>
-                <div className="pb-6 pr-12">
-                  <p className="text-white/70 text-base md:text-lg leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-              </details>
+                </AccordionTrigger>
+                <AccordionContent className="text-white/70 leading-relaxed pb-6 text-base md:text-lg">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
       </section>
 
