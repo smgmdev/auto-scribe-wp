@@ -450,11 +450,9 @@ export default function MediaBuying() {
           
           {/* Description */}
           <p className="text-lg md:text-xl text-[#1d1d1f]/80 leading-relaxed mb-12 max-w-4xl">
-            Reach your audience with a comprehensive network of publications and services that let you 
-            deliver your message to the right people. Access each outlet's unique audience so 
-            you can seamlessly integrate your content with the optimal reach for each market. 
-            And with industry-leading verification and quality protections built in, you're 
-            free to focus on your story.
+            Reach your audience through a network of publications and services that connect your content 
+            with the right people. Access each outlet's unique audience and maximize your market reach, 
+            backed by industry-leading verification and quality standards. Explore available media categories on Arcana Mace:
           </p>
           
           {/* Categories - modern pill tags */}
