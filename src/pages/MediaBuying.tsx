@@ -882,22 +882,19 @@ export default function MediaBuying() {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
             <p>
-              All media placements are fulfilled by third-party agencies and publishers. Arcana Mace acts as a marketplace facilitator and does not directly publish content. Publication timelines, editorial standards, and content guidelines vary by outlet.
+              All media placements are fulfilled by third-party agencies and publishers. Talk to an agency before placing an order regarding publication delivery timelines and content guidelines. Arcana Mace acts as a marketplace facilitator and does not directly publish content.
             </p>
             <p>
-              Pricing displayed is set by partner agencies and may vary based on content type, word count, and publication requirements. All prices are in USD unless otherwise specified. Additional fees may apply for expedited delivery or premium placements.
+              Pricing is set by onboarded agencies and may vary depending on content type, word count, and media channel. All prices are in USD and are fixed. No additional fees apply. If anyone requests extra payment, please contact support immediately.
             </p>
             <p>
-              Publication guarantee applies to standard placements only. If your article cannot be published for any reason attributable to the agency, a full refund will be issued. Refund requests must be submitted within 14 days of the original delivery deadline.
+              If your article cannot be published due to reasons attributable to the agency, a full refund of your credits will be issued. Please note that credits already purchased are non-withdrawable.
             </p>
             <p>
-              Payment is held in escrow until the client confirms delivery. Funds are released to agencies (minus platform commission) only after confirmation. Disputes must be raised within 7 days of delivery.
+              Credits are held until the service is delivered. They are released to the agency (minus platform commission) only after the client confirms delivery. If you have concerns about delivery quality or any agreed-upon terms, open a dispute immediately before completing the order. Disputes can be initiated by both the client and the agency.
             </p>
             <p>
-              Agency response times and availability may vary. Some publications may require editorial review and content modifications before acceptance. Arcana Mace does not guarantee acceptance by any specific publication.
-            </p>
-            <p>
-              Content must comply with each publication's editorial guidelines and applicable laws. Arcana Mace reserves the right to remove listings or suspend accounts that violate platform policies.
+              Agency response times and availability may vary. Some publications may require editorial review and content modifications before acceptance. Arcana Mace does not guarantee placement with any specific publication. Clients should discuss all order-related matters directly with the agency on the Arcana Mace platform.
             </p>
           </div>
         </div>
