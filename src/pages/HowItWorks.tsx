@@ -220,7 +220,6 @@ const ScrollColorSection = ({
     const offset = targetRect.top - containerRect.top + container.scrollTop - 100;
     container.scrollTo({ top: offset, behavior: 'smooth' });
   };
-  const [bgColor, setBgColor] = useState('#ffffff'); // Start with white
   const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
   const [mediaSites, setMediaSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
 
@@ -257,57 +256,8 @@ const ScrollColorSection = ({
     fetchMediaSites();
   }, []);
 
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const coralCard = coralCardRef.current;
-      const localLibrary = localLibraryRef.current;
-      const globalLibrary = globalLibraryRef.current;
-      const whatYouCanDo = whatYouCanDoRef.current;
-      const aiSection = aiSectionRef.current;
-      
-      if (!coralCard || !localLibrary || !globalLibrary) return;
-      const triggerPoint = window.innerHeight * 0.5;
-      const coralRect = coralCard.getBoundingClientRect();
-      const localRect = localLibrary.getBoundingClientRect();
-      const globalRect = globalLibrary.getBoundingClientRect();
-      const whatYouCanDoRect = whatYouCanDo?.getBoundingClientRect();
-      const aiSectionRect = aiSection?.getBoundingClientRect();
-      
-      let newColor = '#ffffff';
-      
-      // Determine which section occupies the trigger point - check from bottom to top
-      if (aiSectionRect && aiSectionRect.top <= triggerPoint && aiSectionRect.bottom > 0) {
-        newColor = '#d88b57'; // Orange for AI section
-      } else if (whatYouCanDoRect && whatYouCanDoRect.top <= triggerPoint && whatYouCanDoRect.bottom > 0) {
-        newColor = '#0d1b4b'; // Dark blue for What You Can Do section
-      } else if (globalRect.top <= triggerPoint && globalRect.bottom > 0) {
-        newColor = '#1d1d1f'; // Black for Global Media Library
-      } else if (localRect.top <= triggerPoint && localRect.bottom > 0) {
-        newColor = '#1d1d1f'; // Black for Local Media Library
-      } else if (coralRect.top <= triggerPoint && coralRect.bottom > 0) {
-        newColor = '#f87171'; // Coral for main card
-      }
-      
-      setBgColor(newColor);
-    };
-
-    // Initial call
-    handleScroll();
-
-    // Add scroll listener to the scroll container, not window
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [scrollContainerRef]);
-
   return (
-    <section 
-      className="py-24 md:py-32 transition-colors duration-700 ease-out"
-      style={{ backgroundColor: bgColor }}
-    >
+    <section className="py-24 md:py-32">
         <div className="max-w-[980px] mx-auto px-0 md:px-6">
         <div 
           id="media-libraries-section"
