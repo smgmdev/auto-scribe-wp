@@ -13,8 +13,7 @@ import { useAppStore } from "@/stores/appStore";
 
 const MODELS = [
   { id: "anime_girl", name: "Anime Girl", path: "/models/anime_girl.glb", scale: 3.5, positionY: -2.5 },
-  { id: "dragon_emblem", name: "Dragon Emblem", path: "/models/dragon_emblem.glb", scale: 3, positionY: -2 },
-  { id: "winged_angel", name: "Winged Angel", path: "/models/winged_angel.glb", scale: 3, positionY: -2 },
+  { id: "ai", name: "AI", path: "/models/ai.glb", scale: 3, positionY: -2 },
 ];
 
 // Preload all models
@@ -179,16 +178,16 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
-      <div className="px-3 py-2 border-t border-white/10 flex gap-2">
+      <div className="px-0 py-2 border-t border-white/10 flex gap-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Say something... (/models for list)"
-          className="h-8 text-xs bg-transparent border-white/10 text-left placeholder:text-left"
+          className="h-8 text-xs bg-transparent border-white/10 text-left placeholder:text-left rounded-r-none"
           maxLength={200}
         />
-        <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-white/10">
+        <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-black rounded-l-none">
           <Send className="h-3.5 w-3.5" />
         </Button>
       </div>
