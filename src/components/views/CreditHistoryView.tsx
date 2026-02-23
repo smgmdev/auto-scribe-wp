@@ -1041,13 +1041,13 @@ export function CreditHistoryView() {
 
   const purchasesSubTabsDef = [
     { key: 'purchases', label: 'All Purchases' },
-    { key: 'topups', label: 'Top Ups' },
     { key: 'purchases_b2b', label: 'B2B Media Purchases' },
     { key: 'purchases_instant', label: 'Instant Publishing Purchases' },
   ];
 
   const systemSubTabsDef = [
     { key: 'system', label: 'All System' },
+    { key: 'topups', label: 'Top Ups' },
     { key: 'offer_accepted', label: 'Credits Locked' },
     { key: 'unlocked', label: 'Unlocked' },
     { key: 'gifted', label: 'Gifted' },
@@ -1065,7 +1065,7 @@ export function CreditHistoryView() {
   const isB2BEarning = (t: CreditTransaction) => t.type === 'order_payout' && t.order_id != null;
   const isInstantEarning = (t: CreditTransaction) => t.type === 'order_payout' && t.order_id == null;
 
-  const systemTypes = ['gifted', 'unlocked', 'offer_accepted', 'admin_deduct', 'admin_credit'];
+  const systemTypes = ['gifted', 'unlocked', 'offer_accepted', 'admin_deduct', 'admin_credit', 'purchase'];
 
   const effectiveFilter = (() => {
     if (activeType === 'earnings') return earningsSubTab;
@@ -1084,10 +1084,10 @@ export function CreditHistoryView() {
       case 'earnings': return displayedTransactions.filter(tx => tx.type === 'order_payout');
       case 'earnings_b2b': return displayedTransactions.filter(isB2BEarning);
       case 'earnings_instant': return displayedTransactions.filter(isInstantEarning);
-      case 'purchases': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish');
-      case 'topups': return displayedTransactions.filter(tx => tx.type === 'purchase');
+      case 'purchases': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'publish');
       case 'purchases_b2b': return displayedTransactions.filter(tx => tx.type === 'order_completed');
       case 'purchases_instant': return displayedTransactions.filter(tx => tx.type === 'publish');
+      case 'topups': return displayedTransactions.filter(tx => tx.type === 'purchase');
       case 'system': return displayedTransactions.filter(tx => systemTypes.includes(tx.type));
       case 'withdrawals': return displayedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
       default: return displayedTransactions.filter(tx => tx.type === effectiveFilter);
@@ -1108,15 +1108,15 @@ export function CreditHistoryView() {
         if (isB2BEarning(tx)) counts['earnings_b2b'] = (counts['earnings_b2b'] || 0) + 1;
         else counts['earnings_instant'] = (counts['earnings_instant'] || 0) + 1;
       }
-      if (tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish') {
+      if (tx.type === 'order_completed' || tx.type === 'publish') {
         counts['purchases'] = (counts['purchases'] || 0) + 1;
-        if (tx.type === 'purchase') counts['topups'] = (counts['topups'] || 0) + 1;
         if (tx.type === 'order_completed') counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
         if (tx.type === 'publish') counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
       }
       if (systemTypes.includes(tx.type)) {
         counts['system'] = (counts['system'] || 0) + 1;
         counts[tx.type] = (counts[tx.type] || 0) + 1;
+        if (tx.type === 'purchase') counts['topups'] = (counts['topups'] || 0) + 1;
       }
       if (['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type)) {
         counts['withdrawals'] = (counts['withdrawals'] || 0) + 1;
