@@ -652,8 +652,8 @@ export default function MediaBuying() {
                 </Button>
               </div>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-white/10 flex items-center justify-center">
-                  <div className="text-4xl md:text-5xl font-bold text-white animate-bounce" style={{ animation: 'floatDollar 3s ease-in-out infinite' }}>$</div>
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-white/10 flex items-center justify-center shadow-lg">
+                  <div className="text-8xl md:text-9xl font-bold text-white" style={{ animation: 'floatDollar 3s ease-in-out infinite' }}>$</div>
                 </div>
               </div>
               <style>{`
