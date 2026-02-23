@@ -483,7 +483,7 @@ export default function MediaBuying() {
       {/* Intro paragraph */}
       <section className="pb-20 pt-0">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
+          <p className="text-lg md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
             For years, media buying meant navigating complex relationships and unclear pricing. 
             Arcana Mace simplifies the process by offering direct access to global publications 
             through a transparent marketplace. We connect you with PR agencies and publishers, 
