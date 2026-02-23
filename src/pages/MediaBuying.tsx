@@ -747,7 +747,7 @@ export default function MediaBuying() {
               </div>
               <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
                 <p className="text-xs text-[#1d1d1f]/60 font-medium">Partners</p>
-                <p className="text-xs text-[#1d1d1f]/80">KYC Verified and Monitored by Arcana Mace AI</p>
+                <p className="text-xs text-[#1d1d1f]/80">KYC Verified and Real-Time AI Monitored</p>
               </div>
             </div>
           </div>
