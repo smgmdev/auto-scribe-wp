@@ -557,34 +557,36 @@ export default function SelfPublishing() {
         {/* Business Section - Full Width Black */}
         <section className="bg-black border-t border-[#424245]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
-            <div className="max-w-lg">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
-                Arcana Mace for Business
-              </h2>
-              <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
-                Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
-              </p>
-              <a
-                href="/media-buying"
-                className="inline-flex items-center bg-[#0071e3] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-8 py-3 transition-colors"
-              >
-                Learn more
-              </a>
-            </div>
-            <div className="mt-12">
-              <div className="relative w-full max-w-[700px]">
-                <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-black z-10 transition-opacity duration-300 rounded-none">
-                  <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+            <div className="flex flex-col md:flex-row md:items-center md:gap-12">
+              <div className="max-w-lg flex-1">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-6 leading-tight">
+                  Arcana Mace for Business
+                </h2>
+                <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed">
+                  Amplify your brand's reach with global media placements. Discover how businesses use Arcana Mace for articles and press releases, thought leadership, and strategic content distribution across international publications.
+                </p>
+                <a
+                  href="/media-buying"
+                  className="inline-flex items-center bg-[#0071e3] hover:bg-[#0077ed] text-white text-sm md:text-base font-medium px-8 py-3 transition-colors"
+                >
+                  Learn more
+                </a>
+              </div>
+              <div className="mt-10 md:mt-0 flex-1">
+                <div className="relative w-full max-w-[440px] md:ml-auto">
+                  <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-black z-10 transition-opacity duration-300 rounded-none">
+                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <video 
+                    src={businessVideo}
+                    autoPlay muted loop playsInline
+                    className="w-full rounded-none shadow-2xl"
+                    onLoadedData={(e) => {
+                      const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#business-video-loader');
+                      if (loader) (loader as HTMLElement).style.display = 'none';
+                    }}
+                  />
                 </div>
-                <video 
-                  src={businessVideo}
-                  autoPlay muted loop playsInline
-                  className="w-full rounded-none shadow-2xl"
-                  onLoadedData={(e) => {
-                    const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#business-video-loader');
-                    if (loader) (loader as HTMLElement).style.display = 'none';
-                  }}
-                />
               </div>
             </div>
           </div>
