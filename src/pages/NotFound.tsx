@@ -41,7 +41,7 @@ const NotFound = () => {
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const tracks = ["/sounds/404.mp3", "/sounds/404-2.mp3"];
+  const tracks = ["/sounds/404.mp3", "/sounds/404-2.mp3", "/sounds/404-3.mp3"];
 
   useEffect(() => {
     const audio = new Audio(tracks[0]);
