@@ -551,7 +551,7 @@ const ScrollColorSection = ({
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 leading-tight">
-            Arcana Mace is fully built, powered, and intelligently supervised by AI. Its systems operate continuously in the background, running 24/7 to ensure seamless performance and automation.
+            Arcana Mace is fully built, powered, and supervised by AI. Its systems operate continuously in the background, running 24/7 to ensure seamless performance and automation.
           </p>
 
           {/* Security animation inline */}
