@@ -62,10 +62,10 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
         {/* Disclaimer text */}
         <div className={`pt-8 pb-6 ${showTopBorder ? '' : ''}`}>
           <p className={`text-[11px] leading-relaxed ${dark ? 'text-white/40' : 'text-[#86868b]'} mb-3`}>
-            *Arcana Mace is not affiliated with, endorsed by, or officially connected to any media organizations or magazines whose logos may appear on the platform. Arcana Mace operates solely as a marketplace platform that connects global PR agencies with clients worldwide, specializing in the safe and secure facilitation of media buying transactions. Arcana Mace does not offer direct publishing or media services to clients by itself.
+            Arcana Mace is not affiliated with, endorsed by, or officially connected to any media organizations or magazines whose logos may appear on the platform. Arcana Mace operates solely as a marketplace platform that connects global PR agencies with clients worldwide, specializing in the safe and secure facilitation of media buying transactions. Arcana Mace does not offer direct publishing or media services to clients by itself.
           </p>
           <p className={`text-[11px] leading-relaxed ${dark ? 'text-white/40' : 'text-[#86868b]'}`}>
-            *Arcana Mace is a Progressive Web App (PWA), you can add it to your phone's home screen and it will work perfectly and smoothly.
+            Arcana Mace is a Progressive Web App (PWA), you can add it to your phone's home screen and it will work perfectly and smoothly.
           </p>
         </div>
         <div className={`border-t ${dark ? 'border-white/20' : 'border-[#d2d2d7]'}`} />
