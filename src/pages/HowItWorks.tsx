@@ -1163,7 +1163,7 @@ const HowItWorks = () => {
         </div>
 
         {/* Video */}
-        <div className="mt-12 max-w-4xl mx-auto px-4 pb-16">
+        <div className="mt-12 max-w-4xl mx-auto px-4 pb-16 relative">
           <video
             src={mediaLibraryBgVideo}
             autoPlay
@@ -1171,7 +1171,11 @@ const HowItWorks = () => {
             muted
             playsInline
             className="w-full rounded-lg object-cover"
+            onLoadedData={(e) => (e.currentTarget.parentElement!.querySelector('.video-spinner') as HTMLElement)?.remove()}
           />
+          <div className="video-spinner absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+            <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
+          </div>
         </div>
       </section>
 
