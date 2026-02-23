@@ -1078,7 +1078,7 @@ const HowItWorks = () => {
             <span className="text-xl font-semibold text-foreground">How It Works</span>
             <nav className="hidden md:flex items-center gap-6">
               <button 
-                onClick={() => navigate('/about')}
+                onClick={() => navigate('/help/getting-started')}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Learn More
