@@ -704,7 +704,7 @@ export default function MediaBuying() {
               <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => navigate('/help/orders-delivery')}>
                 View timelines
               </Button>
-              <div className="mt-auto pt-8 flex items-center justify-end flex-1">
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-white/80 to-white/40 backdrop-blur flex items-center justify-center">
                   <svg className="w-16 h-16 md:w-20 md:h-20" viewBox="0 0 100 100">
                     <circle cx="50" cy="50" r="45" fill="none" stroke="#34c759" strokeWidth="4" />
