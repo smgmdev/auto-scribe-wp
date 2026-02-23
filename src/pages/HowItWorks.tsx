@@ -332,10 +332,10 @@ const ScrollColorSection = ({
           
           {/* Links */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
-            <a href="/self-publishing" className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+            <a href="/self-publishing" className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center gap-1 font-medium">
               Discover Self Publishing <span className="text-xl">↗</span>
             </a>
-            <button onClick={() => scrollToSection(globalLibraryRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+            <button onClick={() => scrollToSection(globalLibraryRef)} className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center gap-1 font-medium">
               Learn about Global Library
             </button>
           </div>
@@ -421,13 +421,13 @@ const ScrollColorSection = ({
 
           {/* Links */}
           <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6 mt-10">
-            <a href="/media-buying" className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+            <a href="/media-buying" className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center gap-1 font-medium">
               Discover Media Buying <span className="text-xl">↗</span>
             </a>
-            <button onClick={() => scrollToSection(localLibraryRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+            <button onClick={() => scrollToSection(localLibraryRef)} className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center gap-1 font-medium">
               Learn about Local Library
             </button>
-            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-[#0077ed] text-white text-lg px-6 py-3 rounded-none hover:bg-[#2997ff] transition-colors inline-flex items-center gap-1 font-medium">
+            <button onClick={() => scrollToSection(whatYouCanDoRef)} className="bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center gap-1 font-medium">
               For Agencies
             </button>
           </div>
