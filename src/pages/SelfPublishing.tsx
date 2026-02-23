@@ -18,6 +18,7 @@ import creditManagementVideo from '@/assets/credit-management-video.mp4';
 import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
 import businessHero from '@/assets/business-hero.jpg';
+import businessVideo from '@/assets/business-video.mp4';
 
 // Product-style icons (outline style like Apple devices)
 const products = [
@@ -569,6 +570,22 @@ export default function SelfPublishing() {
               >
                 Learn more
               </a>
+            </div>
+            <div className="mt-12">
+              <div className="relative w-full max-w-[700px]">
+                <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-black z-10 transition-opacity duration-300 rounded-none">
+                  <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                </div>
+                <video 
+                  src={businessVideo}
+                  autoPlay muted loop playsInline
+                  className="w-full rounded-none shadow-2xl"
+                  onLoadedData={(e) => {
+                    const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#business-video-loader');
+                    if (loader) (loader as HTMLElement).style.display = 'none';
+                  }}
+                />
+              </div>
             </div>
           </div>
         </section>
