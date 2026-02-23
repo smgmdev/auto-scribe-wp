@@ -372,16 +372,16 @@ export default function SelfPublishing() {
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
             ) : (
-              <div className="flex flex-col gap-4 md:gap-6 lg:gap-8">
-                {/* Top row - 3 media */}
-                <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
+              <div className="flex flex-col gap-6 md:gap-10">
+                {/* Top row - 3 featured media */}
+                <div className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10">
                   {mediaSites.slice(0, 3).map((site) => (
                     <div 
                       key={site.id} 
-                      className="flex flex-col items-center gap-2 group cursor-pointer"
+                      className="flex flex-col items-center gap-3 group cursor-pointer"
                       onClick={() => setSelectedSite(site)}
                     >
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-none bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-none bg-white shadow-md overflow-hidden group-hover:scale-110 group-hover:shadow-xl transition-all duration-300">
                         {site.favicon ? (
                           <img 
                             src={site.favicon} 
@@ -389,24 +389,24 @@ export default function SelfPublishing() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                          <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7]">
+                            <Globe className="w-8 h-8 md:w-10 md:h-10 text-[#6e6e73]" />
                           </div>
                         )}
                       </div>
-                      <span className="text-[11px] md:text-xs text-[#1d1d1f] font-semibold text-center">{site.name}</span>
+                      <span className="text-xs md:text-sm text-[#1d1d1f] font-semibold text-center max-w-[120px]">{site.name}</span>
                     </div>
                   ))}
                 </div>
-                {/* Bottom rows - remaining 10 media */}
-                <div className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8">
+                {/* Bottom rows - remaining media */}
+                <div className="flex flex-wrap justify-center gap-5 md:gap-8 lg:gap-10">
                   {mediaSites.slice(3).map((site) => (
                     <div 
                       key={site.id} 
-                      className="flex flex-col items-center gap-2 group cursor-pointer"
+                      className="flex flex-col items-center gap-3 group cursor-pointer"
                       onClick={() => setSelectedSite(site)}
                     >
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-none bg-white shadow-sm overflow-hidden group-hover:scale-105 transition-transform">
+                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-white shadow-md overflow-hidden group-hover:scale-110 group-hover:shadow-xl transition-all duration-300">
                         {site.favicon ? (
                           <img 
                             src={site.favicon} 
@@ -414,12 +414,12 @@ export default function SelfPublishing() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Globe className="w-6 h-6 md:w-7 md:h-7 text-[#6e6e73]" />
+                          <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7]">
+                            <Globe className="w-7 h-7 md:w-8 md:h-8 text-[#6e6e73]" />
                           </div>
                         )}
                       </div>
-                      <span className="text-[11px] md:text-xs text-[#1d1d1f] font-semibold text-center">{site.name}</span>
+                      <span className="text-[11px] md:text-sm text-[#1d1d1f] font-semibold text-center max-w-[110px]">{site.name}</span>
                     </div>
                   ))}
                 </div>
