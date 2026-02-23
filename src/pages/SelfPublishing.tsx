@@ -382,7 +382,7 @@ export default function SelfPublishing() {
                   {[...mediaSites, ...mediaSites].map((site, i) => (
                     <div
                       key={`${site.id}-${i}`}
-                      className="flex-shrink-0 mx-3 md:mx-4 cursor-pointer group"
+                      className="flex-shrink-0 mx-1.5 md:mx-2 cursor-pointer group"
                       onClick={() => setSelectedSite(site)}
                     >
                       <div className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden bg-[#1d1d1f] shadow-lg group-hover:scale-110 transition-transform duration-300">
