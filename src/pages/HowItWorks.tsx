@@ -279,7 +279,7 @@ const ScrollColorSection = ({
             <div className="flex-1 flex justify-center md:justify-end p-8 md:py-10 lg:py-12">
               <div className="md:mr-16 text-center md:text-right">
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Local Media<br />Library
+                  Local<br />Media<br />Library
                 </h3>
                 <button 
                   onClick={() => scrollToSection(localLibraryRef)}
@@ -297,7 +297,7 @@ const ScrollColorSection = ({
             <div className="flex-1 flex justify-center md:justify-start p-8 md:py-10 lg:py-12">
               <div className="md:ml-16 text-center md:text-left">
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Global Media<br />Library
+                  Global<br />Media<br />Library
                 </h3>
                 <button 
                   onClick={() => scrollToSection(globalLibraryRef)}
