@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Check, Hand, Lock, Smartphone, Loader2, Plus } from 'lucide-react';
@@ -152,6 +153,11 @@ export default function About() {
   }, []);
 
   return (
+    <>
+    <SEOHead
+      title="About Arcana Mace — Media Buying Marketplace"
+      description="Learn about Arcana Mace, a media buying marketplace connecting global brands and PR agencies for seamless media transactions."
+    />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Main Header - matches Auth page */}
       <header 
@@ -522,5 +528,6 @@ export default function About() {
       </div>
       <Footer narrow />
     </div>
+    </>
   );
 }

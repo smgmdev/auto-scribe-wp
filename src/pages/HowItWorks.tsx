@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Globe, Zap, Shield, Users, FileText, TrendingUp, ExternalLink, Loader2, Newspaper, Building2, PenTool, BarChart3, Send, Clock, CheckCircle2, ArrowUpRight, BookOpen, Library, CornerDownRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -1014,6 +1015,19 @@ const HowItWorks = () => {
   ];
 
   return (
+    <>
+    <SEOHead
+      title="How Arcana Mace Works — Media Publishing Platform"
+      description="Discover how Arcana Mace connects brands with media agencies for AI-powered article publishing across global media channels."
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Arcana Mace Media Publishing",
+        "provider": { "@type": "Organization", "name": "Arcana Mace", "url": "https://arcanamace.com" },
+        "description": "AI-powered media buying and article publishing platform connecting brands with PR agencies worldwide.",
+        "serviceType": "Media Buying"
+      }}
+    />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header */}
       <header 
@@ -1272,6 +1286,7 @@ const HowItWorks = () => {
       <div className="bg-[#f5f5f7]"><div className="max-w-[980px] mx-auto px-4 md:px-6"><div className="border-t border-[#d2d2d7]" /></div></div>
       <Footer narrow showTopBorder />
     </div>
+    </>
   );
 };
 

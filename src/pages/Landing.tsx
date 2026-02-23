@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, Globe, ExternalLink, X, User, Copy, ArrowRight, Loader2, Info, GripHorizontal, Smartphone, Share } from 'lucide-react';
 import { toast } from 'sonner';
@@ -526,6 +527,20 @@ const Landing = () => {
 
   return (
     <>
+    <SEOHead
+      title="Arcana Mace: AI-Powered Controlled Media Publishing"
+      description="Arcana Mace is a media buying marketplace connecting global brands and PR agencies for seamless media transactions."
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Arcana Mace",
+        "url": "https://arcanamace.com",
+        "logo": "https://arcanamace.com/icon-512.png",
+        "description": "Arcana Mace is a media buying marketplace connecting global brands and PR agencies for seamless media transactions.",
+        "sameAs": ["https://twitter.com/ArcanaMace"],
+        "contactPoint": { "@type": "ContactPoint", "contactType": "customer support", "url": "https://arcanamace.com/help" }
+      }}
+    />
     <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { SEOHead } from '@/components/SEOHead';
 import { ChevronDown, ChevronUp, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
@@ -172,6 +173,20 @@ export default function HelpCenter() {
   }, []);
 
   return (
+    <>
+    <SEOHead
+      title="Help Center — Arcana Mace"
+      description="Get help with Arcana Mace: guides on getting started, media buying, publishing articles, credits, AI features, and troubleshooting."
+      structuredData={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "How does Arcana Mace work?", "acceptedAnswer": { "@type": "Answer", "text": "Arcana Mace connects brands with media agencies for seamless article publishing across global media channels." }},
+          { "@type": "Question", "name": "What are credits?", "acceptedAnswer": { "@type": "Answer", "text": "Credits are used to publish articles on media sites. Purchase credit packs to fund your publishing." }},
+          { "@type": "Question", "name": "How do I become an agency?", "acceptedAnswer": { "@type": "Answer", "text": "Apply through the Agency Application page with your media details and credentials for review." }}
+        ]
+      }}
+    />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Main Header - fixed like About page */}
       <header 
@@ -417,5 +432,6 @@ export default function HelpCenter() {
       <Footer narrow />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </div>
+    </>
   );
 }
