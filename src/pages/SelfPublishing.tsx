@@ -350,7 +350,7 @@ export default function SelfPublishing() {
                   navigate('/auth', { state: { redirectTo: '/account', targetView: 'compose' } });
                 }
               }}
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg px-8 py-3 h-auto rounded-full"
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg px-8 py-3 h-auto rounded-none"
             >
               Start Writing
             </Button>
