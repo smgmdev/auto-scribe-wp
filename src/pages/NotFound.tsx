@@ -295,11 +295,27 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
   );
 }
 
-function MiniModelPreview({ modelPath, scale, positionY }: { modelPath: string; scale: number; positionY: number }) {
+function MiniModelPreview({ modelPath }: { modelPath: string; scale: number; positionY: number }) {
   const { scene, animations } = useGLTF(modelPath);
   const ref = useRef<THREE.Group>(null);
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions } = useAnimations(animations, ref);
+
+  // Auto-fit: compute bounding box and normalize scale/position to fill the preview
+  const { autoScale, autoPosition } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(clonedScene);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const targetSize = 3.5; // fill the preview
+    const s = maxDim > 0 ? targetSize / maxDim : 1;
+    return {
+      autoScale: s,
+      autoPosition: [-(center.x * s), -(center.y * s) - 0.3, -(center.z * s)] as [number, number, number],
+    };
+  }, [clonedScene]);
 
   useEffect(() => {
     const firstAction = Object.values(actions)[0];
@@ -310,7 +326,7 @@ function MiniModelPreview({ modelPath, scale, positionY }: { modelPath: string; 
     if (ref.current) ref.current.rotation.y += delta * 0.5;
   });
 
-  return <primitive ref={ref} object={clonedScene} scale={scale} position={[0, positionY * 0.8, 0]} />;
+  return <primitive ref={ref} object={clonedScene} scale={autoScale} position={autoPosition} />;
 }
 
 function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boolean; onClose: () => void; onSelect: (id: string) => void; currentModelId: string }) {
