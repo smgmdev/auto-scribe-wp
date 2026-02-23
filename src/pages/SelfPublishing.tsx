@@ -13,7 +13,7 @@ import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
-import paymentsImg from '@/assets/payments.png';
+import paymentsVideo from '@/assets/payments-video.mp4';
 import creditManagementVideo from '@/assets/credit-management-video.mp4';
 import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
@@ -491,11 +491,23 @@ export default function SelfPublishing() {
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               {/* Left - Phone Mockup - Airwallex Checkout */}
               <div className="flex justify-center md:justify-start">
-                <img 
-                  src={paymentsImg} 
-                  alt="Airwallex payment checkout showing 500 credits for $500 with card payment form" 
-                  className="w-[280px] md:w-[340px] rounded-none shadow-2xl"
-                />
+                <div className="relative w-[280px] md:w-[340px]">
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] z-10 transition-opacity duration-300" id="payments-video-loader">
+                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <video 
+                    src={paymentsVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full rounded-none shadow-2xl"
+                    onLoadedData={(e) => {
+                      const loader = (e.target as HTMLVideoElement).parentElement?.querySelector('#payments-video-loader');
+                      if (loader) (loader as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                </div>
               </div>
               
               {/* Right Content */}
