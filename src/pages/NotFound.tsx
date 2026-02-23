@@ -158,17 +158,6 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       return;
     }
 
-    // Also still support /play <number> directly
-    const playMatch = trimmed.match(/^\/play\s+(\d+)$/i);
-    if (playMatch) {
-      const idx = parseInt(playMatch[1], 10) - 1;
-      if (idx >= 0 && idx < MODELS.length) {
-        const model = MODELS[idx];
-        onSelectModel(model.id);
-        await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
-      }
-      return;
-    }
 
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
   }, [input, nickname, onSelectModel, modelSelectionActive]);
