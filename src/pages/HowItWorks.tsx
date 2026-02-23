@@ -270,7 +270,7 @@ const ScrollColorSection = ({
             </h2>
             <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d] flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <span>Arcana Mace has 2 media libraries:</span>
-              <span className="text-white">Local Media Library</span>
+              <span className="text-white">Local Library</span>
               <button 
                 onClick={() => scrollToSection(localLibraryRef)}
                 className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
@@ -278,7 +278,7 @@ const ScrollColorSection = ({
                 GO
               </button>
               <span className="text-[#7f1d1d]">&</span>
-              <span className="text-white">Global Media Library</span>
+              <span className="text-white">Global Library</span>
               <button 
                 onClick={() => scrollToSection(globalLibraryRef)}
                 className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
