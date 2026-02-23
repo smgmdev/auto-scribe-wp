@@ -620,7 +620,7 @@ const SecurityFadeText = () => {
   return (
     <div className="relative mt-8 text-center px-4">
       <p
-        className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight relative inline-block"
+        className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight relative inline-block"
         style={{
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.92)',
