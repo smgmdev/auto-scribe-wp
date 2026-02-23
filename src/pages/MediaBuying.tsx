@@ -877,7 +877,9 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      {/* Disclaimers Section */}
+      <PWAInstallButtons />
+
+      {/* Disclaimers Section - above footer */}
       <section className="bg-[#f5f5f7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
           <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
@@ -900,7 +902,6 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      <PWAInstallButtons />
       <Footer narrow showTopBorder />
 
       {/* Media Site Dialog */}
