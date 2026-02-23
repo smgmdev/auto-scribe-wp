@@ -514,14 +514,15 @@ export default function AIArticleGeneration() {
             Get Started
           </h2>
           <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6 max-w-[680px]">
-            Start creating AI-powered articles today. Sign up for free and connect your WordPress sites to begin publishing professional content in seconds.
+            Start creating AI-powered articles today. Sign up for free to begin publishing professional content in seconds.
           </p>
-          <Button
-            onClick={handleGetStarted}
-            className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full px-8 py-3 text-base font-medium"
-          >
-            Start Writing with AI
-          </Button>
+          <Link to="/auth">
+            <Button
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-none px-8 py-3 text-base font-medium"
+            >
+              Start Writing with AI
+            </Button>
+          </Link>
         </div>
       </section>
 
