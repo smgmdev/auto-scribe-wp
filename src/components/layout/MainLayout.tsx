@@ -1,4 +1,6 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { Menu, Search, Volume2, VolumeOff } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
@@ -28,6 +30,7 @@ export function MainLayout({
   const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
   const mainRef = useRef<HTMLElement>(null);
+  const { pullDistance, refreshing } = usePullToRefresh({ scrollRef: mainRef as React.RefObject<HTMLElement> });
 
   // Scroll main content to top whenever the view changes
   useEffect(() => {
@@ -119,6 +122,21 @@ export function MainLayout({
           WebkitOverflowScrolling: 'touch',
         }}
       >
+        {/* Pull-to-refresh indicator */}
+        {(pullDistance > 0 || refreshing) && (
+          <div 
+            className="flex items-center justify-center transition-all duration-200 lg:hidden"
+            style={{ height: refreshing ? 48 : pullDistance }}
+          >
+            <Loader2 
+              className={`h-5 w-5 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`}
+              style={{ 
+                opacity: Math.min(pullDistance / 80, 1),
+                transform: `rotate(${pullDistance * 3}deg)`,
+              }}
+            />
+          </div>
+        )}
         <div className="flex-1 p-4 lg:p-8">
           {children}
         </div>
@@ -140,7 +158,7 @@ export function MainLayout({
             </div>
           </div>
         </footer>
-        
+
         
       </main>
     </div>;
