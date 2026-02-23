@@ -480,18 +480,6 @@ const ScrollColorSection = ({
               For Agencies
             </button>
           </div>
-
-          {/* Video */}
-          <div className="mt-12 max-w-4xl mx-auto px-4">
-            <video
-              src={mediaLibraryBgVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full rounded-lg"
-            />
-          </div>
         </div>
 
         {/* What You Can Do Section - Blue */}
@@ -1255,6 +1243,18 @@ const HowItWorks = () => {
           >
             Get Started
           </Button>
+        </div>
+
+        {/* Video */}
+        <div className="mt-12 max-w-4xl mx-auto px-4 pb-16">
+          <video
+            src={mediaLibraryBgVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full rounded-lg"
+          />
         </div>
       </section>
 
