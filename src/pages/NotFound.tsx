@@ -91,7 +91,7 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  
+  const [awaitingModelChoice, setAwaitingModelChoice] = useState(false);
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
@@ -101,18 +101,18 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
     // Handle /models command - broadcast publicly
     if (trimmed.toLowerCase() === "/models") {
       const modelList = MODELS.map((m, i) => `${i + 1}. ${m.name}`).join("\n");
-      // Insert the user's /models command publicly
       await supabase.from("lost_chat_messages").insert({ nickname, message: "/models" });
-      // Insert Arcana Mace's response publicly
       await supabase.from("lost_chat_messages").insert({ nickname: "Arcana Mace", message: `Model List:\n\n${modelList}\n\nChoose a number to display.` });
+      setAwaitingModelChoice(true);
       return;
     }
 
-    // Handle number selection (any user can pick a model at any time)
-    if (/^\d+$/.test(trimmed)) {
+    // Handle number selection only after /models was used
+    if (awaitingModelChoice && /^\d+$/.test(trimmed)) {
       const idx = parseInt(trimmed, 10) - 1;
       if (idx >= 0 && idx < MODELS.length) {
         const model = MODELS[idx];
+        setAwaitingModelChoice(false);
         onSelectModel(model.id);
         await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
       } else {
@@ -133,8 +133,9 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
       return;
     }
 
+    setAwaitingModelChoice(false);
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
-  }, [input, nickname, onSelectModel]);
+  }, [input, nickname, onSelectModel, awaitingModelChoice]);
 
   return (
     <div className="w-full h-full bg-transparent flex flex-col">
