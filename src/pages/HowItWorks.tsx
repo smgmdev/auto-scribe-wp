@@ -596,26 +596,69 @@ const ScrollColorSection = ({
 const securityTexts = ['AI Auto Publishing.', 'AI Article Generation.', 'AI Communication Supervision.', 'AI Data Protection.', 'AI Transaction Security.', 'AI Anti Fraud Supervision.'];
 const SecurityFadeText = () => {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [phase, setPhase] = useState<'entering' | 'visible' | 'exiting' | 'hidden'>('entering');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIndex(prev => (prev + 1) % securityTexts.length);
-        setVisible(true);
-      }, 600);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
+    const timings = { entering: 800, visible: 2000, exiting: 600, hidden: 200 };
+    const timeout = setTimeout(() => {
+      setPhase(prev => {
+        if (prev === 'entering') return 'visible';
+        if (prev === 'visible') return 'exiting';
+        if (prev === 'exiting') {
+          setIndex(i => (i + 1) % securityTexts.length);
+          return 'hidden';
+        }
+        return 'entering';
+      });
+    }, timings[phase]);
+    return () => clearTimeout(timeout);
+  }, [phase]);
+
+  const isVisible = phase === 'entering' || phase === 'visible';
+  const isEntering = phase === 'entering';
 
   return (
-    <p
-      className="text-[#f2a547]/80 text-2xl font-bold mt-4 text-center leading-tight transition-opacity duration-500 ease-in-out"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      {securityTexts[index]}
-    </p>
+    <div className="relative mt-4 text-center">
+      <p
+        className="text-2xl font-bold leading-tight relative inline-block"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.95)',
+          transition: isEntering
+            ? 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'opacity 0.4s ease-out, transform 0.4s ease-out',
+          color: '#f2a547',
+          textShadow: isEntering
+            ? '0 0 40px rgba(242,165,71,0.8), 0 0 80px rgba(242,165,71,0.4), 0 0 120px rgba(242,165,71,0.2)'
+            : isVisible
+              ? '0 0 20px rgba(242,165,71,0.4), 0 0 40px rgba(242,165,71,0.15)'
+              : 'none',
+        }}
+      >
+        {securityTexts[index]}
+      </p>
+      {/* Light sweep overlay */}
+      {isEntering && (
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ mixBlendMode: 'screen' }}
+        >
+          <div
+            className="absolute top-0 bottom-0 w-[60%]"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(242,165,71,0.3), rgba(255,255,255,0.15), rgba(242,165,71,0.3), transparent)',
+              animation: 'lightSweep 0.8s ease-out forwards',
+            }}
+          />
+        </div>
+      )}
+      <style>{`
+        @keyframes lightSweep {
+          0% { left: -60%; }
+          100% { left: 120%; }
+        }
+      `}</style>
+    </div>
   );
 };
 
