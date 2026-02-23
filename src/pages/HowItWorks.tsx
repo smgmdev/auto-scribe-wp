@@ -273,41 +273,6 @@ const ScrollColorSection = ({
             </p>
           </div>
 
-          {/* Two feature cards with vertical divider - inside same coral container */}
-          <div className="flex flex-col md:flex-row mt-4">
-            {/* Card 1 - Local Media Library */}
-            <div className="flex-1 flex justify-center md:justify-end p-8 md:py-10 lg:py-12">
-              <div className="md:mr-16 text-center md:text-right">
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Local<br />Media<br />Library
-                </h3>
-                <button 
-                  onClick={() => scrollToSection(localLibraryRef)}
-                  className="mt-2 px-8 py-3 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
-                >
-                  Learn more
-                </button>
-              </div>
-            </div>
-
-            {/* Vertical Divider - white */}
-            <div className="hidden md:block w-[3px] bg-white/70 rounded-full my-8 flex-shrink-0" />
-
-            {/* Card 2 - Global Media Library */}
-            <div className="flex-1 flex justify-center md:justify-start p-8 md:py-10 lg:py-12">
-              <div className="md:ml-16 text-center md:text-left">
-                <h3 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight mb-4">
-                  Global<br />Media<br />Library
-                </h3>
-                <button 
-                  onClick={() => scrollToSection(globalLibraryRef)}
-                  className="mt-2 px-8 py-3 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
-                >
-                  Learn more
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
         {/* Local Media Library Section */}
         <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
