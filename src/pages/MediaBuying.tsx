@@ -253,6 +253,9 @@ export default function MediaBuying() {
   const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  const sliderTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const sliderLastTouchYRef = useRef<number>(0);
+  const sliderGestureRef = useRef<'horizontal' | 'vertical' | null>(null);
 
   // Check if mobile
   useEffect(() => {
@@ -319,6 +322,39 @@ export default function MediaBuying() {
       navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'custom' } });
     }
   };
+
+  const handleSliderTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    sliderTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    sliderLastTouchYRef.current = touch.clientY;
+    sliderGestureRef.current = null;
+  }, []);
+
+  const handleSliderTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1 || !sliderTouchStartRef.current) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - sliderTouchStartRef.current.x;
+    const deltaY = touch.clientY - sliderTouchStartRef.current.y;
+
+    if (!sliderGestureRef.current && (Math.abs(deltaX) > 6 || Math.abs(deltaY) > 6)) {
+      sliderGestureRef.current = Math.abs(deltaY) > Math.abs(deltaX) ? 'vertical' : 'horizontal';
+    }
+
+    if (sliderGestureRef.current === 'vertical') {
+      e.preventDefault();
+      const step = sliderLastTouchYRef.current - touch.clientY;
+      scrollContainerRef.current?.scrollBy({ top: step, behavior: 'auto' });
+    }
+
+    sliderLastTouchYRef.current = touch.clientY;
+  }, []);
+
+  const handleSliderTouchEnd = useCallback(() => {
+    sliderTouchStartRef.current = null;
+    sliderGestureRef.current = null;
+  }, []);
 
   return (
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
@@ -595,13 +631,16 @@ export default function MediaBuying() {
           {/* Slider Container */}
           <div 
             id="features-slider"
-            className="flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 md:snap-x md:snap-mandatory"
+            className="flex gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide px-4 md:px-[max(1.5rem,calc((100%-980px)/2+1.5rem))] pb-4 md:snap-x md:snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            onTouchStart={handleSliderTouchStart}
+            onTouchMove={handleSliderTouchMove}
+            onTouchEnd={handleSliderTouchEnd}
+            onTouchCancel={handleSliderTouchEnd}
             onWheel={(e) => {
               const isHorizontalScroll = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
               
               if (!isHorizontalScroll) {
-                e.stopPropagation();
                 scrollContainerRef.current?.scrollBy({ top: e.deltaY, behavior: 'auto' });
               }
             }}
