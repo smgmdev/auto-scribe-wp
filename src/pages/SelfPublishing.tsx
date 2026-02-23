@@ -372,10 +372,10 @@ export default function SelfPublishing() {
                 <Loader2 className="w-6 h-6 text-[#6e6e73] animate-spin" />
               </div>
             ) : mediaSites.length > 0 ? (
-              <div className="relative w-screen -ml-[50vw] left-1/2 py-4">
+              <div className="relative overflow-hidden py-4">
                 {/* Fade edges */}
-                <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
                 
                 <div className="flex animate-marquee w-max items-center">
                   {/* Duplicate the list twice for seamless loop */}
