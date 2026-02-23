@@ -556,7 +556,7 @@ const ScrollColorSection = ({
 
           {/* Security animation inline */}
           <div className="flex flex-col items-center justify-center mt-10">
-            <div className="relative w-48 h-48">
+            <div className="relative w-64 h-64 md:w-80 md:h-80">
               <div className="absolute inset-0 rounded-full bg-[#f2a547]/10 blur-2xl animate-pulse" />
               <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
                 <div className="w-full h-full rounded-full border border-[#f2a547]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
@@ -570,7 +570,7 @@ const ScrollColorSection = ({
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
                   <div className="absolute inset-0 -m-3 rounded-full bg-[#f2a547]/20 blur-xl animate-pulse" />
-                  <Shield className="w-12 h-12 text-[#f2a547] drop-shadow-[0_0_15px_rgba(242,165,71,0.5)] relative z-10" />
+                  <Shield className="w-16 h-16 text-[#f2a547] drop-shadow-[0_0_15px_rgba(242,165,71,0.5)] relative z-10" />
                 </div>
               </div>
               <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
@@ -599,7 +599,7 @@ const SecurityFadeText = () => {
   const [phase, setPhase] = useState<'entering' | 'visible' | 'exiting' | 'hidden'>('entering');
 
   useEffect(() => {
-    const timings = { entering: 800, visible: 2000, exiting: 300, hidden: 100 };
+    const timings = { entering: 500, visible: 1200, exiting: 200, hidden: 50 };
     const timeout = setTimeout(() => {
       setPhase(prev => {
         if (prev === 'entering') return 'visible';
