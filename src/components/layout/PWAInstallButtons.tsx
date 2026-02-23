@@ -8,9 +8,9 @@ export function PWAInstallButtons() {
   if (isInstalled) return null;
 
   return (
-    <div className="w-full bg-black">
+    <div className="w-full">
       <div className="max-w-[980px] mx-auto px-0 md:px-6 pt-0">
-        <div className="flex flex-col md:flex-row items-start justify-start gap-0">
+        <div className="flex flex-col md:flex-row items-start justify-start gap-0 bg-black">
         {/* Android / Chrome install */}
         <button
           onClick={() => {
