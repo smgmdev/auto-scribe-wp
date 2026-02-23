@@ -462,6 +462,14 @@ export default function SelfPublishing() {
                 <p className="text-base md:text-lg text-[#86868b] mb-4 leading-relaxed">
                   When you purchase credits on Arcana Mace, they're instantly added to your account balance — so you can quickly publish articles, track your spending, and manage your content budget whether you're publishing one article or a hundred.
                 </p>
+                <div className="flex flex-wrap gap-6">
+                  <a 
+                    href="/help/credits-pricing" 
+                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
+                  >
+                    <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
