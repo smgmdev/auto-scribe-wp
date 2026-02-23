@@ -268,29 +268,24 @@ const ScrollColorSection = ({
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">
               You should also know
             </h2>
-            <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d]">
-              Arcana Mace has 2 media libraries:
+            <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d] flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span>Arcana Mace has 2 media libraries:</span>
+              <span className="text-white">Local Media Library</span>
+              <button 
+                onClick={() => scrollToSection(localLibraryRef)}
+                className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+              >
+                GO
+              </button>
+              <span className="text-[#7f1d1d]">&</span>
+              <span className="text-white">Global Media Library</span>
+              <button 
+                onClick={() => scrollToSection(globalLibraryRef)}
+                className="px-5 py-1.5 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
+              >
+                GO
+              </button>
             </p>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-8">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white">Local Media Library</span>
-                <button 
-                  onClick={() => scrollToSection(localLibraryRef)}
-                  className="px-6 py-2 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
-                >
-                  GO
-                </button>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white">Global Media Library</span>
-                <button 
-                  onClick={() => scrollToSection(globalLibraryRef)}
-                  className="px-6 py-2 bg-black text-white text-lg font-medium hover:bg-black/80 transition-colors"
-                >
-                  GO
-                </button>
-              </div>
-            </div>
           </div>
 
         </div>
