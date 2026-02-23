@@ -877,7 +877,10 @@ export default function MediaBuying() {
         </div>
       </section>
 
-      <PWAInstallButtons />
+      <div className="border-t border-[#424245]" />
+      <div className="bg-black">
+        <PWAInstallButtons />
+      </div>
 
       {/* Disclaimers Section - above footer */}
       <section className="bg-[#f5f5f7]">
