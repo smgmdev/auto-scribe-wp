@@ -536,7 +536,7 @@ const ScrollColorSection = ({
         <div
           id="ai-section"
           ref={aiSectionRef}
-          className="bg-black rounded-none px-4 md:px-6 lg:px-0 py-10 md:py-16 lg:py-20 text-center"
+          className="bg-black rounded-none px-4 md:px-6 lg:px-0 py-10 md:py-16 lg:py-20 text-center overflow-hidden"
         >
 
           {/* Title */}
