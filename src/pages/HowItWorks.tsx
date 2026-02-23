@@ -440,7 +440,7 @@ const ScrollColorSection = ({
           </p>
 
           {/* Feature grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 text-left max-w-[980px] mx-auto lg:px-6">
             {/* Card 1: Self Publish - rotating WP site logos */}
             <a href="/help/publishing-articles#wordpress-publishing" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-white border border-[#d2d2d7]">
               <div>
