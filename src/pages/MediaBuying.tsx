@@ -39,17 +39,12 @@ function LoadingFavicon({ src, alt, className }: { src: string; alt: string; cla
 
 function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const sitesWithFavicon = useMemo(() => sites.filter(s => s.favicon), [sites]);
 
   useEffect(() => {
     if (sitesWithFavicon.length < 2) return;
     const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex(prev => (prev + 1) % sitesWithFavicon.length);
-        setIsTransitioning(false);
-      }, 200);
+      setCurrentIndex(prev => (prev + 1) % sitesWithFavicon.length);
     }, 500);
     return () => clearInterval(interval);
   }, [sitesWithFavicon.length]);
@@ -68,7 +63,7 @@ function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
       <img
         src={current.favicon!}
         alt={current.name}
-        className={`w-full h-full object-cover transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+        className="w-full h-full object-cover"
       />
     </div>
   );
