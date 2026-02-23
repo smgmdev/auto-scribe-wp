@@ -587,7 +587,7 @@ export default function MediaBuying() {
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
             <span className="font-semibold">Arcana Mace.</span>{' '}
-            <span className="text-[#86868b]">Focusing on seamless and easy to use experience.</span>
+            <span className="text-[#86868b]">Focusing on seamless and easy experience.</span>
           </h2>
         </div>
         
