@@ -3,9 +3,12 @@ import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls, Environment, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
-import { Play, Pause, SkipForward } from "lucide-react";
+import { Play, Pause, SkipForward, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import amBlackLogo from "@/assets/amblack.png";
+import { supabase } from "@/integrations/supabase/client";
 
 function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
   const { scene, animations } = useGLTF("/models/anime_girl.glb");
@@ -32,6 +35,97 @@ function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
 }
 
 useGLTF.preload("/models/anime_girl.glb");
+
+interface ChatMessage {
+  id: string;
+  nickname: string;
+  message: string;
+  created_at: string;
+}
+
+function LostChat() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [nickname] = useState(() => {
+    const adjectives = ["Lost", "Wandering", "Drifting", "Stray", "Roaming", "Ghost", "Phantom", "Shadow"];
+    const nouns = ["Traveler", "Soul", "Spirit", "Visitor", "Explorer", "Stranger", "Nomad", "Drifter"];
+    return `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
+  });
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Fetch existing messages
+    supabase
+      .from("lost_chat_messages")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(50)
+      .then(({ data }) => {
+        if (data) setMessages(data);
+      });
+
+    // Subscribe to new messages
+    const channel = supabase
+      .channel("lost-chat")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "lost_chat_messages" },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new as ChatMessage]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = useCallback(async () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    setInput("");
+    await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
+  }, [input, nickname]);
+
+  return (
+    <div className="w-full max-w-sm bg-black/20 backdrop-blur-md rounded-lg border border-white/10 flex flex-col" style={{ height: 280 }}>
+      <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground">Lost Souls Chat</span>
+        <span className="text-[10px] text-muted-foreground/60">You: {nickname}</span>
+      </div>
+      <ScrollArea className="flex-1 px-3 py-2">
+        <div className="space-y-1.5">
+          {messages.length === 0 && (
+            <p className="text-xs text-muted-foreground/50 text-center py-4">No one here yet... say hi!</p>
+          )}
+          {messages.map((msg) => (
+            <div key={msg.id} className={`text-xs ${msg.nickname === nickname ? "text-right" : ""}`}>
+              <span className="font-semibold text-muted-foreground/80">{msg.nickname === nickname ? "You" : msg.nickname}: </span>
+              <span className="text-foreground/90">{msg.message}</span>
+            </div>
+          ))}
+          <div ref={scrollRef} />
+        </div>
+      </ScrollArea>
+      <div className="px-3 py-2 border-t border-white/10 flex gap-2">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Say something..."
+          className="h-8 text-xs bg-transparent border-white/10"
+          maxLength={200}
+        />
+        <Button variant="ghost" size="icon" onClick={sendMessage} className="h-8 w-8 shrink-0 hover:bg-white/10">
+          <Send className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 const NotFound = () => {
   const location = useLocation();
@@ -72,7 +166,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-muted gap-6 px-4">
       <a href="/" className="text-primary underline hover:text-primary/90">
         Return to Home
       </a>
@@ -107,6 +201,7 @@ const NotFound = () => {
           </Canvas>
         )}
       </div>
+      <LostChat />
     </div>
   );
 };
