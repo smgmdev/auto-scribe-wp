@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2 } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper } from 'lucide-react';
 
 function SliderImage({ src, alt }: { src: string; alt: string }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -354,13 +354,13 @@ export default function AIArticleGeneration() {
                 Create articles from Sources, or custom topics using the latest AI models.
               </p>
               <div className="space-y-3">
-                <Link to="/account" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'compose' } : { redirectTo: '/account', targetView: 'compose' }} className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />
-                  Open Dashboard
+                  New Article
                 </Link>
-                <Link to="/help/getting-started" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
-                  <FileCode className="w-4 h-4" />
-                  Getting started guide
+                <Link to={user ? "/account" : "/auth"} state={user ? { targetView: 'headlines' } : { redirectTo: '/account', targetView: 'headlines' }} className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                  <Newspaper className="w-4 h-4" />
+                  Open Sources
                 </Link>
               </div>
             </div>
