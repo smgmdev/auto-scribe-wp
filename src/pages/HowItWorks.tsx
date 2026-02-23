@@ -258,7 +258,7 @@ const ScrollColorSection = ({
 
   return (
     <section>
-        <div className="mx-auto px-0">
+        <div className="mx-auto px-0 overflow-hidden">
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
@@ -343,7 +343,7 @@ const ScrollColorSection = ({
           {/* WordPress Site Logos Row */}
           <div className="relative mt-12 overflow-hidden -mx-6 md:mx-0">
             {/* Right fade overlay - desktop only */}
-            <div className="hidden md:block absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#1d1d1f] via-[#1d1d1f]/70 to-transparent z-20 pointer-events-none" />
+            <div className="hidden md:block absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-black via-black/70 to-transparent z-20 pointer-events-none" />
             
             <div className="flex justify-center items-center gap-2 md:gap-4 px-2">
               {wpSites.length > 0 ? (
