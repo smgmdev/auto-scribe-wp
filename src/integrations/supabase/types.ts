@@ -905,6 +905,27 @@ export type Database = {
         }
         Relationships: []
       }
+      lost_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          nickname: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          nickname?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          nickname?: string
+        }
+        Relationships: []
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null
