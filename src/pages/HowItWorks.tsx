@@ -599,7 +599,7 @@ const SecurityFadeText = () => {
   const [phase, setPhase] = useState<'entering' | 'visible' | 'exiting' | 'hidden'>('entering');
 
   useEffect(() => {
-    const timings = { entering: 800, visible: 2000, exiting: 600, hidden: 200 };
+    const timings = { entering: 800, visible: 2000, exiting: 300, hidden: 100 };
     const timeout = setTimeout(() => {
       setPhase(prev => {
         if (prev === 'entering') return 'visible';
