@@ -653,7 +653,7 @@ export default function MediaBuying() {
               </div>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-white/10 flex items-center justify-center shadow-lg">
-                  <div className="text-7xl md:text-8xl font-bold bg-gradient-to-b from-green-500 to-black bg-clip-text text-transparent" style={{ animation: 'floatDollar 1.4s ease-in-out infinite' }}>$</div>
+                  <div className="text-7xl md:text-8xl font-bold text-white" style={{ animation: 'floatDollar 1.4s ease-in-out infinite' }}>$</div>
                 </div>
               </div>
               <style>{`
