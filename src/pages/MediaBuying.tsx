@@ -583,8 +583,8 @@ export default function MediaBuying() {
       <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] mb-2">
-            <span className="font-semibold">Features.</span>{' '}
-            <span className="text-[#86868b]">Built in, seamless, and easy to use.</span>
+            <span className="font-semibold">Arcana Mace.</span>{' '}
+            <span className="text-[#86868b]">Focusing on seamless and easy to use experience.</span>
           </h2>
         </div>
         
