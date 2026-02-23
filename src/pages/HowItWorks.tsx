@@ -262,7 +262,7 @@ const ScrollColorSection = ({
         <div 
           id="media-libraries-section"
           ref={coralCardRef}
-          className="bg-[#f87171] rounded-none p-12 md:p-16"
+          className="bg-[#f87171] rounded-none px-4 md:px-6 lg:px-16 py-12 md:py-16"
         >
           <div className="min-h-[200px] flex flex-col justify-center items-center text-center">
             <p className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#7f1d1d] flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
