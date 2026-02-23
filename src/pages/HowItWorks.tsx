@@ -622,7 +622,7 @@ const ScrollColorSection = ({
                   <div
                     className="flex items-center h-full whitespace-nowrap"
                     style={{
-                      animation: 'marquee 12s linear infinite',
+                      animation: 'marquee 4s linear infinite',
                     }}
                   >
                     {[...currencies, ...currencies].map((currency, i) => (
