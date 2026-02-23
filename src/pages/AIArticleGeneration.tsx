@@ -339,7 +339,7 @@ export default function AIArticleGeneration() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
             AI Article Generation.
           </h1>
-          <p className="text-sm md:text-xl text-white/70 leading-tight max-w-3xl mx-auto">
+          <p className="text-base md:text-xl text-white/70 leading-tight max-w-3xl mx-auto">
             Artificial intelligence is at the heart of modern content creation. Arcana Mace works with 
             advanced language models to help you create, refine, and publish professional articles in seconds.
           </p>
