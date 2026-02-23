@@ -1179,9 +1179,9 @@ const HowItWorks = () => {
 
 
       {/* More to Explore Section */}
-      <section className="py-24 md:py-32 bg-white">
+      <section className="py-24 md:py-32 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#1d1d1f] text-center mb-12">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-center mb-12">
             More to explore.
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
