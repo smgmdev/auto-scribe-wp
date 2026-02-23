@@ -541,16 +541,32 @@ export default function SelfPublishing() {
                 </p>
                 <div className="flex flex-wrap gap-6">
                   <a 
-                    href="/about" 
+                    href={user ? '/account' : '/auth'}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (user) {
+                        navigate('/account', { state: { targetView: 'support' } });
+                      } else {
+                        navigate('/auth', { state: { redirectTo: '/account', targetView: 'support' } });
+                      }
+                    }}
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    <span className="group-hover:underline">Learn more</span> <span>↗</span>
+                    <span className="group-hover:underline">Request invoice for wire top-up</span> <span>↗</span>
                   </a>
                   <a 
-                    href="/account" 
+                    href={user ? '/account' : '/auth'}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (user) {
+                        navigate('/account', { state: { targetView: 'credits' } });
+                      } else {
+                        navigate('/auth', { state: { redirectTo: '/account', targetView: 'credits' } });
+                      }
+                    }}
                     className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
                   >
-                    <span className="group-hover:underline">Add credits</span> <span>↗</span>
+                    <span className="group-hover:underline">Go to Credit Management</span> <span>↗</span>
                   </a>
                 </div>
               </div>
