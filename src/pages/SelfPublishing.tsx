@@ -429,7 +429,7 @@ export default function SelfPublishing() {
                 Arcana Mace credits are required to publish articles. If anyone asks you to share your account credentials or use credits outside the Arcana Mace platform, you may be the target of a scam.
               </p>
               <p className="text-sm text-[#1d1d1f] leading-relaxed mb-4">
-                <a href="/help" className="text-[#06c] hover:underline">Contact Support</a> if you believe you're the victim of a scam involving Arcana Mace. You can also report suspicious activity through your account settings.
+                <a href={user ? '/account' : '/auth'} onClick={(e) => { e.preventDefault(); if (user) { navigate('/account', { state: { targetView: 'support' } }); } else { navigate('/auth', { state: { redirectTo: '/account', targetView: 'support' } }); } }} className="text-[#06c] hover:underline cursor-pointer">Contact Support</a> if you believe you have been the victim of a scam involving Arcana Mace. You can also report suspicious account activity or credit processing issues <a href="/report-bug" onClick={(e) => { e.preventDefault(); navigate('/report-bug'); }} className="text-[#06c] hover:underline cursor-pointer">here</a>.
               </p>
               <p className="text-sm text-[#1d1d1f] leading-relaxed">
                 <a href="/help/publishing-articles" className="text-[#06c] hover:underline">Learn More</a> about publishing with Arcana Mace.
