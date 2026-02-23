@@ -317,9 +317,9 @@ export default function SelfPublishing() {
               size="sm"
               onClick={() => {
                 if (user) {
-                  navigate('/account', { state: { targetView: 'sites', targetTab: 'local' } });
+                  navigate('/account', { state: { targetView: 'sites', targetTab: 'instant' } });
                 } else {
-                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'local' } });
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'instant' } });
                 }
               }}
               className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-black transition-all duration-200"
