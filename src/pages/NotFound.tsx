@@ -201,21 +201,21 @@ const NotFound = () => {
       {/* Overlay UI */}
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
         {/* Top controls */}
-        <div className="bg-black text-white pointer-events-auto leading-none">
-          <div className="relative flex items-center justify-end px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
-            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-none h-9 w-9 text-white hover:bg-white/20 hover:text-white">
-                {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        <div className="bg-black text-white pointer-events-auto">
+          <div className="relative flex items-center justify-end px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full h-12">
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-none h-10 w-10 text-white hover:bg-white/20 hover:text-white">
+                {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
               </Button>
               <a href="/" className="flex items-center mx-2">
-                <img src={amLogo} alt="Arcana Mace" className="h-7 w-7 hover:opacity-80 transition-opacity" />
+                <img src={amLogo} alt="Arcana Mace" className="h-9 w-9 hover:opacity-80 transition-opacity" />
               </a>
-              <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-none h-8 w-8 text-white hover:bg-white/20 hover:text-white">
-                <SkipForward className="h-4 w-4" />
+              <Button variant="ghost" size="icon" onClick={nextTrack} className="rounded-none h-10 w-10 text-white hover:bg-white/20 hover:text-white">
+                <SkipForward className="h-5 w-5" />
               </Button>
             </div>
             <a href="/">
-              <button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] px-5 text-xs font-bold transition-all leading-none py-1">
+              <button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] px-6 text-sm font-bold transition-all py-1.5">
                 Exit
               </button>
             </a>
