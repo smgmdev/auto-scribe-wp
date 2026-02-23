@@ -347,10 +347,10 @@ export default function AIArticleGeneration() {
           <source src={bgaiVideo} type="video/mp4" />
         </video>
         <div className="relative z-10 max-w-[980px] mx-auto px-6 md:px-8 text-center">
-          <div className="relative h-[60px] md:h-[72px] lg:h-[84px] mb-6 flex items-center justify-center overflow-hidden">
+          <div className="relative h-[48px] md:h-[72px] lg:h-[84px] mb-6 flex items-center justify-center overflow-visible">
             {/* Title */}
             <h1
-              className="absolute inset-0 flex items-center justify-center text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight transition-all duration-700 ease-in-out"
+              className="absolute inset-0 flex items-center justify-center text-3xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight transition-all duration-700 ease-in-out whitespace-nowrap"
               style={{
                 opacity: heroPhase === 0 ? 1 : 0,
                 transform: heroPhase === 0 ? 'scale(1) rotateX(0deg)' : 'scale(0.6) rotateX(90deg)',
