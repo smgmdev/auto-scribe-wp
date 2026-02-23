@@ -142,6 +142,7 @@ export default function MediaBuying() {
   const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchInitialSubcategory, setSearchInitialSubcategory] = useState<string | null>(null);
   const [mediaSites, setMediaSites] = useState<MediaSite[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [selectedSite, setSelectedSite] = useState<MediaSite | null>(null);
@@ -271,7 +272,7 @@ export default function MediaBuying() {
       </header>
 
       {/* Search Modal */}
-      <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+      <SearchModal open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setSearchInitialSubcategory(null); }} initialTab="Global" initialSubcategory={searchInitialSubcategory} />
 
       {/* Spacer */}
       <div className="h-[92px]" />
@@ -464,6 +465,10 @@ export default function MediaBuying() {
             {subcategories.map((cat) => (
               <span
                 key={cat}
+                onClick={() => {
+                  setSearchInitialSubcategory(cat);
+                  setSearchOpen(true);
+                }}
                 className="px-5 py-2.5 bg-white/80 backdrop-blur border border-[#1d1d1f]/10 text-[#1d1d1f] text-sm font-medium hover:bg-[#0071e3] hover:text-white hover:border-[#0071e3] cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 {cat}
