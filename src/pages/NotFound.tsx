@@ -202,8 +202,8 @@ const NotFound = () => {
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
         {/* Top controls */}
         <div className="bg-black text-white pointer-events-auto leading-none">
-          <div className="flex items-center justify-center px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
-            <div className="flex items-center gap-2">
+          <div className="relative flex items-center justify-end px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
               <Button variant="ghost" size="icon" onClick={togglePlay} className="rounded-none h-9 w-9 text-white hover:bg-white/20 hover:text-white">
                 {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
@@ -214,7 +214,7 @@ const NotFound = () => {
                 <SkipForward className="h-4 w-4" />
               </Button>
             </div>
-            <a href="/" className="ml-auto">
+            <a href="/">
               <Button className="bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] rounded-md px-5 h-8 text-xs font-bold transition-all">
                 Exit
               </Button>
