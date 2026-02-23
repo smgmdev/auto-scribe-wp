@@ -517,7 +517,7 @@ export default function About() {
       </section>
 
       {/* Footer */}
-      <div className="w-full bg-black">
+      <div className="w-full bg-black border-t border-[#424245]">
         <PWAInstallButtons />
       </div>
       <Footer narrow />
