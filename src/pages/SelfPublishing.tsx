@@ -406,17 +406,18 @@ export default function SelfPublishing() {
             
             {/* Info text - Apple style */}
             <div className="text-center mt-16 md:mt-24 max-w-3xl mx-auto">
-              <p className="text-sm text-[#1d1d1f] leading-relaxed mb-4">
+              <p className="text-sm text-white/60 leading-relaxed mb-4">
                 Arcana Mace credits are required to publish articles. If anyone asks you to share your account credentials or use credits outside the Arcana Mace platform, you may be the target of a scam.
               </p>
-              <p className="text-sm text-[#1d1d1f] leading-relaxed mb-4">
-                <a href={user ? '/account' : '/auth'} onClick={(e) => { e.preventDefault(); if (user) { navigate('/account', { state: { targetView: 'support' } }); } else { navigate('/auth', { state: { redirectTo: '/account', targetView: 'support' } }); } }} className="text-[#06c] hover:underline cursor-pointer">Contact Support</a> if you believe you have been the victim of a scam involving Arcana Mace. You can also report suspicious account activity or credit processing issues <a href="/report-bug" onClick={(e) => { e.preventDefault(); navigate('/report-bug'); }} className="text-[#06c] hover:underline cursor-pointer">here</a>.
+              <p className="text-sm text-white/60 leading-relaxed mb-4">
+                <a href={user ? '/account' : '/auth'} onClick={(e) => { e.preventDefault(); if (user) { navigate('/account', { state: { targetView: 'support' } }); } else { navigate('/auth', { state: { redirectTo: '/account', targetView: 'support' } }); } }} className="text-[#2997ff] hover:underline cursor-pointer">Contact Support</a> if you believe you have been the victim of a scam involving Arcana Mace. You can also report suspicious account activity or credit processing issues <a href="/report-bug" onClick={(e) => { e.preventDefault(); navigate('/report-bug'); }} className="text-[#2997ff] hover:underline cursor-pointer">here</a>.
               </p>
-              <p className="text-sm text-[#1d1d1f] leading-relaxed">
-                <a href="/help/publishing-articles" className="text-[#06c] hover:underline">Learn More</a> about publishing with Arcana Mace.
+              <p className="text-sm text-white/60 leading-relaxed">
+                <a href="/help/publishing-articles" className="text-[#2997ff] hover:underline">Learn More</a> about publishing with Arcana Mace.
               </p>
             </div>
           </div>
+          <div className="border-b border-[#424245] mt-10 md:mt-12" />
         </section>
 
         {/* Credits Balance Section - Dark */}
