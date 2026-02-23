@@ -989,6 +989,7 @@ const HowItWorks = () => {
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [slidingArticles, setSlidingArticles] = useState<PublishedArticle[]>([]);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     const fetchLatestArticles = async () => {
@@ -1164,18 +1165,20 @@ const HowItWorks = () => {
 
         {/* Video */}
         <div className="mt-12 max-w-4xl mx-auto px-4 pb-16 relative">
+          {!videoLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black rounded-lg mx-4">
+              <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
+            </div>
+          )}
           <video
             src={mediaLibraryBgVideo}
             autoPlay
             loop
             muted
             playsInline
-            className="w-full rounded-lg object-cover"
-            onLoadedData={(e) => (e.currentTarget.parentElement!.querySelector('.video-spinner') as HTMLElement)?.remove()}
+            className={`w-full rounded-lg object-cover transition-opacity duration-300 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoadedData={() => setVideoLoaded(true)}
           />
-          <div className="video-spinner absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-            <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
-          </div>
         </div>
       </section>
 
