@@ -1253,7 +1253,7 @@ const HowItWorks = () => {
             loop
             muted
             playsInline
-            className="w-full rounded-lg"
+            className="w-full rounded-lg object-cover"
           />
         </div>
       </section>
