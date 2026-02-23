@@ -114,7 +114,7 @@ export default function AIGeneration() {
       categorySlug="ai-generation"
       intro={
       <p>
-          AI generated content quality may vary depending on source material, selected tone, and target publication. Users are solely responsible for reviewing and verifying AI-generated content before publishing.
+          Learn how to use AI-powered tools to generate articles, customize tone and style, and streamline your content creation workflow.
         </p>
       }
       sections={sections}
