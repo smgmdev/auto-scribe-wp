@@ -414,7 +414,7 @@ details[open] .details-open-rotate {
 }
 
 .border-trace-btn:hover::before {
-  animation: trace-full 0.5s linear forwards;
+  animation: trace-full 0.2s linear forwards;
 }
 
 @keyframes trace-full {
