@@ -847,7 +847,7 @@ export default function MediaBuying() {
       </section>
 
       {/* CTA Section - Apple style */}
-      <section className="py-24 bg-white">
+      <section className="py-20 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           {/* Arcana Mace Icon */}
           <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-none overflow-hidden">
