@@ -25,14 +25,18 @@ function ModelViewer({ modelPath, scale, positionY, onLoaded }: { modelPath: str
   const { scene, animations } = useGLTF(modelPath);
   const ref = useRef<THREE.Group>(null);
   const { actions } = useAnimations(animations, ref);
+  const onLoadedRef = useRef(onLoaded);
+  onLoadedRef.current = onLoaded;
 
   useEffect(() => {
-    onLoaded();
+    onLoadedRef.current();
     const firstAction = Object.values(actions)[0];
     if (firstAction) {
       firstAction.reset().fadeIn(0.5).play();
     }
-  }, [scene, onLoaded, actions]);
+    // Only run when the model actually changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scene]);
 
   useFrame((_, delta) => {
     if (ref.current) {
