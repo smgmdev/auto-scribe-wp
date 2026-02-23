@@ -350,7 +350,7 @@ export function BriefSubmissionDialog({
           >
             {/* Drag bar */}
             <div
-              className={`px-6 py-2 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -mx-6`}
+              className={`pl-6 pr-4 py-2 border-b bg-muted/30 flex items-center justify-between ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none -ml-6`}
               onMouseDown={handleDragStart}
             >
               <GripHorizontal className="h-4 w-4 text-muted-foreground" />
