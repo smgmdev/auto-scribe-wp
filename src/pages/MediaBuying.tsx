@@ -735,9 +735,9 @@ export default function MediaBuying() {
                 <span className="text-lg font-semibold text-[#1d1d1f]">Trusted Agencies</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
-                Work with vetted media agencies who understand editorial standards. Every agency is reviewed and monitored for quality.
+                Work with KYC verified media agencies who understand professional standards. Every agency is reviewed and monitored for quality.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white">
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => { setSearchInitialSubcategory('Agencies/People'); setSearchOpen(true); }}>
                 Meet agencies
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
@@ -747,7 +747,7 @@ export default function MediaBuying() {
               </div>
               <div className="mt-6 pt-4 border-t border-[#1d1d1f]/10">
                 <p className="text-xs text-[#1d1d1f]/60 font-medium">Partners</p>
-                <p className="text-xs text-[#1d1d1f]/80">Verified, Monitored, Reliable</p>
+                <p className="text-xs text-[#1d1d1f]/80">KYC Verified and Monitored by Arcana Mace AI</p>
               </div>
             </div>
           </div>
