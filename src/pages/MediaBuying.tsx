@@ -413,7 +413,7 @@ export default function MediaBuying() {
 
       {/* Built for growth and scale - Dark section */}
       <section className="bg-black pt-28 pb-20 md:pt-36 md:pb-28">
-        <div className="max-w-[980px] mx-auto px-0 md:px-6 text-center">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-8">
             Built for growth and scale
           </h2>
