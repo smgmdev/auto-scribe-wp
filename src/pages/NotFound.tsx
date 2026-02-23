@@ -14,6 +14,7 @@ import { useAppStore } from "@/stores/appStore";
 const MODELS = [
   { id: "anime_girl", name: "Anime Girl", path: "/models/anime_girl.glb", scale: 3.5, positionY: -2.5 },
   { id: "ai", name: "AI", path: "/models/ai.glb", scale: 3, positionY: -2 },
+  { id: "xiexie_shanghai", name: "谢谢上海", path: "/models/xiexie_shanghai.glb", scale: 3, positionY: -2 },
 ];
 
 // Preload all models
