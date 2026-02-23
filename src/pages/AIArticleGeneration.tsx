@@ -351,7 +351,7 @@ export default function AIArticleGeneration() {
               </div>
               <h4 className="text-xl font-semibold text-[#1d1d1f] mb-2">AI Compose</h4>
               <p className="text-[15px] text-[#1d1d1f] leading-relaxed mb-4">
-                Create articles from headlines, URLs, or custom topics using the latest AI models.
+                Create articles from Sources, or custom topics using the latest AI models.
               </p>
               <div className="space-y-3">
                 <Link to="/account" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
