@@ -557,30 +557,30 @@ const ScrollColorSection = ({
           {/* Security animation inline */}
           <div className="flex flex-col items-center justify-center mt-10">
             <div className="relative w-48 h-48">
-              <div className="absolute inset-0 rounded-full bg-[#30d158]/10 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-[#f2a547]/10 blur-2xl animate-pulse" />
               <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
-                <div className="w-full h-full rounded-full border border-[#30d158]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
+                <div className="w-full h-full rounded-full border border-[#f2a547]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
               </div>
               <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
-                <div className="w-full h-full rounded-full border border-[#30d158]/25" style={{ transform: 'rotateX(70deg) rotateZ(60deg)' }} />
+                <div className="w-full h-full rounded-full border border-[#f2a547]/25" style={{ transform: 'rotateX(70deg) rotateZ(60deg)' }} />
               </div>
               <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
-                <div className="w-full h-full rounded-full border border-[#30d158]/20" style={{ transform: 'rotateX(70deg) rotateZ(120deg)' }} />
+                <div className="w-full h-full rounded-full border border-[#f2a547]/20" style={{ transform: 'rotateX(70deg) rotateZ(120deg)' }} />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
-                  <div className="absolute inset-0 -m-3 rounded-full bg-[#30d158]/20 blur-xl animate-pulse" />
-                  <Shield className="w-12 h-12 text-[#30d158] drop-shadow-[0_0_15px_rgba(48,209,88,0.5)] relative z-10" />
+                  <div className="absolute inset-0 -m-3 rounded-full bg-[#f2a547]/20 blur-xl animate-pulse" />
+                  <Shield className="w-12 h-12 text-[#f2a547] drop-shadow-[0_0_15px_rgba(242,165,71,0.5)] relative z-10" />
                 </div>
               </div>
               <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#f2a547] shadow-[0_0_8px_rgba(242,165,71,0.8)]" />
               </div>
               <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/70 shadow-[0_0_6px_rgba(48,209,88,0.6)]" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#f2a547]/70 shadow-[0_0_6px_rgba(242,165,71,0.6)]" />
               </div>
               <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
-                <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/50 shadow-[0_0_6px_rgba(48,209,88,0.4)]" />
+                <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#f2a547]/50 shadow-[0_0_6px_rgba(242,165,71,0.4)]" />
               </div>
             </div>
             <SecurityFadeText />
@@ -593,7 +593,7 @@ const ScrollColorSection = ({
 };
 
 // Security fade text component
-const securityTexts = ['Transaction security.', 'Communication supervision.', 'Anti fraud supervision.', 'Data protection.', 'Prioritized privacy.'];
+const securityTexts = ['AI Auto Publishing.', 'AI Article Generation.', 'AI Communication Supervision.', 'AI Data Protection.', 'AI Transaction Security.', 'AI Anti Fraud Supervision.'];
 const SecurityFadeText = () => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -611,7 +611,7 @@ const SecurityFadeText = () => {
 
   return (
     <p
-      className="text-[#30d158]/80 text-2xl font-bold mt-4 text-center leading-tight transition-opacity duration-500 ease-in-out"
+      className="text-[#f2a547]/80 text-2xl font-bold mt-4 text-center leading-tight transition-opacity duration-500 ease-in-out"
       style={{ opacity: visible ? 1 : 0 }}
     >
       {securityTexts[index]}
