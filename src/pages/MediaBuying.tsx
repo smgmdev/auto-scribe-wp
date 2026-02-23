@@ -569,12 +569,15 @@ export default function MediaBuying() {
                 See transparent pricing instantly. No back-and-forth negotiations. No hidden fees. Just clear, upfront costs for every placement.
               </p>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="rounded-none px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent">
+                <Button variant="outline" className="rounded-none px-5 py-2 text-sm border-white text-white hover:bg-white hover:text-[#0071e3] bg-transparent" onClick={() => {
+                  if (user) {
+                    navigate('/account', { state: { targetView: 'sites', targetTab: 'custom' } });
+                  } else {
+                    navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'custom' } });
+                  }
+                }}>
                   Browse Sites
                 </Button>
-                <button className="text-white text-sm hover:underline">
-                  Learn more ›
-                </button>
               </div>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1 relative">
                 <div className="absolute inset-0 flex items-center justify-center">
