@@ -611,22 +611,22 @@ const ScrollColorSection = ({
             </a>
 
             {/* Card 3: Arcana Mace for agencies */}
-            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-[#f2a547]">
+            <a href="/help/for-agencies#becoming-agency" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col justify-between p-8 cursor-pointer hover:scale-[1.02] transition-transform duration-300 bg-black">
               <div>
-                <p className="text-sm font-semibold text-black/50 mb-3 uppercase tracking-wide">Agency Account</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">Control pricing<br />and close deals.</h3>
-                <span className="text-black/70 text-sm group-hover:text-black transition-colors">Upgrade to agency ›</span>
+                <p className="text-sm font-semibold text-white/50 mb-3 uppercase tracking-wide">Agency Account</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">Control pricing<br />and close deals.</h3>
+                <span className="text-white/70 text-sm group-hover:text-white transition-colors">Upgrade to agency ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-none bg-black relative overflow-hidden">
+                <div className="w-20 h-20 rounded-none bg-[#f2a547] relative overflow-hidden">
                   <div
                     className="flex items-center h-full whitespace-nowrap w-max"
                     style={{
                       animation: 'marquee 3s linear infinite',
                     }}
                   >
-                    <span className="text-4xl font-bold text-white pr-6">EUR USD JPY USDT CNY</span>
-                    <span className="text-4xl font-bold text-white pr-6">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-black pr-6">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-black pr-6">EUR USD JPY USDT CNY</span>
                   </div>
                 </div>
               </div>
