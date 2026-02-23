@@ -657,7 +657,7 @@ const Landing = () => {
         )}
 
         {/* Bug Report CTA Section */}
-        <section className="relative overflow-hidden my-12">
+        <section className="relative overflow-hidden mt-12">
           <video
             autoPlay
             loop
