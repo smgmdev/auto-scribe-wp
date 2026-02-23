@@ -415,7 +415,7 @@ const ScrollColorSection = ({
           
           {/* Description */}
           <p className="text-lg md:text-xl text-white max-w-3xl mx-auto mb-8 leading-tight">
-            Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
+            Access the global media network on Arcana Mace. Purchase media placements across international news sites, industry publications, and regional outlets, while PR agencies manage everything for you, from content creation to final publication.
           </p>
           
 
