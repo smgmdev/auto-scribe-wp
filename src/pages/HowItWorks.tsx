@@ -310,7 +310,7 @@ const ScrollColorSection = ({
           </div>
         </div>
         {/* Local Media Library Section */}
-        <div id="local-media-library" ref={localLibraryRef} className="bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
+        <div id="local-media-library" ref={localLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
@@ -398,7 +398,7 @@ const ScrollColorSection = ({
         </div>
 
         {/* Global Media Library Section */}
-        <div id="global-media-library" ref={globalLibraryRef} className="bg-[#1d1d1f] rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
+        <div id="global-media-library" ref={globalLibraryRef} className="bg-black rounded-none px-6 py-10 md:p-16 lg:p-20 text-center overflow-hidden">
           {/* Icon - Arcana Mace Logo White */}
           <div className="flex justify-center mb-6">
             <img 
