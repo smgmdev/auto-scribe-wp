@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -461,6 +461,17 @@ export default function UpdateLog() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredUpdates = useMemo(() => {
+    if (!searchQuery.trim()) return updates;
+    const q = searchQuery.toLowerCase();
+    return updates.filter(update =>
+      update.title.toLowerCase().includes(q) ||
+      update.date.toLowerCase().includes(q) ||
+      update.changes.some(c => c.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-black">
@@ -525,7 +536,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 22, 2026
+            Last update: February 24, 2026
           </p>
         </div>
 
@@ -537,11 +548,20 @@ export default function UpdateLog() {
           <p className="text-white/50 leading-relaxed">
             We regularly release updates to improve performance, introduce new capabilities, and refine the user experience across publishing, media buying, and agency management. Each entry below details the changes included in that release.
           </p>
+          <div className="mt-6">
+            <input
+              type="text"
+              placeholder="Search updates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 rounded-none bg-black border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-colors"
+            />
+          </div>
         </div>
 
         {/* Updates as Accordion */}
         <Accordion type="multiple" className="w-full">
-          {updates.map((update, i) => (
+          {filteredUpdates.map((update, i) => (
             <AccordionItem key={i} value={`item-${i}`} className="border-t border-white/10">
               <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
                 <span className="flex items-center justify-between w-full gap-3 text-left">
