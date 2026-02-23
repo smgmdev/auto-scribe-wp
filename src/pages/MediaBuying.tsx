@@ -699,7 +699,7 @@ export default function MediaBuying() {
                 <span className="text-lg font-semibold text-[#1d1d1f]">Fast Turnaround</span>
               </div>
               <p className="text-[15px] text-[#1d1d1f]/80 leading-relaxed mb-4">
-                Most publications deliver within 48-72 hours.
+                Most publications deliver within 48-72 hours. Track your order in real-time and get notified the moment your article goes live.
               </p>
               <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-[#1d1d1f] text-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white" onClick={() => navigate('/help/orders-delivery')}>
                 View timelines
@@ -812,7 +812,7 @@ export default function MediaBuying() {
               },
               {
                 question: "How long does it take to get published?",
-                answer: "Most publications have a turnaround time of 24-72 hours. The exact timeframe is displayed on each listing, and you can track your order status in real-time through your dashboard."
+                answer: "Most publications have a turnaround time of 48-72 hours. The exact timeframe is displayed on each listing, and you can track your order status in real-time through your dashboard."
               },
               {
                 question: "Do I get a refund if my article isn't published?",
