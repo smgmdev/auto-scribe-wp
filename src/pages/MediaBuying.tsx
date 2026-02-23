@@ -592,19 +592,25 @@ export default function MediaBuying() {
               </div>
             </div>
 
-            {/* Card 3 - Global Reach (Dark) */}
+            {/* Card 3 - China Market (Dark) */}
             <div className="flex-shrink-0 w-[300px] md:w-[340px] rounded-none p-6 flex flex-col snap-start min-h-[520px] md:min-h-[580px] bg-[#1d1d1f]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-none bg-white/10 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-semibold text-white">Global Reach</span>
+                <span className="text-lg font-semibold text-white">China Market</span>
               </div>
               <p className="text-[15px] text-white/70 leading-relaxed mb-4">
-                Access publications across 50+ countries and every major language. Expand your brand presence worldwide with local expertise.
+                We are proud to provide media access to the Chinese market. Expand your brand presence in Asia and beyond with localized branding.
               </p>
-              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent">
-                Explore regions
+              <Button variant="outline" className="w-fit rounded-none px-5 py-2 text-sm border-white/30 text-white hover:bg-white hover:text-[#1d1d1f] bg-transparent" onClick={() => {
+                if (user) {
+                  navigate('/account', { state: { targetView: 'sites', targetTab: 'custom', subcategory: 'China' } });
+                } else {
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'custom', subcategory: 'China' } });
+                }
+              }}>
+                Explore Chinese media
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
@@ -612,8 +618,8 @@ export default function MediaBuying() {
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-xs text-white/50 font-medium">Coverage</p>
-                <p className="text-xs text-white/70">50+ countries, 20+ languages</p>
+                <p className="text-xs text-white/50 font-medium">Coverage · 您的内容可以翻译成中文。</p>
+                <p className="text-xs text-white/70">以制胜之势开拓中国市场</p>
               </div>
             </div>
 
