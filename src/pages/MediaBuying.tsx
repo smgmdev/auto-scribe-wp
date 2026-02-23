@@ -194,9 +194,9 @@ export default function MediaBuying() {
 
   const handleGetStarted = () => {
     if (user) {
-      navigate('/account', { state: { targetView: 'sites', targetTab: 'global' } });
+      navigate('/account', { state: { targetView: 'sites', targetTab: 'custom' } });
     } else {
-      navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'global' } });
+      navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'custom' } });
     }
   };
 
@@ -277,9 +277,9 @@ export default function MediaBuying() {
               size="sm"
               onClick={() => {
                 if (user) {
-                  navigate('/account', { state: { targetView: 'sites', targetTab: 'global' } });
+                  navigate('/account', { state: { targetView: 'sites', targetTab: 'custom' } });
                 } else {
-                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'global' } });
+                  navigate('/auth', { state: { redirectTo: '/account', targetView: 'sites', targetTab: 'custom' } });
                 }
               }}
               className="bg-[#f2a547] hover:bg-black text-black hover:text-[#f2a547] text-xs px-4 py-1 h-7 rounded-none border border-transparent hover:border-black transition-all duration-200"
