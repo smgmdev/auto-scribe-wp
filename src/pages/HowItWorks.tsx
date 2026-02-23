@@ -622,14 +622,11 @@ const ScrollColorSection = ({
                   <div
                     className="flex items-center h-full whitespace-nowrap"
                     style={{
-                      animation: 'marquee 4s linear infinite',
+                      animation: 'marquee 6s linear infinite',
                     }}
                   >
-                    {[...currencies, ...currencies].map((currency, i) => (
-                      <span key={i} className="text-4xl font-bold text-black/80 mx-4 inline-block">
-                        {currency}
-                      </span>
-                    ))}
+                    <span className="text-4xl font-bold text-black/80 px-4">EUR USD JPY USDT CNY</span>
+                    <span className="text-4xl font-bold text-black/80 px-4">EUR USD JPY USDT CNY</span>
                   </div>
                 </div>
               </div>
