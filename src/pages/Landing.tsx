@@ -409,12 +409,12 @@ const Landing = () => {
     <div
       key={site.id}
       onClick={() => handleSiteClick(site, 'wp')}
-      className="flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-muted/50 cursor-pointer transition-all duration-200"
+      className="flex items-center gap-3 p-3 rounded-none bg-card hover:bg-muted/50 cursor-pointer transition-all duration-200"
     >
       <img
         src={site.favicon || getFaviconUrl(site.url)}
         alt={site.name}
-        className="h-14 w-14 rounded-xl bg-muted object-contain flex-shrink-0"
+        className="h-14 w-14 rounded-none bg-muted object-contain flex-shrink-0"
       />
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-foreground truncate text-sm">
@@ -434,13 +434,13 @@ const Landing = () => {
     <div
       key={site.id}
       onClick={() => handleSiteClick(site, 'media')}
-      className="flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-muted/50 cursor-pointer transition-all duration-200"
+      className="flex items-center gap-3 p-3 rounded-none bg-card hover:bg-muted/50 cursor-pointer transition-all duration-200"
     >
       <div className="flex-shrink-0 relative">
         <img
           src={site.favicon || getFaviconUrl(site.link)}
           alt={site.name}
-          className="h-14 w-14 rounded-xl bg-muted object-contain"
+          className="h-14 w-14 rounded-none bg-muted object-contain"
           onError={(e) => {
             e.currentTarget.src = '';
             e.currentTarget.style.display = 'none';
