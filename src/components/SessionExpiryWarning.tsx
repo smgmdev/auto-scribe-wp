@@ -26,6 +26,8 @@ export function SessionExpiryWarning() {
   const sessionStartedAtRef = useRef<number | null>(null);
   // Grace window: skip DB fetches until this timestamp passes
   const skipUntilRef = useRef<number>(0);
+  // Cooldown: prevent re-showing warning immediately after user clicks "Stay Logged In"
+  const dismissedAtRef = useRef<number>(0);
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -56,10 +58,10 @@ export function SessionExpiryWarning() {
     clearCountdown();
     setShowWarning(false);
     warningShownRef.current = false;
-    // Set a grace window: ignore any DB-fetched timestamps for 5 seconds
-    // This prevents stale DB reads from overwriting our fresh local timestamp
-    // even if the effect re-runs multiple times due to auth events
-    skipUntilRef.current = Date.now() + 5000;
+    // Set grace window + cooldown to prevent re-triggering
+    const now = Date.now();
+    skipUntilRef.current = now + 10000;
+    dismissedAtRef.current = now;
 
     try {
       const success = await extendSession();
@@ -123,7 +125,7 @@ export function SessionExpiryWarning() {
       }
 
       // If within warning window and haven't shown yet for this cycle
-      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && !warningShownRef.current) {
+      if (timeUntilExpiry <= WARNING_BEFORE_EXPIRY_MS && !warningShownRef.current && (Date.now() - dismissedAtRef.current > 15000)) {
         warningShownRef.current = true;
         const secs = Math.ceil(timeUntilExpiry / 1000);
         setSecondsLeft(secs);
