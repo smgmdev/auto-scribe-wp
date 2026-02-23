@@ -593,9 +593,7 @@ export default function SelfPublishing() {
         </section>
       </main>
 
-      <div className="border-t border-[#424245] bg-black [&_div]:pt-0 [&_div]:md:pt-0">
-        <PWAInstallButtons />
-      </div>
+      <PWAInstallButtons />
 
       {/* Disclaimers Section - matches How It Works style */}
       <section className="bg-[#f5f5f7]">

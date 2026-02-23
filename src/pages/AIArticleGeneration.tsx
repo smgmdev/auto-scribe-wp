@@ -508,7 +508,7 @@ export default function AIArticleGeneration() {
       </section>
 
       {/* Get Started Section */}
-      <section className="py-16 md:py-20 bg-black">
+      <section className="pt-16 md:pt-20 pb-0 bg-black">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-3xl md:text-[40px] font-semibold text-white tracking-tight mb-4">
             Get Started
@@ -528,7 +528,7 @@ export default function AIArticleGeneration() {
 
       {/* Apple-style Feature Slider */}
       {sliderArticles.length > 0 && (
-        <section className="pt-12 pb-6 bg-white">
+        <section className="pt-12 pb-0 bg-white">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <p className="text-xs text-[#86868b] mb-4">*These articles have been composed with AI</p>
             <div 
