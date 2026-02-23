@@ -1041,6 +1041,7 @@ export function CreditHistoryView() {
 
   const purchasesSubTabsDef = [
     { key: 'purchases', label: 'All Purchases' },
+    { key: 'topups', label: 'Top Ups' },
     { key: 'purchases_b2b', label: 'B2B Media Purchases' },
     { key: 'purchases_instant', label: 'Instant Publishing Purchases' },
   ];
@@ -1084,7 +1085,8 @@ export function CreditHistoryView() {
       case 'earnings_b2b': return displayedTransactions.filter(isB2BEarning);
       case 'earnings_instant': return displayedTransactions.filter(isInstantEarning);
       case 'purchases': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish');
-      case 'purchases_b2b': return displayedTransactions.filter(tx => tx.type === 'order_completed' || tx.type === 'purchase');
+      case 'topups': return displayedTransactions.filter(tx => tx.type === 'purchase');
+      case 'purchases_b2b': return displayedTransactions.filter(tx => tx.type === 'order_completed');
       case 'purchases_instant': return displayedTransactions.filter(tx => tx.type === 'publish');
       case 'system': return displayedTransactions.filter(tx => systemTypes.includes(tx.type));
       case 'withdrawals': return displayedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
@@ -1108,7 +1110,8 @@ export function CreditHistoryView() {
       }
       if (tx.type === 'order_completed' || tx.type === 'purchase' || tx.type === 'publish') {
         counts['purchases'] = (counts['purchases'] || 0) + 1;
-        if (tx.type === 'order_completed' || tx.type === 'purchase') counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
+        if (tx.type === 'purchase') counts['topups'] = (counts['topups'] || 0) + 1;
+        if (tx.type === 'order_completed') counts['purchases_b2b'] = (counts['purchases_b2b'] || 0) + 1;
         if (tx.type === 'publish') counts['purchases_instant'] = (counts['purchases_instant'] || 0) + 1;
       }
       if (systemTypes.includes(tx.type)) {
