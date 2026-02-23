@@ -378,7 +378,7 @@ export default function AIArticleGeneration() {
                 Optimize your content
               </h2>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                Every article is automatically optimized for search engines. Arcana Mace generates SEO metadata 
+                Every article is automatically optimized for search engines. Arcana Mace editor allows you to enter custom SEO metadata based on newly generated AI content, 
                 including meta descriptions, focus keywords, and properly structured headlines to maximize visibility.
               </p>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
