@@ -24,6 +24,8 @@ export function SessionExpiryWarning() {
   const checkRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const warningShownRef = useRef(false);
   const sessionStartedAtRef = useRef<number | null>(null);
+  // Guard: when true, skip the next DB fetch so the local Date.now() isn't overwritten
+  const skipNextFetchRef = useRef(false);
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -54,13 +56,12 @@ export function SessionExpiryWarning() {
     clearCountdown();
     setShowWarning(false);
     warningShownRef.current = false;
+    // Prevent the effect re-run from overwriting our fresh timestamp with a stale DB value
+    skipNextFetchRef.current = true;
 
     try {
-      // Use the auth context's extendSession which properly handles
-      // grace periods, session re-registration, and token refresh
       const success = await extendSession();
       if (success) {
-        // Update local cache
         sessionStartedAtRef.current = Date.now();
       } else {
         console.error('[SessionExpiry] extendSession failed, signing out');
@@ -88,10 +89,14 @@ export function SessionExpiryWarning() {
       return;
     }
 
-    // Initial fetch of session_started_at
-    fetchSessionStart().then((ts) => {
-      if (ts) sessionStartedAtRef.current = ts;
-    });
+    // Initial fetch — skip if we just extended the session locally
+    if (skipNextFetchRef.current) {
+      skipNextFetchRef.current = false;
+    } else {
+      fetchSessionStart().then((ts) => {
+        if (ts) sessionStartedAtRef.current = ts;
+      });
+    }
 
     const checkExpiry = async () => {
       // If we don't have a cached value yet, fetch from DB
