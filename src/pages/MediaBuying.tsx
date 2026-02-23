@@ -469,7 +469,7 @@ export default function MediaBuying() {
       </section>
 
       {/* Main headline section */}
-      <section className="bg-white pt-16 pb-16 md:pb-24">
+      <section className="bg-white pt-16 pb-4 md:pb-6">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-3xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-0 leading-tight">
             The reach you need.
@@ -481,7 +481,7 @@ export default function MediaBuying() {
       </section>
 
       {/* Intro paragraph */}
-      <section className="pb-20">
+      <section className="pb-20 pt-0">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
             For years, media buying meant navigating complex relationships and unclear pricing. 
