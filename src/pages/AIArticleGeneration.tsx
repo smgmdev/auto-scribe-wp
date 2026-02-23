@@ -615,7 +615,9 @@ export default function AIArticleGeneration() {
         </section>
       )}
 
-      <PWAInstallButtons />
+      <div className="bg-black">
+        <PWAInstallButtons />
+      </div>
 
       {/* Disclaimers Section */}
       <section className="bg-[#f5f5f7]">
