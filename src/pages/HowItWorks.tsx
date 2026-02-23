@@ -283,6 +283,7 @@ const ScrollColorSection = ({
               >
                 GO
               </button>
+              <span className="text-[#7f1d1d]">— each with its own unique features.</span>
             </p>
           </div>
 
