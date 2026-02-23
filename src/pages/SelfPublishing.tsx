@@ -445,7 +445,7 @@ export default function SelfPublishing() {
                 </div>
                 <div className="relative md:-mx-0">
                   <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] border border-[#424245] z-10 transition-opacity duration-300" id="cm-video-loader">
-                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                    <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
                   </div>
                   <video 
                     src={creditManagementVideo}
@@ -473,7 +473,7 @@ export default function SelfPublishing() {
               <div className="hidden md:flex justify-start">
                 <div className="relative w-[340px]">
                   <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] z-10 transition-opacity duration-300" id="payments-video-loader">
-                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                    <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
                   </div>
                   <video 
                     src={paymentsVideo}
@@ -534,7 +534,7 @@ export default function SelfPublishing() {
               <div className="flex md:hidden justify-center">
                 <div className="relative w-[280px]">
                   <div className="absolute inset-0 flex items-center justify-center bg-[#1d1d1f] z-10 transition-opacity duration-300" id="payments-video-loader-mobile">
-                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                    <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
                   </div>
                   <video 
                     src={paymentsVideo}
@@ -575,7 +575,7 @@ export default function SelfPublishing() {
               <div className="mt-10 md:mt-0 flex-1">
                 <div className="relative w-full max-w-[440px] md:ml-auto">
                   <div id="business-video-loader" className="absolute inset-0 flex items-center justify-center bg-black z-10 transition-opacity duration-300 rounded-none">
-                    <div className="h-8 w-8 border-3 border-[#2997ff] border-t-transparent rounded-full animate-spin" />
+                    <Loader2 className="h-10 w-10 animate-spin text-[#0077ed]" />
                   </div>
                   <video 
                     src={businessVideo}
