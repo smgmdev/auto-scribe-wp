@@ -466,31 +466,6 @@ const ScrollColorSection = ({
             Access our curated network of premium media outlets worldwide. Buy placements on established news sites, industry publications, and regional outlets. Let PR agencies handle everything from content creation to publishing.
           </p>
           
-          {/* Media Site Icons - Inline Row */}
-          <div className="flex items-center justify-center gap-4 mt-10">
-            {/* Purple glow effect */}
-            <div className="absolute w-60 h-20 rounded-full bg-[#bf5af2]/20 blur-3xl" />
-            
-            {mediaSites.slice(0, 3).length > 0 ? (
-              mediaSites.slice(0, 3).map((site, i) => (
-                <div key={site.id || i} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center overflow-hidden animate-purple-glow-pulse relative" style={{ animationDelay: `${i * 0.5}s` }}>
-                  {site.favicon ? (
-                    <img src={site.favicon} alt={site.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Newspaper className="w-1/2 h-1/2 text-[#2997ff]" />
-                  )}
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
-                </div>
-              ))
-            ) : (
-              [Newspaper, Building2, TrendingUp].map((Icon, i) => (
-                <div key={i} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-b from-[#3a3a3c] to-[#2a2a2c] border-2 border-[#4a4a4c] flex items-center justify-center animate-purple-glow-pulse relative" style={{ animationDelay: `${i * 0.5}s` }}>
-                  <Icon className="w-1/2 h-1/2 text-[#bf5af2]" />
-                  <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_15px_rgba(191,90,242,0.3)]" />
-                </div>
-              ))
-            )}
-          </div>
 
           {/* Links */}
           <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6 mt-10">
