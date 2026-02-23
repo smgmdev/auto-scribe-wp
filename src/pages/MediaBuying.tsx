@@ -470,7 +470,7 @@ export default function MediaBuying() {
 
       {/* Main headline section */}
       <section className="bg-white pt-16 pb-16 md:pb-24">
-        <div className="max-w-[980px] mx-auto px-0 md:px-6 text-center">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[#1d1d1f] mb-4 leading-tight">
             The reach you need.
           </h1>
@@ -482,7 +482,7 @@ export default function MediaBuying() {
 
       {/* Intro paragraph */}
       <section className="pb-20">
-        <div className="max-w-[980px] mx-auto px-0 md:px-6">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <p className="text-xl md:text-2xl text-[#1d1d1f] leading-relaxed text-center max-w-4xl mx-auto">
             For years, media buying meant navigating complex relationships and unclear pricing. 
             Arcana Mace simplifies the process by offering direct access to global publications 
