@@ -42,9 +42,7 @@ export default function AIMarketingStrategy() {
           content: (
             <>
               <p className="text-[17px] text-muted-foreground leading-relaxed mb-4">
-                Enabling AI Auto Publishing means your content pipeline never stops. New articles are generated 
-                and published to your connected WordPress sites every day — automatically. This creates a steady 
-                stream of fresh, indexed links that AI crawlers pick up regularly.
+                Enabling AI Auto Publishing means your content pipeline never stops. Publishing articles daily on auto-pilot, creates a steady stream of fresh content that AI crawlers pick up regularly.
               </p>
               <p className="text-[17px] text-muted-foreground leading-relaxed mb-4">
                 Daily publishing builds momentum. Search engines and LLMs favor sources that are consistently 
