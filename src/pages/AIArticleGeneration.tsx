@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper, Plus } from 'lucide-react';
@@ -128,6 +129,7 @@ export default function AIArticleGeneration() {
   const [publishedArticles, setPublishedArticles] = useState<PublishedArticle[]>([]);
   const [sliderArticles, setSliderArticles] = useState<SliderArticle[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -253,6 +255,13 @@ export default function AIArticleGeneration() {
           
           {/* Right side buttons */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="p-2 text-white/70 hover:text-white transition-colors"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
             {user ? (
               <Button 
                 onClick={() => navigate('/account')}
@@ -615,6 +624,7 @@ export default function AIArticleGeneration() {
 
       <PWAInstallButtons />
       <Footer narrow showTopBorder />
+      <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
