@@ -85,12 +85,12 @@ function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
 
   // Duplicate list for seamless loop
   const doubled = [...chinaSites, ...chinaSites];
-  const logoSize = 'w-14 h-14 md:w-16 md:h-16';
-  const totalWidth = chinaSites.length * 64; // approx px per logo + gap
+  const logoSize = 'w-28 h-28 md:w-32 md:h-32';
+  const totalWidth = chinaSites.length * 128; // approx px per logo + gap
   const duration = chinaSites.length * 2; // seconds
 
   return (
-    <div className="w-full rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 overflow-hidden flex flex-col justify-center gap-1 py-6">
+    <div className="w-full rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 overflow-hidden flex flex-col justify-center gap-1 py-2">
       {/* Top row - slides left */}
       <div className="overflow-hidden">
         <div
