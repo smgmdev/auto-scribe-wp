@@ -317,15 +317,15 @@ export default function AIArticleGeneration() {
                 Prepare for publishing
               </h2>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                AI-generated content lets you publish professional articles to your <Link to="/account" className="text-[#06c] hover:underline">WordPress sites</Link> instantly. 
-                Articles created with Arcana Mace are optimized for SEO and can take advantage of advanced features such as automatic meta tags and focus keywords.
+                AI-generated content lets you publish professional articles to Local Media Library sites instantly. 
+                Articles created with Arcana Mace AI are optimized for SEO and can take advantage of advanced features such as meta tags and focus keywords.
               </p>
 
               <h3 className="text-2xl md:text-[28px] font-semibold text-[#1d1d1f] tracking-tight mb-4 mt-10">
                 Generate your article
               </h3>
               <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-4">
-                You can generate articles from headlines in the Dashboard or from any URL using the Compose view. 
+                You can generate articles from headlines in the Account Dashboard → Sources. 
                 Choose your preferred writing tone and let the AI create original, human-quality content in seconds.
               </p>
               <Link to="/help/ai-generation" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
