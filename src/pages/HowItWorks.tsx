@@ -1115,7 +1115,7 @@ const HowItWorks = () => {
 
   const features = [
     { highlight: "Arcana Mace is a media buying marketplace", normal: "" },
-    { highlight: "You can publish articles and press releases", normal: "into online media worldwide" },
+    { highlight: "You can publish articles and press releases", normal: "into online media channels" },
     { highlight: "We connect clients to PR agencies", normal: "and direct media outlets" },
     { highlight: "Arcana Mace has transparent pricing", normal: "with no hidden fees or surprises." },
     { highlight: "We provide global reach", normal: "across all major markets." },
