@@ -1386,7 +1386,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      <div className="max-w-[980px] mx-auto px-4 md:px-6"><hr className="border-[#d2d2d7]" /></div>
+      <hr className="border-[#d2d2d7]" />
       <Footer narrow showTopBorder />
     </div>
   );
