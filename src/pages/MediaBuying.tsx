@@ -300,7 +300,7 @@ export default function MediaBuying() {
           <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-4xl mx-auto">
             We built Arcana Mace to make it easy for everyone from individuals to large 
             teams, to publish content across global media channels and successfully run and 
-            grow a global brand. Arcana Mace empowers you to scale your media distribution 
+            grow a global brand. Arcana Mace empowers you to scale your media presence 
             worldwide using our platform.
           </p>
         </div>
