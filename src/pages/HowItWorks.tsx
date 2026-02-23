@@ -618,20 +618,19 @@ const ScrollColorSection = ({
                 <span className="text-black/70 text-sm group-hover:text-black transition-colors">Upgrade to agency ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-black/10 relative overflow-hidden">
-                  {currencies.map((currency, i) => (
-                    <span
-                      key={currency}
-                      className="absolute text-2xl font-bold text-black/80 whitespace-nowrap"
-                      style={{
-                        transform: i === activeCurrencyIndex ? 'translateX(0)' : i > activeCurrencyIndex || (activeCurrencyIndex === currencies.length - 1 && i === 0) ? 'translateX(100%)' : 'translateX(-100%)',
-                        opacity: i === activeCurrencyIndex ? 1 : 0,
-                        transition: 'transform 0.8s ease-in-out, opacity 0.6s ease-in-out',
-                      }}
-                    >
-                      {currency}
-                    </span>
-                  ))}
+                <div className="w-20 h-20 rounded-none bg-black/10 relative overflow-hidden">
+                  <div
+                    className="flex items-center h-full whitespace-nowrap"
+                    style={{
+                      animation: 'marquee 12s linear infinite',
+                    }}
+                  >
+                    {[...currencies, ...currencies].map((currency, i) => (
+                      <span key={i} className="text-4xl font-bold text-black/80 mx-4 inline-block">
+                        {currency}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </a>
