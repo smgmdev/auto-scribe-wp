@@ -69,6 +69,50 @@ function RotatingMediaLogo({ sites }: { sites: MediaSite[] }) {
   );
 }
 
+function ChinaLogoSlider({ sites }: { sites: MediaSite[] }) {
+  const [offset, setOffset] = useState(0);
+  const chinaSites = useMemo(
+    () => sites.filter(s => s.favicon && s.subcategory?.includes('China')),
+    [sites]
+  );
+
+  useEffect(() => {
+    if (chinaSites.length < 2) return;
+    const interval = setInterval(() => {
+      setOffset(prev => prev + 1);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [chinaSites.length]);
+
+  if (chinaSites.length === 0) {
+    return (
+      <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
+        <Globe className="w-16 h-16 md:w-20 md:h-20 text-[#2997ff]" />
+      </div>
+    );
+  }
+
+  // Show 4 logos in a 2x2 grid, cycling through
+  const getIndex = (i: number) => (offset + i) % chinaSites.length;
+
+  return (
+    <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/20 to-[#5856d6]/20 grid grid-cols-2 grid-rows-2 gap-1 p-2 overflow-hidden">
+      {[0, 1, 2, 3].map(i => {
+        const site = chinaSites[getIndex(i)];
+        return (
+          <div key={`${i}-${getIndex(i)}`} className="rounded-none overflow-hidden bg-white/10">
+            <img
+              src={site.favicon!}
+              alt={site.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 interface MediaSite {
   id: string;
   favicon: string | null;
@@ -613,9 +657,7 @@ export default function MediaBuying() {
                 Explore Chinese media
               </Button>
               <div className="mt-auto pt-8 flex items-center justify-center flex-1">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-gradient-to-br from-[#2997ff]/30 to-[#5856d6]/30 flex items-center justify-center">
-                  <Globe className="w-16 h-16 md:w-20 md:h-20 text-[#2997ff]" />
-                </div>
+                <ChinaLogoSlider sites={mediaSites} />
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
                 <p className="text-xs text-white/50 font-medium">您的内容可以翻译成中文。</p>
