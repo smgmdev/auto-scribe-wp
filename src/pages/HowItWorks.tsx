@@ -174,6 +174,8 @@ const ScrollColorSection = ({
   const [wpSiteFavicons, setWpSiteFavicons] = useState<string[]>([]);
   const [wpSitesLoading, setWpSitesLoading] = useState(true);
   const [activeWpLogoIndex, setActiveWpLogoIndex] = useState(0);
+  const [activeCurrencyIndex, setActiveCurrencyIndex] = useState(0);
+  const currencies = ['EUR', 'USD', 'JPY', 'USDT', 'CNY'];
 
   // Fetch WP site favicons for the Local Library card
   useEffect(() => {
@@ -198,6 +200,14 @@ const ScrollColorSection = ({
     }, 2000);
     return () => clearInterval(interval);
   }, [wpSiteFavicons.length]);
+
+  // Rotate currencies every 2s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCurrencyIndex(prev => (prev + 1) % currencies.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [currencies.length]);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     const container = scrollContainerRef.current;
@@ -608,8 +618,20 @@ const ScrollColorSection = ({
                 <span className="text-black/70 text-sm group-hover:text-black transition-colors">Upgrade to agency ›</span>
               </div>
               <div className="flex justify-end">
-                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-black/10">
-                  <Shield className="w-10 h-10 text-black/60" />
+                <div className="w-20 h-20 rounded-none flex items-center justify-center bg-black/10 relative overflow-hidden">
+                  {currencies.map((currency, i) => (
+                    <span
+                      key={currency}
+                      className="absolute text-2xl font-bold text-black/80"
+                      style={{
+                        transform: i === activeCurrencyIndex ? 'translateY(0)' : i > activeCurrencyIndex || (activeCurrencyIndex === currencies.length - 1 && i === 0) ? 'translateY(100%)' : 'translateY(-100%)',
+                        opacity: i === activeCurrencyIndex ? 1 : 0,
+                        transition: 'transform 0.4s ease-in-out, opacity 0.4s ease-in-out',
+                      }}
+                    >
+                      {currency}
+                    </span>
+                  ))}
                 </div>
               </div>
             </a>
