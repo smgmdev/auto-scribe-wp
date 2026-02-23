@@ -622,11 +622,11 @@ const ScrollColorSection = ({
                   {currencies.map((currency, i) => (
                     <span
                       key={currency}
-                      className="absolute text-2xl font-bold text-black/80"
+                      className="absolute text-2xl font-bold text-black/80 whitespace-nowrap"
                       style={{
-                        transform: i === activeCurrencyIndex ? 'translateY(0)' : i > activeCurrencyIndex || (activeCurrencyIndex === currencies.length - 1 && i === 0) ? 'translateY(100%)' : 'translateY(-100%)',
+                        transform: i === activeCurrencyIndex ? 'translateX(0)' : i > activeCurrencyIndex || (activeCurrencyIndex === currencies.length - 1 && i === 0) ? 'translateX(100%)' : 'translateX(-100%)',
                         opacity: i === activeCurrencyIndex ? 1 : 0,
-                        transition: 'transform 0.4s ease-in-out, opacity 0.4s ease-in-out',
+                        transition: 'transform 0.8s ease-in-out, opacity 0.6s ease-in-out',
                       }}
                     >
                       {currency}
