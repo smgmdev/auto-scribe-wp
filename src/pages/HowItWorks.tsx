@@ -1260,7 +1260,7 @@ const HowItWorks = () => {
       </section>
 
 
-      <section id="first-to-know" className="py-24 md:py-32 bg-white">
+      <section id="first-to-know" className="py-24 md:py-32 pb-8 md:pb-12 bg-white">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
           <h2 className="text-5xl md:text-6xl lg:text-7xl font-semibold text-[#1d1d1f] tracking-tight text-center mb-16">
             First, you should know that...
