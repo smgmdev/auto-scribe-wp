@@ -91,7 +91,7 @@ function LostChat() {
   }, [input, nickname]);
 
   return (
-    <div className="w-full max-w-sm h-full bg-black/20 backdrop-blur-md rounded-lg border border-white/10 flex flex-col">
+    <div className="w-full sm:max-w-sm h-full bg-transparent sm:bg-black/20 sm:backdrop-blur-md sm:rounded-lg sm:border sm:border-white/10 flex flex-col">
       <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">Lost Souls Chat</span>
         <span className="text-[10px] text-muted-foreground/60">You: {nickname}</span>
@@ -192,7 +192,7 @@ const NotFound = () => {
               <p className="text-4xl font-bold text-muted-foreground">404</p>
             </div>
           ) : (
-            <Canvas camera={{ position: [0, 1, 5], fov: 45 }} onError={() => setError(true)}>
+            <Canvas camera={{ position: [0, 0.5, 5], fov: 50 }} onError={() => setError(true)}>
               <ambientLight intensity={0.6} />
               <directionalLight position={[5, 5, 5]} intensity={1} />
               <Suspense fallback={null}>
@@ -206,7 +206,7 @@ const NotFound = () => {
       </div>
 
       {/* Bottom half: Chat */}
-      <div className="h-[45dvh] sm:h-[40dvh] flex items-center justify-center px-4 pb-4">
+      <div className="h-[45dvh] sm:h-[40dvh] flex items-center justify-center sm:px-4 sm:pb-4">
         <LostChat />
       </div>
     </div>
