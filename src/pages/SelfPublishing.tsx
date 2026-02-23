@@ -339,7 +339,7 @@ export default function SelfPublishing() {
         {/* Hero Section */}
         <section className="pt-28 md:pt-36 pb-6 md:pb-8 text-center bg-black">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-14">
+            <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6 md:mb-8">
               Publish your story.<br />
               In seconds. 1 click.
             </h1>
@@ -358,7 +358,7 @@ export default function SelfPublishing() {
               Start Writing
             </Button>
 
-            <p className="text-lg md:text-xl text-white/70 mt-16 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-white/70 mt-6 md:mt-8 max-w-2xl mx-auto leading-relaxed">
               Write, edit, and publish articles directly to media outlets. Self publishing puts you in control of timing, your content and your reach.
             </p>
           </div>
