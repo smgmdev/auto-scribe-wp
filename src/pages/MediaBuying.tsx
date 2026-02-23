@@ -651,13 +651,17 @@ export default function MediaBuying() {
                   Browse Sites
                 </Button>
               </div>
-              <div className="mt-auto pt-8 flex items-center justify-center flex-1 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-none bg-white/10 flex items-center justify-center">
-                    <div className="text-4xl md:text-5xl font-bold text-white">$</div>
-                  </div>
+              <div className="mt-auto pt-8 flex items-center justify-center flex-1">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-none bg-white/10 flex items-center justify-center">
+                  <div className="text-4xl md:text-5xl font-bold text-white animate-bounce" style={{ animation: 'floatDollar 3s ease-in-out infinite' }}>$</div>
                 </div>
               </div>
+              <style>{`
+                @keyframes floatDollar {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-12px); }
+                }
+              `}</style>
               <div className="mt-6 pt-4 border-t border-white/20">
                 <p className="text-xs text-white/60 font-medium">Transparency</p>
                 <p className="text-xs text-white/80">Real-time pricing, No hidden costs</p>
