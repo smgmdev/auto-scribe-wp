@@ -327,7 +327,7 @@ const ScrollColorSection = ({
           
           {/* Description */}
           <p className="text-lg md:text-xl text-white max-w-3xl mx-auto mb-8 leading-tight">
-            Connect your own WordPress sites directly to Arcana Mace. Publish articles instantly to your blogs with full SEO optimization. Manage multiple sites from one dashboard and maintain complete control over your content.
+            Publish articles instantly without approvals through a direct and streamlined process. Local Media Library sites are integrated with Arcana Mace, allowing clients to publish content in seconds with a single click.
           </p>
           
           {/* Links */}
