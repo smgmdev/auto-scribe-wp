@@ -449,27 +449,19 @@ export default function SelfPublishing() {
             
             <div className="pb-16 md:pb-24">
               <div>
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-6">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-8">
                   Your credits. Your wallet.
                 </h3>
-                <p className="text-base md:text-lg text-[#86868b] mb-4 leading-relaxed">
-                  When you purchase credits on Arcana Mace, they're instantly added to your account balance — so you can quickly publish articles, track your spending, and manage your content budget whether you're publishing one article or a hundred.
-                </p>
-                <div className="flex flex-wrap gap-6">
-                  <a 
-                    href="/help/credits-pricing" 
-                    className="text-[#2997ff] text-base md:text-lg inline-flex items-center gap-1 group"
-                  >
-                    <span className="group-hover:underline">Learn more about credits</span> <span>↗</span>
-                  </a>
-                </div>
-                <div className="mt-8">
+                <div className="mb-8">
                   <img 
                     src={creditManagementPreview} 
                     alt="Credit Management dashboard showing available credits, locked credits, total purchased, total orders and total spent" 
                     className="w-full rounded-none shadow-2xl border border-[#424245]"
                   />
                 </div>
+                <p className="text-base md:text-lg text-[#86868b] mb-4 leading-relaxed">
+                  When you purchase credits on Arcana Mace, they're instantly added to your account balance — so you can quickly publish articles, track your spending, and manage your content budget whether you're publishing one article or a hundred.
+                </p>
               </div>
             </div>
           </div>
