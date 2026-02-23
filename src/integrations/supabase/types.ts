@@ -905,6 +905,27 @@ export type Database = {
         }
         Relationships: []
       }
+      lost_chat_global_state: {
+        Row: {
+          active_model_id: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active_model_id?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active_model_id?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       lost_chat_messages: {
         Row: {
           created_at: string

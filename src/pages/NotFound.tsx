@@ -13,6 +13,8 @@ import { useAppStore } from "@/stores/appStore";
 
 const MODELS = [
   { id: "anime_girl", name: "Anime Girl", path: "/models/anime_girl.glb", scale: 3.5, positionY: -2.5 },
+  { id: "dragon_emblem", name: "Dragon Emblem", path: "/models/dragon_emblem.glb", scale: 3, positionY: -2 },
+  { id: "winged_angel", name: "Winged Angel", path: "/models/winged_angel.glb", scale: 3, positionY: -2 },
 ];
 
 // Preload all models
@@ -47,9 +49,10 @@ interface ChatMessage {
   nickname: string;
   message: string;
   created_at: string;
+  is_system?: boolean;
 }
 
-function LostChat() {
+function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(true);
@@ -93,8 +96,49 @@ function LostChat() {
     const trimmed = input.trim();
     if (!trimmed) return;
     setInput("");
+
+    // Handle /models command
+    if (trimmed.toLowerCase() === "/models") {
+      const modelList = MODELS.map((m, i) => `${i + 1}. ${m.name}`).join("\n");
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `system-${Date.now()}`,
+          nickname: "System",
+          message: `Available models:\n${modelList}\n\nType /play <number> to switch.`,
+          created_at: new Date().toISOString(),
+          is_system: true,
+        },
+      ]);
+      return;
+    }
+
+    // Handle /play <number> command
+    const playMatch = trimmed.match(/^\/play\s+(\d+)$/i);
+    if (playMatch) {
+      const idx = parseInt(playMatch[1], 10) - 1;
+      if (idx >= 0 && idx < MODELS.length) {
+        const model = MODELS[idx];
+        onSelectModel(model.id);
+        // Send a public chat message about the switch
+        await supabase.from("lost_chat_messages").insert({ nickname, message: `switched the model to ${model.name} 🎮` });
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `system-${Date.now()}`,
+            nickname: "System",
+            message: `Invalid model number. Type /models to see available options.`,
+            created_at: new Date().toISOString(),
+            is_system: true,
+          },
+        ]);
+      }
+      return;
+    }
+
     await supabase.from("lost_chat_messages").insert({ nickname, message: trimmed });
-  }, [input, nickname]);
+  }, [input, nickname, onSelectModel]);
 
   return (
     <div className="w-full h-full bg-transparent flex flex-col">
@@ -112,9 +156,17 @@ function LostChat() {
             <p className="text-xs text-muted-foreground/50 text-center py-4">No one here yet... say hi!</p>
           ) : null}
           {messages.map((msg) => (
-            <div key={msg.id} className={`text-xs ${msg.nickname === nickname ? "text-right" : ""}`}>
-              <span className="font-semibold text-muted-foreground/80">{msg.nickname === nickname ? "You" : msg.nickname}: </span>
-              <span className="text-foreground/90">{msg.message}</span>
+            <div key={msg.id} className={`text-xs ${msg.is_system ? "text-center" : msg.nickname === nickname ? "text-right" : ""}`}>
+              {msg.is_system ? (
+                <pre className="text-[10px] text-[#f2a547]/80 whitespace-pre-wrap font-mono bg-white/5 rounded px-2 py-1.5 inline-block text-left">
+                  {msg.message}
+                </pre>
+              ) : (
+                <>
+                  <span className="font-semibold text-muted-foreground/80">{msg.nickname === nickname ? "You" : msg.nickname}: </span>
+                  <span className="text-foreground/90">{msg.message}</span>
+                </>
+              )}
             </div>
           ))}
           <div ref={scrollRef} />
@@ -125,7 +177,7 @@ function LostChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Say something..."
+          placeholder="Say something... (/models for list)"
           className="h-8 text-xs bg-transparent border-white/10"
           maxLength={200}
         />
@@ -198,6 +250,41 @@ const NotFound = () => {
     return () => setIs404Page(false);
   }, [setIs404Page]);
 
+  // Load global model state and subscribe to realtime changes
+  useEffect(() => {
+    supabase
+      .from("lost_chat_global_state")
+      .select("active_model_id")
+      .eq("id", "singleton")
+      .single()
+      .then(({ data }) => {
+        if (data?.active_model_id) setActiveModelId(data.active_model_id);
+      });
+
+    const channel = supabase
+      .channel("global-model")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "lost_chat_global_state" },
+        (payload) => {
+          const newModelId = (payload.new as any).active_model_id;
+          if (newModelId) setActiveModelId(newModelId);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  // Update global model state in DB
+  const selectModelGlobally = useCallback(async (modelId: string) => {
+    setActiveModelId(modelId);
+    await supabase
+      .from("lost_chat_global_state")
+      .update({ active_model_id: modelId, updated_at: new Date().toISOString() })
+      .eq("id", "singleton");
+  }, []);
+
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -227,10 +314,10 @@ const NotFound = () => {
     setTrackIndex(nextIdx);
   }, [trackIndex, playing, tracks]);
 
-  // Global keyboard shortcuts: ESC to exit, Ctrl+K / Cmd+K for model list
+  // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (modelListOpen) return; // popup handles its own ESC
+      if (modelListOpen) return;
       if (e.key === "Escape") {
         e.preventDefault();
         navigate("/");
@@ -312,7 +399,7 @@ const NotFound = () => {
 
         {/* Chat pinned to bottom */}
         <div className="h-[45dvh] sm:h-[40dvh] pointer-events-auto max-w-[980px] mx-auto w-full sm:px-6 md:px-8 sm:pb-4">
-          <LostChat />
+          <LostChat onSelectModel={selectModelGlobally} />
         </div>
       </div>
 
@@ -320,7 +407,7 @@ const NotFound = () => {
       <ModelListPopup
         open={modelListOpen}
         onClose={() => setModelListOpen(false)}
-        onSelect={setActiveModelId}
+        onSelect={selectModelGlobally}
         currentModelId={activeModelId}
       />
     </div>
