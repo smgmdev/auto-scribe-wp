@@ -319,7 +319,7 @@ export default function AIArticleGeneration() {
       </div>
 
       {/* Hero Text Section */}
-      <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
+      <section className="relative bg-[#1d1d1f] min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-40 pb-20 md:pt-40 md:pb-28">
         {!heroVideoLoaded && (
           <div className="absolute bottom-4 right-4 z-20">
             <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
@@ -339,7 +339,7 @@ export default function AIArticleGeneration() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight mb-6">
             AI Article Generation.
           </h1>
-          <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-sm md:text-xl text-white/70 leading-tight max-w-3xl mx-auto">
             Artificial intelligence is at the heart of modern content creation. Arcana Mace works with 
             advanced language models to help you create, refine, and publish professional articles in seconds.
           </p>
