@@ -554,54 +554,36 @@ const ScrollColorSection = ({
             From self-publishing to global media placements, AI-generated articles to PR agency partnerships — everything you need to amplify your brand's voice is in one place.
           </p>
 
-          {/* Feature grid */}
-          <div className="grid grid-cols-1 max-w-md mx-auto gap-5 mt-10 text-left px-4 md:px-0">
-            {/* AI Security Supervision */}
-            <a href="/help/ai-security-supervision#overview" className="group relative rounded-none overflow-hidden min-h-[340px] flex flex-col cursor-pointer bg-[#0d2218]">
-              <div className="absolute top-0 left-0 right-0 z-10 p-7 pb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">AI Security<br />Supervision</h3>
+          {/* Security animation inline */}
+          <div className="flex flex-col items-center justify-center mt-10">
+            <div className="relative w-48 h-48">
+              <div className="absolute inset-0 rounded-full bg-[#30d158]/10 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+                <div className="w-full h-full rounded-full border border-[#30d158]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
+              </div>
+              <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
+                <div className="w-full h-full rounded-full border border-[#30d158]/25" style={{ transform: 'rotateX(70deg) rotateZ(60deg)' }} />
+              </div>
+              <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                <div className="w-full h-full rounded-full border border-[#30d158]/20" style={{ transform: 'rotateX(70deg) rotateZ(120deg)' }} />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative">
+                  <div className="absolute inset-0 -m-3 rounded-full bg-[#30d158]/20 blur-xl animate-pulse" />
+                  <Shield className="w-12 h-12 text-[#30d158] drop-shadow-[0_0_15px_rgba(48,209,88,0.5)] relative z-10" />
                 </div>
               </div>
-              {/* Atom orbital animation */}
-              <div className="flex-1 flex flex-col items-center justify-center relative">
-                <div className="relative w-48 h-48">
-                  {/* Glow background */}
-                  <div className="absolute inset-0 rounded-full bg-[#30d158]/10 blur-2xl animate-pulse" />
-                  {/* Orbit 1 */}
-                  <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
-                    <div className="w-full h-full rounded-full border border-[#30d158]/30" style={{ transform: 'rotateX(70deg) rotateZ(0deg)' }} />
-                  </div>
-                  {/* Orbit 2 */}
-                  <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
-                    <div className="w-full h-full rounded-full border border-[#30d158]/25" style={{ transform: 'rotateX(70deg) rotateZ(60deg)' }} />
-                  </div>
-                  {/* Orbit 3 */}
-                  <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
-                    <div className="w-full h-full rounded-full border border-[#30d158]/20" style={{ transform: 'rotateX(70deg) rotateZ(120deg)' }} />
-                  </div>
-                  {/* Center shield */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 -m-3 rounded-full bg-[#30d158]/20 blur-xl animate-pulse" />
-                      <Shield className="w-12 h-12 text-[#30d158] drop-shadow-[0_0_15px_rgba(48,209,88,0.5)] relative z-10" />
-                    </div>
-                  </div>
-                  {/* Orbiting dots */}
-                  <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
-                  </div>
-                  <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/70 shadow-[0_0_6px_rgba(48,209,88,0.6)]" />
-                  </div>
-                  <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
-                    <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/50 shadow-[0_0_6px_rgba(48,209,88,0.4)]" />
-                  </div>
-                </div>
-                {/* Cycling fade text */}
-                <SecurityFadeText />
+              <div className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#30d158] shadow-[0_0_8px_rgba(48,209,88,0.8)]" />
               </div>
-            </a>
+              <div className="absolute inset-0 animate-[spin_8s_linear_infinite_reverse]">
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/70 shadow-[0_0_6px_rgba(48,209,88,0.6)]" />
+              </div>
+              <div className="absolute inset-0 animate-[spin_10s_linear_infinite]">
+                <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#30d158]/50 shadow-[0_0_6px_rgba(48,209,88,0.4)]" />
+              </div>
+            </div>
+            <SecurityFadeText />
           </div>
 
         </div>
