@@ -50,6 +50,9 @@ export interface OpenChat {
 }
 
 interface AppState {
+  // 404 page flag
+  is404Page: boolean;
+  setIs404Page: (val: boolean) => void;
   // Headlines (session state only)
   headlines: Headline[];
   setHeadlines: (headlines: Headline[]) => void;
@@ -294,6 +297,9 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>()((set) => ({
+  // 404 page flag
+  is404Page: false,
+  setIs404Page: (val) => set({ is404Page: val }),
   // Headlines
   headlines: [],
   setHeadlines: (headlines) => set({ headlines }),

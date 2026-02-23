@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import amBlackLogo from "@/assets/amblack.png";
 import { supabase } from "@/integrations/supabase/client";
+import { useAppStore } from "@/stores/appStore";
 
 function AnimeModel({ onLoaded }: { onLoaded: () => void }) {
   const { scene, animations } = useGLTF("/models/anime_girl.glb");
@@ -129,8 +130,14 @@ function LostChat() {
 
 const NotFound = () => {
   const location = useLocation();
+  const setIs404Page = useAppStore((s) => s.setIs404Page);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setIs404Page(true);
+    return () => setIs404Page(false);
+  }, [setIs404Page]);
   
   const [playing, setPlaying] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -195,7 +202,7 @@ const NotFound = () => {
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
         {/* Top controls */}
         <div className="bg-black text-white pointer-events-auto">
-          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-2 max-w-[980px] mx-auto w-full">
+          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 max-w-[980px] mx-auto w-full">
             <div className="flex items-center gap-3">
               <a href="/" className="flex items-center">
                 <img src={amBlackLogo} alt="Arcana Mace" className="h-7 w-7 hover:opacity-80 transition-opacity" />
