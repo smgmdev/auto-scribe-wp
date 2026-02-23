@@ -616,6 +616,9 @@ export default function AIArticleGeneration() {
       )}
 
       <div className="bg-black">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="border-t border-[#424245]" />
+        </div>
         <PWAInstallButtons />
       </div>
 
