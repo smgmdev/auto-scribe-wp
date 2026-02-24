@@ -263,28 +263,56 @@ export function AgencyPayoutsView() {
 
         typedOrders = (ordersData || []) as unknown as CompletedOrder[];
 
-        // Fetch in-progress orders (locked in orders - not yet accepted by client)
-        // Show full order amount (not commission-adjusted) since the full amount is locked in escrow
-        const { data: inProgressOrders } = await supabase
-          .from('orders')
-          .select('amount_cents')
-          .in('id', orderIds)
-          .neq('delivery_status', 'accepted')
-          .neq('status', 'cancelled');
-
-        lockedAmount = (inProgressOrders || []).reduce((sum, o) => sum + (o.amount_cents || 0), 0);
+        // Seller-side in-progress orders are NOT locked from the agency's wallet
+        // (those are buyer's locked credits, not the agency's)
       }
 
-      // Fetch pending order requests (service_requests without orders yet)
-      const { data: pendingRequests } = await supabase
+      // Fetch BUYER-SIDE locked credits (agency as a buyer placing orders)
+      // Locked in active orders (as buyer)
+      const { data: buyerActiveOrders } = await supabase
+        .from('orders')
+        .select('id, media_sites(price)')
+        .eq('user_id', user.id)
+        .neq('status', 'cancelled')
+        .neq('status', 'completed')
+        .neq('delivery_status', 'accepted');
+
+      let buyerLockedInOrders = 0;
+      if (buyerActiveOrders) {
+        for (const order of buyerActiveOrders) {
+          const ms = order.media_sites as unknown as { price: number } | null;
+          if (ms?.price) buyerLockedInOrders += ms.price;
+        }
+      }
+      lockedAmount = buyerLockedInOrders;
+
+      // Fetch buyer-side pending order requests (service_requests where the agency user is the client)
+      const { data: buyerPendingRequests } = await supabase
         .from('service_requests')
-        .select('media_site_id, media_sites!inner(price)')
-        .eq('agency_payout_id', agencyData.id)
+        .select('id, media_sites!inner(price)')
+        .eq('user_id', user.id)
         .is('order_id', null)
         .not('status', 'in', '("cancelled","completed")');
 
-      // media_sites.price is in whole credits/dollars, not cents — no division needed
-      lockedRequestsAmount = (pendingRequests || []).reduce((sum: number, req: any) => sum + (req.media_sites?.price || 0), 0);
+      // Check which have CLIENT_ORDER_REQUEST messages (credits locked)
+      const buyerRequestIds = (buyerPendingRequests || []).map(r => r.id);
+      let buyerLockedRequestsAmount = 0;
+      if (buyerRequestIds.length > 0) {
+        const { data: lockMessages } = await supabase
+          .from('service_messages')
+          .select('request_id')
+          .in('request_id', buyerRequestIds)
+          .like('message', '%CLIENT_ORDER_REQUEST%');
+        
+        const requestsWithLock = new Set((lockMessages || []).map(m => m.request_id));
+        for (const req of (buyerPendingRequests || [])) {
+          if (requestsWithLock.has(req.id)) {
+            const ms = req.media_sites as unknown as { price: number } | null;
+            if (ms?.price) buyerLockedRequestsAmount += ms.price;
+          }
+        }
+      }
+      lockedRequestsAmount = buyerLockedRequestsAmount;
 
       // Fetch payout transactions for pending/completed payouts
       const { data: payoutData } = await supabase
@@ -454,10 +482,9 @@ export function AgencyPayoutsView() {
               completedWithdrawals={completedWithdrawalsTotal}
               pendingBankWithdrawals={pendingBankWithdrawals}
               pendingCryptoWithdrawals={pendingCryptoWithdrawals}
-              lockedInOrderRequests={0}
-              lockedInOrders={0}
+              lockedInOrderRequests={lockedInOrderRequests}
+              lockedInOrders={lockedInOrders}
               lockedInWithdrawals={pendingWithdrawalsTotal}
-              showLocked={false}
               walletBalance={walletBalance}
             />
           </TooltipContent>
