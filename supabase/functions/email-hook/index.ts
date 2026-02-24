@@ -70,6 +70,12 @@ serve(async (req) => {
       to: [email],
       subject,
       html: htmlContent,
+      reply_to: "support@arcanamace.com",
+      headers: {
+        "X-Entity-Ref-ID": crypto.randomUUID(),
+        "List-Unsubscribe": "<mailto:unsubscribe@arcanamace.com>",
+        "X-Mailer": "Arcana Mace Mailer",
+      },
     });
 
     console.log("Email sent successfully:", emailResponse);
