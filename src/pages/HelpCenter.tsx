@@ -342,11 +342,11 @@ export default function HelpCenter() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-[#f5f5f7] pt-[160px] pb-16">
+        <section className="bg-[#f5f5f7] pt-[120px] pb-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-start">
               <div>
-                <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-6">
+                <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-6 mt-10">
                   How can we help?
                 </h1>
                 <p className="text-lg text-muted-foreground leading-relaxed">
