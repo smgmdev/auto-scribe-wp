@@ -454,9 +454,10 @@ export function AgencyPayoutsView() {
               completedWithdrawals={completedWithdrawalsTotal}
               pendingBankWithdrawals={pendingBankWithdrawals}
               pendingCryptoWithdrawals={pendingCryptoWithdrawals}
-              lockedInOrderRequests={lockedInOrderRequests}
-              lockedInOrders={lockedInOrders}
+              lockedInOrderRequests={0}
+              lockedInOrders={0}
               lockedInWithdrawals={pendingWithdrawalsTotal}
+              showLocked={false}
               walletBalance={walletBalance}
             />
           </TooltipContent>
