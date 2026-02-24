@@ -295,28 +295,11 @@ function LostChat({ onSelectModel }: { onSelectModel: (modelId: string) => void 
   );
 }
 
-function MiniModelPreview({ modelPath }: { modelPath: string; scale: number; positionY: number }) {
+function MiniModelPreview({ modelPath, scale, positionY }: { modelPath: string; scale: number; positionY: number }) {
   const { scene, animations } = useGLTF(modelPath);
   const ref = useRef<THREE.Group>(null);
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions } = useAnimations(animations, ref);
-
-  // Auto-fit using the ORIGINAL scene's bounding box (more reliable)
-  const { autoScale, autoPosition } = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const targetSize = 3.4;
-    const s = maxDim > 0 ? targetSize / maxDim : 1;
-    const targetBottomY = -1.15;
-    return {
-      autoScale: s,
-      autoPosition: [-(center.x * s), targetBottomY - box.min.y * s, -(center.z * s)] as [number, number, number],
-    };
-  }, [scene]);
 
   useEffect(() => {
     const firstAction = Object.values(actions)[0];
@@ -327,7 +310,7 @@ function MiniModelPreview({ modelPath }: { modelPath: string; scale: number; pos
     if (ref.current) ref.current.rotation.y += delta * 0.5;
   });
 
-  return <primitive ref={ref} object={clonedScene} scale={autoScale} position={autoPosition} />;
+  return <primitive ref={ref} object={clonedScene} scale={scale} position={[0, positionY, 0]} />;
 }
 
 function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boolean; onClose: () => void; onSelect: (id: string) => void; currentModelId: string }) {
@@ -371,7 +354,7 @@ function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boo
                 }`}
               >
                 <div className="aspect-square bg-black/60">
-                  <Canvas camera={{ position: [0, 0, 2.15], fov: 36 }}>
+                  <Canvas camera={{ position: [0, 0.5, 3.5], fov: 50 }}>
                     <ambientLight intensity={0.7} />
                     <directionalLight position={[3, 3, 3]} intensity={0.8} />
                     <Suspense fallback={null}>
