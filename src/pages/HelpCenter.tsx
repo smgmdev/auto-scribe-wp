@@ -344,7 +344,7 @@ export default function HelpCenter() {
         {/* Hero Section */}
         <section className="bg-[#f5f5f7] pt-[120px] pb-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-center">
               <div>
                 <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-6 mt-8">
                   How can we help?
