@@ -309,11 +309,12 @@ function MiniModelPreview({ modelPath }: { modelPath: string; scale: number; pos
     box.getSize(size);
     box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z);
-    const targetSize = 4.6;
+    const targetSize = 3.4;
     const s = maxDim > 0 ? targetSize / maxDim : 1;
+    const targetBottomY = -1.15;
     return {
       autoScale: s,
-      autoPosition: [-(center.x * s), -(center.y * s) - 0.55, -(center.z * s)] as [number, number, number],
+      autoPosition: [-(center.x * s), targetBottomY - box.min.y * s, -(center.z * s)] as [number, number, number],
     };
   }, [scene]);
 
@@ -370,7 +371,7 @@ function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boo
                 }`}
               >
                 <div className="aspect-square bg-black/60">
-                  <Canvas camera={{ position: [0, 0.05, 1.85], fov: 34 }}>
+                  <Canvas camera={{ position: [0, 0, 2.15], fov: 36 }}>
                     <ambientLight intensity={0.7} />
                     <directionalLight position={[3, 3, 3]} intensity={0.8} />
                     <Suspense fallback={null}>
