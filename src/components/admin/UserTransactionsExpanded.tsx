@@ -91,6 +91,7 @@ const purchasesSubTabs = [
 
 const systemSubTabs = [
   { key: 'system', label: 'All System' },
+  { key: 'top_ups', label: 'Top Ups' },
   { key: 'offer_accepted', label: 'Credits Locked' },
   { key: 'unlocked', label: 'Unlocked' },
   { key: 'gifted', label: 'Gifted' },
@@ -704,7 +705,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     return activeType;
   })();
 
-  const systemTypes = ['gifted', 'unlocked', 'offer_accepted', 'admin_deduct'];
+  const systemTypes = ['gifted', 'unlocked', 'offer_accepted', 'admin_deduct', 'purchase'];
 
   const filteredTransactions = (() => {
     switch (effectiveFilter) {
@@ -716,6 +717,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       case 'purchases_b2b': return processedTransactions.filter(isB2BPurchase);
       case 'purchases_instant': return processedTransactions.filter(isInstantPurchase);
       case 'system': return processedTransactions.filter(tx => systemTypes.includes(tx.type));
+      case 'top_ups': return processedTransactions.filter(tx => tx.type === 'purchase');
       case 'withdrawals': return processedTransactions.filter(tx => ['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type));
       default: return processedTransactions.filter(tx => tx.type === effectiveFilter);
     }
@@ -743,6 +745,9 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       }
       if (systemTypes.includes(tx.type)) {
         counts['system'] = (counts['system'] || 0) + 1;
+      }
+      if (tx.type === 'purchase') {
+        counts['top_ups'] = (counts['top_ups'] || 0) + 1;
       }
       if (['withdrawal_completed', 'withdrawal_unlocked', 'withdrawal_locked'].includes(tx.type)) {
         counts['withdrawals'] = (counts['withdrawals'] || 0) + 1;
