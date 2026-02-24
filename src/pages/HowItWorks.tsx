@@ -315,7 +315,7 @@ const ScrollColorSection = ({
           {/* Links */}
           <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-4 md:gap-6">
             <a href="/self-publishing" className="w-full md:w-auto bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center justify-center gap-1 font-medium">
-              Discover Self Publishing <span className="text-xl">↗</span>
+              Discover Self Publishing ↗
             </a>
             <button onClick={() => scrollToSection(globalLibraryRef)} className="w-full md:w-auto bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all inline-flex items-center justify-center gap-1 font-medium">
               Learn about Global Library
