@@ -301,21 +301,21 @@ function MiniModelPreview({ modelPath }: { modelPath: string; scale: number; pos
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions } = useAnimations(animations, ref);
 
-  // Auto-fit: compute bounding box and normalize scale/position to fill the preview
+  // Auto-fit using the ORIGINAL scene's bounding box (more reliable)
   const { autoScale, autoPosition } = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(clonedScene);
+    const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z);
-    const targetSize = 3.5; // fill the preview
+    const targetSize = 2.2;
     const s = maxDim > 0 ? targetSize / maxDim : 1;
     return {
       autoScale: s,
-      autoPosition: [-(center.x * s), -(center.y * s) - 0.3, -(center.z * s)] as [number, number, number],
+      autoPosition: [-(center.x * s), -(center.y * s), -(center.z * s)] as [number, number, number],
     };
-  }, [clonedScene]);
+  }, [scene]);
 
   useEffect(() => {
     const firstAction = Object.values(actions)[0];
@@ -370,7 +370,7 @@ function ModelListPopup({ open, onClose, onSelect, currentModelId }: { open: boo
                 }`}
               >
                 <div className="aspect-square bg-black/60">
-                  <Canvas camera={{ position: [0, 0.5, 3.5], fov: 50 }}>
+                  <Canvas camera={{ position: [0, 0, 2.8], fov: 45 }}>
                     <ambientLight intensity={0.7} />
                     <directionalLight position={[3, 3, 3]} intensity={0.8} />
                     <Suspense fallback={null}>
