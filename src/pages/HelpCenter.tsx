@@ -344,16 +344,16 @@ export default function HelpCenter() {
         {/* Hero Section */}
         <section className="bg-[#f5f5f7] pt-[120px] pb-16">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-center">
-              <div>
-                <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-6 mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 items-start">
+              <div className="mt-8">
+                <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-6">
                   How can we help?
                 </h1>
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   We want you to have the simplest, easiest experience possible. But we know you might have a few questions. Read on for details about publishing, media buying, credits, and more.
                 </p>
               </div>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-border">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-border mt-8">
                 <h2 className="text-xl font-semibold text-foreground mb-3">
                   Help yourself.
                 </h2>
