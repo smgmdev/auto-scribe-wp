@@ -158,6 +158,21 @@ serve(async (req) => {
       blocked: false,
     });
 
+    // ── UN-CONFIRM THE USER ─────────────────────────────────────────────────
+    // auto_confirm_email is ON to suppress Supabase's built-in emails,
+    // but we must immediately un-confirm so the user can't log in until
+    // they click our custom Resend verification link.
+    const { error: unconfirmError } = await supabase.auth.admin.updateUserById(userId, {
+      email_confirm: false,
+    });
+    if (unconfirmError) {
+      console.error("Failed to un-confirm user:", unconfirmError);
+      // Don't throw — continue sending the email; the profile-level check
+      // (email_verified=false) still blocks login as a safety net.
+    } else {
+      console.log("User un-confirmed at auth level:", userId);
+    }
+
     console.log(`Sending welcome email to: ${email}`);
 
     // Generate verification token
