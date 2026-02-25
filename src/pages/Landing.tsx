@@ -202,60 +202,53 @@ const Landing = () => {
     setSelectedSite(null);
   };
 
+  // Fetch public data immediately (no auth needed), then fetch auth-dependent data once auth settles
+  const authSettledRef = useRef(false);
+
   useEffect(() => {
-    const fetchSites = async () => {
+    const fetchPublicData = async () => {
       try {
-        const { data: sitesData, error: sitesError } = await supabase.rpc('get_public_sites');
-        if (sitesError) throw sitesError;
+        const [sitesResult, creditsResult, tagsResult, mediaResult, publicAgenciesResult] = await Promise.all([
+          supabase.rpc('get_public_sites'),
+          supabase.from('site_credits').select('site_id, credits_required'),
+          supabase.from('site_tags').select('*'),
+          supabase.from('media_sites').select('*').order('created_at', { ascending: true }),
+          supabase.rpc('get_public_agencies'),
+        ]);
 
-        const { data: creditsData, error: creditsError } = await supabase
-          .from('site_credits')
-          .select('site_id, credits_required');
+        const { data: sitesData, error: sitesError } = sitesResult;
+        const { data: creditsData } = creditsResult;
+        const { data: tagsData } = tagsResult;
+        const { data: mediaData, error: mediaError } = mediaResult;
+        const { data: publicAgencies } = publicAgenciesResult;
 
-        if (creditsError) throw creditsError;
+        if (!sitesError && sitesData) {
+          const creditsMap: Record<string, number> = {};
+          creditsData?.forEach(credit => {
+            creditsMap[credit.site_id] = credit.credits_required;
+          });
+          setWpSites(sitesData.map(site => ({
+            ...site,
+            credits_required: creditsMap[site.id] || 25,
+          })));
+        }
 
-        const creditsMap: Record<string, number> = {};
-        creditsData?.forEach(credit => {
-          creditsMap[credit.site_id] = credit.credits_required;
-        });
-
-        const sitesWithCredits = sitesData?.map(site => ({
-          ...site,
-          credits_required: creditsMap[site.id] || 25,
-        })) || [];
-
-        setWpSites(sitesWithCredits);
-
-        // Fetch site tags for WP sites
-        const { data: tagsData, error: tagsError } = await supabase
-          .from('site_tags')
-          .select('*');
-        
-        if (!tagsError && tagsData) {
+        if (tagsData) {
           const tagsMap: Record<string, SiteTag[]> = {};
           tagsData.forEach(tag => {
-            if (!tagsMap[tag.site_id]) {
-              tagsMap[tag.site_id] = [];
-            }
+            if (!tagsMap[tag.site_id]) tagsMap[tag.site_id] = [];
             tagsMap[tag.site_id].push(tag);
           });
           setSiteTags(tagsMap);
         }
 
-        const { data: mediaData, error: mediaError } = await supabase
-          .from('media_sites')
-          .select('*')
-          .order('created_at', { ascending: true });
+        if (!mediaError && mediaData) {
+          setMediaSites(mediaData);
+        }
 
-        if (mediaError) throw mediaError;
-        setMediaSites(mediaData || []);
+        // Fetch active agencies
+        const { data: activeAgenciesData } = await supabase.rpc('get_active_agency_payouts');
 
-        // Fetch active agencies via secure RPCs
-        const { data: activeAgenciesData } = await supabase
-          .rpc('get_active_agency_payouts');
-        
-        const { data: publicAgencies } = await supabase.rpc('get_public_agencies');
-        
         if (activeAgenciesData && activeAgenciesData.length > 0 && publicAgencies) {
           const agencies: ActiveAgency[] = [];
           for (const app of publicAgencies) {
@@ -283,7 +276,7 @@ const Landing = () => {
           setActiveAgencies([]);
         }
 
-        // Fetch agency logos using public RPC
+        // Fetch agency logos
         const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
         if (uniqueAgencies.length > 0 && publicAgencies) {
           const logos: Record<string, string> = {};
@@ -302,15 +295,12 @@ const Landing = () => {
       } catch (error) {
         console.error('Error fetching sites:', error);
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     };
 
-    // Only fetch after auth has settled to avoid stale token issues during logout
-    if (!authLoading) {
-      fetchSites();
-    }
-  }, [authLoading]);
+    fetchPublicData();
+  }, []);
 
   // Real-time media_sites sync
   useEffect(() => {
