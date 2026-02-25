@@ -302,11 +302,13 @@ export default function Auth() {
       return;
     }
 
-    // Send custom verification email via Resend (don't capture IP on signup - only on actual login)
-    if (data?.user) {
+    // Send custom verification email via Resend
+    // Use the captured signup token since the session is already destroyed
+    if (data?.user && data?.signupAccessToken) {
       try {
         const { error: emailError, data: emailData } = await supabase.functions.invoke('send-welcome-email', {
-          body: { email, userId: data.user.id, honeypot }
+          body: { email, userId: data.user.id, honeypot },
+          headers: { Authorization: `Bearer ${data.signupAccessToken}` }
         });
         
         if (emailError) {

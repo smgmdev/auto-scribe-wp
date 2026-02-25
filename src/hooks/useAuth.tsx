@@ -17,7 +17,7 @@ interface AuthContextType {
   emailVerified: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null } | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null; signupAccessToken: string | null } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
@@ -770,6 +770,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
 
+    // Capture the access token BEFORE destroying the session
+    const signupAccessToken = data?.session?.access_token ?? null;
+
     if (!error && data?.session) {
       // Immediately destroy the auto-created session so user is NEVER logged in.
       userInitiatedSignOutRef.current = true;
@@ -780,7 +783,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     isSigningUpRef.current = false;
     
-    return { error: error as Error | null, data: data ? { user: data.user } : null };
+    return { error: error as Error | null, data: data ? { user: data.user, signupAccessToken } : null };
   };
 
   const signIn = async (email: string, password: string) => {
