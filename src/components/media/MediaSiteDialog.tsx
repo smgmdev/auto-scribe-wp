@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import { pushPopup, removePopup } from '@/lib/popup-stack';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,7 @@ export function MediaSiteDialog({
   agencyLogos = {},
   onSuccess
 }: MediaSiteDialogProps) {
-  const { user } = useAuth();
+  const { user, emailVerified } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [openEngagementData, setOpenEngagementData] = useState<any>(null);
@@ -298,6 +299,10 @@ export function MediaSiteDialog({
   };
 
   const handleInterested = () => {
+    if (!emailVerified) {
+      toast.error('Please verify your email before creating engagements');
+      return;
+    }
     setBriefDialogOpen(true);
   };
 
