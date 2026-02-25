@@ -289,7 +289,7 @@ export default function Auth() {
     setIsLoading(true);
     setIsSigningUp(true); // Prevent auto-redirect during signup
     
-    const { error, data } = await signUp(email, password);
+    const { error, data, welcomeEmailResult } = await signUp(email, password, { honeypot });
     
     if (error) {
       setIsLoading(false);
@@ -302,29 +302,12 @@ export default function Auth() {
       return;
     }
 
-    // Send custom verification email via Resend
-    // Use the captured signup token since the session is already destroyed
-    if (data?.user && data?.signupAccessToken) {
-      try {
-        const { error: emailError, data: emailData } = await supabase.functions.invoke('send-welcome-email', {
-          body: { email, userId: data.user.id, honeypot },
-          headers: { Authorization: `Bearer ${data.signupAccessToken}` }
-        });
-        
-        if (emailError) {
-          console.error('Failed to send welcome email:', emailError);
-        }
-
-        // Handle rate limit / disposable email errors from edge function
-        if (emailData?.error) {
-          setIsLoading(false);
-          setIsSigningUp(false);
-          toast.error(emailData.error);
-          return;
-        }
-      } catch (emailError) {
-        console.error('Failed to send welcome email:', emailError);
-      }
+    // Handle rate limit / disposable email errors from edge function
+    if (welcomeEmailResult?.error) {
+      setIsLoading(false);
+      setIsSigningUp(false);
+      toast.error(welcomeEmailResult.error);
+      return;
     }
     
     setIsLoading(false);
