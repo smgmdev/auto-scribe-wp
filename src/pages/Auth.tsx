@@ -297,34 +297,36 @@ export default function Auth() {
       }, 1500);
       return;
     }
-    
+
     setIsLoading(true);
     setIsSigningUp(true); // Prevent auto-redirect during signup
-    
-    const { error, data, welcomeEmailResult } = await signUp(email, password, { honeypot, redirectTo: `${window.location.origin}/auth` });
-    
-    if (error) {
-      setIsLoading(false);
-      setIsSigningUp(false);
-      let errorMessage = error.message;
-      if (error.message.includes('already registered')) {
-        errorMessage = 'This email is already registered. Please sign in instead.';
-      }
-      toast.error(errorMessage);
-      return;
-    }
 
-    // Handle rate limit / disposable email errors from edge function
-    if (welcomeEmailResult?.error) {
+    try {
+      const { error, welcomeEmailResult } = await signUp(email, password, { honeypot, redirectTo: `${window.location.origin}/auth` });
+
+      if (error) {
+        let errorMessage = error.message;
+        if (error.message.includes('already registered')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
+        }
+        toast.error(errorMessage);
+        return;
+      }
+
+      // Handle rate limit / disposable email / delivery errors from edge function
+      if (welcomeEmailResult?.error) {
+        toast.error(welcomeEmailResult.error);
+        return;
+      }
+
+      toast.success('Check your email! We sent you a verification link.');
+    } catch (err) {
+      console.error('Signup flow failed:', err);
+      toast.error('Something went wrong during signup. Please try again.');
+    } finally {
       setIsLoading(false);
       setIsSigningUp(false);
-      toast.error(welcomeEmailResult.error);
-      return;
     }
-    
-    setIsLoading(false);
-    setIsSigningUp(false);
-    toast.success('Check your email! We sent you a verification link.');
   };
 
   const handleActiveSessionConfirm = async () => {
