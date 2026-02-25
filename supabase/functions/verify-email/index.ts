@@ -110,30 +110,16 @@ serve(async (req) => {
 
     console.log("Email verified successfully for:", profile.email);
 
-    // Redirect back to app auth page with success flag
+    // Immediate 302 redirect back to app auth page with success flag
     const safeRedirectTo = /^https?:\/\//i.test(redirectTo) ? redirectTo : "https://amdev.lovable.app/auth";
     const redirectWithStatus = safeRedirectTo.includes("?")
       ? `${safeRedirectTo}&verified=1`
       : `${safeRedirectTo}?verified=1`;
 
-    // Redirect to success page
-    return new Response(
-      `<!DOCTYPE html>
-      <html>
-      <head>
-        <title>Email Verified</title>
-        <meta http-equiv="refresh" content="2;url=${redirectWithStatus}">
-      </head>
-      <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000;">
-        <div style="text-align: center; color: #fff;">
-          <h1 style="color: #22c55e;">✓ Email Verified!</h1>
-          <p>Your email has been verified successfully.</p>
-          <p>Redirecting to login...</p>
-        </div>
-      </body>
-      </html>`,
-      { status: 200, headers: { "Content-Type": "text/html" } }
-    );
+    return new Response(null, {
+      status: 302,
+      headers: { Location: redirectWithStatus },
+    });
   } catch (error: any) {
     console.error("Error verifying email:", error);
     return new Response(
