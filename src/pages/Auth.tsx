@@ -79,17 +79,27 @@ export default function Auth() {
   
   const locationState = location.state as LocationState | null;
 
+  // Track whether we've already shown the verified toast to avoid duplicates
+  const verifiedToastShownRef = useRef(false);
+
+  // Show verified toast synchronously on first render if ?verified=1 is present
+  // This avoids delays from auth loading or re-renders
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    if (verifiedToastShownRef.current) return;
+    const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === '1') {
-      toast.success('Email verified successfully. You can now login.');
+      verifiedToastShownRef.current = true;
+      // Use setTimeout(0) to ensure toast renders after first paint
+      setTimeout(() => {
+        toast.success('Email verified successfully! You can now sign in.', { duration: 6000 });
+      }, 0);
       setMode('signin');
       params.delete('verified');
       const nextQuery = params.toString();
-      const cleanedUrl = `${location.pathname}${nextQuery ? `?${nextQuery}` : ''}${location.hash}`;
+      const cleanedUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}`;
       window.history.replaceState({}, '', cleanedUrl);
     }
-  }, [location.search, location.pathname, location.hash]);
+  }, []);
 
   useEffect(() => {
     // Only redirect verified users; unverified users must stay on auth
@@ -149,9 +159,9 @@ export default function Auth() {
     window.addEventListener('mouseup', onUp);
   }, [dataPopupPos]);
 
-  // Show loading screen while checking initial auth state
-  // Show loading screen only for initial auth bootstrap or verified redirect
-  if (loading || (user && emailVerified && !isSigningUp)) {
+  // Only show loading screen when a verified user is about to be redirected.
+  // Do NOT show it during initial auth bootstrap — the form should appear instantly.
+  if (user && emailVerified && !isSigningUp) {
     return <LoadingScreen />;
   }
 
