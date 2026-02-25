@@ -52,6 +52,12 @@ const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "zxcvbnm.com", "zzrgg.com",
 ]);
 
+
+// Trusted IPs that bypass signup email rate limiting
+const SIGNUP_RATE_LIMIT_ALLOWLIST = new Set([
+  "91.73.120.157",
+]);
+
 interface WelcomeEmailRequest {
   email: string;
   userId: string;
@@ -130,26 +136,31 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Count signups from this IP in the last hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count, error: countError } = await supabase
-      .from("signup_attempts")
-      .select("id", { count: "exact", head: true })
-      .eq("ip_address", clientIp)
-      .gte("attempted_at", oneHourAgo);
+    const isAllowlistedIp = SIGNUP_RATE_LIMIT_ALLOWLIST.has(clientIp);
 
-    if (!countError && (count ?? 0) >= 3) {
-      console.warn(`[signup] Rate limit hit for IP: ${clientIp}`);
-      // Log the blocked attempt
-      await supabase.from("signup_attempts").insert({
-        ip_address: clientIp,
-        email,
-        blocked: true,
-      });
-      return new Response(JSON.stringify({ error: "Too many signup attempts. Please try again later." }), {
-        status: 429,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    // Count signups from this IP in the last hour (unless allowlisted)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    if (!isAllowlistedIp) {
+      const { count, error: countError } = await supabase
+        .from("signup_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("ip_address", clientIp)
+        .gte("attempted_at", oneHourAgo);
+
+      if (!countError && (count ?? 0) >= 3) {
+        console.warn(`[signup] Rate limit hit for IP: ${clientIp}`);
+        // Log the blocked attempt
+        await supabase.from("signup_attempts").insert({
+          ip_address: clientIp,
+          email,
+          blocked: true,
+        });
+        return new Response(JSON.stringify({ error: "Too many signup attempts. Please try again later." }), {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
     }
 
     // Log this signup attempt
