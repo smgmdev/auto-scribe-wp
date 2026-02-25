@@ -34,7 +34,7 @@ export function BriefSubmissionDialog({
   onSuccess,
   onBack
 }: BriefSubmissionDialogProps) {
-  const { user } = useAuth();
+  const { user, emailVerified } = useAuth();
   const { addMinimizedChat } = useMinimizedChats();
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,7 +133,7 @@ export function BriefSubmissionDialog({
   // (Esc handled via popup-stack registered above)
 
   const handleSubmit = async () => {
-    if (!user || !mediaSite) return;
+    if (!user || !mediaSite || !emailVerified) return;
     if (!description.trim()) {
       toast.error('Please describe what you are looking for.');
       return;
