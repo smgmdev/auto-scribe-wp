@@ -223,7 +223,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
       
       // Set email verification status
-      setEmailVerified(profileData?.email_verified ?? false);
+      const isVerified = profileData?.email_verified ?? false;
+      setEmailVerified(isVerified);
+
+      // Hard security gate: never keep a session for unverified accounts
+      if (!isVerified && !shadowModeRef.current) {
+        console.log('[Auth] Unverified session detected, forcing immediate sign-out');
+        userInitiatedSignOutRef.current = true;
+        await supabase.auth.signOut({ scope: 'local' });
+        resetAuthState();
+        return;
+      }
       
       if (profileData?.pin_enabled && profileData?.pin_hash && !shadowModeRef.current) {
         setPinRequired(true);

@@ -73,15 +73,15 @@ export default function Auth() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, emailVerified, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const locationState = location.state as LocationState | null;
 
   useEffect(() => {
-    // Don't redirect during signup flow - user needs to verify email first
-    if (user && !isSigningUp) {
+    // Only redirect verified users; unverified users must stay on auth
+    if (user && emailVerified && !isSigningUp) {
       // Pass along the target view, tab and subcategory state when redirecting
       navigate('/account', { 
         state: { 
@@ -91,7 +91,7 @@ export default function Auth() {
         } 
       });
     }
-  }, [user, navigate, locationState, isSigningUp]);
+  }, [user, emailVerified, navigate, locationState, isSigningUp]);
 
   // Scroll-driven header hiding
   useEffect(() => {
@@ -138,8 +138,8 @@ export default function Auth() {
   }, [dataPopupPos]);
 
   // Show loading screen while checking initial auth state
-  // Also show loading if user is already logged in (will redirect shortly)
-  if (loading || (user && !isSigningUp)) {
+  // Show loading screen only for initial auth bootstrap or verified redirect
+  if (loading || (user && emailVerified && !isSigningUp)) {
     return <LoadingScreen />;
   }
 

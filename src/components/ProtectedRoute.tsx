@@ -9,13 +9,17 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading, pinRequired, pinVerified, verifyPin, signOut } = useAuth();
+  const { user, loading, emailVerified, pinRequired, pinVerified, verifyPin, signOut } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
   if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!emailVerified) {
     return <Navigate to="/auth" replace />;
   }
 
