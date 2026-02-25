@@ -892,10 +892,13 @@ export default function Auth() {
       {/* Data Management Popup - draggable on desktop, fullscreen on mobile */}
       {isDataDialogOpen && createPortal(
         <>
-          {/* Backdrop */}
+          {/* Backdrop + ESC key handler */}
           <div
             className="fixed inset-0 z-[999] bg-black/40"
             onClick={() => setIsDataDialogOpen(false)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setIsDataDialogOpen(false); }}
+            tabIndex={-1}
+            ref={(el) => el?.focus()}
           />
           {/* Popup */}
           <div
