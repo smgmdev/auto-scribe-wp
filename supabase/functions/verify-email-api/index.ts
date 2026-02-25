@@ -53,7 +53,17 @@ serve(async (req) => {
       }
     }
 
-    // Mark email as verified
+    // Confirm auth email first (strict login gate)
+    const { error: confirmError } = await supabase.auth.admin.updateUserById(profile.id, {
+      email_confirm: true,
+    });
+
+    if (confirmError) {
+      console.error("Auth confirm error:", confirmError);
+      throw confirmError;
+    }
+
+    // Mark profile email as verified
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
