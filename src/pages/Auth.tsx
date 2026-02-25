@@ -80,6 +80,18 @@ export default function Auth() {
   const locationState = location.state as LocationState | null;
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('verified') === '1') {
+      toast.success('Email verified successfully. You can now login.');
+      setMode('signin');
+      params.delete('verified');
+      const nextQuery = params.toString();
+      const cleanedUrl = `${location.pathname}${nextQuery ? `?${nextQuery}` : ''}${location.hash}`;
+      window.history.replaceState({}, '', cleanedUrl);
+    }
+  }, [location.search, location.pathname, location.hash]);
+
+  useEffect(() => {
     // Only redirect verified users; unverified users must stay on auth
     if (user && emailVerified && !isSigningUp) {
       // Pass along the target view, tab and subcategory state when redirecting
@@ -289,7 +301,7 @@ export default function Auth() {
     setIsLoading(true);
     setIsSigningUp(true); // Prevent auto-redirect during signup
     
-    const { error, data, welcomeEmailResult } = await signUp(email, password, { honeypot });
+    const { error, data, welcomeEmailResult } = await signUp(email, password, { honeypot, redirectTo: `${window.location.origin}/auth` });
     
     if (error) {
       setIsLoading(false);

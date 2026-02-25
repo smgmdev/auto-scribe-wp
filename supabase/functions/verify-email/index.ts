@@ -15,7 +15,7 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const token = url.searchParams.get("token");
-    const redirectUrl = url.searchParams.get("redirect") || "/auth";
+    const redirectTo = url.searchParams.get("redirect") || "https://amdev.lovable.app/auth";
 
     if (!token) {
       return new Response(
@@ -110,8 +110,11 @@ serve(async (req) => {
 
     console.log("Email verified successfully for:", profile.email);
 
-    // Redirect to arcanamace.com
-    const appUrl = `https://arcanamace.com`;
+    // Redirect back to app auth page with success flag
+    const safeRedirectTo = /^https?:\/\//i.test(redirectTo) ? redirectTo : "https://amdev.lovable.app/auth";
+    const redirectWithStatus = safeRedirectTo.includes("?")
+      ? `${safeRedirectTo}&verified=1`
+      : `${safeRedirectTo}?verified=1`;
 
     // Redirect to success page
     return new Response(
@@ -119,7 +122,7 @@ serve(async (req) => {
       <html>
       <head>
         <title>Email Verified</title>
-        <meta http-equiv="refresh" content="3;url=${appUrl}${redirectUrl}">
+        <meta http-equiv="refresh" content="2;url=${redirectWithStatus}">
       </head>
       <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000;">
         <div style="text-align: center; color: #fff;">

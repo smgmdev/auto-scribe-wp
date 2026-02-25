@@ -17,7 +17,7 @@ interface AuthContextType {
   emailVerified: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
-  signUp: (email: string, password: string, options?: { honeypot?: string }) => Promise<{ error: Error | null; data: { user: User | null } | null; welcomeEmailResult: { error?: string } | null }>;
+  signUp: (email: string, password: string, options?: { honeypot?: string; redirectTo?: string }) => Promise<{ error: Error | null; data: { user: User | null } | null; welcomeEmailResult: { error?: string } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
@@ -761,7 +761,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, options?: { honeypot?: string }) => {
+  const signUp = async (email: string, password: string, options?: { honeypot?: string; redirectTo?: string }) => {
     // Set flag BEFORE calling signUp to suppress onAuthStateChange SIGNED_IN
     isSigningUpRef.current = true;
     
@@ -776,7 +776,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Send welcome email NOW, while the token is still valid
       try {
         const { data: emailData } = await supabase.functions.invoke('send-welcome-email', {
-          body: { email, userId: data.user.id, honeypot: options?.honeypot ?? '' },
+          body: { email, userId: data.user.id, honeypot: options?.honeypot ?? '', redirectTo: options?.redirectTo },
           headers: { Authorization: `Bearer ${data.session.access_token}` }
         });
         if (emailData?.error) {

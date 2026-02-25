@@ -56,6 +56,7 @@ interface WelcomeEmailRequest {
   email: string;
   userId: string;
   honeypot?: string;
+  redirectTo?: string;
 }
 
 serve(async (req) => {
@@ -87,7 +88,7 @@ serve(async (req) => {
       });
     }
 
-    const { email, userId, honeypot }: WelcomeEmailRequest = await req.json();
+    const { email, userId, honeypot, redirectTo }: WelcomeEmailRequest = await req.json();
 
     // ── HONEYPOT CHECK ──────────────────────────────────────────────────────
     // If this hidden field has any value, it's a bot. Silently succeed to not reveal the trap.
@@ -195,8 +196,12 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Build verification URL using the Supabase edge function directly
-    const verificationUrl = `${supabaseUrl}/functions/v1/verify-email?token=${verificationToken}&redirect=/auth`;
+    // Build verification URL that returns users to the app auth page
+    const safeRedirectTo =
+      typeof redirectTo === "string" && /^https?:\/\//i.test(redirectTo)
+        ? redirectTo
+        : "https://amdev.lovable.app/auth";
+    const verificationUrl = `${supabaseUrl}/functions/v1/verify-email?token=${verificationToken}&redirect=${encodeURIComponent(safeRedirectTo)}`;
 
     console.log("Generated verification URL for:", email);
 
