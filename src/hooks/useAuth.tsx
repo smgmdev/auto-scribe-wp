@@ -522,9 +522,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Skip if initial load hasn't finished yet — getSession handles that
         if (!initialLoadDoneRef.current) return;
 
-        // Skip SIGNED_IN events during signup — user must verify email first
-        if (event === 'SIGNED_IN' && isSigningUpRef.current) {
-          console.log('[Auth] Suppressing SIGNED_IN during signup flow');
+        // Skip ALL auth events during signup — user must verify email first
+        if (isSigningUpRef.current) {
+          console.log('[Auth] Suppressing', event, 'during signup flow');
           return;
         }
 
@@ -674,6 +674,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         previousUserIdRef.current = existingSession?.user?.id || null;
 
+        // If signup is in progress, the auto-created session must be ignored
+        // completely — don't set user/session state at all.
+        if (isSigningUpRef.current && existingSession) {
+          console.log('[Auth] Suppressing initial session during signup flow');
+          // signUp() will handle signOut() — just finish loading
+          return;
+        }
+
         accessTokenRef.current = existingSession?.access_token ?? null;
         setSession(existingSession);
         setUser(existingSession?.user ?? null);
@@ -754,10 +762,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!error && data?.session) {
       // Immediately destroy the auto-created session so user is NEVER logged in.
-      // Use userInitiatedSignOutRef to prevent the SIGNED_OUT handler from
-      // trying session recovery.
       userInitiatedSignOutRef.current = true;
       await supabase.auth.signOut();
+      // Small delay to let any queued auth events flush before clearing the flag
+      await new Promise(r => setTimeout(r, 100));
     }
 
     isSigningUpRef.current = false;
