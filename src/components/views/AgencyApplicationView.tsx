@@ -424,7 +424,7 @@ export function AgencyApplicationView() {
               },
               {
                 q: "How do I avoid being downgraded in the future?",
-                a: "Maintain compliance with our agency guidelines, deliver orders on time and to quality standards, complete your verification promptly, and respond to client requests in a timely manner."
+                a: "Maintain compliance with our user guidelines, deliver orders on time and to quality standards, complete your verification promptly, and respond to client requests in a timely manner."
               }
             ].map((item, index) => (
               <Collapsible key={index}>
