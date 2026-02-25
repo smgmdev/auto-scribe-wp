@@ -79,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const previousUserIdRef = useRef<string | null>(null);
   const userInitiatedSignOutRef = useRef(false);
   const shadowModeRef = useRef(isShadowMode());
+  // Flag to suppress auth state changes during signup flow
+  const isSigningUpRef = useRef(false);
   // Single-session enforcement: unique ID for this browser tab
   // Use sessionStorage so the ID persists across same-tab refreshes
   // but is unique per tab and per browser
@@ -520,6 +522,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Skip if initial load hasn't finished yet — getSession handles that
         if (!initialLoadDoneRef.current) return;
 
+        // Skip SIGNED_IN events during signup — user must verify email first
+        if (event === 'SIGNED_IN' && isSigningUpRef.current) {
+          console.log('[Auth] Suppressing SIGNED_IN during signup flow');
+          return;
+        }
+
         // Check if this is a different user than before (account switch)
         const newUserId = newSession?.user?.id || null;
 
@@ -736,15 +744,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Set flag BEFORE calling signUp to suppress onAuthStateChange SIGNED_IN
+    isSigningUpRef.current = true;
     
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
     });
+
+    if (!error && data?.session) {
+      // Immediately destroy the auto-created session so user is NEVER logged in.
+      // Use userInitiatedSignOutRef to prevent the SIGNED_OUT handler from
+      // trying session recovery.
+      userInitiatedSignOutRef.current = true;
+      await supabase.auth.signOut();
+    }
+
+    isSigningUpRef.current = false;
     
     return { error: error as Error | null, data: data ? { user: data.user } : null };
   };

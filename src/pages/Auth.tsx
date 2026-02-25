@@ -317,16 +317,12 @@ export default function Auth() {
         if (emailData?.error) {
           setIsLoading(false);
           setIsSigningUp(false);
-          await supabase.auth.signOut();
           toast.error(emailData.error);
           return;
         }
       } catch (emailError) {
         console.error('Failed to send welcome email:', emailError);
       }
-
-      // Sign out immediately since they need to verify
-      await supabase.auth.signOut();
     }
     
     setIsLoading(false);
