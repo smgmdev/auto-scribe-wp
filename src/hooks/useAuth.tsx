@@ -17,7 +17,7 @@ interface AuthContextType {
   emailVerified: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null; data: { user: User | null; signupAccessToken: string | null } | null }>;
+  signUp: (email: string, password: string, options?: { honeypot?: string }) => Promise<{ error: Error | null; data: { user: User | null } | null; welcomeEmailResult: { error?: string } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
@@ -761,7 +761,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, options?: { honeypot?: string }) => {
     // Set flag BEFORE calling signUp to suppress onAuthStateChange SIGNED_IN
     isSigningUpRef.current = true;
     
@@ -770,20 +770,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
 
-    // Capture the access token BEFORE destroying the session
-    const signupAccessToken = data?.session?.access_token ?? null;
+    let welcomeEmailResult: { error?: string } | null = null;
 
-    if (!error && data?.session) {
-      // Immediately destroy the auto-created session so user is NEVER logged in.
+    if (!error && data?.session && data?.user) {
+      // Send welcome email NOW, while the token is still valid
+      try {
+        const { data: emailData } = await supabase.functions.invoke('send-welcome-email', {
+          body: { email, userId: data.user.id, honeypot: options?.honeypot ?? '' },
+          headers: { Authorization: `Bearer ${data.session.access_token}` }
+        });
+        if (emailData?.error) {
+          welcomeEmailResult = { error: emailData.error };
+        }
+      } catch (e) {
+        console.error('Failed to send welcome email:', e);
+      }
+
+      // NOW destroy the auto-created session so user is NEVER logged in
       userInitiatedSignOutRef.current = true;
       await supabase.auth.signOut();
-      // Small delay to let any queued auth events flush before clearing the flag
       await new Promise(r => setTimeout(r, 100));
     }
 
     isSigningUpRef.current = false;
     
-    return { error: error as Error | null, data: data ? { user: data.user, signupAccessToken } : null };
+    return { error: error as Error | null, data: data ? { user: data.user } : null, welcomeEmailResult };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -971,7 +982,7 @@ const defaultAuthContext: AuthContextType = {
   emailVerified: false,
   pinRequired: false,
   pinVerified: false,
-  signUp: async () => ({ error: new Error('Auth not ready'), data: null }),
+  signUp: async () => ({ error: new Error('Auth not ready'), data: null, welcomeEmailResult: null }),
   signIn: async () => ({ error: new Error('Auth not ready') }),
   signOut: async () => {},
   refreshCredits: async () => {},
