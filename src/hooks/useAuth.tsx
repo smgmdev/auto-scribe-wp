@@ -227,7 +227,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setEmailVerified(isVerified);
 
       // Hard security gate: never keep a session for unverified accounts
-      if (!isVerified && !shadowModeRef.current) {
+      // Skip during signup flow — signUp() handles its own sign-out after
+      // sending the welcome email; forcing sign-out here would race with it
+      // and could prevent the toast or break the email call.
+      if (!isVerified && !shadowModeRef.current && !isSigningUpRef.current) {
         console.log('[Auth] Unverified session detected, forcing immediate sign-out');
         userInitiatedSignOutRef.current = true;
         await supabase.auth.signOut({ scope: 'local' });
