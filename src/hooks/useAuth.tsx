@@ -784,6 +784,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.error('Failed to send welcome email:', e);
+        welcomeEmailResult = { error: 'Unable to send verification email right now. Please try again.' };
       }
 
       // NOW destroy the auto-created session so user is NEVER logged in
