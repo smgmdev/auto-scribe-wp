@@ -383,7 +383,7 @@ export function AgencyApplicationView() {
               <Button
                 variant="outline"
                 className="rounded-sm bg-accent border border-accent text-white hover:bg-transparent hover:text-accent"
-                onClick={() => window.open('mailto:support@arcanamace.com', '_blank')}
+                onClick={() => useAppStore.getState().setCurrentView('support')}
               >
                 Contact Support
               </Button>
