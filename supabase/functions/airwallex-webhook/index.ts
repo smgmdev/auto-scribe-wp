@@ -119,9 +119,17 @@ async function processPaymentIntent(
   );
 
   if (intent.status !== "SUCCEEDED") {
+    const latestAttempt = intent?.latest_payment_attempt;
+    const latestAttemptStatus = latestAttempt?.status || null;
+    const latestAttemptFailureMessage =
+      latestAttempt?.failure_details?.message ||
+      latestAttempt?.latest_payment_error?.message ||
+      latestAttempt?.failure_reason ||
+      latestAttempt?.failure_code ||
+      null;
+
     const gatewayMessage =
-      intent?.latest_payment_attempt?.latest_payment_error?.message ||
-      intent?.latest_payment_attempt?.failure_reason ||
+      latestAttemptFailureMessage ||
       intent?.next_action?.type ||
       null;
 
@@ -136,7 +144,7 @@ async function processPaymentIntent(
       message: isUnsubmitted
         ? "Payment method not submitted to gateway yet."
         : gatewayMessage
-          ? `Payment not completed (${intent.status}): ${gatewayMessage}`
+          ? `Payment not completed (${intent.status}${latestAttemptStatus ? ` / ${latestAttemptStatus}` : ""}): ${gatewayMessage}`
           : `Payment not completed (${intent.status})`,
     };
   }
