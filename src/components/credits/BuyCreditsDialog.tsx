@@ -132,7 +132,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     const initDropIn = async () => {
       try {
         const { payments } = await airwallexInit({
-          env: 'demo',
+          env: 'prod',
           origin: window.location.origin,
           enabledElements: ['payments'],
         });

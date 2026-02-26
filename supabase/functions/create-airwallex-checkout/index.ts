@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const AIRWALLEX_API_URL = "https://api-demo.airwallex.com";
+const AIRWALLEX_API_URL = "https://api.airwallex.com";
 const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
 const MIN_CREDITS = 1;
 const MAX_CREDITS = 10000; // $10,000 maximum per transaction
