@@ -1403,8 +1403,7 @@ export function ComposeView() {
                 </>}
             </Button>
             <Button
-              variant="outline"
-              className="rounded-none border-border"
+              className="rounded-none border border-transparent shadow-none bg-foreground text-background transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground hover:shadow-none"
               onClick={() => {
                 if (!content.trim()) {
                   toast.error("No content to format");
@@ -1511,7 +1510,6 @@ export function ComposeView() {
               disabled={!content.trim()}
               title="Clean up formatting — separates paragraphs and titles"
             >
-              <Paintbrush className="mr-2 h-4 w-4" />
               Clean Formatting
             </Button>
           </div>
