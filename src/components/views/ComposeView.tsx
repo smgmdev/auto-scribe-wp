@@ -1415,27 +1415,41 @@ export function ComposeView() {
                 temp.innerHTML = content;
                 const raw = temp.innerText || temp.textContent || '';
                 
+                // Fix missing spaces after dots
+                const fixedRaw = raw.replace(/\.([A-Za-z])/g, '. $1');
+                
                 // Split by double newlines or single newlines
-                const lines = raw.split(/\n{2,}|\r?\n/).map(l => l.trim()).filter(Boolean);
+                const lines = fixedRaw.split(/\n{2,}|\r?\n/).map(l => l.trim()).filter(Boolean);
                 
                 const formatted: string[] = [];
                 for (const line of lines) {
                   // Detect title-like lines: short (under 80 chars), no period at end, often capitalized
                   const isTitle = line.length < 80 && !line.endsWith('.') && !line.endsWith(',') && !line.endsWith(';') && !line.endsWith(':') && line.split(/\s+/).length <= 12;
                   if (isTitle) {
-                    formatted.push(`<h2>${line}</h2>`);
+                    formatted.push(`<h2><strong>${line}</strong></h2>`);
+                    // Add spacing after title
+                    formatted.push('<p>&nbsp;</p>');
                   } else {
                     // Split very long blocks into paragraphs (~3-4 sentences each)
                     const sentences = line.match(/[^.!?]+[.!?]+\s*/g);
                     if (sentences && sentences.length > 4) {
                       for (let i = 0; i < sentences.length; i += 3) {
                         const chunk = sentences.slice(i, i + 3).join('').trim();
-                        if (chunk) formatted.push(`<p>${chunk}</p>`);
+                        if (chunk) {
+                          formatted.push(`<p>${chunk}</p>`);
+                          formatted.push('<p>&nbsp;</p>');
+                        }
                       }
                     } else {
                       formatted.push(`<p>${line}</p>`);
+                      formatted.push('<p>&nbsp;</p>');
                     }
                   }
+                }
+                
+                // Remove trailing spacer
+                if (formatted.length && formatted[formatted.length - 1] === '<p>&nbsp;</p>') {
+                  formatted.pop();
                 }
                 
                 setContent(formatted.join(''));
