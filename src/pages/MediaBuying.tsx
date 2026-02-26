@@ -360,7 +360,7 @@ export default function MediaBuying() {
   return (
     <>
     <SEOHead
-      title="Media Buying — Arcana Mace Marketplace"
+      title="Media Buying"
       description="Browse and order media placements from hundreds of global media sites. Arcana Mace connects you with verified PR agencies for seamless publishing."
     />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">

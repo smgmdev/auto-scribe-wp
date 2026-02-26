@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Plus, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ const Guidelines = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
+    <>
+    <SEOHead title="User Guidelines" />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
@@ -418,6 +421,7 @@ const Guidelines = () => {
       <PWAInstallButtons />
       <Footer narrow showTopBorder />
     </div>
+    </>
   );
 };
 

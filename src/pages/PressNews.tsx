@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Loader2, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -150,6 +151,8 @@ export default function PressNews() {
   };
 
   return (
+    <>
+    <SEOHead title="Arcana Mace Newsroom" />
     <div className="h-screen overflow-y-auto bg-white">
       {/* Header - Apple-style centered */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
@@ -451,5 +454,6 @@ export default function PressNews() {
       <Footer narrow />
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
+    </>
   );
 }

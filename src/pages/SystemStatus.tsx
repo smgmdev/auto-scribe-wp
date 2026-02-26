@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, ExternalLink, RefreshCw, User, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
@@ -211,6 +212,8 @@ export default function SystemStatus() {
   const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
+    <>
+    <SEOHead title="Arcana Mace System Status" />
     <div className="h-screen bg-white flex flex-col overflow-hidden">
       {/* Header - Same as homepage */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
@@ -432,5 +435,6 @@ export default function SystemStatus() {
         <Footer narrow />
       </div>
     </div>
+    </>
   );
 }

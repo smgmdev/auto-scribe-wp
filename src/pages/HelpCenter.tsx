@@ -175,7 +175,7 @@ export default function HelpCenter() {
   return (
     <>
     <SEOHead
-      title="Help Center — Arcana Mace"
+      title="Arcana Mace Help Center"
       description="Get help with Arcana Mace: guides on getting started, media buying, publishing articles, credits, AI features, and troubleshooting."
       structuredData={{
         "@context": "https://schema.org",

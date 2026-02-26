@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,6 +106,8 @@ const SiteMap = () => {
   };
 
   return (
+    <>
+    <SEOHead title="Sitemap" />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
@@ -206,6 +209,7 @@ const SiteMap = () => {
       <PWAInstallButtons />
       <Footer narrow />
     </div>
+    </>
   );
 };
 

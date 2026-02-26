@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -255,6 +256,8 @@ export default function AIArticleGeneration() {
   };
 
   return (
+    <>
+    <SEOHead title="AI Article Generation" />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - dark background */}
       <header 
@@ -704,5 +707,6 @@ export default function AIArticleGeneration() {
       <Footer narrow showTopBorder />
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
+    </>
   );
 }
