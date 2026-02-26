@@ -233,6 +233,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               await refreshCredits?.();
               setStep('success');
               setConfirming(false);
+              return;
+            }
+
+            // Stop polling early on terminal failure states to avoid silent loops
+            if (result?.status && ['FAILED', 'CANCELLED', 'REQUIRES_PAYMENT_METHOD'].includes(result.status)) {
+              clearInterval(pollIntervalId!);
+              if (!mounted) return;
+              setPaymentSubmitted(false);
+              setConfirming(false);
+              toast.error(result?.message || 'Payment failed. Please try a different card.');
             }
           } catch {
             // Silently retry

@@ -85,7 +85,7 @@ async function verifyAirwallexSignature(
 async function processPaymentIntent(
   intentId: string,
   supabase: ReturnType<typeof createClient>
-): Promise<{ success: boolean; already_processed?: boolean; credits_added?: number; new_balance?: number; message?: string }> {
+): Promise<{ success: boolean; already_processed?: boolean; credits_added?: number; new_balance?: number; message?: string; status?: string }> {
   const airwallexToken = await getAirwallexToken();
 
   const intentRes = await fetch(
@@ -105,7 +105,19 @@ async function processPaymentIntent(
   console.log("Payment intent status:", intent.status, "metadata:", intent.metadata);
 
   if (intent.status !== "SUCCEEDED") {
-    return { success: false, message: "Payment not yet completed" };
+    const gatewayMessage =
+      intent?.latest_payment_attempt?.latest_payment_error?.message ||
+      intent?.latest_payment_attempt?.failure_reason ||
+      intent?.next_action?.type ||
+      null;
+
+    return {
+      success: false,
+      status: intent.status,
+      message: gatewayMessage
+        ? `Payment not completed (${intent.status}): ${gatewayMessage}`
+        : `Payment not completed (${intent.status})`,
+    };
   }
 
   const userId = intent.metadata?.user_id;
