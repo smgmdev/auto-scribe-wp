@@ -1410,45 +1410,98 @@ export function ComposeView() {
                   toast.error("No content to format");
                   return;
                 }
-                // Strip HTML to get plain text, then re-structure
+                // Work with HTML directly to preserve bold/italic formatting
+                // Parse into a temporary DOM to work with block-level elements
                 const temp = document.createElement('div');
                 temp.innerHTML = content;
-                const raw = temp.innerText || temp.textContent || '';
                 
-                // Fix missing spaces after dots
-                const fixedRaw = raw.replace(/\.([A-Za-z])/g, '. $1');
-                
-                // Split by double newlines or single newlines
-                const lines = fixedRaw.split(/\n{2,}|\r?\n/).map(l => l.trim()).filter(Boolean);
-                
-                const formatted: string[] = [];
-                for (const line of lines) {
-                  // Detect title-like lines: short (under 80 chars), no period at end, often capitalized
-                  const isTitle = line.length < 80 && !line.endsWith('.') && !line.endsWith(',') && !line.endsWith(';') && !line.endsWith(':') && line.split(/\s+/).length <= 12;
-                  if (isTitle) {
-                    formatted.push(`<h2><strong>${line}</strong></h2>`);
-                    // Add spacing after title
-                    formatted.push('<p>&nbsp;</p>');
-                  } else {
-                    // Split very long blocks into paragraphs (~3-4 sentences each)
-                    const sentences = line.match(/[^.!?]+[.!?]+\s*/g);
-                    if (sentences && sentences.length > 4) {
-                      for (let i = 0; i < sentences.length; i += 3) {
-                        const chunk = sentences.slice(i, i + 3).join('').trim();
-                        if (chunk) {
-                          formatted.push(`<p>${chunk}</p>`);
-                          formatted.push('<p>&nbsp;</p>');
+                // Collect all block-level content, preserving inline HTML (bold, italic, links)
+                const blocks: string[] = [];
+                const walkNodes = (parent: Node) => {
+                  parent.childNodes.forEach((node) => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                      const text = (node.textContent || '').trim();
+                      if (text) {
+                        // Fix missing spaces after dots
+                        blocks.push(text.replace(/\.([A-Za-z])/g, '. $1'));
+                      }
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                      const el = node as HTMLElement;
+                      const tag = el.tagName.toLowerCase();
+                      // Block-level elements: extract their innerHTML as a block
+                      if (['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote'].includes(tag)) {
+                        let inner = el.innerHTML.trim();
+                        if (inner) {
+                          // Fix missing spaces after dots in the HTML content
+                          inner = inner.replace(/\.([A-Za-z])/g, '. $1');
+                          // Preserve heading tags
+                          if (tag.startsWith('h')) {
+                            blocks.push(`<${tag}>${inner}</${tag}>`);
+                          } else {
+                            blocks.push(inner);
+                          }
+                        }
+                      } else if (['br'].includes(tag)) {
+                        // br acts as line separator — skip
+                      } else {
+                        // Inline elements (strong, em, a, span) — get outerHTML as part of content
+                        const html = el.outerHTML.trim();
+                        if (html) {
+                          blocks.push(html.replace(/\.([A-Za-z])/g, '. $1'));
                         }
                       }
+                    }
+                  });
+                };
+                walkNodes(temp);
+                
+                // If we got no blocks from HTML parsing, fall back to text splitting
+                if (blocks.length === 0) {
+                  const raw = (temp.innerText || temp.textContent || '').replace(/\.([A-Za-z])/g, '. $1');
+                  blocks.push(...raw.split(/\n{2,}|\r?\n/).map(l => l.trim()).filter(Boolean));
+                }
+                
+                const formatted: string[] = [];
+                for (const block of blocks) {
+                  // Check if it's already a heading tag
+                  const headingMatch = block.match(/^<(h[1-6])>(.*)<\/\1>$/s);
+                  if (headingMatch) {
+                    // Ensure heading content is bold
+                    let headingContent = headingMatch[2];
+                    if (!headingContent.includes('<strong>') && !headingContent.includes('<b>')) {
+                      headingContent = `<strong>${headingContent}</strong>`;
+                    }
+                    formatted.push(`<${headingMatch[1]}>${headingContent}</${headingMatch[1]}>`);
+                    formatted.push('<p></p>');
+                  } else {
+                    // Check if block is a plain-text title-like line (strip tags to measure)
+                    const stripped = block.replace(/<[^>]+>/g, '').trim();
+                    const isTitle = stripped.length > 0 && stripped.length < 80 && !stripped.endsWith('.') && !stripped.endsWith(',') && !stripped.endsWith(';') && !stripped.endsWith(':') && stripped.split(/\s+/).length <= 12;
+                    
+                    // Check if entire block is bold (likely a subtitle)
+                    const isBoldBlock = /^<(strong|b)>.*<\/\1>$/s.test(block.trim());
+                    
+                    if (isBoldBlock || isTitle) {
+                      const inner = isBoldBlock ? block : `<strong>${block}</strong>`;
+                      formatted.push(`<h2>${inner}</h2>`);
+                      formatted.push('<p></p>');
                     } else {
-                      formatted.push(`<p>${line}</p>`);
-                      formatted.push('<p>&nbsp;</p>');
+                      // Split very long text blocks into paragraphs (~3-4 sentences)
+                      const sentences = stripped.match(/[^.!?]+[.!?]+\s*/g);
+                      if (sentences && sentences.length > 4) {
+                        // For HTML content with inline tags, just wrap as-is in paragraphs
+                        formatted.push(`<p>${block}</p>`);
+                        formatted.push('<p></p>');
+                      } else {
+                        formatted.push(`<p>${block}</p>`);
+                        formatted.push('<p></p>');
+                      }
                     }
                   }
                 }
                 
                 // Remove trailing spacer
-                if (formatted.length && formatted[formatted.length - 1] === '<p>&nbsp;</p>') {
+                if (formatted.length && formatted[formatted.length - 1] === '<p></p>') {
                   formatted.pop();
                 }
                 
