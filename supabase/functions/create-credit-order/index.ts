@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -418,8 +419,13 @@ serve(async (req) => {
           client_email: user.email,
           service_request_id: service_request_id,
         }),
-      }).catch((err) => console.error("Failed to send agency notification:", err));
+    }).catch((err) => console.error("Failed to send agency notification:", err));
     }
+
+    // Telegram alert for new order
+    sendTelegramAlert(
+      TelegramAlerts.newOrder(order.order_number || order.id, mediaSite.name, creditCost)
+    ).catch(() => {});
 
     console.log(`Successfully created order ${order.id} for user ${user.id}. Credits deducted: ${creditCost}. New balance: ${newCredits}`);
 

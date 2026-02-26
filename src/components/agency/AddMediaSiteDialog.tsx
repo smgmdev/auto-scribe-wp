@@ -98,6 +98,11 @@ export function AddMediaSiteDialog({
 
       if (error) throw error;
 
+      // Telegram alert for media site submission (fire-and-forget)
+      supabase.functions.invoke('send-telegram', {
+        body: { message: `📰 <b>New Media Site Submission</b>\n🏢 ${agencyName}` }
+      }).catch(() => {});
+
       toast.success('Your media list has been submitted for approval.');
 
       setGoogleSheetUrl('');
