@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -183,6 +184,21 @@ async function processPaymentIntent(
   }
 
   console.log("Credits added successfully. New balance:", newCredits);
+
+  // Telegram alert for credit purchase
+  const { data: buyerProfile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .single();
+  sendTelegramAlert(
+    TelegramAlerts.creditPurchase(
+      buyerProfile?.email || userId,
+      creditsToAdd,
+      (creditsToAdd).toFixed(2)
+    )
+  ).catch(() => {});
+
   return { success: true, credits_added: creditsToAdd, new_balance: newCredits };
 }
 
