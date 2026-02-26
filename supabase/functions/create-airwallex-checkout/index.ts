@@ -128,16 +128,7 @@ serve(async (req) => {
           credit_amount: credits.toString(),
           type: "custom_credits",
         },
-        return_url: `${origin}/payment-success`,
         descriptor: `${credits} Credits`,
-        payment_method_options: {
-          card: {
-            risk_control: {
-              avs_result_action: "block",
-              three_ds_action: "force",
-            },
-          },
-        },
       }),
     });
 
