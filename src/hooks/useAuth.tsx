@@ -737,15 +737,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
           
-          // Only re-register if DB doesn't already have our session ID
-          // (e.g. first login). On page refresh, sessionStorage preserves our ID
-          // and the DB already has it, so skip to avoid resetting session_started_at.
+          // Always re-register on page load to refresh session_started_at.
+          // This prevents mass session expiry after deployments/reloads where
+          // the old session_started_at could be stale (>30 min) even though
+          // the user is clearly still active (they just reloaded the page).
           sessionKickedRef.current = false;
-          if (dbSessionId !== localSessionIdRef.current) {
-            await registerActiveSession(existingSession.user.id);
-          } else {
-            console.log('[Auth] Session ID already matches DB, skipping re-registration');
-          }
+          await registerActiveSession(existingSession.user.id);
           await fetchUserData(existingSession.user.id);
         }
       } finally {
