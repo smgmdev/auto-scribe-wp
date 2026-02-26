@@ -155,7 +155,7 @@ export default function About() {
   return (
     <>
     <SEOHead
-      title="About Arcana Mace — Media Buying Marketplace"
+      title="About Arcana Mace Marketplace"
       description="Learn about Arcana Mace, a media buying marketplace connecting global brands and PR agencies for seamless media transactions."
     />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">

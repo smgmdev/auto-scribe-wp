@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -474,6 +475,8 @@ export default function UpdateLog() {
   }, [searchQuery]);
 
   return (
+    <>
+    <SEOHead title="Changelog" />
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-black/90 backdrop-blur-sm border-b border-white/10">
@@ -593,5 +596,6 @@ export default function UpdateLog() {
       </div>
       <Footer narrow dark />
     </div>
+    </>
   );
 }

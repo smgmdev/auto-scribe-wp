@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { ArrowRight, Bug } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
@@ -121,6 +122,8 @@ export default function ReportBug() {
   };
 
   return (
+    <>
+    <SEOHead title="Report a Bug and Get Rewards" />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - hide on scroll like Help Center */}
       <header 
@@ -389,5 +392,6 @@ export default function ReportBug() {
       <PWAInstallButtons />
       <Footer narrow />
     </div>
+    </>
   );
 }

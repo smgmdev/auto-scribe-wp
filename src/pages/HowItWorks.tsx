@@ -1017,7 +1017,7 @@ const HowItWorks = () => {
   return (
     <>
     <SEOHead
-      title="How Arcana Mace Works — Media Publishing Platform"
+      title="How Arcana Mace Works"
       description="Discover how Arcana Mace connects brands with media agencies for AI-powered article publishing across global media channels."
       structuredData={{
         "@context": "https://schema.org",

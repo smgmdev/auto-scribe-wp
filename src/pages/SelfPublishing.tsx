@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, FileText, Globe, Zap, Shield, BarChart3, ChevronRight, Newspaper, BookOpen, Mic, Radio, Tv, Loader2, ExternalLink, ArrowRight, Info, X, GripHorizontal } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
@@ -247,6 +248,8 @@ export default function SelfPublishing() {
   }, []);
 
   return (
+    <>
+    <SEOHead title="Self Publishing" />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header */}
       <header 
@@ -797,5 +800,6 @@ export default function SelfPublishing() {
         />
       )}
     </div>
+    </>
   );
 }
