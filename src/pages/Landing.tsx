@@ -518,7 +518,7 @@ const Landing = () => {
   return (
     <>
     <SEOHead
-      title="Arcana Mace: AI-Powered Controlled Media Publishing"
+      title="Arcana Mace: Media Buying Marketplace"
       description="Arcana Mace is a media buying marketplace connecting global brands and PR agencies for seamless media transactions."
       structuredData={{
         "@context": "https://schema.org",
