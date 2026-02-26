@@ -102,7 +102,21 @@ async function processPaymentIntent(
   }
 
   const intent = await intentRes.json();
-  console.log("Payment intent status:", intent.status, "metadata:", intent.metadata);
+  console.log(
+    "Payment intent snapshot:",
+    JSON.stringify(
+      {
+        id: intent?.id,
+        status: intent?.status,
+        next_action: intent?.next_action,
+        latest_payment_attempt: intent?.latest_payment_attempt,
+        latest_payment_attempts: intent?.latest_payment_attempts,
+        metadata: intent?.metadata,
+      },
+      null,
+      2
+    )
+  );
 
   if (intent.status !== "SUCCEEDED") {
     const gatewayMessage =
@@ -111,12 +125,19 @@ async function processPaymentIntent(
       intent?.next_action?.type ||
       null;
 
+    const isUnsubmitted =
+      intent.status === "REQUIRES_PAYMENT_METHOD" &&
+      !intent?.latest_payment_attempt &&
+      !(Array.isArray(intent?.latest_payment_attempts) && intent.latest_payment_attempts.length > 0);
+
     return {
       success: false,
       status: intent.status,
-      message: gatewayMessage
-        ? `Payment not completed (${intent.status}): ${gatewayMessage}`
-        : `Payment not completed (${intent.status})`,
+      message: isUnsubmitted
+        ? "Payment method not submitted to gateway yet."
+        : gatewayMessage
+          ? `Payment not completed (${intent.status}): ${gatewayMessage}`
+          : `Payment not completed (${intent.status})`,
     };
   }
 
