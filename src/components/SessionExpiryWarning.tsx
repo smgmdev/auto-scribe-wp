@@ -15,6 +15,8 @@ import { Shield } from 'lucide-react';
 const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
 const CHECK_INTERVAL_MS = 10 * 1000;
+// Grace period after component mounts to avoid firing immediately on page load/deploy
+const INIT_GRACE_MS = 15 * 1000;
 
 export function SessionExpiryWarning() {
   const { session, signOut, extendSession } = useAuth();
@@ -28,6 +30,8 @@ export function SessionExpiryWarning() {
   const skipUntilRef = useRef<number>(0);
   // Cooldown: prevent re-showing warning immediately after user clicks "Stay Logged In"
   const dismissedAtRef = useRef<number>(0);
+  // Mount time: don't show expiry warning within first N seconds of page load
+  const mountedAtRef = useRef<number>(Date.now());
 
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
@@ -116,8 +120,15 @@ export function SessionExpiryWarning() {
       const elapsed = Date.now() - sessionStartedAtRef.current;
       const timeUntilExpiry = SESSION_DURATION_MS - elapsed;
 
-      // If already expired, sign out immediately
+      // If already expired, sign out — BUT only if we're past the init grace period.
+      // This prevents mass sign-outs right after a deployment/reload where
+      // session_started_at hasn't been refreshed yet by registerActiveSession.
       if (timeUntilExpiry <= 0) {
+        if (Date.now() - mountedAtRef.current < INIT_GRACE_MS) {
+          console.log('[SessionExpiry] Skipping expiry during init grace period, re-fetching...');
+          sessionStartedAtRef.current = null; // Force re-fetch from DB
+          return;
+        }
         clearCountdown();
         setShowWarning(false);
         signOut();
