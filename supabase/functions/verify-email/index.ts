@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,6 +110,9 @@ serve(async (req) => {
     }
 
     console.log("Email verified successfully for:", profile.email);
+
+    // Send Telegram alert for verified new user (fire-and-forget)
+    sendTelegramAlert(TelegramAlerts.newSignup(profile.email || "unknown")).catch(() => {});
 
     // Immediate 302 redirect back to app auth page with success flag
     const safeRedirectTo = /^https?:\/\//i.test(redirectTo) ? redirectTo : "https://amdev.lovable.app/auth";

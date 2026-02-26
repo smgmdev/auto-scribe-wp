@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
+
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -289,8 +289,7 @@ serve(async (req) => {
 
     console.log("Welcome email sent successfully:", emailResponse);
 
-    // Send Telegram alert for new signup (fire-and-forget)
-    sendTelegramAlert(TelegramAlerts.newSignup(email)).catch(() => {});
+    // Telegram alert moved to verify-email function (only fires after email verification)
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
