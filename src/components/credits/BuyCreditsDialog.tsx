@@ -35,6 +35,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [intentData, setIntentData] = useState<{ intent_id: string; client_secret: string } | null>(null);
   const cardElementRef = useRef<any>(null);
+  const paymentSubmittedRef = useRef(false);
   const { refreshCredits } = useAuth();
   const { setCurrentView } = useAppStore();
   const [, setSearchParams] = useSearchParams();
@@ -84,6 +85,10 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     });
     return () => removePopup('buy-credits-dialog');
   }, [open, onOpenChange, step, confirming]);
+
+  useEffect(() => {
+    paymentSubmittedRef.current = paymentSubmitted;
+  }, [paymentSubmitted]);
 
   const parsedAmount = parseInt(creditAmount) || 0;
   const isValidAmount = parsedAmount >= MIN_CREDITS;
@@ -180,13 +185,17 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
         (dropIn as any).on('pending', () => {
           console.log('[Airwallex] Payment pending event fired');
-          if (mounted) setPaymentSubmitted(true);
+          if (mounted) {
+            setPaymentSubmitted(true);
+            paymentSubmittedRef.current = true;
+          }
         });
 
-        dropIn.on('error', (event: any) => {
+        dropIn.on('error', async (event: any) => {
           console.error('[Airwallex] Payment error:', event);
           if (mounted) {
             setPaymentSubmitted(false);
+            paymentSubmittedRef.current = false;
             setConfirming(false);
             const code = event?.code || event?.detail?.code || '';
             const rawMsg = event?.message || event?.detail?.message || '';
@@ -204,23 +213,59 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             } else if (rawMsg) {
               userMessage = rawMsg;
             }
+
+            // Re-check intent state to avoid false "declined" messages when no submit reached gateway
+            try {
+              const { data: verifyResult } = await supabase.functions.invoke('airwallex-webhook', {
+                body: { intent_id: intentData.intent_id },
+              });
+              const isUnsubmitted =
+                verifyResult?.status === 'REQUIRES_PAYMENT_METHOD' &&
+                (!verifyResult?.message || /Payment not completed \(REQUIRES_PAYMENT_METHOD\)/.test(verifyResult.message));
+
+              if (isUnsubmitted) {
+                userMessage = 'Payment details were not submitted to the gateway. Please retry your card entry.';
+              } else if (verifyResult?.message && !/Payment not completed \(REQUIRES_PAYMENT_METHOD\)/.test(verifyResult.message)) {
+                userMessage = verifyResult.message;
+              }
+            } catch {
+              // Keep original SDK message
+            }
+
             toast.error(userMessage, { duration: 6000 });
           }
         });
 
         dropIn.on('cancel', () => {
           console.log('[Airwallex] Payment cancelled');
-          if (mounted) setPaymentSubmitted(false);
+          if (mounted) {
+            setPaymentSubmitted(false);
+            paymentSubmittedRef.current = false;
+          }
         });
 
-        // Polling fallback: check intent status every 5s in case Drop-in events don't fire
+        // Polling fallback: check intent status only after submit signal (pending/success path)
         let pollCount = 0;
-        const maxPolls = 24; // 2 minutes max
+        const maxPolls = 18; // ~90 seconds after submit
         pollIntervalId = setInterval(async () => {
-          if (!mounted || pollCount >= maxPolls) {
+          if (!mounted) {
             clearInterval(pollIntervalId!);
             return;
           }
+
+          // Do not verify before a real submit signal from SDK/iframe heuristics
+          if (!paymentSubmittedRef.current) return;
+
+          if (pollCount >= maxPolls) {
+            clearInterval(pollIntervalId!);
+            if (!mounted) return;
+            setConfirming(false);
+            setPaymentSubmitted(false);
+            paymentSubmittedRef.current = false;
+            toast.error('Payment verification timed out. Please retry once.');
+            return;
+          }
+
           pollCount++;
           try {
             const { data: result } = await supabase.functions.invoke('airwallex-webhook', {
@@ -236,13 +281,12 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               return;
             }
 
-            // Stop polling early on terminal failure states to avoid silent loops
-            // NOTE: REQUIRES_PAYMENT_METHOD is the initial state — only treat it as failure
-            // if the user has already submitted payment (paymentSubmitted is true)
+            // Stop polling early on terminal failure states
             if (result?.status && ['FAILED', 'CANCELLED'].includes(result.status)) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
               setPaymentSubmitted(false);
+              paymentSubmittedRef.current = false;
               setConfirming(false);
               toast.error(result?.message || 'Payment failed. Please try a different card.');
             }
