@@ -17,6 +17,30 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 26, 2026',
+    title: 'Real-Time Dashboard & Messaging Reliability',
+    changes: [
+      'Latest Global Articles section on the account dashboard now updates in real-time — newly published articles appear instantly without requiring a page refresh',
+      'Real-time subscription listens for inserts, updates, and deletions on published articles so the dashboard always reflects the current state',
+      'Fixed a messaging widget issue where sound notifications were not playing on one side of the conversation — both clients and agencies now reliably hear incoming message alerts',
+      'Resolved an asymmetric notification bug caused by incorrect identity matching when an agency user received messages from another party',
+      'Standardized notification trigger logic across broadcast and database insert handlers to ensure consistent behavior regardless of how the message is delivered',
+      'Improved fallback notification logic so sound alerts still fire during the brief window after a session refresh when local chat lists have not fully loaded yet',
+    ],
+  },
+  {
+    date: 'February 25, 2026',
+    title: 'Messaging Widget Stability & Session Recovery',
+    changes: [
+      'Fixed a critical issue where the messaging widget would become stuck and stop showing new messages after a session refresh or reconnection',
+      'Resolved a stale-closure bug in the chat list panel that caused background data fetches to use an outdated agency ID, resulting in empty responses and a frozen widget',
+      'Agency identity is now tracked via a ref-backed value so real-time event handlers and heartbeat timers always use the latest session data',
+      'Improved self-healing heartbeat mechanism to correctly recover the messaging widget when real-time channels temporarily disconnect',
+      'Enhanced window focus and visibility change handlers to immediately re-sync the message list when returning to the app after being in the background',
+      'Sound notification fallback now correctly triggers for incoming messages even when the local engagement and service request lists have not finished loading',
+    ],
+  },
+  {
     date: 'February 24, 2026',
     title: 'Media Buying Page & Layout Refinements',
     changes: [
@@ -539,7 +563,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 24, 2026
+            Last update: February 26, 2026
           </p>
         </div>
 
