@@ -1297,6 +1297,11 @@ export function OrdersView() {
                   
                   if (error) throw error;
                   
+                  // Telegram alert for new dispute (fire-and-forget)
+                  supabase.functions.invoke('send-telegram', {
+                    body: { message: `⚠️ <b>New Dispute</b>\n🔢 #${selectedOrder.order_number || selectedOrder.id}\n📝 Delivery overdue - dispute opened by client` }
+                  }).catch(() => {});
+                  
                   // Add to local dispute set (but NOT unread since client opened it)
                   setDisputeOrderIds(prev => new Set([...prev, selectedOrder.id]));
                   // Don't add to unread since the client just opened it themselves

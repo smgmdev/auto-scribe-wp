@@ -197,6 +197,11 @@ export function BriefSubmissionDialog({
       addMinimizedChat({ id: request.id, title: mediaSite.name, favicon: mediaSite.favicon, type: 'my-request', unreadCount: 0 });
       window.dispatchEvent(new CustomEvent('engagement-added', { detail: { id: request.id, title: request.title, description: request.description, favicon: mediaSite.favicon, media_site: mediaSite } }));
 
+      // Telegram alert for new engagement (fire-and-forget)
+      supabase.functions.invoke('send-telegram', {
+        body: { message: `💬 <b>New Engagement</b>\n🌐 ${mediaSite.name}\n📧 ${user.email || 'Unknown'}` }
+      }).catch(() => {});
+
       toast.success('Brief sent to agency for review');
       setDescription('');
       setFiles([]);

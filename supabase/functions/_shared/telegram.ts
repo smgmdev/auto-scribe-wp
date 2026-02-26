@@ -51,8 +51,11 @@ export const TelegramAlerts = {
   creditPurchase: (email: string, credits: number, amount: string) =>
     `💰 <b>Credit Purchase</b>\n📧 ${escapeHtml(email)}\n💳 ${credits} credits ($${amount})`,
 
-  newOrder: (orderNumber: string, siteName: string, amountCents: number) =>
-    `📦 <b>New Order</b>\n🔢 #${escapeHtml(orderNumber)}\n🌐 ${escapeHtml(siteName)}\n💵 $${(amountCents / 100).toFixed(2)}`,
+  newEngagement: (siteName: string, email: string) =>
+    `💬 <b>New Engagement</b>\n🌐 ${escapeHtml(siteName)}\n📧 ${escapeHtml(email)}`,
+
+  newOrder: (orderNumber: string, siteName: string, amountCredits: number) =>
+    `📦 <b>New Order</b>\n🔢 #${escapeHtml(orderNumber)}\n🌐 ${escapeHtml(siteName)}\n💵 ${amountCredits} credits`,
 
   orderDelivered: (orderNumber: string, siteName: string) =>
     `✅ <b>Order Delivered</b>\n🔢 #${escapeHtml(orderNumber)}\n🌐 ${escapeHtml(siteName)}`,
@@ -80,6 +83,9 @@ export const TelegramAlerts = {
 
   bugReport: (subject: string, category: string) =>
     `🐛 <b>Bug Report</b>\n📝 ${escapeHtml(subject)}\n📂 ${escapeHtml(category)}`,
+
+  wpArticlePublished: (siteName: string, title: string, link: string) =>
+    `📝 <b>WP Article Published</b>\n🌐 ${escapeHtml(siteName)}\n📄 ${escapeHtml(title)}\n🔗 ${escapeHtml(link)}`,
 };
 
 function escapeHtml(text: string): string {

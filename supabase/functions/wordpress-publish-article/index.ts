@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -275,6 +276,12 @@ Deno.serve(async (req) => {
     }
 
     console.log('[wordpress-publish-article] Article published successfully:', wpPostId);
+
+    // Telegram alert for WP article published
+    const siteName = site.name || site.url || 'Unknown';
+    sendTelegramAlert(
+      TelegramAlerts.wpArticlePublished(siteName, title, data.link || '')
+    ).catch(() => {});
 
     // ── Notify site owner via email ──────────────────────────────────────
     if (site.user_id && status === 'publish') {

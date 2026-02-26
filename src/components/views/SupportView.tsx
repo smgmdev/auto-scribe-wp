@@ -182,6 +182,11 @@ export function SupportView() {
         message: newFirstMessage.trim()
       });
 
+      // Telegram alert for new support ticket (fire-and-forget)
+      supabase.functions.invoke('send-telegram', {
+        body: { message: `🎫 <b>New Support Ticket</b>\n📝 ${newCategory}\n📧 ${user.email || 'Unknown'}` }
+      }).catch(() => {});
+
       setNewFirstMessage('');
       setNewCategory('');
       setNewTicketOpen(false);

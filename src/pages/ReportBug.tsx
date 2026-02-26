@@ -110,6 +110,11 @@ export default function ReportBug() {
 
       if (error) throw error;
 
+      // Telegram alert for bug report (fire-and-forget)
+      supabase.functions.invoke('send-telegram', {
+        body: { message: `🐛 <b>Bug Report</b>\n📝 ${subject.trim()}\n📂 ${category}` }
+      }).catch(() => {});
+
       setSubmitted(true);
       toast.success('Bug report submitted successfully!');
     } catch (err) {
