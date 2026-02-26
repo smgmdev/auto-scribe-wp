@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -313,6 +314,12 @@ serve(async (req) => {
         }),
       });
       console.log("Admin withdrawal notification email sent to:", adminEmail);
+
+      // Telegram alert
+      const methodLabel = withdrawal_method === "bank" ? "Bank Transfer" : "USDT";
+      sendTelegramAlert(
+        TelegramAlerts.withdrawalRequest(agencyName, amount_cents.toFixed(2), methodLabel)
+      ).catch(() => {});
     } catch (emailErr) {
       // Don't fail the withdrawal if email fails
       console.error("Failed to send admin withdrawal notification:", emailErr);
