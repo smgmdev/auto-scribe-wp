@@ -50,6 +50,22 @@ export function LatestGlobalArticles() {
     };
 
     fetchGlobalArticles();
+
+    // Real-time: refresh when articles are inserted, updated, or deleted
+    const channel = supabase
+      .channel('global-articles-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'articles' },
+        () => {
+          fetchGlobalArticles();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   if (loading) {
