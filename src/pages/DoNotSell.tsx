@@ -22,7 +22,7 @@ const DoNotSell = () => {
 
   return (
     <>
-    <SEOHead title="We Do Not Sell or Share Your Personal Information" />
+    <SEOHead title="We Do Not Sell or Share Your Personal Information" description="Learn about Arcana Mace's commitment to protecting your personal data and privacy rights." />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">

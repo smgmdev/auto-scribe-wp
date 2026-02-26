@@ -123,7 +123,7 @@ export default function ReportBug() {
 
   return (
     <>
-    <SEOHead title="Report a Bug and Get Rewards" />
+    <SEOHead title="Report a Bug and Get Rewards" description="Found an issue? Report bugs on Arcana Mace and earn rewards for helping improve the platform." />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - hide on scroll like Help Center */}
       <header 

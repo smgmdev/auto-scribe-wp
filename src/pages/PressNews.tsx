@@ -152,7 +152,7 @@ export default function PressNews() {
 
   return (
     <>
-    <SEOHead title="Arcana Mace Newsroom" />
+    <SEOHead title="Arcana Mace Newsroom" description="Official press releases, company news, and announcements from Arcana Mace." />
     <div className="h-screen overflow-y-auto bg-white">
       {/* Header - Apple-style centered */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">

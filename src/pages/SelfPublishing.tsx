@@ -249,7 +249,7 @@ export default function SelfPublishing() {
 
   return (
     <>
-    <SEOHead title="Self Publishing" />
+    <SEOHead title="Self Publishing" description="Publish articles directly to top-tier media outlets worldwide with Arcana Mace's self-publishing platform." />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header */}
       <header 

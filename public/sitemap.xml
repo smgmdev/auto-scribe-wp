@@ -4,37 +4,37 @@
   <!-- Main Pages -->
   <url>
     <loc>https://arcanamace.com/</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/about</loc>
-    <lastmod>2026-02-20</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/how-it-works</loc>
-    <lastmod>2026-02-20</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/media-buying</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/self-publishing</loc>
-    <lastmod>2026-02-20</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/ai-article-generation</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -42,7 +42,7 @@
   <!-- Press -->
   <url>
     <loc>https://arcanamace.com/press</loc>
-    <lastmod>2026-02-20</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -50,79 +50,79 @@
   <!-- Help Center -->
   <url>
     <loc>https://arcanamace.com/help</loc>
-    <lastmod>2026-02-20</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/getting-started</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/your-account</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/credits-pricing</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/publishing-articles</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/media-buying</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/orders-delivery</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/for-agencies</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-generation</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/troubleshooting</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-auto-publishing</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-security-supervision</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-marketing-strategy</loc>
-    <lastmod>2026-02-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -130,25 +130,25 @@
   <!-- Legal & Info -->
   <url>
     <loc>https://arcanamace.com/terms</loc>
-    <lastmod>2026-01-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/privacy</loc>
-    <lastmod>2026-01-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/do-not-sell</loc>
-    <lastmod>2026-01-15</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/guidelines</loc>
-    <lastmod>2026-02-10</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -156,25 +156,25 @@
   <!-- Utility & Info -->
   <url>
     <loc>https://arcanamace.com/system-status</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/update-log</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/report-bug</loc>
-    <lastmod>2026-02-10</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/sitemap</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-02-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -476,7 +476,7 @@ export default function UpdateLog() {
 
   return (
     <>
-    <SEOHead title="Changelog" />
+    <SEOHead title="Changelog" description="Stay up to date with the latest features, improvements, and fixes on Arcana Mace." />
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-black/90 backdrop-blur-sm border-b border-white/10">
