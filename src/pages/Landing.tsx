@@ -202,18 +202,19 @@ const Landing = () => {
     setSelectedSite(null);
   };
 
-  // Fetch public data immediately (no auth needed), then fetch auth-dependent data once auth settles
+  // Fetch ALL public data in a single parallel batch (no auth needed)
   const authSettledRef = useRef(false);
 
   useEffect(() => {
     const fetchPublicData = async () => {
       try {
-        const [sitesResult, creditsResult, tagsResult, mediaResult, publicAgenciesResult] = await Promise.all([
+        const [sitesResult, creditsResult, tagsResult, mediaResult, publicAgenciesResult, activeAgenciesResult] = await Promise.all([
           supabase.rpc('get_public_sites'),
           supabase.from('site_credits').select('site_id, credits_required'),
           supabase.from('site_tags').select('*'),
-          supabase.from('media_sites').select('*').order('created_at', { ascending: true }),
+          supabase.from('media_sites').select('*').order('created_at', { ascending: true }).limit(200),
           supabase.rpc('get_public_agencies'),
+          supabase.rpc('get_active_agency_payouts'),
         ]);
 
         const { data: sitesData, error: sitesError } = sitesResult;
@@ -221,6 +222,7 @@ const Landing = () => {
         const { data: tagsData } = tagsResult;
         const { data: mediaData, error: mediaError } = mediaResult;
         const { data: publicAgencies } = publicAgenciesResult;
+        const { data: activeAgenciesData } = activeAgenciesResult;
 
         if (!sitesError && sitesData) {
           const creditsMap: Record<string, number> = {};
@@ -246,9 +248,7 @@ const Landing = () => {
           setMediaSites(mediaData);
         }
 
-        // Fetch active agencies
-        const { data: activeAgenciesData } = await supabase.rpc('get_active_agency_payouts');
-
+        // Process active agencies (no extra query needed now)
         if (activeAgenciesData && activeAgenciesData.length > 0 && publicAgencies) {
           const agencies: ActiveAgency[] = [];
           for (const app of publicAgencies) {
@@ -276,7 +276,7 @@ const Landing = () => {
           setActiveAgencies([]);
         }
 
-        // Fetch agency logos
+        // Build agency logos map (getPublicUrl is synchronous/local — no network call)
         const uniqueAgencies = [...new Set((mediaData || []).filter(s => s.agency).map(s => s.agency as string))];
         if (uniqueAgencies.length > 0 && publicAgencies) {
           const logos: Record<string, string> = {};
@@ -633,6 +633,7 @@ const Landing = () => {
                 muted
                 loop
                 playsInline
+                preload="none"
                 poster={mediaBuyingPoster}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
                 src={mediaBuyingBg}
@@ -668,6 +669,7 @@ const Landing = () => {
             loop
             muted
             playsInline
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src={bugReportBg} type="video/mp4" />
