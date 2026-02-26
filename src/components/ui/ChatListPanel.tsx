@@ -880,7 +880,7 @@ export function ChatListPanel() {
       window.removeEventListener('engagement-cancelled', handleEngagementCancelled as EventListener);
     };
   }, [closeGlobalChat, removeMinimizedChat, setUnreadDisputesCount]);
-  const handleBroadcastNotification = useCallback(async (payload: any) => {
+  const handleBroadcastNotification = useCallback((payload: any) => {
     if (!payload) return;
     
     // Early return if no user - prevents false notifications
@@ -888,6 +888,10 @@ export function ChatListPanel() {
       console.log('[ChatListPanel] No user.id for broadcast, skipping');
       return;
     }
+
+    // Realtime heartbeat: any broadcast means the channel is alive
+    lastRealtimeHeartbeatRef.current = Date.now();
+    fallbackPollDelayRef.current = 8000;
     
     const { request_id, sender_type, sender_id, message, title, media_site_name, media_site_favicon } = payload;
     
@@ -895,22 +899,8 @@ export function ChatListPanel() {
     const isMyEngagement = myEngagementsRef.current.some(e => e.id === request_id);
     const isServiceRequest = serviceRequestsRef.current.some(r => r.id === request_id);
     
-    // CRITICAL: Check if sender_id matches our agency payout ID by querying the database
-    // This is needed because the refs might not be set yet when this callback fires
-    let isOwnAgencyMessage = false;
-    if (sender_type === 'agency') {
-      const { data: agencyData } = await supabase
-        .from('agency_payouts')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('id', sender_id)
-        .maybeSingle();
-      
-      if (agencyData) {
-        isOwnAgencyMessage = true;
-        console.log('[ChatListPanel] Detected own agency message via DB lookup');
-      }
-    }
+    // Fast local own-agency detection (avoid blocking DB lookup in realtime path)
+    const isOwnAgencyMessage = sender_type === 'agency' && sender_id === agencyPayoutIdRef.current;
     
     // Skip if this is our own message
     const isOwnBroadcast = sender_id === user.id || 
@@ -1395,10 +1385,20 @@ export function ChatListPanel() {
           table: 'service_messages'
         },
         async (payload) => {
+          lastRealtimeHeartbeatRef.current = Date.now();
+          fallbackPollDelayRef.current = 8000;
+
           const newMsg = payload.new as any;
           const requestId = newMsg.request_id;
           const senderId = newMsg.sender_id;
           const senderType = newMsg.sender_type;
+          const messageDedupKey = String(newMsg.id ?? `${requestId}:${senderId}:${newMsg.created_at}`);
+
+          if (processedMessageIdsRef.current.has(messageDedupKey)) {
+            return;
+          }
+          processedMessageIdsRef.current.add(messageDedupKey);
+          setTimeout(() => processedMessageIdsRef.current.delete(messageDedupKey), 6000);
           
           console.log('[ChatListPanel] Received service_messages INSERT:', { 
             requestId, 
@@ -1441,27 +1441,13 @@ export function ChatListPanel() {
           
           console.log('[ChatListPanel] Local state check:', { isMyEngagement, isServiceRequest, engagementsCount: myEngagementsRef.current.length });
           
-          // If not found in local state, verify from database (handles race condition on initial load)
+          // If not found in local state, trigger non-blocking refresh and avoid waiting on DB here.
+          // This keeps realtime snappy after token refresh/session extension.
           if (!isMyEngagement && !isServiceRequest) {
-            console.log('[ChatListPanel] Request not found in local state, checking database...');
-            const { data: requestData } = await supabase
-              .from('service_requests')
-              .select('id, user_id, agency_payout_id, title, media_site:media_sites(name)')
-              .eq('id', requestId)
-              .maybeSingle();
-            
-            if (requestData) {
-              isMyEngagement = requestData.user_id === user?.id;
-              isServiceRequest = agencyPayoutIdRef.current ? requestData.agency_payout_id === agencyPayoutIdRef.current : false;
-              console.log('[ChatListPanel] Database check result:', { isMyEngagement, isServiceRequest, requestData });
-              
-              // Refresh lists if we found a match
-              if (isMyEngagement) {
-                fetchMyEngagements();
-              }
-              if (isServiceRequest) {
-                fetchServiceRequests();
-              }
+            console.log('[ChatListPanel] Request not found in local state, scheduling background refresh');
+            fetchMyEngagements();
+            if (agencyPayoutIdRef.current || isAdmin) {
+              fetchServiceRequests();
             }
           }
           
