@@ -169,89 +169,8 @@ export interface PublishArticleParams {
 }
 
 export async function publishArticle(params: PublishArticleParams): Promise<{ id: number; link: string }> {
-  // If credentials are missing, use edge function
-  if (!params.site.username || !params.site.applicationPassword) {
-    return publishArticleViaEdgeFunction(params);
-  }
-  
-  try {
-    const baseUrl = normalizeUrl(params.site.url);
-    
-    // Build the request body
-    const body: Record<string, any> = {
-      title: params.title,
-      content: params.content,
-      status: params.status,
-      categories: params.categories,
-      tags: params.tags,
-      featured_media: params.featuredMediaId || 0,
-    };
-
-    // Add SEO data based on plugin type
-    if (params.seo) {
-      if (params.site.seoPlugin === 'aioseo') {
-        // AIOSEO Pro uses specific meta structure for TruSEO
-        body.meta = {
-          _aioseo_description: params.seo.metaDescription || '',
-          _aioseo_keywords: params.seo.focusKeyword || '',
-        };
-        // Also include aioseo_meta_data for REST API compatibility
-        body.aioseo_meta_data = {
-          description: params.seo.metaDescription || '',
-          keyphrases: {
-            focus: {
-              keyphrase: params.seo.focusKeyword || '',
-              score: 0,
-              analysis: {}
-            },
-            additional: []
-          },
-        };
-      } else if (params.site.seoPlugin === 'rankmath') {
-        // RankMath uses meta object
-        body.meta = {
-          rank_math_focus_keyword: params.seo.focusKeyword || '',
-          rank_math_description: params.seo.metaDescription || '',
-        };
-      }
-    }
-
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
-      method: 'POST',
-      headers: {
-        'Authorization': createAuthHeader(params.site),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to publish article:', response.status, errorData);
-      throw new Error(errorData.message || `Failed to publish: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const postId = data.id;
-
-    // For Rank Math, try updating meta via a separate request to ensure it saves
-    if (params.site.seoPlugin === 'rankmath' && params.seo && (params.seo.focusKeyword || params.seo.metaDescription)) {
-      try {
-        await updateRankMathMeta(params.site, postId, params.seo);
-      } catch (seoError) {
-        console.error('Failed to update Rank Math SEO meta, but post was created:', seoError);
-        // Don't throw - the post was created successfully, just SEO might not have saved
-      }
-    }
-
-    return {
-      id: postId,
-      link: data.link,
-    };
-  } catch (error) {
-    console.error('Error publishing article:', error);
-    throw error;
-  }
+  // Always publish via backend so side effects stay consistent (Telegram + owner email)
+  return publishArticleViaEdgeFunction(params);
 }
 
 // Publish article via edge function (for users without direct credentials)
@@ -369,84 +288,8 @@ export interface UpdateArticleParams {
 }
 
 export async function updateArticle(params: UpdateArticleParams): Promise<{ id: number; link: string }> {
-  // If credentials are missing, use edge function (same as publishArticle)
-  if (!params.site.username || !params.site.applicationPassword) {
-    return updateArticleViaEdgeFunction(params);
-  }
-
-  try {
-    const baseUrl = normalizeUrl(params.site.url);
-    
-    // Build the request body
-    const body: Record<string, any> = {
-      title: params.title,
-      content: params.content,
-      status: params.status,
-      categories: params.categories,
-      tags: params.tags,
-      featured_media: params.featuredMediaId ?? undefined,
-    };
-
-    // Add SEO data based on plugin type
-    if (params.seo) {
-      if (params.site.seoPlugin === 'aioseo') {
-        body.meta = {
-          _aioseo_description: params.seo.metaDescription || '',
-          _aioseo_keywords: params.seo.focusKeyword || '',
-        };
-        body.aioseo_meta_data = {
-          description: params.seo.metaDescription || '',
-          keyphrases: {
-            focus: {
-              keyphrase: params.seo.focusKeyword || '',
-              score: 0,
-              analysis: {}
-            },
-            additional: []
-          },
-        };
-      } else if (params.site.seoPlugin === 'rankmath') {
-        body.meta = {
-          rank_math_focus_keyword: params.seo.focusKeyword || '',
-          rank_math_description: params.seo.metaDescription || '',
-        };
-      }
-    }
-
-    const response = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${params.postId}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': createAuthHeader(params.site),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to update article:', response.status, errorData);
-      throw new Error(errorData.message || `Failed to update: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // For Rank Math, try updating meta via a separate request to ensure it saves
-    if (params.site.seoPlugin === 'rankmath' && params.seo && (params.seo.focusKeyword || params.seo.metaDescription)) {
-      try {
-        await updateRankMathMeta(params.site, params.postId, params.seo);
-      } catch (seoError) {
-        console.error('Failed to update Rank Math SEO meta, but article was updated:', seoError);
-      }
-    }
-
-    return {
-      id: data.id,
-      link: data.link,
-    };
-  } catch (error) {
-    console.error('Error updating article:', error);
-    throw error;
-  }
+  // Always update via backend so side effects stay consistent
+  return updateArticleViaEdgeFunction(params);
 }
 
 // Update article via edge function (for users without direct credentials)
