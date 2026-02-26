@@ -178,44 +178,40 @@ export default function AIArticleGeneration() {
     return shuffled;
   };
 
-  // Fetch published articles for the grid
+  // Fetch published articles from local library WP sites via secure RPC
   useEffect(() => {
     const fetchPublishedArticles = async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('id, title, content, published_to_name, published_to_favicon, wp_link, featured_image')
-        .eq('status', 'published')
-        .not('wp_link', 'is', null)
-        .limit(50);
+      const { data, error } = await supabase.rpc('get_published_articles');
       
       if (!error && data) {
-        // Shuffle and take first 6
-        const shuffled = shuffleArray(data as PublishedArticle[]);
-        setPublishedArticles(shuffled.slice(0, 6));
+        const articles = data as any[];
+        // Shuffle for random order
+        const shuffled = shuffleArray(articles);
+        
+        // Map to PublishedArticle for the grid (take 6)
+        setPublishedArticles(shuffled.slice(0, 6).map(a => ({
+          id: a.id,
+          title: a.title,
+          content: a.content,
+          published_to_name: a.published_to_name,
+          published_to_favicon: a.published_to_favicon,
+          wp_link: a.wp_link,
+          featured_image: a.featured_image,
+        })));
+        
+        // Map to SliderArticle for the slider (take 8)
+        setSliderArticles(shuffled.slice(0, 8).map(a => ({
+          id: a.id,
+          title: a.title,
+          published_to_name: a.published_to_name,
+          published_to_favicon: a.published_to_favicon,
+          wp_link: a.wp_link,
+          featured_image: a.featured_image,
+        })));
       }
     };
     
     fetchPublishedArticles();
-  }, []);
-
-  // Fetch articles for the slider (with featured images)
-  useEffect(() => {
-    const fetchSliderArticles = async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('id, title, published_to_name, published_to_favicon, wp_link, featured_image')
-        .eq('status', 'published')
-        .not('wp_link', 'is', null)
-        .limit(50);
-      
-      if (!error && data) {
-        // Shuffle for random order
-        const shuffled = shuffleArray(data as SliderArticle[]);
-        setSliderArticles(shuffled.slice(0, 8)); // Take 8 for the slider
-      }
-    };
-    
-    fetchSliderArticles();
   }, []);
 
   // Check if mobile
