@@ -197,42 +197,77 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             setPaymentSubmitted(false);
             paymentSubmittedRef.current = false;
             setConfirming(false);
-            const code = event?.code || event?.detail?.code || '';
-            const rawMsg = event?.message || event?.detail?.message || '';
-            let userMessage = 'Payment failed. Please try again.';
-            if (/decline|declined/i.test(rawMsg) || /decline/i.test(code)) {
-              userMessage = 'Your card was declined. Please check your card details or try a different card.';
-            } else if (/cvv|cvc|security.code/i.test(rawMsg) || /cvv/i.test(code)) {
-              userMessage = 'Incorrect CVV/security code. Please check and try again.';
-            } else if (/expir/i.test(rawMsg) || /expir/i.test(code)) {
-              userMessage = 'Your card has expired or the expiry date is incorrect. Please try a different card.';
-            } else if (/insufficient.funds/i.test(rawMsg) || /insufficient/i.test(code)) {
-              userMessage = 'Insufficient funds. Please try a different card.';
-            } else if (/3ds|authentication|authenticate/i.test(rawMsg)) {
-              userMessage = 'Card authentication failed. Please try again or use a different card.';
-            } else if (rawMsg) {
-              userMessage = rawMsg;
-            }
 
-            // Re-check intent state to avoid false "declined" messages when no submit reached gateway
+            let userTitle = 'Payment Failed';
+            let userMessage = 'Please try again or use a different payment method.';
+            let userTips: string[] = [];
+
+            // Re-check intent state for detailed failure info from gateway
             try {
               const { data: verifyResult } = await supabase.functions.invoke('airwallex-webhook', {
                 body: { intent_id: intentData.intent_id },
               });
+
               const isUnsubmitted =
                 verifyResult?.status === 'REQUIRES_PAYMENT_METHOD' &&
-                (!verifyResult?.message || /Payment not completed \(REQUIRES_PAYMENT_METHOD\)/.test(verifyResult.message));
+                (!verifyResult?.message || /Payment method not submitted/.test(verifyResult.message));
+
+              const failureCode = verifyResult?.failure_code || '';
+              const attemptStatus = verifyResult?.attempt_status || '';
+              const serverMsg = verifyResult?.message || '';
 
               if (isUnsubmitted) {
-                userMessage = 'Payment details were not submitted to the gateway. Please retry your card entry.';
-              } else if (verifyResult?.message && !/Payment not completed \(REQUIRES_PAYMENT_METHOD\)/.test(verifyResult.message)) {
-                userMessage = verifyResult.message;
+                userTitle = 'Payment Not Submitted';
+                userMessage = 'Your card details were not sent to the payment gateway. Please re-enter your card and try again.';
+              } else if (/fraud|risk/i.test(failureCode) || /risk/i.test(serverMsg)) {
+                userTitle = 'Payment Blocked by Risk Check';
+                userMessage = 'The payment gateway\'s fraud prevention system blocked this transaction.';
+                userTips = [
+                  'Your card\'s issuing country may differ from your billing address — ensure they match.',
+                  'Try using a card issued in the same country as your billing address.',
+                  'Contact your bank to authorise international or online transactions.',
+                  'Try a different card or payment method.',
+                  'If this persists, contact support with the error: ' + failureCode
+                ];
+              } else if (/decline|declined/i.test(serverMsg) || /decline/i.test(failureCode)) {
+                userTitle = 'Card Declined';
+                userMessage = 'Your card issuer declined this transaction.';
+                userTips = [
+                  'Check your card details and available balance.',
+                  'Contact your bank to authorise online payments.',
+                  'Try a different card.'
+                ];
+              } else if (/insufficient/i.test(serverMsg) || /insufficient/i.test(failureCode)) {
+                userTitle = 'Insufficient Funds';
+                userMessage = 'Your card does not have enough balance for this transaction.';
+                userTips = ['Please try a different card with sufficient funds.'];
+              } else if (/3ds|authentication|authenticate/i.test(serverMsg)) {
+                userTitle = 'Authentication Failed';
+                userMessage = 'Card 3D Secure authentication was not completed.';
+                userTips = ['Please try again and complete the verification prompt from your bank.', 'Try a different card.'];
+              } else if (/cvv|cvc|security/i.test(serverMsg)) {
+                userTitle = 'Incorrect Security Code';
+                userMessage = 'The CVV/CVC code you entered is incorrect.';
+                userTips = ['Check the 3-digit code on the back of your card and try again.'];
+              } else if (/expir/i.test(serverMsg)) {
+                userTitle = 'Card Expired';
+                userMessage = 'Your card has expired or the expiry date is incorrect.';
+                userTips = ['Please use a valid, non-expired card.'];
+              } else if (serverMsg) {
+                userMessage = serverMsg;
               }
             } catch {
-              // Keep original SDK message
+              // Fallback to SDK error info
+              const rawMsg = event?.message || event?.detail?.message || '';
+              if (rawMsg) userMessage = rawMsg;
             }
 
-            toast.error(userMessage, { duration: 6000 });
+            // Show detailed toast with tips
+            const tipsText = userTips.length > 0 ? '\n\n' + userTips.map((t, i) => `${i + 1}. ${t}`).join('\n') : '';
+            toast.error(userTitle, {
+              description: userMessage + tipsText,
+              duration: 12000,
+            });
           }
         });
 
@@ -288,7 +323,19 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               setPaymentSubmitted(false);
               paymentSubmittedRef.current = false;
               setConfirming(false);
-              toast.error(result?.message || 'Payment failed. Please try a different card.');
+              const fc = result?.failure_code || '';
+              const msg = result?.message || '';
+              if (/fraud|risk/i.test(fc) || /risk/i.test(msg)) {
+                toast.error('Payment Blocked by Risk Check', {
+                  description: 'The fraud prevention system blocked this transaction. Try a card issued in your billing country, or contact your bank to authorise online payments.',
+                  duration: 12000,
+                });
+              } else {
+                toast.error('Payment Failed', {
+                  description: msg || 'Please try a different card.',
+                  duration: 8000,
+                });
+              }
             }
           } catch {
             // Silently retry
