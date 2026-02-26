@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -150,6 +151,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await res.json();
     console.log("Admin notification email sent successfully:", emailResponse);
+
+    // Telegram alert
+    sendTelegramAlert(TelegramAlerts.newWpSiteSubmission(siteName, siteUrl)).catch(() => {});
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
