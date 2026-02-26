@@ -568,7 +568,7 @@ export default function AIArticleGeneration() {
 
       {/* Apple-style Feature Slider */}
       {sliderArticles.length > 0 && (
-        <section className="py-0 bg-white border-b border-[#d2d2d7]">
+        <section className="py-6 bg-white border-b border-[#d2d2d7]">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <p className="text-xs text-[#86868b] mb-4">*These articles have been composed with AI</p>
             <div 
