@@ -1053,8 +1053,12 @@ export function ChatListPanel() {
     // ALL roles (client, agency, admin) receive sound for counterparty messages in engagement chats
     // The only condition is that the message must NOT be from the current user themselves
     const isOwnMessage = isAgencySendingAsAgency || sender_id === user?.id;
+
+    // Fallback: for non-admin users, channel-scoped broadcast can arrive before local lists hydrate
+    const shouldNotifyFallback = !isAdmin && !isOwnMessage && !isMyEngagement && !isServiceRequest && !isMinimizedMyRequest && !isMinimizedAgencyRequest && !!request_id;
+
     const shouldNotify = !isOwnMessage && (
-      isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest
+      isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || shouldNotifyFallback
     );
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
@@ -1467,12 +1471,16 @@ export function ChatListPanel() {
           const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
           const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
           
-          if (!isMyEngagement && !isServiceRequest && !isDisputedChat && !isMinimized) {
+          const shouldNotifyFallback = !isAdmin && !isOwnMessage && !isMyEngagement && !isServiceRequest && !isDisputedChat && !isMinimized;
+
+          if (!isMyEngagement && !isServiceRequest && !isDisputedChat && !isMinimized && !shouldNotifyFallback) {
             console.log('[ChatListPanel] Request does not belong to this user, ignoring');
             return;
           }
-          
-          // Mark this request as recently handled by INSERT so broadcast handler skips state updates
+
+          if (shouldNotifyFallback) {
+            console.log('[ChatListPanel] Fallback notify path: list not hydrated yet, allowing sound');
+          }
           recentInsertUpdatesRef.current.set(requestId, Date.now());
           setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
           
@@ -1692,9 +1700,9 @@ export function ChatListPanel() {
           const msgSenderId = newMsg.sender_id;
           const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency' && msgSenderId === agencyPayoutIdRef.current;
           const isOwnInsertMessage = isAgencySendingAsAgency || msgSenderId === user?.id;
-          const isFromCounterparty = !isOwnInsertMessage && (
+          const isFromCounterparty = shouldNotifyFallback || (!isOwnInsertMessage && (
             isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isDisputedChat
-          );
+          ));
           
           console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isOwnInsertMessage, senderType, isAgencyUser, isDialogOpen });
           
