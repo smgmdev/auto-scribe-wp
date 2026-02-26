@@ -1042,6 +1042,7 @@ export function ChatListPanel() {
     // Check both local lists AND minimized chat type to handle cases where the chat
     // is minimized but not in the current serviceRequests/myEngagements lists
     const minimizedChat = currentMinimizedChats.find(c => c.id === request_id);
+    const isMinimizedForRequest = !!minimizedChat;
     const isMinimizedAgencyRequest = minimizedChat?.type === 'agency-request';
     const isMinimizedMyRequest = minimizedChat?.type === 'my-request';
     
@@ -1055,10 +1056,10 @@ export function ChatListPanel() {
     const isOwnMessage = isAgencySendingAsAgency || sender_id === user?.id;
 
     // Fallback: for non-admin users, channel-scoped broadcast can arrive before local lists hydrate
-    const shouldNotifyFallback = !isAdmin && !isOwnMessage && !isMyEngagement && !isServiceRequest && !isMinimizedMyRequest && !isMinimizedAgencyRequest && !!request_id;
+    const shouldNotifyFallback = !isAdmin && !isOwnMessage && !isMyEngagement && !isServiceRequest && !isMinimizedForRequest && !!request_id;
 
     const shouldNotify = !isOwnMessage && (
-      isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || shouldNotifyFallback
+      isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isMinimizedForRequest || shouldNotifyFallback
     );
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
@@ -1701,7 +1702,7 @@ export function ChatListPanel() {
           const isAgencySendingAsAgency = isAgencyUser && senderType === 'agency' && msgSenderId === agencyPayoutIdRef.current;
           const isOwnInsertMessage = isAgencySendingAsAgency || msgSenderId === user?.id;
           const isFromCounterparty = shouldNotifyFallback || (!isOwnInsertMessage && (
-            isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isDisputedChat
+            isMyEngagement || isServiceRequest || isMinimizedMyRequest || isMinimizedAgencyRequest || isMinimized || isDisputedChat
           ));
           
           console.log('[ChatListPanel] isFromCounterparty check:', { isFromCounterparty, isOwnInsertMessage, senderType, isAgencyUser, isDialogOpen });
