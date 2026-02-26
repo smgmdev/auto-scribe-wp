@@ -28,16 +28,32 @@ export function SEOHead({ title, description, structuredData }: SEOHeadProps) {
     }
     link.href = canonicalUrl;
 
-    // Set meta description
-    if (description) {
-      let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    // Helper to set a meta tag
+    const setMeta = (attr: string, key: string, content: string) => {
+      let meta = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
       if (!meta) {
         meta = document.createElement('meta');
-        meta.name = 'description';
+        meta.setAttribute(attr, key);
         document.head.appendChild(meta);
       }
-      meta.content = description;
+      meta.content = content;
+    };
+
+    // Set meta description + OG/Twitter description
+    if (description) {
+      setMeta('name', 'description', description);
+      setMeta('property', 'og:description', description);
+      setMeta('name', 'twitter:description', description);
     }
+
+    // Set OG/Twitter title
+    if (title) {
+      setMeta('property', 'og:title', title);
+      setMeta('name', 'twitter:title', title);
+    }
+
+    // Set OG URL
+    setMeta('property', 'og:url', canonicalUrl);
 
     // Set structured data
     if (structuredData) {
