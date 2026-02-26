@@ -1994,6 +1994,26 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_random_published_articles: {
+        Args: never
+        Returns: {
+          content: string
+          created_at: string
+          featured_image: Json
+          focus_keyword: string
+          id: string
+          meta_description: string
+          published_to: string
+          published_to_favicon: string
+          published_to_name: string
+          status: string
+          tags: string[]
+          title: string
+          tone: string
+          updated_at: string
+          wp_link: string
+        }[]
+      }
       get_user_credits: { Args: { _user_id: string }; Returns: number }
       has_credit_history: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
