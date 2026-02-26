@@ -945,9 +945,92 @@ export function ChatListPanel() {
       request_id, sender_type, isMinimized, isDialogOpen, isFromAgency, isFromClient, isFromAdmin, isMyEngagement, isServiceRequest 
     });
     
-    // Broadcast handler does NOT update engagement/service request state.
-    // All state updates (lastMessage, unreadCount, read) are handled exclusively
-    // by the postgres_changes INSERT handler to prevent double-update glitches.
+    // Broadcast handler now updates state as a FALLBACK when postgres_changes INSERT
+    // is blocked by RLS. Uses recentInsertUpdatesRef for dedup: if INSERT handler
+    // already processed this request within 3 seconds, skip state updates here.
+    const recentlyHandledByInsert = recentInsertUpdatesRef.current.has(request_id) && 
+      (Date.now() - (recentInsertUpdatesRef.current.get(request_id) || 0)) < 3000;
+    
+    if (!recentlyHandledByInsert && !isOwnBroadcast) {
+      console.log('[ChatListPanel] Broadcast fallback: updating state for', request_id);
+      
+      // Determine if chat is focused
+      const focusedChatId = useAppStore.getState().focusedChatId;
+      const isBroadcastDialogOpen = focusedChatId === request_id;
+      
+      // Update myEngagements state
+      if (isMyEngagement && (sender_type === 'agency' || sender_type === 'admin')) {
+        recentInsertUpdatesRef.current.set(request_id, Date.now());
+        setTimeout(() => recentInsertUpdatesRef.current.delete(request_id), 4000);
+        
+        if (isBroadcastDialogOpen) {
+          setMyEngagements(prev => {
+            const updated = prev.map(e => 
+              e.id === request_id 
+                ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString(), unreadCount: 0, read: true }
+                : e
+            );
+            myEngagementsRef.current = updated;
+            return updated;
+          });
+        } else {
+          setMyEngagements(prev => {
+            const updated = prev.map(e => 
+              e.id === request_id 
+                ? { ...e, lastMessage: message, lastMessageTime: new Date().toISOString(), unreadCount: e.unreadCount + 1, read: false }
+                : e
+            );
+            myEngagementsRef.current = updated;
+            return updated;
+          });
+        }
+        
+        window.dispatchEvent(new CustomEvent('my-engagement-updated', {
+          detail: { id: request_id, lastMessage: message, lastMessageTime: new Date().toISOString(), senderId: sender_id, senderType: sender_type }
+        }));
+      }
+      
+      // Update serviceRequests state
+      if (isServiceRequest && (sender_type === 'client' || sender_type === 'admin')) {
+        recentInsertUpdatesRef.current.set(request_id, Date.now());
+        setTimeout(() => recentInsertUpdatesRef.current.delete(request_id), 4000);
+        
+        if (isBroadcastDialogOpen) {
+          setServiceRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === request_id 
+                ? { ...r, lastMessage: message, lastMessageTime: new Date().toISOString(), unreadCount: 0, read: true }
+                : r
+            );
+            serviceRequestsRef.current = updated;
+            return updated;
+          });
+        } else {
+          setServiceRequests(prev => {
+            const updated = prev.map(r => 
+              r.id === request_id 
+                ? { ...r, lastMessage: message, lastMessageTime: new Date().toISOString(), unreadCount: r.unreadCount + 1, read: false }
+                : r
+            );
+            serviceRequestsRef.current = updated;
+            return updated;
+          });
+        }
+        
+        window.dispatchEvent(new CustomEvent('service-request-updated', {
+          detail: { id: request_id, lastMessage: message, lastMessageTime: new Date().toISOString() }
+        }));
+      }
+      
+      // Also increment minimized chat unread if applicable
+      if (!isBroadcastDialogOpen && isMinimized) {
+        useAppStore.setState(state => ({
+          minimizedChats: state.minimizedChats.map(c => 
+            c.id === request_id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+          )
+        }));
+      }
+    }
     
     console.log('[ChatListPanel] Broadcast: isMinimized check', { 
       isMinimized, 
@@ -977,13 +1060,17 @@ export function ChatListPanel() {
     
     console.log('[ChatListPanel] Broadcast shouldNotify check:', { shouldNotify, isAgencySendingAsAgency, isOwnAgencyMessage, sender_type, isFromAdmin });
     
-    // Sound is now handled by the postgres_changes INSERT handler (single source of truth).
-    // Broadcast handler is only responsible for toast notifications.
     
-    // Broadcast handler is ONLY responsible for sound + toast notifications.
-    // Unread count increments are handled exclusively by the postgres_changes INSERT handler
-    // to prevent double-counting.
+    // Broadcast handler handles toast notifications AND sound as fallback
+    // when postgres_changes INSERT is blocked by RLS.
+    const recentlyHandledByInsertForSound = recentInsertUpdatesRef.current.has(request_id) && 
+      (Date.now() - (recentInsertUpdatesRef.current.get(request_id) || 0)) < 3000;
+    
     if (!isDialogOpen && shouldNotify) {
+      // Play sound only if INSERT handler hasn't already
+      if (!recentlyHandledByInsertForSound) {
+        playMessageSound(request_id, message?.substring(0, 30));
+      }
       // Show toast for non-open chats
       if (isMyEngagement && (isFromAgency || isFromAdmin)) {
         sonnerToast(isFromAdmin ? 'New Staff Message' : 'New Message', {
@@ -1387,6 +1474,10 @@ export function ChatListPanel() {
             console.log('[ChatListPanel] Request does not belong to this user, ignoring');
             return;
           }
+          
+          // Mark this request as recently handled by INSERT so broadcast handler skips state updates
+          recentInsertUpdatesRef.current.set(requestId, Date.now());
+          setTimeout(() => recentInsertUpdatesRef.current.delete(requestId), 4000);
           
           // Skip notification/sound for own messages - but still update last message
           if (isOwnMessage) {
