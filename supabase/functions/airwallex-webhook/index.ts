@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const AIRWALLEX_API_URL = "https://api.airwallex.com";
+const AIRWALLEX_API_URL = "https://api-demo.airwallex.com";
 const PRICE_PER_CREDIT_CENTS = 100; // $1.00 per credit
 const MAX_CREDITS = 10000;
 
