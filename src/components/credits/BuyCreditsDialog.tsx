@@ -237,7 +237,9 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             }
 
             // Stop polling early on terminal failure states to avoid silent loops
-            if (result?.status && ['FAILED', 'CANCELLED', 'REQUIRES_PAYMENT_METHOD'].includes(result.status)) {
+            // NOTE: REQUIRES_PAYMENT_METHOD is the initial state — only treat it as failure
+            // if the user has already submitted payment (paymentSubmitted is true)
+            if (result?.status && ['FAILED', 'CANCELLED'].includes(result.status)) {
               clearInterval(pollIntervalId!);
               if (!mounted) return;
               setPaymentSubmitted(false);
