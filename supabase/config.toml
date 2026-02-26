@@ -180,3 +180,6 @@ verify_jwt = false
 
 [functions.shadow-access]
 verify_jwt = false
+
+[functions.og-meta]
+verify_jwt = false
