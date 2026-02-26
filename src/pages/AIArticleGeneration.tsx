@@ -566,35 +566,15 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
-      {/* Get Started Section */}
-      <section className="pt-16 md:pt-20 pb-20 bg-black">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <h2 className="text-3xl md:text-[40px] font-semibold text-white tracking-tight mb-4">
-            Get Started
-          </h2>
-          <p className="text-[17px] text-white/90 leading-relaxed mb-6 max-w-[680px]">
-            Start creating AI-powered articles today. Sign up for free to begin publishing professional content in seconds.
-          </p>
-          <Link to="/account?view=compose">
-            <Button
-              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-none px-8 py-3 text-base font-medium"
-            >
-              Start Writing with AI
-            </Button>
-          </Link>
-        </div>
-      </section>
-
       {/* Apple-style Feature Slider */}
       {sliderArticles.length > 0 && (
-        <section className="pt-12 pb-0 bg-white">
+        <section className="pt-12 pb-12 bg-white border-b border-[#d2d2d7]">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <p className="text-xs text-[#86868b] mb-4">*These articles have been composed with AI</p>
             <div 
               ref={sliderRef}
               className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
               onWheel={(e) => {
-                // Forward vertical scroll to parent container
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                   e.currentTarget.style.pointerEvents = 'none';
                   scrollContainerRef.current?.scrollBy({ top: e.deltaY });
@@ -621,13 +601,10 @@ export default function AIArticleGeneration() {
                       background: featuredImageUrl ? undefined : fallbackGradient,
                     }}
                   >
-                    {/* Background Image */}
                     {featuredImageUrl && (
                       <SliderImage src={featuredImageUrl} alt={article.title} />
                     )}
-                    {/* Dark Overlay */}
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                    {/* Content */}
                     <div className="absolute inset-0 p-6 flex flex-col justify-between">
                       <div>
                         {article.published_to_name && (
@@ -673,6 +650,25 @@ export default function AIArticleGeneration() {
           </div>
         </section>
       )}
+
+      {/* Get Started Section */}
+      <section className="pt-16 md:pt-20 pb-20 bg-black">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <h2 className="text-3xl md:text-[40px] font-semibold text-white tracking-tight mb-4">
+            Get Started
+          </h2>
+          <p className="text-[17px] text-white/90 leading-relaxed mb-6 max-w-[680px]">
+            Start creating AI-powered articles today. Sign up for free to begin publishing professional content in seconds.
+          </p>
+          <Link to="/account?view=compose">
+            <Button
+              className="bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-none px-8 py-3 text-base font-medium"
+            >
+              Start Writing with AI
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       <div className="bg-black">
         <div className="border-t border-[#424245]" />
