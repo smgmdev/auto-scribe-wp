@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAppStore, GlobalChatRequest } from '@/stores/appStore';
 import { playMessageSound } from '@/lib/chat-presence';
+import { setNotificationGuard } from '@/lib/notification-guard';
 
 interface ServiceRequest {
   id: string;
@@ -991,9 +992,10 @@ export function AgencyRequestsView() {
       (request?.order && (request.order.status === 'cancelled' || request.order.delivery_status === 'cancelled'));
     const isCompleted = request?.order && request.order.delivery_status === 'accepted';
     
+    const now = new Date().toISOString();
     await supabase
       .from('service_requests')
-      .update({ agency_read: true })
+      .update({ agency_read: true, agency_last_read_at: now })
       .eq('id', requestId);
     
     setRequests(prev => prev.map(r => 
@@ -1026,10 +1028,12 @@ export function AgencyRequestsView() {
     }
     
     // Dispatch event to sync with ChatListPanel messaging widget
+    setNotificationGuard();
     window.dispatchEvent(new CustomEvent('service-request-updated', {
       detail: {
         id: requestId,
-        read: true
+        read: true,
+        unreadCount: 0
       }
     }));
   };
@@ -1709,6 +1713,13 @@ export function AgencyRequestsView() {
                             if (error) throw error;
                             setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
                             setAgencyUnreadCompletedCount(0);
+                            // Sync with messaging widget
+                            setNotificationGuard();
+                            unreadIds.forEach(id => {
+                              window.dispatchEvent(new CustomEvent('service-request-updated', {
+                                detail: { id, read: true, unreadCount: 0 }
+                              }));
+                            });
                             toast.success(`Marked ${unreadIds.length} completed requests as read`);
                           } catch (error: any) {
                             toast.error(error.message || 'Failed to mark all as read');
@@ -1828,6 +1839,13 @@ export function AgencyRequestsView() {
                             if (error) throw error;
                             setRequests(prev => prev.map(r => unreadIds.includes(r.id) ? { ...r, read: true } : r));
                             setAgencyUnreadCancelledCount(0);
+                            // Sync with messaging widget
+                            setNotificationGuard();
+                            unreadIds.forEach(id => {
+                              window.dispatchEvent(new CustomEvent('service-request-updated', {
+                                detail: { id, read: true, unreadCount: 0 }
+                              }));
+                            });
                             toast.success(`Marked ${unreadIds.length} cancelled requests as read`);
                           } catch (error: any) {
                             toast.error(error.message || 'Failed to mark all as read');
