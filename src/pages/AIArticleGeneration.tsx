@@ -257,7 +257,7 @@ export default function AIArticleGeneration() {
 
   return (
     <>
-    <SEOHead title="AI Article Generation" />
+    <SEOHead title="AI Article Generation" description="Generate high-quality, SEO-optimized articles with Arcana Mace's AI-powered content creation tools." />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Header - dark background */}
       <header 

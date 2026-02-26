@@ -22,7 +22,7 @@ const Guidelines = () => {
 
   return (
     <>
-    <SEOHead title="User Guidelines" />
+    <SEOHead title="User Guidelines" description="Review Arcana Mace's community and content guidelines for publishers, agencies, and advertisers." />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">

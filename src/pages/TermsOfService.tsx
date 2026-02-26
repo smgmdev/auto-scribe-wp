@@ -16,7 +16,7 @@ const TermsOfService = () => {
 
   return (
     <>
-    <SEOHead title="Terms of Service" />
+    <SEOHead title="Terms of Service" description="Read Arcana Mace's terms of service governing use of the media buying marketplace." />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">

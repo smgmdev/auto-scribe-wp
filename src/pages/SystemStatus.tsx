@@ -213,7 +213,7 @@ export default function SystemStatus() {
 
   return (
     <>
-    <SEOHead title="Arcana Mace System Status" />
+    <SEOHead title="Arcana Mace System Status" description="Check the real-time operational status of Arcana Mace services and infrastructure." />
     <div className="h-screen bg-white flex flex-col overflow-hidden">
       {/* Header - Same as homepage */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">

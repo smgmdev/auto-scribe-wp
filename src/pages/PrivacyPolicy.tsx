@@ -22,7 +22,7 @@ const PrivacyPolicy = () => {
 
   return (
     <>
-    <SEOHead title="Privacy Policy" />
+    <SEOHead title="Privacy Policy" description="Arcana Mace's privacy policy explaining how we collect, use, and protect your data." />
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm border-b border-border">
