@@ -66,7 +66,7 @@ interface DisputeItem {
 
 
 export function ChatListPanel() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, session } = useAuth();
   const { 
     openGlobalChat, 
     clearUnreadMessageCount, 
@@ -811,6 +811,10 @@ export function ChatListPanel() {
   const minimizedChatsRef = useRef(minimizedChats);
   const openChatsRef = useRef(openChats);
   const agencyPayoutIdRef = useRef(agencyPayoutId);
+  const lastRealtimeHeartbeatRef = useRef<number>(Date.now());
+  const fallbackPollDelayRef = useRef<number>(8000);
+  const fallbackPollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fallbackPollingInFlightRef = useRef(false);
 
   useEffect(() => {
     minimizedChatsRef.current = minimizedChats;
@@ -1109,6 +1113,8 @@ export function ChatListPanel() {
           table: 'service_requests'
         },
         (payload) => {
+          lastRealtimeHeartbeatRef.current = Date.now();
+          fallbackPollDelayRef.current = 8000;
           console.log('[ChatListPanel] service_requests UPDATE received:', payload);
           const updated = payload.new as any;
           const old = payload.old as any;
@@ -1714,14 +1720,78 @@ export function ChatListPanel() {
       )
       .subscribe((status) => {
         console.log('[ChatListPanel] chat-panel-sync subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          lastRealtimeHeartbeatRef.current = Date.now();
+          fallbackPollDelayRef.current = 8000;
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          const hasAgencyScope = Boolean(agencyPayoutIdRef.current) || isAdmin;
+          fetchMyEngagements();
+          if (hasAgencyScope) fetchServiceRequests();
+          if (isAdmin) fetchDisputes();
+        }
       });
 
     return () => {
       supabase.removeChannel(syncChannel);
     };
-  }, [user?.id, incrementUnreadMessageCount, isAdmin]);
+  }, [user?.id, incrementUnreadMessageCount, isAdmin, session?.access_token]);
 
-  // Broadcast notification subscription - backup for when postgres_changes is blocked by RLS
+  // Fallback sync to recover when realtime channels silently stall (e.g. after session refresh)
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    const runFallbackSync = async () => {
+      if (fallbackPollingInFlightRef.current) return;
+      fallbackPollingInFlightRef.current = true;
+      try {
+        await fetchMyEngagements();
+        if (agencyPayoutIdRef.current || isAdmin) {
+          await fetchServiceRequests();
+        }
+        if (isAdmin) {
+          await fetchDisputes();
+        }
+      } finally {
+        fallbackPollingInFlightRef.current = false;
+      }
+    };
+
+    const schedule = () => {
+      if (cancelled) return;
+      fallbackPollTimerRef.current = setTimeout(async () => {
+        const staleForMs = Date.now() - lastRealtimeHeartbeatRef.current;
+        if (staleForMs >= 15000) {
+          await runFallbackSync();
+          fallbackPollDelayRef.current = Math.min(Math.round(fallbackPollDelayRef.current * 1.4), 30000);
+        } else {
+          fallbackPollDelayRef.current = 8000;
+        }
+        schedule();
+      }, fallbackPollDelayRef.current);
+    };
+
+    const handleForegroundRecovery = () => {
+      if (document.visibilityState === 'hidden') return;
+      runFallbackSync();
+    };
+
+    schedule();
+    window.addEventListener('focus', handleForegroundRecovery);
+    document.addEventListener('visibilitychange', handleForegroundRecovery);
+
+    return () => {
+      cancelled = true;
+      if (fallbackPollTimerRef.current) {
+        clearTimeout(fallbackPollTimerRef.current);
+        fallbackPollTimerRef.current = null;
+      }
+      window.removeEventListener('focus', handleForegroundRecovery);
+      document.removeEventListener('visibilitychange', handleForegroundRecovery);
+    };
+  }, [user?.id, isAdmin, session?.access_token]);
   useEffect(() => {
     if (!user) return;
 
@@ -1810,7 +1880,7 @@ export function ChatListPanel() {
       supabase.removeChannel(userChannel);
       supabase.removeChannel(userAdminActionChannel);
     };
-  }, [user?.id, handleBroadcastNotification]);
+  }, [user?.id, handleBroadcastNotification, session?.access_token]);
 
   // Separate effect for agency broadcast subscription - re-runs when agencyPayoutId changes
   useEffect(() => {
@@ -1917,7 +1987,7 @@ export function ChatListPanel() {
       supabase.removeChannel(agencyAdminActionChannel);
       supabase.removeChannel(clientActionChannel);
     };
-  }, [agencyPayoutId, handleBroadcastNotification]);
+  }, [agencyPayoutId, handleBroadcastNotification, session?.access_token]);
 
   const handleOpenChat = (item: ChatItem, type: 'my-request' | 'agency-request') => {
     // Show loading indicator immediately
