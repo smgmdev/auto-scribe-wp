@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins, CheckCircle2, Check } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Sparkles, Upload, X, Send, Loader2, Plus, Tag, AlertCircle, RefreshCw, Lock, Coins, CheckCircle2, Check, Paintbrush } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useArticles } from '@/hooks/useArticles';
 import { useAuth } from '@/hooks/useAuth';
@@ -1391,16 +1391,63 @@ export function ComposeView() {
             </div>
           </div>
 
-          {/* Generate Button */}
-          <Button className="w-full rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
-            {isGenerating ? <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </> : <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Article with AI
-              </>}
-          </Button>
+          {/* Generate & Clean Formatting Buttons */}
+          <div className="flex gap-2">
+            <Button className="flex-1 rounded-none border border-transparent shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
+              {isGenerating ? <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </> : <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Article with AI
+                </>}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-none border-border"
+              onClick={() => {
+                if (!content.trim()) {
+                  toast.error("No content to format");
+                  return;
+                }
+                // Strip HTML to get plain text, then re-structure
+                const temp = document.createElement('div');
+                temp.innerHTML = content;
+                const raw = temp.innerText || temp.textContent || '';
+                
+                // Split by double newlines or single newlines
+                const lines = raw.split(/\n{2,}|\r?\n/).map(l => l.trim()).filter(Boolean);
+                
+                const formatted: string[] = [];
+                for (const line of lines) {
+                  // Detect title-like lines: short (under 80 chars), no period at end, often capitalized
+                  const isTitle = line.length < 80 && !line.endsWith('.') && !line.endsWith(',') && !line.endsWith(';') && !line.endsWith(':') && line.split(/\s+/).length <= 12;
+                  if (isTitle) {
+                    formatted.push(`<h2>${line}</h2>`);
+                  } else {
+                    // Split very long blocks into paragraphs (~3-4 sentences each)
+                    const sentences = line.match(/[^.!?]+[.!?]+\s*/g);
+                    if (sentences && sentences.length > 4) {
+                      for (let i = 0; i < sentences.length; i += 3) {
+                        const chunk = sentences.slice(i, i + 3).join('').trim();
+                        if (chunk) formatted.push(`<p>${chunk}</p>`);
+                      }
+                    } else {
+                      formatted.push(`<p>${line}</p>`);
+                    }
+                  }
+                }
+                
+                setContent(formatted.join(''));
+                toast.success("Formatting cleaned up");
+              }}
+              disabled={!content.trim()}
+              title="Clean up formatting — separates paragraphs and titles"
+            >
+              <Paintbrush className="mr-2 h-4 w-4" />
+              Clean Formatting
+            </Button>
+          </div>
 
           {/* Content Editor */}
           <div className="space-y-2">
