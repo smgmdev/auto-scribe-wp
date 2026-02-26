@@ -245,8 +245,13 @@ export function ChatListPanel() {
   // Fetch service requests (agency's received requests, or all for admins)
   const fetchServiceRequests = async () => {
     if (!user) return;
-    // For non-admin users, require agencyPayoutId
-    if (!isAdmin && !agencyPayoutId) return;
+
+    // IMPORTANT: use ref-backed agency id so callbacks/subscriptions from older renders
+    // still fetch the correct data after session refresh/reconnect.
+    const effectiveAgencyPayoutId = agencyPayoutIdRef.current ?? agencyPayoutId;
+
+    // For non-admin users, require agency payout id
+    if (!isAdmin && !effectiveAgencyPayoutId) return;
 
     let query = supabase
       .from('service_requests')
@@ -267,8 +272,8 @@ export function ChatListPanel() {
       .order('updated_at', { ascending: false });
 
     // Filter by agency for non-admins
-    if (!isAdmin && agencyPayoutId) {
-      query = query.eq('agency_payout_id', agencyPayoutId);
+    if (!isAdmin && effectiveAgencyPayoutId) {
+      query = query.eq('agency_payout_id', effectiveAgencyPayoutId);
     }
 
     const { data, error } = await query;
