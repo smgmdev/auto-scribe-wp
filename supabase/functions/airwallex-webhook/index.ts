@@ -121,17 +121,14 @@ async function processPaymentIntent(
   if (intent.status !== "SUCCEEDED") {
     const latestAttempt = intent?.latest_payment_attempt;
     const latestAttemptStatus = latestAttempt?.status || null;
-    const latestAttemptFailureMessage =
+    const failureCode = latestAttempt?.failure_code || latestAttempt?.failure_details?.code || null;
+    const failureMessage =
       latestAttempt?.failure_details?.message ||
       latestAttempt?.latest_payment_error?.message ||
       latestAttempt?.failure_reason ||
-      latestAttempt?.failure_code ||
       null;
 
-    const gatewayMessage =
-      latestAttemptFailureMessage ||
-      intent?.next_action?.type ||
-      null;
+    const gatewayMessage = failureMessage || intent?.next_action?.type || null;
 
     const isUnsubmitted =
       intent.status === "REQUIRES_PAYMENT_METHOD" &&
@@ -141,6 +138,8 @@ async function processPaymentIntent(
     return {
       success: false,
       status: intent.status,
+      failure_code: failureCode,
+      attempt_status: latestAttemptStatus,
       message: isUnsubmitted
         ? "Payment method not submitted to gateway yet."
         : gatewayMessage
