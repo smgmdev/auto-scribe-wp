@@ -181,7 +181,7 @@ export default function AIArticleGeneration() {
   // Fetch published articles from local library WP sites via secure RPC
   useEffect(() => {
     const fetchPublishedArticles = async () => {
-      const { data, error } = await supabase.rpc('get_published_articles');
+      const { data, error } = await supabase.rpc('get_random_published_articles' as any);
       
       if (!error && data) {
         const articles = data as any[];
