@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
     // Fetch the approved site, scoped to caller ownership (unless admin)
     const approvedQuery = supabase
       .from('wordpress_sites')
-      .select('id, url, username, app_password, seo_plugin, user_id, agency')
+      .select('id, name, url, username, app_password, seo_plugin, user_id, agency')
       .eq('id', siteId)
       .eq('connected', true);
 
