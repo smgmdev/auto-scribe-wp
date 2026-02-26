@@ -573,7 +573,7 @@ export default function AIArticleGeneration() {
             <p className="text-xs text-[#86868b] mb-4">*These articles have been composed with AI</p>
             <div 
               ref={sliderRef}
-              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth"
+              className="flex overflow-x-auto scrollbar-hide scroll-smooth"
               onWheel={(e) => {
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                   e.currentTarget.style.pointerEvents = 'none';
@@ -596,7 +596,7 @@ export default function AIArticleGeneration() {
                     href={article.wp_link || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] overflow-hidden relative group rounded-xl"
+                    className="flex-shrink-0 w-[320px] md:w-[400px] h-[200px] md:h-[240px] overflow-hidden relative group"
                     style={{ 
                       background: featuredImageUrl ? undefined : fallbackGradient,
                     }}
