@@ -18,8 +18,7 @@ const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 1;
 const QUICK_AMOUNTS = [1, 5, 10, 50, 100, 500];
 
-// Initialize Stripe - replace with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+const stripePromise = loadStripe('pk_live_51PxjHbHDa8IL2NcPuZAuQ8G2xhAaKG26DWhPcmd4TUhnCmfBQnhkC6V9wOKsrfctngZfTWQrocKvpgZ9cwR1nkzj000D6E5Lzp');
 
 interface BuyCreditsDialogProps {
   open: boolean;
