@@ -39,15 +39,40 @@ async function getAirwallexToken(): Promise<string> {
 
 /**
  * Verify Airwallex webhook signature.
- * Airwallex signs the raw body with HMAC-SHA256 using the webhook secret.
- * The signature is provided in the `x-signature` header as a hex string.
+ * Supports common Airwallex header formats (x-gateway-signature, x-signature, x-airwallex-signature)
+ * and values like:
+ * - <hex>
+ * - sha256=<hex>
+ * - t=...,v1=<hex>
  */
+function extractSignatureCandidates(signatureHeader: string): string[] {
+  const candidates = new Set<string>();
+
+  const raw = signatureHeader.trim();
+  if (raw) candidates.add(raw.toLowerCase());
+
+  const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+  for (const part of parts) {
+    const value = part.includes("=") ? part.split("=").slice(1).join("=").trim() : part;
+    const normalized = value
+      .replace(/^sha256=/i, "")
+      .replace(/^v1=/i, "")
+      .trim()
+      .toLowerCase();
+
+    if (normalized) candidates.add(normalized);
+  }
+
+  return Array.from(candidates).filter((candidate) => /^[a-f0-9]{64}$/.test(candidate));
+}
+
 async function verifyAirwallexSignature(
   rawBody: string,
-  signatureHeader: string | null,
+  signatureHeaders: string[],
   secret: string
 ): Promise<boolean> {
-  if (!signatureHeader) return false;
+  if (!signatureHeaders.length) return false;
+
   try {
     const encoder = new TextEncoder();
     const keyData = encoder.encode(secret);
@@ -66,13 +91,21 @@ async function verifyAirwallexSignature(
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Timing-safe comparison
-    const sigBytes = encoder.encode(signatureHeader);
     const expBytes = encoder.encode(expectedHex);
-    if (sigBytes.length !== expBytes.length) return false;
-    let diff = 0;
-    for (let i = 0; i < sigBytes.length; i++) diff |= sigBytes[i] ^ expBytes[i];
-    return diff === 0;
+
+    for (const headerValue of signatureHeaders) {
+      const candidates = extractSignatureCandidates(headerValue);
+      for (const candidate of candidates) {
+        const sigBytes = encoder.encode(candidate);
+        if (sigBytes.length !== expBytes.length) continue;
+
+        let diff = 0;
+        for (let i = 0; i < sigBytes.length; i++) diff |= sigBytes[i] ^ expBytes[i];
+        if (diff === 0) return true;
+      }
+    }
+
+    return false;
   } catch {
     return false;
   }
@@ -260,10 +293,14 @@ serve(async (req) => {
       throw new Error("Invalid JSON body");
     }
 
-    // ── PATH 1: Airwallex webhook (has x-signature header) ──────────────
-    const signatureHeader = req.headers.get("x-signature");
+    // ── PATH 1: Airwallex webhook (has signature header) ────────────────
+    const signatureHeaders = [
+      req.headers.get("x-gateway-signature"),
+      req.headers.get("x-signature"),
+      req.headers.get("x-airwallex-signature"),
+    ].filter((h): h is string => Boolean(h));
 
-    if (signatureHeader) {
+    if (signatureHeaders.length > 0) {
       // This is an Airwallex server-to-server webhook — verify signature
       const webhookSecret = Deno.env.get("AIRWALLEX_WEBHOOK_SECRET");
       if (!webhookSecret) {
@@ -274,7 +311,7 @@ serve(async (req) => {
         });
       }
 
-      const isValid = await verifyAirwallexSignature(rawBody, signatureHeader, webhookSecret);
+      const isValid = await verifyAirwallexSignature(rawBody, signatureHeaders, webhookSecret);
       if (!isValid) {
         console.error("[SECURITY] Invalid Airwallex webhook signature — rejecting");
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
