@@ -864,7 +864,7 @@ export default function MediaBuying() {
               },
               {
                 question: "How long does it take to get published?",
-                answer: "Most publications have a turnaround time of 48-72 hours. The exact timeframe is displayed on each listing, and you can track your order status in real-time through your dashboard."
+                answer: "Most publications have an average turnaround time of 48-72 hours, however some publications may have longer publishing timelines. Discuss with the agency for delivery timelines before placing an order. For live orders, you can also track your order status in real-time."
               },
               {
                 question: "Do I get a credit refund if my article isn't published?",
