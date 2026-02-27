@@ -46,38 +46,53 @@ Deno.serve(async (req) => {
 
     const rssText = await rssResponse.text();
     
-    // Parse all items from RSS to find the most recent one
-    const itemMatches = rssText.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    // Parse all items from RSS/Atom to find the most recent one
     const items: Array<{ title: string; description: string; link: string; pubDate: string; timestamp: number }> = [];
     
     const extractTag = (xml: string, tag: string): string => {
       const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
       if (!match) return '';
-      // Clean CDATA wrappers in various formats
       return match[1]
         .replace(/<!\[CDATA\[/g, '')
         .replace(/\]\]>/g, '')
         .trim();
     };
 
+    const extractLink = (xml: string): string => {
+      // Try standard <link>text</link> first
+      const textLink = extractTag(xml, 'link');
+      if (textLink) return textLink;
+      // Atom uses <link href="..." /> (self-closing)
+      const attrMatch = xml.match(/<link[^>]*href=["']([^"']+)["'][^>]*\/?>/);
+      return attrMatch ? attrMatch[1] : '';
+    };
+
+    // Try RSS <item> tags first, then Atom <entry> tags
+    const isAtom = !rssText.includes('<item>') && rssText.includes('<entry>');
+    const tagName = isAtom ? 'entry' : 'item';
+    const itemMatches = rssText.matchAll(new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, 'g'));
+
     for (const match of itemMatches) {
       const itemXml = match[1];
-      const pubDateStr = extractTag(itemXml, 'pubDate');
+      // RSS uses pubDate, Atom uses published or updated
+      const pubDateStr = extractTag(itemXml, 'pubDate') || extractTag(itemXml, 'published') || extractTag(itemXml, 'updated');
       const timestamp = pubDateStr ? new Date(pubDateStr).getTime() : 0;
       
-      // Clean up title - Google News sometimes includes source in title
       let title = extractTag(itemXml, 'title');
-      // Remove " - Source Name" suffix if present
       title = title.replace(/\s*-\s*[^-]+$/, '').trim();
+      
+      const description = extractTag(itemXml, 'description') || extractTag(itemXml, 'summary') || extractTag(itemXml, 'content');
       
       items.push({
         title,
-        description: extractTag(itemXml, 'description'),
-        link: extractTag(itemXml, 'link'),
+        description,
+        link: extractLink(itemXml),
         pubDate: pubDateStr,
         timestamp,
       });
     }
+    
+    console.log('[ai-test-preview] Feed format:', isAtom ? 'Atom' : 'RSS', '- found', items.length, 'items');
 
     if (items.length === 0) {
       throw new Error('No items found in RSS feed');
