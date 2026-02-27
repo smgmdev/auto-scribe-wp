@@ -583,15 +583,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               </p>
             </div>
 
-            {/* Full overlay spinner when payment is being verified */}
-            {(paymentSubmitted && confirming) && (
-              <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center gap-3">
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Verifying your payment...
-                </p>
-              </div>
-            )}
           </div>
         )}
         </div>
@@ -632,6 +623,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 `Pay $${totalPrice.toLocaleString()}`
               )}
             </Button>
+          </div>
+        )}
+
+        {/* Full overlay spinner when payment is being verified - covers entire popup */}
+        {(paymentSubmitted && confirming) && (
+          <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center gap-3 rounded-lg">
+            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Verifying your payment...
+            </p>
           </div>
         )}
       </div>
