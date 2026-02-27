@@ -86,6 +86,9 @@ export const TelegramAlerts = {
 
   wpArticlePublished: (siteName: string, title: string, link: string) =>
     `📝 <b>WP Article Published</b>\n🌐 ${escapeHtml(siteName)}\n📄 ${escapeHtml(title)}\n🔗 ${escapeHtml(link)}`,
+
+  stripeTopUp: (email: string, credits: number, amountCents: number, currency: string) =>
+    `💳 <b>Stripe Top-Up</b>\n📧 ${escapeHtml(email)}\n💰 ${credits} credits ($${(amountCents / 100).toFixed(2)} ${currency.toUpperCase()})`,
 };
 
 function escapeHtml(text: string): string {

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,6 +108,14 @@ serve(async (req) => {
     }
 
     console.log(`Successfully added ${creditAmount} credits for user ${userId}`);
+
+    // Send Telegram notification
+    await sendTelegramAlert(TelegramAlerts.stripeTopUp(
+      userData.user.email || "unknown",
+      creditAmount,
+      paymentIntent.amount,
+      paymentIntent.currency || "usd"
+    ));
 
     return new Response(
       JSON.stringify({ success: true, credits_added: creditAmount }),
