@@ -622,7 +622,7 @@ export default function AIArticleGeneration() {
                         <h3 className="text-white text-lg md:text-xl font-semibold line-clamp-3">{article.title}</h3>
                       </div>
                       <div className="flex justify-end">
-                        <span className="bg-white text-[#1d1d1f] px-5 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-colors">
+                        <span className="bg-white text-[#1d1d1f] px-5 py-2 rounded-none text-sm font-medium hover:bg-white/90 transition-colors">
                           Read article
                         </span>
                       </div>
