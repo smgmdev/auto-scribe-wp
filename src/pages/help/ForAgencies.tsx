@@ -54,9 +54,9 @@ const sections: HelpSection[] = [
           <li><strong>USDT (TRC20/ERC20):</strong> Direct payouts to your wallet</li>
         </ul>
         <p>
-          Withdrawals are processed within 1–10 business days depending on the withdrawal method and amount.
-          We currently use Airwallex as our payments gateway and processing times may vary.
-          You can request a withdrawal at any time from <strong>Agency Management → My Earnings → Withdraw</strong>.
+           Withdrawals are processed within 1–10 business days depending on the withdrawal method and amount.
+           Processing times may vary.
+           You can request a withdrawal at any time from <strong>Agency Management → My Earnings → Withdraw</strong>.
         </p>
       </div>
     ),
