@@ -856,7 +856,7 @@ export default function MediaBuying() {
             {[
               {
                 question: "How do I get started with media buying?",
-                answer: "Simply browse our catalog of verified publications, select the outlets that match your target audience, and submit your content brief. Our agencies will guide you through the rest of the process."
+                answer: "Simply browse media network of diverse publications, select the outlets that match your target audience, and submit your content brief to the agency. The agencies will guide you through the rest of the process."
               },
               {
                 question: "What does it cost? How is pricing determined?",
