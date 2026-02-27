@@ -17,8 +17,8 @@ const sections: HelpSection[] = [
             If missing after 5 minutes, open a support ticket.
           </li>
           <li>
-            <strong>Credits not added after payment:</strong> Check your email for an Airwallex payment confirmation.
-            If the payment succeeded but credits weren't added, open a support ticket with the transaction reference.
+             <strong>Credits not added after payment:</strong> Check your email for a Stripe payment confirmation.
+             If the payment succeeded but credits weren't added, open a support ticket with the transaction reference.
           </li>
           <li>
             <strong>Article rejected by agency:</strong> Check the rejection reason in the order chat,
@@ -41,13 +41,13 @@ const sections: HelpSection[] = [
     title: 'Payment Problems',
     content: (
       <div className="space-y-4">
-        <p>All credit purchases are processed through <strong>Airwallex</strong>. If you encounter a payment issue:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Card Declined:</strong> Check your card details and available balance. Some banks block international or online transactions — contact your bank to authorise the payment</li>
-          <li><strong>Payment Stuck or Pending:</strong> Do not retry immediately. Wait a few minutes, then check your credit balance. Airwallex payments can take a moment to confirm</li>
-          <li><strong>Double Charged:</strong> Contact support immediately with your Airwallex transaction reference number</li>
-          <li><strong>Credits Not Added:</strong> Check your email for an Airwallex receipt. If payment completed but credits are missing, open a support ticket with the reference number</li>
-          <li><strong>Wire Transfer / USDT:</strong> If you topped up via bank transfer or USDT, allow up to 1–2 business days for credits to be added manually. Contact support if it's been longer</li>
+         <p>All credit purchases are processed through <strong>Stripe</strong>. If you encounter a payment issue:</p>
+         <ul className="list-disc list-inside space-y-2 ml-4">
+           <li><strong>Card Declined:</strong> Check your card details and available balance. Some banks block international or online transactions — contact your bank to authorise the payment</li>
+           <li><strong>Payment Stuck or Pending:</strong> Do not retry immediately. Wait a few minutes, then check your credit balance. Payments can take a moment to confirm</li>
+           <li><strong>Double Charged:</strong> Contact support immediately with your Stripe transaction reference number</li>
+           <li><strong>Credits Not Added:</strong> Check your email for a Stripe receipt. If payment completed but credits are missing, open a support ticket with the reference number</li>
+           <li><strong>Wire Transfer / USDT:</strong> If you topped up via bank transfer or USDT, allow up to 1–2 business days for credits to be added manually. Contact support if it's been longer</li>
         </ul>
         <p>
           Note: Purchased credits are non-withdrawable and are restricted to media buying on the platform.
@@ -100,7 +100,7 @@ const sections: HelpSection[] = [
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Visit <a href="/system-status" className="text-[#06c] hover:underline">System Status</a> to see real-time health of all services</li>
-          <li>Services monitored include: Database, Authentication, AI Article Generation, WordPress Publishing, Payment Gateway (Airwallex), Real-time Messaging, and more</li>
+          <li>Services monitored include: Database, Authentication, AI Article Generation, WordPress Publishing, Payment Gateway (Stripe), Real-time Messaging, and more</li>
           <li>An overall status banner shows whether all systems are operating normally</li>
           <li>Past and ongoing incidents are recorded in the Incident History section</li>
         </ul>

@@ -30,8 +30,8 @@ const PaymentSuccess = () => {
     const verifyPayment = async () => {
       if (id) {
         try {
-          const { data, error } = await supabase.functions.invoke('airwallex-webhook', {
-            body: { intent_id: id },
+          const { data, error } = await supabase.functions.invoke('verify-stripe-payment', {
+            body: { payment_intent_id: id },
           });
 
           if (error) {

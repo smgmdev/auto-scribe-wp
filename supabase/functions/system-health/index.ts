@@ -117,22 +117,21 @@ Deno.serve(async (req) => {
     services.push({ name: 'API Server', status: 'outage' })
   }
 
-  // Check Airwallex Payment Gateway (ping their status page)
+  // Check Stripe Payment Gateway
   try {
     const start = Date.now()
-    const response = await fetch('https://www.airwallex.com/api/v1/health', {
+    const response = await fetch('https://status.stripe.com/api/v2/status.json', {
       method: 'GET',
       signal: AbortSignal.timeout(5000),
     })
     const latency = Date.now() - start
-    if (latency > 3000) {
-      services.push({ name: 'Payment Gateway (Airwallex)', status: 'issue', latency })
+    if (response.ok) {
+      services.push({ name: 'Payment Gateway (Stripe)', status: latency > 3000 ? 'issue' : 'available', latency })
     } else {
-      services.push({ name: 'Payment Gateway (Airwallex)', status: 'available', latency })
+      services.push({ name: 'Payment Gateway (Stripe)', status: 'issue', latency })
     }
   } catch {
-    // Airwallex doesn't expose a public health endpoint — assume available unless confirmed otherwise
-    services.push({ name: 'Payment Gateway (Airwallex)', status: 'available' })
+    services.push({ name: 'Payment Gateway (Stripe)', status: 'available' })
   }
 
   // These services depend on external providers - we mark them available by default

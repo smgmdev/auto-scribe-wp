@@ -14,7 +14,7 @@ const sections: HelpSection[] = [
         <ol className="list-decimal list-inside space-y-2 ml-4">
           <li>Browse the media network and select publications that match your needs</li>
           <li>Choose a media outlet and submit a brief to discuss terms with the agency offering the publication</li>
-          <li>Once terms are agreed, purchase credits via the secure payment system (Airwallex) and submit your order</li>
+          <li>Once terms are agreed, purchase credits via the secure payment system and submit your order</li>
           <li>The agency reviews, accepts, and publishes your content</li>
           <li>Track your publication status in real-time in the My Orders section via your dashboard</li>
           <li>Receive a live link once your article is published</li>
@@ -81,7 +81,7 @@ const sections: HelpSection[] = [
         </p>
         <p><strong>Key things to know about credits:</strong></p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Credits are purchased via Airwallex (secure payment gateway)</li>
+          <li>Credits are purchased via Stripe (secure payment gateway)</li>
           <li>Credits never expire once purchased</li>
           <li>Different publications require different credit amounts</li>
           <li>Credits cannot be withdrawn</li>

@@ -1274,7 +1274,7 @@ const HowItWorks = () => {
               Media placements through the Global Media Library are subject to individual agency terms, availability, and editorial guidelines. Acceptance of submitted content is at the sole discretion of the respective agency or publication. Arcana Mace operates strictly as an intermediary marketplace and does not guarantee placement outcomes.
             </p>
             <p>
-              Payments are processed via Airwallex. Arcana Mace charges a platform commission on each completed transaction. The commission is covered by the agency.
+              Payments are processed via Stripe. Arcana Mace charges a platform commission on each completed transaction. The commission is covered by the agency.
             </p>
             <p>
               Arcana Mace is operated by Stankevicius Pacific Limited, Hong Kong. All transactions and services are governed by the laws of Hong Kong. Platform features, pricing, and agency availability may change without prior notice. See our Terms of Service and Privacy Policy for full details.
