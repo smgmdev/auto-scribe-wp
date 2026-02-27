@@ -867,7 +867,7 @@ export default function MediaBuying() {
                 answer: "Most publications have an average turnaround time of 48-72 hours, however some publications may have longer publishing timelines. Discuss with the agency for delivery timelines before placing an order. For active ongoing orders, you can also track live status in real-time."
               },
               {
-                question: "Do I get a credit refund if my article isn't published?",
+                question: "Do I get my credits back if my article isn't published?",
                 answer: "Yes. If your article cannot be published for any reason, you'll receive full credits back."
               },
               {
