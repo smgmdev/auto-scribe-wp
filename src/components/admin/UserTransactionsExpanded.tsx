@@ -1064,25 +1064,28 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                               ) : (tx.type === 'admin_deduct' || tx.type === 'gifted') && tx.description?.includes(': ') ? (
                                 tx.description.split(': ')[0].replace(/by admin/gi, 'by Arcana Mace Staff')
                               ) : (
-                                tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '') : '-'
+                                tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '').replace(/\s*\(pi_[^)]+\)/gi, '') : '-'
                               )}
                             </span>
-                            {/* Copy button for Stripe/Airwallex transaction IDs */}
+                            {/* TRX ID line for Stripe/Airwallex transaction IDs */}
                             {tx.description && /\((pi_[^)]+)\)/.test(tx.description) && (() => {
                               const match = tx.description!.match(/\((pi_[^)]+)\)/);
                               if (!match) return null;
                               return (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigator.clipboard.writeText(match[1]);
-                                    toast.success('Transaction ID copied');
-                                  }}
-                                  className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors ml-1"
-                                  title="Copy transaction ID"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </button>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <span>TRX ID: {match[1]}</span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(match[1]);
+                                      toast.success('Transaction ID copied');
+                                    }}
+                                    className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Copy transaction ID"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </button>
+                                </div>
                               );
                             })()}
                             <div className="flex items-center gap-2">
