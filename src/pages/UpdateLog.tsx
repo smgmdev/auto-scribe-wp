@@ -17,6 +17,16 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'February 27, 2026',
+    title: 'Payment Gateway Migration & Help Center Updates',
+    changes: [
+      'Migrated credit purchase flow to Stripe — all new credit top-ups are now processed through Stripe Checkout with support for Visa, Mastercard, American Express, Apple Pay, and Google Pay',
+      'Updated Help Center articles to reflect new Stripe payment integration, including Credits & Pricing and Getting Started sections',
+      'Legacy payment records are preserved in transaction history and labeled accordingly for full audit trail continuity',
+      'Compact credit purchase dialog with refined input fields and order summary for a cleaner checkout experience',
+    ],
+  },
+  {
     date: 'February 26, 2026',
     title: 'Real-Time Dashboard & Messaging Reliability',
     changes: [
@@ -563,7 +573,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: February 26, 2026
+            Last update: February 27, 2026
           </p>
         </div>
 
