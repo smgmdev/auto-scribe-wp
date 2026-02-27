@@ -1072,7 +1072,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                               const match = tx.description!.match(/\((pi_[^)]+)\)/);
                               if (!match) return null;
                               return (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                   <span>TRX ID: {match[1]}</span>
                                   <button
                                     onClick={(e) => {
