@@ -860,7 +860,7 @@ export default function MediaBuying() {
               },
               {
                 question: "What does it cost? How is pricing determined?",
-                answer: "Pricing varies by publication based on factors like domain authority, audience size, and content type. Each listing shows transparent pricing upfront with no hidden fees. You only pay when you're ready to publish."
+                answer: "Each listing shows transparent pricing upfront with no hidden fees. You only pay for what you see."
               },
               {
                 question: "How long does it take to get published?",
