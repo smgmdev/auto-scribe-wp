@@ -173,25 +173,23 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           if (mounted) setCardReady(true);
         });
 
-        // Wait a tick for the container
-        setTimeout(() => {
-          if (mounted) {
-            const container = document.getElementById('stripe-payment-element');
-            if (container) {
-              paymentElement.mount(container);
+        paymentElement.on('loaderror', (event: any) => {
+          console.error('[Stripe] Payment Element load error:', event);
+          toast.error('Failed to load payment form. Please try again.');
+          if (mounted) setStep('select');
+        });
 
-              // Fallback: if ready doesn't fire in 4s
-              setTimeout(() => {
-                if (mounted && !cardReady) {
-                  console.log('[Stripe] Ready timeout - showing form anyway');
-                  setCardReady(true);
-                }
-              }, 4000);
-            } else {
-              console.error('[Stripe] Container not found');
-            }
+        // Wait for the container to be in the DOM
+        setTimeout(() => {
+          if (!mounted) return;
+          const container = document.getElementById('stripe-payment-element');
+          if (container) {
+            console.log('[Stripe] Mounting Payment Element');
+            paymentElement.mount(container);
+          } else {
+            console.error('[Stripe] Container #stripe-payment-element not found');
           }
-        }, 100);
+        }, 200);
       } catch (err: any) {
         console.error('Failed to init Stripe:', err);
         toast.error('Failed to load payment form. Please try again.');
@@ -582,7 +580,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                   )}
                   <div 
                     id="stripe-payment-element" 
-                    className={`min-h-[120px] bg-background transition-opacity ${!cardReady ? 'opacity-0' : 'opacity-100'}`}
+                    className={`min-h-[120px] transition-opacity ${!cardReady ? 'opacity-0' : 'opacity-100'}`}
                   />
                 </div>
               </div>
