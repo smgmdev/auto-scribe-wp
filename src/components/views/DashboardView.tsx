@@ -98,6 +98,7 @@ export function DashboardView() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [sessionsPopupOpen, setSessionsPopupOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [resubKey, setResubKey] = useState(0);
 
   // Re-subscribe all realtime channels after session extension
@@ -586,6 +587,7 @@ export function DashboardView() {
 
   const refreshDashboard = useCallback(async () => {
     setIsRefreshing(true);
+    setRefreshTrigger(t => t + 1);
     await Promise.all([
       refreshArticles(false),
       refetchSites(false),
@@ -1115,7 +1117,7 @@ export function DashboardView() {
           <CardTitle className="text-xl text-white">Latest Global Articles</CardTitle>
         </CardHeader>
         <CardContent className="px-0">
-          <LatestGlobalArticles />
+          <LatestGlobalArticles refreshTrigger={refreshTrigger} />
         </CardContent>
       </Card>
 

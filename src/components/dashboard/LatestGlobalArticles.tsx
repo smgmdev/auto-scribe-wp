@@ -34,7 +34,11 @@ function formatRelativeTime(dateString: string): string {
   return format(date, 'MMM d, yyyy');
 }
 
-export function LatestGlobalArticles() {
+interface LatestGlobalArticlesProps {
+  refreshTrigger?: number;
+}
+
+export function LatestGlobalArticles({ refreshTrigger = 0 }: LatestGlobalArticlesProps) {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [resubKey, setResubKey] = useState(0);
@@ -75,6 +79,19 @@ export function LatestGlobalArticles() {
       supabase.removeChannel(channel);
     };
   }, [resubKey]);
+
+  // Refresh when parent triggers it
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      const fetchGlobalArticles = async () => {
+        const { data, error } = await supabase.rpc('get_published_articles');
+        if (!error && data) {
+          setArticles(data);
+        }
+      };
+      fetchGlobalArticles();
+    }
+  }, [refreshTrigger]);
 
   if (loading) {
     return (
