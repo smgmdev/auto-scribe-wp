@@ -163,6 +163,14 @@ export function useArticles() {
     }
   }, [user?.id, isAdmin, hasFetched]);
 
+  // Re-subscribe key for session extension
+  const [resubKey, setResubKey] = useState(0);
+  useEffect(() => {
+    const handler = () => setResubKey(k => k + 1);
+    window.addEventListener('session-extended', handler);
+    return () => window.removeEventListener('session-extended', handler);
+  }, []);
+
   // Subscribe to realtime updates - only for this user's articles (or all for admin)
   useEffect(() => {
     if (!user) return;
@@ -173,7 +181,7 @@ export function useArticles() {
       : { event: '*' as const, schema: 'public', table: 'articles', filter: `user_id=eq.${user.id}` };
 
     const channel = supabase
-      .channel('articles-changes')
+      .channel(`articles-changes-${resubKey}`)
       .on('postgres_changes', channelConfig, () => {
         // Background refresh without loading spinner
         fetchArticles(false);
@@ -183,7 +191,7 @@ export function useArticles() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, isAdmin]);
+  }, [user?.id, isAdmin, resubKey]);
 
   const addArticle = async (article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return null;

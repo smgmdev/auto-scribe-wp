@@ -59,6 +59,9 @@ export function ArticlesView() {
       setSearchResults(null);
       // Force a fresh fetch so new data appears immediately
       refreshArticles(false);
+      // Second fetch after a short delay to catch any DB propagation lag
+      const timer = setTimeout(() => refreshArticles(false), 1500);
+      return () => clearTimeout(timer);
     }
   }, [articlesTargetTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
