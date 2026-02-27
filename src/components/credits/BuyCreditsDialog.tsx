@@ -476,8 +476,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="credit-amount">Custom Amount</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="credit-amount" className="text-xs">Custom Amount</Label>
                 <Input
                   id="credit-amount"
                   type="text"
@@ -485,26 +485,26 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                   value={creditAmount}
                   onChange={handleInputChange}
                   placeholder="Enter amount"
-                  className="text-sm rounded-none"
+                  className="text-xs rounded-none h-8"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   Minimum purchase: {MIN_CREDITS} credits
                 </p>
               </div>
 
-              <div className="rounded-none border border-border bg-muted/50 p-4">
+              <div className="rounded-none border border-border bg-muted/50 px-3 py-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Price per credit</span>
-                  <span className="font-medium">${PRICE_PER_CREDIT}</span>
+                  <span className="text-xs text-muted-foreground">Price per credit</span>
+                  <span className="text-xs font-medium">${PRICE_PER_CREDIT}</span>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm text-muted-foreground">Credits</span>
-                  <span className="font-medium">{parsedAmount || 0}</span>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-muted-foreground">Credits</span>
+                  <span className="text-xs font-medium">{parsedAmount || 0}</span>
                 </div>
-                <div className="border-t border-border my-3" />
+                <div className="border-t border-border my-2" />
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Total</span>
-                  <span className="text-2xl font-bold text-primary">
+                  <span className="text-sm font-semibold">Total</span>
+                  <span className="text-lg font-bold text-primary">
                     ${totalPrice.toLocaleString()}
                   </span>
                 </div>
