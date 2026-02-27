@@ -46,11 +46,15 @@ Deno.serve(async (req) => {
 
     const rssText = await rssResponse.text();
     
+    // Debug: log feed structure
+    console.log('[ai-test-preview] Feed preview (first 500 chars):', rssText.substring(0, 500));
+    console.log('[ai-test-preview] Feed length:', rssText.length, 'has <item>:', rssText.includes('<item>'), 'has <entry>:', rssText.includes('<entry>'), 'has <entry :', rssText.includes('<entry '));
+
     // Parse all items from RSS/Atom to find the most recent one
     const items: Array<{ title: string; description: string; link: string; pubDate: string; timestamp: number }> = [];
     
     const extractTag = (xml: string, tag: string): string => {
-      const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
+      const match = xml.match(new RegExp(`<(?:[a-z]+:)?${tag}[^>]*>([\\s\\S]*?)</(?:[a-z]+:)?${tag}>`, 'i'));
       if (!match) return '';
       return match[1]
         .replace(/<!\[CDATA\[/g, '')
@@ -59,23 +63,23 @@ Deno.serve(async (req) => {
     };
 
     const extractLink = (xml: string): string => {
-      // Try standard <link>text</link> first
       const textLink = extractTag(xml, 'link');
-      if (textLink) return textLink;
-      // Atom uses <link href="..." /> (self-closing)
+      if (textLink && textLink.startsWith('http')) return textLink;
       const attrMatch = xml.match(/<link[^>]*href=["']([^"']+)["'][^>]*\/?>/);
-      return attrMatch ? attrMatch[1] : '';
+      return attrMatch ? attrMatch[1] : textLink;
     };
 
-    // Try RSS <item> tags first, then Atom <entry> tags
-    const isAtom = !rssText.includes('<item>') && rssText.includes('<entry>');
+    const hasItem = rssText.includes('<item>') || rssText.includes('<item ');
+    const hasEntry = rssText.includes('<entry>') || rssText.includes('<entry ');
+    const isAtom = !hasItem && hasEntry;
     const tagName = isAtom ? 'entry' : 'item';
-    const itemMatches = rssText.matchAll(new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, 'g'));
+    const itemMatches = [...rssText.matchAll(new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)</${tagName}>`, 'g'))];
+    
+    console.log('[ai-test-preview] Using tag:', tagName, '- matches found:', itemMatches.length);
 
     for (const match of itemMatches) {
       const itemXml = match[1];
-      // RSS uses pubDate, Atom uses published or updated
-      const pubDateStr = extractTag(itemXml, 'pubDate') || extractTag(itemXml, 'published') || extractTag(itemXml, 'updated');
+      const pubDateStr = extractTag(itemXml, 'pubDate') || extractTag(itemXml, 'published') || extractTag(itemXml, 'updated') || extractTag(itemXml, 'date');
       const timestamp = pubDateStr ? new Date(pubDateStr).getTime() : 0;
       
       let title = extractTag(itemXml, 'title');
@@ -93,6 +97,9 @@ Deno.serve(async (req) => {
     }
     
     console.log('[ai-test-preview] Feed format:', isAtom ? 'Atom' : 'RSS', '- found', items.length, 'items');
+    if (items.length > 0) {
+      console.log('[ai-test-preview] First item title:', items[0].title?.substring(0, 80));
+    }
 
     if (items.length === 0) {
       throw new Error('No items found in RSS feed');
