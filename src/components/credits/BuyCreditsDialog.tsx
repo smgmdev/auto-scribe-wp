@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Coins, GripHorizontal, X, ArrowLeft, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import amBlackLogo from '@/assets/amblack-2.png';
+import stripeLogo from '@/assets/stripe-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
@@ -147,7 +148,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               colorDanger: '#ef4444',
               fontFamily: 'system-ui, -apple-system, sans-serif',
               borderRadius: '0px',
-              spacingUnit: '4px',
+              spacingUnit: '3px',
+              fontSizeBase: '13px',
             },
             rules: {
               '.Input': {
@@ -575,7 +577,14 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               {/* Security badge */}
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Payments securely processed by Stripe</span>
+                <span>Payments securely processed by</span>
+                <img 
+                  src={stripeLogo} 
+                  alt="Stripe" 
+                  className="h-[14px] w-auto object-contain"
+                  onLoad={(e) => (e.currentTarget.style.opacity = '1')}
+                  style={{ opacity: 0, transition: 'opacity 0.2s' }}
+                />
               </div>
 
               <p className="text-xs text-center text-muted-foreground">
