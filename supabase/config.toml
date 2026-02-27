@@ -186,3 +186,9 @@ verify_jwt = false
 
 [functions.send-telegram]
 verify_jwt = false
+
+[functions.create-stripe-payment-intent]
+verify_jwt = false
+
+[functions.verify-stripe-payment]
+verify_jwt = false
