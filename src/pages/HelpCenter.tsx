@@ -38,7 +38,7 @@ const helpCategories = [
     topics: [
       'Purchasing Credits',
       'Credit Packages',
-      'Payment Methods (Airwallex)',
+      'Payment Methods (Stripe)',
       'Credit Locking & Escrow',
       'Refund Policy',
     ],

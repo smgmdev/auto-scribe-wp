@@ -249,7 +249,7 @@ const updates = [
     date: 'February 7, 2026',
     title: 'Credit Purchase & Payment Flow',
     changes: [
-      'Added Airwallex payment integration as an alternative to Stripe for international users',
+      'Added Stripe payment integration for credit purchases',
       'Implemented credit pack selection with visual comparison of pack sizes and savings',
       'Added payment success page with animated confirmation and credit balance update',
       'Payment cancellation page now includes a retry button to return to the checkout flow',

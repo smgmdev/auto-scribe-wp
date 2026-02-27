@@ -149,7 +149,7 @@ export function CreditHistoryView() {
       let transaction: CreditTransaction | undefined;
       
       if (txType === 'purchase_intent') {
-        // Match purchase transactions by Airwallex intent ID in description
+        // Match purchase transactions by Stripe intent ID in description
         transaction = transactions.find(t => 
           t.type === 'purchase' && t.description?.includes(targetId)
         );
@@ -2503,7 +2503,7 @@ export function CreditHistoryView() {
                            ) : isInstantPublishingPayout ? (
                             null
                            ) : (transaction.type === 'purchase' && transaction.description?.startsWith('Airwallex payment:')) ? (
-                           /* Card Purchase - Show Payment ID, type, and processed date */
+                           /* Legacy Airwallex Card Purchase - Show Payment ID, type, and processed date */
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
                                <div>
                                  <span className="text-muted-foreground">Payment ID:</span>

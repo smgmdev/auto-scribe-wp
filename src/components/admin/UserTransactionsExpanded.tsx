@@ -1067,7 +1067,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                                 tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '').replace(/\s*\(pi_[^)]+\)/gi, '') : '-'
                               )}
                             </span>
-                            {/* TRX ID line for Stripe/Airwallex transaction IDs */}
+                            {/* TRX ID line for Stripe transaction IDs */}
                             {tx.description && /\((pi_[^)]+)\)/.test(tx.description) && (() => {
                               const match = tx.description!.match(/\((pi_[^)]+)\)/);
                               if (!match) return null;
