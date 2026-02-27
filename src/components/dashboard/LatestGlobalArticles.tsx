@@ -37,6 +37,14 @@ function formatRelativeTime(dateString: string): string {
 export function LatestGlobalArticles() {
   const [articles, setArticles] = useState<GlobalArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resubKey, setResubKey] = useState(0);
+
+  // Re-subscribe realtime channels after session extension
+  useEffect(() => {
+    const handler = () => setResubKey(k => k + 1);
+    window.addEventListener('session-extended', handler);
+    return () => window.removeEventListener('session-extended', handler);
+  }, []);
 
   useEffect(() => {
     const fetchGlobalArticles = async () => {
@@ -53,7 +61,7 @@ export function LatestGlobalArticles() {
 
     // Real-time: refresh when articles are inserted, updated, or deleted
     const channel = supabase
-      .channel('global-articles-realtime')
+      .channel(`global-articles-realtime-${resubKey}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'articles' },
@@ -66,7 +74,7 @@ export function LatestGlobalArticles() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [resubKey]);
 
   if (loading) {
     return (

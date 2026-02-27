@@ -816,17 +816,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionGraceUntilRef.current = Date.now() + 15000;
 
       // 2. Refresh the auth token first (most likely to fail)
-      const { error: refreshError } = await supabase.auth.refreshSession();
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         console.error('[Auth] extendSession: refreshSession failed:', refreshError);
         return false;
       }
 
-      // 3. Re-register active session (resets session_started_at)
+      // 3. Update realtime connection with the new access token so channels stay alive
+      const newToken = refreshData?.session?.access_token;
+      if (newToken) {
+        supabase.realtime.setAuth(newToken);
+      }
+
+      // 4. Re-register active session (resets session_started_at)
       await registerActiveSession(user.id);
 
-      // 4. Extend grace period after registration
+      // 5. Extend grace period after registration
       sessionGraceUntilRef.current = Date.now() + 10000;
+
+      // 6. Dispatch custom event so components can re-subscribe realtime channels
+      window.dispatchEvent(new CustomEvent('session-extended'));
 
       console.log('[Auth] extendSession: success');
       return true;
