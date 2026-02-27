@@ -550,8 +550,8 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
 
             <div className="space-y-5 py-4">
               {/* Order summary */}
-              <div className="rounded-none border border-border bg-muted/50 p-3">
-                <div className="flex items-center justify-between text-sm">
+              <div className="rounded-none border border-border bg-muted/50 px-3 py-1.5">
+                <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">{parsedAmount} credits</span>
                   <span className="font-semibold">${totalPrice.toLocaleString()}</span>
                 </div>
