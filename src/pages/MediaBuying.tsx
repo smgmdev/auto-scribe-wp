@@ -867,8 +867,8 @@ export default function MediaBuying() {
                 answer: "Most publications have a turnaround time of 48-72 hours. The exact timeframe is displayed on each listing, and you can track your order status in real-time through your dashboard."
               },
               {
-                question: "Do I get a refund if my article isn't published?",
-                answer: "Yes. We offer a 100% publication guarantee. If your article cannot be published for any reason, you'll receive a full refund. Your satisfaction and successful placement are our priorities."
+                question: "Do I get a credit refund if my article isn't published?",
+                answer: "Yes. If your article cannot be published for any reason, you'll receive full credits back."
               },
               {
                 question: "Can I write my own content or do agencies provide it?",
