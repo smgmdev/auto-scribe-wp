@@ -1392,7 +1392,7 @@ export function ComposeView() {
           </div>
 
           {/* Generate & Clean Formatting Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-0">
             <Button className="flex-1 rounded-none border border-transparent shadow-none bg-foreground text-background transition-all duration-300 hover:bg-transparent hover:text-foreground hover:border-foreground hover:shadow-none" onClick={handleGenerate} disabled={isGenerating || !title}>
               {isGenerating ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
