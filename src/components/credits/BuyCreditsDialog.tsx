@@ -379,19 +379,19 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       className="fixed inset-0 z-[10000] flex items-center justify-center pointer-events-none"
     >
       <div
-        className={`pointer-events-auto bg-white text-black relative ${
+        className={`pointer-events-auto bg-white text-black relative flex flex-col ${
           isMobile
-            ? 'w-full h-[100dvh] flex flex-col overflow-hidden'
-            : 'overflow-y-auto w-full max-w-md max-h-[90vh] border pt-0 px-6 pb-6 shadow-lg rounded-lg overflow-hidden'
+            ? 'w-full h-[100dvh] overflow-hidden'
+            : 'w-full max-w-md max-h-[90vh] border shadow-lg rounded-lg overflow-hidden'
         }`}
         style={isMobile ? undefined : { transform: `translate(${position.x}px, ${position.y}px)` }}
       >
-        {/* Drag bar */}
+        {/* Fixed header - drag bar */}
         <div
-          className={`flex items-center justify-between border-b bg-muted/30 ${
+          className={`flex items-center justify-between border-b bg-muted/30 shrink-0 ${
             isMobile
-              ? 'px-3 py-1.5 shrink-0'
-              : `px-4 py-2 -mx-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
+              ? 'px-3 py-1.5'
+              : `px-4 py-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`
           }`}
           onMouseDown={!isMobile ? handleDragStart : undefined}
         >
@@ -407,36 +407,38 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           </button>
         </div>
 
-        {/* Scrollable content on mobile / inline on desktop */}
-        <div className={isMobile ? 'flex-1 overflow-y-auto px-6 pb-6 pt-3' : 'pt-4'}>
-
-        {/* Header */}
+        {/* Fixed header content */}
         {step !== 'success' && !confirming && (
-        <div className="flex items-center gap-2 mb-1">
-          {step === 'payment' && (
-            <button
-              onClick={handleBack}
-              disabled={confirming}
-              className="rounded-sm ring-offset-background transition-all hover:bg-muted focus:outline-none h-7 w-7 flex items-center justify-center"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-          )}
-          <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
-            {step === 'select' ? (
-              <>
-                <Coins className="h-5 w-5 text-accent" />
-                Buy Credits
-              </>
-            ) : (
-              <>
-                <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain" />
-                 Payment
-              </>
+        <div className="px-6 pt-3 pb-2 shrink-0 border-b border-border/50">
+          <div className="flex items-center gap-2 mb-1">
+            {step === 'payment' && (
+              <button
+                onClick={handleBack}
+                disabled={confirming}
+                className="rounded-sm ring-offset-background transition-all hover:bg-muted focus:outline-none h-7 w-7 flex items-center justify-center"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
             )}
-          </h2>
+            <h2 className="text-lg font-semibold leading-none tracking-tight flex items-center gap-2">
+              {step === 'select' ? (
+                <>
+                  <Coins className="h-5 w-5 text-accent" />
+                  Buy Credits
+                </>
+              ) : (
+                <>
+                  <img src={amBlackLogo} alt="Arcana Mace" className="h-5 w-5 object-contain" />
+                   Payment
+                </>
+              )}
+            </h2>
+          </div>
         </div>
         )}
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-6 pt-3 pb-4">
 
         {step === 'select' ? (
           <>
@@ -506,21 +508,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </div>
               </div>
 
-              <Button
-                onClick={handleProceedToPayment}
-                disabled={purchasing || !isValidAmount}
-                className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
-              >
-                {purchasing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Setting up payment...
-                  </>
-                ) : (
-                  `Continue to Payment — $${totalPrice.toLocaleString()}`
-                )}
-              </Button>
-
               {!isValidAmount && parsedAmount > 0 && (
                 <p className="text-sm text-destructive text-center">
                   Please enter at least {MIN_CREDITS} credits
@@ -585,24 +572,6 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </div>
               </div>
 
-              {/* Pay button */}
-              {cardReady && (
-                <Button
-                  onClick={handleConfirmPayment}
-                  disabled={confirming}
-                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
-                >
-                  {confirming ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    `Pay $${totalPrice.toLocaleString()}`
-                  )}
-                </Button>
-              )}
-
               {/* Security badge */}
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -626,6 +595,45 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
           </div>
         )}
         </div>
+
+        {/* Fixed footer button */}
+        {step === 'select' && (
+          <div className="shrink-0 border-t border-border px-6 py-3 bg-white">
+            <Button
+              onClick={handleProceedToPayment}
+              disabled={purchasing || !isValidAmount}
+              className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
+            >
+              {purchasing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Setting up payment...
+                </>
+              ) : (
+                `Continue to Payment — $${totalPrice.toLocaleString()}`
+              )}
+            </Button>
+          </div>
+        )}
+
+        {step === 'payment' && cardReady && (
+          <div className="shrink-0 border-t border-border px-6 py-3 bg-white">
+            <Button
+              onClick={handleConfirmPayment}
+              disabled={confirming}
+              className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
+            >
+              {confirming ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                `Pay $${totalPrice.toLocaleString()}`
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>,
     document.body
