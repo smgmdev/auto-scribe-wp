@@ -856,7 +856,7 @@ export default function MediaBuying() {
             {[
               {
                 question: "How do I get started with media buying?",
-                answer: "Simply browse media network of diverse publications, select the outlets that match your target audience, and submit your content brief to the agency. The agencies will guide you through the rest of the process."
+                answer: "Simply create an account, browse a network of global media channels, choose your target outlet, and start a conversation with the PR agency. Discuss your content, agree on terms, set a delivery timeline, and place your order. Then sit back while the agency prepares and delivers your article."
               },
               {
                 question: "What does it cost? How is pricing determined?",
