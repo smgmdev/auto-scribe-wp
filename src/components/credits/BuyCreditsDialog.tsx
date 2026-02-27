@@ -8,16 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Coins, GripHorizontal, X, ArrowLeft, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import amBlackLogo from '@/assets/amblack-2.png';
-import airwallexLogo from '@/assets/airwallex-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppStore } from '@/stores/appStore';
 import { toast } from 'sonner';
-import { init as airwallexInit } from '@airwallex/components-sdk';
+import { loadStripe, type Stripe as StripeType, type StripeElements } from '@stripe/stripe-js';
 
 const PRICE_PER_CREDIT = 1; // $1 per credit
 const MIN_CREDITS = 1;
 const QUICK_AMOUNTS = [1, 5, 10, 50, 100, 500];
+
+// Initialize Stripe - replace with your publishable key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
 
 interface BuyCreditsDialogProps {
   open: boolean;
@@ -33,9 +35,9 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   const [cardReady, setCardReady] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
-  const [intentData, setIntentData] = useState<{ intent_id: string; client_secret: string } | null>(null);
-  const cardElementRef = useRef<any>(null);
-  const paymentSubmittedRef = useRef(false);
+  const [intentData, setIntentData] = useState<{ payment_intent_id: string; client_secret: string } | null>(null);
+  const stripeRef = useRef<StripeType | null>(null);
+  const elementsRef = useRef<StripeElements | null>(null);
   const { refreshCredits } = useAuth();
   const { setCurrentView } = useAppStore();
   const [, setSearchParams] = useSearchParams();
@@ -55,17 +57,18 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
       setConfirming(false);
       setPaymentSubmitted(false);
       setIntentData(null);
-      cardElementRef.current = null;
+      stripeRef.current = null;
+      elementsRef.current = null;
     } else {
-      // Clean up Airwallex SDK DOM nodes when closing to prevent removeChild errors
-      if (cardElementRef.current) {
+      // Clean up Stripe Elements
+      if (elementsRef.current) {
         try {
-          cardElementRef.current.unmount?.();
-          cardElementRef.current.destroy?.();
+          const paymentElement = elementsRef.current.getElement('payment');
+          paymentElement?.unmount();
         } catch (e) { /* ignore */ }
-        cardElementRef.current = null;
+        elementsRef.current = null;
       }
-      const container = document.getElementById('airwallex-drop-in');
+      const container = document.getElementById('stripe-payment-element');
       if (container) container.innerHTML = '';
     }
   }, [open]);
@@ -78,17 +81,13 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         setStep('select');
         setCardReady(false);
         setIntentData(null);
-        cardElementRef.current = null;
+        elementsRef.current = null;
       } else if (step === 'select') {
         onOpenChange(false);
       }
     });
     return () => removePopup('buy-credits-dialog');
   }, [open, onOpenChange, step, confirming]);
-
-  useEffect(() => {
-    paymentSubmittedRef.current = paymentSubmitted;
-  }, [paymentSubmitted]);
 
   const parsedAmount = parseInt(creditAmount) || 0;
   const isValidAmount = parsedAmount >= MIN_CREDITS;
@@ -104,17 +103,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     setPurchasing(true);
 
     try {
-      // Create PaymentIntent via edge function
-      const { data, error } = await supabase.functions.invoke('create-airwallex-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-stripe-payment-intent', {
         body: { creditAmount: parsedAmount },
       });
 
       if (error) throw error;
-      if (!data?.intent_id || !data?.client_secret) {
+      if (!data?.payment_intent_id || !data?.client_secret) {
         throw new Error('Invalid response from payment service');
       }
 
-      setIntentData({ intent_id: data.intent_id, client_secret: data.client_secret });
+      setIntentData({ payment_intent_id: data.payment_intent_id, client_secret: data.client_secret });
       setStep('payment');
     } catch (error: any) {
       toast.error(error.message || 'Failed to create checkout session.');
@@ -123,287 +121,199 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
     }
   };
 
-  // Mount card element when entering payment step
+  // Mount Stripe Payment Element when entering payment step
   useEffect(() => {
     if (step !== 'payment' || !intentData) return;
 
     let mounted = true;
-    let pollIntervalId: ReturnType<typeof setInterval> | null = null;
-    const initDropIn = async () => {
+
+    const initStripe = async () => {
       try {
-        const { payments } = await airwallexInit({
-          env: 'prod',
-          origin: window.location.origin,
-          enabledElements: ['payments'],
+        const stripe = await stripePromise;
+        if (!stripe || !mounted) {
+          if (!stripe) toast.error('Failed to load payment processor. Please refresh and try again.');
+          return;
+        }
+
+        stripeRef.current = stripe;
+
+        const elements = stripe.elements({
+          clientSecret: intentData.client_secret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#000000',
+              colorBackground: '#ffffff',
+              colorText: '#1d1d1f',
+              colorDanger: '#ef4444',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              borderRadius: '0px',
+              spacingUnit: '4px',
+            },
+            rules: {
+              '.Input': {
+                border: '1px solid #e5e7eb',
+                boxShadow: 'none',
+              },
+              '.Input:focus': {
+                border: '1px solid #000000',
+                boxShadow: 'none',
+              },
+            },
+          },
         });
 
-        const dropIn = payments.createElement('dropIn', {
-          intent_id: intentData.intent_id,
-          client_secret: intentData.client_secret,
-          currency: 'USD',
-          country_code: 'US',
-          methods: ['card'],
-          layout: {
-            type: 'accordion',
-          } as any,
+        elementsRef.current = elements;
+
+        const paymentElement = elements.create('payment', {
+          layout: 'tabs',
         });
 
-        dropIn.on('ready', () => {
-          console.log('[Airwallex] Drop-in ready event fired');
+        paymentElement.on('ready', () => {
+          console.log('[Stripe] Payment Element ready');
           if (mounted) setCardReady(true);
         });
 
-        const handlePaymentSuccess = async () => {
-          if (!mounted) return;
-          setPaymentSubmitted(true);
-          setConfirming(true);
-          try {
-            const { data: result, error } = await supabase.functions.invoke('airwallex-webhook', {
-              body: { intent_id: intentData.intent_id },
-            });
-            if (error) throw error;
-            if (result?.success) {
-              await refreshCredits?.();
-              setStep('success');
-            } else {
-              toast.error(result?.message || 'Payment not yet completed. Please wait a moment.');
-              setStep('payment');
-            }
-          } catch (err: any) {
-            console.error('[Airwallex] Credit update error:', err);
-            toast.error('Payment succeeded but credit update failed. Please contact support.');
-            setStep('payment');
-          } finally {
-            setConfirming(false);
-          }
-        };
-
-        dropIn.on('success', () => {
-          console.log('[Airwallex] Payment success event fired');
-          handlePaymentSuccess();
-        });
-
-        (dropIn as any).on('pending', () => {
-          console.log('[Airwallex] Payment pending event fired');
-          if (mounted) {
-            setPaymentSubmitted(true);
-            paymentSubmittedRef.current = true;
-          }
-        });
-
-        dropIn.on('error', async (event: any) => {
-          console.error('[Airwallex] Payment error:', event);
-          if (mounted) {
-            setPaymentSubmitted(false);
-            paymentSubmittedRef.current = false;
-            setConfirming(false);
-
-            let userTitle = 'Payment Failed';
-            let userMessage = 'Please try again or use a different payment method.';
-            let userTips: string[] = [];
-
-            // Re-check intent state for detailed failure info from gateway
-            try {
-              const { data: verifyResult } = await supabase.functions.invoke('airwallex-webhook', {
-                body: { intent_id: intentData.intent_id },
-              });
-
-              const isUnsubmitted =
-                verifyResult?.status === 'REQUIRES_PAYMENT_METHOD' &&
-                (!verifyResult?.message || /Payment method not submitted/.test(verifyResult.message));
-
-              const failureCode = verifyResult?.failure_code || '';
-              const attemptStatus = verifyResult?.attempt_status || '';
-              const serverMsg = verifyResult?.message || '';
-
-              if (isUnsubmitted) {
-                userTitle = 'Payment Not Submitted';
-                userMessage = 'Your card details were not sent to the payment gateway. Please re-enter your card and try again.';
-              } else if (/fraud|risk/i.test(failureCode) || /risk/i.test(serverMsg)) {
-                userTitle = 'Payment Blocked by Risk Check';
-                userMessage = 'The payment gateway\'s fraud prevention system blocked this transaction.';
-                userTips = [
-                  'Your card\'s issuing country may differ from your billing address — ensure they match.',
-                  'Try using a card issued in the same country as your billing address.',
-                  'Contact your bank to authorise international or online transactions.',
-                  'Try a different card or payment method.',
-                  'If this persists, contact support with the error: ' + failureCode
-                ];
-              } else if (/decline|declined/i.test(serverMsg) || /decline/i.test(failureCode)) {
-                userTitle = 'Card Declined';
-                userMessage = 'Your card issuer declined this transaction.';
-                userTips = [
-                  'Check your card details and available balance.',
-                  'Contact your bank to authorise online payments.',
-                  'Try a different card.'
-                ];
-              } else if (/insufficient/i.test(serverMsg) || /insufficient/i.test(failureCode)) {
-                userTitle = 'Insufficient Funds';
-                userMessage = 'Your card does not have enough balance for this transaction.';
-                userTips = ['Please try a different card with sufficient funds.'];
-              } else if (/3ds|authentication|authenticate/i.test(serverMsg)) {
-                userTitle = 'Authentication Failed';
-                userMessage = 'Card 3D Secure authentication was not completed.';
-                userTips = ['Please try again and complete the verification prompt from your bank.', 'Try a different card.'];
-              } else if (/cvv|cvc|security/i.test(serverMsg)) {
-                userTitle = 'Incorrect Security Code';
-                userMessage = 'The CVV/CVC code you entered is incorrect.';
-                userTips = ['Check the 3-digit code on the back of your card and try again.'];
-              } else if (/expir/i.test(serverMsg)) {
-                userTitle = 'Card Expired';
-                userMessage = 'Your card has expired or the expiry date is incorrect.';
-                userTips = ['Please use a valid, non-expired card.'];
-              } else if (serverMsg) {
-                userMessage = serverMsg;
-              }
-            } catch {
-              // Fallback to SDK error info
-              const rawMsg = event?.message || event?.detail?.message || '';
-              if (rawMsg) userMessage = rawMsg;
-            }
-
-            // Show detailed toast with tips
-            const tipsText = userTips.length > 0 ? '\n\n' + userTips.map((t, i) => `${i + 1}. ${t}`).join('\n') : '';
-            toast.error(userTitle, {
-              description: userMessage + tipsText,
-              duration: 12000,
-            });
-          }
-        });
-
-        dropIn.on('cancel', () => {
-          console.log('[Airwallex] Payment cancelled');
-          if (mounted) {
-            setPaymentSubmitted(false);
-            paymentSubmittedRef.current = false;
-          }
-        });
-
-        // Polling fallback: check intent status only after submit signal (pending/success path)
-        let pollCount = 0;
-        const maxPolls = 18; // ~90 seconds after submit
-        pollIntervalId = setInterval(async () => {
-          if (!mounted) {
-            clearInterval(pollIntervalId!);
-            return;
-          }
-
-          // Do not verify before a real submit signal from SDK/iframe heuristics
-          if (!paymentSubmittedRef.current) return;
-
-          if (pollCount >= maxPolls) {
-            clearInterval(pollIntervalId!);
-            if (!mounted) return;
-            setConfirming(false);
-            setPaymentSubmitted(false);
-            paymentSubmittedRef.current = false;
-            toast.error('Payment verification timed out. Please retry once.');
-            return;
-          }
-
-          pollCount++;
-          try {
-            const { data: result } = await supabase.functions.invoke('airwallex-webhook', {
-              body: { intent_id: intentData.intent_id },
-            });
-            if (result?.success) {
-              clearInterval(pollIntervalId!);
-              if (!mounted) return;
-              setConfirming(true);
-              await refreshCredits?.();
-              setStep('success');
-              setConfirming(false);
-              return;
-            }
-
-            // Stop polling early on terminal failure states
-            if (result?.status && ['FAILED', 'CANCELLED'].includes(result.status)) {
-              clearInterval(pollIntervalId!);
-              if (!mounted) return;
-              setPaymentSubmitted(false);
-              paymentSubmittedRef.current = false;
-              setConfirming(false);
-              const fc = result?.failure_code || '';
-              const msg = result?.message || '';
-              if (/fraud|risk/i.test(fc) || /risk/i.test(msg)) {
-                toast.error('Payment Blocked by Risk Check', {
-                  description: 'The fraud prevention system blocked this transaction. Try a card issued in your billing country, or contact your bank to authorise online payments.',
-                  duration: 12000,
-                });
-              } else {
-                toast.error('Payment Failed', {
-                  description: msg || 'Please try a different card.',
-                  duration: 8000,
-                });
-              }
-            }
-          } catch {
-            // Silently retry
-          }
-        }, 5000);
-
-        // Wait a tick for the container to be in the DOM
+        // Wait a tick for the container
         setTimeout(() => {
           if (mounted) {
-            const container = document.getElementById('airwallex-drop-in');
+            const container = document.getElementById('stripe-payment-element');
             if (container) {
-              console.log('[Airwallex] Mounting drop-in to container');
-              dropIn.mount(container);
-              cardElementRef.current = dropIn;
+              paymentElement.mount(container);
 
-              // Detect when iframe height changes significantly (Airwallex shows loading after Pay click)
-              const iframe = container.querySelector('iframe');
-              if (iframe) {
-                let lastHeight = iframe.clientHeight;
-                const heightObserver = setInterval(() => {
-                  if (!mounted) { clearInterval(heightObserver); return; }
-                  const newHeight = iframe.clientHeight;
-                  // If height shrinks significantly, the drop-in is processing payment
-                  if (lastHeight > 0 && newHeight < lastHeight * 0.5) {
-                    console.log('[Airwallex] Iframe height change detected - payment processing');
-                    setPaymentSubmitted(true);
-                    clearInterval(heightObserver);
-                  }
-                  lastHeight = newHeight;
-                }, 300);
-              }
-              
-              // Fallback: if ready event doesn't fire in 4s, show the form anyway
+              // Fallback: if ready doesn't fire in 4s
               setTimeout(() => {
                 if (mounted && !cardReady) {
-                  console.log('[Airwallex] Ready event timeout - showing form anyway');
+                  console.log('[Stripe] Ready timeout - showing form anyway');
                   setCardReady(true);
                 }
               }, 4000);
             } else {
-              console.error('[Airwallex] Container #airwallex-drop-in not found');
+              console.error('[Stripe] Container not found');
             }
           }
         }, 100);
       } catch (err: any) {
-        console.error('Failed to init Airwallex drop-in:', err);
+        console.error('Failed to init Stripe:', err);
         toast.error('Failed to load payment form. Please try again.');
         setStep('select');
       }
     };
 
-    initDropIn();
+    initStripe();
 
     return () => {
       mounted = false;
-      if (pollIntervalId) clearInterval(pollIntervalId);
-      if (cardElementRef.current) {
+      if (elementsRef.current) {
         try {
-          cardElementRef.current.unmount?.();
-        } catch (e) {
-          // ignore
-        }
-        cardElementRef.current = null;
+          const pe = elementsRef.current.getElement('payment');
+          pe?.unmount();
+        } catch (e) { /* ignore */ }
+        elementsRef.current = null;
       }
     };
   }, [step, intentData]);
 
-  // handleConfirmPayment is no longer needed - Drop-in handles it via 'success' event
+  // Handle payment confirmation
+  const handleConfirmPayment = async () => {
+    if (!stripeRef.current || !elementsRef.current || !intentData) return;
+
+    setConfirming(true);
+    setPaymentSubmitted(true);
+
+    try {
+      const { error: submitError } = await elementsRef.current.submit();
+      if (submitError) {
+        toast.error(submitError.message || 'Please check your payment details.');
+        setConfirming(false);
+        setPaymentSubmitted(false);
+        return;
+      }
+
+      const { error: confirmError, paymentIntent } = await stripeRef.current.confirmPayment({
+        elements: elementsRef.current,
+        confirmParams: {
+          return_url: window.location.origin, // Fallback, not used for embedded
+        },
+        redirect: 'if_required',
+      });
+
+      if (confirmError) {
+        let title = 'Payment Failed';
+        let message = confirmError.message || 'Please try again or use a different payment method.';
+        const tips: string[] = [];
+
+        if (confirmError.type === 'card_error') {
+          switch (confirmError.code) {
+            case 'card_declined':
+              title = 'Card Declined';
+              tips.push('Check your card details and available balance.', 'Contact your bank to authorise online payments.', 'Try a different card.');
+              break;
+            case 'insufficient_funds':
+              title = 'Insufficient Funds';
+              tips.push('Please try a different card with sufficient funds.');
+              break;
+            case 'incorrect_cvc':
+              title = 'Incorrect Security Code';
+              tips.push('Check the 3-digit code on the back of your card and try again.');
+              break;
+            case 'expired_card':
+              title = 'Card Expired';
+              tips.push('Please use a valid, non-expired card.');
+              break;
+            default:
+              tips.push('Try a different card or payment method.');
+          }
+        } else if (confirmError.type === 'validation_error') {
+          title = 'Invalid Details';
+          message = confirmError.message || 'Please check your payment details.';
+        }
+
+        const tipsText = tips.length > 0 ? '\n\n' + tips.map((t, i) => `${i + 1}. ${t}`).join('\n') : '';
+        toast.error(title, {
+          description: message + tipsText,
+          duration: 12000,
+        });
+
+        setConfirming(false);
+        setPaymentSubmitted(false);
+        return;
+      }
+
+      // Payment succeeded or requires action (3DS handled by Stripe)
+      if (paymentIntent?.status === 'succeeded') {
+        // Verify and add credits
+        try {
+          const { data: result, error: verifyError } = await supabase.functions.invoke('verify-stripe-payment', {
+            body: { payment_intent_id: intentData.payment_intent_id },
+          });
+
+          if (verifyError) throw verifyError;
+
+          if (result?.success) {
+            await refreshCredits?.();
+            setStep('success');
+          } else {
+            toast.error(result?.message || 'Payment verification pending. Credits will appear shortly.');
+          }
+        } catch (err: any) {
+          console.error('[Stripe] Credit update error:', err);
+          toast.error('Payment succeeded but credit update failed. Please contact support.');
+        }
+      } else if (paymentIntent?.status === 'requires_action') {
+        // 3DS was needed but not completed - Stripe handles this automatically
+        toast.info('Please complete the authentication to finish your payment.');
+      } else {
+        toast.info('Payment is being processed. Credits will appear shortly.');
+      }
+    } catch (err: any) {
+      console.error('[Stripe] Payment error:', err);
+      toast.error('Payment failed. Please try again.');
+    } finally {
+      setConfirming(false);
+      setPaymentSubmitted(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -411,21 +321,16 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
   };
 
   const handleBack = () => {
-    // Destroy Airwallex drop-in BEFORE React re-renders to avoid removeChild conflict
-    if (cardElementRef.current) {
+    // Clean up Stripe Elements
+    if (elementsRef.current) {
       try {
-        cardElementRef.current.unmount?.();
-        cardElementRef.current.destroy?.();
-      } catch (e) {
-        // ignore SDK cleanup errors
-      }
-      cardElementRef.current = null;
+        const pe = elementsRef.current.getElement('payment');
+        pe?.unmount();
+      } catch (e) { /* ignore */ }
+      elementsRef.current = null;
     }
-    // Clear the container's DOM manually so React doesn't try to remove SDK-injected nodes
-    const container = document.getElementById('airwallex-drop-in');
-    if (container) {
-      container.innerHTML = '';
-    }
+    const container = document.getElementById('stripe-payment-element');
+    if (container) container.innerHTML = '';
     setCardReady(false);
     setIntentData(null);
     setStep('select');
@@ -637,14 +542,12 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
             </div>
             <Button
               onClick={() => {
-                const intentId = intentData?.intent_id;
-                // Set view param so Index.tsx useEffect picks it up correctly
+                const piId = intentData?.payment_intent_id;
                 const params = new URLSearchParams();
                 params.set('view', 'credit-history');
-                if (intentId) {
-                  params.set('purchaseIntentId', intentId);
+                if (piId) {
+                  params.set('purchaseIntentId', piId);
                 }
-                // Close dialog first, then navigate
                 onOpenChange(false);
                 setSearchParams(params, { replace: true });
               }}
@@ -656,7 +559,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         ) : (
           <div className="relative">
             <p className="text-sm text-muted-foreground mt-1">
-              Choose a payment method to complete your purchase.
+              Enter your payment details to complete your purchase.
             </p>
 
             <div className="space-y-5 py-4">
@@ -668,7 +571,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                 </div>
               </div>
 
-              {/* Card element container */}
+              {/* Stripe Payment Element container */}
               <div className="space-y-2">
                 <Label>Payment Method</Label>
                 <div className="relative min-h-[120px]">
@@ -679,22 +582,34 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
                     </div>
                   )}
                   <div 
-                    id="airwallex-drop-in" 
-                    className={`min-h-[120px] rounded-none bg-background transition-opacity ${!cardReady ? 'opacity-0' : 'opacity-100'}`}
-                    ref={(node) => {
-                      if (node) {
-                        (node as any).__reactFiber = undefined;
-                      }
-                    }}
+                    id="stripe-payment-element" 
+                    className={`min-h-[120px] bg-background transition-opacity ${!cardReady ? 'opacity-0' : 'opacity-100'}`}
                   />
                 </div>
               </div>
 
+              {/* Pay button */}
+              {cardReady && (
+                <Button
+                  onClick={handleConfirmPayment}
+                  disabled={confirming}
+                  className="w-full rounded-none border border-primary hover:!bg-transparent hover:!text-primary transition-all duration-200 h-10 md:h-9 text-sm"
+                >
+                  {confirming ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    `Pay $${totalPrice.toLocaleString()}`
+                  )}
+                </Button>
+              )}
+
               {/* Security badge */}
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Your payment is securely processed by</span>
-                <img src={airwallexLogo} alt="Airwallex" className="h-4 object-contain" />
+                <span>Payments securely processed by Stripe</span>
               </div>
 
               <p className="text-xs text-center text-muted-foreground">
@@ -702,12 +617,12 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
               </p>
             </div>
 
-            {/* Full overlay spinner when payment is submitted or being verified */}
-            {(paymentSubmitted || confirming) && (
+            {/* Full overlay spinner when payment is being verified */}
+            {(paymentSubmitted && confirming) && (
               <div className="absolute inset-0 z-50 bg-background flex flex-col items-center justify-center gap-3">
                 <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  {confirming ? 'Verifying your payment...' : 'Processing your payment...'}
+                  Verifying your payment...
                 </p>
               </div>
             )}
