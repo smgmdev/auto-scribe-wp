@@ -872,7 +872,7 @@ export default function MediaBuying() {
               },
               {
                 question: "Can I write my own content or do agencies provide it?",
-                answer: "Both options are available. You can submit your own finished article, provide a detailed brief for agencies to write, or collaborate with agencies to create content that meets publication standards."
+                answer: "Initially, it is recommended that you submit your own finished article or provide a detailed brief for the agency to write. After review, the agency can inform you how to proceed with your content idea to meet publication standards."
               },
             ].map((faq, index) => (
               <AccordionItem key={index} value={`faq-${index}`} className="border-t border-white/20 first:border-t-0">
