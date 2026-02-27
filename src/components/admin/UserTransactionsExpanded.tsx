@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, ChevronDown, ChevronUp, Search, X, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -1066,6 +1067,24 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                                 tx.description ? tx.description.replace(/by admin/gi, 'by Arcana Mace Staff').replace(/\s*\(Platform fee:.*?\)/gi, '') : '-'
                               )}
                             </span>
+                            {/* Copy button for Stripe/Airwallex transaction IDs */}
+                            {tx.description && /\((pi_[^)]+)\)/.test(tx.description) && (() => {
+                              const match = tx.description!.match(/\((pi_[^)]+)\)/);
+                              if (!match) return null;
+                              return (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(match[1]);
+                                    toast.success('Transaction ID copied');
+                                  }}
+                                  className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors ml-1"
+                                  title="Copy transaction ID"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              );
+                            })()}
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground/70">
                                 {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
