@@ -122,16 +122,23 @@ Deno.serve(async (req) => {
     const start = Date.now()
     const response = await fetch('https://status.stripe.com/api/v2/status.json', {
       method: 'GET',
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(8000),
     })
     const latency = Date.now() - start
     if (response.ok) {
-      services.push({ name: 'Payment Gateway (Stripe)', status: latency > 3000 ? 'issue' : 'available', latency })
+      const data = await response.json().catch(() => null)
+      const indicator = data?.status?.indicator
+      // Use Stripe's own status indicator if available
+      if (indicator && indicator !== 'none') {
+        services.push({ name: 'Payment Gateway (Stripe)', status: 'issue', latency })
+      } else {
+        services.push({ name: 'Payment Gateway (Stripe)', status: 'available', latency })
+      }
     } else {
       services.push({ name: 'Payment Gateway (Stripe)', status: 'issue', latency })
     }
   } catch {
-    services.push({ name: 'Payment Gateway (Stripe)', status: 'available' })
+    services.push({ name: 'Payment Gateway (Stripe)', status: 'issue' })
   }
 
   // These services depend on external providers - we mark them available by default
