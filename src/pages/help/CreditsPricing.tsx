@@ -88,7 +88,7 @@ export default function CreditsPricing() {
       categorySlug="credits-pricing"
       intro={
         <p>
-          Everything you need to know about purchasing credits, payment methods via Airwallex,
+          Everything you need to know about purchasing credits, payment methods via Stripe,
           credit locking, and our refund policy.
         </p>
       }

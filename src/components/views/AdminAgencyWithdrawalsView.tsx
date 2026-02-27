@@ -184,7 +184,7 @@ export function AdminAgencyWithdrawalsView() {
     setProcessingId(selectedWithdrawal.id);
 
     try {
-      // If approve with auto payout, call the Airwallex edge function
+      // If approve with auto payout, call the payout edge function
       if (actionType === 'approve' && payoutMode === 'auto') {
         setAutoPayoutProcessing(true);
         
@@ -863,7 +863,7 @@ export function AdminAgencyWithdrawalsView() {
                       <Zap className={`h-4 w-4 shrink-0 ${payoutMode === 'auto' ? 'text-blue-500' : 'text-muted-foreground'}`} />
                       <div>
                         <p className="text-sm font-medium">Auto (API)</p>
-                        <p className="text-xs text-muted-foreground">Via Airwallex</p>
+                        <p className="text-xs text-muted-foreground">Via Stripe</p>
                       </div>
                     </button>
                     <button
@@ -886,7 +886,7 @@ export function AdminAgencyWithdrawalsView() {
                     <p className="text-xs text-amber-600">Auto payout is not available for USDT withdrawals.</p>
                   )}
                   {payoutMode === 'auto' && selectedWithdrawal.withdrawal_method === 'bank' && (
-                    <p className="text-xs text-blue-600">Funds will be transferred automatically via Airwallex to the agency's bank account.</p>
+                    <p className="text-xs text-blue-600">Funds will be transferred automatically via Stripe to the agency's bank account.</p>
                   )}
                 </div>
               )}

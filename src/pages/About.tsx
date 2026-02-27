@@ -466,7 +466,7 @@ export default function About() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Credit and debit card top-ups are processed securely through Airwallex, a globally licensed payment institution. Your card details are never stored on our servers or shared with any third party. Additionally, all account credits and payment activity are continuously monitored by Arcana Mace AI to detect and prevent any suspicious or unauthorized transactions.
+                  Credit and debit card top-ups are processed securely through Stripe, a globally trusted payment platform. Your card details are never stored on our servers or shared with any third party. Additionally, all account credits and payment activity are continuously monitored by Arcana Mace AI to detect and prevent any suspicious or unauthorized transactions.
                 </AccordionContent>
               </AccordionItem>
 
