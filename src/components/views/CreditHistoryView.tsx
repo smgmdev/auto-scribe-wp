@@ -2089,6 +2089,9 @@ export function CreditHistoryView() {
                   if (transaction.type === 'purchase' && transaction.description?.startsWith('Airwallex payment:')) {
                     return 'Account top up with card';
                   }
+                  if (transaction.type === 'purchase' && transaction.description?.includes('via Stripe')) {
+                    return 'Account top up with card';
+                  }
                   if (transaction.type === 'withdrawal_locked') {
                     return transaction.description?.includes('Bank Transfer') 
                       ? 'Withdrawal via Bank Transfer' 
@@ -2443,7 +2446,7 @@ export function CreditHistoryView() {
                                 </p>
                               </div>
                               <div className="md:col-span-2">
-                                <span className="text-muted-foreground">Date & Time:</span>
+                                 <span className="text-muted-foreground">Processed:</span>
                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                               </div>
                             </div>
@@ -2531,6 +2534,44 @@ export function CreditHistoryView() {
                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                </div>
                              </div>
+                            ) : (transaction.type === 'purchase' && transaction.description?.includes('via Stripe')) ? (
+                           /* Stripe Card Purchase - Show Transaction ID, type, and processed date */
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-2">
+                               <div>
+                                 <span className="text-muted-foreground">Transaction Type:</span>
+                                 <p className="font-medium">Card Purchase</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Amount:</span>
+                                 <p className="font-medium text-green-500">+{transaction.amount.toLocaleString()} credits</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Processed:</span>
+                                 <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
+                               </div>
+                               <div>
+                                 <span className="text-muted-foreground">Transaction ID:</span>
+                                 <div className="flex items-center gap-1.5">
+                                   <p className="font-medium text-sm break-all">{(() => {
+                                     const match = transaction.description?.match(/\((pi_[^)]+)\)/);
+                                     return match ? match[1] : 'N/A';
+                                   })()}</p>
+                                   <button
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       const match = transaction.description?.match(/\((pi_[^)]+)\)/);
+                                       if (match) {
+                                         navigator.clipboard.writeText(match[1]);
+                                         toast.success('Transaction ID copied');
+                                       }
+                                     }}
+                                     className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                                   >
+                                     <Copy className="h-3.5 w-3.5" />
+                                   </button>
+                                 </div>
+                               </div>
+                             </div>
                             ) : (
                             /* Other transaction types - Show standard details */
                              <>
@@ -2557,7 +2598,7 @@ export function CreditHistoryView() {
                                   </p>
                                 </div>
                                 <div>
-                                 <span className="text-muted-foreground">Date & Time:</span>
+                                 <span className="text-muted-foreground">Processed:</span>
                                  <p className="font-medium">{format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}</p>
                                </div>
                                {transaction.order_number && (
