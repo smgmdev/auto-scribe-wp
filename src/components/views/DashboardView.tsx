@@ -98,6 +98,14 @@ export function DashboardView() {
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [sessionsPopupOpen, setSessionsPopupOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [resubKey, setResubKey] = useState(0);
+
+  // Re-subscribe all realtime channels after session extension
+  useEffect(() => {
+    const handler = () => setResubKey(k => k + 1);
+    window.addEventListener('session-extended', handler);
+    return () => window.removeEventListener('session-extended', handler);
+  }, []);
   
   // Agency summary data
   const [agencySummary, setAgencySummary] = useState({
@@ -182,7 +190,7 @@ export function DashboardView() {
     const interval = setInterval(fetchActiveSessions, 15000);
     // Real-time listener on profiles changes
     const channel = supabase
-      .channel('active-sessions-realtime')
+      .channel(`active-sessions-realtime-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         fetchActiveSessions();
       })
@@ -191,7 +199,7 @@ export function DashboardView() {
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, [fetchActiveSessions, isAdmin]);
+  }, [fetchActiveSessions, isAdmin, resubKey]);
 
   const availableCreditsData = useAvailableCredits();
 
@@ -411,13 +419,13 @@ export function DashboardView() {
   // Real-time: global library count (media_sites changes)
   useEffect(() => {
     const channel = supabase
-      .channel('dashboard-media-sites-rt')
+      .channel(`dashboard-media-sites-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'media_sites' }, () => {
         fetchGlobalLibraryCount();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchGlobalLibraryCount]);
+  }, [fetchGlobalLibraryCount, resubKey]);
 
   // Debounced agency summary refresh to prevent rapid re-fetches
   const agencyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -430,7 +438,7 @@ export function DashboardView() {
   useEffect(() => {
     if (!user || !isAgency) return;
     const channel = supabase
-      .channel('dashboard-agency-rt')
+      .channel(`dashboard-agency-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
         debouncedFetchAgencySummary();
       })
@@ -445,37 +453,37 @@ export function DashboardView() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, isAgency, debouncedFetchAgencySummary]);
+  }, [user, isAgency, debouncedFetchAgencySummary, resubKey]);
 
   // Real-time: articles (published count + recent articles list)
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel('dashboard-articles-rt')
+      .channel(`dashboard-articles-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'articles', filter: `user_id=eq.${user.id}` }, () => {
         refreshArticles(false);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, refreshArticles]);
+  }, [user, refreshArticles, resubKey]);
 
   // Real-time: wordpress_sites (local library count)
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel('dashboard-wp-sites-rt')
+      .channel(`dashboard-wp-sites-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wordpress_sites', filter: `user_id=eq.${user.id}` }, () => {
         refetchSites(false);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, refetchSites]);
+  }, [user, refetchSites, resubKey]);
 
   // Real-time: agency_payouts (agency status / downgrade changes)
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel('dashboard-agency-payouts-rt')
+      .channel(`dashboard-agency-payouts-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_payouts', filter: `user_id=eq.${user.id}` }, () => {
         // Re-check agency status
         (async () => {
@@ -490,19 +498,19 @@ export function DashboardView() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user, resubKey]);
 
   // Real-time: user_credits (available credits)
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel('dashboard-user-credits-rt')
+      .channel(`dashboard-user-credits-rt-${resubKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'user_credits', filter: `user_id=eq.${user.id}` }, () => {
         availableCreditsData.refresh();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, availableCreditsData.refresh]);
+  }, [user, availableCreditsData.refresh, resubKey]);
 
   const getSiteInfo = (article: { publishedTo?: string; publishedToName?: string | null; publishedToFavicon?: string | null }): { name: string; favicon: string | null } | null => {
     // Use stored article data first (persists after site deletion)
