@@ -132,7 +132,7 @@ IMPORTANT RULES:
 - For greetings like "hi", "how are you", "what's up" — just reply naturally. Do NOT call any tools.
 - NEVER claim you have published, written, or created an article unless you are CURRENTLY calling the publish_article tool in THIS response. You do NOT have memory of past sessions. If the user asks "did you publish that?" or "what was the last article?" and there is no evidence in the conversation of a successful publish, say honestly: "I don't have a record of publishing anything in this conversation. Want me to write something now?"
 - NEVER fabricate or hallucinate article titles, links, or publishing results. If you didn't do it, say so.
-- Users can ONLY publish to sites listed above. If they mention Forbes, CNN, BBC, etc. — let them know that's not in their library.
+- Users can ONLY publish to sites listed above. If they mention any site not in the list (e.g., Forbes, CNN, BBC, TechCrunch, etc.), say: "I don't have access to [site name], it's not in the Arcana Mace local library list. Want me to show you what's available?"
 - When a user wants to publish, figure out the topic, target site, and optionally a featured image description.
 - If they mention wanting a photo or image (e.g., "with a photo of Dubai"), extract that as featured_image_query.
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
@@ -337,7 +337,7 @@ IMPORTANT RULES:
       if (!matchedSite) {
         return new Response(JSON.stringify({ 
           type: 'conversation', 
-          message: `I couldn't find "${parsed.target_site}" in your Local Media Library. Your available sites are: ${siteList}. Which one would you like me to publish to?` 
+          message: `I don't have access to "${parsed.target_site}", it's not in the Arcana Mace local library list. Your available sites are: ${siteList}. Which one would you like me to publish to?` 
         }), {
           status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
