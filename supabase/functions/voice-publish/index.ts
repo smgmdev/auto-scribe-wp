@@ -289,7 +289,7 @@ IMPORTANT RULES:
             if (availableCredits < creditsRequired) {
               return new Response(JSON.stringify({
                 type: 'conversation',
-                message: `You don't have enough credits. You need ${creditsRequired} credits but only have ${availableCredits} available. Please top up your credits first.`,
+                message: `Hey, you're short on credits. You need ${creditsRequired} but you've only got ${availableCredits} available. Head over to your credits page and recharge, then come back and I'll get it published for you.`,
               }), {
                 status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
               });
