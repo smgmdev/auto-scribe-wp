@@ -48,63 +48,45 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Check globally AND per-site to prevent duplicate sources or topics
+        // Check per-site to prevent duplicates WITHIN each site (each site is independent)
         const { data: published } = await supabase
           .from('ai_published_sources')
           .select('source_url, source_title, ai_title, wordpress_site_id');
-
-        const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
         
-        // Separate per-site published articles for stricter per-site dedup
+        // Only check against articles on THIS specific site — each site gets unique content independently
         const sitePublished = (published || []).filter(
           (p: { wordpress_site_id: string | null }) => p.wordpress_site_id === setting.target_site_id
         );
         
-        // Find a new item that hasn't been published and has a unique topic
+        // Find a new item that hasn't been published to THIS site with a unique topic
         const newItem = rssItems.find((item) => {
-          // Skip if URL already published anywhere
-          if (publishedUrls.has(item.link)) return false;
+          // Skip if exact same URL already published to THIS site
+          const urlAlreadyOnSite = sitePublished.some(
+            (p: any) => p.source_url === item.link
+          );
+          if (urlAlreadyOnSite) return false;
           
           // Extract key entities (proper nouns, names, companies) from new title
           const newEntities = extractKeyEntities(item.title);
           
-          // Per-site check: VERY strict — any shared key entity OR 15% keyword overlap = duplicate
+          // Per-site strict check: 2+ shared entities OR 15% keyword overlap = duplicate
           const isSimilarOnSameSite = sitePublished.some((pub: { source_title: string; ai_title: string | null }) => {
-            // Check entity overlap first (catches "Trump tariffs" vs "Trump trade war")
             const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
             const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
             if (sharedEntities.length >= 2) {
-              console.log(`[auto-publish] Skipping (same-site entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
+              console.log(`[auto-publish] Skipping (entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
               return true;
             }
             
             const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
             if (similarity > 0.15) {
-              console.log(`[auto-publish] Skipping (same-site duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
-              return true;
-            }
-            return false;
-          });
-          if (isSimilarOnSameSite) return false;
-          
-          // Global check: strict — shared entities or 20% keyword overlap = duplicate
-          const isSimilarGlobally = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
-            const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
-            const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
-            if (sharedEntities.length >= 2) {
-              console.log(`[auto-publish] Skipping (global entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
-              return true;
-            }
-            
-            const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.20) {
-              console.log(`[auto-publish] Skipping (global duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
+              console.log(`[auto-publish] Skipping (duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
               return true;
             }
             return false;
           });
           
-          return !isSimilarGlobally;
+          return !isSimilarOnSameSite;
         });
 
         if (!newItem) {
