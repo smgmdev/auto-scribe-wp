@@ -1252,7 +1252,9 @@ export default function Industries() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
+  const [headerOffset, setHeaderOffset] = useState(120);
   
   const activeSlug = searchParams.get('industry') || INDUSTRIES[0].slug;
   const activeIndustry = INDUSTRIES.find(i => i.slug === activeSlug) || INDUSTRIES[0];
@@ -1262,6 +1264,19 @@ export default function Industries() {
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
+
+  // Measure header offset dynamically
+  useEffect(() => {
+    const measure = () => {
+      if (headerRef.current) {
+        const rect = headerRef.current.getBoundingClientRect();
+        setHeaderOffset(rect.bottom);
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
 
   // Scroll-hide header effect
   useEffect(() => {
@@ -1300,7 +1315,8 @@ export default function Industries() {
 
       <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
         {/* Main Header - matches About page */}
-        <header 
+        <header
+          ref={headerRef}
           className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
         >
           <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
@@ -1355,8 +1371,8 @@ export default function Industries() {
         {/* Search Modal */}
         <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
-        {/* Spacer for fixed header + QuickNav banner */}
-        <div className="h-[120px]" />
+        {/* Spacer for fixed header + QuickNav banner (auto-measured) */}
+        <div style={{ height: headerOffset }} />
 
         {/* Sub-header with title - Sticky */}
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
