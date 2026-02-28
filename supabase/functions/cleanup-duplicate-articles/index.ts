@@ -49,14 +49,22 @@ Deno.serve(async (req) => {
       toDelete.push(...articles);
       console.log(`[cleanup] DELETE ALL mode - marking all ${articles.length} articles for deletion`);
     } else {
-      // Find duplicates using similarity check
+      // Find duplicates using similarity check AND entity matching
       for (const article of articles) {
+        const articleEntities = extractKeyEntities(article.ai_title || article.source_title);
+        
         const isSimilarToKept = kept.some(keptArticle => {
+          const keptEntities = extractKeyEntities(keptArticle.ai_title || keptArticle.source_title);
+          
+          // Entity overlap check: 2+ shared entities = duplicate
+          const sharedEntities = [...articleEntities].filter(e => keptEntities.has(e));
+          if (sharedEntities.length >= 2) return true;
+          
           const similarity = calculateTopicSimilarity(
             article.ai_title || article.source_title,
             keptArticle.ai_title || keptArticle.source_title
           );
-          return similarity > 0.35; // 35% similarity threshold - more aggressive
+          return similarity > 0.15; // 15% similarity threshold — very strict
         });
 
         if (isSimilarToKept) {
@@ -141,6 +149,23 @@ Deno.serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
+
+// Extract key entities (proper nouns, names, companies) from text
+function extractKeyEntities(text: string): Set<string> {
+  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'it', 'its', 'this', 'that', 'these', 'those', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if', 'report', 'reports', 'according', 'amid', 'despite', 'while', 'faces', 'shows', 'finds', 'reveals', 'announces', 'launches', 'plans', 'targets', 'hits', 'rises', 'falls', 'drops', 'gains', 'loses', 'grows', 'cuts', 'raises', 'sets', 'sees', 'makes', 'takes', 'gets', 'puts', 'gives', 'keeps', 'holds', 'major', 'big', 'latest', 'first']);
+  const words = text.split(/[\s,;:!?\-–—]+/).filter(w => w.length > 1);
+  const entities = new Set<string>();
+  for (const word of words) {
+    const clean = word.replace(/[^a-zA-Z0-9']/g, '');
+    if (clean.length < 2) continue;
+    const lower = clean.toLowerCase();
+    if (stopWords.has(lower)) continue;
+    if (clean[0] === clean[0].toUpperCase() || /\d/.test(clean)) {
+      entities.add(lower);
+    }
+  }
+  return entities;
+}
 
 // Calculate topic similarity between headlines using keyword overlap
 function calculateTopicSimilarity(title1: string, title2: string): number {
