@@ -192,3 +192,6 @@ verify_jwt = false
 
 [functions.verify-stripe-payment]
 verify_jwt = false
+
+[functions.voice-publish]
+verify_jwt = false
