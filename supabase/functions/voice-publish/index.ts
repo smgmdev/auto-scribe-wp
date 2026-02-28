@@ -123,6 +123,7 @@ WHAT YOU DO:
 1. Publish articles to any of the available media sites listed above
 2. List available sites when asked
 3. Answer questions about publishing
+4. Search the internet for real-time information when users ask about current events, facts, news, or anything that needs up-to-date data
 
 IMPORTANT RULES:
 - Users can ONLY publish to sites listed above. If they mention Forbes, CNN, BBC, etc. — let them know that's not in their library. Say something like "That one's not connected to your library. Want me to show you what's available?"
@@ -131,7 +132,9 @@ IMPORTANT RULES:
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
 - When listing sites, say them naturally: "You've got Washington Morning, European Capitalist, and Asia Daily."
 - Match site names loosely (e.g., "washington morning" → "Washington Morning")
-- Don't repeat yourself or over-explain. Be efficient and helpful.`;
+- Don't repeat yourself or over-explain. Be efficient and helpful.
+- When users ask questions about current events, news, facts, prices, weather, sports scores, or anything that needs real-time info, use the search_web tool.
+- After searching, summarize the results naturally in your own words. Don't just dump raw search results.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -172,6 +175,21 @@ IMPORTANT RULES:
               parameters: { type: 'object', properties: {}, additionalProperties: false },
             },
           },
+          {
+            type: 'function',
+            function: {
+              name: 'search_web',
+              description: 'Search the internet for real-time information, current events, news, facts, prices, weather, sports scores, or any question that needs up-to-date data. Use this whenever the user asks about something that requires current or factual information.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  query: { type: 'string', description: 'The search query to look up on the internet' },
+                },
+                required: ['query'],
+                additionalProperties: false,
+              },
+            },
+          },
         ],
       }),
     });
@@ -204,6 +222,86 @@ IMPORTANT RULES:
       return new Response(JSON.stringify({ type: 'conversation', message: responseText }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // ── Handle search_web via Perplexity ──
+    if (toolCall.function.name === 'search_web') {
+      const parsed = JSON.parse(toolCall.function.arguments);
+      console.log('[voice-publish] Web search query:', parsed.query);
+
+      const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+      if (!PERPLEXITY_API_KEY) {
+        return new Response(JSON.stringify({ type: 'conversation', message: "I can't search the web right now — the search service isn't configured. Let me know if there's anything else I can help with." }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      try {
+        const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'sonar',
+            messages: [
+              { role: 'system', content: 'Be precise and concise. Provide factual, up-to-date information. Keep responses brief — 2-3 sentences max.' },
+              { role: 'user', content: parsed.query },
+            ],
+          }),
+        });
+
+        if (!perplexityResponse.ok) {
+          const errText = await perplexityResponse.text();
+          console.error('[voice-publish] Perplexity error:', perplexityResponse.status, errText);
+          return new Response(JSON.stringify({ type: 'conversation', message: "I tried searching but ran into an issue. Could you rephrase that?" }), {
+            status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const searchData = await perplexityResponse.json();
+        const searchResult = searchData.choices?.[0]?.message?.content || 'No results found.';
+        const citations = searchData.citations || [];
+
+        // Now have the AI summarize the search result conversationally
+        const summaryResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash-lite',
+            messages: [
+              { role: 'system', content: 'You are Mace, a friendly voice assistant. Summarize the following search results in a natural, conversational way. Keep it to 2-3 sentences max. Sound like a real person talking, not reading a report. Use contractions.' },
+              { role: 'user', content: `The user asked: "${parsed.query}"\n\nSearch results:\n${searchResult}${citations.length > 0 ? '\n\nSources: ' + citations.slice(0, 3).join(', ') : ''}` },
+            ],
+            temperature: 0.7,
+            max_tokens: 300,
+          }),
+        });
+
+        if (!summaryResponse.ok) {
+          await summaryResponse.text();
+          // Fall back to raw Perplexity response
+          return new Response(JSON.stringify({ type: 'conversation', message: searchResult }), {
+            status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const summaryData = await summaryResponse.json();
+        const conversationalAnswer = summaryData.choices?.[0]?.message?.content || searchResult;
+
+        return new Response(JSON.stringify({ type: 'conversation', message: conversationalAnswer }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (searchError) {
+        console.error('[voice-publish] Search error:', searchError);
+        return new Response(JSON.stringify({ type: 'conversation', message: "I had trouble searching for that. Want to try asking a different way?" }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // ── Handle list_available_sites ──
