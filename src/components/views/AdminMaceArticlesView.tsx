@@ -113,7 +113,8 @@ const AdminMaceArticlesView = () => {
   }, [articles, siteFilter, searchQuery]);
 
   return (
-    <div className="w-full max-w-[980px] mx-auto">
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
+      <div className="max-w-[980px] mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
         <Button
@@ -260,6 +261,7 @@ const AdminMaceArticlesView = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 };

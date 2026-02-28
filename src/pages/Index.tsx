@@ -33,6 +33,7 @@ import { AdminSecuritySupervisionView } from '@/components/views/AdminSecuritySu
 import { AdminFeedbackView } from '@/components/views/AdminFeedbackView';
 import { AdminMaceAIView } from '@/components/views/AdminMaceAIView';
 import AdminMaceArticlesView from '@/components/views/AdminMaceArticlesView';
+import { AdminMaceSettingsView } from '@/components/views/AdminMaceSettingsView';
 import { AdminSystemView } from '@/components/views/AdminSystemView';
 import { SupportView } from '@/components/views/SupportView';
 import { AdminSupportView } from '@/components/views/AdminSupportView';
@@ -95,6 +96,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-feedback': AdminFeedbackView,
   'admin-mace-ai': AdminMaceAIView,
   'admin-mace-articles': AdminMaceArticlesView,
+  'admin-mace-settings': AdminMaceSettingsView,
   'admin-system': AdminSystemView,
   'admin-support': AdminSupportView,
 };
