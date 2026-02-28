@@ -1453,11 +1453,11 @@ export default function Industries() {
           </main>
         </div>
 
-        {/* Download buttons */}
-        <PWAInstallButtons />
-
-        {/* Footer */}
-        <Footer dark />
+        <div className="border-t border-[#424245]" />
+        <div className="bg-black">
+          <PWAInstallButtons />
+        </div>
+        <Footer narrow dark />
       </div>
     </>
   );
