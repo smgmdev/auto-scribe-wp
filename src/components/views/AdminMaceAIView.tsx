@@ -344,26 +344,11 @@ export function AdminMaceAIView() {
             {step === 'speaking' && 'Speaking... tap to interrupt'}
           </p>
 
-          {/* Publish result card */}
+          {/* Publish success - brief confirmation only, articles listed in Mace Articles */}
           {publishResult && (
-            <div className="w-full max-w-lg bg-emerald-50 border border-emerald-200 rounded-lg p-5 space-y-3">
-              <h3 className="font-semibold text-emerald-900 text-lg">{publishResult.title}</h3>
-              <div className="flex flex-wrap gap-4 text-sm text-emerald-700">
-                <span>📡 {publishResult.site}</span>
-                {publishResult.creditsUsed > 0 && <span>💰 {publishResult.creditsUsed} credits</span>}
-                {publishResult.focusKeyword && <span>🔑 {publishResult.focusKeyword}</span>}
-              </div>
-              {publishResult.link && (
-                <a
-                  href={publishResult.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-900 underline"
-                >
-                  View Published Article <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-            </div>
+            <p className="text-sm text-emerald-600 font-medium">
+              ✓ Article published to {publishResult.site}. View it in Mace Articles.
+            </p>
           )}
 
           {/* Hint */}
