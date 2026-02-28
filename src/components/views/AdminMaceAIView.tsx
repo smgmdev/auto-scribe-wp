@@ -316,6 +316,7 @@ export function AdminMaceAIView() {
     
     setCurrentTranscript('');
     setInterimTranscript('');
+    setPublishResult(null);
     scribeCommittedTextRef.current = '';
     scribeActiveRef.current = true;
     
@@ -554,7 +555,7 @@ export function AdminMaceAIView() {
             </p>
           )}
 
-          {publishResult && (
+          {publishResult && step === 'idle' && (
             <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
               ✓ Published to {publishResult.site}
             </p>
