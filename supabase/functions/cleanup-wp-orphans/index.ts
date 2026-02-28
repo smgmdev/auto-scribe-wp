@@ -119,9 +119,10 @@ Deno.serve(async (req) => {
 
         r.wpPostCount = allWpPosts.length;
 
-        // 4b. Also search for posts matching tracked titles (WP search catches posts that listing misses)
-        for (const trackedTitle of (await getTrackedTitles(supabase, site.id)).slice(0, 20)) {
-          const keywords = trackedTitle.split(/\s+/).slice(0, 3).join('+');
+        // 4b. Also search for recent tracked titles (WP listing can miss newer posts)
+        const recentTracked = await getRecentTrackedTitles(supabase, site.id, 5);
+        for (const title of recentTracked) {
+          const keywords = title.split(/\s+/).slice(0, 3).join('+');
           try {
             const searchRes = await fetch(
               `${baseUrl}/wp-json/wp/v2/posts?search=${encodeURIComponent(keywords)}&per_page=20&_fields=id,title,date_gmt,status&status=publish,draft,pending,future`,
@@ -226,6 +227,18 @@ async function getTrackedTitles(supabase: any, siteId: string): Promise<string[]
     offset += 1000;
   }
   return titles;
+}
+
+// Get only the most recent tracked titles (for search augmentation, to avoid timeout)
+async function getRecentTrackedTitles(supabase: any, siteId: string, limit: number): Promise<string[]> {
+  const { data } = await supabase
+    .from('ai_published_sources')
+    .select('ai_title')
+    .eq('wordpress_site_id', siteId)
+    .not('ai_title', 'is', null)
+    .order('published_at', { ascending: false })
+    .limit(limit);
+  return (data || []).map((r: any) => r.ai_title).filter(Boolean);
 }
 
 function decodeHtml(html: string): string {
