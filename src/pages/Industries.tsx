@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ChevronLeft, ChevronRight, Factory } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Factory, ArrowLeft } from 'lucide-react';
+import { Footer } from '@/components/layout/Footer';
 
 const INDUSTRIES: { slug: string; name: string; content: string }[] = [
   {
@@ -1246,6 +1247,8 @@ export default function Industries() {
   const activeSlug = searchParams.get('industry') || INDUSTRIES[0].slug;
   const activeIndustry = INDUSTRIES.find(i => i.slug === activeSlug) || INDUSTRIES[0];
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
@@ -1263,32 +1266,49 @@ export default function Industries() {
         description={`Learn how Arcana Mace media publishing impacts the ${activeIndustry.name} sector through strategic public relations and global media distribution.`}
       />
 
-      <div className="min-h-screen bg-white dark:bg-black">
+      <div className="min-h-screen bg-white dark:bg-black flex flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-[#d2d2d7] dark:border-white/10">
-          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-12 flex items-center gap-3">
+        <header className="sticky top-0 z-40 bg-[#1d1d1f] text-white">
+          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-11 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Home</span>
+              </button>
+              <span className="text-white/30">|</span>
+              <div className="flex items-center gap-2 text-sm">
+                <Factory className="w-4 h-4 text-white/50" />
+                <span className="text-white/70">Industries</span>
+              </div>
+            </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 -ml-1.5 rounded-md hover:bg-[#f5f5f7] dark:hover:bg-white/10 transition-colors"
+              className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors"
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
-            <div className="flex items-center gap-2 text-sm">
-              <Factory className="w-4 h-4 text-[#86868b]" />
-              <span className="text-[#86868b]">Industries</span>
-              <span className="text-[#86868b]">/</span>
-              <span className="font-medium text-foreground truncate">{activeIndustry.name}</span>
-            </div>
           </div>
         </header>
 
-        <div className="max-w-[1440px] mx-auto flex">
+        {/* Breadcrumb bar */}
+        <div className="bg-[#f5f5f7] dark:bg-[#111] border-b border-[#d2d2d7] dark:border-white/10">
+          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-10 flex items-center text-xs text-[#86868b]">
+            <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Arcana Mace</button>
+            <span className="mx-2">/</span>
+            <span className="text-foreground font-medium truncate">{activeIndustry.name}</span>
+          </div>
+        </div>
+
+        <div className="max-w-[1440px] mx-auto flex flex-1 w-full">
           {/* Sidebar */}
           <aside
             className={`
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              fixed lg:sticky top-12 left-0 z-30 h-[calc(100vh-48px)]
+              fixed lg:sticky top-[84px] left-0 z-30 h-[calc(100vh-84px)]
               w-72 lg:w-64 xl:w-72
               bg-white dark:bg-black lg:bg-[#fbfbfd] lg:dark:bg-[#111]
               border-r border-[#d2d2d7] dark:border-white/10
@@ -1361,6 +1381,9 @@ export default function Industries() {
             </article>
           </main>
         </div>
+
+        {/* Footer */}
+        <Footer dark />
       </div>
     </>
   );
