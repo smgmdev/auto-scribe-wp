@@ -68,7 +68,7 @@ export function PWAInstallButtons() {
           <form onSubmit={handleSignup} className="flex w-full lg:w-auto lg:flex-1">
             <input
               type="email"
-              placeholder="Enter you e-mail for offers & news"
+              placeholder="Enter your email for offers and news"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
