@@ -51,7 +51,7 @@ export function AdminMaceAIView() {
   const [pendingArticle, setPendingArticle] = useState<any>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -71,38 +71,65 @@ export function AdminMaceAIView() {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
   }, []);
 
-  const speak = useCallback((text: string, onDone?: () => void) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.3;
-    utterance.volume = 1;
+  const speak = useCallback(async (text: string, onDone?: () => void) => {
+    // Stop any current audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
 
-    // Pick a sweet, feminine voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => 
-      v.name.includes('Samantha') || 
-      v.name.includes('Karen') ||
-      v.name.includes('Google UK English Female') ||
-      v.name.includes('Microsoft Hazel') ||
-      v.name.includes('Moira') ||
-      (v.name.includes('Female') && v.lang.startsWith('en'))
-    );
-    if (preferred) utterance.voice = preferred;
-
-    utterance.onend = () => {
-      if (isMountedRef.current && onDone) onDone();
-    };
-    utterance.onerror = () => {
-      if (isMountedRef.current && onDone) onDone();
-    };
-
-    utteranceRef.current = utterance;
     setStep('speaking');
-    window.speechSynthesis.speak(utterance);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`TTS failed: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (isMountedRef.current && onDone) onDone();
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (isMountedRef.current && onDone) onDone();
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.error('ElevenLabs TTS error, falling back to browser:', err);
+      // Fallback to browser TTS
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.3;
+      utterance.onend = () => { if (isMountedRef.current && onDone) onDone(); };
+      utterance.onerror = () => { if (isMountedRef.current && onDone) onDone(); };
+      window.speechSynthesis.speak(utterance);
+    }
   }, []);
 
   const startListening = useCallback(() => {
@@ -112,7 +139,7 @@ export function AdminMaceAIView() {
       return;
     }
 
-    window.speechSynthesis.cancel();
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
     setStep('listening');
     setCurrentTranscript('');
     setInterimTranscript('');
@@ -310,7 +337,7 @@ export function AdminMaceAIView() {
         try { recognitionRef.current.stop(); } catch (_) {}
       }
     } else if (step === 'speaking') {
-      window.speechSynthesis.cancel();
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
       startListening();
     } else if (step === 'idle') {
       startListening();
