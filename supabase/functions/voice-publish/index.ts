@@ -534,38 +534,50 @@ FORMAT YOUR RESPONSE EXACTLY:
       if (!pa.featuredImageQuery) return 0;
       try {
         console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
-        const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
+        // Use Gemini image generation model via chat completions
+        const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'flux.schnell',
-            prompt: `Professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.`,
-            n: 1,
-            size: '1024x1024',
+            model: 'google/gemini-2.5-flash-image',
+            messages: [
+              { role: 'user', content: `Generate a professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.` },
+            ],
+            modalities: ['image', 'text'],
           }),
         });
-        if (!imgGenResp.ok) { await imgGenResp.text(); return 0; }
+        if (!imgGenResp.ok) {
+          const errText = await imgGenResp.text();
+          console.error('[voice-publish] Image gen failed:', imgGenResp.status, errText);
+          return 0;
+        }
         const imgGenData = await imgGenResp.json();
-        const generatedUrl = imgGenData.data?.[0]?.url;
-        if (!generatedUrl) return 0;
-        console.log('[voice-publish] Generated image, downloading...');
-        const imgResp = await fetch(generatedUrl);
-        if (!imgResp.ok) return 0;
-        const imgBuffer = await imgResp.arrayBuffer();
-        const contentType = imgResp.headers.get('content-type') || 'image/png';
-        const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
-        const filename = `mace-featured-${Date.now()}.${ext}`;
+        const imageData = imgGenData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (!imageData || !imageData.startsWith('data:image/')) {
+          console.error('[voice-publish] No image data returned from Gemini');
+          return 0;
+        }
+        console.log('[voice-publish] Generated image, uploading to WP...');
+        // Parse base64 data URI
+        const matches = imageData.match(/^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/);
+        if (!matches) { console.error('[voice-publish] Invalid image data URI'); return 0; }
+        const imgExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+        const imgBase64 = matches[2];
+        const imgBytes = Uint8Array.from(atob(imgBase64), c => c.charCodeAt(0));
+        const contentType = `image/${matches[1]}`;
+        const filename = `mace-featured-${Date.now()}.${imgExt}`;
         const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
           method: 'POST',
           headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
-          body: imgBuffer,
+          body: imgBytes,
         });
         if (wpMediaResp.ok) {
           const wpMediaData = await wpMediaResp.json();
           console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
           return wpMediaData.id;
         }
-        await wpMediaResp.text();
+        const wpErr = await wpMediaResp.text();
+        console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
         return 0;
       } catch (imgError) {
         console.error('[voice-publish] Featured image error (non-fatal):', imgError);
