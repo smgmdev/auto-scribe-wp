@@ -65,7 +65,22 @@ export function AdminMaceAIView() {
   const scribe = useScribe({
     modelId: 'scribe_v2_realtime',
     commitStrategy: CommitStrategy.VAD,
+    onConnect: () => {
+      console.log('[Scribe] Connected to ElevenLabs STT');
+    },
+    onDisconnect: () => {
+      console.log('[Scribe] Disconnected from ElevenLabs STT');
+    },
+    onError: (error) => {
+      console.error('[Scribe] Error:', error);
+      if (isMountedRef.current && scribeActiveRef.current) {
+        scribeActiveRef.current = false;
+        setStep('idle');
+        toast.error('Speech recognition error. Please try again.');
+      }
+    },
     onPartialTranscript: (data) => {
+      console.log('[Scribe] Partial:', data.text);
       if (!isMountedRef.current || !scribeActiveRef.current) return;
       setInterimTranscript(data.text || '');
       // Reset silence timer on any partial
@@ -75,6 +90,7 @@ export function AdminMaceAIView() {
       }, SCRIBE_SILENCE_MS);
     },
     onCommittedTranscript: (data) => {
+      console.log('[Scribe] Committed:', data.text);
       if (!isMountedRef.current || !scribeActiveRef.current) return;
       const text = data.text || '';
       if (text.trim()) {
