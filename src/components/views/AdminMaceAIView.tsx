@@ -364,11 +364,6 @@ export function AdminMaceAIView() {
 
   const isProcessing = step === 'processing';
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 relative flex flex-col">
@@ -391,28 +386,27 @@ export function AdminMaceAIView() {
         )}
       </div>
 
-      {/* Messages - scrollable full body, with padding for centered button */}
-      <div className="flex-1 overflow-y-auto px-4 lg:px-8">
-        <div className="max-w-lg mx-auto space-y-3 pt-6 pb-64">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] px-4 py-2.5 text-sm ${
-                  msg.role === 'user'
-                    ? 'text-foreground text-right'
-                    : 'text-muted-foreground'
-                }`}
-              >
-                {msg.content}
-              </div>
+      {/* Hidden spacer for layout */}
+      <div className="flex-1" />
+
+      {/* Centered button / processing - fixed in viewport center */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
+        <div className="flex flex-col items-center gap-6 pointer-events-auto max-w-md px-6">
+          {/* Last message - shown above button */}
+          {messages.length > 0 && (
+            <div className="text-center max-h-40 overflow-y-auto scrollbar-none">
+              <p className={`text-sm leading-relaxed ${
+                messages[messages.length - 1].role === 'user' 
+                  ? 'text-foreground' 
+                  : 'text-muted-foreground'
+              }`}>
+                {messages[messages.length - 1].content}
+              </p>
             </div>
-          ))}
+          )}
 
           {pendingArticle && step !== 'processing' && (
-            <div className="text-center py-2">
+            <div className="text-center">
               <p className="text-sm text-amber-800 font-medium">
                 📝 Article ready: "{pendingArticle.title}" → {pendingArticle.siteName}
               </p>
@@ -421,7 +415,7 @@ export function AdminMaceAIView() {
           )}
 
           {step === 'listening' && (currentTranscript || interimTranscript) && (
-            <div className="text-center py-2">
+            <div className="text-center">
               <p className="text-foreground text-sm">
                 {currentTranscript}
                 {interimTranscript && (
@@ -432,20 +426,12 @@ export function AdminMaceAIView() {
           )}
 
           {publishResult && (
-            <div className="text-center py-2">
+            <div className="text-center">
               <p className="text-sm text-emerald-600 font-medium">
                 ✓ Article published to {publishResult.site}. View it in Mace Articles.
               </p>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Centered button / processing - fixed in viewport center */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
-        <div className="flex flex-col items-center gap-4 pointer-events-auto">
           {isProcessing ? (
             <>
               <style>{`
