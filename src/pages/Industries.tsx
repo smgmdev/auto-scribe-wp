@@ -1413,7 +1413,7 @@ export default function Industries() {
                 onClick={() => setSidebarOpen(false)}
               />
             )}
-            <div className="pt-[120px] pb-4 px-3">
+            <div className="pt-[110px] pb-4 px-3">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
                   <button
@@ -1422,7 +1422,7 @@ export default function Industries() {
                     className={`
                       w-full text-left px-3 py-2 rounded-lg text-[13px] leading-snug transition-colors
                       ${industry.slug === activeSlug
-                        ? 'bg-[#007aff] text-white font-medium'
+                        ? 'bg-black text-white font-medium'
                         : 'text-foreground hover:bg-[#f5f5f7]'
                       }
                     `}
@@ -1435,7 +1435,7 @@ export default function Industries() {
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[120px] pb-10 lg:pb-14">
+          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[110px] pb-10 lg:pb-14">
             <article className="max-w-3xl">
               <div className="prose prose-lg dark:prose-invert max-w-none
                 prose-headings:font-semibold
