@@ -73,7 +73,13 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages, action, pendingArticle } = body;
+
+    // ── Handle confirm_publish action ──
+    if (action === 'confirm_publish' && pendingArticle) {
+      return await handleConfirmPublish(supabase, userId, pendingArticle, LOVABLE_API_KEY);
+    }
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), {
@@ -233,7 +239,7 @@ IMPORTANT RULES:
         });
       }
 
-      // ── Check admin or lock credits ──
+      // ── Check credits before generating ──
       const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
@@ -242,7 +248,6 @@ IMPORTANT RULES:
         .maybeSingle();
       const isAdmin = !!roleData;
 
-      let lockId: string | null = null;
       let creditsRequired = 0;
 
       if (!isAdmin) {
@@ -294,18 +299,12 @@ IMPORTANT RULES:
                 status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
               });
             }
-            const { data: txData, error: txError } = await supabase
-              .from('credit_transactions')
-              .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${matchedSite.name} (pending)` })
-              .select('id')
-              .single();
-            if (txError) throw new Error('Failed to lock credits');
-            lockId = txData.id;
           }
         }
       }
 
-      // ── Generate article ──
+      // ── Generate article + SEO in parallel ──
+      const selectedTone = parsed.tone || 'journalist';
       const toneGuidance: Record<string, string> = {
         neutral: 'Write in a balanced, objective tone.',
         professional: 'Write in a polished corporate tone.',
@@ -315,7 +314,6 @@ IMPORTANT RULES:
         powerful: 'Write with commanding authority.',
         important: 'Write with gravitas and significance.',
       };
-      const selectedTone = parsed.tone || 'journalist';
       const toneInstruction = toneGuidance[selectedTone] || toneGuidance.journalist;
 
       const articlePrompt = `You are an experienced journalist writing for ${matchedSite.name}. Your writing must be indistinguishable from human content.
@@ -340,29 +338,45 @@ FORMAT YOUR RESPONSE EXACTLY:
 
 [Article content - ~700 words, flowing paragraphs]`;
 
-      const articleResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: articlePrompt },
-            { role: 'user', content: `Write the article about: ${parsed.topic}` },
-          ],
-          temperature: 0.7,
-          max_tokens: 2000,
+      console.log('[voice-publish] Generating article + SEO in parallel...');
+
+      // Run article generation and SEO generation in parallel
+      const [articleResponse, seoResponse] = await Promise.all([
+        fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'system', content: articlePrompt },
+              { role: 'user', content: `Write the article about: ${parsed.topic}` },
+            ],
+            temperature: 0.7,
+            max_tokens: 2000,
+          }),
         }),
-      });
+        fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash-lite',
+            messages: [
+              { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
+              { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${parsed.topic}" targeting the site "${matchedSite.name}"` },
+            ],
+            tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
+            tool_choice: { type: 'function', function: { name: 'generate_seo' } },
+          }),
+        }),
+      ]);
 
       if (!articleResponse.ok) {
-        if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
         throw new Error('Failed to generate article');
       }
 
       const articleData = await articleResponse.json();
       const rawContent = articleData.choices?.[0]?.message?.content;
       if (!rawContent) {
-        if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
         throw new Error('No article content generated');
       }
 
@@ -373,24 +387,9 @@ FORMAT YOUR RESPONSE EXACTLY:
       const articleBody = lines.slice(contentStartIndex).join('\n').trim();
       const paragraphs = articleBody.split(/\n\s*\n/).filter((p: string) => p.trim());
       const htmlContent = paragraphs.map((p: string) => p.trim().replace(/\n/g, ' ')).join('<br><br>');
+      const wordCount = articleBody.split(/\s+/).length;
 
-      console.log('[voice-publish] Generated:', articleTitle, '- words:', articleBody.split(/\s+/).length);
-
-      // ── SEO ──
-      const seoResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-3-flash-preview',
-          messages: [
-            { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
-            { role: 'user', content: `Generate SEO focus keyword and meta description for this article:\nTitle: "${articleTitle}"\nTopic: "${parsed.topic}"` },
-          ],
-          tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
-          tool_choice: { type: 'function', function: { name: 'generate_seo' } },
-        }),
-      });
-
+      // Parse SEO results
       let focusKeyword = parsed.topic;
       let metaDescription = '';
       if (seoResponse.ok) {
@@ -403,127 +402,39 @@ FORMAT YOUR RESPONSE EXACTLY:
         }
       } else { await seoResponse.text(); }
 
-      // ── Featured image (if requested) ──
-      let wpFeaturedMediaId = 0;
-      if (parsed.featured_image_query) {
-        try {
-          console.log('[voice-publish] Fetching featured image for:', parsed.featured_image_query);
-          // Use Unsplash-like free image search via Lovable AI image generation
-          const imageSearchUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(parsed.featured_image_query)}&per_page=1&orientation=landscape`;
-          // Try Pixabay as a free alternative (no key needed for limited use)
-          const pixabayKey = ''; // We'll use AI to generate image description as alt text instead
-          
-          // Upload a placeholder — in production you'd integrate with an image API
-          // For now, we search for a free image using the WordPress built-in media search
-          // or skip if no image API is configured
-          console.log('[voice-publish] Featured image requested but no image API configured, skipping');
-        } catch (imgErr) {
-          console.error('[voice-publish] Featured image error:', imgErr);
-        }
-      }
+      console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount);
 
-      // ── Publish to WordPress ──
-      const credentials = btoa(`${matchedSite.username}:${matchedSite.app_password}`);
-      const wpAuthHeader = `Basic ${credentials}`;
-      const baseUrl = matchedSite.url.replace(/\/+$/, '');
+      // ── Build a short summary for voice preview ──
+      // Take the first 2 sentences of the article as a natural summary
+      const plainText = articleBody.replace(/#+\s*/g, '').replace(/\*\*/g, '');
+      const sentences = plainText.match(/[^.!?]+[.!?]+/g) || [];
+      const summarySnippet = sentences.slice(0, 2).join(' ').trim();
+      
+      const summaryMessage = `Alright, I've written the article. The headline is: "${articleTitle}". Here's a quick preview: ${summarySnippet} — It's about ${wordCount} words. Should I go ahead and publish it to ${matchedSite.name}?`;
 
-      const postBody: Record<string, unknown> = {
-        title: articleTitle,
-        content: htmlContent,
-        status: 'publish',
-        categories: [],
-        tags: [],
-        featured_media: wpFeaturedMediaId,
-      };
-
-      if (matchedSite.seo_plugin === 'aioseo') {
-        postBody.meta = { _aioseo_description: metaDescription, _aioseo_keywords: focusKeyword };
-        postBody.aioseo_meta_data = { description: metaDescription, keyphrases: { focus: { keyphrase: focusKeyword, score: 0, analysis: {} }, additional: [] } };
-      } else if (matchedSite.seo_plugin === 'rankmath') {
-        postBody.meta = { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription };
-      }
-
-      const wpResponse = await publishWithRetry(`${baseUrl}/wp-json/wp/v2/posts`, wpAuthHeader, postBody);
-      if (!wpResponse.ok) {
-        const wpError = await wpResponse.json().catch(() => ({}));
-        if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
-        return new Response(JSON.stringify({
-          type: 'conversation',
-          message: `I couldn't publish to ${matchedSite.name}. WordPress returned an error: ${wpError.message || 'Unknown error'}. Would you like me to try again?`,
-        }), {
-          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const wpData = await wpResponse.json();
-      const wpPostId = wpData.id;
-      const wpLink = wpData.link;
-
-      // RankMath meta update
-      if (matchedSite.seo_plugin === 'rankmath' && (focusKeyword || metaDescription)) {
-        try {
-          await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
-            method: 'POST',
-            headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ meta: { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription } }),
-          }).then(r => r.text());
-        } catch (_) {}
-      }
-
-      // ── Confirm credits ──
-      if (lockId) {
-        let commissionPercentage: number | null = null;
-        if (matchedSite.agency) {
-          const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', matchedSite.agency).maybeSingle();
-          if (agencyData) commissionPercentage = agencyData.commission_percentage;
-        }
-        const metadataObj: Record<string, unknown> = {};
-        if (wpLink) metadataObj.wp_link = wpLink;
-        if (matchedSite.url) metadataObj.site_url = matchedSite.url;
-        if (commissionPercentage !== null) metadataObj.commission_percentage = commissionPercentage;
-
-        await supabase.from('credit_transactions').update({
-          type: 'publish',
-          description: `Published article to ${matchedSite.name} (voice)`,
-          ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
-        }).eq('id', lockId);
-
-        if (matchedSite.user_id && matchedSite.user_id !== userId) {
-          const commission = commissionPercentage ?? 10;
-          const platformFee = Math.round(creditsRequired * (commission / 100));
-          const ownerPayout = creditsRequired - platformFee;
-          if (ownerPayout > 0) {
-            await supabase.from('credit_transactions').insert({
-              user_id: matchedSite.user_id, amount: ownerPayout, type: 'order_payout',
-              description: `Payout for voice-published article on ${matchedSite.name}`,
-              metadata: { buyer_id: userId, site_name: matchedSite.name, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
-            });
-          }
-        }
-      }
-
-      // ── Save to DB ──
-      await supabase.from('articles').insert({
-        user_id: userId, title: articleTitle, content: htmlContent, tone: selectedTone,
-        status: 'published', published_to: matchedSite.id, published_to_name: matchedSite.name,
-        published_to_favicon: matchedSite.favicon || null, wp_post_id: wpPostId, wp_link: wpLink,
-        focus_keyword: focusKeyword, meta_description: metaDescription,
-        source_headline: { source: 'mace' },
-      });
-
-      sendTelegramAlert(TelegramAlerts.wpArticlePublished(matchedSite.name, articleTitle, wpLink || '')).catch(() => {});
-
-      const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
+      // Return the pending article for user confirmation
       return new Response(JSON.stringify({
-        type: 'publish_success',
-        message: `Done! I've published "${articleTitle}" to ${matchedSite.name}.${creditsMsg} The article is now live.`,
-        title: articleTitle,
-        site: matchedSite.name,
-        link: wpLink,
-        postId: wpPostId,
-        creditsUsed: creditsRequired,
-        focusKeyword,
-        metaDescription,
+        type: 'pending_publish',
+        message: summaryMessage,
+        pendingArticle: {
+          title: articleTitle,
+          htmlContent,
+          tone: selectedTone,
+          focusKeyword,
+          metaDescription,
+          siteId: matchedSite.id,
+          siteName: matchedSite.name,
+          siteUrl: matchedSite.url,
+          siteUsername: matchedSite.username,
+          siteAppPassword: matchedSite.app_password,
+          siteSeoPlugin: matchedSite.seo_plugin,
+          siteFavicon: matchedSite.favicon || null,
+          siteUserId: matchedSite.user_id,
+          siteAgency: matchedSite.agency,
+          creditsRequired,
+          isAdmin,
+          featuredImageQuery: parsed.featured_image_query || null,
+        },
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -542,3 +453,142 @@ FORMAT YOUR RESPONSE EXACTLY:
     });
   }
 });
+
+// ── Confirm and publish to WordPress ──
+async function handleConfirmPublish(
+  supabase: any,
+  userId: string,
+  pa: any,
+  _apiKey: string,
+) {
+  try {
+    console.log('[voice-publish] Confirming publish:', pa.title, '→', pa.siteName);
+
+    // ── Lock credits if needed ──
+    let lockId: string | null = null;
+    const creditsRequired = pa.creditsRequired || 0;
+
+    if (!pa.isAdmin && creditsRequired > 0) {
+      const { data: txData, error: txError } = await supabase
+        .from('credit_transactions')
+        .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${pa.siteName} (pending)` })
+        .select('id')
+        .single();
+      if (txError) throw new Error('Failed to lock credits');
+      lockId = txData.id;
+    }
+
+    // ── Publish to WordPress ──
+    const credentials = btoa(`${pa.siteUsername}:${pa.siteAppPassword}`);
+    const wpAuthHeader = `Basic ${credentials}`;
+    const baseUrl = pa.siteUrl.replace(/\/+$/, '');
+
+    const postBody: Record<string, unknown> = {
+      title: pa.title,
+      content: pa.htmlContent,
+      status: 'publish',
+      categories: [],
+      tags: [],
+      featured_media: 0,
+    };
+
+    if (pa.siteSeoPlugin === 'aioseo') {
+      postBody.meta = { _aioseo_description: pa.metaDescription, _aioseo_keywords: pa.focusKeyword };
+      postBody.aioseo_meta_data = { description: pa.metaDescription, keyphrases: { focus: { keyphrase: pa.focusKeyword, score: 0, analysis: {} }, additional: [] } };
+    } else if (pa.siteSeoPlugin === 'rankmath') {
+      postBody.meta = { rank_math_focus_keyword: pa.focusKeyword, rank_math_description: pa.metaDescription };
+    }
+
+    const wpResponse = await publishWithRetry(`${baseUrl}/wp-json/wp/v2/posts`, wpAuthHeader, postBody);
+    if (!wpResponse.ok) {
+      const wpError = await wpResponse.json().catch(() => ({}));
+      if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
+      return new Response(JSON.stringify({
+        type: 'conversation',
+        message: `I couldn't publish to ${pa.siteName}. WordPress returned an error: ${wpError.message || 'Unknown error'}. Would you like me to try again?`,
+      }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const wpData = await wpResponse.json();
+    const wpPostId = wpData.id;
+    const wpLink = wpData.link;
+
+    // RankMath meta update
+    if (pa.siteSeoPlugin === 'rankmath' && (pa.focusKeyword || pa.metaDescription)) {
+      try {
+        await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
+          method: 'POST',
+          headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meta: { rank_math_focus_keyword: pa.focusKeyword, rank_math_description: pa.metaDescription } }),
+        }).then(r => r.text());
+      } catch (_) {}
+    }
+
+    // ── Confirm credits ──
+    if (lockId) {
+      let commissionPercentage: number | null = null;
+      if (pa.siteAgency) {
+        const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', pa.siteAgency).maybeSingle();
+        if (agencyData) commissionPercentage = agencyData.commission_percentage;
+      }
+      const metadataObj: Record<string, unknown> = {};
+      if (wpLink) metadataObj.wp_link = wpLink;
+      if (pa.siteUrl) metadataObj.site_url = pa.siteUrl;
+      if (commissionPercentage !== null) metadataObj.commission_percentage = commissionPercentage;
+
+      await supabase.from('credit_transactions').update({
+        type: 'publish',
+        description: `Published article to ${pa.siteName} (voice)`,
+        ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
+      }).eq('id', lockId);
+
+      if (pa.siteUserId && pa.siteUserId !== userId) {
+        const commission = commissionPercentage ?? 10;
+        const platformFee = Math.round(creditsRequired * (commission / 100));
+        const ownerPayout = creditsRequired - platformFee;
+        if (ownerPayout > 0) {
+          await supabase.from('credit_transactions').insert({
+            user_id: pa.siteUserId, amount: ownerPayout, type: 'order_payout',
+            description: `Payout for voice-published article on ${pa.siteName}`,
+            metadata: { buyer_id: userId, site_name: pa.siteName, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
+          });
+        }
+      }
+    }
+
+    // ── Save to DB ──
+    await supabase.from('articles').insert({
+      user_id: userId, title: pa.title, content: pa.htmlContent, tone: pa.tone,
+      status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
+      published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
+      focus_keyword: pa.focusKeyword, meta_description: pa.metaDescription,
+      source_headline: { source: 'mace' },
+    });
+
+    sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, pa.title, wpLink || '')).catch(() => {});
+
+    const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
+    return new Response(JSON.stringify({
+      type: 'publish_success',
+      message: `Done! "${pa.title}" is now live on ${pa.siteName}.${creditsMsg}`,
+      title: pa.title,
+      site: pa.siteName,
+      link: wpLink,
+      postId: wpPostId,
+      creditsUsed: creditsRequired,
+      focusKeyword: pa.focusKeyword,
+      metaDescription: pa.metaDescription,
+    }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('[voice-publish] Confirm publish error:', error);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ type: 'conversation', message: `Publishing failed: ${msg}. Please try again.` }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
