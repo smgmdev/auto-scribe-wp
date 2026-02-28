@@ -144,10 +144,28 @@ export function AdminMaceSettingsView() {
               Configure default categories for Mace AI published articles per site
             </p>
           </div>
-          <Button onClick={handleSave} disabled={saving} size="sm">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-            Save
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={async () => {
+                setLoading(true);
+                await Promise.all([fetchSites(), fetchSavedCategories()]);
+                setSiteCategories({});
+                setOpenSites({});
+                setLoading(false);
+                toast.success('Refreshed');
+              }}
+              disabled={loading}
+              size="sm"
+              variant="outline"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Refresh
+            </Button>
+            <Button onClick={handleSave} disabled={saving} size="sm">
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Save
+            </Button>
+          </div>
         </div>
 
         {sites.length === 0 && (
