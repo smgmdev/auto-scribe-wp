@@ -1432,7 +1432,7 @@ export default function Industries() {
 
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-            <div className="sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto bg-[#fbfbfd] border-r border-[#d2d2d7] pb-4 px-3 pt-4">
+            <div className="sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto bg-[#fbfbfd] border border-[#d2d2d7] rounded-lg p-3 mt-4 mr-3">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
                   <button
