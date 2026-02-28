@@ -150,6 +150,14 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
                   Agency Account
                 </button>
               </li>
+              <li>
+                <button 
+                  onClick={() => navigate('/industries')}
+                  className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}
+                >
+                  Industries
+                </button>
+              </li>
             </ul>
           </div>
           
