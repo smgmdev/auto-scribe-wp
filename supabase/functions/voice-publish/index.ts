@@ -633,11 +633,28 @@ FORMAT YOUR RESPONSE EXACTLY:
     }
 
     // ── Publish to WordPress ──
+    // ── Resolve categories from Mace settings ──
+    let resolvedCategories: number[] = [];
+    try {
+      const hasImage = featuredMediaId > 0;
+      const { data: catRows } = await supabase
+        .from('mace_site_categories')
+        .select('category_id')
+        .eq('site_id', pa.siteId)
+        .eq('has_image', hasImage);
+      if (catRows && catRows.length > 0) {
+        resolvedCategories = catRows.map((r: any) => r.category_id);
+        console.log('[voice-publish] Resolved categories (has_image=' + hasImage + '):', resolvedCategories);
+      }
+    } catch (catErr) {
+      console.error('[voice-publish] Category lookup error (non-fatal):', catErr);
+    }
+
     const postBody: Record<string, unknown> = {
       title: articleTitle,
       content: htmlContent,
       status: 'publish',
-      categories: [],
+      categories: resolvedCategories,
       tags: [],
       featured_media: featuredMediaId,
     };

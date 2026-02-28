@@ -968,6 +968,41 @@ export type Database = {
         }
         Relationships: []
       }
+      mace_site_categories: {
+        Row: {
+          category_id: number
+          category_name: string
+          created_at: string
+          has_image: boolean
+          id: string
+          site_id: string
+        }
+        Insert: {
+          category_id: number
+          category_name: string
+          created_at?: string
+          has_image?: boolean
+          id?: string
+          site_id: string
+        }
+        Update: {
+          category_id?: number
+          category_name?: string
+          created_at?: string
+          has_image?: boolean
+          id?: string
+          site_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mace_site_categories_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "wordpress_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null
