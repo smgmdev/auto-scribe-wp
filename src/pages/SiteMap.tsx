@@ -31,6 +31,7 @@ const SITEMAP_SECTIONS = [
     title: 'For Business',
     links: [
       { label: 'Agency Account', href: '/account', state: { targetView: 'agency-application' } },
+      { label: 'Industries', href: '/industries' },
     ],
   },
   {
