@@ -199,42 +199,35 @@ export function AdminMaceAIView() {
       if (event.error === 'not-allowed') {
         toast.error('Microphone access denied.');
       }
+      recognitionRef.current = null;
       if (isMountedRef.current) {
         setStep('idle');
       }
     };
 
+    recognition.onstart = () => {
+      if (isMountedRef.current) {
+        setStep('listening');
+      }
+    };
+
     recognition.onend = () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      const wasOurRecognition = recognitionRef.current === recognition;
       recognitionRef.current = null;
 
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current || !wasOurRecognition) return;
 
       const text = finalText.trim();
       if (text.length > 1) {
         processUserMessage(text);
       } else {
-        // If recognition ended too quickly without speech (< 300ms), 
-        // it likely auto-stopped — go idle without error
-        const elapsed = Date.now() - startedAt;
-        if (!hasReceivedSpeech && elapsed < 300) {
-          setStep('idle');
-          return;
-        }
         setStep('idle');
-        if (text.length > 0) {
+        if (hasReceivedSpeech && text.length > 0) {
           toast.error('Too short. Please try again with more detail.');
         }
       }
     };
-
-    // Only show listening state after a brief delay to prevent flicker
-    // if recognition immediately fails
-    setTimeout(() => {
-      if (recognitionRef.current && isMountedRef.current) {
-        setStep('listening');
-      }
-    }, 50);
 
     recognition.start();
   }, []);
