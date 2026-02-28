@@ -70,8 +70,10 @@ export function AdminMaceAIView() {
   }, []);
 
   const stopAll = useCallback(() => {
+    isInterruptModeRef.current = false;
+    interruptCallbackRef.current = null;
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch (_) {}
+      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
     }
     if (silenceTimerRef.current) {
@@ -85,7 +87,11 @@ export function AdminMaceAIView() {
     }
   }, []);
 
-  // Start a passive background listener that can interrupt speech
+  // Ref to track if we're in "interrupt mode" (listening while AI speaks)
+  const interruptCallbackRef = useRef<((text: string) => void) | null>(null);
+  const isInterruptModeRef = useRef(false);
+
+  // Start a passive background listener that auto-restarts and can interrupt speech
   const startBackgroundListener = useCallback((onInterrupt: (text: string) => void) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -96,43 +102,93 @@ export function AdminMaceAIView() {
       recognitionRef.current = null;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    interruptCallbackRef.current = onInterrupt;
+    isInterruptModeRef.current = true;
 
-    let finalText = '';
-    let interrupted = false;
+    const createRecognition = () => {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
 
-    recognition.onresult = (event: any) => {
-      let newFinal = '';
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          newFinal += result[0].transcript;
+      let interruptTriggered = false;
+
+      recognition.onresult = (event: any) => {
+        if (!isInterruptModeRef.current || interruptTriggered) return;
+        
+        // Check for any meaningful speech (even interim) to interrupt quickly
+        let latestTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          latestTranscript += event.results[i][0].transcript;
         }
-      }
-      if (newFinal.trim().length > 1) {
-        finalText = newFinal.trim();
-        interrupted = true;
-        try { recognition.stop(); } catch (_) {}
-      }
-    };
+        
+        const trimmed = latestTranscript.trim();
+        // Interrupt as soon as we get 2+ characters of speech
+        if (trimmed.length > 1) {
+          interruptTriggered = true;
+          isInterruptModeRef.current = false;
+          
+          // Wait a tiny bit for the final result to stabilize
+          setTimeout(() => {
+            // Gather best transcript
+            let finalText = '';
+            for (let i = 0; i < event.results.length; i++) {
+              finalText += event.results[i][0].transcript;
+            }
+            const text = finalText.trim() || trimmed;
+            
+            try { recognition.stop(); } catch (_) {}
+            recognitionRef.current = null;
+            
+            if (interruptCallbackRef.current && isMountedRef.current) {
+              interruptCallbackRef.current(text);
+              interruptCallbackRef.current = null;
+            }
+          }, 300);
+        }
+      };
 
-    recognition.onerror = () => { /* let onend handle */ };
+      recognition.onerror = (event: any) => {
+        console.log('Background listener error:', event.error);
+        // no-speech is normal, will auto-restart via onend
+      };
 
-    recognition.onend = () => {
-      if (recognitionRef.current !== recognition) return;
-      recognitionRef.current = null;
-      if (interrupted && finalText && isMountedRef.current) {
-        onInterrupt(finalText);
-      }
+      recognition.onend = () => {
+        if (recognitionRef.current !== recognition) return;
+        recognitionRef.current = null;
+        
+        // Auto-restart if still in interrupt mode (keeps mic hot)
+        if (isInterruptModeRef.current && isMountedRef.current) {
+          setTimeout(() => {
+            if (isInterruptModeRef.current && isMountedRef.current) {
+              try {
+                const newRecog = createRecognition();
+                recognitionRef.current = newRecog;
+                newRecog.start();
+              } catch (_) {}
+            }
+          }, 100);
+        }
+      };
+
+      return recognition;
     };
 
     try {
+      const recognition = createRecognition();
       recognitionRef.current = recognition;
       recognition.start();
     } catch (_) {
+      recognitionRef.current = null;
+      isInterruptModeRef.current = false;
+    }
+  }, []);
+
+  const stopBackgroundListener = useCallback(() => {
+    isInterruptModeRef.current = false;
+    interruptCallbackRef.current = null;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
     }
   }, []);
@@ -144,8 +200,13 @@ export function AdminMaceAIView() {
       audioRef.current.src = '';
     }
 
+    // Store onDone so interrupt can skip it
+    const onDoneRef = { current: onDone };
+    let wasInterrupted = false;
+
     // Handler for voice interruption during speech
     const handleInterrupt = (spokenText: string) => {
+      wasInterrupted = true;
       // Stop audio playback
       if (audioRef.current) {
         audioRef.current.pause();
@@ -190,20 +251,17 @@ export function AdminMaceAIView() {
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
-        // Stop background listener if still running
-        if (recognitionRef.current) {
-          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-          recognitionRef.current = null;
+        if (!wasInterrupted) {
+          stopBackgroundListener();
+          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
         }
-        if (isMountedRef.current && onDone) onDone();
       };
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
-        if (recognitionRef.current) {
-          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-          recognitionRef.current = null;
+        if (!wasInterrupted) {
+          stopBackgroundListener();
+          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
         }
-        if (isMountedRef.current && onDone) onDone();
       };
 
       await audio.play();
@@ -217,22 +275,20 @@ export function AdminMaceAIView() {
       utterance.rate = 1.0;
       utterance.pitch = 1.3;
       utterance.onend = () => {
-        if (recognitionRef.current) {
-          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-          recognitionRef.current = null;
+        if (!wasInterrupted) {
+          stopBackgroundListener();
+          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
         }
-        if (isMountedRef.current && onDone) onDone();
       };
       utterance.onerror = () => {
-        if (recognitionRef.current) {
-          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-          recognitionRef.current = null;
+        if (!wasInterrupted) {
+          stopBackgroundListener();
+          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
         }
-        if (isMountedRef.current && onDone) onDone();
       };
       window.speechSynthesis.speak(utterance);
     }
-  }, [startBackgroundListener]);
+  }, [startBackgroundListener, stopBackgroundListener]);
 
   const startListening = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -667,7 +723,7 @@ export function AdminMaceAIView() {
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
             {step === 'listening' && (pendingArticle ? 'Listening for confirmation...' : 'Listening...')}
             {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
-            {step === 'speaking' && 'Speaking... tap to interrupt'}
+            {step === 'speaking' && 'Speaking... just speak to interrupt'}
           </p>
 
           {/* Publish success */}
