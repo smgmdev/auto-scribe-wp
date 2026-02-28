@@ -52,10 +52,7 @@ const AdminMaceArticlesView = () => {
   return (
     <div className="w-full max-w-[980px] mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
-          <span className="text-4xl font-bold text-foreground">({articles.length})</span>
-        </div>
+        <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
         <Button
           onClick={() => fetchMaceArticles(true)}
           disabled={loading}
