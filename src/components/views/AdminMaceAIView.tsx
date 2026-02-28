@@ -67,6 +67,7 @@ export function AdminMaceAIView() {
   const scribe = useScribe({
     modelId: 'scribe_v2_realtime',
     commitStrategy: CommitStrategy.VAD,
+    languageCode: 'en',
     onConnect: () => {
       console.log('[Scribe] Connected to ElevenLabs STT');
     },
