@@ -48,29 +48,45 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Check globally across ALL settings to prevent any duplicate sources or topics
+        // Check globally AND per-site to prevent duplicate sources or topics
         const { data: published } = await supabase
           .from('ai_published_sources')
-          .select('source_url, source_title, ai_title');
+          .select('source_url, source_title, ai_title, wordpress_site_id');
 
         const publishedUrls = new Set((published || []).map((s: { source_url: string }) => s.source_url));
         
+        // Separate per-site published articles for stricter per-site dedup
+        const sitePublished = (published || []).filter(
+          (p: { wordpress_site_id: string | null }) => p.wordpress_site_id === setting.target_site_id
+        );
+        
         // Find a new item that hasn't been published and has a unique topic
         const newItem = rssItems.find((item) => {
-          // Skip if URL already published
+          // Skip if URL already published anywhere
           if (publishedUrls.has(item.link)) return false;
           
-          // Check topic similarity against recently published articles
-          const isSimilarTopic = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
+          // Per-site check: stricter threshold (25%) to prevent same topic on same WP site
+          const isSimilarOnSameSite = sitePublished.some((pub: { source_title: string; ai_title: string | null }) => {
             const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.35) { // 35% threshold - stricter to ensure unique topics
-              console.log(`[auto-publish] Skipping similar topic: "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
+            if (similarity > 0.25) {
+              console.log(`[auto-publish] Skipping (same-site duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
+              return true;
+            }
+            return false;
+          });
+          if (isSimilarOnSameSite) return false;
+          
+          // Global check: moderate threshold to avoid cross-site exact duplicates
+          const isSimilarGlobally = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
+            const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
+            if (similarity > 0.40) {
+              console.log(`[auto-publish] Skipping (global duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
               return true;
             }
             return false;
           });
           
-          return !isSimilarTopic;
+          return !isSimilarGlobally;
         });
 
         if (!newItem) {
@@ -181,7 +197,8 @@ interface RssItem {
 function calculateTopicSimilarity(newTitle: string, publishedSourceTitle: string, publishedAiTitle: string | null): number {
   const extractKeywords = (text: string): Set<string> => {
     // Common stop words to ignore
-    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if', 'massive', 'major', 'big', 'global', 'market', 'markets', 'stock', 'stocks', 'investors', 'wall', 'street', 'billions', 'trillion', 'trillions', 'erases', 'erase', 'erasing', 'wipes', 'wipe', 'wiping', 'fears', 'fear', 'panic', 'anxiety', 'triggers', 'trigger', 'sparks', 'spark', 'selloff', 'sell', 'selling', 'gains', 'losses', 'wealth', 'value', 'software', 'tech', 'technology', 'giants', 'giant', 'generative', 'artificial', 'intelligence']);
+    // Only true grammatical stop words — keep ALL topic/subject words for accurate similarity
+    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if']);
     
     return new Set(
       text.toLowerCase()
