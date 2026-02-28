@@ -1395,8 +1395,8 @@ export default function Industries() {
           <aside
             className={`
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              fixed lg:sticky top-[148px] lg:top-[110px] left-0 z-30
-              h-[calc(100vh-148px)] lg:h-[calc(100vh-110px)]
+              fixed lg:sticky top-[148px] lg:top-0 left-0 z-30
+              h-[calc(100vh-148px)] lg:h-screen lg:self-start
               w-72 lg:w-64 xl:w-72
               bg-white lg:bg-[#fbfbfd]
               border-r border-[#d2d2d7]
