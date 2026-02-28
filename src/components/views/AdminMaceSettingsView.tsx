@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Loader2, Save, ImageOff, ImageIcon, ChevronRight, X } from 'lucide-react';
+import { Loader2, Save, ImageOff, ImageIcon, ChevronRight, X, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -144,9 +144,9 @@ export function AdminMaceSettingsView() {
               Configure default categories for Mace AI published articles per site
             </p>
           </div>
-          <div className="flex items-center">
-            <Button onClick={handleSave} disabled={saving} size="sm" className="rounded-r-none bg-black text-white hover:bg-black/90">
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSave} disabled={saving} className="bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Save
             </Button>
             <Button
@@ -159,10 +159,9 @@ export function AdminMaceSettingsView() {
                 toast.success('Refreshed');
               }}
               disabled={loading}
-              size="sm"
-              className="rounded-l-none border-l border-l-white/20 bg-black text-white hover:bg-black/90"
+              className="bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               Refresh
             </Button>
           </div>
