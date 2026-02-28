@@ -96,15 +96,16 @@ Deno.serve(async (req) => {
         }
 
         // 4. Fetch WP posts published AFTER the earliest auto-publish date
-        const allWpPosts: { id: number; title: { rendered: string }; date: string }[] = [];
+        // Use 24hr buffer and date_gmt parameter for timezone-safe filtering
+        const allWpPosts: { id: number; title: { rendered: string }; date_gmt: string }[] = [];
         let wpPage = 1;
-        const afterDate = new Date(earliestAutoPublish.getTime() - 60 * 60 * 1000).toISOString(); // 1hr buffer
+        const afterDate = new Date(earliestAutoPublish.getTime() - 24 * 60 * 60 * 1000).toISOString();
         while (wpPage <= 50) {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 15000);
           try {
             const wpRes = await fetch(
-              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&after=${afterDate}&_fields=id,title,date`,
+              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&after=${afterDate}&orderby=date&order=desc&_fields=id,title,date_gmt`,
               { headers: { 'Authorization': `Basic ${creds}` }, signal: controller.signal }
             );
             clearTimeout(timeout);
