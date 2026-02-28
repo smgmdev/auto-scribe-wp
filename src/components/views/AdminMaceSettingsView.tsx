@@ -34,6 +34,7 @@ export function AdminMaceSettingsView() {
   const [savedCategories, setSavedCategories] = useState<SavedCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [openSites, setOpenSites] = useState<Record<string, boolean>>({});
 
   // Local selections: { siteId: { withImage: number[], withoutImage: number[] } }
@@ -151,17 +152,17 @@ export function AdminMaceSettingsView() {
             </Button>
             <Button
               onClick={async () => {
-                setLoading(true);
+                setRefreshing(true);
                 await Promise.all([fetchSites(), fetchSavedCategories()]);
                 setSiteCategories({});
                 setOpenSites({});
-                setLoading(false);
+                setRefreshing(false);
                 toast.success('Refreshed');
               }}
-              disabled={loading}
+              disabled={refreshing}
               className="rounded-l-none bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              {refreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               Refresh
             </Button>
           </div>
