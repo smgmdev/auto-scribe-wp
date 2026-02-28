@@ -673,6 +673,82 @@ const Landing = () => {
         )}
       </main>
 
+      {/* Bug Report CTA Section */}
+      <section className="relative overflow-hidden mt-12">
+        {!bugReportVideoLoaded && (
+          <div className="absolute bottom-4 right-4 z-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+          </div>
+        )}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          onCanPlayThrough={() => setBugReportVideoLoaded(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={bugReportBg} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24 text-center">
+          <h2 className="text-2xl md:text-4xl font-heading font-bold text-white mb-4">
+            Found a bug? Report it and get free credits.
+          </h2>
+          <p className="text-[#86868b] text-base md:text-lg mb-8 max-w-2xl mx-auto">
+            Help us improve the platform. Submit a detailed bug report and earn credits as a thank you.
+          </p>
+          <Button
+            variant="outline"
+            className="rounded-none border-white text-white hover:bg-white hover:text-black transition-all duration-300 group"
+            onClick={() => navigate('/report-bug')}
+          >
+            Report a Bug
+            <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
+          </Button>
+        </div>
+      </section>
+
+      {/* Media Buying Section */}
+      <section className="relative overflow-hidden">
+        {!mediaBuyingVideoLoaded && (
+          <div className="absolute bottom-4 right-4 z-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+          </div>
+        )}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={mediaBuyingPoster}
+          onCanPlayThrough={() => setMediaBuyingVideoLoaded(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src={mediaBuyingBg} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 py-16 md:py-24">
+          <div className="text-center">
+            <h2 className="text-2xl md:text-4xl font-heading font-bold text-white mb-4">
+              Control the Narrative.
+            </h2>
+            <p className="text-lg md:text-xl text-[#86868b] mb-2">Media Buying Marketplace.</p>
+            <p className="text-[#86868b] text-base md:text-lg mb-8 max-w-2xl mx-auto">
+              Access premium media placements worldwide. Publish on top-tier sites with guaranteed delivery and transparent pricing.
+            </p>
+            <Button
+              variant="outline"
+              className="rounded-none border-white text-white hover:bg-white hover:text-black transition-all duration-300 group"
+              onClick={() => navigate('/media-buying')}
+            >
+              Explore Media Buying
+              <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* WP Site Detail - Draggable Popup */}
       {wpDialogOpen && selectedSite && (isMobile ? (
         createPortal(
