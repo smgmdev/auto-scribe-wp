@@ -1395,14 +1395,14 @@ export default function Industries() {
           <aside
             className={`
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              fixed lg:sticky top-[148px] lg:top-0 left-0 z-30
-              h-[calc(100vh-148px)] lg:h-screen lg:self-start
+              fixed lg:relative top-[148px] lg:top-0 left-0 z-30
+              h-[calc(100vh-148px)] lg:h-auto
               w-72 lg:w-64 xl:w-72
               bg-white lg:bg-[#fbfbfd]
               border-r border-[#d2d2d7]
               transition-transform duration-200 ease-in-out
               lg:transition-none
-              overflow-y-auto
+              overflow-y-auto lg:overflow-visible
               flex-shrink-0
             `}
           >
@@ -1413,7 +1413,7 @@ export default function Industries() {
                 onClick={() => setSidebarOpen(false)}
               />
             )}
-            <div className="pt-4 pb-4 px-3">
+            <div className="pt-[110px] pb-4 px-3">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
                   <button
