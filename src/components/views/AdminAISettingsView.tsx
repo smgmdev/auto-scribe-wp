@@ -747,7 +747,16 @@ export function AdminAISettingsView() {
 
       {/* Existing Settings */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Configured Sources</h2>
+        <h2 className="text-xl font-semibold">
+          Configured Sources{' '}
+          {settings && settings.length > 0 && (
+            <span className="text-muted-foreground text-base font-normal">
+              ({settings.filter(s => s.enabled).length === settings.length 
+                ? settings.length 
+                : `${settings.filter(s => s.enabled).length}/${settings.length}`})
+            </span>
+          )}
+        </h2>
 
         {settingsLoading ? (
           Array.from({ length: 2 }).map((_, i) => (
