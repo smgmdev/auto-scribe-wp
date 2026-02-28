@@ -133,9 +133,9 @@ const AdminMaceArticlesView = () => {
 
       {/* Filter & Search */}
       {!loading && articles.length > 0 && (
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-col md:flex-row mb-4">
           <Select value={siteFilter} onValueChange={setSiteFilter}>
-            <SelectTrigger className="w-[200px] h-9 text-sm">
+            <SelectTrigger className="w-full md:w-[200px] h-9 text-sm rounded-b-none md:rounded-b-lg md:rounded-r-none border-b-0 md:border-b md:border-r-0">
               <SelectValue placeholder="Filter by news site" />
             </SelectTrigger>
             <SelectContent>
@@ -150,13 +150,13 @@ const AdminMaceArticlesView = () => {
               ))}
             </SelectContent>
           </Select>
-          <div className="relative flex-1 max-w-[280px]">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search articles..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="pl-8 h-9 text-sm bg-black text-white border-black placeholder:text-gray-400"
+              className="pl-8 h-9 text-sm bg-black text-white border-black placeholder:text-gray-400 rounded-t-none md:rounded-t-lg md:rounded-l-none"
             />
           </div>
         </div>
