@@ -1432,14 +1432,14 @@ export default function Industries() {
 
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-            <div className="sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto bg-[#fbfbfd] border border-[#d2d2d7] rounded-lg p-3 mt-4 mr-3">
-              <nav className="space-y-0.5">
+            <div className="sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto bg-[#fbfbfd] border border-[#d2d2d7] rounded-none p-0 mt-4 mr-3">
+              <nav>
                 {INDUSTRIES.map((industry) => (
                   <button
                     key={industry.slug}
                     onClick={() => handleSelect(industry.slug)}
                     className={`
-                      w-full text-left px-3 py-2 rounded-lg text-[13px] leading-snug transition-colors
+                      w-full text-left px-4 py-3 text-[13px] leading-snug transition-colors
                       ${industry.slug === activeSlug
                         ? 'bg-black text-white font-medium'
                         : 'text-foreground hover:bg-[#f5f5f7]'
