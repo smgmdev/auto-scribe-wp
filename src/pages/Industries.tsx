@@ -1442,17 +1442,24 @@ export default function Industries() {
                 {activeIndustry.content.split('\n').map((line, i) => {
                   const trimmed = line.trim();
                   if (!trimmed) return null;
+                  
+                  // Helper to parse inline **bold** markers
+                  const renderInline = (text: string) => {
+                    const parts = text.split(/(\*\*.*?\*\*)/g);
+                    return parts.map((part, j) => {
+                      if (part.startsWith('**') && part.endsWith('**')) {
+                        return <strong key={j} className="text-foreground">{part.slice(2, -2)}</strong>;
+                      }
+                      return <span key={j}>{part}</span>;
+                    });
+                  };
+                  
                   if (trimmed.startsWith('## ')) return <h2 key={i} className="text-3xl font-bold text-foreground mt-2 mb-4">{trimmed.replace('## ', '')}</h2>;
                   if (trimmed.startsWith('### ')) return <h3 key={i} className="text-xl font-semibold text-foreground mt-10 mb-3">{trimmed.replace('### ', '')}</h3>;
-                  if (trimmed.startsWith('- **')) {
-                    const match = trimmed.match(/^- \*\*(.+?)\*\*\s*(.*)$/);
-                    if (match) return <li key={i} className="list-disc ml-6 text-[15px] leading-relaxed text-[#1d1d1f]"><strong className="text-foreground">{match[1]}</strong> {match[2]}</li>;
+                  if (trimmed.startsWith('- ')) {
+                    return <li key={i} className="list-disc ml-6 text-[15px] leading-relaxed text-[#1d1d1f]">{renderInline(trimmed.slice(2))}</li>;
                   }
-                  if (trimmed.startsWith('**') && trimmed.includes('.**')) {
-                    const match = trimmed.match(/^\*\*(.+?)\*\*\s*(.*)$/);
-                    if (match) return <p key={i} className="text-[15px] leading-relaxed text-[#1d1d1f]"><strong className="text-foreground">{match[1]}</strong> {match[2]}</p>;
-                  }
-                  return <p key={i} className="text-[15px] leading-relaxed text-[#424245]">{trimmed}</p>;
+                  return <p key={i} className="text-[15px] leading-relaxed text-[#424245]">{renderInline(trimmed)}</p>;
                 })}
               </div>
             </article>
