@@ -746,7 +746,7 @@ export function AdminAISettingsView() {
       )}
 
       {/* Existing Settings */}
-      <div className="space-y-4">
+      <div className="space-y-0">
         <h2 className="text-xl font-semibold">
           Configured Sources{' '}
           {settings && settings.length > 0 && (
