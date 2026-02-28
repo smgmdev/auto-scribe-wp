@@ -341,11 +341,11 @@ export function AdminMaceAIView() {
         try { recognitionRef.current.stop(); } catch (_) {}
       }
     } else if (step === 'speaking') {
-      // Stop speech, go to idle
+      // Stop speech and immediately start listening (interrupt)
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
       window.speechSynthesis.cancel();
       isProcessingRef.current = false;
-      setStep('idle');
+      startListening();
     } else if (step === 'idle') {
       startListening();
     }
@@ -524,7 +524,7 @@ export function AdminMaceAIView() {
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
             {step === 'listening' && (pendingArticle ? 'Listening for confirmation...' : 'Listening...')}
             {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
-            {step === 'speaking' && 'Speaking... tap to stop'}
+            {step === 'speaking' && 'Speaking... tap to interrupt & talk'}
           </p>
 
           {publishResult && (
