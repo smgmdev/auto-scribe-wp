@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
           const timeout = setTimeout(() => controller.abort(), 15000);
           try {
             const wpRes = await fetch(
-              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&orderby=date&order=desc&_fields=id,title,date_gmt`,
+              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&orderby=date&order=desc&status=publish,draft,pending,future&_fields=id,title,date_gmt,status`,
               { headers: { 'Authorization': `Basic ${creds}` }, signal: controller.signal }
             );
             clearTimeout(timeout);
@@ -118,6 +118,29 @@ Deno.serve(async (req) => {
         }
 
         r.wpPostCount = allWpPosts.length;
+
+        // 4b. Also search for posts matching tracked titles (WP search catches posts that listing misses)
+        for (const trackedTitle of (await getTrackedTitles(supabase, site.id)).slice(0, 20)) {
+          const keywords = trackedTitle.split(/\s+/).slice(0, 3).join('+');
+          try {
+            const searchRes = await fetch(
+              `${baseUrl}/wp-json/wp/v2/posts?search=${encodeURIComponent(keywords)}&per_page=20&_fields=id,title,date_gmt,status&status=publish,draft,pending,future`,
+              { headers: { 'Authorization': `Basic ${creds}` } }
+            );
+            if (searchRes.ok) {
+              const searchPosts = await searchRes.json();
+              if (Array.isArray(searchPosts)) {
+                for (const sp of searchPosts) {
+                  if (!allWpPosts.some(p => p.id === sp.id)) {
+                    allWpPosts.push(sp);
+                  }
+                }
+              }
+            }
+          } catch { /* search failed, continue */ }
+        }
+
+        console.log(`[wp-orphan-cleanup] ${site.name}: ${allWpPosts.length} total WP posts after search augmentation`);
 
         // 5. Find duplicate orphans: WP posts whose titles closely match tracked auto-published
         // articles but have DIFFERENT post IDs (= race-condition ghosts from the old bug)
