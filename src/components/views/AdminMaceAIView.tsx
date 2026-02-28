@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, MicOff, Loader2, Volume2, ExternalLink, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import amblack from '@/assets/amblack.png';
 
 type ConversationStep = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -394,38 +395,113 @@ export function AdminMaceAIView() {
             </div>
           )}
 
-          {/* Mic Button */}
-          <button
-            onClick={handleMicClick}
-            disabled={isProcessing}
-            className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-              step === 'listening'
-                ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
-                : step === 'speaking'
-                ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
-                : isProcessing
-                ? 'bg-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]'
-                : 'bg-foreground hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
-            }`}
-          >
-            {step === 'listening' && (
-              <>
-                <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" />
-                <span className="absolute -inset-4 rounded-full border-2 border-red-400 opacity-30 animate-pulse" />
-              </>
-            )}
-            {step === 'speaking' && (
-              <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse" />
-            )}
-            {isProcessing && (
-              <span className="absolute inset-0 rounded-full border-4 border-amber-300 opacity-40 animate-spin" style={{ borderTopColor: 'transparent' }} />
-            )}
+          {/* Mic / Processing display */}
+          {isProcessing ? (
+            <>
+              <style>{`
+                @keyframes mace-orbit-1 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-2 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-3 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-4 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-glow-spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+                @keyframes mace-glow-spin-rev {
+                  0% { transform: rotate(360deg); }
+                  100% { transform: rotate(0deg); }
+                }
+                @keyframes mace-sphere-pulse {
+                  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+                  50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
+                }
+                @keyframes mace-rings-entrance {
+                  0% { opacity: 0; transform: scale(0.8); }
+                  100% { opacity: 1; transform: scale(1); }
+                }
+                .mace-rings { animation: mace-rings-entrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+              `}</style>
+              <div 
+                className="relative w-32 h-32 flex items-center justify-center mace-rings"
+                style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
+              >
+                <img src={amblack} alt="Mace AI" className="absolute z-10 h-12 w-12 object-contain" style={{ transform: 'translateZ(0px)' }} />
+                
+                {/* Ring 1 - Blue */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-1 8s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #007AFF', boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 1s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #007AFF 30%, #0055cc 70%, #003399 100%)', boxShadow: '0 0 8px 2px rgba(0, 122, 255, 1), 0 0 16px 6px rgba(0, 122, 255, 0.7)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.5s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Ring 2 - Purple */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-2 10s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #5856D6', boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 1.2s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #5856D6 30%, #4240a8 70%, #2d2b7a 100%)', boxShadow: '0 0 8px 2px rgba(88, 86, 214, 1), 0 0 16px 6px rgba(88, 86, 214, 0.7)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.6s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Ring 3 - Cyan */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-3 12s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #32ADE6', boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 0.8s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #32ADE6 30%, #1a8fc4 70%, #0d6a99 100%)', boxShadow: '0 0 8px 2px rgba(50, 173, 230, 1), 0 0 16px 6px rgba(50, 173, 230, 0.7)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.4s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Ring 4 - Orange */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-4 9s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #FF9500', boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 0.9s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #FF9500 30%, #cc7700 70%, #995900 100%)', boxShadow: '0 0 8px 2px rgba(255, 149, 0, 1), 0 0 16px 6px rgba(255, 149, 0, 0.7)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.45s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={handleMicClick}
+              className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 ${
+                step === 'listening'
+                  ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
+                  : step === 'speaking'
+                  ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
+                  : 'bg-foreground hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
+              }`}
+            >
+              {step === 'listening' && (
+                <>
+                  <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" />
+                  <span className="absolute -inset-4 rounded-full border-2 border-red-400 opacity-30 animate-pulse" />
+                </>
+              )}
+              {step === 'speaking' && (
+                <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse" />
+              )}
 
-            {step === 'idle' && <Mic className="w-9 h-9 text-white relative z-10" />}
-            {step === 'listening' && <MicOff className="w-9 h-9 text-white relative z-10" />}
-            {isProcessing && <Loader2 className="w-9 h-9 text-white relative z-10 animate-spin" />}
-            {step === 'speaking' && <Volume2 className="w-9 h-9 text-white relative z-10 animate-pulse" />}
-          </button>
+              {step === 'idle' && <Mic className="w-9 h-9 text-white relative z-10" />}
+              {step === 'listening' && <MicOff className="w-9 h-9 text-white relative z-10" />}
+              {step === 'speaking' && <Volume2 className="w-9 h-9 text-white relative z-10 animate-pulse" />}
+            </button>
+          )}
 
           {/* Status label */}
           <p className={`text-xs font-medium transition-colors ${
