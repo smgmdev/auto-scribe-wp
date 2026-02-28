@@ -364,51 +364,55 @@ export function AdminMaceAIView() {
 
   const isProcessing = step === 'processing';
 
-  return (
-    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
-      <div className="max-w-[980px] mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Mace AI</h1>
-            <p className="mt-2 text-muted-foreground">
-              Voice-powered article publishing — speak and I'll handle the rest
-            </p>
-          </div>
-          {messages.length > 0 && (
-            <button
-              onClick={resetConversation}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
-          )}
-        </div>
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
-          {messages.length > 0 && (
-            <div className="w-full max-w-lg space-y-3 max-h-[35vh] overflow-y-auto px-1">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === 'user'
-                        ? 'bg-foreground text-white rounded-br-md'
-                        : 'bg-muted text-foreground rounded-bl-md'
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 relative flex flex-col">
+      {/* Header */}
+      <div className="p-4 lg:p-8 pb-0 flex items-center justify-between max-w-[980px] mx-auto w-full">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Mace AI</h1>
+          <p className="mt-2 text-muted-foreground">
+            Voice-powered article publishing — speak and I'll handle the rest
+          </p>
+        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={resetConversation}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset
+          </button>
+        )}
+      </div>
+
+      {/* Messages - scrollable full body, with padding for centered button */}
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8">
+        <div className="max-w-lg mx-auto space-y-3 pt-6 pb-64">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[85%] px-4 py-2.5 text-sm ${
+                  msg.role === 'user'
+                    ? 'text-foreground text-right'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {msg.content}
+              </div>
             </div>
-          )}
+          ))}
 
           {pendingArticle && step !== 'processing' && (
-            <div className="w-full max-w-lg bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+            <div className="text-center py-2">
               <p className="text-sm text-amber-800 font-medium">
                 📝 Article ready: "{pendingArticle.title}" → {pendingArticle.siteName}
               </p>
@@ -417,7 +421,7 @@ export function AdminMaceAIView() {
           )}
 
           {step === 'listening' && (currentTranscript || interimTranscript) && (
-            <div className="w-full max-w-lg bg-muted/50 rounded-lg p-3 text-center">
+            <div className="text-center py-2">
               <p className="text-foreground text-sm">
                 {currentTranscript}
                 {interimTranscript && (
@@ -427,6 +431,21 @@ export function AdminMaceAIView() {
             </div>
           )}
 
+          {publishResult && (
+            <div className="text-center py-2">
+              <p className="text-sm text-emerald-600 font-medium">
+                ✓ Article published to {publishResult.site}. View it in Mace Articles.
+              </p>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Centered button / processing - fixed in viewport center */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
+        <div className="flex flex-col items-center gap-4 pointer-events-auto">
           {isProcessing ? (
             <>
               <style>{`
@@ -526,28 +545,23 @@ export function AdminMaceAIView() {
             {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
             {step === 'speaking' && 'Speaking... tap to interrupt & talk'}
           </p>
-
-          {publishResult && (
-            <p className="text-sm text-emerald-600 font-medium">
-              ✓ Article published to {publishResult.site}. View it in Mace Articles.
-            </p>
-          )}
-
-          {step === 'idle' && messages.length === 0 && (
-            <div className="text-center max-w-md space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Tap the microphone and say something like:
-              </p>
-              <p className="text-sm text-foreground font-medium italic">
-                "Publish an article about Dubai on Washington Morning"
-              </p>
-              <p className="text-xs text-muted-foreground mt-4">
-                Mace AI will generate the article, read you a summary, and ask for your confirmation before publishing.
-              </p>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Hint - only when no messages */}
+      {step === 'idle' && messages.length === 0 && (
+        <div className="fixed bottom-8 left-0 right-0 text-center pointer-events-none z-10 px-4">
+          <p className="text-sm text-muted-foreground">
+            Tap the microphone and say something like:
+          </p>
+          <p className="text-sm text-foreground font-medium italic mt-1">
+            "Publish an article about Dubai on Washington Morning"
+          </p>
+          <p className="text-xs text-muted-foreground mt-3">
+            Mace AI will generate the article, read you a summary, and ask for your confirmation before publishing.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
