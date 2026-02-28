@@ -21,7 +21,7 @@ interface PublishResult {
 }
 
 const SILENCE_TIMEOUT_MS = 1500;
-const SCRIBE_SILENCE_MS = 3000; // Time after last committed transcript to auto-stop
+const SCRIBE_SILENCE_MS = 1500; // Time after last speech to auto-stop and process
 
 function isConfirmation(text: string): boolean {
   const lower = text.toLowerCase().trim();
