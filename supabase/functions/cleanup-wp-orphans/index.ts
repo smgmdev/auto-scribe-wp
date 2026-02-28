@@ -16,75 +16,53 @@ Deno.serve(async (req) => {
 
   try {
     let targetSiteId: string | null = null;
-    let dryRun = true; // Default to dry run for safety
+    let dryRun = true;
     try {
       const body = await req.json();
       targetSiteId = body?.siteId || null;
       if (body?.dryRun === false) dryRun = false;
     } catch { /* no body */ }
 
-    console.log(`[wp-orphan-cleanup] Starting cleanup. dryRun=${dryRun}, targetSiteId=${targetSiteId || 'all'}`);
+    console.log(`[wp-orphan-cleanup] dryRun=${dryRun}, siteId=${targetSiteId || 'all'}`);
 
-    // Get all WordPress sites (or a specific one)
+    // Get target site(s)
     let siteQuery = supabase.from('wordpress_sites').select('id, name, url, username, app_password');
-    if (targetSiteId) {
-      siteQuery = siteQuery.eq('id', targetSiteId);
-    }
+    if (targetSiteId) siteQuery = siteQuery.eq('id', targetSiteId);
     const { data: sites, error: sitesError } = await siteQuery;
     if (sitesError) throw sitesError;
-    if (!sites || sites.length === 0) {
-      return new Response(JSON.stringify({ message: 'No WordPress sites found' }),
+    if (!sites?.length) {
+      return new Response(JSON.stringify({ message: 'No sites found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const results: {
-      siteName: string;
-      siteId: string;
-      wpPostCount: number;
-      trackedCount: number;
-      orphanCount: number;
-      deletedCount: number;
-      orphanTitles: string[];
-      errors: string[];
-    }[] = [];
+    const results: any[] = [];
 
     for (const site of sites) {
-      console.log(`[wp-orphan-cleanup] Scanning site: ${site.name} (${site.id})`);
-      const siteResult = {
-        siteName: site.name,
-        siteId: site.id,
-        wpPostCount: 0,
-        trackedCount: 0,
-        orphanCount: 0,
-        deletedCount: 0,
-        orphanTitles: [] as string[],
-        errors: [] as string[],
-      };
+      console.log(`[wp-orphan-cleanup] Scanning: ${site.name}`);
+      const r = { siteName: site.name, siteId: site.id, wpPostCount: 0, trackedCount: 0, orphanCount: 0, deletedCount: 0, orphanTitles: [] as string[], errors: [] as string[] };
 
       try {
         const creds = btoa(`${site.username}:${site.app_password}`);
         const baseUrl = site.url.replace(/\/+$/, '');
 
-        // Fetch ALL tracked post IDs for this site from our DB (paginated)
-        const trackedPostIds = new Set<number>();
+        // 1. Get ALL tracked auto-publish post IDs for this site
+        const trackedIds = new Set<number>();
         let offset = 0;
-        const PAGE_SIZE = 1000;
         while (true) {
           const { data: page } = await supabase
             .from('ai_published_sources')
             .select('wordpress_post_id')
             .eq('wordpress_site_id', site.id)
             .not('wordpress_post_id', 'is', null)
-            .range(offset, offset + PAGE_SIZE - 1);
-          if (!page || page.length === 0) break;
-          for (const row of page) {
-            if (row.wordpress_post_id) trackedPostIds.add(row.wordpress_post_id);
-          }
-          if (page.length < PAGE_SIZE) break;
-          offset += PAGE_SIZE;
+            .range(offset, offset + 999);
+          if (!page?.length) break;
+          for (const row of page) if (row.wordpress_post_id) trackedIds.add(row.wordpress_post_id);
+          if (page.length < 1000) break;
+          offset += 1000;
         }
 
-        // Also check articles table for instant-published posts
+        // 2. Get ALL tracked Local Library (articles table) post IDs for this site
+        const localLibIds = new Set<number>();
         offset = 0;
         while (true) {
           const { data: page } = await supabase
@@ -92,110 +70,91 @@ Deno.serve(async (req) => {
             .select('wp_post_id')
             .eq('published_to', site.id)
             .not('wp_post_id', 'is', null)
-            .range(offset, offset + PAGE_SIZE - 1);
-          if (!page || page.length === 0) break;
-          for (const row of page) {
-            if (row.wp_post_id) trackedPostIds.add(row.wp_post_id);
-          }
-          if (page.length < PAGE_SIZE) break;
-          offset += PAGE_SIZE;
+            .range(offset, offset + 999);
+          if (!page?.length) break;
+          for (const row of page) if (row.wp_post_id) localLibIds.add(row.wp_post_id);
+          if (page.length < 1000) break;
+          offset += 1000;
         }
 
-        siteResult.trackedCount = trackedPostIds.size;
-        console.log(`[wp-orphan-cleanup] ${site.name}: ${trackedPostIds.size} posts tracked in app DB`);
+        r.trackedCount = trackedIds.size + localLibIds.size;
 
-        // Fetch all posts from WordPress (paginated, 100 per page)
-        // Use only published status and minimal fields for speed
-        const allWpPosts: { id: number; title: { rendered: string } }[] = [];
+        // 3. Get the earliest auto-publish date for this site (anything before this is pre-existing)
+        const { data: earliest } = await supabase
+          .from('ai_published_sources')
+          .select('published_at')
+          .eq('wordpress_site_id', site.id)
+          .order('published_at', { ascending: true })
+          .limit(1);
+        
+        const earliestAutoPublish = earliest?.[0]?.published_at ? new Date(earliest[0].published_at) : null;
+        if (!earliestAutoPublish) {
+          console.log(`[wp-orphan-cleanup] ${site.name}: No auto-published articles, skipping`);
+          r.orphanTitles.push('(no auto-published articles on this site)');
+          results.push(r);
+          continue;
+        }
+
+        // 4. Fetch WP posts published AFTER the earliest auto-publish date
+        const allWpPosts: { id: number; title: { rendered: string }; date: string }[] = [];
         let wpPage = 1;
-        const MAX_PAGES = 50; // Safety limit
-        while (wpPage <= MAX_PAGES) {
+        const afterDate = new Date(earliestAutoPublish.getTime() - 60 * 60 * 1000).toISOString(); // 1hr buffer
+        while (wpPage <= 50) {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 15000);
           try {
             const wpRes = await fetch(
-              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&_fields=id,title`,
+              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&after=${afterDate}&_fields=id,title,date`,
               { headers: { 'Authorization': `Basic ${creds}` }, signal: controller.signal }
             );
             clearTimeout(timeout);
-            if (!wpRes.ok) {
-              const errText = await wpRes.text();
-              if (wpRes.status === 400) break;
-              siteResult.errors.push(`WP API error page ${wpPage}: ${wpRes.status}`);
-              break;
-            }
+            if (!wpRes.ok) { if (wpRes.status === 400) break; await wpRes.text(); break; }
             const posts = await wpRes.json();
-            if (!Array.isArray(posts) || posts.length === 0) break;
+            if (!Array.isArray(posts) || !posts.length) break;
             allWpPosts.push(...posts);
             const totalPages = parseInt(wpRes.headers.get('X-WP-TotalPages') || '1');
             if (wpPage >= totalPages) break;
             wpPage++;
-          } catch (fetchErr) {
-            clearTimeout(timeout);
-            siteResult.errors.push(`WP fetch timeout/error page ${wpPage}: ${String(fetchErr)}`);
-            break;
-          }
+          } catch (e) { clearTimeout(timeout); r.errors.push(`WP fetch error page ${wpPage}`); break; }
         }
 
-        siteResult.wpPostCount = allWpPosts.length;
-        console.log(`[wp-orphan-cleanup] ${site.name}: ${allWpPosts.length} posts found on WordPress`);
+        r.wpPostCount = allWpPosts.length;
 
-        // Find orphans: posts on WP but NOT tracked in our DB
-        const orphans = allWpPosts.filter(post => !trackedPostIds.has(post.id));
-        siteResult.orphanCount = orphans.length;
-        siteResult.orphanTitles = orphans.map(p => {
-          const title = p.title?.rendered || 'Untitled';
-          // Decode HTML entities
-          const clean = title.replace(/&#(\d+);/g, (_: string, num: string) => String.fromCharCode(parseInt(num)))
-                             .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-          return `[WP#${p.id}] ${clean.substring(0, 80)}`;
+        // 5. Find orphans: on WP, NOT in ai_published_sources, NOT in articles (Local Library)
+        const orphans = allWpPosts.filter(post => !trackedIds.has(post.id) && !localLibIds.has(post.id));
+        r.orphanCount = orphans.length;
+        r.orphanTitles = orphans.slice(0, 50).map(p => {
+          const title = (p.title?.rendered || 'Untitled').replace(/&#\d+;/g, '').replace(/&amp;/g, '&');
+          return `[WP#${p.id}] ${title.substring(0, 80)}`;
         });
 
-        console.log(`[wp-orphan-cleanup] ${site.name}: ${orphans.length} orphaned posts found`);
+        console.log(`[wp-orphan-cleanup] ${site.name}: ${allWpPosts.length} WP posts after cutoff, ${orphans.length} orphans`);
 
-        // Delete orphans (only if not dry run)
+        // 6. Delete orphans if not dry run
         if (!dryRun && orphans.length > 0) {
           for (const orphan of orphans) {
             try {
-              const delRes = await fetch(
-                `${baseUrl}/wp-json/wp/v2/posts/${orphan.id}?force=true`,
-                { method: 'DELETE', headers: { 'Authorization': `Basic ${creds}` } }
-              );
-              if (delRes.ok) {
-                siteResult.deletedCount++;
-                console.log(`[wp-orphan-cleanup] Deleted WP#${orphan.id} from ${site.name}`);
-              } else {
-                const errText = await delRes.text();
-                siteResult.errors.push(`Failed to delete WP#${orphan.id}: ${delRes.status}`);
-                console.error(`[wp-orphan-cleanup] Failed delete WP#${orphan.id}: ${errText.substring(0, 100)}`);
-              }
-            } catch (delErr) {
-              siteResult.errors.push(`Error deleting WP#${orphan.id}: ${String(delErr)}`);
-            }
+              const delRes = await fetch(`${baseUrl}/wp-json/wp/v2/posts/${orphan.id}?force=true`,
+                { method: 'DELETE', headers: { 'Authorization': `Basic ${creds}` } });
+              if (delRes.ok) { r.deletedCount++; await delRes.text(); }
+              else { const t = await delRes.text(); r.errors.push(`Del WP#${orphan.id}: ${delRes.status}`); }
+            } catch (e) { r.errors.push(`Del WP#${orphan.id}: ${String(e)}`); }
           }
         }
-      } catch (siteErr) {
-        siteResult.errors.push(String(siteErr));
-        console.error(`[wp-orphan-cleanup] Error scanning ${site.name}:`, siteErr);
-      }
+      } catch (e) { r.errors.push(String(e)); }
 
-      results.push(siteResult);
+      results.push(r);
     }
-
-    const totalOrphans = results.reduce((sum, r) => sum + r.orphanCount, 0);
-    const totalDeleted = results.reduce((sum, r) => sum + r.deletedCount, 0);
-
-    console.log(`[wp-orphan-cleanup] Complete. Total orphans: ${totalOrphans}, Deleted: ${totalDeleted}, dryRun: ${dryRun}`);
 
     return new Response(JSON.stringify({
       dryRun,
-      totalOrphans,
-      totalDeleted,
+      totalOrphans: results.reduce((s, r) => s + r.orphanCount, 0),
+      totalDeleted: results.reduce((s, r) => s + r.deletedCount, 0),
       sites: results,
     }, null, 2), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
-    console.error('[wp-orphan-cleanup] Fatal error:', error);
+    console.error('[wp-orphan-cleanup] Fatal:', error);
     return new Response(JSON.stringify({ error: String(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
