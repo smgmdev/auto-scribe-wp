@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, Calendar, Globe, Mic } from 'lucide-react';
+import { ExternalLink, Calendar, Globe, Mic, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface MaceArticle {
@@ -11,7 +11,6 @@ interface MaceArticle {
   wp_link: string | null;
   focus_keyword: string | null;
   created_at: string;
-  tone: string;
 }
 
 const AdminMaceArticlesView = () => {
@@ -25,39 +24,20 @@ const AdminMaceArticlesView = () => {
   const fetchMaceArticles = async () => {
     setLoading(true);
     try {
-      // Get all credit transactions that are voice-published
-      const { data: txData } = await supabase
-        .from('credit_transactions')
-        .select('metadata, created_at')
-        .eq('type', 'publish')
-        .like('description', '%(voice)%')
-        .order('created_at', { ascending: false });
-
-      if (!txData || txData.length === 0) {
-        setArticles([]);
-        setLoading(false);
-        return;
-      }
-
-      // Get the wp_links from metadata to match articles
-      const wpLinks = txData
-        .map(tx => (tx.metadata as Record<string, unknown>)?.wp_link as string)
-        .filter(Boolean);
-
-      if (wpLinks.length === 0) {
-        setArticles([]);
-        setLoading(false);
-        return;
-      }
-
       const { data: articlesData } = await supabase
         .from('articles')
-        .select('id, title, published_to_name, published_to_favicon, wp_link, focus_keyword, created_at, tone')
-        .in('wp_link', wpLinks)
+        .select('id, title, published_to_name, published_to_favicon, wp_link, focus_keyword, created_at, source_headline')
         .eq('status', 'published')
+        .not('published_to', 'is', null)
         .order('created_at', { ascending: false });
 
-      setArticles(articlesData || []);
+      // Filter for mace-sourced articles
+      const maceArticles = (articlesData || []).filter((a: any) => {
+        const sh = a.source_headline;
+        return sh && typeof sh === 'object' && (sh as any).source === 'mace';
+      });
+
+      setArticles(maceArticles);
     } catch (err) {
       console.error('Error fetching mace articles:', err);
     } finally {
@@ -67,10 +47,20 @@ const AdminMaceArticlesView = () => {
 
   return (
     <div className="w-full max-w-[980px] mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Mic className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">Mace Articles</h1>
-        <span className="text-sm text-muted-foreground">({articles.length})</span>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Mic className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Mace Articles</h1>
+          <span className="text-sm text-muted-foreground">({articles.length})</span>
+        </div>
+        <button
+          onClick={fetchMaceArticles}
+          disabled={loading}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       {loading ? (
