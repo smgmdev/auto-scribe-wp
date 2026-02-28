@@ -141,13 +141,22 @@ Deno.serve(async (req) => {
       }
 
       // Check per-site to prevent duplicates WITHIN each site
-      const { data: published } = await supabase
-        .from('ai_published_sources')
-        .select('source_url, source_title, ai_title, wordpress_site_id');
-      
-      const sitePublished = (published || []).filter(
-        (p: { wordpress_site_id: string | null }) => p.wordpress_site_id === setting.target_site_id
-      );
+      // Fetch ALL articles for this specific site using pagination to avoid 1000-row limit
+      const sitePublished: { source_url: string; source_title: string; ai_title: string | null }[] = [];
+      let offset = 0;
+      const PAGE_SIZE = 1000;
+      while (true) {
+        const { data: page } = await supabase
+          .from('ai_published_sources')
+          .select('source_url, source_title, ai_title')
+          .eq('wordpress_site_id', setting.target_site_id)
+          .range(offset, offset + PAGE_SIZE - 1);
+        if (!page || page.length === 0) break;
+        sitePublished.push(...page);
+        if (page.length < PAGE_SIZE) break;
+        offset += PAGE_SIZE;
+      }
+      console.log(`[auto-publish] Loaded ${sitePublished.length} existing articles for site ${setting.target_site_id}`);
       
       const newItem = rssItems.find((item) => {
         const urlAlreadyOnSite = sitePublished.some(
@@ -232,7 +241,7 @@ Deno.serve(async (req) => {
 
       const wordCount = content.content ? content.content.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
 
-      await supabase.from('ai_published_sources').insert({
+      const { error: dbInsertError } = await supabase.from('ai_published_sources').insert({
         setting_id: setting.id,
         source_url: newItem.link,
         source_title: newItem.title,
@@ -248,6 +257,25 @@ Deno.serve(async (req) => {
         wordpress_site_id: site.id,
         source_config_name: setting.source_name,
       });
+
+      if (dbInsertError) {
+        console.error(`[auto-publish] CRITICAL: Article published to WP (post ${postResult.id}) but DB insert failed:`, dbInsertError);
+        // Attempt to delete the orphaned WordPress post to prevent ghost duplicates
+        try {
+          const creds = btoa(`${site.username}:${site.app_password}`);
+          const baseUrl = site.url.replace(/\/+$/, '');
+          await fetch(`${baseUrl}/wp-json/wp/v2/posts/${postResult.id}?force=true`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Basic ${creds}` },
+          });
+          console.log(`[auto-publish] Cleaned up orphaned WP post ${postResult.id}`);
+        } catch (cleanupErr) {
+          console.error(`[auto-publish] Failed to cleanup orphaned WP post ${postResult.id}:`, cleanupErr);
+        }
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'db_insert_failed', wpPostId: postResult.id, error: String(dbInsertError) }), 
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
 
       await supabase
         .from('ai_publishing_settings')
