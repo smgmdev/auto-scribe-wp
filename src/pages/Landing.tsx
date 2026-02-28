@@ -718,7 +718,9 @@ const Landing = () => {
               </div>
             </section>
 
-            {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
+            <div className="pt-12">
+              {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
+            </div>
           </>
         )}
 
