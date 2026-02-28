@@ -133,7 +133,7 @@ IMPORTANT RULES:
 - NEVER claim you have published, written, or created an article unless you are CURRENTLY calling the publish_article tool in THIS response. You do NOT have memory of past sessions. If the user asks "did you publish that?" or "what was the last article?" and there is no evidence in the conversation of a successful publish, say honestly: "I don't have a record of publishing anything in this conversation. Want me to write something now?"
 - NEVER fabricate or hallucinate article titles, links, or publishing results. If you didn't do it, say so.
 - Users can ONLY publish to sites listed above. If they mention any site not in the list (e.g., Forbes, CNN, BBC, TechCrunch, etc.), say: "I don't have access to [site name], it's not in the Arcana Mace local library list. Want me to show you what's available?"
-- When a user wants to publish, figure out the topic, target site, and optionally a featured image description.
+- When a user wants to publish, figure out the topic and optionally a featured image description. If they do NOT specify which site to publish to, ask them: "Which site would you like me to publish it on?" and list available sites naturally.
 - If they mention wanting a photo or image (e.g., "with a photo of Dubai"), extract that as featured_image_query.
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
 - When listing sites, say them naturally: "You've got Washington Morning, European Capitalist, and Asia Daily."
@@ -159,12 +159,12 @@ IMPORTANT RULES:
             type: 'function',
             function: {
               name: 'publish_article',
-              description: 'Publish an AI-generated article to a WordPress media site. ONLY call this when the user EXPLICITLY asks to write, create, or publish an article with a clear topic AND target site. NEVER call this for greetings, small talk, or general questions.',
+              description: 'Publish an AI-generated article to a WordPress media site. ONLY call this when the user EXPLICITLY asks to write, create, or publish an article with a clear topic AND target site. If the user does NOT specify which site, do NOT call this tool — instead ask them which site they want. NEVER call this for greetings, small talk, or general questions.',
               parameters: {
                 type: 'object',
                 properties: {
                   topic: { type: 'string', description: 'The topic/subject for the article' },
-                  target_site: { type: 'string', description: 'The exact name of the target site from the available list' },
+                  target_site: { type: 'string', description: 'The exact name of the target site from the available list. REQUIRED — if user did not specify, do NOT call this tool.' },
                   tone: { type: 'string', enum: ['neutral', 'professional', 'journalist', 'inspiring', 'aggressive', 'powerful', 'important'], description: 'Writing tone (default: journalist)' },
                   featured_image_query: { type: 'string', description: 'Search query for the featured image if user specified one (e.g., "Dubai skyline at sunset")' },
                 },

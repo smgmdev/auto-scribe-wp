@@ -41,9 +41,9 @@ serve(async (req) => {
           voice_settings: {
             stability: 0.4,
             similarity_boost: 0.75,
-            style: 0.3,
+            style: 0.35,
             use_speaker_boost: true,
-            speed: 1.2,
+            speed: 1.05,
           },
         }),
       }
