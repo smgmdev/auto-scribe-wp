@@ -19,9 +19,8 @@ interface PublishResult {
   focusKeyword: string;
 }
 
-const SILENCE_TIMEOUT_MS = 1000;
+const SILENCE_TIMEOUT_MS = 1500;
 
-// Simple confirmation detection
 function isConfirmation(text: string): boolean {
   const lower = text.toLowerCase().trim();
   const yesPatterns = [
@@ -55,9 +54,8 @@ export function AdminMaceAIView() {
   const isMountedRef = useRef(true);
   const messagesRef = useRef<Message[]>([]);
   const pendingArticleRef = useRef<any>(null);
-  const processUserMessageRef = useRef<(text: string) => void>(() => {});
+  const isProcessingRef = useRef(false);
 
-  // Keep refs in sync with state
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
 
@@ -70,8 +68,6 @@ export function AdminMaceAIView() {
   }, []);
 
   const stopAll = useCallback(() => {
-    isInterruptModeRef.current = false;
-    interruptCallbackRef.current = null;
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
@@ -85,153 +81,14 @@ export function AdminMaceAIView() {
       audioRef.current.src = '';
       audioRef.current = null;
     }
-  }, []);
-
-  // Ref to track if we're in "interrupt mode" (listening while AI speaks)
-  const interruptCallbackRef = useRef<((text: string) => void) | null>(null);
-  const isInterruptModeRef = useRef(false);
-  const isProcessingRef = useRef(false); // Guard against concurrent processUserMessage calls
-
-  // Start a passive background listener that auto-restarts and can interrupt speech
-  const startBackgroundListener = useCallback((onInterrupt: (text: string) => void) => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-
-    // Clean up any existing recognition
-    if (recognitionRef.current) {
-      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-      recognitionRef.current = null;
-    }
-
-    interruptCallbackRef.current = onInterrupt;
-    isInterruptModeRef.current = true;
-
-    let restartCount = 0;
-    const MAX_RESTARTS = 20; // Safety limit to prevent infinite loops
-
-    const createRecognition = () => {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      let interruptTriggered = false;
-      let listenerReady = false;
-      
-      // Delay activation so the mic doesn't pick up the AI's own TTS audio
-      setTimeout(() => { listenerReady = true; }, 1200);
-
-      recognition.onresult = (event: any) => {
-        if (!isInterruptModeRef.current || interruptTriggered || !listenerReady) return;
-        
-        let latestTranscript = '';
-        let confidence = 0;
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          latestTranscript += event.results[i][0].transcript;
-          confidence = Math.max(confidence, event.results[i][0].confidence || 0);
-        }
-        
-        const trimmed = latestTranscript.trim();
-        // Require 5+ chars AND reasonable confidence to avoid TTS echo false positives
-        if (trimmed.length >= 5 && confidence > 0.5) {
-          interruptTriggered = true;
-          isInterruptModeRef.current = false;
-          
-          setTimeout(() => {
-            let finalText = '';
-            for (let i = 0; i < event.results.length; i++) {
-              finalText += event.results[i][0].transcript;
-            }
-            const text = finalText.trim() || trimmed;
-            
-            try { recognition.stop(); } catch (_) {}
-            recognitionRef.current = null;
-            
-            if (interruptCallbackRef.current && isMountedRef.current) {
-              const cb = interruptCallbackRef.current;
-              interruptCallbackRef.current = null;
-              cb(text);
-            }
-          }, 400);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.log('Background listener error:', event.error);
-        if (event.error === 'aborted' || event.error === 'not-allowed') {
-          isInterruptModeRef.current = false;
-        }
-      };
-
-      recognition.onend = () => {
-        if (recognitionRef.current !== recognition) return;
-        recognitionRef.current = null;
-        
-        if (isInterruptModeRef.current && isMountedRef.current && restartCount < MAX_RESTARTS) {
-          restartCount++;
-          setTimeout(() => {
-            if (isInterruptModeRef.current && isMountedRef.current) {
-              try {
-                const newRecog = createRecognition();
-                recognitionRef.current = newRecog;
-                newRecog.start();
-              } catch (_) {
-                isInterruptModeRef.current = false;
-              }
-            }
-          }, 200);
-        } else if (restartCount >= MAX_RESTARTS) {
-          console.warn('Background listener hit max restarts, stopping');
-          isInterruptModeRef.current = false;
-        }
-      };
-
-      return recognition;
-    };
-
-    try {
-      const recognition = createRecognition();
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch (_) {
-      recognitionRef.current = null;
-      isInterruptModeRef.current = false;
-    }
-  }, []);
-
-  const stopBackgroundListener = useCallback(() => {
-    isInterruptModeRef.current = false;
-    interruptCallbackRef.current = null;
-    if (recognitionRef.current) {
-      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-      recognitionRef.current = null;
-    }
+    window.speechSynthesis.cancel();
   }, []);
 
   const speak = useCallback(async (text: string, onDone?: () => void) => {
-    // Stop any current audio
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
     }
-
-    // Store onDone so interrupt can skip it
-    const onDoneRef = { current: onDone };
-    let wasInterrupted = false;
-
-    // Handler for voice interruption during speech
-    const handleInterrupt = (spokenText: string) => {
-      wasInterrupted = true;
-      // Stop audio playback
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-      window.speechSynthesis.cancel();
-      // Process the interruption as a new user message
-      processUserMessageRef.current(spokenText);
-    };
 
     try {
       const response = await fetch(
@@ -247,9 +104,7 @@ export function AdminMaceAIView() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`TTS failed: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -257,53 +112,42 @@ export function AdminMaceAIView() {
       audioRef.current = audio;
 
       audio.onplay = () => {
-        if (isMountedRef.current) {
-          setStep('speaking');
-          // Start background listener for voice interruption
-          startBackgroundListener(handleInterrupt);
-        }
+        if (isMountedRef.current) setStep('speaking');
       };
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
-        if (!wasInterrupted) {
-          stopBackgroundListener();
-          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
+        audioRef.current = null;
+        if (isMountedRef.current) {
+          setStep('idle');
+          onDone?.();
         }
       };
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
-        if (!wasInterrupted) {
-          stopBackgroundListener();
-          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
+        audioRef.current = null;
+        if (isMountedRef.current) {
+          setStep('idle');
+          onDone?.();
         }
       };
 
       await audio.play();
     } catch (err) {
       console.error('ElevenLabs TTS error, falling back to browser:', err);
-      if (isMountedRef.current) {
-        setStep('speaking');
-        startBackgroundListener(handleInterrupt);
-      }
+      if (isMountedRef.current) setStep('speaking');
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.3;
       utterance.onend = () => {
-        if (!wasInterrupted) {
-          stopBackgroundListener();
-          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
-        }
+        if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       utterance.onerror = () => {
-        if (!wasInterrupted) {
-          stopBackgroundListener();
-          if (isMountedRef.current && onDoneRef.current) onDoneRef.current();
-        }
+        if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       window.speechSynthesis.speak(utterance);
     }
-  }, [startBackgroundListener, stopBackgroundListener]);
+  }, []);
 
   const startListening = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -312,14 +156,14 @@ export function AdminMaceAIView() {
       return;
     }
 
-    // Stop any existing recognition first
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
     }
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
-    
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+    window.speechSynthesis.cancel();
+
     setCurrentTranscript('');
     setInterimTranscript('');
 
@@ -351,7 +195,6 @@ export function AdminMaceAIView() {
       }
       setInterimTranscript(newInterim);
 
-      // Reset silence timer on activity
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
         if (recognitionRef.current) {
@@ -365,27 +208,21 @@ export function AdminMaceAIView() {
       if (event.error === 'not-allowed') {
         toast.error('Microphone access denied.');
       }
-      // onend always fires after onerror, so let it handle cleanup
     };
 
     recognition.onstart = () => {
-      if (isMountedRef.current) {
-        setStep('listening');
-      }
+      if (isMountedRef.current) setStep('listening');
     };
 
     recognition.onend = () => {
       if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-      
-      // Only process if this is still our active recognition
       if (recognitionRef.current !== recognition) return;
       recognitionRef.current = null;
-
       if (!isMountedRef.current) return;
 
       const text = finalText.trim();
       if (text.length > 1) {
-        processUserMessageRef.current(text);
+        processUserMessage(text);
       } else {
         setStep('idle');
         if (hasReceivedSpeech && text.length > 0) {
@@ -406,15 +243,10 @@ export function AdminMaceAIView() {
   }, []);
 
   const processUserMessage = async (text: string) => {
-    // Guard against concurrent calls
-    if (isProcessingRef.current) {
-      console.warn('processUserMessage already running, ignoring:', text);
-      return;
-    }
+    if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
-    // Stop any lingering recognition/audio before processing
-    stopBackgroundListener();
+    // Full cleanup
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
@@ -435,10 +267,9 @@ export function AdminMaceAIView() {
     const updatedMessages = [...currentMessages, userMsg];
     setMessages(updatedMessages);
 
-    const finishAndListen = () => { isProcessingRef.current = false; };
+    const done = () => { isProcessingRef.current = false; };
 
     try {
-      // Check if we're waiting for confirmation on a pending article
       if (currentPending) {
         if (isConfirmation(text)) {
           const { data, error } = await supabase.functions.invoke('voice-publish', {
@@ -447,8 +278,7 @@ export function AdminMaceAIView() {
           if (error) throw new Error(error.message || 'Publish failed');
 
           const responseMessage = data?.message || "Something went wrong during publishing.";
-          const assistantMsg: Message = { role: 'assistant', content: responseMessage };
-          setMessages(prev => [...prev, assistantMsg]);
+          setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
           setPendingArticle(null);
 
           if (data?.type === 'publish_success') {
@@ -459,29 +289,21 @@ export function AdminMaceAIView() {
             toast.success(`Published to ${data.site}!`);
           }
 
-          isProcessingRef.current = false;
-          speak(responseMessage, () => {
-            if (isMountedRef.current) {
-              data?.type === 'publish_success' ? setStep('idle') : startListening();
-            }
-          });
+          speak(responseMessage, done);
           return;
         } else if (isDenial(text)) {
           setPendingArticle(null);
           const cancelMsg = "No worries, I've cancelled that. Let me know if you want to try something else.";
           setMessages(prev => [...prev, { role: 'assistant', content: cancelMsg }]);
-          isProcessingRef.current = false;
-          speak(cancelMsg, () => { if (isMountedRef.current) startListening(); });
+          speak(cancelMsg, done);
           return;
         }
         const clarifyMsg = "Just to be clear — should I publish this article? Say yes to publish or no to cancel.";
         setMessages(prev => [...prev, { role: 'assistant', content: clarifyMsg }]);
-        isProcessingRef.current = false;
-        speak(clarifyMsg, () => { if (isMountedRef.current) startListening(); });
+        speak(clarifyMsg, done);
         return;
       }
 
-      // Normal flow — send to AI
       const { data, error } = await supabase.functions.invoke('voice-publish', {
         body: { messages: updatedMessages },
       });
@@ -492,9 +314,6 @@ export function AdminMaceAIView() {
 
       if (data?.type === 'pending_publish' && data?.pendingArticle) {
         setPendingArticle(data.pendingArticle);
-        isProcessingRef.current = false;
-        speak(responseMessage, () => { if (isMountedRef.current) startListening(); });
-        return;
       }
 
       if (data?.type === 'publish_success') {
@@ -505,27 +324,16 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      isProcessingRef.current = false;
-      speak(responseMessage, () => {
-        if (isMountedRef.current && data?.type !== 'publish_success') {
-          startListening();
-        } else if (isMountedRef.current) {
-          setStep('idle');
-        }
-      });
+      speak(responseMessage, done);
 
     } catch (err: any) {
       console.error('Voice publish error:', err);
       const errorMsg = err.message || 'Something went wrong';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-      isProcessingRef.current = false;
-      speak(errorMsg, () => { if (isMountedRef.current) startListening(); });
+      speak(errorMsg, done);
       toast.error(errorMsg);
     }
   };
-
-  // Keep ref in sync so memoized startListening always calls latest version
-  processUserMessageRef.current = processUserMessage;
 
   const handleMicClick = () => {
     if (step === 'listening') {
@@ -533,12 +341,11 @@ export function AdminMaceAIView() {
         try { recognitionRef.current.stop(); } catch (_) {}
       }
     } else if (step === 'speaking') {
-      // Full cleanup before transitioning
-      stopBackgroundListener();
+      // Stop speech, go to idle
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
       window.speechSynthesis.cancel();
       isProcessingRef.current = false;
-      startListening();
+      setStep('idle');
     } else if (step === 'idle') {
       startListening();
     }
@@ -579,7 +386,6 @@ export function AdminMaceAIView() {
         </div>
 
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
-          {/* Conversation history */}
           {messages.length > 0 && (
             <div className="w-full max-w-lg space-y-3 max-h-[35vh] overflow-y-auto px-1">
               {messages.map((msg, i) => (
@@ -601,17 +407,15 @@ export function AdminMaceAIView() {
             </div>
           )}
 
-          {/* Pending publish indicator */}
           {pendingArticle && step !== 'processing' && (
             <div className="w-full max-w-lg bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
               <p className="text-sm text-amber-800 font-medium">
                 📝 Article ready: "{pendingArticle.title}" → {pendingArticle.siteName}
               </p>
-              <p className="text-xs text-amber-600 mt-1">Say "yes" to publish or "no" to cancel</p>
+              <p className="text-xs text-amber-600 mt-1">Tap mic and say "yes" to publish or "no" to cancel</p>
             </div>
           )}
 
-          {/* Current transcript while listening */}
           {step === 'listening' && (currentTranscript || interimTranscript) && (
             <div className="w-full max-w-lg bg-muted/50 rounded-lg p-3 text-center">
               <p className="text-foreground text-sm">
@@ -623,7 +427,6 @@ export function AdminMaceAIView() {
             </div>
           )}
 
-          {/* Mic / Processing display */}
           {isProcessing ? (
             <>
               <style>{`
@@ -643,22 +446,10 @@ export function AdminMaceAIView() {
                   0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
                   100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
                 }
-                @keyframes mace-glow-spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-                @keyframes mace-glow-spin-rev {
-                  0% { transform: rotate(360deg); }
-                  100% { transform: rotate(0deg); }
-                }
-                @keyframes mace-sphere-pulse {
-                  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
-                  50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
-                }
-                @keyframes mace-rings-entrance {
-                  0% { opacity: 0; transform: scale(0.8); }
-                  100% { opacity: 1; transform: scale(1); }
-                }
+                @keyframes mace-glow-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                @keyframes mace-glow-spin-rev { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+                @keyframes mace-sphere-pulse { 0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; } 50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; } }
+                @keyframes mace-rings-entrance { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
                 .mace-rings { animation: mace-rings-entrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
               `}</style>
               <div 
@@ -667,7 +458,6 @@ export function AdminMaceAIView() {
               >
                 <img src={amblack} alt="Mace AI" className="absolute z-10 h-12 w-12 object-contain" style={{ transform: 'translateZ(0px)' }} />
                 
-                {/* Ring 1 - Blue */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-1 8s linear infinite' }}>
                   <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #007AFF', boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)' }}>
                     <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 1s linear infinite' }}>
@@ -676,7 +466,6 @@ export function AdminMaceAIView() {
                   </div>
                 </div>
                 
-                {/* Ring 2 - Purple */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-2 10s linear infinite' }}>
                   <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #5856D6', boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)' }}>
                     <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 1.2s linear infinite' }}>
@@ -685,7 +474,6 @@ export function AdminMaceAIView() {
                   </div>
                 </div>
                 
-                {/* Ring 3 - Cyan */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-3 12s linear infinite' }}>
                   <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #32ADE6', boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)' }}>
                     <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 0.8s linear infinite' }}>
@@ -694,7 +482,6 @@ export function AdminMaceAIView() {
                   </div>
                 </div>
                 
-                {/* Ring 4 - Orange */}
                 <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-4 9s linear infinite' }}>
                   <div className="absolute rounded-full" style={{ width: '95px', height: '95px', border: '1.5px solid #FF9500', boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)' }}>
                     <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 0.9s linear infinite' }}>
@@ -728,7 +515,6 @@ export function AdminMaceAIView() {
             </button>
           )}
 
-          {/* Status label */}
           <p className={`text-xs font-medium transition-colors ${
             step === 'listening' ? 'text-red-500 animate-pulse' 
             : step === 'speaking' ? 'text-blue-500'
@@ -738,17 +524,15 @@ export function AdminMaceAIView() {
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
             {step === 'listening' && (pendingArticle ? 'Listening for confirmation...' : 'Listening...')}
             {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
-            {step === 'speaking' && 'Speaking... just speak to interrupt'}
+            {step === 'speaking' && 'Speaking... tap to stop'}
           </p>
 
-          {/* Publish success */}
           {publishResult && (
             <p className="text-sm text-emerald-600 font-medium">
               ✓ Article published to {publishResult.site}. View it in Mace Articles.
             </p>
           )}
 
-          {/* Hint */}
           {step === 'idle' && messages.length === 0 && (
             <div className="text-center max-w-md space-y-2">
               <p className="text-sm text-muted-foreground">
