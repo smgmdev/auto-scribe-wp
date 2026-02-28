@@ -50,7 +50,7 @@ export function AdminMaceAIView() {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [pendingArticle, setPendingArticle] = useState<any>(null);
-  const [speakingWords, setSpeakingWords] = useState('');
+  const [speakingWords, setSpeakingWords] = useState<string[]>([]);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -167,7 +167,7 @@ export function AdminMaceAIView() {
     if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
     try { scribe.disconnect(); } catch (_) {}
     scribeCommittedTextRef.current = '';
-    setSpeakingWords('');
+    setSpeakingWords([]);
     
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
@@ -191,13 +191,13 @@ export function AdminMaceAIView() {
     if (words.length === 0) return;
     const intervalMs = Math.max(80, durationMs / words.length);
     let idx = 0;
-    setSpeakingWords('');
+    setSpeakingWords([]);
     wordRevealTimerRef.current = setInterval(() => {
       if (!isMountedRef.current) { clearInterval(wordRevealTimerRef.current!); return; }
       idx++;
       // Show last ~6 words as a sliding window so it stays on 1 line
       const start = Math.max(0, idx - 6);
-      setSpeakingWords(words.slice(start, idx).join(' '));
+      setSpeakingWords(words.slice(start, idx));
       if (idx >= words.length) {
         clearInterval(wordRevealTimerRef.current!);
         wordRevealTimerRef.current = null;
@@ -210,7 +210,7 @@ export function AdminMaceAIView() {
       audioRef.current.pause();
       audioRef.current.src = '';
     }
-    setSpeakingWords('');
+    setSpeakingWords([]);
 
     try {
       const response = await fetch(
@@ -254,7 +254,7 @@ export function AdminMaceAIView() {
         URL.revokeObjectURL(audioUrl);
         audioRef.current = null;
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords('');
+        setSpeakingWords([]);
         if (isMountedRef.current) {
           setStep('idle');
           onDone?.();
@@ -264,7 +264,7 @@ export function AdminMaceAIView() {
         URL.revokeObjectURL(audioUrl);
         audioRef.current = null;
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords('');
+        setSpeakingWords([]);
         if (isMountedRef.current) {
           setStep('idle');
           onDone?.();
@@ -282,12 +282,12 @@ export function AdminMaceAIView() {
       startWordReveal(text, text.split(/\s+/).length * 180);
       utterance.onend = () => {
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords('');
+        setSpeakingWords([]);
         if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       utterance.onerror = () => {
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords('');
+        setSpeakingWords([]);
         if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       window.speechSynthesis.speak(utterance);
@@ -489,14 +489,22 @@ export function AdminMaceAIView() {
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
         <div className="flex flex-col items-center gap-4 pointer-events-auto max-w-lg px-6">
           {/* Speaking words - word-by-word reveal on 1 line */}
-          {step === 'speaking' && speakingWords && (
-            <p className="text-sm text-muted-foreground text-center truncate max-w-full transition-all duration-150">
-              {speakingWords}
+          {step === 'speaking' && speakingWords.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center truncate max-w-full">
+              {speakingWords.map((word, i) => (
+                <span
+                  key={`${word}-${i}`}
+                  className="inline-block opacity-0 animate-[fadeWord_0.35s_ease-out_forwards]"
+                  style={{ animationDelay: `${i === speakingWords.length - 1 ? 0 : 0}ms` }}
+                >
+                  {word}{i < speakingWords.length - 1 ? '\u00A0' : ''}
+                </span>
+              ))}
             </p>
           )}
 
           {/* Last message - only when idle (not speaking/listening), single line */}
-          {step === 'idle' && messages.length > 0 && !speakingWords && (
+          {step === 'idle' && messages.length > 0 && speakingWords.length === 0 && (
             <p className={`text-sm text-center truncate max-w-full ${
               messages[messages.length - 1].role === 'user' 
                 ? 'text-foreground' 
