@@ -681,6 +681,24 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_publish_locks: {
+        Row: {
+          locked_at: string
+          locked_by: string
+          source_url: string
+        }
+        Insert: {
+          locked_at?: string
+          locked_by: string
+          source_url: string
+        }
+        Update: {
+          locked_at?: string
+          locked_by?: string
+          source_url?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           admin_notes: string | null

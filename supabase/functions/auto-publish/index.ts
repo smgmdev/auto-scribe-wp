@@ -15,173 +15,248 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    console.log('[auto-publish] Starting...');
+    // Check if a specific setting_id was provided (independent mode)
+    let targetSettingId: string | null = null;
+    try {
+      const body = await req.json();
+      targetSettingId = body?.setting_id || null;
+    } catch {
+      // No body — run all configs (legacy/cron dispatcher mode)
+    }
 
-    const { data: settings } = await supabase
-      .from('ai_publishing_settings')
-      .select('*')
-      .eq('enabled', true)
-      .eq('auto_publish', true)
-      .not('target_site_id', 'is', null);
+    console.log(`[auto-publish] Starting... ${targetSettingId ? `(single config: ${targetSettingId})` : '(dispatcher mode)'}`);
 
-    if (!settings?.length) {
-      return new Response(JSON.stringify({ message: 'No active settings' }), 
+    // DISPATCHER MODE: If no specific setting_id, fan out to invoke each config independently
+    if (!targetSettingId) {
+      const { data: settings } = await supabase
+        .from('ai_publishing_settings')
+        .select('id')
+        .eq('enabled', true)
+        .eq('auto_publish', true)
+        .not('target_site_id', 'is', null);
+
+      if (!settings?.length) {
+        return new Response(JSON.stringify({ message: 'No active settings' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      console.log(`[auto-publish] Dispatching ${settings.length} configs independently...`);
+
+      // Fire all configs in parallel — each runs independently
+      const dispatches = settings.map(async (s) => {
+        try {
+          const fnUrl = `${supabaseUrl}/functions/v1/auto-publish`;
+          const res = await fetch(fnUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseServiceKey}`,
+            },
+            body: JSON.stringify({ setting_id: s.id }),
+          });
+          const result = await res.json();
+          return { id: s.id, status: 'dispatched', result };
+        } catch (e) {
+          return { id: s.id, status: 'dispatch_error', message: String(e) };
+        }
+      });
+
+      const results = await Promise.all(dispatches);
+      return new Response(JSON.stringify({ mode: 'dispatcher', results }), 
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const results: { id: string; status: string; title?: string; message?: string }[] = [];
+    // INDEPENDENT MODE: Process a single config
+    const { data: setting } = await supabase
+      .from('ai_publishing_settings')
+      .select('*')
+      .eq('id', targetSettingId)
+      .eq('enabled', true)
+      .eq('auto_publish', true)
+      .not('target_site_id', 'is', null)
+      .single();
 
-    for (const setting of settings) {
-      try {
-        const now = new Date();
-        const lastPublished = setting.last_published_at ? new Date(setting.last_published_at) : null;
-        const intervalMs = setting.publish_interval_minutes * 60 * 1000;
+    if (!setting) {
+      return new Response(JSON.stringify({ status: 'skipped', message: 'Setting not found or disabled' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
-        if (lastPublished && (now.getTime() - lastPublished.getTime()) < intervalMs) {
-          results.push({ id: setting.id, status: 'waiting' });
-          continue;
-        }
+    // Check interval
+    const now = new Date();
+    const lastPublished = setting.last_published_at ? new Date(setting.last_published_at) : null;
+    const intervalMs = setting.publish_interval_minutes * 60 * 1000;
 
-        const rssItems = await fetchRss(setting.source_url);
-        if (!rssItems.length) {
-          results.push({ id: setting.id, status: 'no_rss' });
-          continue;
-        }
+    if (lastPublished && (now.getTime() - lastPublished.getTime()) < intervalMs) {
+      return new Response(JSON.stringify({ status: 'waiting', message: 'Interval not elapsed' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
-        // Check per-site to prevent duplicates WITHIN each site (each site is independent)
-        const { data: published } = await supabase
-          .from('ai_published_sources')
-          .select('source_url, source_title, ai_title, wordpress_site_id');
-        
-        // Only check against articles on THIS specific site — each site gets unique content independently
-        const sitePublished = (published || []).filter(
-          (p: { wordpress_site_id: string | null }) => p.wordpress_site_id === setting.target_site_id
-        );
-        
-        // Find a new item that hasn't been published to THIS site with a unique topic
-        const newItem = rssItems.find((item) => {
-          // Skip if exact same URL already published to THIS site
-          const urlAlreadyOnSite = sitePublished.some(
-            (p: any) => p.source_url === item.link
-          );
-          if (urlAlreadyOnSite) return false;
-          
-          // Extract key entities (proper nouns, names, companies) from new title
-          const newEntities = extractKeyEntities(item.title);
-          
-          // Per-site strict check: 2+ shared entities OR 15% keyword overlap = duplicate
-          const isSimilarOnSameSite = sitePublished.some((pub: { source_title: string; ai_title: string | null }) => {
-            const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
-            const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
-            if (sharedEntities.length >= 2) {
-              console.log(`[auto-publish] Skipping (entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
-              return true;
-            }
-            
-            const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.15) {
-              console.log(`[auto-publish] Skipping (duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
-              return true;
-            }
-            return false;
-          });
-          
-          return !isSimilarOnSameSite;
-        });
+    // ── RSS LOCK: Prevent concurrent publishing from same RSS source ──
+    const rssUrl = setting.source_url;
+    
+    // Try to acquire lock — if another config is already fetching this RSS, skip
+    const { error: lockError } = await supabase
+      .from('auto_publish_locks')
+      .upsert(
+        { source_url: rssUrl, locked_by: setting.id, locked_at: new Date().toISOString() },
+        { onConflict: 'source_url' }
+      );
 
-        if (!newItem) {
-          console.log(`[auto-publish] Setting ${setting.id}: No unique topics found, skipping until new sources`);
-          results.push({ id: setting.id, status: 'all_published', message: 'No unique topics available' });
-          continue;
-        }
+    // Check if lock is held by another config (inserted within last 5 minutes)
+    const { data: existingLock } = await supabase
+      .from('auto_publish_locks')
+      .select('locked_by, locked_at')
+      .eq('source_url', rssUrl)
+      .single();
 
-        console.log(`[auto-publish] Setting ${setting.id}: Found new source - ${newItem.title}`);
-
-        const { data: site } = await supabase
-          .from('wordpress_sites')
-          .select('*')
-          .eq('id', setting.target_site_id)
-          .eq('connected', true)
-          .single();
-
-        if (!site) {
-          results.push({ id: setting.id, status: 'no_site' });
-          continue;
-        }
-
-        const content = await generateContent(newItem.title, setting.tone);
-        if (!content) {
-          results.push({ id: setting.id, status: 'gen_failed' });
-          continue;
-        }
-
-        // Validate all required fields before publishing
-        const missingFields: string[] = [];
-        if (!content.focusKeyword || content.focusKeyword.trim() === '') {
-          missingFields.push('focus keyword');
-        }
-        if (!content.metaDescription || content.metaDescription.trim() === '') {
-          missingFields.push('meta description');
-        }
-        if (!content.tag || content.tag.trim() === '') {
-          missingFields.push('tag');
-        }
-
-        if (missingFields.length > 0) {
-          console.log(`[auto-publish] Skipping article - missing required fields: ${missingFields.join(', ')}`);
-          results.push({ 
-            id: setting.id, 
-            status: 'incomplete_fields', 
-            message: `Missing: ${missingFields.join(', ')}` 
-          });
-          continue;
-        }
-
-        const postResult = await publishToWP(site, content, setting);
-        if (postResult === 'category_not_found') {
-          console.log(`[auto-publish] Setting ${setting.id}: Target category not available, skipping until next interval`);
-          results.push({ id: setting.id, status: 'category_unavailable', message: 'Target category not found on WordPress, will retry next interval' });
-          continue;
-        }
-        if (!postResult) {
-          results.push({ id: setting.id, status: 'publish_failed' });
-          continue;
-        }
-
-        // Calculate word count from the content
-        const wordCount = content.content ? content.content.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
-
-        await supabase.from('ai_published_sources').insert({
-          setting_id: setting.id,
-          source_url: newItem.link,
-          source_title: newItem.title,
-          ai_title: content.title,
-          focus_keyword: content.focusKeyword || null,
-          meta_description: content.metaDescription || null,
-          tags: content.tag ? [content.tag] : null,
-          wordpress_post_id: postResult.id,
-          wordpress_post_link: postResult.link,
-          word_count: wordCount,
-          // Preserve site and source info for when config is deleted
-          wordpress_site_name: site.name,
-          wordpress_site_favicon: site.favicon || null,
-          wordpress_site_id: site.id,
-          source_config_name: setting.source_name,
-        });
-
-        await supabase
-          .from('ai_publishing_settings')
-          .update({ last_published_at: new Date().toISOString() })
-          .eq('id', setting.id);
-
-        results.push({ id: setting.id, status: 'published', title: content.title });
-      } catch (e) {
-        results.push({ id: setting.id, status: 'error', message: String(e) });
+    if (existingLock && existingLock.locked_by !== setting.id) {
+      const lockAge = now.getTime() - new Date(existingLock.locked_at).getTime();
+      if (lockAge < 5 * 60 * 1000) {
+        console.log(`[auto-publish] RSS "${rssUrl}" locked by config ${existingLock.locked_by}, skipping to avoid concurrent fetch`);
+        return new Response(JSON.stringify({ 
+          status: 'rss_locked', 
+          message: `RSS source locked by another config, will retry next interval` 
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
     }
 
-    return new Response(JSON.stringify({ results }), 
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // We have the lock — proceed
+    const releaseLock = async () => {
+      await supabase.from('auto_publish_locks').delete().eq('source_url', rssUrl).eq('locked_by', setting.id);
+    };
+
+    try {
+      const rssItems = await fetchRss(setting.source_url);
+      if (!rssItems.length) {
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'no_rss' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      // Check per-site to prevent duplicates WITHIN each site
+      const { data: published } = await supabase
+        .from('ai_published_sources')
+        .select('source_url, source_title, ai_title, wordpress_site_id');
+      
+      const sitePublished = (published || []).filter(
+        (p: { wordpress_site_id: string | null }) => p.wordpress_site_id === setting.target_site_id
+      );
+      
+      const newItem = rssItems.find((item) => {
+        const urlAlreadyOnSite = sitePublished.some(
+          (p: any) => p.source_url === item.link
+        );
+        if (urlAlreadyOnSite) return false;
+        
+        const newEntities = extractKeyEntities(item.title);
+        
+        const isSimilarOnSameSite = sitePublished.some((pub: { source_title: string; ai_title: string | null }) => {
+          const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
+          const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
+          if (sharedEntities.length >= 2) {
+            console.log(`[auto-publish] Skipping (entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
+            return true;
+          }
+          
+          const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
+          if (similarity > 0.15) {
+            console.log(`[auto-publish] Skipping (duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
+            return true;
+          }
+          return false;
+        });
+        
+        return !isSimilarOnSameSite;
+      });
+
+      if (!newItem) {
+        console.log(`[auto-publish] Setting ${setting.id}: No unique topics found`);
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'all_published', message: 'No unique topics available' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      console.log(`[auto-publish] Setting ${setting.id}: Found new source - ${newItem.title}`);
+
+      const { data: site } = await supabase
+        .from('wordpress_sites')
+        .select('*')
+        .eq('id', setting.target_site_id)
+        .eq('connected', true)
+        .single();
+
+      if (!site) {
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'no_site' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const content = await generateContent(newItem.title, setting.tone);
+      if (!content) {
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'gen_failed' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      // Validate required fields
+      const missingFields: string[] = [];
+      if (!content.focusKeyword || content.focusKeyword.trim() === '') missingFields.push('focus keyword');
+      if (!content.metaDescription || content.metaDescription.trim() === '') missingFields.push('meta description');
+      if (!content.tag || content.tag.trim() === '') missingFields.push('tag');
+
+      if (missingFields.length > 0) {
+        console.log(`[auto-publish] Skipping article - missing: ${missingFields.join(', ')}`);
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'incomplete_fields', message: `Missing: ${missingFields.join(', ')}` }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const postResult = await publishToWP(site, content, setting);
+      if (postResult === 'category_not_found') {
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'category_unavailable', message: 'Target category not found on WordPress' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (!postResult) {
+        await releaseLock();
+        return new Response(JSON.stringify({ status: 'publish_failed' }), 
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const wordCount = content.content ? content.content.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
+
+      await supabase.from('ai_published_sources').insert({
+        setting_id: setting.id,
+        source_url: newItem.link,
+        source_title: newItem.title,
+        ai_title: content.title,
+        focus_keyword: content.focusKeyword || null,
+        meta_description: content.metaDescription || null,
+        tags: content.tag ? [content.tag] : null,
+        wordpress_post_id: postResult.id,
+        wordpress_post_link: postResult.link,
+        word_count: wordCount,
+        wordpress_site_name: site.name,
+        wordpress_site_favicon: site.favicon || null,
+        wordpress_site_id: site.id,
+        source_config_name: setting.source_name,
+      });
+
+      await supabase
+        .from('ai_publishing_settings')
+        .update({ last_published_at: new Date().toISOString() })
+        .eq('id', setting.id);
+
+      await releaseLock();
+
+      return new Response(JSON.stringify({ status: 'published', title: content.title }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+    } catch (e) {
+      await releaseLock();
+      throw e;
+    }
+
   } catch (error) {
     return new Response(JSON.stringify({ error: String(error) }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -197,7 +272,6 @@ interface RssItem {
 function extractKeyEntities(text: string): Set<string> {
   const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'it', 'its', 'this', 'that', 'these', 'those', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if', 'report', 'reports', 'according', 'amid', 'despite', 'while', 'faces', 'shows', 'finds', 'reveals', 'announces', 'launches', 'plans', 'targets', 'hits', 'rises', 'falls', 'drops', 'gains', 'loses', 'grows', 'cuts', 'raises', 'sets', 'sees', 'makes', 'takes', 'gets', 'puts', 'gives', 'keeps', 'holds', 'major', 'big', 'latest', 'first', 'could', 'may', 'might']);
   
-  // Extract words that look like proper nouns or key subjects
   const words = text.split(/[\s,;:!?\-–—]+/).filter(w => w.length > 1);
   const entities = new Set<string>();
   
@@ -207,7 +281,6 @@ function extractKeyEntities(text: string): Set<string> {
     const lower = clean.toLowerCase();
     if (stopWords.has(lower)) continue;
     
-    // Keep capitalized words (proper nouns) and numbers, normalize to lowercase for matching
     if (clean[0] === clean[0].toUpperCase() || /\d/.test(clean)) {
       entities.add(lower);
     }
@@ -219,8 +292,6 @@ function extractKeyEntities(text: string): Set<string> {
 // Calculate topic similarity between headlines using keyword overlap
 function calculateTopicSimilarity(newTitle: string, publishedSourceTitle: string, publishedAiTitle: string | null): number {
   const extractKeywords = (text: string): Set<string> => {
-    // Common stop words to ignore
-    // Only true grammatical stop words — keep ALL topic/subject words for accurate similarity
     const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if']);
     
     return new Set(
@@ -239,7 +310,6 @@ function calculateTopicSimilarity(newTitle: string, publishedSourceTitle: string
 
   if (newKeywords.size === 0 || publishedKeywords.size === 0) return 0;
 
-  // Calculate Jaccard similarity (intersection over union)
   let intersection = 0;
   newKeywords.forEach(keyword => {
     if (publishedKeywords.has(keyword)) intersection++;
@@ -255,25 +325,19 @@ async function fetchRss(url: string): Promise<RssItem[]> {
     
     let fetchUrl = url;
     
-    // Check if it's a Google News URL - add cache-busting but preserve the configured query
     if (url.includes('news.google.com')) {
       const urlObj = new URL(url);
-      
-      // Check if it's a search URL with a query parameter
       const existingQuery = urlObj.searchParams.get('q');
       
       if (existingQuery) {
-        // Use the configured search query, just add cache-busting
         urlObj.searchParams.set('_t', Date.now().toString());
         fetchUrl = urlObj.toString();
         console.log(`[auto-publish] Using configured search query: ${existingQuery}`);
       } else if (url.includes('/topics/') || url.includes('/sections/')) {
-        // It's a topic or section feed - add cache-busting
         const separator = url.includes('?') ? '&' : '?';
         fetchUrl = `${url}${separator}_t=${Date.now()}`;
         console.log(`[auto-publish] Using topic/section feed with cache-busting`);
       } else {
-        // Fallback: use the URL as-is with cache-busting
         const separator = url.includes('?') ? '&' : '?';
         fetchUrl = `${url}${separator}_t=${Date.now()}`;
         console.log(`[auto-publish] Using URL as-is with cache-busting`);
@@ -308,7 +372,6 @@ async function fetchRss(url: string): Promise<RssItem[]> {
 function parseRssText(text: string): RssItem[] {
   const items: RssItem[] = [];
   
-  // Helper to clean CDATA wrappers
   const cleanCData = (str: string): string => {
     return str
       .replace(/<!\[CDATA\[/g, '')
@@ -316,17 +379,14 @@ function parseRssText(text: string): RssItem[] {
       .trim();
   };
   
-  // Handle <item> (RSS 2.0) format
   for (const match of text.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
     const xml = match[1];
     let title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1] || '';
     let link = xml.match(/<link[^>]*>([\s\S]*?)<\/link>/)?.[1] || '';
     
-    // Clean CDATA wrappers
     title = cleanCData(title);
     link = cleanCData(link);
     
-    // Clean up Google News titles that include source name
     title = title.replace(/\s*-\s*[^-]+$/, '').trim();
     
     if (title && link && title.length >= 20) {
@@ -334,15 +394,12 @@ function parseRssText(text: string): RssItem[] {
     }
   }
   
-  // Handle <entry> (Atom) format
   for (const match of text.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
     const xml = match[1];
     let title = xml.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1] || '';
     const link = xml.match(/<link[^>]*href=["']([^"']+)["']/)?.[1] || '';
     
-    // Clean CDATA wrappers
     title = cleanCData(title);
-    
     title = title.replace(/\s*-\s*[^-]+$/, '').trim();
     
     if (title && link && title.length >= 20) {
@@ -454,12 +511,11 @@ Return JSON with these exact fields:
 
     const parsed = JSON.parse(raw);
     
-    // Clean up the title - remove any colons, dashes that might have slipped through
     let cleanTitle = parsed.title
-      .replace(/^["']|["']$/g, '') // Remove surrounding quotes
-      .replace(/^#+\s*/, '') // Remove markdown headers
-      .replace(/:/g, '') // Remove colons
-      .replace(/\s*[-—–]\s*/g, ' ') // Replace dashes with spaces
+      .replace(/^["']|["']$/g, '')
+      .replace(/^#+\s*/, '')
+      .replace(/:/g, '')
+      .replace(/\s*[-—–]\s*/g, ' ')
       .trim();
     
     return {
@@ -494,8 +550,6 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
     const baseUrl = site.url.replace(/\/+$/, '');
     const headers = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
 
-    // Validate that the target category exists on the WordPress site
-    // Use the categories list endpoint with include filter (more permissive than direct ID access)
     if (setting.target_category_id) {
       console.log(`[auto-publish] Validating category ID ${setting.target_category_id} exists on WordPress...`);
       
@@ -507,8 +561,6 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
         try {
           console.log(`[auto-publish] Category validation attempt ${attempt}/${maxRetries}...`);
           
-          // Use list endpoint with include filter - more permissive than direct ID access
-          // Some WordPress security plugins block direct /categories/{id} but allow /categories?include={id}
           const categoryRes = await fetch(`${baseUrl}/wp-json/wp/v2/categories?include=${setting.target_category_id}&per_page=1`, {
             headers: { 
               'Authorization': `Basic ${creds}`,
@@ -536,7 +588,6 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
           console.log(`[auto-publish] Attempt ${attempt}: Failed to validate category: ${lastError}`);
         }
         
-        // Wait before retry (1 second, then 2 seconds)
         if (attempt < maxRetries) {
           const waitMs = attempt * 1000;
           console.log(`[auto-publish] Waiting ${waitMs}ms before retry...`);
@@ -549,7 +600,6 @@ async function publishToWP(site: WpSite, content: GeneratedContent, setting: Set
         return 'category_not_found';
       }
     } else {
-      // No category specified - skip to prevent publishing to default "Uncategorized"
       console.log(`[auto-publish] No target category configured. Skipping article to prevent publishing to default category.`);
       return 'category_not_found';
     }
