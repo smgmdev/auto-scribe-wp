@@ -1379,13 +1379,14 @@ export default function Industries() {
             className={`
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               fixed lg:relative top-[148px] lg:top-0 left-0 z-30
-              h-[calc(100vh-148px)] lg:h-auto lg:min-h-full lg:self-stretch
+              h-[calc(100vh-148px)] lg:h-auto
               w-72 lg:w-64 xl:w-72
               bg-white lg:bg-[#fbfbfd]
               border-r border-[#d2d2d7]
               transition-transform duration-200 ease-in-out
               lg:transition-none
-              overflow-hidden flex-shrink-0
+              overflow-y-auto lg:overflow-visible
+              flex-shrink-0
             `}
           >
             {/* Mobile overlay */}
@@ -1395,31 +1396,27 @@ export default function Industries() {
                 onClick={() => setSidebarOpen(false)}
               />
             )}
-            <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="py-4 px-3">
-                  <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#86868b] px-3 mb-2">
-                    Industries A–Z
-                  </h3>
-                  <nav className="space-y-0.5">
-                    {INDUSTRIES.map((industry) => (
-                      <button
-                        key={industry.slug}
-                        onClick={() => handleSelect(industry.slug)}
-                        className={`
-                          w-full text-left px-3 py-2 rounded-lg text-[13px] leading-snug transition-colors
-                          ${industry.slug === activeSlug
-                            ? 'bg-[#007aff] text-white font-medium'
-                            : 'text-foreground hover:bg-[#f5f5f7] dark:hover:bg-white/5'
-                          }
-                        `}
-                      >
-                        {industry.name}
-                      </button>
-                    ))}
-                  </nav>
-                </div>
-              </ScrollArea>
+            <div className="py-4 px-3">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#86868b] px-3 mb-2">
+                Industries A–Z
+              </h3>
+              <nav className="space-y-0.5">
+                {INDUSTRIES.map((industry) => (
+                  <button
+                    key={industry.slug}
+                    onClick={() => handleSelect(industry.slug)}
+                    className={`
+                      w-full text-left px-3 py-2 rounded-lg text-[13px] leading-snug transition-colors
+                      ${industry.slug === activeSlug
+                        ? 'bg-[#007aff] text-white font-medium'
+                        : 'text-foreground hover:bg-[#f5f5f7]'
+                      }
+                    `}
+                  >
+                    {industry.name}
+                  </button>
+                ))}
+              </nav>
             </div>
           </aside>
 
