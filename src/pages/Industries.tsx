@@ -1431,8 +1431,8 @@ export default function Industries() {
           </Sheet>
 
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-64 xl:w-72 bg-[#fbfbfd] border-r border-[#d2d2d7] flex-shrink-0">
-            <div className="pt-[110px] pb-4 px-3">
+          <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
+            <div className="sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto bg-[#fbfbfd] border-r border-[#d2d2d7] pb-4 px-3 pt-4">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
                   <button
