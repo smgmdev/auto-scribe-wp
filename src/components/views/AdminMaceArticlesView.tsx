@@ -249,7 +249,7 @@ const AdminMaceArticlesView = () => {
               Are you sure you want to delete "{articleToDelete?.title}"? This will also remove it from WordPress. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-0 space-x-0">
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-0 sm:space-x-0">
             <AlertDialogCancel className="bg-black text-white border-black hover:bg-transparent hover:text-black mt-0">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => articleToDelete && handleDelete(articleToDelete)}
