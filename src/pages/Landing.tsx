@@ -667,7 +667,7 @@ const Landing = () => {
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
 
             {/* Email Signup Section */}
-            <section className="bg-[#1d1d1f] py-16 md:py-20">
+            <section className="bg-[#1d1d1f]">
               <div className="max-w-2xl mx-auto px-6 text-center">
                 <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-3">
                   Stay in the Loop
