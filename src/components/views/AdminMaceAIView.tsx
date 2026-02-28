@@ -391,6 +391,16 @@ export function AdminMaceAIView() {
   }, []);
 
   const processUserMessage = async (text: string) => {
+    // Stop any lingering recognition/audio before processing
+    stopBackgroundListener();
+    if (recognitionRef.current) {
+      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+      recognitionRef.current = null;
+    }
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+
+    if (!isMountedRef.current) return;
     setStep('processing');
     setCurrentTranscript(text);
     setInterimTranscript('');
@@ -508,7 +518,7 @@ export function AdminMaceAIView() {
       const assistantMsg: Message = { role: 'assistant', content: errorMsg };
       setMessages(prev => [...prev, assistantMsg]);
       speak(errorMsg, () => {
-        if (isMountedRef.current) setStep('idle');
+        if (isMountedRef.current) startListening();
       });
       toast.error(errorMsg);
     }
