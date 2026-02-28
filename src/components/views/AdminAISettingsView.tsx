@@ -801,7 +801,7 @@ export function AdminAISettingsView() {
                     )}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-base truncate">{setting.source_name}</h3>
+                        <h3 className="font-semibold text-base truncate">{targetSite ? targetSite.name : 'No site'}</h3>
                         {setting.enabled ? (
                           <Badge className="bg-green-500/10 text-green-500 border-green-500/30 text-xs">
                             <Power className="h-3 w-3 mr-1" />
@@ -815,7 +815,7 @@ export function AdminAISettingsView() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
-                        {targetSite ? targetSite.name : 'No site'} 
+                        {setting.source_name}
                         {setting.target_category_name ? ` · ${setting.target_category_name}` : ''} 
                         {` · ${intervalLabel}`}
                       </p>
