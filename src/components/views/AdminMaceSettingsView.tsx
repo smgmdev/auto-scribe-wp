@@ -144,7 +144,11 @@ export function AdminMaceSettingsView() {
               Configure default categories for Mace AI published articles per site
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
+            <Button onClick={handleSave} disabled={saving} size="sm" className="rounded-r-none bg-black text-white hover:bg-black/90">
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Save
+            </Button>
             <Button
               onClick={async () => {
                 setLoading(true);
@@ -156,14 +160,10 @@ export function AdminMaceSettingsView() {
               }}
               disabled={loading}
               size="sm"
-              variant="outline"
+              className="rounded-l-none border-l border-l-white/20 bg-black text-white hover:bg-black/90"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Refresh
-            </Button>
-            <Button onClick={handleSave} disabled={saving} size="sm">
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Save
             </Button>
           </div>
         </div>
