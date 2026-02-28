@@ -575,13 +575,84 @@ FORMAT YOUR RESPONSE EXACTLY:
     const wpAuthHeader = `Basic ${credentials}`;
     const baseUrl = pa.siteUrl.replace(/\/+$/, '');
 
+    // ── Featured image: search, download, upload to WP ──
+    let featuredMediaId = 0;
+    if (pa.featuredImageQuery) {
+      try {
+        console.log('[voice-publish] Searching for featured image:', pa.featuredImageQuery);
+        const PERPLEXITY_API_KEY = Deno.env.get('PERPLEXITY_API_KEY');
+        
+        if (PERPLEXITY_API_KEY) {
+          // Ask Perplexity for a direct image URL
+          const imgSearchResp = await fetch('https://api.perplexity.ai/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${PERPLEXITY_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'sonar',
+              messages: [
+                { role: 'system', content: 'Return ONLY a single direct URL to a high-quality, royalty-free image. No explanation, no markdown, just the raw URL. Prefer Unsplash, Pexels, or Pixabay images. The URL must end with an image extension (.jpg, .jpeg, .png, .webp) or be a direct image link.' },
+                { role: 'user', content: `Find a high quality royalty-free image of: ${pa.featuredImageQuery}` },
+              ],
+            }),
+          });
+
+          if (imgSearchResp.ok) {
+            const imgSearchData = await imgSearchResp.json();
+            let imageUrl = imgSearchData.choices?.[0]?.message?.content?.trim() || '';
+            // Extract URL if AI returned extra text
+            const urlMatch = imageUrl.match(/https?:\/\/[^\s"'<>]+/);
+            if (urlMatch) imageUrl = urlMatch[0];
+
+            if (imageUrl && imageUrl.startsWith('http')) {
+              console.log('[voice-publish] Found image URL:', imageUrl);
+              
+              // Download the image
+              const imgResp = await fetch(imageUrl);
+              if (imgResp.ok) {
+                const imgBuffer = await imgResp.arrayBuffer();
+                const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+                const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+                const filename = `mace-featured-${Date.now()}.${ext}`;
+
+                // Upload to WordPress Media Library
+                const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': wpAuthHeader,
+                    'Content-Disposition': `attachment; filename="${filename}"`,
+                    'Content-Type': contentType,
+                  },
+                  body: imgBuffer,
+                });
+
+                if (wpMediaResp.ok) {
+                  const wpMediaData = await wpMediaResp.json();
+                  featuredMediaId = wpMediaData.id;
+                  console.log('[voice-publish] Uploaded featured image, media ID:', featuredMediaId);
+                } else {
+                  const mediaErr = await wpMediaResp.text();
+                  console.error('[voice-publish] WP media upload failed:', mediaErr);
+                }
+              } else {
+                console.error('[voice-publish] Failed to download image:', imgResp.status);
+              }
+            }
+          } else {
+            await imgSearchResp.text();
+          }
+        }
+      } catch (imgError) {
+        console.error('[voice-publish] Featured image error (non-fatal):', imgError);
+      }
+    }
+
     const postBody: Record<string, unknown> = {
       title: articleTitle,
       content: htmlContent,
       status: 'publish',
       categories: [],
       tags: [],
-      featured_media: 0,
+      featured_media: featuredMediaId,
     };
 
     if (pa.siteSeoPlugin === 'aioseo') {

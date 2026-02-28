@@ -249,12 +249,13 @@ export function AdminMaceAIView() {
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
+      audio.playbackRate = 1.15;
       audio.onplay = () => {
         if (isMountedRef.current) {
           setStep('speaking');
-          // Estimate duration: ~150ms per word average for ElevenLabs
-          const estimatedMs = text.split(/\s+/).length * 150;
-          startWordReveal(text, audio.duration ? audio.duration * 1000 : estimatedMs);
+          // Estimate duration: ~120ms per word for faster speech
+          const estimatedMs = text.split(/\s+/).length * 120;
+          startWordReveal(text, audio.duration ? (audio.duration * 1000 / audio.playbackRate) : estimatedMs);
         }
       };
 
