@@ -1372,7 +1372,7 @@ export default function Industries() {
         <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
         {/* Spacer for fixed header + QuickNav banner */}
-        <div style={{ height: headerOffset + 400 }} />
+        <div style={{ height: headerOffset + 800 }} />
 
         {/* Sub-header with title - Sticky */}
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
