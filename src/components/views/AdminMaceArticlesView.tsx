@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 interface MaceArticle {
@@ -26,6 +27,7 @@ const AdminMaceArticlesView = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [siteFilter, setSiteFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [articleToDelete, setArticleToDelete] = useState<MaceArticle | null>(null);
 
   useEffect(() => {
     fetchMaceArticles();
@@ -62,10 +64,9 @@ const AdminMaceArticlesView = () => {
   }, [articles.length]);
 
   const handleDelete = async (article: MaceArticle) => {
-    if (!confirm(`Delete "${article.title}"? This will also remove it from WordPress.`)) return;
     setDeletingId(article.id);
+    setArticleToDelete(null);
     try {
-      // Delete from WordPress first
       if (article.wp_post_id && article.published_to) {
         await supabase.functions.invoke('delete-wordpress-post', {
           body: {
@@ -75,7 +76,6 @@ const AdminMaceArticlesView = () => {
           },
         });
       }
-      // Delete from DB
       const { error } = await supabase.from('articles').delete().eq('id', article.id);
       if (error) throw error;
       setArticles(prev => prev.filter(a => a.id !== article.id));
@@ -225,7 +225,7 @@ const AdminMaceArticlesView = () => {
                   </a>
                 )}
                 <button
-                  onClick={() => handleDelete(article)}
+                  onClick={() => setArticleToDelete(article)}
                   disabled={deletingId === article.id}
                   className="p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                 >
@@ -240,6 +240,26 @@ const AdminMaceArticlesView = () => {
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!articleToDelete} onOpenChange={(open) => !open && setArticleToDelete(null)}>
+        <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle>Delete Article</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{articleToDelete?.title}"? This will also remove it from WordPress. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => articleToDelete && handleDelete(articleToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
