@@ -55,6 +55,7 @@ export function AdminMaceAIView() {
   const isMountedRef = useRef(true);
   const messagesRef = useRef<Message[]>([]);
   const pendingArticleRef = useRef<any>(null);
+  const processUserMessageRef = useRef<(text: string) => void>(() => {});
 
   // Keep refs in sync with state
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -220,7 +221,7 @@ export function AdminMaceAIView() {
 
       const text = finalText.trim();
       if (text.length > 1) {
-        processUserMessage(text);
+        processUserMessageRef.current(text);
       } else {
         setStep('idle');
         if (hasReceivedSpeech && text.length > 0) {
@@ -355,6 +356,9 @@ export function AdminMaceAIView() {
       toast.error(errorMsg);
     }
   };
+
+  // Keep ref in sync so memoized startListening always calls latest version
+  processUserMessageRef.current = processUserMessage;
 
   const handleMicClick = () => {
     if (step === 'listening') {
