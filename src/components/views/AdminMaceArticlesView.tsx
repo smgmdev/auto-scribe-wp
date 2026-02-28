@@ -133,7 +133,7 @@ const AdminMaceArticlesView = () => {
 
       {/* Filter & Search */}
       {!loading && articles.length > 0 && (
-        <div className="flex flex-col md:flex-row mb-4">
+        <div className="flex flex-col md:flex-row">
           <Select value={siteFilter} onValueChange={setSiteFilter}>
             <SelectTrigger className="w-full md:w-[200px] h-9 text-sm rounded-b-none md:rounded-b-lg md:rounded-r-none border-b-0 md:border-b md:border-r-0">
               <SelectValue placeholder="Filter by news site" />
