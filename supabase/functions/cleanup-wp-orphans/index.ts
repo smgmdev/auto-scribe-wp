@@ -95,17 +95,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // 4. Fetch WP posts published AFTER the earliest auto-publish date
-        // Use 24hr buffer and date_gmt parameter for timezone-safe filtering
+        // 4. Fetch ALL WP posts (no date filter — WP date filters are unreliable across timezones)
         const allWpPosts: { id: number; title: { rendered: string }; date_gmt: string }[] = [];
         let wpPage = 1;
-        const afterDate = new Date(earliestAutoPublish.getTime() - 24 * 60 * 60 * 1000).toISOString();
         while (wpPage <= 50) {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 15000);
           try {
             const wpRes = await fetch(
-              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&after=${afterDate}&orderby=date&order=desc&_fields=id,title,date_gmt`,
+              `${baseUrl}/wp-json/wp/v2/posts?per_page=100&page=${wpPage}&orderby=date&order=desc&_fields=id,title,date_gmt`,
               { headers: { 'Authorization': `Basic ${creds}` }, signal: controller.signal }
             );
             clearTimeout(timeout);
@@ -121,15 +119,40 @@ Deno.serve(async (req) => {
 
         r.wpPostCount = allWpPosts.length;
 
-        // 5. Find orphans: on WP, NOT in ai_published_sources, NOT in articles (Local Library)
-        const orphans = allWpPosts.filter(post => !trackedIds.has(post.id) && !localLibIds.has(post.id));
+        // 5. Find duplicate orphans: WP posts whose titles closely match tracked auto-published
+        // articles but have DIFFERENT post IDs (= race-condition ghosts from the old bug)
+        const trackedTitles = await getTrackedTitles(supabase, site.id);
+        console.log(`[wp-orphan-cleanup] ${site.name}: ${trackedTitles.length} tracked titles, ${trackedIds.size} tracked IDs, ${localLibIds.size} local lib IDs`);
+        
+        // Log Trump-related posts specifically for debugging
+        const trumpPosts = allWpPosts.filter(p => decodeHtml(p.title?.rendered || '').toLowerCase().includes('trump'));
+        for (const tp of trumpPosts) {
+          const t = decodeHtml(tp.title?.rendered || '');
+          const inTracked = trackedIds.has(tp.id);
+          const inLocal = localLibIds.has(tp.id);
+          const bestSim = trackedTitles.reduce((max, tracked) => Math.max(max, titleSimilarity(t, tracked)), 0);
+          console.log(`[wp-orphan-cleanup] TRUMP WP#${tp.id}: inTracked=${inTracked} inLocal=${inLocal} bestSim=${bestSim.toFixed(2)} "${t.substring(0, 70)}"`);
+        }
+        
+        
+        const orphans = allWpPosts.filter(post => {
+          if (trackedIds.has(post.id) || localLibIds.has(post.id)) return false;
+          
+          const wpTitle = decodeHtml(post.title?.rendered || '');
+          const isTitleDuplicate = trackedTitles.some(tracked => {
+            const sim = titleSimilarity(wpTitle, tracked);
+            return sim > 0.5;
+          });
+          
+          return isTitleDuplicate;
+        });
         r.orphanCount = orphans.length;
         r.orphanTitles = orphans.slice(0, 50).map(p => {
-          const title = (p.title?.rendered || 'Untitled').replace(/&#\d+;/g, '').replace(/&amp;/g, '&');
+          const title = decodeHtml(p.title?.rendered || 'Untitled');
           return `[WP#${p.id}] ${title.substring(0, 80)}`;
         });
 
-        console.log(`[wp-orphan-cleanup] ${site.name}: ${allWpPosts.length} WP posts after cutoff, ${orphans.length} orphans`);
+        console.log(`[wp-orphan-cleanup] ${site.name}: ${allWpPosts.length} WP posts, ${orphans.length} duplicate orphans`);
 
         // 6. Delete orphans if not dry run
         if (!dryRun && orphans.length > 0) {
@@ -160,3 +183,40 @@ Deno.serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
+
+// Get all tracked auto-published titles for a site
+async function getTrackedTitles(supabase: any, siteId: string): Promise<string[]> {
+  const titles: string[] = [];
+  let offset = 0;
+  while (true) {
+    const { data: page } = await supabase
+      .from('ai_published_sources')
+      .select('ai_title, source_title')
+      .eq('wordpress_site_id', siteId)
+      .range(offset, offset + 999);
+    if (!page?.length) break;
+    for (const row of page) {
+      if (row.ai_title) titles.push(row.ai_title);
+      if (row.source_title) titles.push(row.source_title);
+    }
+    if (page.length < 1000) break;
+    offset += 1000;
+  }
+  return titles;
+}
+
+function decodeHtml(html: string): string {
+  return html
+    .replace(/&#(\d+);/g, (_: string, n: string) => String.fromCharCode(parseInt(n)))
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#8217;/g, "'").replace(/&#8216;/g, "'").replace(/&#8220;/g, '"').replace(/&#8221;/g, '"');
+}
+
+function titleSimilarity(a: string, b: string): number {
+  const stop = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','was','are','were','its','this','that']);
+  const words = (s: string) => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !stop.has(w)));
+  const w1 = words(a), w2 = words(b);
+  if (!w1.size || !w2.size) return 0;
+  let overlap = 0;
+  w1.forEach(w => { if (w2.has(w)) overlap++; });
+  return overlap / Math.min(w1.size, w2.size);
+}
