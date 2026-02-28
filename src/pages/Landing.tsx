@@ -665,6 +665,59 @@ const Landing = () => {
             </section>
 
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
+
+            {/* Email Signup Section */}
+            <section className="bg-[#1d1d1f] py-16 md:py-20">
+              <div className="max-w-2xl mx-auto px-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-3">
+                  Stay in the Loop
+                </h2>
+                <p className="text-[#86868b] text-base md:text-lg mb-8">
+                  Get the latest updates on new media sites, features, and exclusive offers delivered to your inbox.
+                </p>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const emailInput = form.elements.namedItem('signup-email') as HTMLInputElement;
+                    const email = emailInput?.value?.trim();
+                    if (!email) return;
+
+                    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+                    if (btn) { btn.disabled = true; btn.textContent = 'Subscribing...'; }
+
+                    try {
+                      const { data, error } = await supabase.functions.invoke('collect-email', {
+                        body: { email },
+                      });
+                      if (error) throw error;
+                      toast.success('Successfully subscribed!');
+                      emailInput.value = '';
+                    } catch (err) {
+                      toast.error('Failed to subscribe. Please try again.');
+                    } finally {
+                      if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+                    }
+                  }}
+                  className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+                >
+                  <input
+                    name="signup-email"
+                    type="email"
+                    required
+                    placeholder="Enter your email"
+                    className="flex-1 h-11 rounded-lg bg-[#2d2d2f] border border-[#424245] px-4 text-white placeholder:text-[#86868b] focus:outline-none focus:ring-1 focus:ring-[#0071e3] text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="h-11 px-6 rounded-lg bg-[#0071e3] text-white font-medium text-sm hover:bg-[#0077ED] transition-colors shrink-0"
+                  >
+                    Subscribe
+                  </button>
+                </form>
+              </div>
+            </section>
+
             {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
           </>
         )}
