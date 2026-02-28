@@ -1371,8 +1371,8 @@ export default function Industries() {
         {/* Search Modal */}
         <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
-        {/* Spacer for fixed header + QuickNav banner */}
-        <div style={{ height: headerOffset + 300 }} />
+        {/* Spacer for fixed header + QuickNav banner (28px QuickNav + 64px header = 92px) */}
+        <div className="h-[92px]" />
 
         {/* Sub-header with title - Sticky */}
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
@@ -1438,7 +1438,7 @@ export default function Industries() {
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 py-10 lg:py-14 pt-[200px]">
+          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 py-10 lg:py-14">
             <article className="max-w-3xl">
               <div className="prose prose-lg dark:prose-invert max-w-none
                 prose-headings:font-semibold
