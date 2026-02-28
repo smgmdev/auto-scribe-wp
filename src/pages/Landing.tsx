@@ -666,98 +666,12 @@ const Landing = () => {
 
             {renderSection('Global Media Library China', chinaSites, 'media', { subcategory: 'China' })}
 
-            {/* Email Signup Section */}
-            <section className="bg-[#1d1d1f] py-8 md:py-10">
-              <div className="max-w-2xl mx-auto px-6 text-center">
-                <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-3">
-                  Stay in the Loop
-                </h2>
-                <p className="text-[#86868b] text-base md:text-lg mb-8">
-                  Get the latest updates on new media sites, features, and exclusive offers delivered to your inbox.
-                </p>
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const form = e.currentTarget;
-                    const emailInput = form.elements.namedItem('signup-email') as HTMLInputElement;
-                    const email = emailInput?.value?.trim();
-                    if (!email) return;
-
-                    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-                    if (btn) { btn.disabled = true; btn.textContent = 'Subscribing...'; }
-
-                    try {
-                      const { data, error } = await supabase.functions.invoke('collect-email', {
-                        body: { email },
-                      });
-                      if (error) throw error;
-                      toast.success('Successfully subscribed!');
-                      emailInput.value = '';
-                    } catch (err) {
-                      toast.error('Failed to subscribe. Please try again.');
-                    } finally {
-                      if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
-                    }
-                  }}
-                  className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-                >
-                  <input
-                    name="signup-email"
-                    type="email"
-                    required
-                    placeholder="Enter your email"
-                    className="flex-1 h-11 rounded-lg bg-[#2d2d2f] border border-[#424245] px-4 text-white placeholder:text-[#86868b] focus:outline-none focus:ring-1 focus:ring-[#0071e3] text-sm"
-                  />
-                  <button
-                    type="submit"
-                    className="h-11 px-6 rounded-lg bg-[#0071e3] text-white font-medium text-sm hover:bg-[#0077ED] transition-colors shrink-0"
-                  >
-                    Subscribe
-                  </button>
-                </form>
-              </div>
-            </section>
-
             <div className="pt-12">
               {renderSection('Global Media Library Business', businessSites, 'media', { subcategory: 'Business and Finance' })}
             </div>
           </>
         )}
-
-        {/* Bug Report CTA Section */}
-        <section className="relative overflow-hidden mt-12">
-          {!bugReportVideoLoaded && (
-            <div className="absolute bottom-4 right-4 z-20">
-              <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
-            </div>
-          )}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="none"
-            className="absolute inset-0 w-full h-full object-cover"
-            onCanPlayThrough={() => setBugReportVideoLoaded(true)}
-          >
-            <source src={bugReportBg} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 min-h-[320px]">
-            <h2 className="text-xl md:text-4xl font-semibold text-white mb-6">
-              Found a bug? Report it and get free credits.
-            </h2>
-            <Button
-              onClick={() => navigate('/report-bug')}
-              className="group bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
-            >
-              Report a Bug
-              <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
-            </Button>
-          </div>
-        </section>
       </main>
-
 
       {/* WP Site Detail - Draggable Popup */}
       {wpDialogOpen && selectedSite && (isMobile ? (
@@ -883,6 +797,58 @@ const Landing = () => {
         zIndex={250}
         isAuthenticated={!!user}
       />
+
+      {/* Email Signup Section */}
+      <section className="bg-[#1d1d1f] py-8 md:py-10">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-3">
+            Stay in the Loop
+          </h2>
+          <p className="text-[#86868b] text-base md:text-lg mb-8">
+            Get the latest updates on new media sites, features, and exclusive offers delivered to your inbox.
+          </p>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const emailInput = form.elements.namedItem('signup-email') as HTMLInputElement;
+              const email = emailInput?.value?.trim();
+              if (!email) return;
+
+              const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+              if (btn) { btn.disabled = true; btn.textContent = 'Subscribing...'; }
+
+              try {
+                const { data, error } = await supabase.functions.invoke('collect-email', {
+                  body: { email },
+                });
+                if (error) throw error;
+                toast.success('Successfully subscribed!');
+                emailInput.value = '';
+              } catch (err) {
+                toast.error('Failed to subscribe. Please try again.');
+              } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+              }
+            }}
+            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+          >
+            <input
+              name="signup-email"
+              type="email"
+              required
+              placeholder="Enter your email"
+              className="flex-1 h-11 rounded-lg bg-[#2d2d2f] border border-[#424245] px-4 text-white placeholder:text-[#86868b] focus:outline-none focus:ring-1 focus:ring-[#0071e3] text-sm"
+            />
+            <button
+              type="submit"
+              className="h-11 px-6 rounded-lg bg-[#0071e3] text-white font-medium text-sm hover:bg-[#0077ED] transition-colors shrink-0"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </section>
 
       <PWAInstallButtons />
       <Footer narrow hideBlackSpacer />
