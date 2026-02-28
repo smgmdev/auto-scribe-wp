@@ -1437,29 +1437,22 @@ export default function Industries() {
           {/* Main content */}
           <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[110px] pb-10 lg:pb-14">
             <article className="max-w-3xl">
-              <div className="prose prose-lg dark:prose-invert max-w-none
-                prose-headings:font-semibold
-                prose-h2:text-3xl prose-h2:mt-0 prose-h2:mb-6
-                prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4
-                prose-p:text-[15px] prose-p:leading-relaxed prose-p:text-[#1d1d1f] dark:prose-p:text-white/80
-                prose-li:text-[15px] prose-li:leading-relaxed prose-li:text-[#1d1d1f] dark:prose-li:text-white/80
-                prose-strong:text-[#1d1d1f] dark:prose-strong:text-white
-                prose-ul:my-4
-              ">
+              <div className="max-w-none space-y-5">
+
                 {activeIndustry.content.split('\n').map((line, i) => {
                   const trimmed = line.trim();
                   if (!trimmed) return null;
-                  if (trimmed.startsWith('## ')) return <h2 key={i}>{trimmed.replace('## ', '')}</h2>;
-                  if (trimmed.startsWith('### ')) return <h3 key={i}>{trimmed.replace('### ', '')}</h3>;
+                  if (trimmed.startsWith('## ')) return <h2 key={i} className="text-3xl font-bold text-foreground mt-2 mb-4">{trimmed.replace('## ', '')}</h2>;
+                  if (trimmed.startsWith('### ')) return <h3 key={i} className="text-xl font-semibold text-foreground mt-10 mb-3">{trimmed.replace('### ', '')}</h3>;
                   if (trimmed.startsWith('- **')) {
                     const match = trimmed.match(/^- \*\*(.+?)\*\*\s*(.*)$/);
-                    if (match) return <li key={i} className="list-disc ml-4"><strong>{match[1]}</strong> {match[2]}</li>;
+                    if (match) return <li key={i} className="list-disc ml-6 text-[15px] leading-relaxed text-[#1d1d1f]"><strong className="text-foreground">{match[1]}</strong> {match[2]}</li>;
                   }
                   if (trimmed.startsWith('**') && trimmed.includes('.**')) {
                     const match = trimmed.match(/^\*\*(.+?)\*\*\s*(.*)$/);
-                    if (match) return <p key={i}><strong>{match[1]}</strong> {match[2]}</p>;
+                    if (match) return <p key={i} className="text-[15px] leading-relaxed text-[#1d1d1f]"><strong className="text-foreground">{match[1]}</strong> {match[2]}</p>;
                   }
-                  return <p key={i}>{trimmed}</p>;
+                  return <p key={i} className="text-[15px] leading-relaxed text-[#424245]">{trimmed}</p>;
                 })}
               </div>
             </article>
