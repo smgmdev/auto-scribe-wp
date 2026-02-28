@@ -93,43 +93,53 @@ Deno.serve(async (req) => {
 
     // ── RSS LOCK: Prevent concurrent publishing from same RSS source ──
     const rssUrl = setting.source_url;
+    const siteId = setting.target_site_id;
     
-    // First check if a lock already exists (another config is processing this RSS)
-    const { data: existingLock } = await supabase
-      .from('auto_publish_locks')
-      .select('locked_by, locked_at')
-      .eq('source_url', rssUrl)
-      .single();
+    // We need TWO locks:
+    // 1. Per-RSS lock: prevents same RSS from being processed by multiple configs
+    // 2. Per-SITE lock: prevents race condition where two different RSS sources
+    //    publish the same topic to the same WP site simultaneously
+    const lockKeys = [rssUrl, `site:${siteId}`];
+    
+    for (const lockKey of lockKeys) {
+      const { data: existingLock } = await supabase
+        .from('auto_publish_locks')
+        .select('locked_by, locked_at')
+        .eq('source_url', lockKey)
+        .single();
 
-    if (existingLock) {
-      const lockAge = now.getTime() - new Date(existingLock.locked_at).getTime();
-      if (lockAge < 5 * 60 * 1000) {
-        console.log(`[auto-publish] RSS "${rssUrl}" locked by config ${existingLock.locked_by}, skipping`);
-        return new Response(JSON.stringify({ 
-          status: 'rss_locked', 
-          message: `RSS source locked by another config, will retry next interval` 
-        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (existingLock) {
+        const lockAge = now.getTime() - new Date(existingLock.locked_at).getTime();
+        if (lockAge < 5 * 60 * 1000) {
+          console.log(`[auto-publish] Lock "${lockKey}" held by config ${existingLock.locked_by}, skipping`);
+          return new Response(JSON.stringify({ 
+            status: 'locked', 
+            message: `Lock "${lockKey}" held by another config, will retry next interval` 
+          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        await supabase.from('auto_publish_locks').delete().eq('source_url', lockKey);
       }
-      // Stale lock — delete it before trying to acquire
-      await supabase.from('auto_publish_locks').delete().eq('source_url', rssUrl);
     }
 
-    // Try to INSERT lock (will fail if another config grabbed it between our check and insert)
+    // Acquire both locks atomically (insert both)
+    const lockRows = lockKeys.map(key => ({ source_url: key, locked_by: setting.id, locked_at: new Date().toISOString() }));
     const { error: lockError } = await supabase
       .from('auto_publish_locks')
-      .insert({ source_url: rssUrl, locked_by: setting.id, locked_at: new Date().toISOString() });
+      .insert(lockRows);
 
     if (lockError) {
-      console.log(`[auto-publish] Failed to acquire lock for "${rssUrl}" — another config grabbed it`);
+      console.log(`[auto-publish] Failed to acquire locks for config ${setting.id} — contention`);
+      // Clean up any partial locks we may have inserted
+      await supabase.from('auto_publish_locks').delete().in('source_url', lockKeys).eq('locked_by', setting.id);
       return new Response(JSON.stringify({ 
-        status: 'rss_locked', 
+        status: 'locked', 
         message: 'Lock contention, will retry next interval' 
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // We have the lock — proceed
+    // We have both locks — proceed
     const releaseLock = async () => {
-      await supabase.from('auto_publish_locks').delete().eq('source_url', rssUrl).eq('locked_by', setting.id);
+      await supabase.from('auto_publish_locks').delete().in('source_url', lockKeys).eq('locked_by', setting.id);
     };
 
     try {
