@@ -383,24 +383,39 @@ export function AdminMaceAIView() {
     try {
       if (currentPending) {
         if (isConfirmation(text)) {
-          const { data, error } = await supabase.functions.invoke('voice-publish', {
-            body: { action: 'confirm_publish', pendingArticle: currentPending },
+          // Say "Got it" first, then publish in background
+          const goMsg = "Got it, just a moment, doing it right now.";
+          setMessages(prev => [...prev, { role: 'assistant', content: goMsg }]);
+          
+          speak(goMsg, async () => {
+            // Now actually publish
+            try {
+              setStep('processing');
+              const { data, error } = await supabase.functions.invoke('voice-publish', {
+                body: { action: 'confirm_publish', pendingArticle: currentPending },
+              });
+              if (error) throw new Error(error.message || 'Publish failed');
+
+              const responseMessage = data?.message || "Something went wrong during publishing.";
+              setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
+              setPendingArticle(null);
+
+              if (data?.type === 'publish_success') {
+                setPublishResult({
+                  title: data.title, site: data.site, link: data.link,
+                  creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
+                });
+                toast.success(`Published to ${data.site}!`);
+              }
+
+              speak(responseMessage, done);
+            } catch (err: any) {
+              const errorMsg = err.message || 'Publishing failed';
+              setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+              speak(errorMsg, done);
+              toast.error(errorMsg);
+            }
           });
-          if (error) throw new Error(error.message || 'Publish failed');
-
-          const responseMessage = data?.message || "Something went wrong during publishing.";
-          setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
-          setPendingArticle(null);
-
-          if (data?.type === 'publish_success') {
-            setPublishResult({
-              title: data.title, site: data.site, link: data.link,
-              creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
-            });
-            toast.success(`Published to ${data.site}!`);
-          }
-
-          speak(responseMessage, done);
           return;
         } else if (isDenial(text)) {
           setPendingArticle(null);
@@ -409,10 +424,8 @@ export function AdminMaceAIView() {
           speak(cancelMsg, done);
           return;
         }
-        const clarifyMsg = "Just to be clear — should I publish this article? Say yes to publish or no to cancel.";
-        setMessages(prev => [...prev, { role: 'assistant', content: clarifyMsg }]);
-        speak(clarifyMsg, done);
-        return;
+        // If not a clear yes/no, clear pending and treat as new input
+        setPendingArticle(null);
       }
 
       const { data, error } = await supabase.functions.invoke('voice-publish', {
@@ -530,11 +543,6 @@ export function AdminMaceAIView() {
             </p>
           )}
 
-          {pendingArticle && step !== 'processing' && (
-            <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--accent-foreground))' }}>
-              📝 "{pendingArticle.title}" → {pendingArticle.siteName} — say "yes" or "no"
-            </p>
-          )}
 
           {/* Listening - show live transcript on 1 line */}
           {step === 'listening' && (currentTranscript || interimTranscript) && (
