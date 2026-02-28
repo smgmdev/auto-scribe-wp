@@ -82,6 +82,8 @@ const Landing = () => {
   const [selectedSite, setSelectedSite] = useState<SelectedSite>(null);
   const [selectedSiteType, setSelectedSiteType] = useState<'wp' | 'media' | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [bugReportVideoLoaded, setBugReportVideoLoaded] = useState(false);
+  const [mediaBuyingVideoLoaded, setMediaBuyingVideoLoaded] = useState(false);
   
   // Media site dialog state (unified with brief submission)
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
@@ -628,6 +630,11 @@ const Landing = () => {
 
             {/* Media Buying Marketplace Section */}
             <section className="relative overflow-hidden my-10 bg-[#1d1d1f]" style={{ backgroundImage: `url(${mediaBuyingPoster})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+              {!mediaBuyingVideoLoaded && (
+                <div className="absolute bottom-4 right-4 z-20">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+                </div>
+              )}
               <video
                 autoPlay
                 muted
@@ -637,7 +644,7 @@ const Landing = () => {
                 poster={mediaBuyingPoster}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
                 src={mediaBuyingBg}
-                onCanPlayThrough={(e) => (e.currentTarget.style.opacity = '1')}
+                onCanPlayThrough={(e) => { e.currentTarget.style.opacity = '1'; setMediaBuyingVideoLoaded(true); }}
               />
               <div className="absolute inset-0 bg-black/30" />
               <div className="relative z-10 flex flex-col items-center text-center px-6 py-16 md:py-24">
@@ -664,6 +671,11 @@ const Landing = () => {
 
         {/* Bug Report CTA Section */}
         <section className="relative overflow-hidden mt-12">
+          {!bugReportVideoLoaded && (
+            <div className="absolute bottom-4 right-4 z-20">
+              <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+            </div>
+          )}
           <video
             autoPlay
             loop
@@ -671,6 +683,7 @@ const Landing = () => {
             playsInline
             preload="none"
             className="absolute inset-0 w-full h-full object-cover"
+            onCanPlayThrough={() => setBugReportVideoLoaded(true)}
           >
             <source src={bugReportBg} type="video/mp4" />
           </video>
