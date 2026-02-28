@@ -1438,7 +1438,7 @@ export default function Industries() {
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 py-10 lg:py-14">
+          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[200px] pb-10 lg:pb-14">
             <article className="max-w-3xl">
               <div className="prose prose-lg dark:prose-invert max-w-none
                 prose-headings:font-semibold
