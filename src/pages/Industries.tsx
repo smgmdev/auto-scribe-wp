@@ -1385,8 +1385,7 @@ export default function Industries() {
         {/* Sub-header with title - Sticky */}
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
           <div className="bg-white border-b border-border">
-            <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-              <span className="text-xl font-semibold text-foreground">Industries</span>
+            <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="lg:hidden p-1.5 rounded-md hover:bg-muted transition-colors"
@@ -1394,6 +1393,7 @@ export default function Industries() {
               >
                 <Menu className="w-5 h-5" />
               </button>
+              <span className="text-xl font-semibold text-foreground">Industries</span>
             </div>
           </div>
         </div>
