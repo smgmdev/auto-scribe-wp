@@ -504,7 +504,7 @@ export function AdminMaceAIView() {
         <div className="flex flex-col items-center gap-4 pointer-events-auto max-w-lg px-6">
           {/* Speaking words - word-by-word reveal on 1 line */}
           {step === 'speaking' && speakingWords.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center truncate max-w-full">
+            <p className="text-sm text-muted-foreground text-center max-w-full overflow-hidden whitespace-nowrap">
               {speakingWords.map(({ word, absIdx }, i) => {
                 const isNewest = i === speakingWords.length - 1;
                 return (
@@ -639,7 +639,7 @@ export function AdminMaceAIView() {
             </button>
           )}
 
-          <p className={`text-xs font-medium transition-colors ${
+          <p className={`text-sm font-medium transition-colors ${
             step === 'listening' ? 'text-red-500 animate-pulse' 
             : step === 'speaking' ? 'text-blue-500'
             : step === 'processing' ? 'text-muted-foreground'
