@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye, RefreshCw } from 'lucide-react';
+import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -103,16 +103,17 @@ export function AdminAISettingsView() {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [newSource, setNewSource] = useState({
-    source_id: '', // ID of the selected AI source
+    source_id: '',
     source_name: '',
     source_url: '',
     enabled: false,
-    auto_publish: true, // Always ON
+    auto_publish: true,
     target_site_id: '',
     target_category_id: null as number | null,
     target_category_name: null as string | null,
-    rewrite_enabled: true, // Always ON
+    rewrite_enabled: true,
     fetch_images: true,
     publish_interval_minutes: 5,
     tone: 'professional',
@@ -130,6 +131,15 @@ export function AdminAISettingsView() {
   const [loadingCategories, setLoadingCategories] = useState<Record<string, boolean>>({});
   const [togglingEnabledId, setTogglingEnabledId] = useState<string | null>(null);
   const [updatingSettingId, setUpdatingSettingId] = useState<string | null>(null);
+
+  const toggleCardExpanded = (id: string) => {
+    setExpandedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Fetch settings
   const { data: settings, isLoading: settingsLoading } = useQuery({
@@ -775,68 +785,44 @@ export function AdminAISettingsView() {
             const targetSite = sites?.find(s => s.id === setting.target_site_id);
             const categories = settingCategories[setting.id] || [];
             const isLoadingCats = loadingCategories[setting.id];
+            const isExpanded = expandedCards.has(setting.id);
+            const intervalLabel = INTERVAL_OPTIONS.find(o => o.value === setting.publish_interval_minutes)?.label || `${setting.publish_interval_minutes}m`;
             
             return (
-              <Card key={setting.id} className={setting.enabled ? 'border-green-500/30' : ''}>
-                <CardContent className="pt-6">
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 min-w-0">
-                        <h3 className="font-semibold text-lg">{setting.source_name}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {setting.enabled ? (
-                            <Badge className="bg-green-500/10 text-green-500 border-green-500/30">
-                              <Power className="h-3 w-3 mr-1" />
-                              Active
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary">
-                              <PowerOff className="h-3 w-3 mr-1" />
-                              Inactive
-                            </Badge>
-                          )}
-                          {setting.auto_publish && (
-                            <Badge variant="outline">Auto-Publish</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:bg-black hover:text-white shrink-0 -mt-1 -mr-2"
-                        onClick={() => deleteMutation.mutate(setting.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground break-all">
-                      Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
-                    </p>
-                    {targetSite && (
-                      <div className="text-sm text-muted-foreground space-y-0.5">
-                        <div className="flex items-center gap-1">
-                          <span>Publishing to:</span>
-                          {targetSite.favicon && (
-                            <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
-                          )}
-                          <span className="font-medium">{targetSite.name}</span>
-                        </div>
-                        {setting.target_category_name && (
-                          <div>
-                            <span>Category:</span>{' '}
-                            <span className="font-medium">{setting.target_category_name}</span>
-                          </div>
+              <Card key={setting.id} className={`transition-all ${setting.enabled ? 'border-green-500/30' : ''}`}>
+                {/* Collapsed summary — always visible */}
+                <div 
+                  className="flex items-center justify-between gap-3 px-6 py-4 cursor-pointer select-none hover:bg-muted/30 transition-colors"
+                  onClick={() => toggleCardExpanded(setting.id)}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {targetSite?.favicon && (
+                      <img src={targetSite.favicon} alt="" className="w-5 h-5 rounded shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-base truncate">{setting.source_name}</h3>
+                        {setting.enabled ? (
+                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30 text-xs">
+                            <Power className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            <PowerOff className="h-3 w-3 mr-1" />
+                            Off
+                          </Badge>
                         )}
                       </div>
-                    )}
+                      <p className="text-xs text-muted-foreground truncate">
+                        {targetSite ? targetSite.name : 'No site'} 
+                        {setting.target_category_name ? ` · ${setting.target_category_name}` : ''} 
+                        {` · ${intervalLabel}`}
+                      </p>
+                    </div>
                   </div>
-
-                  <Separator className="my-4" />
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
-                      <Label className="text-sm">Enabled</Label>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <div onClick={(e) => e.stopPropagation()}>
                       {togglingEnabledId === setting.id ? (
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       ) : (
@@ -847,119 +833,166 @@ export function AdminAISettingsView() {
                         />
                       )}
                     </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
-                      <Label className="text-sm text-muted-foreground">Auto Publish</Label>
-                      <Switch
-                        checked={true}
-                        disabled
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
-                      <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
-                      <Switch
-                        checked={true}
-                        disabled
-                      />
-                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </div>
+                </div>
 
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Target Site</Label>
-                      <Select
-                        value={setting.target_site_id || undefined}
-                        onValueChange={(value) => handleSiteChange(setting.id, value)}
-                        disabled={setting.enabled}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a site" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sites?.filter(s => s.connected).map((site) => (
-                            <SelectItem key={site.id} value={site.id}>
-                              <div className="flex items-center gap-2">
-                                {site.favicon && (
-                                  <img src={site.favicon} alt="" className="w-4 h-4 rounded" />
-                                )}
-                                {site.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Target Category</Label>
-                      <Select
-                        value={setting.target_category_id ? setting.target_category_id.toString() : undefined}
-                        onValueChange={(value) => {
-                          const cat = categories.find(c => c.id === parseInt(value));
-                          if (cat) {
-                            handleCategoryChange(setting.id, cat.id, cat.name);
-                          }
-                        }}
-                        disabled={!setting.target_site_id || isLoadingCats || setting.enabled}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"}>
-                            {setting.target_category_name || (isLoadingCats ? "Loading..." : "Select category")}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.length > 0 ? (
-                            categories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id.toString()}>
-                                {cat.name}
-                              </SelectItem>
-                            ))
+                {/* Expanded details */}
+                {isExpanded && (
+                  <CardContent className="pt-0 pb-6 border-t">
+                    <div className="pt-4 space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground break-all">
+                          Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
+                        </p>
+                        {targetSite && (
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <span>Publishing to:</span>
+                            {targetSite.favicon && (
+                              <img src={targetSite.favicon} alt="" className="w-4 h-4 rounded shrink-0" />
+                            )}
+                            <span className="font-medium">{targetSite.name}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <Separator />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
+                          <Label className="text-sm">Enabled</Label>
+                          {togglingEnabledId === setting.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                           ) : (
-                            <div className="px-2 py-4 text-sm text-muted-foreground text-center">
-                              {isLoadingCats ? "Loading..." : "No categories available"}
-                            </div>
+                            <Switch
+                              checked={setting.enabled}
+                              onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
+                              disabled={updatingSettingId === setting.id}
+                            />
                           )}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
+                          <Label className="text-sm text-muted-foreground">Auto Publish</Label>
+                          <Switch checked={true} disabled />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
+                          <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
+                          <Switch checked={true} disabled />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Target Site</Label>
+                          <Select
+                            value={setting.target_site_id || undefined}
+                            onValueChange={(value) => handleSiteChange(setting.id, value)}
+                            disabled={setting.enabled}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a site" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sites?.filter(s => s.connected).map((site) => (
+                                <SelectItem key={site.id} value={site.id}>
+                                  <div className="flex items-center gap-2">
+                                    {site.favicon && (
+                                      <img src={site.favicon} alt="" className="w-4 h-4 rounded" />
+                                    )}
+                                    {site.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Target Category</Label>
+                          <Select
+                            value={setting.target_category_id ? setting.target_category_id.toString() : undefined}
+                            onValueChange={(value) => {
+                              const cat = categories.find(c => c.id === parseInt(value));
+                              if (cat) {
+                                handleCategoryChange(setting.id, cat.id, cat.name);
+                              }
+                            }}
+                            disabled={!setting.target_site_id || isLoadingCats || setting.enabled}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingCats ? "Loading..." : "Select category"}>
+                                {setting.target_category_name || (isLoadingCats ? "Loading..." : "Select category")}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.length > 0 ? (
+                                categories.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.id.toString()}>
+                                    {cat.name}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                  {isLoadingCats ? "Loading..." : "No categories available"}
+                                </div>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Tone</Label>
+                          <Select
+                            value={setting.tone}
+                            onValueChange={(value) => handleSelectChange(setting.id, 'tone', value)}
+                            disabled={setting.enabled}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TONE_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Interval</Label>
+                          <Select
+                            value={String(setting.publish_interval_minutes)}
+                            onValueChange={(value) => handleSelectChange(setting.id, 'publish_interval_minutes', parseInt(value))}
+                            disabled={setting.enabled}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {INTERVAL_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={String(option.value)}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => deleteMutation.mutate(setting.id)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Config
+                        </Button>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Tone</Label>
-                      <Select
-                        value={setting.tone}
-                        onValueChange={(value) => handleSelectChange(setting.id, 'tone', value)}
-                        disabled={setting.enabled}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TONE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Interval</Label>
-                      <Select
-                        value={String(setting.publish_interval_minutes)}
-                        onValueChange={(value) => handleSelectChange(setting.id, 'publish_interval_minutes', parseInt(value))}
-                        disabled={setting.enabled}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {INTERVAL_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={String(option.value)}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
+                )}
               </Card>
             );
           })
