@@ -136,7 +136,8 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       icon: Mic,
       submenu: [
         { id: 'admin-mace-ai', label: 'GO', icon: Mic },
-        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
+        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText },
+        { id: 'admin-mace-settings', label: 'Mace Settings', icon: Cog }
       ]
     }];
   }
@@ -290,6 +291,10 @@ export function Sidebar({
     }
     if (adminUsersGroupIds.includes(currentView)) {
       setExpandedMenus(prev => ({ ...prev, 'admin-users-group': true }));
+    }
+    const maceIds = ['admin-mace-ai', 'admin-mace-articles', 'admin-mace-settings'];
+    if (maceIds.includes(currentView)) {
+      setExpandedMenus(prev => ({ ...prev, 'admin-mace-section': true }));
     }
   }, [currentView, hasUserNavigated]);
 
