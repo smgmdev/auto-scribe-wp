@@ -501,7 +501,7 @@ export function AdminMaceAIView() {
 
       {/* Centered button / processing - fixed in viewport center */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
-        <div className="flex flex-col items-center gap-4 pointer-events-auto max-w-lg px-6">
+        <div className="flex flex-col items-center gap-3 pointer-events-auto max-w-lg px-6">
           {/* Speaking words - word-by-word reveal on 1 line */}
           {step === 'speaking' && speakingWords.length > 0 && (
             <p className="text-sm text-muted-foreground text-center max-w-full overflow-hidden whitespace-nowrap">
@@ -618,7 +618,7 @@ export function AdminMaceAIView() {
           ) : (
             <button
               onClick={handleMicClick}
-              className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible ${
+              className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible ${
                 step === 'listening'
                   ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
                   : step === 'speaking'
@@ -633,9 +633,9 @@ export function AdminMaceAIView() {
                 <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse pointer-events-none" />
               )}
 
-              {step === 'idle' && <Mic className="w-9 h-9 text-white relative z-10" />}
-              {step === 'listening' && <MicOff className="w-9 h-9 text-white relative z-10" />}
-              {step === 'speaking' && <Volume2 className="w-9 h-9 text-white relative z-10 animate-pulse" />}
+              {step === 'idle' && <Mic className="w-7 h-7 text-white relative z-10" />}
+              {step === 'listening' && <MicOff className="w-7 h-7 text-white relative z-10" />}
+              {step === 'speaking' && <Volume2 className="w-7 h-7 text-white relative z-10 animate-pulse" />}
             </button>
           )}
 
