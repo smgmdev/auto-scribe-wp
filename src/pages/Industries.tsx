@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { ChevronLeft, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -1451,6 +1452,9 @@ export default function Industries() {
             </article>
           </main>
         </div>
+
+        {/* Download buttons */}
+        <PWAInstallButtons />
 
         {/* Footer */}
         <Footer dark />
