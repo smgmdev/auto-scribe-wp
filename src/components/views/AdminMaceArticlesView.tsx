@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, Calendar, Globe, Mic, RefreshCw } from 'lucide-react';
+import { ExternalLink, Calendar, Globe, Mic, RefreshCw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface MaceArticle {
   id: string;
@@ -21,7 +23,7 @@ const AdminMaceArticlesView = () => {
     fetchMaceArticles();
   }, []);
 
-  const fetchMaceArticles = async () => {
+  const fetchMaceArticles = useCallback(async (manual = false) => {
     setLoading(true);
     try {
       const { data: articlesData } = await supabase
@@ -31,36 +33,42 @@ const AdminMaceArticlesView = () => {
         .not('published_to', 'is', null)
         .order('created_at', { ascending: false });
 
-      // Filter for mace-sourced articles
       const maceArticles = (articlesData || []).filter((a: any) => {
         const sh = a.source_headline;
         return sh && typeof sh === 'object' && (sh as any).source === 'mace';
       });
 
       setArticles(maceArticles);
+      if (manual) {
+        toast.success('Articles refreshed');
+      }
     } catch (err) {
       console.error('Error fetching mace articles:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return (
     <div className="w-full max-w-[980px] mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Mic className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Mace Articles</h1>
-          <span className="text-sm text-muted-foreground">({articles.length})</span>
+        <div className="flex items-center gap-2">
+          <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
+          <span className="text-4xl font-bold text-foreground">({articles.length})</span>
         </div>
-        <button
-          onClick={fetchMaceArticles}
+        <Button
+          onClick={() => fetchMaceArticles(true)}
           disabled={loading}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          size="sm"
+          className="w-full md:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
           Refresh
-        </button>
+        </Button>
       </div>
 
       {loading ? (
