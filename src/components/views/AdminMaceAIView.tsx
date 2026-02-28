@@ -90,6 +90,7 @@ export function AdminMaceAIView() {
   // Ref to track if we're in "interrupt mode" (listening while AI speaks)
   const interruptCallbackRef = useRef<((text: string) => void) | null>(null);
   const isInterruptModeRef = useRef(false);
+  const isProcessingRef = useRef(false); // Guard against concurrent processUserMessage calls
 
   // Start a passive background listener that auto-restarts and can interrupt speech
   const startBackgroundListener = useCallback((onInterrupt: (text: string) => void) => {
@@ -105,6 +106,9 @@ export function AdminMaceAIView() {
     interruptCallbackRef.current = onInterrupt;
     isInterruptModeRef.current = true;
 
+    let restartCount = 0;
+    const MAX_RESTARTS = 20; // Safety limit to prevent infinite loops
+
     const createRecognition = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -116,21 +120,17 @@ export function AdminMaceAIView() {
       recognition.onresult = (event: any) => {
         if (!isInterruptModeRef.current || interruptTriggered) return;
         
-        // Check for any meaningful speech (even interim) to interrupt quickly
         let latestTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           latestTranscript += event.results[i][0].transcript;
         }
         
         const trimmed = latestTranscript.trim();
-        // Interrupt as soon as we get 2+ characters of speech
         if (trimmed.length > 1) {
           interruptTriggered = true;
           isInterruptModeRef.current = false;
           
-          // Wait a tiny bit for the final result to stabilize
           setTimeout(() => {
-            // Gather best transcript
             let finalText = '';
             for (let i = 0; i < event.results.length; i++) {
               finalText += event.results[i][0].transcript;
@@ -141,8 +141,9 @@ export function AdminMaceAIView() {
             recognitionRef.current = null;
             
             if (interruptCallbackRef.current && isMountedRef.current) {
-              interruptCallbackRef.current(text);
+              const cb = interruptCallbackRef.current;
               interruptCallbackRef.current = null;
+              cb(text);
             }
           }, 300);
         }
@@ -150,24 +151,31 @@ export function AdminMaceAIView() {
 
       recognition.onerror = (event: any) => {
         console.log('Background listener error:', event.error);
-        // no-speech is normal, will auto-restart via onend
+        if (event.error === 'aborted' || event.error === 'not-allowed') {
+          isInterruptModeRef.current = false;
+        }
       };
 
       recognition.onend = () => {
         if (recognitionRef.current !== recognition) return;
         recognitionRef.current = null;
         
-        // Auto-restart if still in interrupt mode (keeps mic hot)
-        if (isInterruptModeRef.current && isMountedRef.current) {
+        if (isInterruptModeRef.current && isMountedRef.current && restartCount < MAX_RESTARTS) {
+          restartCount++;
           setTimeout(() => {
             if (isInterruptModeRef.current && isMountedRef.current) {
               try {
                 const newRecog = createRecognition();
                 recognitionRef.current = newRecog;
                 newRecog.start();
-              } catch (_) {}
+              } catch (_) {
+                isInterruptModeRef.current = false;
+              }
             }
-          }, 100);
+          }, 200);
+        } else if (restartCount >= MAX_RESTARTS) {
+          console.warn('Background listener hit max restarts, stopping');
+          isInterruptModeRef.current = false;
         }
       };
 
@@ -391,6 +399,13 @@ export function AdminMaceAIView() {
   }, []);
 
   const processUserMessage = async (text: string) => {
+    // Guard against concurrent calls
+    if (isProcessingRef.current) {
+      console.warn('processUserMessage already running, ignoring:', text);
+      return;
+    }
+    isProcessingRef.current = true;
+
     // Stop any lingering recognition/audio before processing
     stopBackgroundListener();
     if (recognitionRef.current) {
@@ -399,8 +414,9 @@ export function AdminMaceAIView() {
     }
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+    window.speechSynthesis.cancel();
 
-    if (!isMountedRef.current) return;
+    if (!isMountedRef.current) { isProcessingRef.current = false; return; }
     setStep('processing');
     setCurrentTranscript(text);
     setInterimTranscript('');
@@ -412,15 +428,15 @@ export function AdminMaceAIView() {
     const updatedMessages = [...currentMessages, userMsg];
     setMessages(updatedMessages);
 
+    const finishAndListen = () => { isProcessingRef.current = false; };
+
     try {
       // Check if we're waiting for confirmation on a pending article
       if (currentPending) {
         if (isConfirmation(text)) {
-          // User confirmed — publish!
           const { data, error } = await supabase.functions.invoke('voice-publish', {
             body: { action: 'confirm_publish', pendingArticle: currentPending },
           });
-
           if (error) throw new Error(error.message || 'Publish failed');
 
           const responseMessage = data?.message || "Something went wrong during publishing.";
@@ -430,43 +446,31 @@ export function AdminMaceAIView() {
 
           if (data?.type === 'publish_success') {
             setPublishResult({
-              title: data.title,
-              site: data.site,
-              link: data.link,
-              creditsUsed: data.creditsUsed || 0,
-              focusKeyword: data.focusKeyword || '',
+              title: data.title, site: data.site, link: data.link,
+              creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
             });
             toast.success(`Published to ${data.site}!`);
           }
 
+          isProcessingRef.current = false;
           speak(responseMessage, () => {
             if (isMountedRef.current) {
-              if (data?.type === 'publish_success') {
-                setStep('idle');
-              } else {
-                startListening();
-              }
+              data?.type === 'publish_success' ? setStep('idle') : startListening();
             }
           });
           return;
         } else if (isDenial(text)) {
-          // User declined
           setPendingArticle(null);
           const cancelMsg = "No worries, I've cancelled that. Let me know if you want to try something else.";
-          const assistantMsg: Message = { role: 'assistant', content: cancelMsg };
-          setMessages(prev => [...prev, assistantMsg]);
-          speak(cancelMsg, () => {
-            if (isMountedRef.current) startListening();
-          });
+          setMessages(prev => [...prev, { role: 'assistant', content: cancelMsg }]);
+          isProcessingRef.current = false;
+          speak(cancelMsg, () => { if (isMountedRef.current) startListening(); });
           return;
         }
-        // Ambiguous response — ask again
         const clarifyMsg = "Just to be clear — should I publish this article? Say yes to publish or no to cancel.";
-        const assistantMsg: Message = { role: 'assistant', content: clarifyMsg };
-        setMessages(prev => [...prev, assistantMsg]);
-        speak(clarifyMsg, () => {
-          if (isMountedRef.current) startListening();
-        });
+        setMessages(prev => [...prev, { role: 'assistant', content: clarifyMsg }]);
+        isProcessingRef.current = false;
+        speak(clarifyMsg, () => { if (isMountedRef.current) startListening(); });
         return;
       }
 
@@ -474,36 +478,27 @@ export function AdminMaceAIView() {
       const { data, error } = await supabase.functions.invoke('voice-publish', {
         body: { messages: updatedMessages },
       });
-
       if (error) throw new Error(error.message || 'Request failed');
 
       const responseMessage = data?.message || "I'm not sure what happened. Can you try again?";
-      const assistantMsg: Message = { role: 'assistant', content: responseMessage };
-      const newMessages = [...updatedMessages, assistantMsg];
-      setMessages(newMessages);
+      setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
 
-      // Handle pending publish — store article and wait for confirmation
       if (data?.type === 'pending_publish' && data?.pendingArticle) {
         setPendingArticle(data.pendingArticle);
-        speak(responseMessage, () => {
-          if (isMountedRef.current) startListening();
-        });
+        isProcessingRef.current = false;
+        speak(responseMessage, () => { if (isMountedRef.current) startListening(); });
         return;
       }
 
-      // Handle publish success (direct, shouldn't happen in new flow but keep as fallback)
       if (data?.type === 'publish_success') {
         setPublishResult({
-          title: data.title,
-          site: data.site,
-          link: data.link,
-          creditsUsed: data.creditsUsed || 0,
-          focusKeyword: data.focusKeyword || '',
+          title: data.title, site: data.site, link: data.link,
+          creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
         });
         toast.success(`Published to ${data.site}!`);
       }
 
-      // Speak the response, then auto-listen again
+      isProcessingRef.current = false;
       speak(responseMessage, () => {
         if (isMountedRef.current && data?.type !== 'publish_success') {
           startListening();
@@ -515,11 +510,9 @@ export function AdminMaceAIView() {
     } catch (err: any) {
       console.error('Voice publish error:', err);
       const errorMsg = err.message || 'Something went wrong';
-      const assistantMsg: Message = { role: 'assistant', content: errorMsg };
-      setMessages(prev => [...prev, assistantMsg]);
-      speak(errorMsg, () => {
-        if (isMountedRef.current) startListening();
-      });
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+      isProcessingRef.current = false;
+      speak(errorMsg, () => { if (isMountedRef.current) startListening(); });
       toast.error(errorMsg);
     }
   };
@@ -533,7 +526,11 @@ export function AdminMaceAIView() {
         try { recognitionRef.current.stop(); } catch (_) {}
       }
     } else if (step === 'speaking') {
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
+      // Full cleanup before transitioning
+      stopBackgroundListener();
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+      window.speechSynthesis.cancel();
+      isProcessingRef.current = false;
       startListening();
     } else if (step === 'idle') {
       startListening();
@@ -542,6 +539,7 @@ export function AdminMaceAIView() {
 
   const resetConversation = () => {
     stopAll();
+    isProcessingRef.current = false;
     setStep('idle');
     setMessages([]);
     setCurrentTranscript('');
