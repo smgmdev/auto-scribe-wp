@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, ImageOff, ImageIcon, RefreshCw, X } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Loader2, Save, ImageOff, ImageIcon, ChevronRight, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,6 +34,7 @@ export function AdminMaceSettingsView() {
   const [savedCategories, setSavedCategories] = useState<SavedCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [openSites, setOpenSites] = useState<Record<string, boolean>>({});
 
   // Local selections: { siteId: { withImage: number[], withoutImage: number[] } }
   const [selections, setSelections] = useState<Record<string, { withImage: number[]; withoutImage: number[] }>>({});
@@ -160,80 +162,94 @@ export function AdminMaceSettingsView() {
           const cats = siteCategories[site.id] || [];
           const isLoadingCats = loadingCategories[site.id];
           const sel = selections[site.id] || { withImage: [], withoutImage: [] };
+          const isOpen = openSites[site.id] || false;
+          const selectedCount = sel.withImage.length + sel.withoutImage.length;
+
+          const handleToggle = (open: boolean) => {
+            setOpenSites(prev => ({ ...prev, [site.id]: open }));
+            if (open && !cats.length && !isLoadingCats) {
+              fetchCategoriesForSite(site.id);
+            }
+          };
 
           return (
-            <Card key={site.id}>
-              <CardContent className="pt-6 space-y-5">
-                {/* Site header */}
-                <div className="flex items-center gap-3">
-                  {site.favicon && <img src={site.favicon} alt="" className="h-5 w-5 rounded" />}
-                  <h2 className="text-lg font-semibold text-foreground">{site.name}</h2>
-                  {!cats.length && !isLoadingCats && (
-                    <Button variant="outline" size="sm" onClick={() => fetchCategoriesForSite(site.id)} className="ml-auto">
-                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Load Categories
-                    </Button>
-                  )}
-                </div>
-
-                {isLoadingCats && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Loading categories...
-                  </div>
-                )}
-
-                {cats.length > 0 && (
-                  <div className="space-y-5">
-                    {/* WITHOUT featured image */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                        <ImageOff className="h-4 w-4" />
-                        <span>Without Featured Image — publish to:</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {cats.map(cat => {
-                          const selected = sel.withoutImage.includes(cat.id);
-                          return (
-                            <Badge
-                              key={cat.id}
-                              variant={selected ? 'default' : 'outline'}
-                              className={`cursor-pointer transition-colors ${selected ? '' : 'hover:bg-muted'}`}
-                              onClick={() => toggleCategory(site.id, cat.id, 'withoutImage')}
-                            >
-                              {cat.name}
-                              {selected && <X className="h-3 w-3 ml-1" />}
-                            </Badge>
-                          );
-                        })}
-                      </div>
+            <Collapsible key={site.id} open={isOpen} onOpenChange={handleToggle}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardContent className="pt-6 pb-6 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      {site.favicon && <img src={site.favicon} alt="" className="h-5 w-5 rounded" />}
+                      <h2 className="text-lg font-semibold text-foreground">{site.name}</h2>
+                      {selectedCount > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-xs">{selectedCount} categories</Badge>
+                      )}
+                      <ChevronRight className={`h-4 w-4 ml-auto text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
                     </div>
+                  </CardContent>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0 pb-6 space-y-5">
+                    {isLoadingCats && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Loading categories...
+                      </div>
+                    )}
 
-                    {/* WITH featured image */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                        <ImageIcon className="h-4 w-4" />
-                        <span>With Featured Image — publish to:</span>
+                    {cats.length > 0 && (
+                      <div className="space-y-5">
+                        {/* WITHOUT featured image */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <ImageOff className="h-4 w-4" />
+                            <span>Without Featured Image — publish to:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {cats.map(cat => {
+                              const selected = sel.withoutImage.includes(cat.id);
+                              return (
+                                <Badge
+                                  key={cat.id}
+                                  variant={selected ? 'default' : 'outline'}
+                                  className={`cursor-pointer transition-colors ${selected ? '' : 'hover:bg-muted'}`}
+                                  onClick={() => toggleCategory(site.id, cat.id, 'withoutImage')}
+                                >
+                                  {cat.name}
+                                  {selected && <X className="h-3 w-3 ml-1" />}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* WITH featured image */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <ImageIcon className="h-4 w-4" />
+                            <span>With Featured Image — publish to:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {cats.map(cat => {
+                              const selected = sel.withImage.includes(cat.id);
+                              return (
+                                <Badge
+                                  key={cat.id}
+                                  variant={selected ? 'default' : 'outline'}
+                                  className={`cursor-pointer transition-colors ${selected ? '' : 'hover:bg-muted'}`}
+                                  onClick={() => toggleCategory(site.id, cat.id, 'withImage')}
+                                >
+                                  {cat.name}
+                                  {selected && <X className="h-3 w-3 ml-1" />}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {cats.map(cat => {
-                          const selected = sel.withImage.includes(cat.id);
-                          return (
-                            <Badge
-                              key={cat.id}
-                              variant={selected ? 'default' : 'outline'}
-                              className={`cursor-pointer transition-colors ${selected ? '' : 'hover:bg-muted'}`}
-                              onClick={() => toggleCategory(site.id, cat.id, 'withImage')}
-                            >
-                              {cat.name}
-                              {selected && <X className="h-3 w-3 ml-1" />}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           );
         })}
       </div>
