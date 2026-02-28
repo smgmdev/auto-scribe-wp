@@ -1248,7 +1248,14 @@ INDUSTRIES.sort((a, b) => a.name.localeCompare(b.name));
 export default function Industries() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -1263,8 +1270,8 @@ export default function Industries() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isMobile) setSidebarOpen(false);
-  }, [isMobile]);
+    if (isDesktop) setSidebarOpen(false);
+  }, [isDesktop]);
 
   // Measure header offset dynamically
   useEffect(() => {
@@ -1393,7 +1400,7 @@ export default function Industries() {
 
         <div className="max-w-[980px] mx-auto flex flex-1 w-full">
           {/* Mobile Sidebar - Fullscreen Sheet */}
-          <Sheet open={sidebarOpen && isMobile} onOpenChange={setSidebarOpen}>
+          <Sheet open={sidebarOpen && !isDesktop} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="w-full sm:max-w-full p-0 border-none">
               <SheetTitle className="sr-only">Industries Menu</SheetTitle>
               <div className="h-full flex flex-col bg-white">
