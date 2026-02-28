@@ -200,10 +200,8 @@ export function AdminMaceAIView() {
       if (event.error === 'not-allowed') {
         toast.error('Microphone access denied.');
       }
-      recognitionRef.current = null;
-      if (isMountedRef.current) {
-        setStep('idle');
-      }
+      // Don't null the ref here — let onend handle cleanup.
+      // onerror is always followed by onend in the Web Speech API.
     };
 
     recognition.onstart = () => {
@@ -214,10 +212,9 @@ export function AdminMaceAIView() {
 
     recognition.onend = () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      const wasOurRecognition = recognitionRef.current === recognition;
       recognitionRef.current = null;
 
-      if (!isMountedRef.current || !wasOurRecognition) return;
+      if (!isMountedRef.current) return;
 
       const text = finalText.trim();
       if (text.length > 1) {
