@@ -1310,7 +1310,7 @@ export default function Industries() {
 
   const handleSelect = (slug: string) => {
     setSearchParams({ industry: slug });
-    if (isMobile) setSidebarOpen(false);
+    if (!isDesktop) setSidebarOpen(false);
     scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
