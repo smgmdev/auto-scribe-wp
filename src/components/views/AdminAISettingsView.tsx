@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Settings, Plus, Trash2, Power, PowerOff, Loader2, Eye, RefreshCw, ChevronDown } from 'lucide-react';
+import { Settings, Plus, Trash2, Loader2, Eye, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -792,28 +792,28 @@ export function AdminAISettingsView() {
               <Card key={setting.id} className={`transition-all ${setting.enabled ? 'border-green-500/30' : ''}`}>
                 {/* Collapsed summary — always visible */}
                 <div 
-                  className="flex items-center justify-between gap-3 px-6 py-4 cursor-pointer select-none hover:bg-muted/30 transition-colors"
+                  className="relative px-6 py-4 cursor-pointer select-none hover:bg-muted/30 transition-colors"
                   onClick={() => toggleCardExpanded(setting.id)}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Toggle - top right */}
+                  <div className="absolute top-4 right-6" onClick={(e) => e.stopPropagation()}>
+                    {togglingEnabledId === setting.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <Switch
+                        checked={setting.enabled}
+                        onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
+                        disabled={updatingSettingId === setting.id}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 min-w-0 pr-16">
                     {targetSite?.favicon && (
                       <img src={targetSite.favicon} alt="" className="w-5 h-5 rounded shrink-0" />
                     )}
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-base truncate">{targetSite ? targetSite.name : 'No site'}</h3>
-                        {setting.enabled ? (
-                          <Badge className="bg-green-500/10 text-green-500 border-green-500/30 text-xs">
-                            <Power className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            <PowerOff className="h-3 w-3 mr-1" />
-                            Off
-                          </Badge>
-                        )}
-                      </div>
+                      <h3 className="font-semibold text-base truncate">{targetSite ? targetSite.name : 'No site'}</h3>
                       <p className="text-xs text-muted-foreground truncate">
                         {setting.source_name}
                         {setting.target_category_name ? ` · ${setting.target_category_name}` : ''} 
@@ -821,18 +821,9 @@ export function AdminAISettingsView() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <div onClick={(e) => e.stopPropagation()}>
-                      {togglingEnabledId === setting.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                      ) : (
-                        <Switch
-                          checked={setting.enabled}
-                          onCheckedChange={(checked) => handleToggle(setting.id, 'enabled', checked)}
-                          disabled={updatingSettingId === setting.id}
-                        />
-                      )}
-                    </div>
+
+                  {/* Chevron - bottom right */}
+                  <div className="absolute bottom-3 right-6">
                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
