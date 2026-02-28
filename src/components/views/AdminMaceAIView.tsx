@@ -21,7 +21,7 @@ interface PublishResult {
 }
 
 const SILENCE_TIMEOUT_MS = 1500;
-const SCRIBE_SILENCE_MS = 2000; // Time after last committed transcript to auto-stop
+const SCRIBE_SILENCE_MS = 3000; // Time after last committed transcript to auto-stop
 
 function isConfirmation(text: string): boolean {
   const lower = text.toLowerCase().trim();
@@ -285,10 +285,19 @@ export function AdminMaceAIView() {
     setStep('listening');
 
     try {
+      // Request microphone access FIRST (while still in user gesture chain)
+      // This ensures the browser grants mic permission before the async token fetch
+      await navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        // Immediately stop the stream — Scribe will open its own
+        stream.getTracks().forEach(t => t.stop());
+      });
+
       const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
       if (error || !data?.token) {
         throw new Error('Failed to get speech recognition token');
       }
+
+      if (!scribeActiveRef.current || !isMountedRef.current) return;
 
       await scribe.connect({
         token: data.token,
@@ -299,10 +308,10 @@ export function AdminMaceAIView() {
         },
       });
 
-      // Initial silence timer — if no speech at all after 8s, stop
+      // Initial silence timer — if no speech at all after 10s, stop
       scribeSilenceTimerRef.current = setTimeout(() => {
         finishScribeListening();
-      }, 8000);
+      }, 10000);
     } catch (err) {
       console.error('Failed to start ElevenLabs STT:', err);
       scribeActiveRef.current = false;
