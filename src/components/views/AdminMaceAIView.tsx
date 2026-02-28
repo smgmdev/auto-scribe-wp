@@ -85,6 +85,58 @@ export function AdminMaceAIView() {
     }
   }, []);
 
+  // Start a passive background listener that can interrupt speech
+  const startBackgroundListener = useCallback((onInterrupt: (text: string) => void) => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    // Clean up any existing recognition
+    if (recognitionRef.current) {
+      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+      recognitionRef.current = null;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    let finalText = '';
+    let interrupted = false;
+
+    recognition.onresult = (event: any) => {
+      let newFinal = '';
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          newFinal += result[0].transcript;
+        }
+      }
+      if (newFinal.trim().length > 1) {
+        finalText = newFinal.trim();
+        interrupted = true;
+        try { recognition.stop(); } catch (_) {}
+      }
+    };
+
+    recognition.onerror = () => { /* let onend handle */ };
+
+    recognition.onend = () => {
+      if (recognitionRef.current !== recognition) return;
+      recognitionRef.current = null;
+      if (interrupted && finalText && isMountedRef.current) {
+        onInterrupt(finalText);
+      }
+    };
+
+    try {
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (_) {
+      recognitionRef.current = null;
+    }
+  }, []);
+
   const speak = useCallback(async (text: string, onDone?: () => void) => {
     // Stop any current audio
     if (audioRef.current) {
@@ -92,7 +144,18 @@ export function AdminMaceAIView() {
       audioRef.current.src = '';
     }
 
-    // Keep showing 'processing' until audio is ready — don't set 'speaking' yet
+    // Handler for voice interruption during speech
+    const handleInterrupt = (spokenText: string) => {
+      // Stop audio playback
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      window.speechSynthesis.cancel();
+      // Process the interruption as a new user message
+      processUserMessageRef.current(spokenText);
+    };
 
     try {
       const response = await fetch(
@@ -117,33 +180,59 @@ export function AdminMaceAIView() {
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
-      // Only switch to 'speaking' when audio actually starts playing
       audio.onplay = () => {
-        if (isMountedRef.current) setStep('speaking');
+        if (isMountedRef.current) {
+          setStep('speaking');
+          // Start background listener for voice interruption
+          startBackgroundListener(handleInterrupt);
+        }
       };
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        // Stop background listener if still running
+        if (recognitionRef.current) {
+          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+          recognitionRef.current = null;
+        }
         if (isMountedRef.current && onDone) onDone();
       };
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
+        if (recognitionRef.current) {
+          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+          recognitionRef.current = null;
+        }
         if (isMountedRef.current && onDone) onDone();
       };
 
       await audio.play();
     } catch (err) {
       console.error('ElevenLabs TTS error, falling back to browser:', err);
-      // Fallback to browser TTS
-      if (isMountedRef.current) setStep('speaking');
+      if (isMountedRef.current) {
+        setStep('speaking');
+        startBackgroundListener(handleInterrupt);
+      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.3;
-      utterance.onend = () => { if (isMountedRef.current && onDone) onDone(); };
-      utterance.onerror = () => { if (isMountedRef.current && onDone) onDone(); };
+      utterance.onend = () => {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+          recognitionRef.current = null;
+        }
+        if (isMountedRef.current && onDone) onDone();
+      };
+      utterance.onerror = () => {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+          recognitionRef.current = null;
+        }
+        if (isMountedRef.current && onDone) onDone();
+      };
       window.speechSynthesis.speak(utterance);
     }
-  }, []);
+  }, [startBackgroundListener]);
 
   const startListening = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
