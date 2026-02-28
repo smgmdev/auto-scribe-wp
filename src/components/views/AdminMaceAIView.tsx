@@ -20,12 +20,34 @@ interface PublishResult {
 
 const SILENCE_TIMEOUT_MS = 1000;
 
+// Simple confirmation detection
+function isConfirmation(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const yesPatterns = [
+    'yes', 'yeah', 'yep', 'yup', 'sure', 'go ahead', 'do it', 'publish',
+    'publish it', 'go for it', 'absolutely', 'definitely', 'of course',
+    'let\'s go', 'let\'s do it', 'send it', 'confirmed', 'confirm',
+    'okay', 'ok', 'alright', 'right', 'affirmative', 'please', 'please do',
+  ];
+  return yesPatterns.some(p => lower === p || lower.startsWith(p + ' ') || lower.includes(p));
+}
+
+function isDenial(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const noPatterns = [
+    'no', 'nope', 'nah', 'don\'t', 'cancel', 'stop', 'nevermind',
+    'never mind', 'forget it', 'skip', 'not now', 'hold on', 'wait',
+  ];
+  return noPatterns.some(p => lower === p || lower.startsWith(p + ' ') || lower.includes(p));
+}
+
 export function AdminMaceAIView() {
   const [step, setStep] = useState<ConversationStep>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
+  const [pendingArticle, setPendingArticle] = useState<any>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -124,7 +146,6 @@ export function AdminMaceAIView() {
       // Reset silence timer on activity
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
-        // Silence detected — stop recognition
         if (recognitionRef.current) {
           try { recognitionRef.current.stop(); } catch (_) {}
         }
@@ -148,7 +169,7 @@ export function AdminMaceAIView() {
       if (!isMountedRef.current) return;
 
       const text = finalText.trim();
-      if (text.length > 2) {
+      if (text.length > 1) {
         processUserMessage(text);
       } else {
         setStep('idle');
@@ -171,6 +192,64 @@ export function AdminMaceAIView() {
     setMessages(updatedMessages);
 
     try {
+      // Check if we're waiting for confirmation on a pending article
+      if (pendingArticle) {
+        if (isConfirmation(text)) {
+          // User confirmed — publish!
+          const { data, error } = await supabase.functions.invoke('voice-publish', {
+            body: { action: 'confirm_publish', pendingArticle },
+          });
+
+          if (error) throw new Error(error.message || 'Publish failed');
+
+          const responseMessage = data?.message || "Something went wrong during publishing.";
+          const assistantMsg: Message = { role: 'assistant', content: responseMessage };
+          setMessages(prev => [...prev, assistantMsg]);
+          setPendingArticle(null);
+
+          if (data?.type === 'publish_success') {
+            setPublishResult({
+              title: data.title,
+              site: data.site,
+              link: data.link,
+              creditsUsed: data.creditsUsed || 0,
+              focusKeyword: data.focusKeyword || '',
+            });
+            toast.success(`Published to ${data.site}!`);
+          }
+
+          speak(responseMessage, () => {
+            if (isMountedRef.current) {
+              if (data?.type === 'publish_success') {
+                setStep('idle');
+              } else {
+                startListening();
+              }
+            }
+          });
+          return;
+        } else if (isDenial(text)) {
+          // User declined
+          setPendingArticle(null);
+          const cancelMsg = "No worries, I've cancelled that. Let me know if you want to try something else.";
+          const assistantMsg: Message = { role: 'assistant', content: cancelMsg };
+          setMessages(prev => [...prev, assistantMsg]);
+          speak(cancelMsg, () => {
+            if (isMountedRef.current) startListening();
+          });
+          return;
+        }
+        // Ambiguous response — ask again
+        const clarifyMsg = "Just to be clear — should I publish this article? Say yes to publish or no to cancel.";
+        const assistantMsg: Message = { role: 'assistant', content: clarifyMsg };
+        setMessages(prev => [...prev, assistantMsg]);
+        speak(clarifyMsg, () => {
+          if (isMountedRef.current) startListening();
+        });
+        return;
+      }
+
+      // Normal flow — send to AI
       const { data, error } = await supabase.functions.invoke('voice-publish', {
         body: { messages: updatedMessages },
       });
@@ -182,7 +261,16 @@ export function AdminMaceAIView() {
       const newMessages = [...updatedMessages, assistantMsg];
       setMessages(newMessages);
 
-      // Handle publish success
+      // Handle pending publish — store article and wait for confirmation
+      if (data?.type === 'pending_publish' && data?.pendingArticle) {
+        setPendingArticle(data.pendingArticle);
+        speak(responseMessage, () => {
+          if (isMountedRef.current) startListening();
+        });
+        return;
+      }
+
+      // Handle publish success (direct, shouldn't happen in new flow but keep as fallback)
       if (data?.type === 'publish_success') {
         setPublishResult({
           title: data.title,
@@ -194,10 +282,9 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      // Speak the response, then auto-listen again (unless it was a publish success)
+      // Speak the response, then auto-listen again
       speak(responseMessage, () => {
         if (isMountedRef.current && data?.type !== 'publish_success') {
-          // Auto-listen for next user input after AI finishes speaking
           startListening();
         } else if (isMountedRef.current) {
           setStep('idle');
@@ -218,12 +305,10 @@ export function AdminMaceAIView() {
 
   const handleMicClick = () => {
     if (step === 'listening') {
-      // Force stop listening
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch (_) {}
       }
     } else if (step === 'speaking') {
-      // Interrupt AI speech and start listening
       window.speechSynthesis.cancel();
       startListening();
     } else if (step === 'idle') {
@@ -238,6 +323,7 @@ export function AdminMaceAIView() {
     setCurrentTranscript('');
     setInterimTranscript('');
     setPublishResult(null);
+    setPendingArticle(null);
   };
 
   const isProcessing = step === 'processing';
@@ -283,6 +369,16 @@ export function AdminMaceAIView() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Pending publish indicator */}
+          {pendingArticle && step !== 'processing' && (
+            <div className="w-full max-w-lg bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+              <p className="text-sm text-amber-800 font-medium">
+                📝 Article ready: "{pendingArticle.title}" → {pendingArticle.siteName}
+              </p>
+              <p className="text-xs text-amber-600 mt-1">Say "yes" to publish or "no" to cancel</p>
             </div>
           )}
 
@@ -339,12 +435,12 @@ export function AdminMaceAIView() {
             : 'text-muted-foreground'
           }`}>
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
-            {step === 'listening' && 'Listening...'}
-            {step === 'processing' && 'Thinking...'}
+            {step === 'listening' && (pendingArticle ? 'Listening for confirmation...' : 'Listening...')}
+            {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
             {step === 'speaking' && 'Speaking... tap to interrupt'}
           </p>
 
-          {/* Publish success - brief confirmation only, articles listed in Mace Articles */}
+          {/* Publish success */}
           {publishResult && (
             <p className="text-sm text-emerald-600 font-medium">
               ✓ Article published to {publishResult.site}. View it in Mace Articles.
@@ -361,7 +457,7 @@ export function AdminMaceAIView() {
                 "Publish an article about Dubai on Washington Morning"
               </p>
               <p className="text-xs text-muted-foreground mt-4">
-                Mace AI will talk back to you, generate articles, set SEO keywords, and publish automatically.
+                Mace AI will generate the article, read you a summary, and ask for your confirmation before publishing.
               </p>
             </div>
           )}
