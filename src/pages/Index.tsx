@@ -31,6 +31,7 @@ import { AdminAIArticlesView } from '@/components/views/AdminAIArticlesView';
 import { AdminAgencyWithdrawalsView } from '@/components/views/AdminAgencyWithdrawalsView';
 import { AdminSecuritySupervisionView } from '@/components/views/AdminSecuritySupervisionView';
 import { AdminFeedbackView } from '@/components/views/AdminFeedbackView';
+import { AdminMaceAIView } from '@/components/views/AdminMaceAIView';
 import { AdminSystemView } from '@/components/views/AdminSystemView';
 import { SupportView } from '@/components/views/SupportView';
 import { AdminSupportView } from '@/components/views/AdminSupportView';
@@ -91,6 +92,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-agency-withdrawals': AdminAgencyWithdrawalsView,
   'admin-security-supervision': AdminSecuritySupervisionView,
   'admin-feedback': AdminFeedbackView,
+  'admin-mace-ai': AdminMaceAIView,
   'admin-system': AdminSystemView,
   'admin-support': AdminSupportView,
 };
