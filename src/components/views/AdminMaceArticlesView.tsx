@@ -138,7 +138,7 @@ const AdminMaceArticlesView = () => {
             <SelectTrigger className="w-full md:w-[200px] h-9 text-sm rounded-b-none md:rounded-b-lg md:rounded-r-none border-b-0 md:border-b md:border-r-0">
               <SelectValue placeholder="Filter by news site" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent sideOffset={0}>
               <SelectItem value="all">All Sites</SelectItem>
               {uniqueSites.map(site => (
                 <SelectItem key={site.name} value={site.name}>
