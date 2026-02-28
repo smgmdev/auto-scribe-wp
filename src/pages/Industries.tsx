@@ -1413,10 +1413,7 @@ export default function Industries() {
                 onClick={() => setSidebarOpen(false)}
               />
             )}
-            <div className="pt-[100px] pb-4 px-3">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#86868b] px-3 mb-2">
-                Industries A–Z
-              </h3>
+            <div className="pt-[120px] pb-4 px-3">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
                   <button
@@ -1438,7 +1435,7 @@ export default function Industries() {
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[100px] pb-10 lg:pb-14">
+          <main className="flex-1 min-w-0 px-6 md:px-10 lg:px-16 pt-[120px] pb-10 lg:pb-14">
             <article className="max-w-3xl">
               <div className="prose prose-lg dark:prose-invert max-w-none
                 prose-headings:font-semibold
