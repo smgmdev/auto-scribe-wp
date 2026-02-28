@@ -62,6 +62,8 @@ export function AdminMaceAIView() {
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prefetchedTokenRef = useRef<string | null>(null);
+  const tokenFetchingRef = useRef(false);
 
   // ElevenLabs Scribe for speech-to-text
   const scribe = useScribe({
@@ -112,8 +114,24 @@ export function AdminMaceAIView() {
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
 
+  const prefetchScribeToken = useCallback(async () => {
+    if (tokenFetchingRef.current || prefetchedTokenRef.current) return;
+    tokenFetchingRef.current = true;
+    try {
+      const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
+      if (!error && data?.token) {
+        prefetchedTokenRef.current = data.token;
+      }
+    } catch (_) {}
+    tokenFetchingRef.current = false;
+  }, []);
+
   useEffect(() => {
     isMountedRef.current = true;
+    // Pre-fetch token on mount so it's ready when user taps
+    prefetchScribeToken();
+    // Also request mic permission early
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
     return () => {
       isMountedRef.current = false;
       stopAll();
@@ -130,6 +148,9 @@ export function AdminMaceAIView() {
     
     try { scribe.disconnect(); } catch (_) {}
     
+    // Pre-fetch next token so the next tap is instant
+    prefetchScribeToken();
+    
     if (!isMountedRef.current) return;
     
     if (text.length > 1) {
@@ -138,7 +159,7 @@ export function AdminMaceAIView() {
       setStep('idle');
       setInterimTranscript('');
     }
-  }, [scribe]);
+  }, [scribe, prefetchScribeToken]);
 
   const stopAll = useCallback(() => {
     scribeActiveRef.current = false;
@@ -285,22 +306,20 @@ export function AdminMaceAIView() {
     setStep('listening');
 
     try {
-      // Request microphone access FIRST (while still in user gesture chain)
-      // This ensures the browser grants mic permission before the async token fetch
-      await navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        // Immediately stop the stream — Scribe will open its own
-        stream.getTracks().forEach(t => t.stop());
-      });
+      // Use pre-fetched token for instant connection, or fetch now as fallback
+      let token = prefetchedTokenRef.current;
+      prefetchedTokenRef.current = null; // consume it
 
-      const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
-      if (error || !data?.token) {
-        throw new Error('Failed to get speech recognition token');
+      if (!token) {
+        const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
+        if (error || !data?.token) throw new Error('Failed to get speech recognition token');
+        token = data.token;
       }
 
       if (!scribeActiveRef.current || !isMountedRef.current) return;
 
       await scribe.connect({
-        token: data.token,
+        token,
         microphone: {
           echoCancellation: true,
           noiseSuppression: true,
