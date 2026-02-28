@@ -250,10 +250,10 @@ const AdminMaceArticlesView = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-black text-white border-black hover:bg-black/90 hover:text-white">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => articleToDelete && handleDelete(articleToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-transparent hover:text-destructive border border-destructive"
             >
               Delete
             </AlertDialogAction>
