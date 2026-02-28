@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ChevronLeft, ChevronRight, Factory, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { SearchModal } from '@/components/search/SearchModal';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import amblack from '@/assets/amblack.png';
 
 const INDUSTRIES: { slug: string; name: string; content: string }[] = [
   {
@@ -1243,6 +1247,11 @@ export default function Industries() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const { user } = useAuth();
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
   
   const activeSlug = searchParams.get('industry') || INDUSTRIES[0].slug;
   const activeIndustry = INDUSTRIES.find(i => i.slug === activeSlug) || INDUSTRIES[0];
@@ -1253,10 +1262,32 @@ export default function Industries() {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
 
+  // Scroll-hide header effect
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      const scrollThreshold = 64;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+        setIsHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsHeaderHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleSelect = (slug: string) => {
     setSearchParams({ industry: slug });
     if (isMobile) setSidebarOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -1266,40 +1297,79 @@ export default function Industries() {
         description={`Learn how Arcana Mace media publishing impacts the ${activeIndustry.name} sector through strategic public relations and global media distribution.`}
       />
 
-      <div className="min-h-screen bg-white dark:bg-black flex flex-col">
-        {/* Header */}
-        <header className="sticky top-0 z-40 bg-[#1d1d1f] text-white">
-          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-11 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/')}
-                className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Home</span>
-              </button>
-              <span className="text-white/30">|</span>
-              <div className="flex items-center gap-2 text-sm">
-                <Factory className="w-4 h-4 text-white/50" />
-                <span className="text-white/70">Industries</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors"
-              aria-label="Toggle sidebar"
-            >
-              {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+      <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
+        {/* Main Header - matches About page */}
+        <header 
+          className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        >
+          <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+              <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+              <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
             </button>
+            
+            {/* Search Trigger - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              >
+                <Search className="h-4 w-4" />
+                <span>Search media outlets...</span>
+              </button>
+            </div>
+            
+            {/* Right side buttons */}
+            <div className="flex items-center gap-2">
+              {/* Mobile Search Icon */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden hover:bg-black hover:text-white"
+                onClick={() => setSearchOpen(true)}
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+              
+              {user ? (
+                <Button 
+                  onClick={() => navigate('/account')}
+                  className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                >
+                  <User className="h-4 w-4" />
+                  Account
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Breadcrumb bar */}
-        <div className="bg-[#f5f5f7] dark:bg-[#111] border-b border-[#d2d2d7] dark:border-white/10">
-          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-10 flex items-center text-xs text-[#86868b]">
-            <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Arcana Mace</button>
-            <span className="mx-2">/</span>
-            <span className="text-foreground font-medium truncate">{activeIndustry.name}</span>
+        {/* Search Modal */}
+        <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+
+        {/* Spacer for fixed header */}
+        <div className="h-[92px]" />
+
+        {/* Sub-header with title - Sticky */}
+        <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+          <div className="bg-white border-b border-border">
+            <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
+              <span className="text-xl font-semibold text-foreground">Industries</span>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-1.5 rounded-md hover:bg-muted transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1308,11 +1378,11 @@ export default function Industries() {
           <aside
             className={`
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              fixed lg:relative top-[84px] lg:top-0 left-0 z-30
-              h-[calc(100vh-84px)] lg:h-auto lg:min-h-full lg:self-stretch
+              fixed lg:relative top-[148px] lg:top-0 left-0 z-30
+              h-[calc(100vh-148px)] lg:h-auto lg:min-h-full lg:self-stretch
               w-72 lg:w-64 xl:w-72
-              bg-white dark:bg-black lg:bg-[#fbfbfd] lg:dark:bg-[#111]
-              border-r border-[#d2d2d7] dark:border-white/10
+              bg-white lg:bg-[#fbfbfd]
+              border-r border-[#d2d2d7]
               transition-transform duration-200 ease-in-out
               lg:transition-none
               overflow-hidden flex-shrink-0
