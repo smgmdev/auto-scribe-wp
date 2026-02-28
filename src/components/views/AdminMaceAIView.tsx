@@ -53,6 +53,12 @@ export function AdminMaceAIView() {
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMountedRef = useRef(true);
+  const messagesRef = useRef<Message[]>([]);
+  const pendingArticleRef = useRef<any>(null);
+
+  // Keep refs in sync with state
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -238,17 +244,20 @@ export function AdminMaceAIView() {
     setCurrentTranscript(text);
     setInterimTranscript('');
 
+    const currentMessages = messagesRef.current;
+    const currentPending = pendingArticleRef.current;
+
     const userMsg: Message = { role: 'user', content: text };
-    const updatedMessages = [...messages, userMsg];
+    const updatedMessages = [...currentMessages, userMsg];
     setMessages(updatedMessages);
 
     try {
       // Check if we're waiting for confirmation on a pending article
-      if (pendingArticle) {
+      if (currentPending) {
         if (isConfirmation(text)) {
           // User confirmed — publish!
           const { data, error } = await supabase.functions.invoke('voice-publish', {
-            body: { action: 'confirm_publish', pendingArticle },
+            body: { action: 'confirm_publish', pendingArticle: currentPending },
           });
 
           if (error) throw new Error(error.message || 'Publish failed');
