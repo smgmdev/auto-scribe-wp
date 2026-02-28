@@ -1390,7 +1390,7 @@ export default function Industries() {
           </div>
         </div>
 
-        <div className="max-w-[1440px] mx-auto flex flex-1 w-full">
+        <div className="max-w-[980px] mx-auto flex flex-1 w-full">
           {/* Sidebar */}
           <aside
             className={`
