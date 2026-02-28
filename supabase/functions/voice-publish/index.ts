@@ -508,6 +508,7 @@ FORMAT YOUR RESPONSE EXACTLY:
         status: 'published', published_to: matchedSite.id, published_to_name: matchedSite.name,
         published_to_favicon: matchedSite.favicon || null, wp_post_id: wpPostId, wp_link: wpLink,
         focus_keyword: focusKeyword, meta_description: metaDescription,
+        source_headline: { source: 'mace' },
       });
 
       sendTelegramAlert(TelegramAlerts.wpArticlePublished(matchedSite.name, articleTitle, wpLink || '')).catch(() => {});
