@@ -440,7 +440,7 @@ export function BuyCreditsDialog({ open, onOpenChange }: BuyCreditsDialogProps) 
         )}
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-6 pt-3 pb-4">
+        <div className={`flex-1 overflow-y-auto px-6 pt-3 pb-4 ${!isMobile ? 'min-h-[420px]' : ''}`}>
 
         {step === 'select' ? (
           <>
