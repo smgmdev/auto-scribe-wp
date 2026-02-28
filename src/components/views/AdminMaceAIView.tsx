@@ -506,7 +506,7 @@ export function AdminMaceAIView() {
           ) : (
             <button
               onClick={handleMicClick}
-              className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 ${
+              className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible ${
                 step === 'listening'
                   ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
                   : step === 'speaking'
@@ -515,13 +515,10 @@ export function AdminMaceAIView() {
               }`}
             >
               {step === 'listening' && (
-                <>
-                  <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20" />
-                  <span className="absolute -inset-4 rounded-full border-2 border-red-400 opacity-30 animate-pulse" />
-                </>
+                <span className="absolute -inset-3 rounded-full border-2 border-red-400 opacity-30 animate-pulse pointer-events-none" />
               )}
               {step === 'speaking' && (
-                <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse" />
+                <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse pointer-events-none" />
               )}
 
               {step === 'idle' && <Mic className="w-9 h-9 text-white relative z-10" />}
