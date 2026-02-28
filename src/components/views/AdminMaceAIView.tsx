@@ -152,7 +152,14 @@ export function AdminMaceAIView() {
       return;
     }
 
+    // Stop any existing recognition first
+    if (recognitionRef.current) {
+      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
+      recognitionRef.current = null;
+    }
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
+    
     setCurrentTranscript('');
     setInterimTranscript('');
 
@@ -160,11 +167,9 @@ export function AdminMaceAIView() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognitionRef.current = recognition;
 
     let finalText = '';
     let hasReceivedSpeech = false;
-    const startedAt = Date.now();
 
     recognition.onresult = (event: any) => {
       hasReceivedSpeech = true;
@@ -200,8 +205,7 @@ export function AdminMaceAIView() {
       if (event.error === 'not-allowed') {
         toast.error('Microphone access denied.');
       }
-      // Don't null the ref here — let onend handle cleanup.
-      // onerror is always followed by onend in the Web Speech API.
+      // onend always fires after onerror, so let it handle cleanup
     };
 
     recognition.onstart = () => {
@@ -211,7 +215,10 @@ export function AdminMaceAIView() {
     };
 
     recognition.onend = () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+      
+      // Only process if this is still our active recognition
+      if (recognitionRef.current !== recognition) return;
       recognitionRef.current = null;
 
       if (!isMountedRef.current) return;
@@ -227,7 +234,15 @@ export function AdminMaceAIView() {
       }
     };
 
-    recognition.start();
+    try {
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start recognition:', err);
+      recognitionRef.current = null;
+      if (isMountedRef.current) setStep('idle');
+      toast.error('Could not start microphone. Please try again.');
+    }
   }, []);
 
   const processUserMessage = async (text: string) => {
