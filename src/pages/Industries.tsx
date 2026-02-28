@@ -1413,7 +1413,7 @@ export default function Industries() {
                 onClick={() => setSidebarOpen(false)}
               />
             )}
-            <div className="py-4 px-3">
+            <div className="pt-[200px] pb-4 px-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#86868b] px-3 mb-2">
                 Industries A–Z
               </h3>
