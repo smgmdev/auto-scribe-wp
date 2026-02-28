@@ -133,7 +133,10 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     }, {
       id: 'admin-mace-ai',
       label: 'Mace AI',
-      icon: Mic
+      icon: Mic,
+      submenu: [
+        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
+      ]
     }];
   }
   return base;
