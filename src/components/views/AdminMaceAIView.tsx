@@ -18,7 +18,7 @@ interface PublishResult {
   focusKeyword: string;
 }
 
-const SILENCE_TIMEOUT_MS = 1500;
+const SILENCE_TIMEOUT_MS = 1000;
 
 export function AdminMaceAIView() {
   const [step, setStep] = useState<ConversationStep>('idle');
@@ -54,13 +54,20 @@ export function AdminMaceAIView() {
   const speak = useCallback((text: string, onDone?: () => void) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.1;
-    utterance.pitch = 1.05;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.3;
     utterance.volume = 1;
 
-    // Try to pick a natural-sounding voice
+    // Pick a sweet, feminine voice
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Microsoft Zira'));
+    const preferred = voices.find(v => 
+      v.name.includes('Samantha') || 
+      v.name.includes('Karen') ||
+      v.name.includes('Google UK English Female') ||
+      v.name.includes('Microsoft Hazel') ||
+      v.name.includes('Moira') ||
+      (v.name.includes('Female') && v.lang.startsWith('en'))
+    );
     if (preferred) utterance.voice = preferred;
 
     utterance.onend = () => {
