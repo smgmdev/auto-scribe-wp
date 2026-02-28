@@ -14,7 +14,7 @@ import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/integrations/supabase/client';
 import { getFaviconUrl } from '@/lib/favicon';
 import { AgencyDetailsDialog } from '@/components/agency/AgencyDetailsDialog';
-import paymentsVideo from '@/assets/bgstripe.mp4';
+import paymentsVideo from '@/assets/bgup.mp4';
 import creditManagementVideo from '@/assets/credit-management-video.mp4';
 import { useIsMobile } from '@/hooks/use-mobile';
 import amblack from '@/assets/amblack.png';
