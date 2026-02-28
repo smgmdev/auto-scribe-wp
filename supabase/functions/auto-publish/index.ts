@@ -65,10 +65,21 @@ Deno.serve(async (req) => {
           // Skip if URL already published anywhere
           if (publishedUrls.has(item.link)) return false;
           
-          // Per-site check: stricter threshold (25%) to prevent same topic on same WP site
+          // Extract key entities (proper nouns, names, companies) from new title
+          const newEntities = extractKeyEntities(item.title);
+          
+          // Per-site check: VERY strict — any shared key entity OR 15% keyword overlap = duplicate
           const isSimilarOnSameSite = sitePublished.some((pub: { source_title: string; ai_title: string | null }) => {
+            // Check entity overlap first (catches "Trump tariffs" vs "Trump trade war")
+            const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
+            const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
+            if (sharedEntities.length >= 2) {
+              console.log(`[auto-publish] Skipping (same-site entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
+              return true;
+            }
+            
             const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.25) {
+            if (similarity > 0.15) {
               console.log(`[auto-publish] Skipping (same-site duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
               return true;
             }
@@ -76,10 +87,17 @@ Deno.serve(async (req) => {
           });
           if (isSimilarOnSameSite) return false;
           
-          // Global check: moderate threshold to avoid cross-site exact duplicates
+          // Global check: strict — shared entities or 20% keyword overlap = duplicate
           const isSimilarGlobally = (published || []).some((pub: { source_title: string; ai_title: string | null }) => {
+            const pubEntities = extractKeyEntities(pub.source_title + ' ' + (pub.ai_title || ''));
+            const sharedEntities = [...newEntities].filter(e => pubEntities.has(e));
+            if (sharedEntities.length >= 2) {
+              console.log(`[auto-publish] Skipping (global entity match): "${item.title.substring(0, 50)}..." (shared: ${sharedEntities.join(', ')})`);
+              return true;
+            }
+            
             const similarity = calculateTopicSimilarity(item.title, pub.source_title, pub.ai_title);
-            if (similarity > 0.40) {
+            if (similarity > 0.20) {
               console.log(`[auto-publish] Skipping (global duplicate): "${item.title.substring(0, 50)}..." (similarity: ${similarity.toFixed(2)})`);
               return true;
             }
@@ -191,6 +209,29 @@ Deno.serve(async (req) => {
 interface RssItem {
   title: string;
   link: string;
+}
+
+// Extract key entities (proper nouns, names, companies) from text
+function extractKeyEntities(text: string): Set<string> {
+  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'it', 'its', 'this', 'that', 'these', 'those', 'you', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how', 'when', 'where', 'why', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'new', 'says', 'said', 'after', 'before', 'over', 'under', 'between', 'into', 'through', 'during', 'about', 'against', 'above', 'below', 'from', 'up', 'down', 'out', 'off', 'then', 'once', 'here', 'there', 'any', 'if', 'report', 'reports', 'according', 'amid', 'despite', 'while', 'faces', 'shows', 'finds', 'reveals', 'announces', 'launches', 'plans', 'targets', 'hits', 'rises', 'falls', 'drops', 'gains', 'loses', 'grows', 'cuts', 'raises', 'sets', 'sees', 'makes', 'takes', 'gets', 'puts', 'gives', 'keeps', 'holds', 'major', 'big', 'latest', 'first', 'could', 'may', 'might']);
+  
+  // Extract words that look like proper nouns or key subjects
+  const words = text.split(/[\s,;:!?\-–—]+/).filter(w => w.length > 1);
+  const entities = new Set<string>();
+  
+  for (const word of words) {
+    const clean = word.replace(/[^a-zA-Z0-9']/g, '');
+    if (clean.length < 2) continue;
+    const lower = clean.toLowerCase();
+    if (stopWords.has(lower)) continue;
+    
+    // Keep capitalized words (proper nouns) and numbers, normalize to lowercase for matching
+    if (clean[0] === clean[0].toUpperCase() || /\d/.test(clean)) {
+      entities.add(lower);
+    }
+  }
+  
+  return entities;
 }
 
 // Calculate topic similarity between headlines using keyword overlap
