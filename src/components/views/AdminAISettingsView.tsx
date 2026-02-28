@@ -757,6 +757,7 @@ export function AdminAISettingsView() {
             </span>
           )}
         </h2>
+        <div className="h-3" />
 
         {settingsLoading ? (
           Array.from({ length: 2 }).map((_, i) => (
