@@ -85,7 +85,7 @@ export function AdminMaceAIView() {
       audioRef.current.src = '';
     }
 
-    setStep('speaking');
+    // Keep showing 'processing' until audio is ready — don't set 'speaking' yet
 
     try {
       const response = await fetch(
@@ -110,6 +110,11 @@ export function AdminMaceAIView() {
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
+      // Only switch to 'speaking' when audio actually starts playing
+      audio.onplay = () => {
+        if (isMountedRef.current) setStep('speaking');
+      };
+
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
         if (isMountedRef.current && onDone) onDone();
@@ -123,6 +128,7 @@ export function AdminMaceAIView() {
     } catch (err) {
       console.error('ElevenLabs TTS error, falling back to browser:', err);
       // Fallback to browser TTS
+      if (isMountedRef.current) setStep('speaking');
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.3;
@@ -140,7 +146,6 @@ export function AdminMaceAIView() {
     }
 
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; }
-    setStep('listening');
     setCurrentTranscript('');
     setInterimTranscript('');
 
@@ -151,8 +156,11 @@ export function AdminMaceAIView() {
     recognitionRef.current = recognition;
 
     let finalText = '';
+    let hasReceivedSpeech = false;
+    const startedAt = Date.now();
 
     recognition.onresult = (event: any) => {
+      hasReceivedSpeech = true;
       let newFinal = '';
       let newInterim = '';
 
@@ -200,12 +208,27 @@ export function AdminMaceAIView() {
       if (text.length > 1) {
         processUserMessage(text);
       } else {
+        // If recognition ended too quickly without speech (< 300ms), 
+        // it likely auto-stopped — go idle without error
+        const elapsed = Date.now() - startedAt;
+        if (!hasReceivedSpeech && elapsed < 300) {
+          setStep('idle');
+          return;
+        }
         setStep('idle');
         if (text.length > 0) {
           toast.error('Too short. Please try again with more detail.');
         }
       }
     };
+
+    // Only show listening state after a brief delay to prevent flicker
+    // if recognition immediately fails
+    setTimeout(() => {
+      if (recognitionRef.current && isMountedRef.current) {
+        setStep('listening');
+      }
+    }, 50);
 
     recognition.start();
   }, []);
