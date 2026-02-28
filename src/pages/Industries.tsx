@@ -1317,7 +1317,7 @@ export default function Industries() {
   return (
     <>
       <SEOHead
-        title={`${activeIndustry.name} — Industries | Arcana Mace`}
+        title="Industries"
         description={`Learn how Arcana Mace media publishing impacts the ${activeIndustry.name} sector through strategic public relations and global media distribution.`}
       />
 
