@@ -4,7 +4,8 @@ import { SEOHead } from '@/components/SEOHead';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
-import { ChevronLeft, ChevronRight, Search, User } from 'lucide-react';
+import { Menu, X, Search, User } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
@@ -1384,35 +1385,46 @@ export default function Industries() {
                 className="lg:hidden p-1.5 rounded-md hover:bg-muted transition-colors"
                 aria-label="Toggle sidebar"
               >
-                {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                <Menu className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
 
         <div className="max-w-[980px] mx-auto flex flex-1 w-full">
-          {/* Sidebar */}
-          <aside
-            className={`
-              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              fixed lg:relative top-[148px] lg:top-0 left-0 z-30
-              h-[calc(100vh-148px)] lg:h-auto
-              w-72 lg:w-64 xl:w-72
-              bg-white lg:bg-[#fbfbfd]
-              border-r border-[#d2d2d7]
-              transition-transform duration-200 ease-in-out
-              lg:transition-none
-              overflow-y-auto lg:overflow-visible
-              flex-shrink-0
-            `}
-          >
-            {/* Mobile overlay */}
-            {sidebarOpen && isMobile && (
-              <div 
-                className="fixed inset-0 bg-black/30 z-[-1] lg:hidden"
-                onClick={() => setSidebarOpen(false)}
-              />
-            )}
+          {/* Mobile Sidebar - Fullscreen Sheet */}
+          <Sheet open={sidebarOpen && isMobile} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="w-full sm:max-w-full p-0 border-none">
+              <SheetTitle className="sr-only">Industries Menu</SheetTitle>
+              <div className="h-full flex flex-col bg-white">
+                <div className="flex items-center justify-between px-4 h-14 border-b border-border">
+                  <span className="text-lg font-semibold">Industries</span>
+                </div>
+                <ScrollArea className="flex-1">
+                  <nav className="p-3 space-y-0.5">
+                    {INDUSTRIES.map((industry) => (
+                      <button
+                        key={industry.slug}
+                        onClick={() => handleSelect(industry.slug)}
+                        className={`
+                          w-full text-left px-3 py-2.5 rounded-lg text-[15px] leading-snug transition-colors
+                          ${industry.slug === activeSlug
+                            ? 'bg-black text-white font-medium'
+                            : 'text-foreground hover:bg-[#f5f5f7]'
+                          }
+                        `}
+                      >
+                        {industry.name}
+                      </button>
+                    ))}
+                  </nav>
+                </ScrollArea>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-64 xl:w-72 bg-[#fbfbfd] border-r border-[#d2d2d7] flex-shrink-0">
             <div className="pt-[110px] pb-4 px-3">
               <nav className="space-y-0.5">
                 {INDUSTRIES.map((industry) => (
