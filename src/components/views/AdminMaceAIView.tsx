@@ -18,7 +18,7 @@ interface PublishResult {
   focusKeyword: string;
 }
 
-const SILENCE_TIMEOUT_MS = 2500;
+const SILENCE_TIMEOUT_MS = 1500;
 
 export function AdminMaceAIView() {
   const [step, setStep] = useState<ConversationStep>('idle');
@@ -54,8 +54,8 @@ export function AdminMaceAIView() {
   const speak = useCallback((text: string, onDone?: () => void) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.05;
-    utterance.pitch = 1;
+    utterance.rate = 1.1;
+    utterance.pitch = 1.05;
     utterance.volume = 1;
 
     // Try to pick a natural-sounding voice
