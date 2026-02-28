@@ -116,17 +116,24 @@ export function AdminMaceAIView() {
       recognition.lang = 'en-US';
 
       let interruptTriggered = false;
+      let listenerReady = false;
+      
+      // Delay activation so the mic doesn't pick up the AI's own TTS audio
+      setTimeout(() => { listenerReady = true; }, 1200);
 
       recognition.onresult = (event: any) => {
-        if (!isInterruptModeRef.current || interruptTriggered) return;
+        if (!isInterruptModeRef.current || interruptTriggered || !listenerReady) return;
         
         let latestTranscript = '';
+        let confidence = 0;
         for (let i = event.resultIndex; i < event.results.length; i++) {
           latestTranscript += event.results[i][0].transcript;
+          confidence = Math.max(confidence, event.results[i][0].confidence || 0);
         }
         
         const trimmed = latestTranscript.trim();
-        if (trimmed.length > 1) {
+        // Require 5+ chars AND reasonable confidence to avoid TTS echo false positives
+        if (trimmed.length >= 5 && confidence > 0.5) {
           interruptTriggered = true;
           isInterruptModeRef.current = false;
           
@@ -145,7 +152,7 @@ export function AdminMaceAIView() {
               interruptCallbackRef.current = null;
               cb(text);
             }
-          }, 300);
+          }, 400);
         }
       };
 
