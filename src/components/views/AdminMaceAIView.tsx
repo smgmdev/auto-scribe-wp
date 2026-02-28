@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, MicOff, Loader2, Volume2, ExternalLink, RotateCcw } from 'lucide-react';
+import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import amblack from '@/assets/amblack.png';
@@ -20,6 +21,7 @@ interface PublishResult {
 }
 
 const SILENCE_TIMEOUT_MS = 1500;
+const SCRIBE_SILENCE_MS = 2000; // Time after last committed transcript to auto-stop
 
 function isConfirmation(text: string): boolean {
   const lower = text.toLowerCase().trim();
@@ -55,6 +57,38 @@ export function AdminMaceAIView() {
   const messagesRef = useRef<Message[]>([]);
   const pendingArticleRef = useRef<any>(null);
   const isProcessingRef = useRef(false);
+  const scribeCommittedTextRef = useRef('');
+  const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scribeActiveRef = useRef(false);
+
+  // ElevenLabs Scribe for speech-to-text
+  const scribe = useScribe({
+    modelId: 'scribe_v2_realtime',
+    commitStrategy: CommitStrategy.VAD,
+    onPartialTranscript: (data) => {
+      if (!isMountedRef.current || !scribeActiveRef.current) return;
+      setInterimTranscript(data.text || '');
+      // Reset silence timer on any partial
+      if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
+      scribeSilenceTimerRef.current = setTimeout(() => {
+        finishScribeListening();
+      }, SCRIBE_SILENCE_MS);
+    },
+    onCommittedTranscript: (data) => {
+      if (!isMountedRef.current || !scribeActiveRef.current) return;
+      const text = data.text || '';
+      if (text.trim()) {
+        scribeCommittedTextRef.current = (scribeCommittedTextRef.current + ' ' + text).trim();
+        setCurrentTranscript(scribeCommittedTextRef.current);
+        setInterimTranscript('');
+      }
+      // Reset silence timer
+      if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
+      scribeSilenceTimerRef.current = setTimeout(() => {
+        finishScribeListening();
+      }, SCRIBE_SILENCE_MS);
+    },
+  });
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
@@ -67,7 +101,32 @@ export function AdminMaceAIView() {
     };
   }, []);
 
+  const finishScribeListening = useCallback(() => {
+    if (!scribeActiveRef.current) return;
+    scribeActiveRef.current = false;
+    if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
+    
+    const text = scribeCommittedTextRef.current.trim();
+    scribeCommittedTextRef.current = '';
+    
+    try { scribe.disconnect(); } catch (_) {}
+    
+    if (!isMountedRef.current) return;
+    
+    if (text.length > 1) {
+      processUserMessage(text);
+    } else {
+      setStep('idle');
+      setInterimTranscript('');
+    }
+  }, [scribe]);
+
   const stopAll = useCallback(() => {
+    scribeActiveRef.current = false;
+    if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
+    try { scribe.disconnect(); } catch (_) {}
+    scribeCommittedTextRef.current = '';
+    
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
@@ -82,7 +141,7 @@ export function AdminMaceAIView() {
       audioRef.current = null;
     }
     window.speechSynthesis.cancel();
-  }, []);
+  }, [scribe]);
 
   const speak = useCallback(async (text: string, onDone?: () => void) => {
     if (audioRef.current) {
@@ -149,98 +208,43 @@ export function AdminMaceAIView() {
     }
   }, []);
 
-  const startListening = useCallback(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error('Speech recognition not supported. Please use Chrome.');
-      return;
-    }
-
-    if (recognitionRef.current) {
-      try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
-      recognitionRef.current = null;
-    }
-    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+  const startListening = useCallback(async () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
     window.speechSynthesis.cancel();
-
+    
     setCurrentTranscript('');
     setInterimTranscript('');
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    let finalText = '';
-    let hasReceivedSpeech = false;
-
-    recognition.onresult = (event: any) => {
-      hasReceivedSpeech = true;
-      let newFinal = '';
-      let newInterim = '';
-
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          newFinal += result[0].transcript;
-        } else {
-          newInterim += result[0].transcript;
-        }
-      }
-
-      if (newFinal) {
-        finalText = newFinal;
-        setCurrentTranscript(newFinal);
-      }
-      setInterimTranscript(newInterim);
-
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = setTimeout(() => {
-        if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch (_) {}
-        }
-      }, SILENCE_TIMEOUT_MS);
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
-      if (event.error === 'not-allowed') {
-        toast.error('Microphone access denied.');
-      }
-    };
-
-    recognition.onstart = () => {
-      if (isMountedRef.current) setStep('listening');
-    };
-
-    recognition.onend = () => {
-      if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-      if (recognitionRef.current !== recognition) return;
-      recognitionRef.current = null;
-      if (!isMountedRef.current) return;
-
-      const text = finalText.trim();
-      if (text.length > 1) {
-        processUserMessage(text);
-      } else {
-        setStep('idle');
-        if (hasReceivedSpeech && text.length > 0) {
-          toast.error('Too short. Please try again with more detail.');
-        }
-      }
-    };
+    scribeCommittedTextRef.current = '';
+    scribeActiveRef.current = true;
+    
+    setStep('listening');
 
     try {
-      recognitionRef.current = recognition;
-      recognition.start();
+      const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
+      if (error || !data?.token) {
+        throw new Error('Failed to get speech recognition token');
+      }
+
+      await scribe.connect({
+        token: data.token,
+        microphone: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+
+      // Initial silence timer — if no speech at all after 8s, stop
+      scribeSilenceTimerRef.current = setTimeout(() => {
+        finishScribeListening();
+      }, 8000);
     } catch (err) {
-      console.error('Failed to start recognition:', err);
-      recognitionRef.current = null;
+      console.error('Failed to start ElevenLabs STT:', err);
+      scribeActiveRef.current = false;
       if (isMountedRef.current) setStep('idle');
-      toast.error('Could not start microphone. Please try again.');
+      toast.error('Could not start speech recognition. Please try again.');
     }
-  }, []);
+  }, [scribe, finishScribeListening]);
 
   const processUserMessage = async (text: string) => {
     if (isProcessingRef.current) return;
@@ -337,9 +341,8 @@ export function AdminMaceAIView() {
 
   const handleMicClick = () => {
     if (step === 'listening') {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (_) {}
-      }
+      // Stop listening and process what we have
+      finishScribeListening();
     } else if (step === 'speaking') {
       // Stop speech and immediately start listening (interrupt)
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
