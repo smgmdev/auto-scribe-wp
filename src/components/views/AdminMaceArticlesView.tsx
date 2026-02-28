@@ -1,16 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, Calendar, Globe, Mic, RefreshCw, Loader2 } from 'lucide-react';
+import { ExternalLink, Calendar, Globe, Mic, RefreshCw, Loader2, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 interface MaceArticle {
   id: string;
   title: string;
+  published_to: string | null;
   published_to_name: string | null;
   published_to_favicon: string | null;
   wp_link: string | null;
+  wp_post_id: number | null;
+  wp_featured_media_id: number | null;
   focus_keyword: string | null;
   created_at: string;
 }
@@ -18,17 +23,24 @@ interface MaceArticle {
 const AdminMaceArticlesView = () => {
   const [articles, setArticles] = useState<MaceArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [siteFilter, setSiteFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchMaceArticles();
   }, []);
 
   const fetchMaceArticles = useCallback(async (manual = false) => {
-    setLoading(true);
+    if (!manual && articles.length > 0) {
+      // Background refresh — don't show loading
+    } else {
+      setLoading(true);
+    }
     try {
       const { data: articlesData } = await supabase
         .from('articles')
-        .select('id, title, published_to_name, published_to_favicon, wp_link, focus_keyword, created_at, source_headline')
+        .select('id, title, published_to, published_to_name, published_to_favicon, wp_link, wp_post_id, wp_featured_media_id, focus_keyword, created_at, source_headline')
         .eq('status', 'published')
         .not('published_to', 'is', null)
         .order('created_at', { ascending: false });
@@ -47,11 +59,62 @@ const AdminMaceArticlesView = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [articles.length]);
+
+  const handleDelete = async (article: MaceArticle) => {
+    if (!confirm(`Delete "${article.title}"? This will also remove it from WordPress.`)) return;
+    setDeletingId(article.id);
+    try {
+      // Delete from WordPress first
+      if (article.wp_post_id && article.published_to) {
+        await supabase.functions.invoke('delete-wordpress-post', {
+          body: {
+            siteId: article.published_to,
+            wpPostId: article.wp_post_id,
+            wpFeaturedMediaId: article.wp_featured_media_id || null,
+          },
+        });
+      }
+      // Delete from DB
+      const { error } = await supabase.from('articles').delete().eq('id', article.id);
+      if (error) throw error;
+      setArticles(prev => prev.filter(a => a.id !== article.id));
+      toast.success('Article deleted');
+    } catch (err) {
+      console.error('Error deleting article:', err);
+      toast.error('Failed to delete article');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Unique sites for filter
+  const uniqueSites = useMemo(() => {
+    const sites = new Map<string, { name: string; favicon: string | null }>();
+    articles.forEach(a => {
+      if (a.published_to_name && !sites.has(a.published_to_name)) {
+        sites.set(a.published_to_name, { name: a.published_to_name, favicon: a.published_to_favicon });
+      }
+    });
+    return Array.from(sites.values());
+  }, [articles]);
+
+  // Filtered articles
+  const filtered = useMemo(() => {
+    let result = articles;
+    if (siteFilter !== 'all') {
+      result = result.filter(a => a.published_to_name === siteFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(a => a.title.toLowerCase().includes(q));
+    }
+    return result;
+  }, [articles, siteFilter, searchQuery]);
 
   return (
     <div className="w-full max-w-[980px] mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
         <Button
           onClick={() => fetchMaceArticles(true)}
@@ -68,24 +131,59 @@ const AdminMaceArticlesView = () => {
         </Button>
       </div>
 
+      {/* Filter & Search */}
+      {!loading && articles.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          <Select value={siteFilter} onValueChange={setSiteFilter}>
+            <SelectTrigger className="w-[200px] h-9 text-sm">
+              <SelectValue placeholder="Filter by news site" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sites</SelectItem>
+              {uniqueSites.map(site => (
+                <SelectItem key={site.name} value={site.name}>
+                  <div className="flex items-center gap-2">
+                    {site.favicon && <img src={site.favicon} alt="" className="w-4 h-4 rounded-sm" />}
+                    {site.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative flex-1 max-w-[280px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-8 h-9 text-sm bg-black text-white border-black placeholder:text-gray-400"
+            />
+          </div>
+        </div>
+      )}
+
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-0">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-muted/30 rounded-lg animate-pulse" />
+            <div key={i} className="h-20 bg-muted/30 animate-pulse border-b border-border" />
           ))}
         </div>
-      ) : articles.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Mic className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-medium">No Mace articles yet</p>
-          <p className="text-sm mt-1">Articles published via Mace AI voice commands will appear here.</p>
+          <p className="text-lg font-medium">{articles.length === 0 ? 'No Mace articles yet' : 'No matching articles'}</p>
+          <p className="text-sm mt-1">
+            {articles.length === 0
+              ? 'Articles published via Mace AI voice commands will appear here.'
+              : 'Try adjusting your filter or search.'}
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {articles.map((article) => (
+        <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+          {filtered.map((article) => (
             <div
               key={article.id}
-              className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg hover:border-primary/30 transition-colors"
+              className="flex items-center gap-4 p-4 bg-card hover:bg-muted/30 transition-colors"
             >
               {article.published_to_favicon ? (
                 <img
@@ -115,16 +213,29 @@ const AdminMaceArticlesView = () => {
                 </div>
               </div>
 
-              {article.wp_link && (
-                <a
-                  href={article.wp_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 p-2 text-muted-foreground hover:text-primary transition-colors"
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {article.wp_link && (
+                  <a
+                    href={article.wp_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                <button
+                  onClick={() => handleDelete(article)}
+                  disabled={deletingId === article.id}
+                  className="p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
+                  {deletingId === article.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
           ))}
         </div>
