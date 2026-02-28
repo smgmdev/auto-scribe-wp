@@ -158,6 +158,7 @@ export function AdminMaceSettingsView() {
           </Card>
         )}
 
+        <div className="divide-y border">
         {sites.map(site => {
           const cats = siteCategories[site.id] || [];
           const isLoadingCats = loadingCategories[site.id];
@@ -174,21 +175,18 @@ export function AdminMaceSettingsView() {
 
           return (
             <Collapsible key={site.id} open={isOpen} onOpenChange={handleToggle}>
-              <Card>
-                <CollapsibleTrigger asChild>
-                  <CardContent className="pt-6 pb-6 cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      {site.favicon && <img src={site.favicon} alt="" className="h-5 w-5 rounded" />}
-                      <h2 className="text-lg font-semibold text-foreground">{site.name}</h2>
-                      {selectedCount > 0 && (
-                        <Badge variant="secondary" className="ml-1 text-xs">{selectedCount} categories</Badge>
-                      )}
-                      <ChevronRight className={`h-4 w-4 ml-auto text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
-                    </div>
-                  </CardContent>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0 pb-6 space-y-5">
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                  {site.favicon && <img src={site.favicon} alt="" className="h-5 w-5 rounded" />}
+                  <h2 className="text-sm font-semibold text-foreground">{site.name}</h2>
+                  {selectedCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-xs">{selectedCount} categories</Badge>
+                  )}
+                  <ChevronRight className={`h-4 w-4 ml-auto text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-4 pb-4 space-y-5">
                     {isLoadingCats && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
                         <Loader2 className="h-4 w-4 animate-spin" /> Loading categories...
@@ -246,12 +244,12 @@ export function AdminMaceSettingsView() {
                         </div>
                       </div>
                     )}
-                  </CardContent>
+                  </div>
                 </CollapsibleContent>
-              </Card>
             </Collapsible>
           );
         })}
+        </div>
       </div>
     </div>
   );
