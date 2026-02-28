@@ -50,6 +50,7 @@ import ReportBug from "./pages/ReportBug";
 import Guidelines from "./pages/Guidelines";
 import UpdateLog from "./pages/UpdateLog";
 import ResetPassword from "./pages/ResetPassword";
+import Industries from "./pages/Industries";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -181,6 +182,7 @@ const App = () => {
               <Route path="/update-log" element={<UpdateLog />} />
               <Route path="/report-bug" element={<ReportBug />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/industries" element={<Industries />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
