@@ -94,30 +94,37 @@ Deno.serve(async (req) => {
     // ── RSS LOCK: Prevent concurrent publishing from same RSS source ──
     const rssUrl = setting.source_url;
     
-    // Try to acquire lock — if another config is already fetching this RSS, skip
-    const { error: lockError } = await supabase
-      .from('auto_publish_locks')
-      .upsert(
-        { source_url: rssUrl, locked_by: setting.id, locked_at: new Date().toISOString() },
-        { onConflict: 'source_url' }
-      );
-
-    // Check if lock is held by another config (inserted within last 5 minutes)
+    // First check if a lock already exists (another config is processing this RSS)
     const { data: existingLock } = await supabase
       .from('auto_publish_locks')
       .select('locked_by, locked_at')
       .eq('source_url', rssUrl)
       .single();
 
-    if (existingLock && existingLock.locked_by !== setting.id) {
+    if (existingLock) {
       const lockAge = now.getTime() - new Date(existingLock.locked_at).getTime();
       if (lockAge < 5 * 60 * 1000) {
-        console.log(`[auto-publish] RSS "${rssUrl}" locked by config ${existingLock.locked_by}, skipping to avoid concurrent fetch`);
+        console.log(`[auto-publish] RSS "${rssUrl}" locked by config ${existingLock.locked_by}, skipping`);
         return new Response(JSON.stringify({ 
           status: 'rss_locked', 
           message: `RSS source locked by another config, will retry next interval` 
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
+      // Stale lock — delete it before trying to acquire
+      await supabase.from('auto_publish_locks').delete().eq('source_url', rssUrl);
+    }
+
+    // Try to INSERT lock (will fail if another config grabbed it between our check and insert)
+    const { error: lockError } = await supabase
+      .from('auto_publish_locks')
+      .insert({ source_url: rssUrl, locked_by: setting.id, locked_at: new Date().toISOString() });
+
+    if (lockError) {
+      console.log(`[auto-publish] Failed to acquire lock for "${rssUrl}" — another config grabbed it`);
+      return new Response(JSON.stringify({ 
+        status: 'rss_locked', 
+        message: 'Lock contention, will retry next interval' 
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // We have the lock — proceed
