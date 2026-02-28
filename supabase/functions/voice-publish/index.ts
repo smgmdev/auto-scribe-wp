@@ -494,36 +494,86 @@ FORMAT YOUR RESPONSE EXACTLY:
 
 [Article content - ~700 words, flowing paragraphs]`;
 
-    console.log('[voice-publish] Generating article + SEO in parallel...');
+    console.log('[voice-publish] Generating article + SEO + image in parallel...');
 
-    const [articleResponse, seoResponse] = await Promise.all([
-      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: articlePrompt },
-            { role: 'user', content: `Write the article about: ${pa.topic}` },
-          ],
-          temperature: 0.7,
-          max_tokens: 2000,
-        }),
+    const credentials = btoa(`${pa.siteUsername}:${pa.siteAppPassword}`);
+    const wpAuthHeader = `Basic ${credentials}`;
+    const baseUrl = pa.siteUrl.replace(/\/+$/, '');
+
+    // Run article, SEO, and image generation ALL in parallel
+    const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: articlePrompt },
+          { role: 'user', content: `Write the article about: ${pa.topic}` },
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
       }),
-      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-lite',
-          messages: [
-            { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
-            { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${pa.topic}" targeting the site "${pa.siteName}"` },
-          ],
-          tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
-          tool_choice: { type: 'function', function: { name: 'generate_seo' } },
-        }),
+    });
+
+    const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-lite',
+        messages: [
+          { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
+          { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${pa.topic}" targeting the site "${pa.siteName}"` },
+        ],
+        tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
+        tool_choice: { type: 'function', function: { name: 'generate_seo' } },
       }),
-    ]);
+    });
+
+    // Generate + upload image as a single parallel promise
+    const imagePromise = (async (): Promise<number> => {
+      if (!pa.featuredImageQuery) return 0;
+      try {
+        console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
+        const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'flux.schnell',
+            prompt: `Professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.`,
+            n: 1,
+            size: '1024x1024',
+          }),
+        });
+        if (!imgGenResp.ok) { await imgGenResp.text(); return 0; }
+        const imgGenData = await imgGenResp.json();
+        const generatedUrl = imgGenData.data?.[0]?.url;
+        if (!generatedUrl) return 0;
+        console.log('[voice-publish] Generated image, downloading...');
+        const imgResp = await fetch(generatedUrl);
+        if (!imgResp.ok) return 0;
+        const imgBuffer = await imgResp.arrayBuffer();
+        const contentType = imgResp.headers.get('content-type') || 'image/png';
+        const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+        const filename = `mace-featured-${Date.now()}.${ext}`;
+        const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+          method: 'POST',
+          headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
+          body: imgBuffer,
+        });
+        if (wpMediaResp.ok) {
+          const wpMediaData = await wpMediaResp.json();
+          console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
+          return wpMediaData.id;
+        }
+        await wpMediaResp.text();
+        return 0;
+      } catch (imgError) {
+        console.error('[voice-publish] Featured image error (non-fatal):', imgError);
+        return 0;
+      }
+    })();
+
+    const [articleResponse, seoResponse, featuredMediaId] = await Promise.all([articlePromise, seoPromise, imagePromise]);
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
@@ -556,7 +606,7 @@ FORMAT YOUR RESPONSE EXACTLY:
       }
     } else { await seoResponse.text(); }
 
-    console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount);
+    console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount, '- image:', featuredMediaId);
     let lockId: string | null = null;
     const creditsRequired = pa.creditsRequired || 0;
 
@@ -571,73 +621,6 @@ FORMAT YOUR RESPONSE EXACTLY:
     }
 
     // ── Publish to WordPress ──
-    const credentials = btoa(`${pa.siteUsername}:${pa.siteAppPassword}`);
-    const wpAuthHeader = `Basic ${credentials}`;
-    const baseUrl = pa.siteUrl.replace(/\/+$/, '');
-
-    // ── Featured image: generate with AI, upload to WP ──
-    let featuredMediaId = 0;
-    if (pa.featuredImageQuery) {
-      try {
-        console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
-
-        // Generate image via Lovable AI gateway
-        const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'flux.schnell',
-            prompt: `Professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.`,
-            n: 1,
-            size: '1024x1024',
-          }),
-        });
-
-        if (imgGenResp.ok) {
-          const imgGenData = await imgGenResp.json();
-          const generatedUrl = imgGenData.data?.[0]?.url;
-
-          if (generatedUrl) {
-            console.log('[voice-publish] Generated image, downloading...');
-            const imgResp = await fetch(generatedUrl);
-            if (imgResp.ok) {
-              const imgBuffer = await imgResp.arrayBuffer();
-              const contentType = imgResp.headers.get('content-type') || 'image/png';
-              const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
-              const filename = `mace-featured-${Date.now()}.${ext}`;
-
-              // Upload to WordPress Media Library
-              const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-                method: 'POST',
-                headers: {
-                  'Authorization': wpAuthHeader,
-                  'Content-Disposition': `attachment; filename="${filename}"`,
-                  'Content-Type': contentType,
-                },
-                body: imgBuffer,
-              });
-
-              if (wpMediaResp.ok) {
-                const wpMediaData = await wpMediaResp.json();
-                featuredMediaId = wpMediaData.id;
-                console.log('[voice-publish] Uploaded featured image, media ID:', featuredMediaId);
-              } else {
-                const mediaErr = await wpMediaResp.text();
-                console.error('[voice-publish] WP media upload failed:', mediaErr);
-              }
-            } else {
-              console.error('[voice-publish] Failed to download generated image:', imgResp.status);
-            }
-          }
-        } else {
-          const errText = await imgGenResp.text();
-          console.error('[voice-publish] Image generation failed:', errText);
-        }
-      } catch (imgError) {
-        console.error('[voice-publish] Featured image error (non-fatal):', imgError);
-      }
-    }
-
     const postBody: Record<string, unknown> = {
       title: articleTitle,
       content: htmlContent,
