@@ -401,125 +401,16 @@ IMPORTANT RULES:
         }
       }
 
-      // ── Generate article + SEO in parallel ──
+      // ── Return confirmation request (don't generate yet) ──
       const selectedTone = parsed.tone || 'journalist';
-      const toneGuidance: Record<string, string> = {
-        neutral: 'Write in a balanced, objective tone.',
-        professional: 'Write in a polished corporate tone.',
-        journalist: 'Write like a veteran news reporter. Lead with the most newsworthy angle.',
-        inspiring: 'Write with warmth and optimism.',
-        aggressive: 'Write with urgency and conviction.',
-        powerful: 'Write with commanding authority.',
-        important: 'Write with gravitas and significance.',
-      };
-      const toneInstruction = toneGuidance[selectedTone] || toneGuidance.journalist;
+      const confirmMessage = `Understood, you want me to publish an article about "${parsed.topic}" on ${matchedSite.name}. Should I go ahead?`;
 
-      const articlePrompt = `You are an experienced journalist writing for ${matchedSite.name}. Your writing must be indistinguishable from human content.
-
-WRITING RULES:
-- NEVER use numbered lists or bullet points
-- NEVER use more than 1-2 subheadings
-- NEVER start with "In a world where...", "In today's...", "In a groundbreaking..."
-- Write in flowing paragraphs with natural transitions
-- Vary sentence length
-- Use specific details and concrete examples
-- Target approximately 700 words
-- 5-7 paragraphs with natural flow
-
-TONE: ${selectedTone.toUpperCase()}
-${toneInstruction}
-
-Write an article about: "${parsed.topic}"
-
-FORMAT YOUR RESPONSE EXACTLY:
-[Compelling headline - no prefix, 12-18 words, no colons]
-
-[Article content - ~700 words, flowing paragraphs]`;
-
-      console.log('[voice-publish] Generating article + SEO in parallel...');
-
-      // Run article generation and SEO generation in parallel
-      const [articleResponse, seoResponse] = await Promise.all([
-        fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
-            messages: [
-              { role: 'system', content: articlePrompt },
-              { role: 'user', content: `Write the article about: ${parsed.topic}` },
-            ],
-            temperature: 0.7,
-            max_tokens: 2000,
-          }),
-        }),
-        fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash-lite',
-            messages: [
-              { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
-              { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${parsed.topic}" targeting the site "${matchedSite.name}"` },
-            ],
-            tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
-            tool_choice: { type: 'function', function: { name: 'generate_seo' } },
-          }),
-        }),
-      ]);
-
-      if (!articleResponse.ok) {
-        throw new Error('Failed to generate article');
-      }
-
-      const articleData = await articleResponse.json();
-      const rawContent = articleData.choices?.[0]?.message?.content;
-      if (!rawContent) {
-        throw new Error('No article content generated');
-      }
-
-      const lines = rawContent.trim().split('\n');
-      let articleTitle = lines[0].trim().replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
-      let contentStartIndex = 1;
-      while (contentStartIndex < lines.length && lines[contentStartIndex].trim() === '') contentStartIndex++;
-      const articleBody = lines.slice(contentStartIndex).join('\n').trim();
-      const paragraphs = articleBody.split(/\n\s*\n/).filter((p: string) => p.trim());
-      const htmlContent = paragraphs.map((p: string) => p.trim().replace(/\n/g, ' ')).join('<br><br>');
-      const wordCount = articleBody.split(/\s+/).length;
-
-      // Parse SEO results
-      let focusKeyword = parsed.topic;
-      let metaDescription = '';
-      if (seoResponse.ok) {
-        const seoData = await seoResponse.json();
-        const seoToolCall = seoData.choices?.[0]?.message?.tool_calls?.[0];
-        if (seoToolCall) {
-          const seo = JSON.parse(seoToolCall.function.arguments);
-          focusKeyword = seo.focus_keyword || focusKeyword;
-          metaDescription = seo.meta_description || '';
-        }
-      } else { await seoResponse.text(); }
-
-      console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount);
-
-      // ── Build a short summary for voice preview ──
-      // Take the first 2 sentences of the article as a natural summary
-      const plainText = articleBody.replace(/#+\s*/g, '').replace(/\*\*/g, '');
-      const sentences = plainText.match(/[^.!?]+[.!?]+/g) || [];
-      const summarySnippet = sentences.slice(0, 2).join(' ').trim();
-      
-      const summaryMessage = `Alright, I've written the article. The headline is: "${articleTitle}". Here's a quick preview: ${summarySnippet} — It's about ${wordCount} words. Should I go ahead and publish it to ${matchedSite.name}?`;
-
-      // Return the pending article for user confirmation
       return new Response(JSON.stringify({
         type: 'pending_publish',
-        message: summaryMessage,
+        message: confirmMessage,
         pendingArticle: {
-          title: articleTitle,
-          htmlContent,
+          topic: parsed.topic,
           tone: selectedTone,
-          focusKeyword,
-          metaDescription,
           siteId: matchedSite.id,
           siteName: matchedSite.name,
           siteUrl: matchedSite.url,
@@ -557,12 +448,109 @@ async function handleConfirmPublish(
   supabase: any,
   userId: string,
   pa: any,
-  _apiKey: string,
+  apiKey: string,
 ) {
   try {
-    console.log('[voice-publish] Confirming publish:', pa.title, '→', pa.siteName);
+    console.log('[voice-publish] Confirming publish:', pa.topic, '→', pa.siteName);
 
-    // ── Lock credits if needed ──
+    // ── Generate article + SEO in parallel ──
+    const selectedTone = pa.tone || 'journalist';
+    const toneGuidance: Record<string, string> = {
+      neutral: 'Write in a balanced, objective tone.',
+      professional: 'Write in a polished corporate tone.',
+      journalist: 'Write like a veteran news reporter. Lead with the most newsworthy angle.',
+      inspiring: 'Write with warmth and optimism.',
+      aggressive: 'Write with urgency and conviction.',
+      powerful: 'Write with commanding authority.',
+      important: 'Write with gravitas and significance.',
+    };
+    const toneInstruction = toneGuidance[selectedTone] || toneGuidance.journalist;
+
+    const articlePrompt = `You are an experienced journalist writing for ${pa.siteName}. Your writing must be indistinguishable from human content.
+
+WRITING RULES:
+- NEVER use numbered lists or bullet points
+- NEVER use more than 1-2 subheadings
+- NEVER start with "In a world where...", "In today's...", "In a groundbreaking..."
+- Write in flowing paragraphs with natural transitions
+- Vary sentence length
+- Use specific details and concrete examples
+- Target approximately 700 words
+- 5-7 paragraphs with natural flow
+
+TONE: ${selectedTone.toUpperCase()}
+${toneInstruction}
+
+Write an article about: "${pa.topic}"
+
+FORMAT YOUR RESPONSE EXACTLY:
+[Compelling headline - no prefix, 12-18 words, no colons]
+
+[Article content - ~700 words, flowing paragraphs]`;
+
+    console.log('[voice-publish] Generating article + SEO in parallel...');
+
+    const [articleResponse, seoResponse] = await Promise.all([
+      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: articlePrompt },
+            { role: 'user', content: `Write the article about: ${pa.topic}` },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      }),
+      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [
+            { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
+            { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${pa.topic}" targeting the site "${pa.siteName}"` },
+          ],
+          tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
+          tool_choice: { type: 'function', function: { name: 'generate_seo' } },
+        }),
+      }),
+    ]);
+
+    if (!articleResponse.ok) {
+      throw new Error('Failed to generate article');
+    }
+
+    const articleData = await articleResponse.json();
+    const rawContent = articleData.choices?.[0]?.message?.content;
+    if (!rawContent) {
+      throw new Error('No article content generated');
+    }
+
+    const lines = rawContent.trim().split('\n');
+    let articleTitle = lines[0].trim().replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+    let contentStartIndex = 1;
+    while (contentStartIndex < lines.length && lines[contentStartIndex].trim() === '') contentStartIndex++;
+    const articleBody = lines.slice(contentStartIndex).join('\n').trim();
+    const paragraphs = articleBody.split(/\n\s*\n/).filter((p: string) => p.trim());
+    const htmlContent = paragraphs.map((p: string) => p.trim().replace(/\n/g, ' ')).join('<br><br>');
+    const wordCount = articleBody.split(/\s+/).length;
+
+    let focusKeyword = pa.topic;
+    let metaDescription = '';
+    if (seoResponse.ok) {
+      const seoData = await seoResponse.json();
+      const seoToolCall = seoData.choices?.[0]?.message?.tool_calls?.[0];
+      if (seoToolCall) {
+        const seo = JSON.parse(seoToolCall.function.arguments);
+        focusKeyword = seo.focus_keyword || focusKeyword;
+        metaDescription = seo.meta_description || '';
+      }
+    } else { await seoResponse.text(); }
+
+    console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount);
     let lockId: string | null = null;
     const creditsRequired = pa.creditsRequired || 0;
 
@@ -582,8 +570,8 @@ async function handleConfirmPublish(
     const baseUrl = pa.siteUrl.replace(/\/+$/, '');
 
     const postBody: Record<string, unknown> = {
-      title: pa.title,
-      content: pa.htmlContent,
+      title: articleTitle,
+      content: htmlContent,
       status: 'publish',
       categories: [],
       tags: [],
@@ -591,10 +579,10 @@ async function handleConfirmPublish(
     };
 
     if (pa.siteSeoPlugin === 'aioseo') {
-      postBody.meta = { _aioseo_description: pa.metaDescription, _aioseo_keywords: pa.focusKeyword };
-      postBody.aioseo_meta_data = { description: pa.metaDescription, keyphrases: { focus: { keyphrase: pa.focusKeyword, score: 0, analysis: {} }, additional: [] } };
+      postBody.meta = { _aioseo_description: metaDescription, _aioseo_keywords: focusKeyword };
+      postBody.aioseo_meta_data = { description: metaDescription, keyphrases: { focus: { keyphrase: focusKeyword, score: 0, analysis: {} }, additional: [] } };
     } else if (pa.siteSeoPlugin === 'rankmath') {
-      postBody.meta = { rank_math_focus_keyword: pa.focusKeyword, rank_math_description: pa.metaDescription };
+      postBody.meta = { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription };
     }
 
     const wpResponse = await publishWithRetry(`${baseUrl}/wp-json/wp/v2/posts`, wpAuthHeader, postBody);
@@ -614,12 +602,12 @@ async function handleConfirmPublish(
     const wpLink = wpData.link;
 
     // RankMath meta update
-    if (pa.siteSeoPlugin === 'rankmath' && (pa.focusKeyword || pa.metaDescription)) {
+    if (pa.siteSeoPlugin === 'rankmath' && (focusKeyword || metaDescription)) {
       try {
         await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
           method: 'POST',
           headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meta: { rank_math_focus_keyword: pa.focusKeyword, rank_math_description: pa.metaDescription } }),
+          body: JSON.stringify({ meta: { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription } }),
         }).then(r => r.text());
       } catch (_) {}
     }
@@ -658,26 +646,26 @@ async function handleConfirmPublish(
 
     // ── Save to DB ──
     await supabase.from('articles').insert({
-      user_id: userId, title: pa.title, content: pa.htmlContent, tone: pa.tone,
+      user_id: userId, title: articleTitle, content: htmlContent, tone: selectedTone,
       status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
       published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
-      focus_keyword: pa.focusKeyword, meta_description: pa.metaDescription,
+      focus_keyword: focusKeyword, meta_description: metaDescription,
       source_headline: { source: 'mace' },
     });
 
-    sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, pa.title, wpLink || '')).catch(() => {});
+    sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, articleTitle, wpLink || '')).catch(() => {});
 
     const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
     return new Response(JSON.stringify({
       type: 'publish_success',
-      message: `Done! "${pa.title}" is now live on ${pa.siteName}.${creditsMsg}`,
-      title: pa.title,
+      message: `It's done! "${articleTitle}" is now live on ${pa.siteName}.${creditsMsg}`,
+      title: articleTitle,
       site: pa.siteName,
       link: wpLink,
       postId: wpPostId,
       creditsUsed: creditsRequired,
-      focusKeyword: pa.focusKeyword,
-      metaDescription: pa.metaDescription,
+      focusKeyword: focusKeyword,
+      metaDescription: metaDescription,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
