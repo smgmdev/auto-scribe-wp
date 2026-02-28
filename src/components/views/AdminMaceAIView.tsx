@@ -50,6 +50,7 @@ export function AdminMaceAIView() {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [pendingArticle, setPendingArticle] = useState<any>(null);
+  const [speakingWords, setSpeakingWords] = useState('');
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -60,6 +61,7 @@ export function AdminMaceAIView() {
   const scribeCommittedTextRef = useRef('');
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
+  const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ElevenLabs Scribe for speech-to-text
   const scribe = useScribe({
@@ -140,8 +142,10 @@ export function AdminMaceAIView() {
   const stopAll = useCallback(() => {
     scribeActiveRef.current = false;
     if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
+    if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
     try { scribe.disconnect(); } catch (_) {}
     scribeCommittedTextRef.current = '';
+    setSpeakingWords('');
     
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
@@ -159,11 +163,32 @@ export function AdminMaceAIView() {
     window.speechSynthesis.cancel();
   }, [scribe]);
 
+  const startWordReveal = useCallback((text: string, durationMs: number) => {
+    if (wordRevealTimerRef.current) clearInterval(wordRevealTimerRef.current);
+    const words = text.split(/\s+/);
+    if (words.length === 0) return;
+    const intervalMs = Math.max(80, durationMs / words.length);
+    let idx = 0;
+    setSpeakingWords('');
+    wordRevealTimerRef.current = setInterval(() => {
+      if (!isMountedRef.current) { clearInterval(wordRevealTimerRef.current!); return; }
+      idx++;
+      // Show last ~6 words as a sliding window so it stays on 1 line
+      const start = Math.max(0, idx - 6);
+      setSpeakingWords(words.slice(start, idx).join(' '));
+      if (idx >= words.length) {
+        clearInterval(wordRevealTimerRef.current!);
+        wordRevealTimerRef.current = null;
+      }
+    }, intervalMs);
+  }, []);
+
   const speak = useCallback(async (text: string, onDone?: () => void) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
     }
+    setSpeakingWords('');
 
     try {
       const response = await fetch(
@@ -187,12 +212,27 @@ export function AdminMaceAIView() {
       audioRef.current = audio;
 
       audio.onplay = () => {
-        if (isMountedRef.current) setStep('speaking');
+        if (isMountedRef.current) {
+          setStep('speaking');
+          // Estimate duration: ~150ms per word average for ElevenLabs
+          const estimatedMs = text.split(/\s+/).length * 150;
+          startWordReveal(text, audio.duration ? audio.duration * 1000 : estimatedMs);
+        }
+      };
+
+      // Update word reveal timing once duration is known
+      audio.onloadedmetadata = () => {
+        if (audio.duration && audio.duration > 0) {
+          // Restart with accurate duration
+          startWordReveal(text, audio.duration * 1000);
+        }
       };
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
         audioRef.current = null;
+        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+        setSpeakingWords('');
         if (isMountedRef.current) {
           setStep('idle');
           onDone?.();
@@ -201,6 +241,8 @@ export function AdminMaceAIView() {
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
         audioRef.current = null;
+        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+        setSpeakingWords('');
         if (isMountedRef.current) {
           setStep('idle');
           onDone?.();
@@ -214,15 +256,21 @@ export function AdminMaceAIView() {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.3;
+      // Estimate ~180ms per word for browser TTS
+      startWordReveal(text, text.split(/\s+/).length * 180);
       utterance.onend = () => {
+        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+        setSpeakingWords('');
         if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       utterance.onerror = () => {
+        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+        setSpeakingWords('');
         if (isMountedRef.current) { setStep('idle'); onDone?.(); }
       };
       window.speechSynthesis.speak(utterance);
     }
-  }, []);
+  }, [startWordReveal]);
 
   const startListening = useCallback(async () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
@@ -410,46 +458,45 @@ export function AdminMaceAIView() {
 
       {/* Centered button / processing - fixed in viewport center */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
-        <div className="flex flex-col items-center gap-6 pointer-events-auto max-w-md px-6">
-          {/* Last message - shown above button */}
-          {messages.length > 0 && (
-            <div className="text-center max-h-40 overflow-y-auto scrollbar-none">
-              <p className={`text-sm leading-relaxed ${
-                messages[messages.length - 1].role === 'user' 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground'
-              }`}>
-                {messages[messages.length - 1].content}
-              </p>
-            </div>
+        <div className="flex flex-col items-center gap-4 pointer-events-auto max-w-lg px-6">
+          {/* Speaking words - word-by-word reveal on 1 line */}
+          {step === 'speaking' && speakingWords && (
+            <p className="text-sm text-muted-foreground text-center truncate max-w-full transition-all duration-150">
+              {speakingWords}
+            </p>
+          )}
+
+          {/* Last message - only when idle (not speaking/listening), single line */}
+          {step === 'idle' && messages.length > 0 && !speakingWords && (
+            <p className={`text-sm text-center truncate max-w-full ${
+              messages[messages.length - 1].role === 'user' 
+                ? 'text-foreground' 
+                : 'text-muted-foreground'
+            }`}>
+              {messages[messages.length - 1].content}
+            </p>
           )}
 
           {pendingArticle && step !== 'processing' && (
-            <div className="text-center">
-              <p className="text-sm text-amber-800 font-medium">
-                📝 Article ready: "{pendingArticle.title}" → {pendingArticle.siteName}
-              </p>
-              <p className="text-xs text-amber-600 mt-1">Tap mic and say "yes" to publish or "no" to cancel</p>
-            </div>
+            <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--accent-foreground))' }}>
+              📝 "{pendingArticle.title}" → {pendingArticle.siteName} — say "yes" or "no"
+            </p>
           )}
 
+          {/* Listening - show live transcript on 1 line */}
           {step === 'listening' && (currentTranscript || interimTranscript) && (
-            <div className="text-center">
-              <p className="text-foreground text-sm">
-                {currentTranscript}
-                {interimTranscript && (
-                  <span className="text-muted-foreground/60 italic">{interimTranscript}</span>
-                )}
-              </p>
-            </div>
+            <p className="text-sm text-foreground text-center truncate max-w-full">
+              {currentTranscript}
+              {interimTranscript && (
+                <span className="text-muted-foreground/60 italic"> {interimTranscript}</span>
+              )}
+            </p>
           )}
 
           {publishResult && (
-            <div className="text-center">
-              <p className="text-sm text-emerald-600 font-medium">
-                ✓ Article published to {publishResult.site}. View it in Mace Articles.
-              </p>
-            </div>
+            <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
+              ✓ Published to {publishResult.site}
+            </p>
           )}
           {isProcessing ? (
             <>
