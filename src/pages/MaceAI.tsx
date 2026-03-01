@@ -456,7 +456,7 @@ export default function MaceAI() {
                   </div>
                   <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4">Article Generation</h3>
                   <p className="text-lg text-[#86868b] leading-relaxed">
-                    Generate full-length, publication-ready articles from headlines or topics. Choose your tone, style, and target outlet — Mace AI handles the rest. From drafting to SEO optimization, your content is ready in seconds.
+                    Generate full-length, publication-ready articles by voice command. Just tell what you want to publish about — Mace AI handles the rest. From drafting to SEO optimization, your content is ready and published in seconds.
                   </p>
                 </div>
                 <div className="bg-[#1d1d1f] rounded-2xl p-8">
