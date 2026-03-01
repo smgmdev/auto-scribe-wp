@@ -623,17 +623,8 @@ export default function MaceAI() {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="q4" className="border-t border-white/20">
-                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
-                  <span className="flex items-center justify-between w-full gap-3 text-left">
-                    <span className="text-left">What can auto publishing do?</span>
-                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Auto publishing monitors RSS feeds from your configured news sources, generates AI-rewritten articles in your preferred tone, and publishes them directly to your WordPress sites on a schedule you control — all without manual intervention.
-                </AccordionContent>
-              </AccordionItem>
+
+
 
               <AccordionItem value="q5" className="border-t border-white/20 border-b border-b-white/20">
                 <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
@@ -643,7 +634,7 @@ export default function MaceAI() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Mace AI features are included with your Arcana Mace account. Article generation, auto publishing, and security monitoring are available to all users with connected WordPress sites and account credits.
+                  Mace AI features are included with your Arcana Mace account. Article generation and publishing by voice with Mace AI are available to all users. Users must have enough credits to publish on their selected Local Media Library channels.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
