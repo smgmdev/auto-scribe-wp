@@ -506,43 +506,26 @@ FORMAT YOUR RESPONSE EXACTLY:
 
 [Article content - ~700 words, flowing paragraphs]`;
 
-    // Run article + SEO generation in parallel
-    const [articleResponse, seoResponse] = await Promise.all([
-      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-lite',
-          messages: [
-            { role: 'system', content: articlePrompt },
-            { role: 'user', content: `Write the article about: ${pa.topic}` },
-          ],
-          temperature: 0.7,
-          max_tokens: 1500,
-        }),
+    // Generate article content only (no SEO, no tags)
+    const articleResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-lite',
+        messages: [
+          { role: 'system', content: articlePrompt },
+          { role: 'user', content: `Write the article about: ${pa.topic}` },
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
       }),
-      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-lite',
-          messages: [
-            { role: 'system', content: 'You generate SEO metadata and tags for news articles. Always use the provided tool.' },
-            { role: 'user', content: `Generate SEO focus keyword, meta description, and 3-5 relevant tags for an article about: "${pa.topic}" targeting the site "${pa.siteName}". Tags should be short (1-3 words each), relevant to the topic, and good for SEO categorization.` },
-          ],
-          tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
-          tool_choice: { type: 'function', function: { name: 'generate_seo' } },
-        }),
-      }),
-    ]);
+    });
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
     }
 
-    const articleText = await articleResponse.text();
-    let articleData: any;
-    try { articleData = JSON.parse(articleText); } catch { throw new Error('Article generation returned invalid response'); }
+    const articleData = await articleResponse.json();
     const rawContent = articleData.choices?.[0]?.message?.content;
     if (!rawContent) throw new Error('No article content generated');
 
@@ -554,20 +537,6 @@ FORMAT YOUR RESPONSE EXACTLY:
     const paragraphs = articleBody.split(/\n\s*\n/).filter((p: string) => p.trim());
     const htmlContent = paragraphs.map((p: string) => p.trim().replace(/\n/g, ' ')).join('<br><br>');
 
-    let focusKeyword = pa.topic;
-    let metaDescription = '';
-    let articleTags: string[] = [];
-    if (seoResponse.ok) {
-      const seoData = await seoResponse.json();
-      const seoToolCall = seoData.choices?.[0]?.message?.tool_calls?.[0];
-      if (seoToolCall) {
-        const seo = JSON.parse(seoToolCall.function.arguments);
-        focusKeyword = seo.focus_keyword || focusKeyword;
-        metaDescription = seo.meta_description || '';
-        articleTags = Array.isArray(seo.tags) ? seo.tags.slice(0, 5) : [];
-      }
-    } else { await seoResponse.text(); }
-
     console.log('[voice-publish] Phase 1 complete:', articleTitle);
 
     // Return generated content — NO WordPress calls here
@@ -577,11 +546,7 @@ FORMAT YOUR RESPONSE EXACTLY:
       generatedContent: {
         title: articleTitle,
         htmlContent,
-        focusKeyword,
-        metaDescription,
-        articleTags,
         tone: selectedTone,
-        // Pass through site info for Phase 2
         siteId: pa.siteId,
         siteName: pa.siteName,
         siteUrl: pa.siteUrl,
@@ -647,61 +612,14 @@ async function handleDoPublish(
       }
     } catch (_) {}
 
-    // Create/find tags in WordPress (with 10s timeout per tag)
-    let wpTagIds: number[] = [];
-    const articleTags: string[] = gc.articleTags || [];
-    if (articleTags.length > 0) {
-      const tagPromises = articleTags.map(async (tagName: string) => {
-        try {
-          const searchResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags?search=${encodeURIComponent(tagName)}&per_page=5`, {
-            headers: { 'Authorization': wpAuthHeader },
-            signal: AbortSignal.timeout(8000),
-          });
-          if (searchResp.ok) {
-            const existingTags = await searchResp.json();
-            const exactMatch = existingTags.find((t: any) => t.name.toLowerCase() === tagName.toLowerCase());
-            if (exactMatch) return exactMatch.id;
-          }
-          const createResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
-            method: 'POST',
-            headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: tagName }),
-            signal: AbortSignal.timeout(8000),
-          });
-          if (createResp.ok) {
-            const newTag = await createResp.json();
-            return newTag.id;
-          }
-          if (createResp.status === 400 || createResp.status === 409) {
-            const errData = await createResp.json().catch(() => ({}));
-            if (errData.data?.term_id) return errData.data.term_id;
-          }
-          return null;
-        } catch (e) {
-          console.error('[voice-publish] Tag error for', tagName, '(skipping)');
-          return null;
-        }
-      });
-      const tagResults = await Promise.all(tagPromises);
-      wpTagIds = tagResults.filter((id): id is number => id !== null);
-    }
-
-    // Build WP post body
+    // Build WP post body (no tags, no SEO meta)
     const postBody: Record<string, unknown> = {
       title: gc.title,
       content: gc.htmlContent,
       status: 'publish',
       categories: resolvedCategories,
-      tags: wpTagIds,
       featured_media: 0,
     };
-
-    if (gc.siteSeoPlugin === 'aioseo') {
-      postBody.meta = { _aioseo_description: gc.metaDescription, _aioseo_keywords: gc.focusKeyword };
-      postBody.aioseo_meta_data = { description: gc.metaDescription, keyphrases: { focus: { keyphrase: gc.focusKeyword, score: 0, analysis: {} }, additional: [] } };
-    } else if (gc.siteSeoPlugin === 'rankmath') {
-      postBody.meta = { rank_math_focus_keyword: gc.focusKeyword, rank_math_description: gc.metaDescription };
-    }
 
     // Publish to WordPress
     const wpResponse = await publishWithRetry(`${baseUrl}/wp-json/wp/v2/posts`, wpAuthHeader, postBody);
@@ -719,17 +637,6 @@ async function handleDoPublish(
     const wpData = await wpResponse.json();
     const wpPostId = wpData.id;
     const wpLink = wpData.link;
-
-    // RankMath meta update
-    if (gc.siteSeoPlugin === 'rankmath' && (gc.focusKeyword || gc.metaDescription)) {
-      try {
-        await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
-          method: 'POST',
-          headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meta: { rank_math_focus_keyword: gc.focusKeyword, rank_math_description: gc.metaDescription } }),
-        }).then(r => r.text());
-      } catch (_) {}
-    }
 
     // Confirm credits
     if (lockId) {
@@ -769,9 +676,6 @@ async function handleDoPublish(
         user_id: userId, title: gc.title, content: gc.htmlContent, tone: gc.tone,
         status: 'published', published_to: gc.siteId, published_to_name: gc.siteName,
         published_to_favicon: gc.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
-        focus_keyword: gc.focusKeyword, meta_description: gc.metaDescription,
-        tags: articleTags.length > 0 ? articleTags : null,
-        tag_ids: wpTagIds.length > 0 ? wpTagIds : null,
         source_headline: { source: 'mace' },
       }),
       sendTelegramAlert(TelegramAlerts.wpArticlePublished(gc.siteName, gc.title, wpLink || '')).catch(() => {}),
@@ -787,9 +691,6 @@ async function handleDoPublish(
       link: wpLink,
       postId: wpPostId,
       creditsUsed: creditsRequired,
-      focusKeyword: gc.focusKeyword,
-      metaDescription: gc.metaDescription,
-      tags: articleTags,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
