@@ -289,7 +289,7 @@ export function AgencyApplicationView() {
 
   const getStatusBadge = (status: string, isExpired?: boolean, isDowngraded?: boolean) => {
     if (isDowngraded) {
-      return <Badge className="bg-red-600"><UserMinus className="h-3 w-3 mr-1" />Downgraded</Badge>;
+      return <Badge className="bg-red-600">Downgraded</Badge>;
     }
     if (isExpired || status === 'expired') {
       return <Badge className="bg-red-600"><XCircle className="h-3 w-3 mr-1" />Expired Application</Badge>;
