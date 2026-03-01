@@ -638,7 +638,7 @@ export function SurveillanceGlobe({
   return (
     <div className="w-full h-full">
       <Canvas
-        camera={{ position: [0.8, 1.8, 3.6], fov: 45 }}
+        camera={{ position: [1.2, 1.4, 3.5], fov: 45 }}
         style={{ background: 'transparent' }}
         gl={{ antialias: true, alpha: true }}
       >
