@@ -104,10 +104,14 @@ export default function Auth() {
   useEffect(() => {
     // Only redirect verified users; unverified users must stay on auth
     if (user && emailVerified && !isSigningUp) {
+      // Check for redirect query param (e.g., from Mace AI landing page)
+      const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+      const targetView = redirectParam === 'mace-ai' ? 'admin-mace-ai' : locationState?.targetView;
+      
       // Pass along the target view, tab and subcategory state when redirecting
       navigate('/account', { 
         state: { 
-          targetView: locationState?.targetView,
+          targetView,
           targetTab: locationState?.targetTab,
           targetSubcategory: locationState?.targetSubcategory 
         } 

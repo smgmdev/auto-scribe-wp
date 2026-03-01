@@ -565,7 +565,7 @@ export default function MaceAI() {
                   useAppStore.getState().setCurrentView('admin-mace-ai');
                   navigate('/account');
                 } else {
-                  navigate('/auth?mode=signup');
+                  navigate('/auth?mode=signup&redirect=mace-ai');
                 }
               }}
               className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-none transition-colors duration-200"
