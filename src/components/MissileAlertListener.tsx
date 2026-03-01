@@ -24,7 +24,7 @@ interface MissileAlert {
 
 type AlertType = 'missile' | 'drone';
 
-function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type: AlertType; onDismiss: () => void }) {
+function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: AlertType; onDismiss: () => void }) {
   const isMissile = type === 'missile';
   
   const colors = isMissile
@@ -47,7 +47,6 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
         btnBg: 'bg-red-600 hover:bg-red-700',
         btnBorder: 'border-red-500/50',
         btnShadow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
-        flashBorder: 'border-red-600/60',
       }
     : {
         border: 'border-blue-700/80',
@@ -68,7 +67,6 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
         btnBg: 'bg-blue-800 hover:bg-blue-900',
         btnBorder: 'border-blue-600/50',
         btnShadow: 'shadow-[0_0_20px_rgba(30,58,95,0.4)]',
-        flashBorder: 'border-blue-700/60',
       };
 
   return (
@@ -94,34 +92,30 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
           </p>
         </div>
 
-        {alerts.some(a => a.origin_country_code && a.destination_country_code) && (
+        {alert.origin_country_code && alert.destination_country_code && (
           <Suspense fallback={<div className="w-full h-48 bg-black/40 rounded-lg animate-pulse" />}>
             <MissileTrajectoryGlobe
-              originCode={alerts.find(a => a.origin_country_code)?.origin_country_code ?? null}
-              destinationCode={alerts.find(a => a.destination_country_code)?.destination_country_code ?? null}
+              originCode={alert.origin_country_code}
+              destinationCode={alert.destination_country_code}
             />
           </Suspense>
         )}
 
-        <div className="space-y-2 text-left max-h-48 overflow-y-auto">
-          {alerts.map((alert) => (
-            <div key={alert.id} className={`p-3 rounded-lg ${colors.cardBg} border ${colors.cardBorder}`}>
-              <p className={`text-sm font-medium ${colors.textPrimary}`}>{alert.title}</p>
-              {alert.description && (
-                <p className={`text-xs ${colors.textSecondary} mt-1`}>{alert.description}</p>
-              )}
-              <div className="flex items-center gap-2 mt-1">
-                <p className={`text-xs ${colors.textTertiary}`}>
-                  {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
-                </p>
-                {alert.origin_country_name && alert.destination_country_name && (
-                  <span className="text-xs text-blue-400 font-mono">
-                    {alert.origin_country_name} → {alert.destination_country_name}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className={`p-3 rounded-lg ${colors.cardBg} border ${colors.cardBorder} text-left`}>
+          <p className={`text-sm font-medium ${colors.textPrimary}`}>{alert.title}</p>
+          {alert.description && (
+            <p className={`text-xs ${colors.textSecondary} mt-1`}>{alert.description}</p>
+          )}
+          <div className="flex items-center gap-2 mt-1">
+            <p className={`text-xs ${colors.textTertiary}`}>
+              {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
+            </p>
+            {alert.origin_country_name && alert.destination_country_name && (
+              <span className="text-xs text-blue-400 font-mono">
+                {alert.origin_country_name} → {alert.destination_country_name}
+              </span>
+            )}
+          </div>
         </div>
 
         <Button
@@ -138,9 +132,7 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
 }
 
 export function MissileAlertListener() {
-  const [missileAlerts, setMissileAlerts] = useState<MissileAlert[]>([]);
-  const [droneAlerts, setDroneAlerts] = useState<MissileAlert[]>([]);
-  const [missileDismissed, setMissileDismissed] = useState(false);
+  const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -177,20 +169,15 @@ export function MissileAlertListener() {
     }
   }, []);
 
-  const dismissMissiles = useCallback(() => {
-    missileAlerts.forEach(a => dismissedRef.current.add(a.id));
-    setMissileAlerts([]);
-    setMissileDismissed(true);
-    if (droneAlerts.length === 0) stopSound();
-  }, [missileAlerts, droneAlerts, stopSound]);
+  const dismissAlert = useCallback((id: string) => {
+    dismissedRef.current.add(id);
+    setAlerts(prev => {
+      const remaining = prev.filter(a => a.id !== id);
+      if (remaining.length === 0) stopSound();
+      return remaining;
+    });
+  }, [stopSound]);
 
-  const dismissDrones = useCallback(() => {
-    droneAlerts.forEach(a => dismissedRef.current.add(a.id));
-    setDroneAlerts([]);
-    stopSound();
-  }, [droneAlerts, stopSound]);
-
-  // Fetch active alerts on mount only
   useEffect(() => {
     const fetchActive = async () => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -202,11 +189,8 @@ export function MissileAlertListener() {
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
         const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
-        const missiles = filtered.filter(a => a.severity !== 'drone');
-        const drones = filtered.filter(a => a.severity === 'drone');
-        if (missiles.length > 0) setMissileAlerts(missiles);
-        if (drones.length > 0) setDroneAlerts(drones);
-        if (missiles.length > 0 || drones.length > 0) {
+        if (filtered.length > 0) {
+          setAlerts(filtered);
           playAlertSound();
           alertIntervalRef.current = setInterval(playAlertSound, 2500);
         }
@@ -219,19 +203,20 @@ export function MissileAlertListener() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const hasAlerts = missileAlerts.length > 0 || droneAlerts.length > 0;
-  if (!hasAlerts) return null;
+  if (alerts.length === 0) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
       <div className="absolute inset-0 pointer-events-none animate-pulse border-[3px] border-red-600/60" />
       <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[90vh] overflow-auto px-4">
-        {missileAlerts.length > 0 && (
-          <AlertPopup alerts={missileAlerts} type="missile" onDismiss={dismissMissiles} />
-        )}
-        {droneAlerts.length > 0 && (
-          <AlertPopup alerts={droneAlerts} type="drone" onDismiss={dismissDrones} />
-        )}
+        {alerts.map(alert => (
+          <AlertPopup
+            key={alert.id}
+            alert={alert}
+            type={alert.severity === 'drone' ? 'drone' : 'missile'}
+            onDismiss={() => dismissAlert(alert.id)}
+          />
+        ))}
       </div>
     </div>,
     document.body
