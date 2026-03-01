@@ -859,8 +859,8 @@ export function AdminAISettingsView() {
 
                       <Separator />
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border min-w-[180px]">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+                        <div className="flex items-center justify-between p-4 border min-w-[180px]">
                           <Label className="text-sm">Enabled</Label>
                           {togglingEnabledId === setting.id ? (
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -872,17 +872,17 @@ export function AdminAISettingsView() {
                             />
                           )}
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
+                        <div className="flex items-center justify-between p-4 border bg-muted/30 min-w-[180px]">
                           <Label className="text-sm text-muted-foreground">Auto Publish</Label>
                           <Switch checked={true} disabled />
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 min-w-[180px]">
+                        <div className="flex items-center justify-between p-4 border bg-muted/30 min-w-[180px]">
                           <Label className="text-sm text-muted-foreground">AI Rewrite</Label>
                           <Switch checked={true} disabled />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-0">
                         <div className="space-y-2">
                           <Label className="text-xs text-muted-foreground">Target Site</Label>
                           <Select
