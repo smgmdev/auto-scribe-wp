@@ -120,6 +120,17 @@ const helpCategories = [
     slug: 'ai-security-supervision',
   },
   {
+    title: 'Mace AI',
+    topics: [
+      'What Is Mace AI?',
+      'How to Use Mace AI',
+      'Voice Commands & Conversations',
+      'Requirements',
+      'Benefits of Mace AI',
+    ],
+    slug: 'mace-ai',
+  },
+  {
     title: 'AI Marketing Strategy',
     topics: [
       'Why Frequent Publishing Matters',
