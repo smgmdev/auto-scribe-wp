@@ -436,6 +436,26 @@ export default function MaceAI() {
         </div>
       </section>
 
+      {/* Voice Command Marquee */}
+      <section className="bg-white py-20 md:py-28 overflow-hidden">
+        <style>{`
+          @keyframes mace-slide-left {
+            0% { transform: translateX(100%); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 1; }
+          }
+        `}</style>
+        <div 
+          className="whitespace-nowrap"
+          style={{
+            animation: 'mace-slide-left 12s linear infinite',
+          }}
+        >
+          <span className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-none">
+            Hey Mace, publish an article about Nvidia on Washington Morning!
+          </span>
+        </div>
+      </section>
 
       {/* Capabilities Grid - Siri-style scenarios */}
       <section id="capabilities" className="bg-black py-20 md:py-32">
