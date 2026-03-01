@@ -211,7 +211,7 @@ const AdminMaceArticlesView = () => {
                     <span className="hidden md:inline">·</span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {format(new Date(article.created_at), 'MMM d, yyyy')}
+                      {format(new Date(article.created_at), 'MMM d, yyyy · h:mm a')}
                     </span>
                   </div>
                 </div>
