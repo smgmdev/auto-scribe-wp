@@ -1,6 +1,6 @@
-import { useRef, useMemo, useState, useCallback } from 'react';
+import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame, useLoader, ThreeEvent, useThree } from '@react-three/fiber';
-import { OrbitControls, Html, Line } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { COUNTRY_COORDINATES, latLngToVector3 } from '@/constants/countryCoordinates';
 
@@ -80,10 +80,7 @@ function AtmosphereGlow() {
 
 /** Renders country name labels when camera is zoomed in */
 function CountryLabels({ countries, zoomLevel }: { countries: CountryData[]; zoomLevel: number }) {
-  // Only show labels when zoomed in (distance < 4)
   if (zoomLevel > 4) return null;
-
-  // Show more labels as user zooms closer
   const maxLabels = zoomLevel < 3.2 ? countries.length : Math.min(20, countries.length);
   const visibleCountries = countries.slice(0, maxLabels);
 
@@ -122,42 +119,67 @@ function CountryLabels({ countries, zoomLevel }: { countries: CountryData[]; zoo
   );
 }
 
-/** Dense graticule grid simulating country borders */
-function GlobeGrid() {
-  const gridLines = useMemo(() => {
-    const lines: [number, number, number][][] = [];
-    // Dense latitude lines every 5°
-    for (let lat = -80; lat <= 80; lat += 5) {
-      const points: [number, number, number][] = [];
-      for (let lng = -180; lng <= 180; lng += 2) {
-        points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
-      }
-      lines.push(points);
-    }
-    // Dense longitude lines every 8°
-    for (let lng = -180; lng < 180; lng += 8) {
-      const points: [number, number, number][] = [];
-      for (let lat = -90; lat <= 90; lat += 2) {
-        points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
-      }
-      lines.push(points);
-    }
-    return lines;
+/** Convert a GeoJSON ring (array of [lng, lat]) to 3D points on the sphere */
+function ringToPoints(ring: number[][]): THREE.Vector3[] {
+  const pts: THREE.Vector3[] = [];
+  for (let i = 0; i < ring.length; i++) {
+    const [lng, lat] = ring[i];
+    const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.004);
+    pts.push(new THREE.Vector3(x, y, z));
+  }
+  return pts;
+}
+
+/** Renders actual country border lines from GeoJSON */
+function CountryBorders() {
+  const [borderGeometry, setBorderGeometry] = useState<THREE.BufferGeometry | null>(null);
+
+  useEffect(() => {
+    fetch('/data/countries.geo.json')
+      .then((r) => r.json())
+      .then((geojson: any) => {
+        const vertices: number[] = [];
+
+        for (const feature of geojson.features) {
+          const geom = feature.geometry;
+          if (!geom) continue;
+
+          const processRing = (ring: number[][]) => {
+            for (let i = 0; i < ring.length - 1; i++) {
+              const [lng1, lat1] = ring[i];
+              const [lng2, lat2] = ring[i + 1];
+              const [x1, y1, z1] = latLngToVector3(lat1, lng1, GLOBE_RADIUS + 0.004);
+              const [x2, y2, z2] = latLngToVector3(lat2, lng2, GLOBE_RADIUS + 0.004);
+              vertices.push(x1, y1, z1, x2, y2, z2);
+            }
+          };
+
+          if (geom.type === 'Polygon') {
+            for (const ring of geom.coordinates) {
+              processRing(ring);
+            }
+          } else if (geom.type === 'MultiPolygon') {
+            for (const polygon of geom.coordinates) {
+              for (const ring of polygon) {
+                processRing(ring);
+              }
+            }
+          }
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        setBorderGeometry(geometry);
+      })
+      .catch((err) => console.error('Failed to load country borders:', err));
   }, []);
 
+  if (!borderGeometry) return null;
+
   return (
-    <>
-      {gridLines.map((points, i) => (
-        <Line
-          key={i}
-          points={points}
-          color="#aaaaaa"
-          opacity={0.09}
-          transparent
-          lineWidth={0.5}
-        />
-      ))}
-    </>
+    <lineSegments geometry={borderGeometry}>
+      <lineBasicMaterial color="#cccccc" opacity={0.18} transparent />
+    </lineSegments>
   );
 }
 
@@ -333,7 +355,7 @@ function RotatingGlobe({
       <group ref={groupRef}>
         <EarthSphere />
         <AtmosphereGlow />
-        <GlobeGrid />
+        <CountryBorders />
         <CountryLabels countries={countries} zoomLevel={zoomLevel} />
 
         {countries.map((country) => (
