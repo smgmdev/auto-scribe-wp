@@ -171,17 +171,12 @@ export function MissileAlertListener() {
 
   const dismissAlert = useCallback((id: string) => {
     dismissedRef.current.add(id);
-    setAlerts(prev => {
-      const remaining = prev.filter(a => a.id !== id);
-      if (remaining.length === 0) {
-        // Stop sound immediately
-        if (alertIntervalRef.current) {
-          clearInterval(alertIntervalRef.current);
-          alertIntervalRef.current = null;
-        }
-      }
-      return remaining;
-    });
+    // Stop sound immediately on any dismiss
+    if (alertIntervalRef.current) {
+      clearInterval(alertIntervalRef.current);
+      alertIntervalRef.current = null;
+    }
+    setAlerts(prev => prev.filter(a => a.id !== id));
   }, []);
 
   useEffect(() => {
@@ -212,9 +207,8 @@ export function MissileAlertListener() {
   if (alerts.length === 0) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="absolute inset-0 pointer-events-none animate-pulse border-[3px] border-red-600/60" />
-      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[90vh] overflow-auto px-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none animate-fade-in">
+      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[90vh] overflow-auto px-4 pointer-events-auto">
         {alerts.map(alert => (
           <AlertPopup
             key={alert.id}
