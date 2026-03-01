@@ -57,7 +57,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
     : "container mx-auto px-4";
 
   return (
-    <footer className={`${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'} ${narrow ? '' : 'mt-12'}`}>
+    <footer className={`${dark ? 'bg-[#1d1d1f]' : 'bg-[#f5f5f7]'} ${narrow ? '' : 'mt-12'} pb-16 md:pb-0`}>
       <div className={containerClass}>
         {/* Disclaimer text */}
         <div className={`pt-8 pb-6 ${showTopBorder ? '' : ''}`}>
