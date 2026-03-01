@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Play, Loader2, Volume2, ExternalLink } from 'lucide-react';
+import { Loader2, Volume2, ExternalLink } from 'lucide-react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -638,11 +638,11 @@ export function AdminMaceAIView() {
 
           {publishResult && step === 'idle' && (
             publishResult.link ? (
-              <a href={publishResult.link} target="_blank" rel="noopener noreferrer" className="text-sm text-center truncate max-w-full font-medium underline underline-offset-2 hover:opacity-80 transition-opacity" style={{ color: 'hsl(var(--chart-2))' }}>
+              <a href={publishResult.link} target="_blank" rel="noopener noreferrer" className="text-sm text-center truncate max-w-full font-normal hover:opacity-80 transition-opacity" style={{ color: '#007AFF' }}>
                 Published to {publishResult.site}
               </a>
             ) : (
-              <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
+              <p className="text-sm text-center truncate max-w-full font-normal" style={{ color: '#007AFF' }}>
                 Published to {publishResult.site}
               </p>
             )
@@ -716,7 +716,34 @@ export function AdminMaceAIView() {
               onClick={handleMicClick}
               className="relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible bg-transparent hover:scale-105 cursor-pointer"
             >
-              {step === 'idle' && <Play className="w-10 h-10 relative z-10" style={{ color: '#f2a547', fill: 'none', strokeWidth: 1.5 }} />}
+              {step === 'idle' && (
+                <>
+                  <style>{`
+                    @keyframes mace-idle-pulse {
+                      0% { transform: scale(0.85); }
+                      50% { transform: scale(1.15); }
+                      100% { transform: scale(0.85); }
+                    }
+                    @keyframes mace-idle-color {
+                      0% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+                      33% { border-color: #32ADE6; box-shadow: 0 0 12px rgba(50, 173, 230, 0.4); }
+                      66% { border-color: #1a3a6e; box-shadow: 0 0 12px rgba(26, 58, 110, 0.4); }
+                      100% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+                    }
+                    @keyframes mace-idle-rotate {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}</style>
+                  <div
+                    className="w-16 h-16 rounded-full relative z-10"
+                    style={{
+                      border: '2px solid #f2a547',
+                      animation: 'mace-idle-pulse 2.5s ease-in-out infinite, mace-idle-color 4s linear infinite',
+                    }}
+                  />
+                </>
+              )}
 
               {step === 'listening' && (
                 <div className="flex items-center justify-center gap-[4px] relative z-10">
@@ -770,7 +797,7 @@ export function AdminMaceAIView() {
             step === 'processing' ? 'text-muted-foreground'
             : 'text-muted-foreground'
           }`}>
-            {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
+            {step === 'idle' && (messages.length === 0 ? 'Tap to speak' : 'Tap to continue')}
             {step === 'processing' && (publishPhase || 'Processing...')}
           </p>
         </div>
