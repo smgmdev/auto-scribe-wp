@@ -40,6 +40,7 @@ import AIGeneration from "./pages/help/AIGeneration";
 import AIAutoPublishing from "./pages/help/AIAutoPublishing";
 import AISecuritySupervision from "./pages/help/AISecuritySupervision";
 import Troubleshooting from "./pages/help/Troubleshooting";
+import MaceAIHelp from "./pages/help/MaceAI";
 import AIMarketingStrategy from "./pages/help/AIMarketingStrategy";
 import SelfPublishing from "./pages/SelfPublishing";
 import MediaBuying from "./pages/MediaBuying";
@@ -172,6 +173,7 @@ const App = () => {
               <Route path="/help/ai-generation" element={<AIGeneration />} />
               <Route path="/help/ai-auto-publishing" element={<AIAutoPublishing />} />
               <Route path="/help/ai-security-supervision" element={<AISecuritySupervision />} />
+              <Route path="/help/mace-ai" element={<MaceAIHelp />} />
               <Route path="/help/ai-marketing-strategy" element={<AIMarketingStrategy />} />
               <Route path="/help/troubleshooting" element={<Troubleshooting />} />
               <Route path="/self-publishing" element={<SelfPublishing />} />
