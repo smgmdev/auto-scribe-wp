@@ -1,6 +1,5 @@
 import { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { COUNTRY_COORDINATES, latLngToVector3 } from '@/constants/countryCoordinates';
 
@@ -10,19 +9,15 @@ interface MissileTrajectoryGlobeProps {
 }
 
 function Earth() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
   return (
-    <mesh ref={meshRef}>
+    <mesh>
       <sphereGeometry args={[1, 48, 48]} />
       <meshStandardMaterial
         color="#1a1a2e"
         emissive="#0a0a1a"
         roughness={0.8}
         metalness={0.2}
-        wireframe={false}
       />
-      {/* Wireframe overlay */}
       <mesh>
         <sphereGeometry args={[1.002, 24, 24]} />
         <meshBasicMaterial color="#2a2a4a" wireframe transparent opacity={0.3} />
@@ -93,11 +88,36 @@ function ArcTrajectory({ origin, destination }: { origin: [number, number, numbe
         <meshBasicMaterial color="#3b82f6" transparent opacity={0.6} />
       </mesh>
       <mesh ref={missileRef}>
-        <coneGeometry args={[0.035, 0.08, 8]} />
+        <coneGeometry args={[0.02, 0.05, 6]} />
         <meshBasicMaterial color="#60a5fa" />
       </mesh>
     </group>
   );
+}
+
+/** Positions camera to look at the midpoint between origin and destination */
+function CameraPositioner({ originPos, destPos }: { originPos: [number, number, number]; destPos: [number, number, number] }) {
+  const { camera } = useThree();
+  const initialized = useRef(false);
+
+  useMemo(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const start = new THREE.Vector3(...originPos);
+    const end = new THREE.Vector3(...destPos);
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    
+    // Camera looks from the direction of the midpoint, pulled back
+    const camDir = mid.clone().normalize();
+    const camPos = camDir.multiplyScalar(3);
+    
+    camera.position.copy(camPos);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+  }, [originPos, destPos, camera]);
+
+  return null;
 }
 
 export function MissileTrajectoryGlobe({ originCode, destinationCode }: MissileTrajectoryGlobeProps) {
@@ -114,18 +134,11 @@ export function MissileTrajectoryGlobe({ originCode, destinationCode }: MissileT
       <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
         <ambientLight intensity={0.4} />
         <pointLight position={[5, 3, 5]} intensity={0.8} />
+        <CameraPositioner originPos={originPos} destPos={destPos} />
         <Earth />
         <CountryDot lat={originCoords.lat} lng={originCoords.lng} color="#ef4444" />
         <CountryDot lat={destCoords.lat} lng={destCoords.lng} color="#3b82f6" />
         <ArcTrajectory origin={originPos} destination={destPos} />
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          autoRotate
-          autoRotateSpeed={0.5}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={Math.PI * 3 / 4}
-        />
       </Canvas>
       <div className="flex justify-between px-3 -mt-6 relative z-10 text-[10px] font-mono">
         <span className="text-red-400">⬤ {originCoords.name}</span>
