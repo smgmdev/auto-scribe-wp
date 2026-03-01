@@ -164,11 +164,6 @@ const sections: HelpSection[] = [
           stored or retained after your session. Mace AI does not collect, sell, or distribute
           your personal data to external entities.
         </p>
-        <p>
-          All data transmission between your browser and Arcana Mace is encrypted. Your
-          account credentials, site connections, and publishing history remain private and
-          accessible only to you.
-        </p>
       </div>
     ),
   },
