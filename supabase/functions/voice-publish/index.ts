@@ -102,6 +102,28 @@ Deno.serve(async (req) => {
 
     console.log('[voice-publish] User message:', lastUserMessage.content);
 
+    // ── Hardcoded Q&A responses ──
+    const userText = lastUserMessage.content.trim().toLowerCase();
+    const creatorPatterns = [/who (made|created|built|developed|owns?) you/, /who is your (creator|developer|maker|owner)/, /who are you (made|created|built|developed) by/];
+    const operatorPatterns = [/who is arcana mace (platform )?operator/, /who (operates|runs|owns) arcana mace/, /arcana mace (platform )?operator/, /who is the operator/];
+    const modelPatterns = [/what model/, /which model/, /what (ai |llm |language )?model/, /based on what/, /what are you based on/, /what (ai|llm) (are you|do you use)/, /are you (gpt|gemini|claude|llama|openai|google)/, /powered by what/];
+
+    if (creatorPatterns.some(p => p.test(userText))) {
+      return new Response(JSON.stringify({ type: 'conversation', message: "I am developed by Arcana Mace platform operator." }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (operatorPatterns.some(p => p.test(userText))) {
+      return new Response(JSON.stringify({ type: 'conversation', message: "Arcana Mace platform operator is Stankevicius Pacific Limited." }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (modelPatterns.some(p => p.test(userText))) {
+      return new Response(JSON.stringify({ type: 'conversation', message: "I can't disclose that." }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ── Fetch all connected WP sites ──
     const { data: wpSites } = await supabase
       .from('wordpress_sites')
@@ -142,6 +164,9 @@ IMPORTANT RULES:
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
 - When listing sites, say them naturally: "You've got Washington Morning, European Capitalist, and Asia Daily."
 - Match site names loosely (e.g., "washington morning" → "Washington Morning")
+- If asked who made you, created you, or owns you: say "I am developed by Arcana Mace platform operator."
+- If asked who the Arcana Mace platform operator is: say "Stankevicius Pacific Limited."
+- If asked what AI model you are based on or use: say "I can't disclose that."
 - Don't repeat yourself or over-explain. Be efficient and helpful.
 - When users ask questions about current events, news, facts, prices, weather, sports scores, or anything that needs real-time info, use the search_web tool.
 - After searching, summarize the results naturally in your own words. Don't just dump raw search results.`;
