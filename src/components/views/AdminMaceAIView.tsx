@@ -491,7 +491,7 @@ export function AdminMaceAIView() {
               const articleToPublish = { ...currentPending };
 
               const controller = new AbortController();
-              const timeout = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+              const timeout = setTimeout(() => controller.abort('Voice publish timeout'), 120000); // 2 min timeout
               const publishResp = await fetch(
                 `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-publish`,
                 {
@@ -537,10 +537,17 @@ export function AdminMaceAIView() {
               speak(responseMessage, done);
             } catch (err: any) {
               setPublishPhase('');
-              const errorMsg = err.message || 'Publishing failed';
-              setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-              speak(errorMsg, done);
-              toast.error(errorMsg);
+              if (err.name === 'AbortError') {
+                const errorMsg = 'Publishing timed out. The article may still be processing — please check your site.';
+                setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+                speak(errorMsg, done);
+                toast.error(errorMsg);
+              } else {
+                const errorMsg = err.message || 'Publishing failed';
+                setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+                speak(errorMsg, done);
+                toast.error(errorMsg);
+              }
             }
           });
           return;
@@ -565,7 +572,7 @@ export function AdminMaceAIView() {
         speculativeResultRef.current = null;
       } else {
         // Cancel any in-flight speculative call
-        if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
+        if (speculativeAbortRef.current) { speculativeAbortRef.current.abort('New request superseded'); speculativeAbortRef.current = null; }
         speculativeResultRef.current = null;
         const result = await supabase.functions.invoke('voice-publish', {
           body: { messages: updatedMessages },
@@ -594,6 +601,12 @@ export function AdminMaceAIView() {
       await speak(displayMessage, done);
 
     } catch (err: any) {
+      // Silently ignore aborts from speculative/superseded requests
+      if (err.name === 'AbortError') {
+        console.log('[Mace] Request aborted (superseded or cancelled)');
+        done();
+        return;
+      }
       console.error('Voice publish error:', err);
       const errorMsg = err.message || 'Something went wrong';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
