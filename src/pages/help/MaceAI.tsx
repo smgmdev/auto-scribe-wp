@@ -132,6 +132,23 @@ const sections: HelpSection[] = [
       </div>
     ),
   },
+  {
+    id: 'associated-costs',
+    title: 'Associated Costs',
+    content: (
+      <div className="space-y-4">
+        <p>
+          Mace AI is currently free to use on Arcana Mace for all registered users. However,
+          users will be charged the standard publishing rate of the selected media site when
+          publishing an article through Mace AI.
+        </p>
+        <p>
+          The publishing cost depends on the media site you choose. You can view the credit
+          cost for each site in the Local Media Library before giving a voice command.
+        </p>
+      </div>
+    ),
+  },
 ];
 
 export default function MaceAIHelp() {
