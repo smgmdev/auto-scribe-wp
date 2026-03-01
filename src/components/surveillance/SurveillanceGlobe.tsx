@@ -160,28 +160,74 @@ function AtmosphereGlow() {
   );
 }
 
-/** Hover label that follows the cursor on the globe */
-function GlobeHoverLabel({ name, point }: { name: string; point: THREE.Vector3 }) {
+/** Highlights a country polygon on hover and shows name at centroid */
+function CountryHighlight({ feature }: { feature: GeoFeature }) {
+  const { highlightGeo, centroid } = useMemo(() => {
+    const vertices: number[] = [];
+    const indices: number[] = [];
+    let centroidLat = 0, centroidLng = 0, totalPoints = 0;
+
+    const processRing = (ring: number[][]) => {
+      if (ring.length < 3) return;
+      let cLat = 0, cLng = 0;
+      for (const [lng, lat] of ring) {
+        cLat += lat; cLng += lng;
+        centroidLat += lat; centroidLng += lng;
+        totalPoints++;
+      }
+      cLat /= ring.length; cLng /= ring.length;
+      const startIdx = vertices.length / 3;
+      const [cx, cy, cz] = latLngToVector3(cLat, cLng, GLOBE_RADIUS + 0.005);
+      vertices.push(cx, cy, cz);
+      for (const [lng, lat] of ring) {
+        const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.005);
+        vertices.push(x, y, z);
+      }
+      for (let i = 0; i < ring.length - 1; i++) {
+        indices.push(startIdx, startIdx + 1 + i, startIdx + 2 + i);
+      }
+    };
+
+    const geom = feature.geometry;
+    if (geom.type === 'Polygon') {
+      processRing(geom.coordinates[0]);
+    } else if (geom.type === 'MultiPolygon') {
+      for (const polygon of geom.coordinates) processRing(polygon[0]);
+    }
+    if (vertices.length === 0) return { highlightGeo: null, centroid: null };
+    const bufGeo = new THREE.BufferGeometry();
+    bufGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    bufGeo.setIndex(indices);
+    bufGeo.computeVertexNormals();
+    centroidLat /= totalPoints || 1;
+    centroidLng /= totalPoints || 1;
+    const [px, py, pz] = latLngToVector3(centroidLat, centroidLng, GLOBE_RADIUS + 0.02);
+    return { highlightGeo: bufGeo, centroid: new THREE.Vector3(px, py, pz) };
+  }, [feature]);
+
+  if (!highlightGeo || !centroid) return null;
   return (
-    <Html position={point} distanceFactor={6} style={{ pointerEvents: 'none' }} center>
-      <div
-        style={{
-          background: 'rgba(8, 12, 22, 0.88)',
+    <group>
+      <mesh geometry={highlightGeo}>
+        <meshBasicMaterial color="#aaaaaa" opacity={0.18} transparent side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <Html position={centroid} distanceFactor={6} style={{ pointerEvents: 'none' }} center>
+        <div style={{
+          background: 'rgba(8,12,22,0.88)',
           border: '1px solid rgba(255,255,255,0.15)',
           borderRadius: '3px',
           padding: '2px 6px',
           whiteSpace: 'nowrap',
           backdropFilter: 'blur(4px)',
-        }}
-      >
-        <span style={{ fontSize: '7px', fontWeight: 600, color: '#eee', fontFamily: 'monospace' }}>
-          {name}
-        </span>
-      </div>
-    </Html>
+        }}>
+          <span style={{ fontSize: '7px', fontWeight: 600, color: '#eee', fontFamily: 'monospace' }}>
+            {feature.properties.name}
+          </span>
+        </div>
+      </Html>
+    </group>
   );
 }
-
 /** Renders actual country border lines from GeoJSON */
 function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
   const borderGeometry = useMemo(() => {
@@ -324,6 +370,11 @@ function RotatingGlobe({
   const [geoFeatures, setGeoFeatures] = useState<GeoFeature[]>([]);
   const [hoveredGeo, setHoveredGeo] = useState<{ name: string; point: THREE.Vector3 } | null>(null);
 
+  const hoveredFeature = useMemo(() => {
+    if (!hoveredGeo) return null;
+    return geoFeatures.find(f => f.properties.name === hoveredGeo.name) || null;
+  }, [hoveredGeo, geoFeatures]);
+
   // Load GeoJSON once
   useEffect(() => {
     fetch('/data/countries.geo.json')
@@ -405,7 +456,7 @@ function RotatingGlobe({
           />
         ))}
 
-        {hoveredGeo && <GlobeHoverLabel name={hoveredGeo.name} point={hoveredGeo.point} />}
+        {hoveredFeature && <CountryHighlight feature={hoveredFeature} />}
       </group>
 
       <OrbitControls
