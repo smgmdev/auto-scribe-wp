@@ -175,17 +175,17 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
         
         {/* Bottom bar */}
         <div className={`border-t pt-6 pb-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 ${dark ? 'border-white/20' : 'border-border'}`}>
-          <p className={`text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
+          <p className={`text-xs shrink-0 ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             © {new Date().getFullYear()} Arcana Mace. All rights reserved.
           </p>
-          <div className={`flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-x-4 gap-y-1 md:gap-y-0 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
-            <button onClick={() => navigate('/terms')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</button>
-            <button onClick={() => navigate('/privacy')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
+          <div className={`flex flex-wrap items-start gap-x-4 gap-y-1.5 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
+            <button onClick={() => navigate('/terms')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</button>
+            <button onClick={() => navigate('/privacy')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
             <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>We Do Not Sell or Share Your Personal Information</button>
-            <button onClick={() => navigate('/guidelines')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</button>
-            <button onClick={() => navigate('/report-bug')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</button>
-            <button onClick={() => navigate('/update-log')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Changelog</button>
-            <button onClick={() => navigate('/sitemap')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</button>
+            <button onClick={() => navigate('/guidelines')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>User Guidelines</button>
+            <button onClick={() => navigate('/report-bug')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Report a Bug</button>
+            <button onClick={() => navigate('/update-log')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Changelog</button>
+            <button onClick={() => navigate('/sitemap')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Site Map</button>
           </div>
         </div>
       </div>
