@@ -47,30 +47,57 @@ export default function ResetPassword() {
   useEffect(() => {
     let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' && mounted) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setIsReady(true);
       }
     });
 
-    // Check if there's a hash fragment with access_token (from the reset email link)
+    // Parse hash tokens and manually set session if present
     const hash = window.location.hash;
     if (hash && hash.includes('access_token')) {
-      // Supabase will pick up the token from the hash and fire PASSWORD_RECOVERY
-      // Set ready after a short delay as fallback in case the event doesn't fire
-      const fallbackTimer = setTimeout(async () => {
-        if (!mounted || isReady) return;
-        const { data: { session } } = await supabase.auth.getSession();
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        }).then(({ data, error }) => {
+          if (!mounted) return;
+          if (data?.session && !error) {
+            console.log('[ResetPassword] Session restored from hash tokens');
+            setIsReady(true);
+            // Clean hash from URL
+            window.history.replaceState(null, '', window.location.pathname);
+          } else {
+            console.error('[ResetPassword] Failed to set session:', error?.message);
+          }
+        });
+      } else {
+        // Fallback: wait for Supabase to auto-detect
+        const fallbackTimer = setTimeout(async () => {
+          if (!mounted || isReady) return;
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session && mounted) {
+            setIsReady(true);
+          }
+        }, 3000);
+        return () => {
+          mounted = false;
+          clearTimeout(fallbackTimer);
+          subscription.unsubscribe();
+        };
+      }
+    } else {
+      // No hash — check if already authenticated (e.g. redirected with session cookie)
+      supabase.auth.getSession().then(({ data: { session } }) => {
         if (session && mounted) {
-          console.log('[ResetPassword] Fallback: session found via getSession');
           setIsReady(true);
         }
-      }, 2000);
-      return () => {
-        mounted = false;
-        clearTimeout(fallbackTimer);
-        subscription.unsubscribe();
-      };
+      });
     }
 
     return () => {
