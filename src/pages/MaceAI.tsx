@@ -607,7 +607,7 @@ export default function MaceAI() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Simply provide a headline, topic, or use voice input. Mace AI generates a full article with SEO metadata, focus keywords, and proper formatting — ready to publish to any connected WordPress site.
+                  Simply use voice input to tell Mace the topic of your interest for article publishing. Mace AI then generates a full article with proper formatting and publishes it instantly to the connected WordPress site of your choice.
                 </AccordionContent>
               </AccordionItem>
 
