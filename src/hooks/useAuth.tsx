@@ -616,7 +616,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Set grace period IMMEDIATELY before any async work to prevent
           // the session-guard poll from kicking us out while we're still
           // registering our own session
-          if (event === 'SIGNED_IN') {
+          const isOnResetPage = window.location.pathname === '/reset-password';
+          if (event === 'SIGNED_IN' && !isOnResetPage) {
             sessionGraceUntilRef.current = Date.now() + 15000;
             // Keep loading true until fetchUserData completes so
             // ProtectedRoute doesn't flash the dashboard before
@@ -628,7 +629,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Register session FIRST to minimize the window where the old
             // session ID is still in the DB (prevents the new device from
             // seeing the old ID and kicking itself)
-            if (event === 'SIGNED_IN') {
+            // Skip session registration on reset-password page — the recovery
+            // session is temporary and should NOT count as a "real" login
+            if (event === 'SIGNED_IN' && !isOnResetPage) {
               sessionKickedRef.current = false;
               // Small delay to ensure supabase client auth headers are fully set
               await new Promise(r => setTimeout(r, 200));
