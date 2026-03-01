@@ -36,6 +36,7 @@ import PublishingArticles from "./pages/help/PublishingArticles";
 import HelpMediaBuying from "./pages/help/MediaBuying";
 import OrdersDelivery from "./pages/help/OrdersDelivery";
 import ForAgencies from "./pages/help/ForAgencies";
+import AgencyAccountDowngraded from "./pages/help/AgencyAccountDowngraded";
 import AIGeneration from "./pages/help/AIGeneration";
 import AIAutoPublishing from "./pages/help/AIAutoPublishing";
 import AISecuritySupervision from "./pages/help/AISecuritySupervision";
@@ -170,6 +171,7 @@ const App = () => {
               <Route path="/help/media-buying" element={<HelpMediaBuying />} />
               <Route path="/help/orders-delivery" element={<OrdersDelivery />} />
               <Route path="/help/for-agencies" element={<ForAgencies />} />
+              <Route path="/help/agency-account-downgraded" element={<AgencyAccountDowngraded />} />
               <Route path="/help/ai-generation" element={<AIGeneration />} />
               <Route path="/help/ai-auto-publishing" element={<AIAutoPublishing />} />
               <Route path="/help/ai-security-supervision" element={<AISecuritySupervision />} />

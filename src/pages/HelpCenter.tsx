@@ -89,6 +89,17 @@ const helpCategories = [
     slug: 'for-agencies',
   },
   {
+    title: 'Agency Account Downgraded',
+    topics: [
+      'What Is an Agency Downgrade?',
+      'Why an Agency Gets Downgraded',
+      'What Happens to Active Orders',
+      'User Guidelines & Compliance',
+      'Arcana Mace AI Monitoring',
+    ],
+    slug: 'agency-account-downgraded',
+  },
+  {
     title: 'AI Article Generation',
     topics: [
       'Using AI to Write Articles',
