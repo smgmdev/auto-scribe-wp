@@ -220,7 +220,7 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
           whiteSpace: 'nowrap',
           backdropFilter: 'blur(4px)',
         }}>
-          <span style={{ fontSize: '7px', fontWeight: 600, color: '#eee', fontFamily: 'monospace' }}>
+          <span style={{ fontSize: '5.5px', fontWeight: 400, color: '#eee', fontFamily: 'monospace' }}>
             {feature.properties.name}
           </span>
         </div>
