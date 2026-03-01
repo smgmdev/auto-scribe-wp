@@ -611,7 +611,7 @@ export function AdminMaceAIView() {
               onClick={handleMicClick}
               className="relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible bg-transparent hover:scale-105 cursor-pointer"
             >
-              {step === 'idle' && <Play className="w-10 h-10 text-foreground relative z-10 fill-foreground" />}
+              {step === 'idle' && <Play className="w-10 h-10 relative z-10" style={{ color: '#f2a547', fill: 'none', strokeWidth: 1.5 }} />}
 
               {step === 'listening' && (
                 <div className="flex items-center justify-center gap-[4px] relative z-10">
