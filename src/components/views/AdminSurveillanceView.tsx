@@ -25,6 +25,8 @@ interface EventData {
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   source: string;
+  source_url?: string;
+  published_at?: string;
 }
 
 interface ScanData {
@@ -401,10 +403,16 @@ export function AdminSurveillanceView() {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-gray-600 font-mono">{event.country_name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-600 font-mono">{event.source}</span>
-                        {scanData.scanned_at && (
+                        {event.source_url ? (
+                          <a href={event.source_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/70 hover:text-blue-300 font-mono underline underline-offset-2">
+                            {event.source}
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-gray-600 font-mono">{event.source}</span>
+                        )}
+                        {event.published_at && (
                           <span className="text-[10px] text-gray-600 font-mono">
-                            {new Date(scanData.scanned_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(scanData.scanned_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(event.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(event.published_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
                       </div>
