@@ -409,7 +409,7 @@ function MissileArc({ originCode, destCode }: { originCode: string; destCode: st
     mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.8);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
-    const tube = new THREE.TubeGeometry(c, 80, 0.025, 8, false);
+    const tube = new THREE.TubeGeometry(c, 80, 0.005, 8, false);
     return { curve: c, tubeGeo: tube };
   }, [originCode, destCode]);
 

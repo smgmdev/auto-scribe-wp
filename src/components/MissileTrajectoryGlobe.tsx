@@ -66,8 +66,8 @@ function ArcTrajectory({ origin, destination }: { origin: [number, number, numbe
     mid.normalize().multiplyScalar(1.6);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
-    const tube = new THREE.TubeGeometry(c, 80, 0.015, 8, false);
-    const glowTube = new THREE.TubeGeometry(c, 80, 0.025, 8, false);
+    const tube = new THREE.TubeGeometry(c, 80, 0.004, 8, false);
+    const glowTube = new THREE.TubeGeometry(c, 80, 0.008, 8, false);
 
     return { curve: c, tubeGeo: tube, glowTubeGeo: glowTube };
   }, [origin, destination]);
