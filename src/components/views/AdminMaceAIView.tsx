@@ -605,7 +605,7 @@ export function AdminMaceAIView() {
       <div className="flex-1" />
 
       {/* Centered button / processing - fixed in viewport center */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20" style={{ marginTop: '-80px' }}>
         <div className="flex flex-col items-center gap-1 pointer-events-auto max-w-lg px-6">
           {/* Speaking words - hidden, audio plays without text */}
 
