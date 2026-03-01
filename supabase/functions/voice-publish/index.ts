@@ -125,13 +125,19 @@ WHAT YOU DO:
 4. Answer questions about publishing
 5. Search the internet for real-time information when users ask about current events, facts, news, or anything that needs up-to-date data
 
+FEATURED IMAGES — IMPORTANT:
+- You CANNOT generate images. You do NOT have image generation capabilities.
+- If a user asks you to add an image, generate an image, or mentions wanting a photo/picture, respond naturally: "I can't generate images myself, but if you have a specific image in mind, you can upload it and I'll attach it to the article for you."
+- If the user says yes or wants to upload, respond with EXACTLY this format: "Sure! Go ahead and use the upload button below to send me the image, and I'll include it in the article." — this triggers the upload UI.
+- When you detect the user wants to upload an image (says yes, ok, sure, etc. after you offer), include the special marker [SHOW_UPLOAD] at the very end of your response (after the period). This is invisible to the user but triggers the upload button in the UI.
+- Once an image is uploaded (you'll see a message like "I've uploaded an image for the article"), acknowledge it and continue with publishing.
+
 IMPORTANT RULES:
 - For greetings like "hi", "how are you", "what's up" — just reply naturally. Do NOT call any tools.
 - NEVER claim you have published, written, or created an article unless you are CURRENTLY calling the publish_article tool in THIS response. You do NOT have memory of past sessions. If the user asks "did you publish that?" or "what was the last article?" and there is no evidence in the conversation of a successful publish, say honestly: "I don't have a record of publishing anything in this conversation. Want me to write something now?"
 - NEVER fabricate or hallucinate article titles, links, or publishing results. If you didn't do it, say so.
 - Users can ONLY publish to sites listed above. If they mention any site not in the list (e.g., Forbes, CNN, BBC, TechCrunch, etc.), say: "I don't have access to [site name], it's not in the Arcana Mace local library list. Want me to show you what's available?"
-- When a user wants to publish, figure out the topic and optionally a featured image description. If they do NOT specify which site to publish to, ask them: "Which site would you like me to publish it on?" and list available sites naturally.
-- If they mention wanting a photo or image (e.g., "with a photo of Dubai"), extract that as featured_image_query.
+- When a user wants to publish, figure out the topic. If they do NOT specify which site to publish to, ask them: "Which site would you like me to publish it on?" and list available sites naturally.
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
 - When listing sites, say them naturally: "You've got Washington Morning, European Capitalist, and Asia Daily."
 - Match site names loosely (e.g., "washington morning" → "Washington Morning")
@@ -163,7 +169,6 @@ IMPORTANT RULES:
                   topic: { type: 'string', description: 'The topic/subject for the article' },
                   target_site: { type: 'string', description: 'The exact name of the target site from the available list. REQUIRED — if user did not specify, do NOT call this tool.' },
                   tone: { type: 'string', enum: ['neutral', 'professional', 'journalist', 'inspiring', 'aggressive', 'powerful', 'important'], description: 'Writing tone (default: journalist)' },
-                  featured_image_query: { type: 'string', description: 'Search query for the featured image if user specified one (e.g., "Dubai skyline at sunset")' },
                 },
                 required: ['topic', 'target_site'],
                 additionalProperties: false,
@@ -425,7 +430,7 @@ IMPORTANT RULES:
           siteAgency: matchedSite.agency,
           creditsRequired,
           isAdmin,
-          featuredImageQuery: parsed.featured_image_query || null,
+          featuredImageUrl: null,
         },
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -529,67 +534,41 @@ FORMAT YOUR RESPONSE EXACTLY:
       }),
     });
 
-    // Generate image in parallel but DON'T block on it — we'll attach after publish
-    const imagePromise = (async (): Promise<{ mediaId: number; imageBytes?: Uint8Array } | null> => {
-      if (!pa.featuredImageQuery) return null;
+    // Upload user-provided featured image to WordPress if provided
+    let featuredMediaId = 0;
+    if (pa.featuredImageUrl) {
       try {
-        console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
-        const imgAbort = new AbortController();
-        const imgTimeout = setTimeout(() => imgAbort.abort(), 40000);
-        const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          signal: imgAbort.signal,
-          body: JSON.stringify({
-            model: 'google/gemini-3-pro-image-preview',
-            messages: [
-              { role: 'user', content: `Generate a professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.` },
-            ],
-            modalities: ['image', 'text'],
-          }),
-        });
-        clearTimeout(imgTimeout);
-        if (!imgGenResp.ok) {
-          const errText = await imgGenResp.text();
-          console.error('[voice-publish] Image gen failed:', imgGenResp.status, errText);
-          return null;
+        console.log('[voice-publish] Uploading user-provided featured image...');
+        // Fetch the image from the URL
+        const imgResp = await fetch(pa.featuredImageUrl);
+        if (imgResp.ok) {
+          const imgBlob = await imgResp.blob();
+          const contentType = imgBlob.type || 'image/jpeg';
+          const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+          const filename = `mace-featured-${Date.now()}.${ext}`;
+          const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
+          const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+            method: 'POST',
+            headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
+            body: imgBytes,
+          });
+          if (wpMediaResp.ok) {
+            const wpMediaData = await wpMediaResp.json();
+            console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
+            featuredMediaId = wpMediaData.id;
+          } else {
+            const wpErr = await wpMediaResp.text();
+            console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
+          }
+        } else {
+          console.error('[voice-publish] Failed to fetch user image:', imgResp.status);
         }
-        const imgGenText = await imgGenResp.text();
-        let imgGenData: any;
-        try { imgGenData = JSON.parse(imgGenText); } catch { console.error('[voice-publish] Image gen returned non-JSON:', imgGenText.slice(0, 200)); return null; }
-        const imageData = imgGenData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-        if (!imageData || !imageData.startsWith('data:image/')) {
-          console.error('[voice-publish] No image data returned from Gemini');
-          return null;
-        }
-        console.log('[voice-publish] Generated image, uploading to WP...');
-        const matches = imageData.match(/^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/);
-        if (!matches) { console.error('[voice-publish] Invalid image data URI'); return null; }
-        const imgExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-        const imgBase64 = matches[2];
-        const imgBytes = Uint8Array.from(atob(imgBase64), c => c.charCodeAt(0));
-        const contentType = `image/${matches[1]}`;
-        const filename = `mace-featured-${Date.now()}.${imgExt}`;
-        const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-          method: 'POST',
-          headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
-          body: imgBytes,
-        });
-        if (wpMediaResp.ok) {
-          const wpMediaData = await wpMediaResp.json();
-          console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
-          return { mediaId: wpMediaData.id };
-        }
-        const wpErr = await wpMediaResp.text();
-        console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
-        return null;
       } catch (imgError) {
-        console.error('[voice-publish] Featured image error (non-fatal):', imgError);
-        return null;
+        console.error('[voice-publish] Featured image upload error (non-fatal):', imgError);
       }
-    })();
+    }
 
-    // Wait for article + SEO first (fast), image resolves in background
+    // Wait for article + SEO
     const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
     // Check if image is already done; if not, we'll attach it after publishing
     const imageResult = await Promise.race([
@@ -738,24 +717,7 @@ FORMAT YOUR RESPONSE EXACTLY:
     const wpPostId = wpData.id;
     const wpLink = wpData.link;
 
-    // If image wasn't ready before publish, wait for it and attach now (fire-and-forget)
-    if (!featuredMediaId && pa.featuredImageQuery) {
-      imagePromise.then(async (result) => {
-        if (result?.mediaId) {
-          try {
-            console.log('[voice-publish] Attaching late image to post:', result.mediaId);
-            await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
-              method: 'POST',
-              headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ featured_media: result.mediaId }),
-            });
-            console.log('[voice-publish] Late image attached successfully');
-          } catch (e) {
-            console.error('[voice-publish] Failed to attach late image:', e);
-          }
-        }
-      }).catch(() => {});
-    }
+
 
     // RankMath meta update
     if (pa.siteSeoPlugin === 'rankmath' && (focusKeyword || metaDescription)) {

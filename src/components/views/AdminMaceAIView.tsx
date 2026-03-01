@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Play, Loader2, Volume2, ExternalLink } from 'lucide-react';
+import { Play, Loader2, Volume2, ExternalLink, Upload, Image } from 'lucide-react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,10 @@ export function AdminMaceAIView() {
   const [pendingArticle, setPendingArticle] = useState<any>(null);
   const [publishPhase, setPublishPhase] = useState<string>('');
   const [speakingWords, setSpeakingWords] = useState<{ word: string; absIdx: number }[]>([]);
+  const [showUploadButton, setShowUploadButton] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -397,12 +401,18 @@ export function AdminMaceAIView() {
               setPublishPhase('Researching topic...');
               const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 4000);
               const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 10000);
-              const phaseTimer3 = setTimeout(() => setPublishPhase('Generating featured image...'), 15000);
-              const phaseTimer4 = setTimeout(() => setPublishPhase('Creating tags...'), 22000);
-              const phaseTimer5 = setTimeout(() => setPublishPhase('Publishing to WordPress...'), 28000);
+              const phaseTimer3 = setTimeout(() => setPublishPhase(uploadedImageUrl ? 'Uploading featured image...' : 'Creating tags...'), 15000);
+              const phaseTimer4 = setTimeout(() => setPublishPhase('Creating tags...'), 20000);
+              const phaseTimer5 = setTimeout(() => setPublishPhase('Publishing to WordPress...'), 25000);
+
+              // Attach uploaded image URL to pending article if available
+              const articleToPublish = { ...currentPending };
+              if (uploadedImageUrl) {
+                articleToPublish.featuredImageUrl = uploadedImageUrl;
+              }
 
               const { data, error } = await supabase.functions.invoke('voice-publish', {
-                body: { action: 'confirm_publish', pendingArticle: currentPending },
+                body: { action: 'confirm_publish', pendingArticle: articleToPublish },
               });
 
               clearTimeout(phaseTimer1);
@@ -452,8 +462,16 @@ export function AdminMaceAIView() {
       });
       if (error) throw new Error(error.message || 'Request failed');
 
-      const responseMessage = data?.message || "I'm not sure what happened. Can you try again?";
-      setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
+      // Check for [SHOW_UPLOAD] marker and strip it from display
+      let displayMessage = data?.message || "I'm not sure what happened. Can you try again?";
+      const shouldShowUpload = displayMessage.includes('[SHOW_UPLOAD]');
+      displayMessage = displayMessage.replace(/\s*\[SHOW_UPLOAD\]\s*/g, '').trim();
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: displayMessage }]);
+
+      if (shouldShowUpload) {
+        setShowUploadButton(true);
+      }
 
       if (data?.type === 'pending_publish' && data?.pendingArticle) {
         setPendingArticle(data.pendingArticle);
@@ -467,7 +485,7 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      speak(responseMessage, done);
+      speak(displayMessage, done);
 
     } catch (err: any) {
       console.error('Voice publish error:', err);
@@ -502,6 +520,63 @@ export function AdminMaceAIView() {
     setInterimTranscript('');
     setPublishResult(null);
     setPendingArticle(null);
+    setShowUploadButton(false);
+    setUploadedImageUrl(null);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a JPG, PNG, WebP, or GIF image.');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be under 10MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    setShowUploadButton(false);
+
+    try {
+      // Upload to Supabase storage in a temporary bucket path
+      const fileName = `mace-upload-${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('press-release-images')
+        .upload(`mace/${fileName}`, file, { contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('press-release-images')
+        .getPublicUrl(`mace/${fileName}`);
+
+      const publicUrl = urlData.publicUrl;
+      setUploadedImageUrl(publicUrl);
+      setIsUploading(false);
+
+      // Add a message to the conversation about the upload
+      const uploadMsg: Message = { role: 'user', content: "I've uploaded an image for the article." };
+      setMessages(prev => [...prev, uploadMsg]);
+
+      toast.success('Image uploaded! It will be attached when publishing.');
+
+      // Let AI know about the upload
+      processUserMessage("I've uploaded an image for the article.");
+    } catch (err: any) {
+      setIsUploading(false);
+      console.error('Image upload error:', err);
+      toast.error('Failed to upload image. Please try again.');
+    }
+
+    // Reset the file input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const isProcessing = step === 'processing';
@@ -668,6 +743,32 @@ export function AdminMaceAIView() {
             </button>
           )}
 
+          {/* Upload button - shown when AI offers image upload */}
+          {showUploadButton && step === 'idle' && !isProcessing && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-background hover:bg-muted transition-colors text-sm font-medium text-foreground"
+            >
+              <Upload className="w-4 h-4" />
+              Upload Image
+            </button>
+          )}
+
+          {/* Uploaded image indicator */}
+          {uploadedImageUrl && step === 'idle' && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Image className="w-4 h-4 text-green-600" />
+              <span>Image attached</span>
+            </div>
+          )}
+
+          {isUploading && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Uploading image...</span>
+            </div>
+          )}
+
           <p className={`text-base font-light transition-colors ${
             step === 'processing' ? 'text-muted-foreground'
             : 'text-muted-foreground'
@@ -677,6 +778,15 @@ export function AdminMaceAIView() {
           </p>
         </div>
       </div>
+
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={handleImageUpload}
+      />
 
     </div>
   );
