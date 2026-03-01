@@ -338,53 +338,63 @@ function CountryMarker({
 
   return (
     <group position={position}>
-      {country.threat_level !== 'safe' && (
-        <PulsingHexRing color={color} size={baseSize} speed={country.threat_level === 'danger' ? 3 : 1.8} delay={0} />
-      )}
-      {country.threat_level === 'danger' && (
-        <PulsingHexRing color={color} size={baseSize * 1.6} speed={2} delay={1} />
-      )}
-
-      <mesh geometry={hexRingGeo}
-        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
-        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
-      >
-        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.6 : 0.3} transparent side={THREE.DoubleSide} />
-      </mesh>
-
-      <mesh geometry={hexGeo}
-        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
-        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
-      >
-        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.85 : 0.55} transparent side={THREE.DoubleSide} />
-      </mesh>
-
+      {/* Vertical glowing beam */}
       <mesh>
-        <sphereGeometry args={[baseSize * 0.3, 8, 8]} />
-        <meshBasicMaterial color="#ffffff" opacity={0.9} transparent />
+        <cylinderGeometry args={[baseSize * 0.08, baseSize * 0.08, baseSize * 4, 6]} />
+        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.5 : 0.25} transparent />
       </mesh>
+
+      {/* 3D hex prism core */}
+      <mesh
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+      >
+        <cylinderGeometry args={[baseSize, baseSize, baseSize * 0.6, 6]} />
+        <meshPhongMaterial color={color} emissive={color} emissiveIntensity={hovered || isSelected ? 0.8 : 0.4} opacity={0.85} transparent shininess={80} />
+      </mesh>
+
+      {/* Top cap glow */}
+      <mesh position={[0, baseSize * 0.3, 0]}>
+        <cylinderGeometry args={[baseSize * 0.7, baseSize, baseSize * 0.05, 6]} />
+        <meshBasicMaterial color="#ffffff" opacity={0.3} transparent />
+      </mesh>
+
+      {/* Floating hex ring */}
+      {country.threat_level !== 'safe' && (
+        <FloatingHexRing color={color} size={baseSize} speed={country.threat_level === 'danger' ? 2.5 : 1.5} />
+      )}
+
+      {/* Second ring for danger */}
+      {country.threat_level === 'danger' && (
+        <FloatingHexRing color={color} size={baseSize * 1.4} speed={1.8} offset={Math.PI} />
+      )}
+
+      {/* Point light for glow effect */}
+      <pointLight color={color} intensity={hovered || isSelected ? 0.4 : 0.15} distance={baseSize * 8} />
     </group>
   );
 }
 
-function PulsingHexRing({ color, size, speed, delay }: { color: string; size: number; speed: number; delay: number }) {
+function FloatingHexRing({ color, size, speed, offset = 0 }: { color: string; size: number; speed: number; offset?: number }) {
   const ref = useRef<THREE.Mesh>(null);
-  const geo = useMemo(() => createHexRingGeometry(size * 1.8, size * 2.2), [size]);
 
   useFrame(({ clock }) => {
     if (ref.current) {
-      const t = (clock.getElapsedTime() + delay) * speed;
-      const pulse = (Math.sin(t) + 1) / 2;
-      const scale = 1 + pulse * 0.8;
-      ref.current.scale.setScalar(scale);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.3 - pulse * 0.25;
+      const t = clock.getElapsedTime() * speed + offset;
+      const bob = Math.sin(t) * size * 0.8;
+      ref.current.position.y = size * 1.5 + bob;
+      ref.current.rotation.y = t * 0.5;
+      const pulse = (Math.sin(t * 1.5) + 1) / 2;
+      const s = 1 + pulse * 0.3;
+      ref.current.scale.set(s, 1, s);
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.35 - pulse * 0.2;
     }
   });
 
   return (
-    <mesh ref={ref} geometry={geo}>
+    <mesh ref={ref}>
+      <torusGeometry args={[size * 1.8, size * 0.08, 6, 6]} />
       <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
     </mesh>
   );
