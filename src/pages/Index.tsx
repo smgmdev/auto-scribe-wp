@@ -60,6 +60,8 @@ const publicViews: Record<string, React.ComponentType> = {
   'my-requests': MyRequestsView,
   'credit-history': CreditHistoryView,
   'support': SupportView,
+  'admin-mace-ai': AdminMaceAIView,
+  'admin-mace-articles': AdminMaceArticlesView,
 };
 
 // Views for non-admin users only (agency application is user-facing only)
@@ -94,8 +96,6 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
   'admin-agency-withdrawals': AdminAgencyWithdrawalsView,
   'admin-security-supervision': AdminSecuritySupervisionView,
   'admin-feedback': AdminFeedbackView,
-  'admin-mace-ai': AdminMaceAIView,
-  'admin-mace-articles': AdminMaceArticlesView,
   'admin-mace-settings': AdminMaceSettingsView,
   'admin-system': AdminSystemView,
   'admin-support': AdminSupportView,
