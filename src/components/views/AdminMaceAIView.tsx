@@ -655,20 +655,6 @@ export function AdminMaceAIView() {
         </div>
       </div>
 
-      {/* Hint - only when no messages */}
-      {step === 'idle' && messages.length === 0 && (
-        <div className="fixed bottom-8 left-0 right-0 text-center pointer-events-none z-10 px-4">
-          <p className="text-sm text-muted-foreground">
-            Tap the microphone and say something like:
-          </p>
-          <p className="text-sm text-foreground font-medium italic mt-1">
-            "Publish an article about Dubai on Washington Morning"
-          </p>
-          <p className="text-xs text-muted-foreground mt-3">
-            Mace AI will generate the article, read you a summary, and ask for your confirmation before publishing.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
