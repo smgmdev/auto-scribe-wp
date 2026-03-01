@@ -415,9 +415,28 @@ export function AdminMaceAIView() {
                 articleToPublish.featuredImageUrl = uploadedImageUrl;
               }
 
-              const { data, error } = await supabase.functions.invoke('voice-publish', {
-                body: { action: 'confirm_publish', pendingArticle: articleToPublish },
-              });
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+              const publishResp = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-publish`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                    Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                  },
+                  body: JSON.stringify({ action: 'confirm_publish', pendingArticle: articleToPublish }),
+                  signal: controller.signal,
+                }
+              );
+              clearTimeout(timeout);
+              if (!publishResp.ok) {
+                const errBody = await publishResp.text();
+                throw new Error(errBody || `Publish failed: ${publishResp.status}`);
+              }
+              const data = await publishResp.json();
+              const error = null;
 
               clearTimeout(phaseTimer1);
               clearTimeout(phaseTimer2);
