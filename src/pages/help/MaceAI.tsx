@@ -69,9 +69,9 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <p>To use Mace AI for publishing, you need:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong>At least one WordPress site</strong> connected in your Local Media Library</li>
-          <li><strong>A microphone</strong> enabled in your browser (Mace will request permission on first use)</li>
           <li><strong>An Arcana Mace account</strong> — Mace AI is available to all registered users</li>
+          <li><strong>A microphone</strong> enabled in your browser (Mace will request permission on first use)</li>
+          <li><strong>Enough credits</strong> to publish on your selected media site</li>
         </ul>
         <p>
           Mace AI publishes to WordPress sites listed in your Local Media Library on Arcana Mace.
