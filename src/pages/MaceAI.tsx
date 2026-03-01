@@ -458,14 +458,14 @@ export default function MaceAI() {
               />
             ))}
           </div>
-          <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
+          <p className="text-3xl md:text-5xl lg:text-[64px] font-bold text-black tracking-tight leading-[1.08]">
             Hey Mace, publish an article about Nvidia on Washington Morning!
           </p>
         </div>
 
         {/* Mace response */}
         <div className="max-w-[980px] mx-auto px-4 md:px-6 mt-12 md:mt-16 flex items-center gap-6 md:gap-10">
-          <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
+          <p className="text-3xl md:text-5xl lg:text-[64px] font-bold text-black tracking-tight leading-[1.08]">
             Hi, I can definitely do that! I'm doing it for you right now.
           </p>
           {/* Blue waveform bars */}
