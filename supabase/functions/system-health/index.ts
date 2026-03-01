@@ -141,6 +141,41 @@ Deno.serve(async (req) => {
     services.push({ name: 'Payment Gateway (Stripe)', status: 'issue' })
   }
 
+  // Check Mace AI (Lovable AI Gateway)
+  try {
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')
+    if (!lovableApiKey) {
+      services.push({ name: 'Mace AI', status: 'outage' })
+    } else {
+      const start = Date.now()
+      const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${lovableApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 1,
+        }),
+        signal: AbortSignal.timeout(10000),
+      })
+      const latency = Date.now() - start
+
+      if (response.ok) {
+        services.push({ name: 'Mace AI', status: latency > 5000 ? 'issue' : 'available', latency })
+      } else if (response.status === 429) {
+        // Rate limited or credits exhausted
+        services.push({ name: 'Mace AI', status: 'issue', latency })
+      } else {
+        services.push({ name: 'Mace AI', status: 'outage', latency })
+      }
+    }
+  } catch {
+    services.push({ name: 'Mace AI', status: 'outage' })
+  }
+
   // These services depend on external providers - we mark them available by default
   // as we can't directly check them without making actual transactions
   const externalServices = [
