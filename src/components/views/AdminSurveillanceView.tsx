@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket, Play, Pause } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket, Play, Pause, ChevronDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -73,8 +74,10 @@ export function AdminSurveillanceView() {
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [missileTimeFilter, setMissileTimeFilter] = useState<number>(1); // hours, 0.0417 = 1h default
+  const [missileTimeFilter, setMissileTimeFilter] = useState<string>('1');
+  const [droneTimeFilter, setDroneTimeFilter] = useState<string>('1');
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
 
   const fetchLatestScan = useCallback(async () => {
@@ -130,7 +133,8 @@ export function AdminSurveillanceView() {
 
   // Fetch active missile alerts for trajectory arcs
   const fetchMissiles = useCallback(async () => {
-    const cutoff = new Date(Date.now() - missileTimeFilter * 60 * 60 * 1000).toISOString();
+    const hours = parseFloat(missileTimeFilter);
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
     const { data } = await supabase
       .from('missile_alerts')
       .select('id, origin_country_code, destination_country_code')
@@ -141,19 +145,40 @@ export function AdminSurveillanceView() {
     if (data) setMissileTrajectories(data);
   }, [missileTimeFilter]);
 
+  // Fetch drone alerts (reusing missile_alerts table with title filter or separate — using same table for now)
+  const fetchDrones = useCallback(async () => {
+    // Drones use the same missile_alerts table — for now returns empty until drone data exists
+    const hours = parseFloat(droneTimeFilter);
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('missile_alerts')
+      .select('id, origin_country_code, destination_country_code')
+      .eq('active', true)
+      .eq('severity', 'drone')
+      .gte('created_at', cutoff)
+      .not('origin_country_code', 'is', null)
+      .not('destination_country_code', 'is', null);
+    if (data) setDroneTrajectories(data);
+  }, [droneTimeFilter]);
+
   useEffect(() => {
     fetchMissiles();
+    fetchDrones();
     const channel = supabase
       .channel('missile-alerts-globe')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'missile_alerts' }, (payload) => {
         const a = payload.new as any;
         if (a.origin_country_code && a.destination_country_code) {
-          setMissileTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
+          if (a.severity === 'drone') {
+            setDroneTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
+          } else {
+            setMissileTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
+          }
         }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchMissiles]);
+  }, [fetchMissiles, fetchDrones]);
 
   const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
   const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
@@ -193,28 +218,38 @@ export function AdminSurveillanceView() {
 
             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
               <Rocket className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
-              {[
-                { label: '1h', value: 1 },
-                { label: '6h', value: 6 },
-                { label: '12h', value: 12 },
-                { label: '24h', value: 24 },
-                { label: '7d', value: 168 },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setMissileTimeFilter(opt.value)}
-                  className={cn(
-                    "text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors",
-                    missileTimeFilter === opt.value
-                      ? "bg-blue-500/30 text-blue-300 border border-blue-500/40"
-                      : "text-gray-500 hover:text-gray-300"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
+              <span className="text-[10px] font-mono text-gray-400">Missiles</span>
+              <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
+                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-white/10 text-gray-300 px-1.5 py-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px] font-mono">1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px] font-mono">6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px] font-mono">12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px] font-mono">24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px] font-mono">7d</SelectItem>
+                </SelectContent>
+              </Select>
               <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
+              <Shield className="w-3 h-3 text-purple-400" />
+              <span className="text-[10px] font-mono text-gray-400">Drones</span>
+              <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
+                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-white/10 text-gray-300 px-1.5 py-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px] font-mono">1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px] font-mono">6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px] font-mono">12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px] font-mono">24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px] font-mono">7d</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[10px] font-mono text-gray-600">({droneTrajectories.length})</span>
             </div>
           </div>
 
