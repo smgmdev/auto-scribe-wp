@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState, useCallback } from 'react';
-import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, Line } from '@react-three/drei';
+import { Canvas, useFrame, useLoader, ThreeEvent } from '@react-three/fiber';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { COUNTRY_COORDINATES, latLngToVector3 } from '@/constants/countryCoordinates';
 
@@ -30,84 +30,159 @@ function getThreatColor(level: string): string {
   }
 }
 
-function GlobeGrid() {
-  const gridLines = useMemo(() => {
-    const lines: THREE.Vector3[][] = [];
-    // Latitude lines
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const points: THREE.Vector3[] = [];
-      for (let lng = -180; lng <= 180; lng += 5) {
-        const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.005);
-        points.push(new THREE.Vector3(x, y, z));
-      }
-      lines.push(points);
-    }
-    // Longitude lines
-    for (let lng = -180; lng < 180; lng += 30) {
-      const points: THREE.Vector3[] = [];
-      for (let lat = -90; lat <= 90; lat += 5) {
-        const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.005);
-        points.push(new THREE.Vector3(x, y, z));
-      }
-      lines.push(points);
-    }
-    return lines;
-  }, []);
+function getThreatGlow(level: string): string {
+  switch (level) {
+    case 'danger': return '#ff000080';
+    case 'caution': return '#ff990060';
+    case 'safe':
+    default: return '#00ff0040';
+  }
+}
+
+function EarthSphere() {
+  const texture = useLoader(THREE.TextureLoader, '/textures/earth-blue-marble.jpg');
+  const bumpMap = useLoader(THREE.TextureLoader, '/textures/earth-topology.png');
 
   return (
-    <>
-      {gridLines.map((points, i) => (
-        <Line
-          key={i}
-          points={points.map(p => [p.x, p.y, p.z] as [number, number, number])}
-          color="#1e3a5f"
-          opacity={0.3}
-          transparent
-          lineWidth={0.5}
-        />
-      ))}
-    </>
+    <mesh>
+      <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
+      <meshPhongMaterial
+        map={texture}
+        bumpMap={bumpMap}
+        bumpScale={0.04}
+        specular={new THREE.Color('#1a3a5c')}
+        shininess={8}
+      />
+    </mesh>
   );
 }
 
-function CountryMarker({ 
-  country, 
+function AtmosphereGlow() {
+  const shaderRef = useRef<THREE.ShaderMaterial>(null);
+
+  const atmosphereMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        void main() {
+          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+          gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      transparent: true,
+    });
+  }, []);
+
+  return (
+    <mesh material={atmosphereMaterial}>
+      <sphereGeometry args={[GLOBE_RADIUS * 1.12, 64, 64]} />
+    </mesh>
+  );
+}
+
+function CountryMarker({
+  country,
   onClick,
-  isSelected 
-}: { 
-  country: CountryData; 
+  isSelected,
+}: {
+  country: CountryData;
   onClick: () => void;
   isSelected: boolean;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
   const coords = COUNTRY_COORDINATES[country.code];
   if (!coords) return null;
 
-  const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.02);
+  const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.015);
   const color = getThreatColor(country.threat_level);
-  const size = country.threat_level === 'danger' ? 0.06 : country.threat_level === 'caution' ? 0.045 : 0.03;
+  const baseSize =
+    country.threat_level === 'danger'
+      ? 0.07
+      : country.threat_level === 'caution'
+      ? 0.05
+      : 0.035;
+  const size = isSelected || hovered ? baseSize * 1.6 : baseSize;
 
   return (
     <group position={position}>
-      {/* Glow ring for active threats */}
+      {/* Outer glow ring for non-safe */}
       {country.threat_level !== 'safe' && (
         <mesh>
-          <ringGeometry args={[size * 1.5, size * 2.5, 32]} />
-          <meshBasicMaterial color={color} opacity={0.2} transparent side={THREE.DoubleSide} />
+          <ringGeometry args={[baseSize * 2, baseSize * 3.5, 32]} />
+          <meshBasicMaterial
+            color={color}
+            opacity={hovered || isSelected ? 0.35 : 0.15}
+            transparent
+            side={THREE.DoubleSide}
+          />
         </mesh>
       )}
-      {/* Main dot */}
+
+      {/* Main marker dot */}
       <mesh
         ref={meshRef}
-        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
-        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { document.body.style.cursor = 'default'; }}
+        onClick={(e: ThreeEvent<MouseEvent>) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'default';
+        }}
       >
-        <sphereGeometry args={[isSelected ? size * 1.5 : size, 16, 16]} />
+        <sphereGeometry args={[size, 16, 16]} />
         <meshBasicMaterial color={color} />
       </mesh>
-      {/* Pulse for danger */}
-      {country.threat_level === 'danger' && <PulsingRing color={color} size={size} />}
+
+      {/* Pulse animation for danger zones */}
+      {country.threat_level === 'danger' && (
+        <PulsingRing color={color} size={baseSize} />
+      )}
+
+      {/* Hover/selected label */}
+      {(hovered || isSelected) && (
+        <Html
+          distanceFactor={6}
+          style={{ pointerEvents: 'none' }}
+          center
+          position={[0, 0.12, 0]}
+        >
+          <div
+            className="px-2.5 py-1.5 rounded-md text-center whitespace-nowrap"
+            style={{
+              background: 'rgba(10, 14, 26, 0.92)',
+              border: `1px solid ${color}50`,
+              boxShadow: `0 0 12px ${getThreatGlow(country.threat_level)}`,
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <div className="text-[11px] font-bold text-white leading-tight">
+              {country.name}
+            </div>
+            <div
+              className="text-[9px] font-mono uppercase tracking-wider mt-0.5"
+              style={{ color }}
+            >
+              {country.threat_level} · {country.score}/100
+            </div>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -116,56 +191,58 @@ function PulsingRing({ color, size }: { color: string; size: number }) {
   const ref = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (ref.current) {
-      const scale = 1 + Math.sin(clock.getElapsedTime() * 2) * 0.5;
+      const scale = 1 + Math.sin(clock.getElapsedTime() * 2.5) * 0.6;
       ref.current.scale.setScalar(scale);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.4 - scale * 0.12;
+      (ref.current.material as THREE.MeshBasicMaterial).opacity =
+        0.35 - scale * 0.1;
     }
   });
   return (
     <mesh ref={ref}>
-      <ringGeometry args={[size * 2, size * 3, 32]} />
-      <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
+      <ringGeometry args={[size * 2.5, size * 4, 32]} />
+      <meshBasicMaterial
+        color={color}
+        opacity={0.3}
+        transparent
+        side={THREE.DoubleSide}
+      />
     </mesh>
   );
 }
 
-function RotatingGlobe({ countries, onCountryClick, selectedCountry }: SurveillanceGlobeProps) {
+function RotatingGlobe({
+  countries,
+  onCountryClick,
+  selectedCountry,
+}: SurveillanceGlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [autoRotate, setAutoRotate] = useState(true);
 
   useFrame(() => {
     if (groupRef.current && autoRotate) {
-      groupRef.current.rotation.y += 0.001;
+      groupRef.current.rotation.y += 0.0008;
     }
   });
 
-  const handleClick = useCallback((country: CountryData) => {
-    setAutoRotate(false);
-    onCountryClick(country);
-    // Resume rotation after 10s
-    setTimeout(() => setAutoRotate(true), 10000);
-  }, [onCountryClick]);
+  const handleClick = useCallback(
+    (country: CountryData) => {
+      setAutoRotate(false);
+      onCountryClick(country);
+      setTimeout(() => setAutoRotate(true), 12000);
+    },
+    [onCountryClick]
+  );
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={0.8} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 3, 5]} intensity={1.2} />
+      <directionalLight position={[-5, -3, -5]} intensity={0.3} color="#4488cc" />
+
       <group ref={groupRef}>
-        {/* Globe sphere */}
-        <mesh>
-          <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
-          <meshPhongMaterial
-            color="#0a1628"
-            emissive="#061020"
-            specular="#1e3a5f"
-            shininess={5}
-            opacity={0.95}
-            transparent
-          />
-        </mesh>
-        {/* Grid */}
-        <GlobeGrid />
-        {/* Country markers */}
+        <EarthSphere />
+        <AtmosphereGlow />
+
         {countries.map((country) => (
           <CountryMarker
             key={country.code}
@@ -175,22 +252,29 @@ function RotatingGlobe({ countries, onCountryClick, selectedCountry }: Surveilla
           />
         ))}
       </group>
+
       <OrbitControls
         enableZoom={true}
         enablePan={false}
         minDistance={3}
         maxDistance={8}
         autoRotate={false}
+        enableDamping
+        dampingFactor={0.05}
       />
     </>
   );
 }
 
-export function SurveillanceGlobe({ countries, onCountryClick, selectedCountry }: SurveillanceGlobeProps) {
+export function SurveillanceGlobe({
+  countries,
+  onCountryClick,
+  selectedCountry,
+}: SurveillanceGlobeProps) {
   return (
     <div className="w-full h-full">
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 45 }}
+        camera={{ position: [0, 0, 4.5], fov: 45 }}
         style={{ background: 'transparent' }}
         gl={{ antialias: true, alpha: true }}
       >
