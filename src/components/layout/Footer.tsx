@@ -174,7 +174,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
         </div>
         
         {/* Bottom bar */}
-        <div className={`border-t pt-6 pb-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 ${dark ? 'border-white/20' : 'border-border'}`}>
+        <div className={`border-t pt-6 pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${dark ? 'border-white/20' : 'border-border'}`}>
           <p className={`text-xs shrink-0 ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             © {new Date().getFullYear()} Arcana Mace. All rights reserved.
           </p>
