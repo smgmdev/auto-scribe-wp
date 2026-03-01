@@ -516,22 +516,7 @@ export function AdminMaceAIView() {
       {/* Centered button / processing - fixed in viewport center */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-20">
         <div className="flex flex-col items-center gap-3 pointer-events-auto max-w-lg px-6">
-          {/* Speaking words - word-by-word reveal on 1 line */}
-          {step === 'speaking' && speakingWords.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center max-w-full overflow-hidden whitespace-nowrap">
-              {speakingWords.map(({ word, absIdx }, i) => {
-                const isNewest = i === speakingWords.length - 1;
-                return (
-                  <span
-                    key={absIdx}
-                    className={`inline-block transition-opacity duration-300 ${isNewest ? 'opacity-0 animate-[fadeWord_0.3s_ease-out_forwards]' : 'opacity-100'}`}
-                  >
-                    {word}{i < speakingWords.length - 1 ? '\u00A0' : ''}
-                  </span>
-                );
-              })}
-            </p>
-          )}
+          {/* Speaking words - hidden, audio plays without text */}
 
           {/* Last message - only when idle (not speaking/listening), single line */}
           {step === 'idle' && messages.length > 0 && speakingWords.length === 0 && (
@@ -545,15 +530,7 @@ export function AdminMaceAIView() {
           )}
 
 
-          {/* Listening - show live transcript on 1 line */}
-          {step === 'listening' && (currentTranscript || interimTranscript) && (
-            <p className="text-sm text-foreground text-center truncate max-w-full">
-              {currentTranscript}
-              {interimTranscript && (
-                <span className="text-muted-foreground/60 italic"> {interimTranscript}</span>
-              )}
-            </p>
-          )}
+          {/* Listening transcript hidden — clean UI during recording */}
 
           {publishResult && step === 'idle' && (
             <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
@@ -670,15 +647,11 @@ export function AdminMaceAIView() {
           )}
 
           <p className={`text-sm font-medium transition-colors ${
-            step === 'listening' ? 'text-red-500 animate-pulse' 
-            : step === 'speaking' ? 'text-blue-500'
-            : step === 'processing' ? 'text-muted-foreground'
+            step === 'processing' ? 'text-muted-foreground'
             : 'text-muted-foreground'
           }`}>
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
-            {step === 'listening' && (pendingArticle ? 'Listening for confirmation...' : 'Listening...')}
             {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
-            {step === 'speaking' && 'Speaking... tap to interrupt & talk'}
           </p>
         </div>
       </div>
