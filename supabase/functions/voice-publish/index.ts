@@ -751,7 +751,7 @@ async function handleDoPublish(
         published_to_favicon: site.favicon || null, wp_post_id: wpPostId, wp_link: wpLink,
         source_headline: { source: 'mace' },
       }),
-      sendTelegramAlert(TelegramAlerts.wpArticlePublished(site.name, articleTitle, wpLink || '')).catch(() => {}),
+      sendTelegramAlert(TelegramAlerts.maceAIPublished(site.name, articleTitle, wpLink || '')).catch(() => {}),
     ]).catch(err => console.error('[voice-publish] DB/alert error:', err));
 
     const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
