@@ -603,7 +603,7 @@ export default function MaceAI() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Mace AI is the intelligent assistant built into Arcana Mace. It powers article generation, automated publishing, security monitoring, and smart content tools — helping you work faster and smarter across the platform.
+                  Mace AI is the intelligent assistant built into Arcana Mace. It listens to your voice and powers article publishing — helping you work faster and smarter across the platform.
                 </AccordionContent>
               </AccordionItem>
 
