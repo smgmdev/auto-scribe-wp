@@ -51,6 +51,7 @@ export function AdminMaceAIView() {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [pendingArticle, setPendingArticle] = useState<any>(null);
+  const [publishPhase, setPublishPhase] = useState<string>('');
   const [speakingWords, setSpeakingWords] = useState<{ word: string; absIdx: number }[]>([]);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -390,12 +391,25 @@ export function AdminMaceAIView() {
           setMessages(prev => [...prev, { role: 'assistant', content: goMsg }]);
           
           speak(goMsg, async () => {
-            // Now actually publish
+            // Now actually publish — cycle through phases for UI feedback
             try {
               setStep('processing');
+              setPublishPhase('Researching...');
+              const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 4000);
+              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating image...'), 10000);
+              const phaseTimer3 = setTimeout(() => setPublishPhase('Adding keywords...'), 18000);
+              const phaseTimer4 = setTimeout(() => setPublishPhase('Publishing...'), 25000);
+
               const { data, error } = await supabase.functions.invoke('voice-publish', {
                 body: { action: 'confirm_publish', pendingArticle: currentPending },
               });
+
+              clearTimeout(phaseTimer1);
+              clearTimeout(phaseTimer2);
+              clearTimeout(phaseTimer3);
+              clearTimeout(phaseTimer4);
+              setPublishPhase('');
+
               if (error) throw new Error(error.message || 'Publish failed');
 
               const responseMessage = data?.message || "Something went wrong during publishing.";
@@ -412,6 +426,7 @@ export function AdminMaceAIView() {
 
               speak(responseMessage, done);
             } catch (err: any) {
+              setPublishPhase('');
               const errorMsg = err.message || 'Publishing failed';
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
               speak(errorMsg, done);
@@ -650,7 +665,7 @@ export function AdminMaceAIView() {
             : 'text-muted-foreground'
           }`}>
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
-            {step === 'processing' && (pendingArticle ? 'Publishing...' : 'Thinking...')}
+            {step === 'processing' && (publishPhase || (pendingArticle ? 'Publishing...' : 'Thinking...'))}
           </p>
         </div>
       </div>
