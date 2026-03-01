@@ -841,7 +841,7 @@ export function AdminAISettingsView() {
                 {/* Expanded details */}
                 {isExpanded && (
                   <CardContent className="pt-0 pb-6 border-t">
-                    <div className="pt-4 space-y-4">
+                    <div className="pt-4 space-y-2">
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground break-all">
                           Source: <a href={setting.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{setting.source_url}</a>
