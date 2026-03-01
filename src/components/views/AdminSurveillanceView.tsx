@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
 import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown } from 'lucide-react';
@@ -81,6 +81,7 @@ export function AdminSurveillanceView() {
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
+  const [countryMissiles, setCountryMissiles] = useState<Array<{ id: string; title: string; created_at: string; origin_country_name: string | null; destination_country_name: string | null; severity: string }>>([]);
 
   const fetchLatestScan = useCallback(async () => {
     const { data } = await supabase
@@ -167,6 +168,26 @@ export function AdminSurveillanceView() {
     fetchMissiles();
     fetchDrones();
   }, [fetchMissiles, fetchDrones]);
+
+  // Fetch missile alerts related to selected country
+  useEffect(() => {
+    if (!selectedCountry) {
+      setCountryMissiles([]);
+      return;
+    }
+    const fetchCountryMissiles = async () => {
+      const code = selectedCountry.code;
+      const { data } = await supabase
+        .from('missile_alerts')
+        .select('id, title, created_at, origin_country_name, destination_country_name, severity')
+        .eq('active', true)
+        .or(`origin_country_code.eq.${code},destination_country_code.eq.${code}`)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (data) setCountryMissiles(data);
+    };
+    fetchCountryMissiles();
+  }, [selectedCountry]);
 
   const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
   const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
@@ -342,6 +363,40 @@ export function AdminSurveillanceView() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                  {countryMissiles.length > 0 && (
+                    <div>
+                      <span className="text-xs text-gray-500 font-mono block mb-1">Detected Missiles & Drones</span>
+                      <ScrollArea className="max-h-40">
+                        <ul className="space-y-1.5">
+                          {countryMissiles.map((m) => {
+                            const date = new Date(m.created_at);
+                            const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                            const isMissile = m.severity !== 'drone';
+                            return (
+                              <li key={m.id} className="text-xs flex items-start gap-1.5 p-1.5 rounded bg-white/5 border border-white/5">
+                                {isMissile ? (
+                                  <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
+                                ) : (
+                                  <Shield className="w-3 h-3 text-blue-400 mt-0.5 flex-shrink-0" />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-gray-300 font-mono truncate">{m.title}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
+                                    {m.origin_country_name && m.destination_country_name && (
+                                      <span className="text-[10px] text-blue-400/70 font-mono">
+                                        {m.origin_country_name} → {m.destination_country_name}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </ScrollArea>
                     </div>
                   )}
                 </div>
