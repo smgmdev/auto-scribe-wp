@@ -579,7 +579,7 @@ export default function AIArticleGeneration() {
                   Generate and publish articles entirely by voice command. Just speak to Mace — tell it what to write about and where to publish. No typing, no clicking through menus. From topic to published article in under 30 seconds.
                 </p>
                 <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
-                  Mace AI listens, researches, writes a full SEO-optimized article, and publishes it directly to your chosen WordPress site — all from a single voice instruction.
+                  Mace AI listens, researches, writes a full SEO-optimized article, and publishes it directly to your chosen WP site that is listed in Local Media Library on Arcana Mace — all from a single voice instruction.
                 </p>
                 <Link to="/mace-ai" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
                   Learn more about Mace AI <ChevronRight className="w-4 h-4" />
