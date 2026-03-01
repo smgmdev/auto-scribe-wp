@@ -566,6 +566,64 @@ export default function AIArticleGeneration() {
         </div>
       </section>
 
+      {/* Mace AI Voice Command Section */}
+      <section className="py-16 md:py-20 bg-white border-b border-[#d2d2d7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <div className="border-t border-[#d2d2d7] pt-16 md:pt-20">
+            <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+              <div className="flex-1 max-w-[680px]">
+                <h2 className="text-3xl md:text-[40px] font-semibold text-[#1d1d1f] tracking-tight mb-4 leading-tight">
+                  Mace AI
+                </h2>
+                <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
+                  Generate and publish articles entirely by voice command. Just speak to Mace — tell it what to write about and where to publish. No typing, no clicking through menus. From topic to published article in under 30 seconds.
+                </p>
+                <p className="text-[17px] text-[#1d1d1f] leading-relaxed mb-6">
+                  Mace AI listens, researches, writes a full SEO-optimized article, and publishes it directly to your chosen WordPress site — all from a single voice instruction.
+                </p>
+                <Link to="/mace-ai" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
+                  Learn more about Mace AI <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Sidebar */}
+              <div className="md:w-[250px] flex-shrink-0">
+                <style>{`
+                  @keyframes aigen-mace-pulse {
+                    0% { transform: scale(0.85); }
+                    50% { transform: scale(1.15); }
+                    100% { transform: scale(0.85); }
+                  }
+                  @keyframes aigen-mace-color {
+                    0% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+                    33% { border-color: #32ADE6; box-shadow: 0 0 12px rgba(50, 173, 230, 0.4); }
+                    66% { border-color: #1a3a6e; box-shadow: 0 0 12px rgba(26, 58, 110, 0.4); }
+                    100% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+                  }
+                `}</style>
+                <div
+                  className="w-16 h-16 rounded-full bg-transparent mb-4"
+                  style={{
+                    border: '2px solid #f2a547',
+                    animation: 'aigen-mace-pulse 2.5s ease-in-out infinite, aigen-mace-color 4s linear infinite',
+                  }}
+                />
+                <h4 className="text-xl font-semibold text-[#1d1d1f] mb-2">Voice Publishing</h4>
+                <p className="text-[15px] text-[#1d1d1f] leading-relaxed mb-4">
+                  Publish articles with just your voice. No keyboard required.
+                </p>
+                <div className="space-y-3">
+                  <Link to="/mace-ai" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    Explore Mace AI
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Apple-style Feature Slider */}
       {sliderArticles.length > 0 && (
         <section className="py-6 bg-white border-b border-[#d2d2d7]">
