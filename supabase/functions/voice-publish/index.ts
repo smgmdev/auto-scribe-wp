@@ -145,18 +145,23 @@ IMPORTANT RULES:
 - When users ask questions about current events, news, facts, prices, weather, sports scores, or anything that needs real-time info, use the search_web tool.
 - After searching, summarize the results naturally in your own words. Don't just dump raw search results.`;
 
+    const convAbort = new AbortController();
+    const convTimeout = setTimeout(() => convAbort.abort(), 15000);
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
+      signal: convAbort.signal,
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-flash-lite',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages,
         ],
+        temperature: 0.7,
+        max_tokens: 300,
         tools: [
           {
             type: 'function',
@@ -187,11 +192,11 @@ IMPORTANT RULES:
             type: 'function',
             function: {
               name: 'search_web',
-              description: 'Search the internet for real-time information, current events, news, facts, prices, weather, sports scores, or any question that needs up-to-date data. Use this whenever the user asks about something that requires current or factual information.',
+              description: 'Search the internet for real-time information, current events, news, facts, prices, weather, sports scores, or any question that needs up-to-date data.',
               parameters: {
                 type: 'object',
                 properties: {
-                  query: { type: 'string', description: 'The search query to look up on the internet' },
+                  query: { type: 'string', description: 'The search query' },
                 },
                 required: ['query'],
                 additionalProperties: false,
@@ -200,7 +205,7 @@ IMPORTANT RULES:
           },
         ],
       }),
-    });
+    }).finally(() => clearTimeout(convTimeout));
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
