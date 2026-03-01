@@ -496,7 +496,7 @@ export function AdminMaceAIView() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Mace AI</h1>
           <p className="mt-2 text-muted-foreground">
-            Voice-powered article publishing — speak and I'll handle the rest
+            You speak and I'll handle the rest
           </p>
         </div>
         {messages.length > 0 && (
