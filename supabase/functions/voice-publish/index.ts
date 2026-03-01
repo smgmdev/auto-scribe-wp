@@ -71,9 +71,14 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { messages, action, pendingArticle } = body;
+    const { messages, action, pendingArticle, generatedContent } = body;
 
-    // ── Handle confirm_publish action ──
+    // ── Phase 2: Publish pre-generated content to WordPress ──
+    if (action === 'do_publish' && generatedContent) {
+      return await handleDoPublish(supabase, userId, generatedContent);
+    }
+
+    // ── Phase 1: Generate article content (no WP calls) ──
     if (action === 'confirm_publish' && pendingArticle) {
       return await handleConfirmPublish(supabase, userId, pendingArticle, LOVABLE_API_KEY);
     }
@@ -457,7 +462,7 @@ IMPORTANT RULES:
   }
 });
 
-// ── Confirm and publish to WordPress ──
+// ── Phase 1: Generate article content only (no WordPress calls) ──
 async function handleConfirmPublish(
   supabase: any,
   userId: string,
@@ -465,9 +470,8 @@ async function handleConfirmPublish(
   apiKey: string,
 ) {
   try {
-    console.log('[voice-publish] Confirming publish:', pa.topic, '→', pa.siteName);
+    console.log('[voice-publish] Phase 1 - Generating content:', pa.topic, '→', pa.siteName);
 
-    // ── Generate article + SEO in parallel ──
     const selectedTone = pa.tone || 'journalist';
     const toneGuidance: Record<string, string> = {
       neutral: 'Write in a balanced, objective tone.',
@@ -502,45 +506,35 @@ FORMAT YOUR RESPONSE EXACTLY:
 
 [Article content - ~700 words, flowing paragraphs]`;
 
-    console.log('[voice-publish] Generating article + SEO + image in parallel...');
-
-    const credentials = btoa(`${pa.siteUsername}:${pa.siteAppPassword}`);
-    const wpAuthHeader = `Basic ${credentials}`;
-    const baseUrl = pa.siteUrl.replace(/\/+$/, '');
-
-    // Run article, SEO, and image generation ALL in parallel
-    const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-lite',
-        messages: [
-          { role: 'system', content: articlePrompt },
-          { role: 'user', content: `Write the article about: ${pa.topic}` },
-        ],
-        temperature: 0.7,
-        max_tokens: 1500,
+    // Run article + SEO generation in parallel
+    const [articleResponse, seoResponse] = await Promise.all([
+      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [
+            { role: 'system', content: articlePrompt },
+            { role: 'user', content: `Write the article about: ${pa.topic}` },
+          ],
+          temperature: 0.7,
+          max_tokens: 1500,
+        }),
       }),
-    });
-
-    const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-lite',
-        messages: [
-          { role: 'system', content: 'You generate SEO metadata and tags for news articles. Always use the provided tool.' },
-          { role: 'user', content: `Generate SEO focus keyword, meta description, and 3-5 relevant tags for an article about: "${pa.topic}" targeting the site "${pa.siteName}". Tags should be short (1-3 words each), relevant to the topic, and good for SEO categorization.` },
-        ],
-        tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
-        tool_choice: { type: 'function', function: { name: 'generate_seo' } },
+      fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-lite',
+          messages: [
+            { role: 'system', content: 'You generate SEO metadata and tags for news articles. Always use the provided tool.' },
+            { role: 'user', content: `Generate SEO focus keyword, meta description, and 3-5 relevant tags for an article about: "${pa.topic}" targeting the site "${pa.siteName}". Tags should be short (1-3 words each), relevant to the topic, and good for SEO categorization.` },
+          ],
+          tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
+          tool_choice: { type: 'function', function: { name: 'generate_seo' } },
+        }),
       }),
-    });
-
-    const featuredMediaId = 0;
-
-    // Wait for article + SEO in parallel
-    const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
+    ]);
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
@@ -550,9 +544,7 @@ FORMAT YOUR RESPONSE EXACTLY:
     let articleData: any;
     try { articleData = JSON.parse(articleText); } catch { throw new Error('Article generation returned invalid response'); }
     const rawContent = articleData.choices?.[0]?.message?.content;
-    if (!rawContent) {
-      throw new Error('No article content generated');
-    }
+    if (!rawContent) throw new Error('No article content generated');
 
     const lines = rawContent.trim().split('\n');
     let articleTitle = lines[0].trim().replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
@@ -561,7 +553,6 @@ FORMAT YOUR RESPONSE EXACTLY:
     const articleBody = lines.slice(contentStartIndex).join('\n').trim();
     const paragraphs = articleBody.split(/\n\s*\n/).filter((p: string) => p.trim());
     const htmlContent = paragraphs.map((p: string) => p.trim().replace(/\n/g, ' ')).join('<br><br>');
-    const wordCount = articleBody.split(/\s+/).length;
 
     let focusKeyword = pa.topic;
     let metaDescription = '';
@@ -577,102 +568,149 @@ FORMAT YOUR RESPONSE EXACTLY:
       }
     } else { await seoResponse.text(); }
 
-    console.log('[voice-publish] Generated:', articleTitle, '- words:', wordCount, '- image:', featuredMediaId);
-    let lockId: string | null = null;
-    const creditsRequired = pa.creditsRequired || 0;
+    console.log('[voice-publish] Phase 1 complete:', articleTitle);
 
-    if (!pa.isAdmin && creditsRequired > 0) {
+    // Return generated content — NO WordPress calls here
+    return new Response(JSON.stringify({
+      type: 'content_ready',
+      message: 'Content generated, publishing now...',
+      generatedContent: {
+        title: articleTitle,
+        htmlContent,
+        focusKeyword,
+        metaDescription,
+        articleTags,
+        tone: selectedTone,
+        // Pass through site info for Phase 2
+        siteId: pa.siteId,
+        siteName: pa.siteName,
+        siteUrl: pa.siteUrl,
+        siteUsername: pa.siteUsername,
+        siteAppPassword: pa.siteAppPassword,
+        siteSeoPlugin: pa.siteSeoPlugin,
+        siteFavicon: pa.siteFavicon,
+        siteUserId: pa.siteUserId,
+        siteAgency: pa.siteAgency,
+        creditsRequired: pa.creditsRequired || 0,
+        isAdmin: pa.isAdmin,
+      },
+    }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('[voice-publish] Phase 1 error:', error);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ type: 'conversation', message: `Article generation failed: ${msg}. Please try again.` }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+// ── Phase 2: Publish generated content to WordPress ──
+async function handleDoPublish(
+  supabase: any,
+  userId: string,
+  gc: any,
+) {
+  try {
+    console.log('[voice-publish] Phase 2 - Publishing:', gc.title, '→', gc.siteName);
+
+    const credentials = btoa(`${gc.siteUsername}:${gc.siteAppPassword}`);
+    const wpAuthHeader = `Basic ${credentials}`;
+    const baseUrl = gc.siteUrl.replace(/\/+$/, '');
+
+    // Lock credits
+    let lockId: string | null = null;
+    const creditsRequired = gc.creditsRequired || 0;
+
+    if (!gc.isAdmin && creditsRequired > 0) {
       const { data: txData, error: txError } = await supabase
         .from('credit_transactions')
-        .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${pa.siteName} (pending)` })
+        .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${gc.siteName} (pending)` })
         .select('id')
         .single();
       if (txError) throw new Error('Failed to lock credits');
       lockId = txData.id;
     }
 
-    // ── Publish to WordPress ──
-    // ── Resolve categories from Mace settings ──
+    // Resolve categories from Mace settings
     let resolvedCategories: number[] = [];
     try {
-      const hasImage = featuredMediaId > 0;
       const { data: catRows } = await supabase
         .from('mace_site_categories')
         .select('category_id')
-        .eq('site_id', pa.siteId)
-        .eq('has_image', hasImage);
+        .eq('site_id', gc.siteId)
+        .eq('has_image', false);
       if (catRows && catRows.length > 0) {
         resolvedCategories = catRows.map((r: any) => r.category_id);
-        console.log('[voice-publish] Resolved categories (has_image=' + hasImage + '):', resolvedCategories);
       }
-    } catch (catErr) {
-      console.error('[voice-publish] Category lookup error (non-fatal):', catErr);
-    }
+    } catch (_) {}
 
-    // ── Create/find tags in WordPress ──
+    // Create/find tags in WordPress (with 10s timeout per tag)
     let wpTagIds: number[] = [];
+    const articleTags: string[] = gc.articleTags || [];
     if (articleTags.length > 0) {
-      console.log('[voice-publish] Creating/finding tags:', articleTags);
       const tagPromises = articleTags.map(async (tagName: string) => {
         try {
-          // Try to find existing tag first
           const searchResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags?search=${encodeURIComponent(tagName)}&per_page=5`, {
             headers: { 'Authorization': wpAuthHeader },
+            signal: AbortSignal.timeout(8000),
           });
           if (searchResp.ok) {
             const existingTags = await searchResp.json();
             const exactMatch = existingTags.find((t: any) => t.name.toLowerCase() === tagName.toLowerCase());
             if (exactMatch) return exactMatch.id;
           }
-          // Create new tag
           const createResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
             method: 'POST',
             headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: tagName }),
+            signal: AbortSignal.timeout(8000),
           });
           if (createResp.ok) {
             const newTag = await createResp.json();
             return newTag.id;
           }
-          // If 409 (term exists), parse the existing ID
           if (createResp.status === 400 || createResp.status === 409) {
             const errData = await createResp.json().catch(() => ({}));
             if (errData.data?.term_id) return errData.data.term_id;
           }
           return null;
         } catch (e) {
-          console.error('[voice-publish] Tag creation error for', tagName, e);
+          console.error('[voice-publish] Tag error for', tagName, '(skipping)');
           return null;
         }
       });
       const tagResults = await Promise.all(tagPromises);
       wpTagIds = tagResults.filter((id): id is number => id !== null);
-      console.log('[voice-publish] Resolved WP tag IDs:', wpTagIds);
     }
 
+    // Build WP post body
     const postBody: Record<string, unknown> = {
-      title: articleTitle,
-      content: htmlContent,
+      title: gc.title,
+      content: gc.htmlContent,
       status: 'publish',
       categories: resolvedCategories,
       tags: wpTagIds,
-      featured_media: featuredMediaId,
+      featured_media: 0,
     };
 
-    if (pa.siteSeoPlugin === 'aioseo') {
-      postBody.meta = { _aioseo_description: metaDescription, _aioseo_keywords: focusKeyword };
-      postBody.aioseo_meta_data = { description: metaDescription, keyphrases: { focus: { keyphrase: focusKeyword, score: 0, analysis: {} }, additional: [] } };
-    } else if (pa.siteSeoPlugin === 'rankmath') {
-      postBody.meta = { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription };
+    if (gc.siteSeoPlugin === 'aioseo') {
+      postBody.meta = { _aioseo_description: gc.metaDescription, _aioseo_keywords: gc.focusKeyword };
+      postBody.aioseo_meta_data = { description: gc.metaDescription, keyphrases: { focus: { keyphrase: gc.focusKeyword, score: 0, analysis: {} }, additional: [] } };
+    } else if (gc.siteSeoPlugin === 'rankmath') {
+      postBody.meta = { rank_math_focus_keyword: gc.focusKeyword, rank_math_description: gc.metaDescription };
     }
 
+    // Publish to WordPress
     const wpResponse = await publishWithRetry(`${baseUrl}/wp-json/wp/v2/posts`, wpAuthHeader, postBody);
     if (!wpResponse.ok) {
       const wpError = await wpResponse.json().catch(() => ({}));
       if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
       return new Response(JSON.stringify({
         type: 'conversation',
-        message: `I couldn't publish to ${pa.siteName}. WordPress returned an error: ${wpError.message || 'Unknown error'}. Would you like me to try again?`,
+        message: `I couldn't publish to ${gc.siteName}. WordPress error: ${wpError.message || 'Unknown error'}. Want me to try again?`,
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -682,96 +720,84 @@ FORMAT YOUR RESPONSE EXACTLY:
     const wpPostId = wpData.id;
     const wpLink = wpData.link;
 
-
-
     // RankMath meta update
-    if (pa.siteSeoPlugin === 'rankmath' && (focusKeyword || metaDescription)) {
+    if (gc.siteSeoPlugin === 'rankmath' && (gc.focusKeyword || gc.metaDescription)) {
       try {
         await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
           method: 'POST',
           headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meta: { rank_math_focus_keyword: focusKeyword, rank_math_description: metaDescription } }),
+          body: JSON.stringify({ meta: { rank_math_focus_keyword: gc.focusKeyword, rank_math_description: gc.metaDescription } }),
         }).then(r => r.text());
       } catch (_) {}
     }
 
-    // ── Confirm credits ──
+    // Confirm credits
     if (lockId) {
       let commissionPercentage: number | null = null;
-      if (pa.siteAgency) {
-        const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', pa.siteAgency).maybeSingle();
+      if (gc.siteAgency) {
+        const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', gc.siteAgency).maybeSingle();
         if (agencyData) commissionPercentage = agencyData.commission_percentage;
       }
       const metadataObj: Record<string, unknown> = {};
       if (wpLink) metadataObj.wp_link = wpLink;
-      if (pa.siteUrl) metadataObj.site_url = pa.siteUrl;
+      if (gc.siteUrl) metadataObj.site_url = gc.siteUrl;
       if (commissionPercentage !== null) metadataObj.commission_percentage = commissionPercentage;
 
       await supabase.from('credit_transactions').update({
         type: 'publish',
-        description: `Published article to ${pa.siteName} (voice)`,
+        description: `Published article to ${gc.siteName} (voice)`,
         ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
       }).eq('id', lockId);
 
-      if (pa.siteUserId && pa.siteUserId !== userId) {
+      if (gc.siteUserId && gc.siteUserId !== userId) {
         const commission = commissionPercentage ?? 10;
         const platformFee = Math.round(creditsRequired * (commission / 100));
         const ownerPayout = creditsRequired - platformFee;
         if (ownerPayout > 0) {
           await supabase.from('credit_transactions').insert({
-            user_id: pa.siteUserId, amount: ownerPayout, type: 'order_payout',
-            description: `Payout for voice-published article on ${pa.siteName}`,
-            metadata: { buyer_id: userId, site_name: pa.siteName, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
+            user_id: gc.siteUserId, amount: ownerPayout, type: 'order_payout',
+            description: `Payout for voice-published article on ${gc.siteName}`,
+            metadata: { buyer_id: userId, site_name: gc.siteName, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
           });
         }
       }
     }
 
-    // ── Save to DB + Telegram (fire-and-forget for speed) ──
-    const dbAndAlertPromise = Promise.all([
+    // Save to DB + Telegram
+    await Promise.all([
       supabase.from('articles').insert({
-        user_id: userId, title: articleTitle, content: htmlContent, tone: selectedTone,
-        status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
-        published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
-        focus_keyword: focusKeyword, meta_description: metaDescription,
+        user_id: userId, title: gc.title, content: gc.htmlContent, tone: gc.tone,
+        status: 'published', published_to: gc.siteId, published_to_name: gc.siteName,
+        published_to_favicon: gc.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
+        focus_keyword: gc.focusKeyword, meta_description: gc.metaDescription,
         tags: articleTags.length > 0 ? articleTags : null,
         tag_ids: wpTagIds.length > 0 ? wpTagIds : null,
         source_headline: { source: 'mace' },
       }),
-      sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, articleTitle, wpLink || '')).catch(() => {}),
-    ]).catch(err => console.error('[voice-publish] DB/alert error (non-fatal):', err));
+      sendTelegramAlert(TelegramAlerts.wpArticlePublished(gc.siteName, gc.title, wpLink || '')).catch(() => {}),
+    ]).catch(err => console.error('[voice-publish] DB/alert error:', err));
 
     const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
-    
-    // Return response immediately — don't await DB save
-    const responsePayload = {
+
+    return new Response(JSON.stringify({
       type: 'publish_success',
-      message: `It's done! "${articleTitle}" is now live on ${pa.siteName}.${creditsMsg}`,
-      title: articleTitle,
-      site: pa.siteName,
+      message: `It's done! "${gc.title}" is now live on ${gc.siteName}.${creditsMsg}`,
+      title: gc.title,
+      site: gc.siteName,
       link: wpLink,
       postId: wpPostId,
       creditsUsed: creditsRequired,
-      focusKeyword: focusKeyword,
-      metaDescription: metaDescription,
+      focusKeyword: gc.focusKeyword,
+      metaDescription: gc.metaDescription,
       tags: articleTags,
-    };
-
-    // Wait for DB save to complete before returning (edge function would terminate otherwise)
-    await dbAndAlertPromise;
-
-    return new Response(JSON.stringify(responsePayload), {
+    }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('[voice-publish] Confirm publish error:', error);
+    console.error('[voice-publish] Phase 2 error:', error);
     const msg = error instanceof Error ? error.message : 'Unknown error';
-    const isAbort = msg.includes('abort') || msg.includes('signal');
-    const userMsg = isAbort
-      ? 'The article generation took too long. Please try again — it usually works on the second attempt.'
-      : `Publishing failed: ${msg}. Please try again.`;
-    return new Response(JSON.stringify({ type: 'conversation', message: userMsg }), {
+    return new Response(JSON.stringify({ type: 'conversation', message: `Publishing failed: ${msg}. Please try again.` }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
