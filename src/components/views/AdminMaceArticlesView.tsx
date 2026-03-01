@@ -207,10 +207,9 @@ const AdminMaceArticlesView = () => {
       )}
 
       {loading ? (
-        <div className="space-y-0">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-muted/30 animate-pulse border-b border-border" />
-          ))}
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mb-3" />
+          <p className="text-sm text-muted-foreground">Loading articles...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
@@ -233,10 +232,10 @@ const AdminMaceArticlesView = () => {
                 <img
                   src={article.published_to_favicon}
                   alt=""
-                  className="w-16 h-full min-h-[72px] object-cover flex-shrink-0"
+                  className="w-16 h-16 object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-16 min-h-[72px] flex items-center justify-center bg-muted flex-shrink-0">
+                <div className="w-16 h-16 flex items-center justify-center bg-muted flex-shrink-0">
                   <Globe className="w-8 h-8 text-muted-foreground" />
                 </div>
               )}
