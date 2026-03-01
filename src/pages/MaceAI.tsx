@@ -491,11 +491,6 @@ export default function MaceAI() {
       {/* Capabilities Grid - Siri-style scenarios */}
       <section id="capabilities" className="bg-black py-20 md:py-32">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <AnimatedSection>
-            <h2 className="text-5xl md:text-7xl lg:text-[80px] font-semibold text-white tracking-tight leading-[1.05] mb-6">
-              Mace AI does<br />all this. And more.
-            </h2>
-          </AnimatedSection>
 
           <div className="mt-16 md:mt-24 space-y-20 md:space-y-28">
             {/* Capability 1 - Article Generation */}
