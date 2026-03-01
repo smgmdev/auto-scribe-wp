@@ -278,38 +278,21 @@ function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
   );
 }
 
-/** Creates a hexagon shape geometry */
-function createHexGeometry(radius: number): THREE.BufferGeometry {
-  const vertices: number[] = [0, 0, 0];
-  const indices: number[] = [];
-  for (let i = 0; i <= 6; i++) {
-    const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
-    vertices.push(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
-  }
-  for (let i = 1; i <= 6; i++) indices.push(0, i, i + 1);
+/** Creates crosshair line geometry */
+function createCrosshairGeo(size: number): THREE.BufferGeometry {
+  const s = size, g = size * 0.3;
+  const vertices = new Float32Array([
+    -s, 0, 0,  -g, 0, 0,
+    g, 0, 0,   s, 0, 0,
+    0, s, 0,   0, g, 0,
+    0, -g, 0,  0, -s, 0,
+    s * 0.7, s, 0,   s, s, 0,   s, s, 0,   s, s * 0.7, 0,
+    -s * 0.7, s, 0,  -s, s, 0,  -s, s, 0,  -s, s * 0.7, 0,
+    s * 0.7, -s, 0,  s, -s, 0,  s, -s, 0,  s, -s * 0.7, 0,
+    -s * 0.7, -s, 0, -s, -s, 0, -s, -s, 0, -s, -s * 0.7, 0,
+  ]);
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  geo.setIndex(indices);
-  return geo;
-}
-
-/** Creates a hexagon ring geometry */
-function createHexRingGeometry(innerR: number, outerR: number): THREE.BufferGeometry {
-  const vertices: number[] = [];
-  const indices: number[] = [];
-  for (let i = 0; i <= 6; i++) {
-    const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
-    const cos = Math.cos(angle), sin = Math.sin(angle);
-    vertices.push(cos * innerR, sin * innerR, 0);
-    vertices.push(cos * outerR, sin * outerR, 0);
-  }
-  for (let i = 0; i < 6; i++) {
-    const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
-    indices.push(a, b, c, b, d, c);
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  geo.setIndex(indices);
+  geo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
   return geo;
 }
 
@@ -325,77 +308,89 @@ function CountryMarker({
   const [hovered, setHovered] = useState(false);
   const coords = COUNTRY_COORDINATES[country.code];
   const baseSize =
-    country.threat_level === 'danger' ? 0.03
-    : country.threat_level === 'caution' ? 0.022
-    : 0.015;
-  const hexGeo = useMemo(() => createHexGeometry(baseSize), [baseSize]);
-  const hexRingGeo = useMemo(() => createHexRingGeometry(baseSize * 1.1, baseSize * 1.35), [baseSize]);
+    country.threat_level === 'danger' ? 0.04
+    : country.threat_level === 'caution' ? 0.03
+    : 0.02;
+  const crosshairGeo = useMemo(() => createCrosshairGeo(baseSize), [baseSize]);
 
   if (!coords) return null;
 
-  const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.015);
+  const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.012);
   const color = getThreatColor(country.threat_level);
+  const active = hovered || isSelected;
 
   return (
     <group position={position}>
-      {/* Vertical glowing beam */}
-      <mesh>
-        <cylinderGeometry args={[baseSize * 0.08, baseSize * 0.08, baseSize * 4, 6]} />
-        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.5 : 0.25} transparent />
-      </mesh>
+      <lineSegments geometry={crosshairGeo}>
+        <lineBasicMaterial color={color} opacity={active ? 0.9 : 0.5} transparent />
+      </lineSegments>
 
-      {/* 3D hex prism core */}
       <mesh
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
       >
-        <cylinderGeometry args={[baseSize, baseSize, baseSize * 0.6, 6]} />
-        <meshPhongMaterial color={color} emissive={color} emissiveIntensity={hovered || isSelected ? 0.8 : 0.4} opacity={0.85} transparent shininess={80} />
+        <circleGeometry args={[baseSize * 0.15, 16]} />
+        <meshBasicMaterial color={color} opacity={active ? 1 : 0.7} transparent side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Top cap glow */}
-      <mesh position={[0, baseSize * 0.3, 0]}>
-        <cylinderGeometry args={[baseSize * 0.7, baseSize, baseSize * 0.05, 6]} />
-        <meshBasicMaterial color="#ffffff" opacity={0.3} transparent />
-      </mesh>
-
-      {/* Floating hex ring */}
-      {country.threat_level !== 'safe' && (
-        <FloatingHexRing color={color} size={baseSize} speed={country.threat_level === 'danger' ? 2.5 : 1.5} />
-      )}
-
-      {/* Second ring for danger */}
-      {country.threat_level === 'danger' && (
-        <FloatingHexRing color={color} size={baseSize * 1.4} speed={1.8} offset={Math.PI} />
-      )}
-
-      {/* Point light for glow effect */}
-      <pointLight color={color} intensity={hovered || isSelected ? 0.4 : 0.15} distance={baseSize * 8} />
+      {active && <LockOnRing color={color} size={baseSize} />}
+      {country.threat_level === 'danger' && <SonarPing color={color} size={baseSize} />}
     </group>
   );
 }
 
-function FloatingHexRing({ color, size, speed, offset = 0 }: { color: string; size: number; speed: number; offset?: number }) {
-  const ref = useRef<THREE.Mesh>(null);
-
+function LockOnRing({ color, size }: { color: string; size: number }) {
+  const ref = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (ref.current) {
-      const t = clock.getElapsedTime() * speed + offset;
-      const bob = Math.sin(t) * size * 0.8;
-      ref.current.position.y = size * 1.5 + bob;
-      ref.current.rotation.y = t * 0.5;
-      const pulse = (Math.sin(t * 1.5) + 1) / 2;
-      const s = 1 + pulse * 0.3;
-      ref.current.scale.set(s, 1, s);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.35 - pulse * 0.2;
-    }
+    if (ref.current) ref.current.rotation.z = clock.getElapsedTime() * 1.5;
   });
 
+  const arcs = useMemo(() => {
+    const geos: THREE.BufferGeometry[] = [];
+    for (let q = 0; q < 4; q++) {
+      const verts: number[] = [];
+      const startA = (q / 4) * Math.PI * 2 + 0.15;
+      const endA = ((q + 1) / 4) * Math.PI * 2 - 0.15;
+      const steps = 12;
+      for (let i = 0; i < steps; i++) {
+        const a1 = startA + (i / steps) * (endA - startA);
+        const a2 = startA + ((i + 1) / steps) * (endA - startA);
+        const r = size * 0.7;
+        verts.push(Math.cos(a1) * r, Math.sin(a1) * r, 0, Math.cos(a2) * r, Math.sin(a2) * r, 0);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+      geos.push(geo);
+    }
+    return geos;
+  }, [size]);
+
+  return (
+    <group ref={ref}>
+      {arcs.map((geo, i) => (
+        <lineSegments key={i} geometry={geo}>
+          <lineBasicMaterial color={color} opacity={0.8} transparent />
+        </lineSegments>
+      ))}
+    </group>
+  );
+}
+
+function SonarPing({ color, size }: { color: string; size: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => {
+    if (ref.current) {
+      const t = (clock.getElapsedTime() * 1.5) % 2;
+      const scale = 1 + t * 1.5;
+      ref.current.scale.setScalar(scale);
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.25 - t * 0.12);
+    }
+  });
   return (
     <mesh ref={ref}>
-      <torusGeometry args={[size * 1.8, size * 0.08, 6, 6]} />
-      <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
+      <ringGeometry args={[size * 0.8, size * 0.85, 32]} />
+      <meshBasicMaterial color={color} opacity={0.25} transparent side={THREE.DoubleSide} />
     </mesh>
   );
 }
