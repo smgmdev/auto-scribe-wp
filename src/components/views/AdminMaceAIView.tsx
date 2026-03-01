@@ -93,12 +93,15 @@ export function AdminMaceAIView() {
     onPartialTranscript: (data) => {
       console.log('[Scribe] Partial:', data.text);
       if (!isMountedRef.current || !scribeActiveRef.current) return;
-      setInterimTranscript(data.text || '');
-      // Reset silence timer on any partial
-      if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
-      scribeSilenceTimerRef.current = setTimeout(() => {
-        finishScribeListening();
-      }, SCRIBE_SILENCE_MS);
+      const partialText = data.text || '';
+      setInterimTranscript(partialText);
+      // Only reset silence timer if there's actual speech content
+      if (partialText.trim()) {
+        if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
+        scribeSilenceTimerRef.current = setTimeout(() => {
+          finishScribeListening();
+        }, SCRIBE_SILENCE_MS);
+      }
     },
     onCommittedTranscript: (data) => {
       console.log('[Scribe] Committed:', data.text);
