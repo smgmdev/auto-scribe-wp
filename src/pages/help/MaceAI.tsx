@@ -92,7 +92,7 @@ const sections: HelpSection[] = [
           <li><strong>Natural conversation:</strong> Speak naturally — no need for rigid commands</li>
           <li><strong>Hands-free workflow:</strong> Perfect for multitasking or when you're on the go</li>
           <li><strong>Real-time feedback:</strong> Mace speaks back with confirmations and progress updates</li>
-          <li><strong>Direct WordPress publishing:</strong> Articles go live on your site instantly</li>
+          <li><strong>Direct media publishing:</strong> Articles go live instantly</li>
         </ul>
       </div>
     ),
