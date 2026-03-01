@@ -582,7 +582,7 @@ export default function AIArticleGeneration() {
                   Mace AI listens, researches, writes a full SEO-optimized article, and publishes it directly to your chosen WP site that is listed in Local Media Library on Arcana Mace — all from a single voice instruction.
                 </p>
                 <Link to="/mace-ai" className="text-[17px] text-[#06c] hover:underline inline-flex items-center gap-1">
-                  Learn more about Mace AI <ChevronRight className="w-4 h-4" />
+                  Explore Mace AI <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
 
@@ -613,10 +613,6 @@ export default function AIArticleGeneration() {
                   Publish articles with just your voice. No keyboard required.
                 </p>
                 <div className="space-y-3">
-                  <Link to="/mace-ai" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Explore Mace AI
-                  </Link>
                   <Link to="/help/mace-ai" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                     <HelpCircle className="w-4 h-4" />
                     How to Use Mace AI
