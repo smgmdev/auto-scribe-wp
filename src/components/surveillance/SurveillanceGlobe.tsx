@@ -29,6 +29,7 @@ interface SurveillanceGlobeProps {
   onCountryClick: (country: CountryData) => void;
   selectedCountry: string | null;
   missileTrajectories?: MissileTrajectory[];
+  droneTrajectories?: MissileTrajectory[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
 }
@@ -435,12 +436,60 @@ function MissileArc({ originCode, destCode }: { originCode: string; destCode: st
         <meshBasicMaterial color="#3b82f6" transparent opacity={0.7} />
       </mesh>
       <mesh ref={missileRef}>
-        <coneGeometry args={[0.06, 0.15, 8]} />
+        <coneGeometry args={[0.025, 0.07, 6]} />
         <meshBasicMaterial color="#60a5fa" />
       </mesh>
       <pointLight ref={(light) => {
         if (light && missileRef.current) light.position.copy(missileRef.current.position);
       }} color="#3b82f6" intensity={0.4} distance={0.5} />
+    </group>
+  );
+}
+
+function DroneArc({ originCode, destCode }: { originCode: string; destCode: string }) {
+  const droneRef = useRef<THREE.Mesh>(null);
+
+  const { curve, tubeGeo } = useMemo(() => {
+    const oCoords = COUNTRY_COORDINATES[originCode];
+    const dCoords = COUNTRY_COORDINATES[destCode];
+    if (!oCoords || !dCoords) return { curve: null, tubeGeo: null };
+
+    const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
+    const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.6);
+
+    const c = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const tube = new THREE.TubeGeometry(c, 80, 0.004, 8, false);
+    return { curve: c, tubeGeo: tube };
+  }, [originCode, destCode]);
+
+  useFrame(({ clock }) => {
+    if (droneRef.current && curve) {
+      const t = (clock.getElapsedTime() * 0.18) % 1;
+      const pos = curve.getPoint(t);
+      droneRef.current.position.copy(pos);
+      const next = curve.getPoint(Math.min(t + 0.02, 1));
+      const dir = new THREE.Vector3().subVectors(next, pos).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      droneRef.current.quaternion.copy(quat);
+    }
+  });
+
+  if (!tubeGeo || !curve) return null;
+
+  return (
+    <group>
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color="#1e3a5f" transparent opacity={0.7} />
+      </mesh>
+      <mesh ref={droneRef}>
+        <coneGeometry args={[0.02, 0.06, 6]} />
+        <meshBasicMaterial color="#2563eb" />
+      </mesh>
+      <pointLight ref={(light) => {
+        if (light && droneRef.current) light.position.copy(droneRef.current.position);
+      }} color="#1e3a5f" intensity={0.3} distance={0.4} />
     </group>
   );
 }
@@ -456,6 +505,7 @@ function RotatingGlobe({
   onCountryClick,
   selectedCountry,
   missileTrajectories = [],
+  droneTrajectories = [],
   isSpinning = false,
   onSpinChange,
 }: SurveillanceGlobeProps) {
@@ -553,6 +603,12 @@ function RotatingGlobe({
             <MissileArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
           ) : null
         )}
+
+        {droneTrajectories.map((t) =>
+          t.origin_country_code && t.destination_country_code ? (
+            <DroneArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
+          ) : null
+        )}
       </group>
 
       <OrbitControls
@@ -575,6 +631,7 @@ export function SurveillanceGlobe({
   onCountryClick,
   selectedCountry,
   missileTrajectories = [],
+  droneTrajectories = [],
   isSpinning = false,
   onSpinChange,
 }: SurveillanceGlobeProps) {
@@ -590,6 +647,7 @@ export function SurveillanceGlobe({
           onCountryClick={onCountryClick}
           selectedCountry={selectedCountry}
           missileTrajectories={missileTrajectories}
+          droneTrajectories={droneTrajectories}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
         />

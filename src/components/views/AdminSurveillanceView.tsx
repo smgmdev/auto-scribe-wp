@@ -290,6 +290,7 @@ export function AdminSurveillanceView() {
                 onCountryClick={(c) => setSelectedCountry(c)}
                 selectedCountry={selectedCountry?.code || null}
                 missileTrajectories={missileTrajectories}
+                droneTrajectories={droneTrajectories}
                 isSpinning={globeSpinning}
                 onSpinChange={setGlobeSpinning}
               />
