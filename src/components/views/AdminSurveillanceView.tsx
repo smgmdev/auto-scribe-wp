@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,8 +78,10 @@ export function AdminSurveillanceView() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [missileTimeFilter, setMissileTimeFilter] = useState<string>('1');
   const [droneTimeFilter, setDroneTimeFilter] = useState<string>('1');
+  const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('1');
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const [countryMissiles, setCountryMissiles] = useState<Array<{ id: string; title: string; created_at: string; origin_country_name: string | null; destination_country_name: string | null; severity: string }>>([]);
 
@@ -164,10 +166,25 @@ export function AdminSurveillanceView() {
     if (data) setDroneTrajectories(data);
   }, [droneTimeFilter]);
 
+  const fetchNukes = useCallback(async () => {
+    const hours = parseFloat(nukeTimeFilter);
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('missile_alerts')
+      .select('id, origin_country_code, destination_country_code')
+      .eq('active', true)
+      .eq('severity', 'nuke')
+      .gte('created_at', cutoff)
+      .not('origin_country_code', 'is', null)
+      .not('destination_country_code', 'is', null);
+    if (data) setNukeTrajectories(data);
+  }, [nukeTimeFilter]);
+
   useEffect(() => {
     fetchMissiles();
     fetchDrones();
-  }, [fetchMissiles, fetchDrones]);
+    fetchNukes();
+  }, [fetchMissiles, fetchDrones, fetchNukes]);
 
   // Fetch missile alerts related to selected country
   useEffect(() => {
@@ -245,6 +262,24 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] font-mono text-gray-600">({droneTrajectories.length})</span>
             </div>
+
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
+              <Radiation className="w-3 h-3 text-yellow-400" />
+              <span className="text-[10px] font-mono text-gray-400">Nukes</span>
+              <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[10px] font-mono text-gray-600">({nukeTrajectories.length})</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -279,6 +314,7 @@ export function AdminSurveillanceView() {
                 selectedCountry={selectedCountry?.code || null}
                 missileTrajectories={missileTrajectories}
                 droneTrajectories={droneTrajectories}
+                nukeTrajectories={nukeTrajectories}
                 isSpinning={globeSpinning}
                 onSpinChange={setGlobeSpinning}
               />
