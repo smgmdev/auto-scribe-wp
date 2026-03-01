@@ -199,19 +199,6 @@ export default function MaceAI() {
           </div>
         </div>
 
-        <div className="bg-[#1d1d1f] py-3">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-            <span className="text-sm text-white/90">
-              AI-powered tools built into Arcana Mace.{' '}
-              <button 
-                onClick={() => navigate('/ai-article-generation')}
-                className="text-[#2997ff] hover:underline"
-              >
-                Learn more ›
-              </button>
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Hero Section */}
