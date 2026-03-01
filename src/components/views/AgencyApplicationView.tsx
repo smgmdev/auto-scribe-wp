@@ -390,7 +390,7 @@ export function AgencyApplicationView() {
               <Button
                 variant="outline"
                 className="rounded-sm bg-accent border border-accent text-white hover:bg-transparent hover:text-accent"
-                onClick={() => window.open('/help', '_self')}
+                onClick={() => window.open('/help/agency-account-downgraded', '_self')}
               >
                 Visit Help Center
               </Button>
