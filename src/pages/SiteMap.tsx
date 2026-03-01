@@ -25,6 +25,7 @@ const SITEMAP_SECTIONS = [
       { label: 'Self Publishing', href: '/self-publishing' },
       { label: 'Media Buying', href: '/media-buying' },
       { label: 'AI Article Generation', href: '/ai-article-generation' },
+      { label: 'Mace AI', href: '/mace-ai' },
     ],
   },
   {
