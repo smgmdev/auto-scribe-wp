@@ -521,10 +521,10 @@ FORMAT YOUR RESPONSE EXACTLY:
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
-          { role: 'system', content: 'You generate SEO metadata for news articles. Always use the provided tool.' },
-          { role: 'user', content: `Generate SEO focus keyword and meta description for an article about: "${pa.topic}" targeting the site "${pa.siteName}"` },
+          { role: 'system', content: 'You generate SEO metadata and tags for news articles. Always use the provided tool.' },
+          { role: 'user', content: `Generate SEO focus keyword, meta description, and 3-5 relevant tags for an article about: "${pa.topic}" targeting the site "${pa.siteName}". Tags should be short (1-3 words each), relevant to the topic, and good for SEO categorization.` },
         ],
-        tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' } }, required: ['focus_keyword', 'meta_description'], additionalProperties: false } } }],
+        tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
         tool_choice: { type: 'function', function: { name: 'generate_seo' } },
       }),
     });
@@ -612,6 +612,7 @@ FORMAT YOUR RESPONSE EXACTLY:
 
     let focusKeyword = pa.topic;
     let metaDescription = '';
+    let articleTags: string[] = [];
     if (seoResponse.ok) {
       const seoData = await seoResponse.json();
       const seoToolCall = seoData.choices?.[0]?.message?.tool_calls?.[0];
@@ -619,6 +620,7 @@ FORMAT YOUR RESPONSE EXACTLY:
         const seo = JSON.parse(seoToolCall.function.arguments);
         focusKeyword = seo.focus_keyword || focusKeyword;
         metaDescription = seo.meta_description || '';
+        articleTags = Array.isArray(seo.tags) ? seo.tags.slice(0, 5) : [];
       }
     } else { await seoResponse.text(); }
 
@@ -654,12 +656,53 @@ FORMAT YOUR RESPONSE EXACTLY:
       console.error('[voice-publish] Category lookup error (non-fatal):', catErr);
     }
 
+    // ── Create/find tags in WordPress ──
+    let wpTagIds: number[] = [];
+    if (articleTags.length > 0) {
+      console.log('[voice-publish] Creating/finding tags:', articleTags);
+      const tagPromises = articleTags.map(async (tagName: string) => {
+        try {
+          // Try to find existing tag first
+          const searchResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags?search=${encodeURIComponent(tagName)}&per_page=5`, {
+            headers: { 'Authorization': wpAuthHeader },
+          });
+          if (searchResp.ok) {
+            const existingTags = await searchResp.json();
+            const exactMatch = existingTags.find((t: any) => t.name.toLowerCase() === tagName.toLowerCase());
+            if (exactMatch) return exactMatch.id;
+          }
+          // Create new tag
+          const createResp = await fetch(`${baseUrl}/wp-json/wp/v2/tags`, {
+            method: 'POST',
+            headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: tagName }),
+          });
+          if (createResp.ok) {
+            const newTag = await createResp.json();
+            return newTag.id;
+          }
+          // If 409 (term exists), parse the existing ID
+          if (createResp.status === 400 || createResp.status === 409) {
+            const errData = await createResp.json().catch(() => ({}));
+            if (errData.data?.term_id) return errData.data.term_id;
+          }
+          return null;
+        } catch (e) {
+          console.error('[voice-publish] Tag creation error for', tagName, e);
+          return null;
+        }
+      });
+      const tagResults = await Promise.all(tagPromises);
+      wpTagIds = tagResults.filter((id): id is number => id !== null);
+      console.log('[voice-publish] Resolved WP tag IDs:', wpTagIds);
+    }
+
     const postBody: Record<string, unknown> = {
       title: articleTitle,
       content: htmlContent,
       status: 'publish',
       categories: resolvedCategories,
-      tags: [],
+      tags: wpTagIds,
       featured_media: featuredMediaId,
     };
 
@@ -736,6 +779,8 @@ FORMAT YOUR RESPONSE EXACTLY:
         status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
         published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
         focus_keyword: focusKeyword, meta_description: metaDescription,
+        tags: articleTags.length > 0 ? articleTags : null,
+        tag_ids: wpTagIds.length > 0 ? wpTagIds : null,
         source_headline: { source: 'mace' },
       }),
       sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, articleTitle, wpLink || '')).catch(() => {}),
@@ -754,6 +799,7 @@ FORMAT YOUR RESPONSE EXACTLY:
       creditsUsed: creditsRequired,
       focusKeyword: focusKeyword,
       metaDescription: metaDescription,
+      tags: articleTags,
     };
 
     // Wait for DB save to complete before returning (edge function would terminate otherwise)

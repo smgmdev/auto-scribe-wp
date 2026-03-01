@@ -394,11 +394,12 @@ export function AdminMaceAIView() {
             // Now actually publish — cycle through phases for UI feedback
             try {
               setStep('processing');
-              setPublishPhase('Researching...');
+              setPublishPhase('Researching topic...');
               const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 4000);
-              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating image...'), 10000);
-              const phaseTimer3 = setTimeout(() => setPublishPhase('Adding keywords...'), 18000);
-              const phaseTimer4 = setTimeout(() => setPublishPhase('Publishing...'), 25000);
+              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 10000);
+              const phaseTimer3 = setTimeout(() => setPublishPhase('Generating featured image...'), 15000);
+              const phaseTimer4 = setTimeout(() => setPublishPhase('Creating tags...'), 22000);
+              const phaseTimer5 = setTimeout(() => setPublishPhase('Publishing to WordPress...'), 28000);
 
               const { data, error } = await supabase.functions.invoke('voice-publish', {
                 body: { action: 'confirm_publish', pendingArticle: currentPending },
@@ -408,6 +409,7 @@ export function AdminMaceAIView() {
               clearTimeout(phaseTimer2);
               clearTimeout(phaseTimer3);
               clearTimeout(phaseTimer4);
+              clearTimeout(phaseTimer5);
               setPublishPhase('');
 
               if (error) throw new Error(error.message || 'Publish failed');
