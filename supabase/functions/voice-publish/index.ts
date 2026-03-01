@@ -424,6 +424,8 @@ IMPORTANT RULES:
       const selectedTone = parsed.tone || 'journalist';
       const confirmMessage = `Understood, you want me to publish an article about "${parsed.topic}" on ${matchedSite.name}. Should I go ahead?`;
 
+      // SECURITY: Only send non-sensitive data to the client.
+      // Credentials, admin status, and credit amounts are re-verified server-side in Phase 2.
       return new Response(JSON.stringify({
         type: 'pending_publish',
         message: confirmMessage,
@@ -432,16 +434,6 @@ IMPORTANT RULES:
           tone: selectedTone,
           siteId: matchedSite.id,
           siteName: matchedSite.name,
-          siteUrl: matchedSite.url,
-          siteUsername: matchedSite.username,
-          siteAppPassword: matchedSite.app_password,
-          siteSeoPlugin: matchedSite.seo_plugin,
-          siteFavicon: matchedSite.favicon || null,
-          siteUserId: matchedSite.user_id,
-          siteAgency: matchedSite.agency,
-          creditsRequired,
-          isAdmin,
-          
         },
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -539,7 +531,8 @@ FORMAT YOUR RESPONSE EXACTLY:
 
     console.log('[voice-publish] Phase 1 complete:', articleTitle);
 
-    // Return generated content — NO WordPress calls here
+    // SECURITY: Only send non-sensitive data to client.
+    // Phase 2 will re-fetch credentials and verify credits server-side.
     return new Response(JSON.stringify({
       type: 'content_ready',
       message: 'Content generated, publishing now...',
@@ -549,15 +542,6 @@ FORMAT YOUR RESPONSE EXACTLY:
         tone: selectedTone,
         siteId: pa.siteId,
         siteName: pa.siteName,
-        siteUrl: pa.siteUrl,
-        siteUsername: pa.siteUsername,
-        siteAppPassword: pa.siteAppPassword,
-        siteSeoPlugin: pa.siteSeoPlugin,
-        siteFavicon: pa.siteFavicon,
-        siteUserId: pa.siteUserId,
-        siteAgency: pa.siteAgency,
-        creditsRequired: pa.creditsRequired || 0,
-        isAdmin: pa.isAdmin,
       },
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -579,20 +563,109 @@ async function handleDoPublish(
   gc: any,
 ) {
   try {
-    console.log('[voice-publish] Phase 2 - Publishing:', gc.title, '→', gc.siteName);
+    // SECURITY: Only trust siteId, title, htmlContent, tone from the client.
+    // Re-fetch ALL sensitive data (credentials, credits, admin status) server-side.
+    const siteId = gc.siteId;
+    const articleTitle = gc.title;
+    const htmlContent = gc.htmlContent;
+    const tone = gc.tone || 'journalist';
 
-    const credentials = btoa(`${gc.siteUsername}:${gc.siteAppPassword}`);
+    if (!siteId || !articleTitle || !htmlContent) {
+      return new Response(JSON.stringify({ type: 'conversation', message: 'Missing required article data. Please try again.' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Re-fetch site from DB (server-side, not from client payload)
+    const { data: site, error: siteError } = await supabase
+      .from('wordpress_sites')
+      .select('id, name, url, username, app_password, seo_plugin, user_id, agency, favicon, connected')
+      .eq('id', siteId)
+      .single();
+
+    if (siteError || !site || !site.connected) {
+      return new Response(JSON.stringify({ type: 'conversation', message: 'That site is no longer available. Please try a different one.' }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('[voice-publish] Phase 2 - Publishing:', articleTitle, '→', site.name);
+
+    // Re-check admin status server-side
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle();
+    const isAdmin = !!roleData;
+
+    // Re-calculate credits server-side
+    let creditsRequired = 0;
+    const isOwner = site.user_id === userId;
+
+    if (!isAdmin && !isOwner) {
+      const { data: siteCreditData } = await supabase
+        .from('site_credits')
+        .select('credits_required')
+        .eq('site_id', site.id)
+        .maybeSingle();
+      creditsRequired = siteCreditData?.credits_required ?? 0;
+
+      if (creditsRequired > 0) {
+        // Verify user has enough credits
+        const { data: transactions } = await supabase
+          .from('credit_transactions')
+          .select('amount, type')
+          .eq('user_id', userId);
+        const txs = transactions || [];
+        const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
+        const incomingCredits = txs.filter((t: any) => t.amount > 0 && !WITHDRAWAL_TYPES.includes(t.type) && t.type !== 'unlocked').reduce((sum: number, t: any) => sum + t.amount, 0);
+        const outgoingCredits = txs.filter((t: any) => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !WITHDRAWAL_TYPES.includes(t.type)).reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0);
+        const totalBalance = incomingCredits - outgoingCredits;
+        let lockedWithdrawalCents = 0;
+        for (const tx of txs) {
+          if (tx.type === 'withdrawal_locked') lockedWithdrawalCents += Math.abs(tx.amount);
+          else if (tx.type === 'withdrawal_unlocked') lockedWithdrawalCents -= Math.abs(tx.amount);
+          else if (tx.type === 'withdrawal_completed') lockedWithdrawalCents -= Math.abs(tx.amount);
+        }
+        const { data: activeOrders } = await supabase
+          .from('orders')
+          .select('id, media_sites(price)')
+          .eq('user_id', userId)
+          .neq('status', 'cancelled')
+          .neq('status', 'completed')
+          .neq('delivery_status', 'accepted');
+        let creditsInOrders = 0;
+        if (activeOrders) {
+          for (const order of activeOrders) {
+            const ms = order.media_sites as { price: number } | null;
+            if (ms?.price) creditsInOrders += ms.price;
+          }
+        }
+        const availableCredits = totalBalance - creditsInOrders - Math.max(0, lockedWithdrawalCents);
+        if (availableCredits < creditsRequired) {
+          return new Response(JSON.stringify({
+            type: 'conversation',
+            message: `You don't have enough credits. You need ${creditsRequired} but only have ${availableCredits} available.`,
+          }), {
+            status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+
+    const credentials = btoa(`${site.username}:${site.app_password}`);
     const wpAuthHeader = `Basic ${credentials}`;
-    const baseUrl = gc.siteUrl.replace(/\/+$/, '');
+    const baseUrl = site.url.replace(/\/+$/, '');
 
     // Lock credits
     let lockId: string | null = null;
-    const creditsRequired = gc.creditsRequired || 0;
 
-    if (!gc.isAdmin && creditsRequired > 0) {
+    if (!isAdmin && creditsRequired > 0) {
       const { data: txData, error: txError } = await supabase
         .from('credit_transactions')
-        .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${gc.siteName} (pending)` })
+        .insert({ user_id: userId, amount: -creditsRequired, type: 'publish_locked', description: `Credits locked for voice publish to ${site.name} (pending)` })
         .select('id')
         .single();
       if (txError) throw new Error('Failed to lock credits');
@@ -605,17 +678,17 @@ async function handleDoPublish(
       const { data: catRows } = await supabase
         .from('mace_site_categories')
         .select('category_id')
-        .eq('site_id', gc.siteId)
+        .eq('site_id', site.id)
         .eq('has_image', false);
       if (catRows && catRows.length > 0) {
         resolvedCategories = catRows.map((r: any) => r.category_id);
       }
     } catch (_) {}
 
-    // Build WP post body (no tags, no SEO meta)
+    // Build WP post body
     const postBody: Record<string, unknown> = {
-      title: gc.title,
-      content: gc.htmlContent,
+      title: articleTitle,
+      content: htmlContent,
       status: 'publish',
       categories: resolvedCategories,
       featured_media: 0,
@@ -628,7 +701,7 @@ async function handleDoPublish(
       if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
       return new Response(JSON.stringify({
         type: 'conversation',
-        message: `I couldn't publish to ${gc.siteName}. WordPress error: ${wpError.message || 'Unknown error'}. Want me to try again?`,
+        message: `I couldn't publish to ${site.name}. WordPress error: ${wpError.message || 'Unknown error'}. Want me to try again?`,
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -641,30 +714,30 @@ async function handleDoPublish(
     // Confirm credits
     if (lockId) {
       let commissionPercentage: number | null = null;
-      if (gc.siteAgency) {
-        const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', gc.siteAgency).maybeSingle();
+      if (site.agency) {
+        const { data: agencyData } = await supabase.from('agency_payouts').select('commission_percentage').eq('agency_name', site.agency).maybeSingle();
         if (agencyData) commissionPercentage = agencyData.commission_percentage;
       }
       const metadataObj: Record<string, unknown> = {};
       if (wpLink) metadataObj.wp_link = wpLink;
-      if (gc.siteUrl) metadataObj.site_url = gc.siteUrl;
+      if (site.url) metadataObj.site_url = site.url;
       if (commissionPercentage !== null) metadataObj.commission_percentage = commissionPercentage;
 
       await supabase.from('credit_transactions').update({
         type: 'publish',
-        description: `Published via Mace AI to ${gc.siteName}`,
+        description: `Published via Mace AI to ${site.name}`,
         ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
       }).eq('id', lockId);
 
-      if (gc.siteUserId && gc.siteUserId !== userId) {
+      if (site.user_id && site.user_id !== userId) {
         const commission = commissionPercentage ?? 10;
         const platformFee = Math.round(creditsRequired * (commission / 100));
         const ownerPayout = creditsRequired - platformFee;
         if (ownerPayout > 0) {
           await supabase.from('credit_transactions').insert({
-            user_id: gc.siteUserId, amount: ownerPayout, type: 'order_payout',
-            description: `Payout for voice-published article on ${gc.siteName}`,
-            metadata: { buyer_id: userId, site_name: gc.siteName, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
+            user_id: site.user_id, amount: ownerPayout, type: 'order_payout',
+            description: `Payout for voice-published article on ${site.name}`,
+            metadata: { buyer_id: userId, site_name: site.name, gross_amount: creditsRequired, commission_percentage: commission, platform_fee: platformFee, wp_link: wpLink || null },
           });
         }
       }
@@ -673,21 +746,21 @@ async function handleDoPublish(
     // Save to DB + Telegram
     await Promise.all([
       supabase.from('articles').insert({
-        user_id: userId, title: gc.title, content: gc.htmlContent, tone: gc.tone,
-        status: 'published', published_to: gc.siteId, published_to_name: gc.siteName,
-        published_to_favicon: gc.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
+        user_id: userId, title: articleTitle, content: htmlContent, tone,
+        status: 'published', published_to: site.id, published_to_name: site.name,
+        published_to_favicon: site.favicon || null, wp_post_id: wpPostId, wp_link: wpLink,
         source_headline: { source: 'mace' },
       }),
-      sendTelegramAlert(TelegramAlerts.wpArticlePublished(gc.siteName, gc.title, wpLink || '')).catch(() => {}),
+      sendTelegramAlert(TelegramAlerts.wpArticlePublished(site.name, articleTitle, wpLink || '')).catch(() => {}),
     ]).catch(err => console.error('[voice-publish] DB/alert error:', err));
 
     const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
 
     return new Response(JSON.stringify({
       type: 'publish_success',
-      message: `It's done! "${gc.title}" is now live on ${gc.siteName}.${creditsMsg}`,
-      title: gc.title,
-      site: gc.siteName,
+      message: `It's done! "${articleTitle}" is now live on ${site.name}.${creditsMsg}`,
+      title: articleTitle,
+      site: site.name,
       link: wpLink,
       postId: wpPostId,
       creditsUsed: creditsRequired,
