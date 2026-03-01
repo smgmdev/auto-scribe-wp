@@ -137,7 +137,7 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       submenu: [
         { id: 'admin-mace-ai', label: 'GO', icon: Play },
         { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText },
-        { id: 'admin-mace-settings', label: 'Mace Settings', icon: Cog }
+        { id: 'admin-mace-settings', label: 'Mace Settings (Dev)', icon: Cog }
       ]
     }];
   }
