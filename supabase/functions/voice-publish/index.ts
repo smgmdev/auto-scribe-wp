@@ -517,7 +517,7 @@ FORMAT YOUR RESPONSE EXACTLY:
 
     // Run article, SEO, and image generation ALL in parallel
     const articleAbort = new AbortController();
-    const articleTimeout = setTimeout(() => articleAbort.abort(), 30000);
+    const articleTimeout = setTimeout(() => articleAbort.abort(), 60000);
     const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -534,7 +534,7 @@ FORMAT YOUR RESPONSE EXACTLY:
     }).finally(() => clearTimeout(articleTimeout));
 
     const seoAbort = new AbortController();
-    const seoTimeout = setTimeout(() => seoAbort.abort(), 20000);
+    const seoTimeout = setTimeout(() => seoAbort.abort(), 45000);
     const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -812,7 +812,11 @@ FORMAT YOUR RESPONSE EXACTLY:
   } catch (error) {
     console.error('[voice-publish] Confirm publish error:', error);
     const msg = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ type: 'conversation', message: `Publishing failed: ${msg}. Please try again.` }), {
+    const isAbort = msg.includes('abort') || msg.includes('signal');
+    const userMsg = isAbort
+      ? 'The article generation took too long. Please try again — it usually works on the second attempt.'
+      : `Publishing failed: ${msg}. Please try again.`;
+    return new Response(JSON.stringify({ type: 'conversation', message: userMsg }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
