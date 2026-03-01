@@ -517,16 +517,7 @@ export function AdminMaceAIView() {
         <div className="flex flex-col items-center gap-3 pointer-events-auto max-w-lg px-6">
           {/* Speaking words - hidden, audio plays without text */}
 
-          {/* Last message - only when idle (not speaking/listening), single line */}
-          {step === 'idle' && messages.length > 0 && speakingWords.length === 0 && (
-            <p className={`text-sm text-center truncate max-w-full ${
-              messages[messages.length - 1].role === 'user' 
-                ? 'text-foreground' 
-                : 'text-muted-foreground'
-            }`}>
-              {messages[messages.length - 1].content}
-            </p>
-          )}
+          {/* Last message removed — clean UI */}
 
 
           {/* Listening transcript hidden — clean UI during recording */}
