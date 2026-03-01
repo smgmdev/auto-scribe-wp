@@ -166,20 +166,6 @@ export function AdminSurveillanceView() {
   useEffect(() => {
     fetchMissiles();
     fetchDrones();
-    const channel = supabase
-      .channel('missile-alerts-globe')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'missile_alerts' }, (payload) => {
-        const a = payload.new as any;
-        if (a.origin_country_code && a.destination_country_code) {
-          if (a.severity === 'drone') {
-            setDroneTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
-          } else {
-            setMissileTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
-          }
-        }
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
   }, [fetchMissiles, fetchDrones]);
 
   const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
@@ -190,7 +176,7 @@ export function AdminSurveillanceView() {
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 lg:px-6 py-1 border-b border-white/5 bg-[#0d1220]">
+        <div className="flex items-center justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#0d1220]">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className={cn(
