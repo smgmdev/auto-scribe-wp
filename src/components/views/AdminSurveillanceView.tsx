@@ -232,7 +232,7 @@ export function AdminSurveillanceView() {
             )}
 
             {/* Legend + missile filter */}
-            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+            <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
                 <Rocket className="w-3 h-3 text-blue-400" />
                 <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
