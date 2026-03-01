@@ -222,7 +222,7 @@ const AdminMaceArticlesView = () => {
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+        <div className="divide-y divide-border border border-border border-t-0 rounded-lg rounded-t-none overflow-hidden">
           {filtered.map((article) => (
             <div
               key={article.id}
