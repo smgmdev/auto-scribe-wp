@@ -530,7 +530,26 @@ export default function MaceAI() {
       <section className="bg-white py-24 px-4">
         <AnimatedSection className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-8">
-            <img src={amblack} alt="Arcana Mace" className="w-20 h-20 object-contain" />
+            <style>{`
+              @keyframes cta-idle-pulse {
+                0% { transform: scale(0.85); }
+                50% { transform: scale(1.15); }
+                100% { transform: scale(0.85); }
+              }
+              @keyframes cta-idle-color {
+                0% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+                33% { border-color: #32ADE6; box-shadow: 0 0 12px rgba(50, 173, 230, 0.4); }
+                66% { border-color: #1a3a6e; box-shadow: 0 0 12px rgba(26, 58, 110, 0.4); }
+                100% { border-color: #f2a547; box-shadow: 0 0 12px rgba(242, 165, 71, 0.4); }
+              }
+            `}</style>
+            <div
+              className="w-20 h-20 rounded-full bg-transparent"
+              style={{
+                border: '2px solid #f2a547',
+                animation: 'cta-idle-pulse 2.5s ease-in-out infinite, cta-idle-color 4s linear infinite',
+              }}
+            />
           </div>
           <h2 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
             Experience Mace AI.
