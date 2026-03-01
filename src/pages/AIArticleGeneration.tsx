@@ -569,7 +569,7 @@ export default function AIArticleGeneration() {
       {/* Mace AI Voice Command Section */}
       <section className="py-16 md:py-20 bg-white border-b border-[#d2d2d7]">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <div className="border-t border-[#d2d2d7] pt-16 md:pt-20">
+          <div>
             <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
               <div className="flex-1 max-w-[680px]">
                 <h2 className="text-3xl md:text-[40px] font-semibold text-[#1d1d1f] tracking-tight mb-4 leading-tight">
