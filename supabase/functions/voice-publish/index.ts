@@ -570,12 +570,6 @@ FORMAT YOUR RESPONSE EXACTLY:
 
     // Wait for article + SEO
     const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
-    // Check if image is already done; if not, we'll attach it after publishing
-    const imageResult = await Promise.race([
-      imagePromise,
-      new Promise<null>(resolve => setTimeout(() => resolve(null), 1000)), // 1s grace period
-    ]);
-    const featuredMediaId = imageResult?.mediaId || 0;
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
