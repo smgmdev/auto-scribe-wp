@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Siren } from 'lucide-react';
 import { createPortal } from 'react-dom';
+
+const MissileTrajectoryGlobe = lazy(() => import('@/components/MissileTrajectoryGlobe').then(m => ({ default: m.MissileTrajectoryGlobe })));
 
 interface MissileAlert {
   id: string;
@@ -10,6 +12,10 @@ interface MissileAlert {
   description: string | null;
   country_code: string | null;
   country_name: string | null;
+  origin_country_code: string | null;
+  origin_country_name: string | null;
+  destination_country_code: string | null;
+  destination_country_name: string | null;
   source: string | null;
   severity: string;
   active: boolean;
@@ -136,6 +142,16 @@ export function MissileAlertListener() {
             </p>
           </div>
 
+          {/* 3D Trajectory Globe */}
+          {alerts.some(a => a.origin_country_code && a.destination_country_code) && (
+            <Suspense fallback={<div className="w-full h-48 bg-black/40 rounded-lg animate-pulse" />}>
+              <MissileTrajectoryGlobe
+                originCode={alerts.find(a => a.origin_country_code)?.origin_country_code ?? null}
+                destinationCode={alerts.find(a => a.destination_country_code)?.destination_country_code ?? null}
+              />
+            </Suspense>
+          )}
+
           {/* Events */}
           <div className="space-y-2 text-left max-h-48 overflow-y-auto">
             {alerts.map((alert) => (
@@ -144,9 +160,16 @@ export function MissileAlertListener() {
                 {alert.description && (
                   <p className="text-xs text-red-400/80 mt-1">{alert.description}</p>
                 )}
-                <p className="text-xs text-red-400/60 mt-1">
-                  {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-red-400/60">
+                    {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
+                  </p>
+                  {alert.origin_country_name && alert.destination_country_name && (
+                    <span className="text-xs text-blue-400 font-mono">
+                      {alert.origin_country_name} → {alert.destination_country_name}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

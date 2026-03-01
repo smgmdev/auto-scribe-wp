@@ -1151,7 +1151,11 @@ export type Database = {
           country_name: string | null
           created_at: string
           description: string | null
+          destination_country_code: string | null
+          destination_country_name: string | null
           id: string
+          origin_country_code: string | null
+          origin_country_name: string | null
           severity: string
           source: string | null
           title: string
@@ -1162,7 +1166,11 @@ export type Database = {
           country_name?: string | null
           created_at?: string
           description?: string | null
+          destination_country_code?: string | null
+          destination_country_name?: string | null
           id?: string
+          origin_country_code?: string | null
+          origin_country_name?: string | null
           severity?: string
           source?: string | null
           title: string
@@ -1173,7 +1181,11 @@ export type Database = {
           country_name?: string | null
           created_at?: string
           description?: string | null
+          destination_country_code?: string | null
+          destination_country_name?: string | null
           id?: string
+          origin_country_code?: string | null
+          origin_country_name?: string | null
           severity?: string
           source?: string | null
           title?: string
