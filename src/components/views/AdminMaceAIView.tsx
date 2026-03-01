@@ -483,7 +483,6 @@ export function AdminMaceAIView() {
               setStep('processing');
               setPublishPhase('Researching topic...');
               const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 3000);
-              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 8000);
 
               const articleToPublish = { ...currentPending };
 
@@ -493,7 +492,6 @@ export function AdminMaceAIView() {
               });
 
               clearTimeout(phaseTimer1);
-              clearTimeout(phaseTimer2);
 
               if (genResult.error) throw new Error(typeof genResult.error === 'string' ? genResult.error : genResult.error?.message || 'Article generation failed');
               
@@ -506,9 +504,9 @@ export function AdminMaceAIView() {
                 throw new Error('Unexpected response from article generation');
               }
 
-              // Phase 2: Publish to WordPress (tags + WP + credits + DB)
-              setPublishPhase('Creating tags...');
-              const pubTimer = setTimeout(() => setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`), 3000);
+              // Phase 2: Publish to WordPress
+              setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`);
+              const pubTimer = setTimeout(() => setPublishPhase('Finalizing...'), 5000);
 
               const pubResult = await supabase.functions.invoke('voice-publish', {
                 body: { action: 'do_publish', generatedContent: genData.generatedContent },
