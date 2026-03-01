@@ -24,6 +24,7 @@ interface MaceArticle {
 const AdminMaceArticlesView = () => {
   const [articles, setArticles] = useState<MaceArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [siteFilter, setSiteFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,9 +35,9 @@ const AdminMaceArticlesView = () => {
   }, []);
 
   const fetchMaceArticles = useCallback(async (manual = false) => {
-    if (!manual && articles.length > 0) {
-      // Background refresh — don't show loading
-    } else {
+    if (manual) {
+      setRefreshing(true);
+    } else if (articles.length === 0) {
       setLoading(true);
     }
     try {
@@ -60,6 +61,7 @@ const AdminMaceArticlesView = () => {
       console.error('Error fetching mace articles:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [articles.length]);
 
@@ -119,10 +121,10 @@ const AdminMaceArticlesView = () => {
         <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
         <Button
           onClick={() => fetchMaceArticles(true)}
-          disabled={loading}
+          disabled={refreshing}
           className="w-full md:w-auto bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
         >
-          {loading ? (
+          {refreshing ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
             <RefreshCw className="h-4 w-4 mr-2" />
