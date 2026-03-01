@@ -163,46 +163,74 @@ function AtmosphereGlow() {
 /** Highlights a country polygon on hover and shows name at centroid */
 function CountryHighlight({ feature }: { feature: GeoFeature }) {
   const { highlightGeo, centroid } = useMemo(() => {
-    const vertices: number[] = [];
-    const indices: number[] = [];
+    const allMeshes: THREE.BufferGeometry[] = [];
     let centroidLat = 0, centroidLng = 0, totalPoints = 0;
 
-    const processRing = (ring: number[][]) => {
-      if (ring.length < 3) return;
-      let cLat = 0, cLng = 0;
-      for (const [lng, lat] of ring) {
-        cLat += lat; cLng += lng;
-        centroidLat += lat; centroidLng += lng;
-        totalPoints++;
+    const processPolygon = (coords: number[][][]) => {
+      const outerRing = coords[0];
+      if (!outerRing || outerRing.length < 3) return;
+
+      // Accumulate centroid
+      for (const [lng, lat] of outerRing) {
+        centroidLat += lat; centroidLng += lng; totalPoints++;
       }
-      cLat /= ring.length; cLng /= ring.length;
-      const startIdx = vertices.length / 3;
-      const [cx, cy, cz] = latLngToVector3(cLat, cLng, GLOBE_RADIUS + 0.005);
-      vertices.push(cx, cy, cz);
-      for (const [lng, lat] of ring) {
-        const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.005);
-        vertices.push(x, y, z);
+
+      // Create 2D shape using lng/lat as x/y for proper earcut triangulation
+      const shape = new THREE.Shape();
+      shape.moveTo(outerRing[0][0], outerRing[0][1]);
+      for (let i = 1; i < outerRing.length; i++) {
+        shape.lineTo(outerRing[i][0], outerRing[i][1]);
       }
-      for (let i = 0; i < ring.length - 1; i++) {
-        indices.push(startIdx, startIdx + 1 + i, startIdx + 2 + i);
+      shape.closePath();
+
+      // Add holes if any
+      const holes: THREE.Path[] = [];
+      for (let h = 1; h < coords.length; h++) {
+        const holeRing = coords[h];
+        if (holeRing.length < 3) continue;
+        const holePath = new THREE.Path();
+        holePath.moveTo(holeRing[0][0], holeRing[0][1]);
+        for (let i = 1; i < holeRing.length; i++) {
+          holePath.lineTo(holeRing[i][0], holeRing[i][1]);
+        }
+        holes.push(holePath);
       }
+      shape.holes = holes;
+
+      // Generate geometry (earcut triangulation handles concave shapes)
+      const shapeGeo = new THREE.ShapeGeometry(shape, 1);
+      const pos = shapeGeo.attributes.position;
+
+      // Remap each vertex from 2D (lng, lat) → 3D sphere position
+      for (let i = 0; i < pos.count; i++) {
+        const lng = pos.getX(i);
+        const lat = pos.getY(i);
+        const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.004);
+        pos.setXYZ(i, x, y, z);
+      }
+      pos.needsUpdate = true;
+      shapeGeo.computeVertexNormals();
+      allMeshes.push(shapeGeo);
     };
 
     const geom = feature.geometry;
     if (geom.type === 'Polygon') {
-      processRing(geom.coordinates[0]);
+      processPolygon(geom.coordinates);
     } else if (geom.type === 'MultiPolygon') {
-      for (const polygon of geom.coordinates) processRing(polygon[0]);
+      for (const polygon of geom.coordinates) processPolygon(polygon);
     }
-    if (vertices.length === 0) return { highlightGeo: null, centroid: null };
-    const bufGeo = new THREE.BufferGeometry();
-    bufGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    bufGeo.setIndex(indices);
-    bufGeo.computeVertexNormals();
+
+    if (allMeshes.length === 0) return { highlightGeo: null, centroid: null };
+
+    // Merge all polygon geometries
+    const merged = allMeshes.length === 1
+      ? allMeshes[0]
+      : mergeBufferGeometries(allMeshes);
+
     centroidLat /= totalPoints || 1;
     centroidLng /= totalPoints || 1;
     const [px, py, pz] = latLngToVector3(centroidLat, centroidLng, GLOBE_RADIUS + 0.02);
-    return { highlightGeo: bufGeo, centroid: new THREE.Vector3(px, py, pz) };
+    return { highlightGeo: merged, centroid: new THREE.Vector3(px, py, pz) };
   }, [feature]);
 
   if (!highlightGeo || !centroid) return null;
@@ -228,6 +256,32 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
     </group>
   );
 }
+
+/** Simple merge of multiple BufferGeometries */
+function mergeBufferGeometries(geometries: THREE.BufferGeometry[]): THREE.BufferGeometry {
+  const positions: number[] = [];
+  const indices: number[] = [];
+  let offset = 0;
+  for (const geo of geometries) {
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      positions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
+    }
+    const idx = geo.index;
+    if (idx) {
+      for (let i = 0; i < idx.count; i++) indices.push((idx.array as Uint16Array | Uint32Array)[i] + offset);
+    } else {
+      for (let i = 0; i < pos.count; i++) indices.push(i + offset);
+    }
+    offset += pos.count;
+  }
+  const merged = new THREE.BufferGeometry();
+  merged.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  merged.setIndex(indices);
+  merged.computeVertexNormals();
+  return merged;
+}
+
 /** Renders actual country border lines from GeoJSON */
 function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
   const borderGeometry = useMemo(() => {
