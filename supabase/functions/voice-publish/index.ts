@@ -504,13 +504,13 @@ FORMAT YOUR RESPONSE EXACTLY:
 
     // Run article, SEO, and image generation ALL in parallel
     const articleAbort = new AbortController();
-    const articleTimeout = setTimeout(() => articleAbort.abort(), 50000);
+    const articleTimeout = setTimeout(() => articleAbort.abort(), 30000);
     const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       signal: articleAbort.signal,
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-flash-lite',
         messages: [
           { role: 'system', content: articlePrompt },
           { role: 'user', content: `Write the article about: ${pa.topic}` },
@@ -520,9 +520,12 @@ FORMAT YOUR RESPONSE EXACTLY:
       }),
     }).finally(() => clearTimeout(articleTimeout));
 
+    const seoAbort = new AbortController();
+    const seoTimeout = setTimeout(() => seoAbort.abort(), 20000);
     const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      signal: seoAbort.signal,
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
@@ -532,7 +535,7 @@ FORMAT YOUR RESPONSE EXACTLY:
         tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
         tool_choice: { type: 'function', function: { name: 'generate_seo' } },
       }),
-    });
+    }).finally(() => clearTimeout(seoTimeout));
 
     // Upload user-provided featured image to WordPress if provided
     let featuredMediaId = 0;
