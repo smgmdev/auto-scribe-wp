@@ -32,6 +32,48 @@ const AdminMaceArticlesView = () => {
 
   useEffect(() => {
     fetchMaceArticles();
+
+    // Real-time subscription for new mace articles
+    const channel = supabase
+      .channel('mace-articles-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'articles' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newArticle = payload.new as any;
+            if (
+              newArticle.status === 'published' &&
+              newArticle.published_to &&
+              newArticle.source_headline?.source === 'mace'
+            ) {
+              setArticles(prev => [newArticle, ...prev]);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setArticles(prev => prev.filter(a => a.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as any;
+            if (
+              updated.status === 'published' &&
+              updated.published_to &&
+              updated.source_headline?.source === 'mace'
+            ) {
+              setArticles(prev => {
+                const exists = prev.some(a => a.id === updated.id);
+                if (exists) {
+                  return prev.map(a => a.id === updated.id ? updated : a);
+                }
+                return [updated, ...prev];
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchMaceArticles = useCallback(async (manual = false) => {
