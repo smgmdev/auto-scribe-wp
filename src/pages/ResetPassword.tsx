@@ -173,7 +173,7 @@ export default function ResetPassword() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 pt-28 sm:pt-36 pb-12">
+      <div className="flex-1 flex items-center justify-center px-4 pt-20 sm:pt-24 pb-12">
         <div className="w-full max-w-[400px]">
           <div className="flex justify-center mb-6">
             <img src={amblack} alt="Arcana Mace" className="h-12 w-12" />
