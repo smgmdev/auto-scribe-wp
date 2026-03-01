@@ -562,8 +562,7 @@ export default function MaceAI() {
             <button
               onClick={() => {
                 if (user) {
-                  useAppStore.getState().setCurrentView('admin-mace-ai');
-                  navigate('/account');
+                  navigate('/account', { state: { targetView: 'admin-mace-ai' } });
                 } else {
                   navigate('/auth?mode=signup&redirect=mace-ai');
                 }
