@@ -18,6 +18,15 @@ import amblack from '@/assets/amblack.png';
 const updates = [
   {
     date: 'March 1, 2026',
+    title: 'Password Reset Flow & Page Consistency',
+    changes: [
+      'Improved password reset flow reliability — clicking the reset link from your email now correctly opens the Set New Password form without session errors',
+      'Set New Password page redesigned to match the Auth page layout with consistent header, sub-header, container width, and footer styling',
+      'Quick Nav banner is now hidden on the Set New Password page for a cleaner, distraction-free experience matching the sign-in page',
+    ],
+  },
+  {
+    date: 'March 1, 2026',
     title: 'Mace AI Landing Page & Publishing Experience',
     changes: [
       'Updated Mace AI landing page hero copy for clarity — "Publish your article to media in under 30 seconds—without touching the keyboard or writing a single word. Just use a voice command."',
