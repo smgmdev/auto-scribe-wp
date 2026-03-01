@@ -321,24 +321,6 @@ function CountryMarker({
 
       {country.threat_level === 'danger' && <PulsingRing color={color} size={baseSize} />}
 
-      {(hovered || isSelected) && (
-        <Html distanceFactor={7} style={{ pointerEvents: 'none' }} center position={[0, 0.07, 0]}>
-          <div style={{
-            background: 'rgba(8, 12, 22, 0.85)',
-            border: `1px solid ${color}30`,
-            borderRadius: '3px',
-            padding: '1.5px 4px',
-            textAlign: 'center',
-            whiteSpace: 'nowrap',
-            backdropFilter: 'blur(4px)',
-          }}>
-            <div style={{ fontSize: '6px', fontWeight: 600, color: '#eee', lineHeight: 1.1 }}>{country.name}</div>
-            <div style={{ fontSize: '5px', fontFamily: 'monospace', textTransform: 'uppercase', color, lineHeight: 1.2 }}>
-              {country.threat_level} · {country.score}
-            </div>
-          </div>
-        </Html>
-      )}
     </group>
   );
 }
