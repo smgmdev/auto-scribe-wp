@@ -316,11 +316,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // If the query fails due to RLS (session expired/invalid), the auth session is broken
         if (error || data === null) {
           consecutiveFailures++;
-          console.warn(`[Auth] Session check failed (${consecutiveFailures}/3) - profile not accessible`);
+          console.warn(`[Auth] Session check failed (${consecutiveFailures}/5) - profile not accessible`, error?.message);
           
-          // Only attempt recovery after 3 consecutive failures to avoid reacting to transient issues
-          if (consecutiveFailures >= 3) {
-            console.warn('[Auth] 3 consecutive session check failures, attempting session refresh');
+          // Only attempt recovery after 5 consecutive failures (was 3, increased for resilience)
+          if (consecutiveFailures >= 5) {
+            console.warn('[Auth] 5 consecutive session check failures, attempting session refresh');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             if (refreshError || !refreshData?.session) {
               console.error('[Auth] Session refresh failed during validity check, signing out');
@@ -338,15 +338,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const currentActive = (data as any)?.active_session_id;
         if (currentActive && currentActive !== localSessionIdRef.current) {
-          handleSessionKicked();
+          // Before kicking, try to re-verify — the DB value might be from our own
+          // session that was re-registered during a page reload. Double-check by
+          // fetching once more after a short delay.
+          console.warn('[Auth] Session mismatch detected! DB:', currentActive, 'Local:', localSessionIdRef.current, '— verifying...');
+          await new Promise(r => setTimeout(r, 1500));
+          
+          // Re-fetch to confirm it wasn't a transient issue
+          const { data: recheck } = await supabase
+            .from('profiles')
+            .select('active_session_id')
+            .eq('id', user.id)
+            .maybeSingle();
+          const recheckActive = (recheck as any)?.active_session_id;
+          
+          if (recheckActive && recheckActive !== localSessionIdRef.current) {
+            console.error('[Auth] Session mismatch confirmed after re-check. DB:', recheckActive, 'Local:', localSessionIdRef.current);
+            handleSessionKicked();
+          } else {
+            console.log('[Auth] Session mismatch resolved on re-check, skipping kick');
+          }
         }
       } catch {
         // ignore transient fetch errors
       }
     };
 
-    // Poll every 2 seconds as a fast fallback alongside realtime
-    const pollInterval = setInterval(checkSessionValidity, 2000);
+    // Poll every 5 seconds (reduced from 2s for resilience during heavy network usage)
+    const pollInterval = setInterval(checkSessionValidity, 5000);
 
     // Also check when the page regains focus (critical for mobile browsers
     // that suspend JS when backgrounded/tab-switched)
