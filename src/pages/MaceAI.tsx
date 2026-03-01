@@ -646,7 +646,23 @@ export default function MaceAI() {
       <div className="w-full bg-black border-t border-[#424245]">
         <PWAInstallButtons />
       </div>
-      <Footer narrow />
+
+      {/* Disclaimers Section */}
+      <section className="bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
+          <div className="space-y-4 text-[11px] text-[#86868b] leading-relaxed">
+            <p>
+              Mace AI is free to use. Please note that when publishing articles with Mace AI, you must have enough credits to publish on your selected media channel. Mace AI supports publishing to media sites that are connected with Arcana Mace and are available on the Local Media Library.
+            </p>
+            <p>
+              Mace AI is currently offered as a free service; however, pricing is subject to change in the future.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="bg-[#f5f5f7]"><div className="max-w-[980px] mx-auto px-4 md:px-6"><div className="border-t border-[#d2d2d7]" /></div></div>
+      <Footer narrow showTopBorder />
     </div>
     </>
   );
