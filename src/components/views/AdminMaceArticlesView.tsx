@@ -227,7 +227,7 @@ const AdminMaceArticlesView = () => {
           {filtered.map((article) => (
             <div
               key={article.id}
-              className="flex items-center gap-4 p-4 bg-card hover:bg-muted/30 transition-colors"
+              className="flex items-center gap-4 px-4 py-2 bg-card hover:bg-muted/30 transition-colors"
             >
               {article.published_to_favicon ? (
                 <img
