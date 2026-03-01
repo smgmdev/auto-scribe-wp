@@ -555,7 +555,9 @@ FORMAT YOUR RESPONSE EXACTLY:
           console.error('[voice-publish] Image gen failed:', imgGenResp.status, errText);
           return 0;
         }
-        const imgGenData = await imgGenResp.json();
+        const imgGenText = await imgGenResp.text();
+        let imgGenData: any;
+        try { imgGenData = JSON.parse(imgGenText); } catch { console.error('[voice-publish] Image gen returned non-JSON:', imgGenText.slice(0, 200)); return 0; }
         const imageData = imgGenData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
         if (!imageData || !imageData.startsWith('data:image/')) {
           console.error('[voice-publish] No image data returned from Gemini');
@@ -595,7 +597,9 @@ FORMAT YOUR RESPONSE EXACTLY:
       throw new Error('Failed to generate article');
     }
 
-    const articleData = await articleResponse.json();
+    const articleText = await articleResponse.text();
+    let articleData: any;
+    try { articleData = JSON.parse(articleText); } catch { throw new Error('Article generation returned invalid response'); }
     const rawContent = articleData.choices?.[0]?.message?.content;
     if (!rawContent) {
       throw new Error('No article content generated');
