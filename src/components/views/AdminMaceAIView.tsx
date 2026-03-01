@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, Loader2, Volume2, ExternalLink } from 'lucide-react';
+import { Play, Loader2, Volume2, ExternalLink } from 'lucide-react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -608,7 +608,7 @@ export function AdminMaceAIView() {
                   ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
                   : step === 'speaking'
                   ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
-                  : 'bg-foreground hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
+                  : 'bg-transparent hover:scale-105 cursor-pointer'
               }`}
             >
               {step === 'listening' && (
@@ -621,7 +621,7 @@ export function AdminMaceAIView() {
                 <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse pointer-events-none" />
               )}
 
-              {step === 'idle' && <Mic className="w-7 h-7 text-white relative z-10" />}
+              {step === 'idle' && <Play className="w-10 h-10 text-foreground relative z-10 fill-foreground" />}
               {step === 'listening' && (
                 <div className="flex items-center gap-[3px] relative z-10">
                   {[0, 1, 2, 3, 4].map(i => (
