@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
-import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper, Plus } from 'lucide-react';
+import { Sparkles, Zap, FileText, Wand2, Settings, PenTool, BookOpen, Target, ChevronLeft, ChevronRight, Search, User, Globe, CheckCircle, ExternalLink, Download, FileCode, Loader2, Newspaper, Plus, HelpCircle } from 'lucide-react';
 
 function SliderImage({ src, alt }: { src: string; alt: string }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -616,6 +616,10 @@ export default function AIArticleGeneration() {
                   <Link to="/mace-ai" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
                     <Sparkles className="w-4 h-4" />
                     Explore Mace AI
+                  </Link>
+                  <Link to="/help/mace-ai" className="text-[15px] text-[#06c] hover:underline flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4" />
+                    How to Use Mace AI
                   </Link>
                 </div>
               </div>
