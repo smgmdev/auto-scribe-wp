@@ -80,7 +80,9 @@ Deno.serve(async (req) => {
       "country_name": "<country name>",
       "severity": "<low|medium|high|critical>",
       "description": "<brief description>",
-      "source": "<source name or X/Twitter>",
+      "source": "<source name e.g. Reuters, BBC, Al Jazeera, X/Twitter>",
+      "source_url": "<direct URL to the source article or post>",
+      "published_at": "<ISO 8601 datetime of when the news was originally published, e.g. 2025-03-01T14:30:00Z>",
       "origin_country_code": "<ISO code of launch origin if missile/rocket event, or null>",
       "origin_country_name": "<origin country name if missile/rocket event, or null>",
       "destination_country_code": "<ISO code of target if missile/rocket event, or null>",
@@ -93,6 +95,7 @@ Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass
 Include ALL countries with notable activity (at least 15-25 countries).
 Mark countries with no issues as "safe".
 Include at least 10-15 latest events from the past 48 hours.
+IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
 Search X/Twitter and news for the most recent developments.
 Return ONLY the JSON object, no other text.`
           },
