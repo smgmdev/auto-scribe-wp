@@ -645,7 +645,7 @@ export function AdminMaceAIView() {
             </button>
           )}
 
-          <p className={`text-lg font-light transition-colors ${
+          <p className={`text-base font-light transition-colors ${
             step === 'processing' ? 'text-muted-foreground'
             : 'text-muted-foreground'
           }`}>
