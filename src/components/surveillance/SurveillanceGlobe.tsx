@@ -13,6 +13,11 @@ interface CountryData {
   events: string[];
 }
 
+interface GeoFeature {
+  properties: { name: string; id?: string };
+  geometry: { type: string; coordinates: any };
+}
+
 interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
@@ -30,12 +35,89 @@ function getThreatColor(level: string): string {
   }
 }
 
-function EarthSphere() {
+/** Point-in-polygon ray casting algorithm */
+function pointInPolygon(lat: number, lng: number, ring: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = [ring[i][0], ring[i][1]];
+    const [xj, yj] = [ring[j][0], ring[j][1]];
+    if ((yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+/** Check if a lat/lng point is inside a GeoJSON geometry */
+function pointInGeometry(lat: number, lng: number, geometry: { type: string; coordinates: any }): boolean {
+  if (geometry.type === 'Polygon') {
+    return pointInPolygon(lat, lng, geometry.coordinates[0]);
+  } else if (geometry.type === 'MultiPolygon') {
+    for (const polygon of geometry.coordinates) {
+      if (pointInPolygon(lat, lng, polygon[0])) return true;
+    }
+  }
+  return false;
+}
+
+/** Convert 3D point on sphere to lat/lng */
+function vector3ToLatLng(point: THREE.Vector3, radius: number): { lat: number; lng: number } {
+  const normalized = point.clone().normalize();
+  const lat = Math.asin(normalized.y) * (180 / Math.PI);
+  const lng = Math.atan2(-normalized.z, normalized.x) * (180 / Math.PI);
+  return { lat, lng };
+}
+
+function EarthSphere({
+  onHoverCountry,
+  onClickCountry,
+  geoFeatures,
+}: {
+  onHoverCountry: (name: string | null, point: THREE.Vector3 | null) => void;
+  onClickCountry: (name: string) => void;
+  geoFeatures: GeoFeature[];
+}) {
   const texture = useLoader(THREE.TextureLoader, '/textures/earth-blue-marble.jpg');
   const bumpMap = useLoader(THREE.TextureLoader, '/textures/earth-topology.png');
 
+  const findCountry = useCallback(
+    (point: THREE.Vector3) => {
+      const { lat, lng } = vector3ToLatLng(point, GLOBE_RADIUS);
+      for (const feature of geoFeatures) {
+        if (feature.geometry && pointInGeometry(lat, lng, feature.geometry)) {
+          return feature.properties.name;
+        }
+      }
+      return null;
+    },
+    [geoFeatures]
+  );
+
   return (
-    <mesh>
+    <mesh
+      onPointerMove={(e: ThreeEvent<PointerEvent>) => {
+        if (e.point && geoFeatures.length > 0) {
+          e.stopPropagation();
+          // Transform point to local group coords
+          const localPoint = e.object.worldToLocal(e.point.clone());
+          const name = findCountry(localPoint);
+          onHoverCountry(name, name ? e.point : null);
+          document.body.style.cursor = name ? 'pointer' : 'default';
+        }
+      }}
+      onPointerOut={() => {
+        onHoverCountry(null, null);
+        document.body.style.cursor = 'default';
+      }}
+      onClick={(e: ThreeEvent<MouseEvent>) => {
+        if (e.point && geoFeatures.length > 0) {
+          e.stopPropagation();
+          const localPoint = e.object.worldToLocal(e.point.clone());
+          const name = findCountry(localPoint);
+          if (name) onClickCountry(name);
+        }
+      }}
+    >
       <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
       <meshPhongMaterial
         map={texture}
@@ -78,101 +160,61 @@ function AtmosphereGlow() {
   );
 }
 
-/** Renders country name labels when camera is zoomed in */
-function CountryLabels({ countries, zoomLevel }: { countries: CountryData[]; zoomLevel: number }) {
-  if (zoomLevel > 4) return null;
-  const maxLabels = zoomLevel < 3.2 ? countries.length : Math.min(20, countries.length);
-  const visibleCountries = countries.slice(0, maxLabels);
-
+/** Hover label that follows the cursor on the globe */
+function GlobeHoverLabel({ name, point }: { name: string; point: THREE.Vector3 }) {
   return (
-    <>
-      {visibleCountries.map((country) => {
-        const coords = COUNTRY_COORDINATES[country.code];
-        if (!coords) return null;
-        const pos = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.04);
-        return (
-          <Html
-            key={`label-${country.code}`}
-            position={pos}
-            distanceFactor={5}
-            style={{ pointerEvents: 'none' }}
-            center
-            occlude={false}
-          >
-            <span
-              style={{
-                fontSize: '7px',
-                color: 'rgba(255,255,255,0.55)',
-                fontFamily: 'monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                textShadow: '0 0 4px rgba(0,0,0,0.9)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {country.name}
-            </span>
-          </Html>
-        );
-      })}
-    </>
+    <Html position={point} distanceFactor={6} style={{ pointerEvents: 'none' }} center>
+      <div
+        style={{
+          background: 'rgba(8, 12, 22, 0.88)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: '3px',
+          padding: '2px 6px',
+          whiteSpace: 'nowrap',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <span style={{ fontSize: '7px', fontWeight: 600, color: '#eee', fontFamily: 'monospace' }}>
+          {name}
+        </span>
+      </div>
+    </Html>
   );
 }
 
-/** Convert a GeoJSON ring (array of [lng, lat]) to 3D points on the sphere */
-function ringToPoints(ring: number[][]): THREE.Vector3[] {
-  const pts: THREE.Vector3[] = [];
-  for (let i = 0; i < ring.length; i++) {
-    const [lng, lat] = ring[i];
-    const [x, y, z] = latLngToVector3(lat, lng, GLOBE_RADIUS + 0.004);
-    pts.push(new THREE.Vector3(x, y, z));
-  }
-  return pts;
-}
-
 /** Renders actual country border lines from GeoJSON */
-function CountryBorders() {
-  const [borderGeometry, setBorderGeometry] = useState<THREE.BufferGeometry | null>(null);
+function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
+  const borderGeometry = useMemo(() => {
+    if (geoFeatures.length === 0) return null;
+    const vertices: number[] = [];
 
-  useEffect(() => {
-    fetch('/data/countries.geo.json')
-      .then((r) => r.json())
-      .then((geojson: any) => {
-        const vertices: number[] = [];
+    for (const feature of geoFeatures) {
+      const geom = feature.geometry;
+      if (!geom) continue;
 
-        for (const feature of geojson.features) {
-          const geom = feature.geometry;
-          if (!geom) continue;
-
-          const processRing = (ring: number[][]) => {
-            for (let i = 0; i < ring.length - 1; i++) {
-              const [lng1, lat1] = ring[i];
-              const [lng2, lat2] = ring[i + 1];
-              const [x1, y1, z1] = latLngToVector3(lat1, lng1, GLOBE_RADIUS + 0.004);
-              const [x2, y2, z2] = latLngToVector3(lat2, lng2, GLOBE_RADIUS + 0.004);
-              vertices.push(x1, y1, z1, x2, y2, z2);
-            }
-          };
-
-          if (geom.type === 'Polygon') {
-            for (const ring of geom.coordinates) {
-              processRing(ring);
-            }
-          } else if (geom.type === 'MultiPolygon') {
-            for (const polygon of geom.coordinates) {
-              for (const ring of polygon) {
-                processRing(ring);
-              }
-            }
-          }
+      const processRing = (ring: number[][]) => {
+        for (let i = 0; i < ring.length - 1; i++) {
+          const [lng1, lat1] = ring[i];
+          const [lng2, lat2] = ring[i + 1];
+          const [x1, y1, z1] = latLngToVector3(lat1, lng1, GLOBE_RADIUS + 0.004);
+          const [x2, y2, z2] = latLngToVector3(lat2, lng2, GLOBE_RADIUS + 0.004);
+          vertices.push(x1, y1, z1, x2, y2, z2);
         }
+      };
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        setBorderGeometry(geometry);
-      })
-      .catch((err) => console.error('Failed to load country borders:', err));
-  }, []);
+      if (geom.type === 'Polygon') {
+        for (const ring of geom.coordinates) processRing(ring);
+      } else if (geom.type === 'MultiPolygon') {
+        for (const polygon of geom.coordinates) {
+          for (const ring of polygon) processRing(ring);
+        }
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    return geometry;
+  }, [geoFeatures]);
 
   if (!borderGeometry) return null;
 
@@ -200,85 +242,45 @@ function CountryMarker({
   const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.015);
   const color = getThreatColor(country.threat_level);
   const baseSize =
-    country.threat_level === 'danger'
-      ? 0.065
-      : country.threat_level === 'caution'
-      ? 0.045
-      : 0.03;
+    country.threat_level === 'danger' ? 0.065
+    : country.threat_level === 'caution' ? 0.045
+    : 0.03;
   const size = isSelected || hovered ? baseSize * 1.4 : baseSize;
 
   return (
     <group position={position}>
-      {/* Outer glow ring for non-safe */}
       {country.threat_level !== 'safe' && (
         <mesh>
           <ringGeometry args={[baseSize * 2, baseSize * 3, 32]} />
-          <meshBasicMaterial
-            color={color}
-            opacity={hovered || isSelected ? 0.3 : 0.12}
-            transparent
-            side={THREE.DoubleSide}
-          />
+          <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.3 : 0.12} transparent side={THREE.DoubleSide} />
         </mesh>
       )}
 
-      {/* Main marker dot */}
       <mesh
         ref={meshRef}
-        onClick={(e: ThreeEvent<MouseEvent>) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        onPointerOver={(e: ThreeEvent<PointerEvent>) => {
-          e.stopPropagation();
-          setHovered(true);
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          setHovered(false);
-          document.body.style.cursor = 'default';
-        }}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
       >
         <sphereGeometry args={[size, 16, 16]} />
         <meshBasicMaterial color={color} />
       </mesh>
 
-      {/* Pulse animation for danger zones */}
-      {country.threat_level === 'danger' && (
-        <PulsingRing color={color} size={baseSize} />
-      )}
+      {country.threat_level === 'danger' && <PulsingRing color={color} size={baseSize} />}
 
-      {/* Tiny hover tooltip */}
       {(hovered || isSelected) && (
-        <Html
-          distanceFactor={7}
-          style={{ pointerEvents: 'none' }}
-          center
-          position={[0, 0.07, 0]}
-        >
-          <div
-            style={{
-              background: 'rgba(8, 12, 22, 0.85)',
-              border: `1px solid ${color}30`,
-              borderRadius: '3px',
-              padding: '1.5px 4px',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              backdropFilter: 'blur(4px)',
-            }}
-          >
-            <div style={{ fontSize: '6px', fontWeight: 600, color: '#eee', lineHeight: 1.1 }}>
-              {country.name}
-            </div>
-            <div
-              style={{
-                fontSize: '5px',
-                fontFamily: 'monospace',
-                textTransform: 'uppercase',
-                color,
-                lineHeight: 1.2,
-              }}
-            >
+        <Html distanceFactor={7} style={{ pointerEvents: 'none' }} center position={[0, 0.07, 0]}>
+          <div style={{
+            background: 'rgba(8, 12, 22, 0.85)',
+            border: `1px solid ${color}30`,
+            borderRadius: '3px',
+            padding: '1.5px 4px',
+            textAlign: 'center',
+            whiteSpace: 'nowrap',
+            backdropFilter: 'blur(4px)',
+          }}>
+            <div style={{ fontSize: '6px', fontWeight: 600, color: '#eee', lineHeight: 1.1 }}>{country.name}</div>
+            <div style={{ fontSize: '5px', fontFamily: 'monospace', textTransform: 'uppercase', color, lineHeight: 1.2 }}>
               {country.threat_level} · {country.score}
             </div>
           </div>
@@ -294,30 +296,20 @@ function PulsingRing({ color, size }: { color: string; size: number }) {
     if (ref.current) {
       const scale = 1 + Math.sin(clock.getElapsedTime() * 2.5) * 0.6;
       ref.current.scale.setScalar(scale);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity =
-        0.35 - scale * 0.1;
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.35 - scale * 0.1;
     }
   });
   return (
     <mesh ref={ref}>
       <ringGeometry args={[size * 2.5, size * 4, 32]} />
-      <meshBasicMaterial
-        color={color}
-        opacity={0.3}
-        transparent
-        side={THREE.DoubleSide}
-      />
+      <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-/** Tracks camera distance for zoom-dependent features */
 function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   const { camera } = useThree();
-  useFrame(() => {
-    const d = camera.position.length();
-    onZoomChange(d);
-  });
+  useFrame(() => onZoomChange(camera.position.length()));
   return null;
 }
 
@@ -329,6 +321,16 @@ function RotatingGlobe({
   const groupRef = useRef<THREE.Group>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(4.5);
+  const [geoFeatures, setGeoFeatures] = useState<GeoFeature[]>([]);
+  const [hoveredGeo, setHoveredGeo] = useState<{ name: string; point: THREE.Vector3 } | null>(null);
+
+  // Load GeoJSON once
+  useEffect(() => {
+    fetch('/data/countries.geo.json')
+      .then((r) => r.json())
+      .then((geojson: any) => setGeoFeatures(geojson.features || []))
+      .catch((err) => console.error('Failed to load GeoJSON:', err));
+  }, []);
 
   useFrame(() => {
     if (groupRef.current && autoRotate) {
@@ -336,13 +338,46 @@ function RotatingGlobe({
     }
   });
 
-  const handleClick = useCallback(
+  const handleMarkerClick = useCallback(
     (country: CountryData) => {
       setAutoRotate(false);
       onCountryClick(country);
       setTimeout(() => setAutoRotate(true), 12000);
     },
     [onCountryClick]
+  );
+
+  const handleGlobeHover = useCallback((name: string | null, point: THREE.Vector3 | null) => {
+    if (name && point) {
+      setHoveredGeo({ name, point });
+    } else {
+      setHoveredGeo(null);
+    }
+  }, []);
+
+  const handleGlobeClick = useCallback(
+    (geoName: string) => {
+      setAutoRotate(false);
+      setTimeout(() => setAutoRotate(true), 12000);
+      // Try to find matching country in scan data
+      const match = countries.find(
+        (c) => c.name.toLowerCase() === geoName.toLowerCase()
+      );
+      if (match) {
+        onCountryClick(match);
+      } else {
+        // Create a basic entry for countries not in scan data
+        onCountryClick({
+          code: '',
+          name: geoName,
+          threat_level: 'safe',
+          score: 0,
+          summary: 'No threat data available for this country.',
+          events: [],
+        });
+      }
+    },
+    [countries, onCountryClick]
   );
 
   return (
@@ -353,23 +388,28 @@ function RotatingGlobe({
       <directionalLight position={[-5, -3, -5]} intensity={0.3} color="#4488cc" />
 
       <group ref={groupRef}>
-        <EarthSphere />
+        <EarthSphere
+          onHoverCountry={handleGlobeHover}
+          onClickCountry={handleGlobeClick}
+          geoFeatures={geoFeatures}
+        />
         <AtmosphereGlow />
-        <CountryBorders />
-        <CountryLabels countries={countries} zoomLevel={zoomLevel} />
+        <CountryBorders geoFeatures={geoFeatures} />
 
         {countries.map((country) => (
           <CountryMarker
             key={country.code}
             country={country}
-            onClick={() => handleClick(country)}
+            onClick={() => handleMarkerClick(country)}
             isSelected={selectedCountry === country.code}
           />
         ))}
+
+        {hoveredGeo && <GlobeHoverLabel name={hoveredGeo.name} point={hoveredGeo.point} />}
       </group>
 
       <OrbitControls
-        enableZoom={true}
+        enableZoom
         enablePan={false}
         minDistance={2.8}
         maxDistance={8}
