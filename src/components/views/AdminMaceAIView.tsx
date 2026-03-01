@@ -736,7 +736,7 @@ export function AdminMaceAIView() {
                     }
                   `}</style>
                   <div
-                    className="w-16 h-16 rounded-full relative z-10"
+                    className="w-16 h-16 rounded-full relative z-10 bg-transparent"
                     style={{
                       border: '2px solid #f2a547',
                       animation: 'mace-idle-pulse 2.5s ease-in-out infinite, mace-idle-color 4s linear infinite',
