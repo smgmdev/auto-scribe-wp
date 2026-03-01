@@ -1712,6 +1712,39 @@ export type Database = {
         }
         Relationships: []
       }
+      surveillance_scans: {
+        Row: {
+          country_data: Json
+          created_at: string
+          events: Json
+          global_tension_level: string
+          global_tension_score: number
+          id: string
+          scanned_at: string
+          source: string
+        }
+        Insert: {
+          country_data?: Json
+          created_at?: string
+          events?: Json
+          global_tension_level?: string
+          global_tension_score?: number
+          id?: string
+          scanned_at?: string
+          source?: string
+        }
+        Update: {
+          country_data?: Json
+          created_at?: string
+          events?: Json
+          global_tension_level?: string
+          global_tension_score?: number
+          id?: string
+          scanned_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string
