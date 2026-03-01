@@ -17,6 +17,17 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'March 1, 2026',
+    title: 'Faster Article Publishing & AI Improvements',
+    changes: [
+      'Streamlined the article publishing pipeline — articles now publish significantly faster by removing intermediate processing steps that added unnecessary delay',
+      'Upgraded the AI conversation model to a more capable version for better understanding of complex or detailed article instructions',
+      'AI assistant now handles nuanced topic requests and longer instructions more accurately during voice-based publishing',
+      'Increased AI response capacity to support more detailed and context-aware replies when discussing article topics',
+      'Simplified the publishing status indicators to reflect the updated, faster workflow with clearer progress messages',
+    ],
+  },
+  {
     date: 'February 27, 2026',
     title: 'Payment Gateway Migration & Help Center Updates',
     changes: [
