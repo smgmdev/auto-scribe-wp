@@ -206,12 +206,12 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
         <div style={{
           background: 'rgba(8,12,22,0.88)',
           border: '1px solid rgba(255,255,255,0.15)',
-          borderRadius: '3px',
-          padding: '2px 6px',
+          borderRadius: '6px',
+          padding: '4px 10px',
           whiteSpace: 'nowrap',
           backdropFilter: 'blur(4px)',
         }}>
-          <span style={{ fontSize: '5.5px', fontWeight: 400, color: '#eee', fontFamily: 'monospace' }}>
+          <span style={{ fontSize: '12px', fontWeight: 400, color: '#eee', fontFamily: 'monospace' }}>
             {feature.properties.name}
           </span>
         </div>
