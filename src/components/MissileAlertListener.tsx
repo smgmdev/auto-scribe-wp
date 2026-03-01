@@ -144,6 +144,7 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
 export function MissileAlertListener() {
   const [missileAlerts, setMissileAlerts] = useState<MissileAlert[]>([]);
   const [droneAlerts, setDroneAlerts] = useState<MissileAlert[]>([]);
+  const [missileDismissed, setMissileDismissed] = useState(false);
   const dismissedRef = useRef<Set<string>>(new Set());
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -173,12 +174,6 @@ export function MissileAlertListener() {
     }
   }, []);
 
-  const startSound = useCallback(() => {
-    playAlertSound();
-    if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
-    alertIntervalRef.current = setInterval(playAlertSound, 2500);
-  }, [playAlertSound]);
-
   const stopSound = useCallback(() => {
     if (alertIntervalRef.current) {
       clearInterval(alertIntervalRef.current);
@@ -189,16 +184,17 @@ export function MissileAlertListener() {
   const dismissMissiles = useCallback(() => {
     missileAlerts.forEach(a => dismissedRef.current.add(a.id));
     setMissileAlerts([]);
+    setMissileDismissed(true);
     if (droneAlerts.length === 0) stopSound();
   }, [missileAlerts, droneAlerts, stopSound]);
 
   const dismissDrones = useCallback(() => {
     droneAlerts.forEach(a => dismissedRef.current.add(a.id));
     setDroneAlerts([]);
-    if (missileAlerts.length === 0) stopSound();
-  }, [droneAlerts, missileAlerts, stopSound]);
+    stopSound();
+  }, [droneAlerts, stopSound]);
 
-  // Fetch active alerts on mount
+  // Fetch active alerts on mount only
   useEffect(() => {
     const fetchActive = async () => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -215,28 +211,8 @@ export function MissileAlertListener() {
         if (missiles.length > 0) setMissileAlerts(missiles);
         if (drones.length > 0) setDroneAlerts(drones);
         if (missiles.length > 0 || drones.length > 0) {
-          // Play sound once on mount
-          try {
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const playTone = (freq: number, startTime: number, duration: number) => {
-              const osc = audioCtx.createOscillator();
-              const gain = audioCtx.createGain();
-              osc.connect(gain);
-              gain.connect(audioCtx.destination);
-              osc.type = 'square';
-              osc.frequency.setValueAtTime(freq, startTime);
-              gain.gain.setValueAtTime(0.25, startTime);
-              gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-              osc.start(startTime);
-              osc.stop(startTime + duration);
-            };
-            const now = audioCtx.currentTime;
-            playTone(880, now, 0.15);
-            playTone(660, now + 0.15, 0.15);
-            playTone(880, now + 0.3, 0.15);
-            playTone(660, now + 0.45, 0.15);
-            playTone(1100, now + 0.6, 0.3);
-          } catch {}
+          playAlertSound();
+          alertIntervalRef.current = setInterval(playAlertSound, 2500);
         }
       }
     };
@@ -244,18 +220,19 @@ export function MissileAlertListener() {
     return () => {
       if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hasAlerts = missileAlerts.length > 0 || droneAlerts.length > 0;
   if (!hasAlerts) return null;
 
-  // Show missile alerts first, then drones
+  // Show missiles first; after dismissed, show drones
   return createPortal(
     <>
       {missileAlerts.length > 0 && (
         <AlertPopup alerts={missileAlerts} type="missile" onDismiss={dismissMissiles} />
       )}
-      {droneAlerts.length > 0 && missileAlerts.length === 0 && (
+      {missileAlerts.length === 0 && droneAlerts.length > 0 && (
         <AlertPopup alerts={droneAlerts} type="drone" onDismiss={dismissDrones} />
       )}
     </>,
