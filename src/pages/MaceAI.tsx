@@ -462,6 +462,30 @@ export default function MaceAI() {
             Hey Mace, publish an article about Nvidia on Washington Morning!
           </p>
         </div>
+
+        {/* Mace response */}
+        <div className="max-w-[980px] mx-auto px-4 md:px-6 mt-12 md:mt-16 flex items-center gap-6 md:gap-10">
+          <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
+            Hi, I can definitely do that! I'm doing it for you right now.
+          </p>
+          {/* Blue waveform bars */}
+          <div className="flex-shrink-0 flex items-center gap-[3px] h-12 md:h-16">
+            {[0, 0.1, 0.2, 0.15, 0.25, 0.35, 0.3, 0.4, 0.2, 0.1].map((delay, i) => {
+              const colors = ['#4fc3f7', '#7986cb', '#5c6bc0', '#42a5f5', '#64b5f6', '#7e57c2', '#5c6bc0', '#42a5f5', '#4fc3f7', '#7986cb'];
+              return (
+                <div
+                  key={i}
+                  className="w-[3px] md:w-1 h-full rounded-full"
+                  style={{
+                    backgroundColor: colors[i],
+                    animation: `voice-bar ${0.6 + (i % 3) * 0.15}s ease-in-out ${delay}s infinite`,
+                    transformOrigin: 'center',
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* Capabilities Grid - Siri-style scenarios */}
