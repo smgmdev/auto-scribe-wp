@@ -536,7 +536,7 @@ export default function MaceAI() {
             Experience Mace AI.
           </h2>
           <p className="text-xl text-[#86868b] leading-relaxed mb-10 max-w-2xl mx-auto">
-            Built into Arcana Mace, ready to help you create, publish, and manage content with intelligence.
+            Built into Arcana Mace, ready to listen to your command.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
