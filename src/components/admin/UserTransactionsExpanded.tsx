@@ -217,7 +217,10 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
     });
   };
 
-  const getTypeBadge = (type: string) => {
+  const getTypeBadge = (type: string, description?: string | null) => {
+    // Check if this is a Mace AI publish
+    const isMacePublish = type === 'publish' && !!description?.includes('via Mace AI');
+    
     const config: Record<string, { className: string; label: string }> = {
       purchase: { className: 'bg-green-100 text-green-700 hover:bg-green-100', label: 'Purchase' },
       gifted: { className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100', label: 'Gifted' },
@@ -237,6 +240,11 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
       withdrawal_unlocked: { className: 'bg-red-100 text-red-700 hover:bg-red-100', label: 'Withdrawal Rejected' },
       withdrawal_completed: { className: 'bg-foreground text-background hover:bg-foreground', label: 'Withdrawal Completed' }
     };
+    
+    if (isMacePublish) {
+      return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 whitespace-nowrap rounded-none">Mace AI</Badge>;
+    }
+    
     const badge = config[type] || { className: 'bg-muted text-muted-foreground hover:bg-muted', label: type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     return <Badge className={`${badge.className} whitespace-nowrap rounded-none`}>{badge.label}</Badge>;
   };
@@ -1053,7 +1061,7 @@ export const UserTransactionsExpanded = ({ userId }: UserTransactionsExpandedPro
                         </TableCell>
                         <TableCell className="max-w-md">
                           <div className="flex flex-col gap-0.5">
-                            <div>{getTypeBadge(tx.type)}</div>
+                            <div>{getTypeBadge(tx.type, tx.description)}</div>
                             <span className="text-muted-foreground break-words">
                               {['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'].includes(tx.type) ? (
                                 tx.description?.includes('Bank Transfer') 
