@@ -202,7 +202,7 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
       <lineSegments geometry={borderGeo}>
         <lineBasicMaterial color="#ffffff" linewidth={5} opacity={0.7} transparent />
       </lineSegments>
-      <Html position={centroid} distanceFactor={6} style={{ pointerEvents: 'none' }} center>
+      <Html position={centroid} style={{ pointerEvents: 'none' }} center sprite>
         <div style={{
           background: 'rgba(8,12,22,0.88)',
           border: '1px solid rgba(255,255,255,0.15)',
