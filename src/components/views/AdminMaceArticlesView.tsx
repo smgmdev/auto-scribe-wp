@@ -242,7 +242,7 @@ const AdminMaceArticlesView = () => {
 
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-foreground truncate">{article.title}</h3>
-                <div className="flex flex-col mt-1 text-xs text-muted-foreground gap-0.5">
+                <div className="flex flex-col text-xs text-muted-foreground gap-0.5">
                   <span>{article.published_to_name || 'Unknown site'}</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
