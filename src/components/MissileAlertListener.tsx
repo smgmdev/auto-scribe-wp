@@ -72,71 +72,67 @@ function AlertPopup({ alerts, type, onDismiss }: { alerts: MissileAlert[]; type:
       };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className={`absolute inset-0 pointer-events-none animate-pulse border-[3px] ${colors.flashBorder}`} />
+    <div className={`relative w-full max-w-md mx-2 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
+      <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
       
-      <div className={`relative w-full max-w-md mx-4 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
-        <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
-        
-        <div className="p-6 text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="relative">
-              <div className={`w-16 h-16 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
-                {isMissile ? <Siren className={`w-8 h-8 ${colors.iconColor}`} /> : <Shield className={`w-8 h-8 ${colors.iconColor}`} />}
-              </div>
-              <div className={`absolute inset-0 w-16 h-16 rounded-full border ${colors.pingBorder} animate-ping`} />
+      <div className="p-6 text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className={`w-16 h-16 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
+              {isMissile ? <Siren className={`w-8 h-8 ${colors.iconColor}`} /> : <Shield className={`w-8 h-8 ${colors.iconColor}`} />}
             </div>
+            <div className={`absolute inset-0 w-16 h-16 rounded-full border ${colors.pingBorder} animate-ping`} />
           </div>
-
-          <div>
-            <h2 className={`text-2xl font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
-              ⚠ {isMissile ? 'MISSILE' : 'DRONE'} ALERT ⚠
-            </h2>
-            <p className={`text-xs ${colors.subtitleColor} font-mono mt-1 uppercase tracking-widest`}>
-              Worldwide Threat Detection
-            </p>
-          </div>
-
-          {alerts.some(a => a.origin_country_code && a.destination_country_code) && (
-            <Suspense fallback={<div className="w-full h-48 bg-black/40 rounded-lg animate-pulse" />}>
-              <MissileTrajectoryGlobe
-                originCode={alerts.find(a => a.origin_country_code)?.origin_country_code ?? null}
-                destinationCode={alerts.find(a => a.destination_country_code)?.destination_country_code ?? null}
-              />
-            </Suspense>
-          )}
-
-          <div className="space-y-2 text-left max-h-48 overflow-y-auto">
-            {alerts.map((alert) => (
-              <div key={alert.id} className={`p-3 rounded-lg ${colors.cardBg} border ${colors.cardBorder}`}>
-                <p className={`text-sm font-medium ${colors.textPrimary}`}>{alert.title}</p>
-                {alert.description && (
-                  <p className={`text-xs ${colors.textSecondary} mt-1`}>{alert.description}</p>
-                )}
-                <div className="flex items-center gap-2 mt-1">
-                  <p className={`text-xs ${colors.textTertiary}`}>
-                    {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
-                  </p>
-                  {alert.origin_country_name && alert.destination_country_name && (
-                    <span className="text-xs text-blue-400 font-mono">
-                      {alert.origin_country_name} → {alert.destination_country_name}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Button
-            onClick={onDismiss}
-            className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-base py-5 border ${colors.btnBorder} ${colors.btnShadow}`}
-          >
-            OK
-          </Button>
         </div>
 
-        <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
+        <div>
+          <h2 className={`text-2xl font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
+            ⚠ {isMissile ? 'MISSILE' : 'DRONE'} ALERT ⚠
+          </h2>
+          <p className={`text-xs ${colors.subtitleColor} font-mono mt-1 uppercase tracking-widest`}>
+            Worldwide Threat Detection
+          </p>
+        </div>
+
+        {alerts.some(a => a.origin_country_code && a.destination_country_code) && (
+          <Suspense fallback={<div className="w-full h-48 bg-black/40 rounded-lg animate-pulse" />}>
+            <MissileTrajectoryGlobe
+              originCode={alerts.find(a => a.origin_country_code)?.origin_country_code ?? null}
+              destinationCode={alerts.find(a => a.destination_country_code)?.destination_country_code ?? null}
+            />
+          </Suspense>
+        )}
+
+        <div className="space-y-2 text-left max-h-48 overflow-y-auto">
+          {alerts.map((alert) => (
+            <div key={alert.id} className={`p-3 rounded-lg ${colors.cardBg} border ${colors.cardBorder}`}>
+              <p className={`text-sm font-medium ${colors.textPrimary}`}>{alert.title}</p>
+              {alert.description && (
+                <p className={`text-xs ${colors.textSecondary} mt-1`}>{alert.description}</p>
+              )}
+              <div className="flex items-center gap-2 mt-1">
+                <p className={`text-xs ${colors.textTertiary}`}>
+                  {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
+                </p>
+                {alert.origin_country_name && alert.destination_country_name && (
+                  <span className="text-xs text-blue-400 font-mono">
+                    {alert.origin_country_name} → {alert.destination_country_name}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Button
+          onClick={onDismiss}
+          className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-base py-5 border ${colors.btnBorder} ${colors.btnShadow}`}
+        >
+          OK
+        </Button>
       </div>
+
+      <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
     </div>
   );
 }
@@ -226,16 +222,18 @@ export function MissileAlertListener() {
   const hasAlerts = missileAlerts.length > 0 || droneAlerts.length > 0;
   if (!hasAlerts) return null;
 
-  // Show missiles first; after dismissed, show drones
   return createPortal(
-    <>
-      {missileAlerts.length > 0 && (
-        <AlertPopup alerts={missileAlerts} type="missile" onDismiss={dismissMissiles} />
-      )}
-      {missileAlerts.length === 0 && droneAlerts.length > 0 && (
-        <AlertPopup alerts={droneAlerts} type="drone" onDismiss={dismissDrones} />
-      )}
-    </>,
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="absolute inset-0 pointer-events-none animate-pulse border-[3px] border-red-600/60" />
+      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[90vh] overflow-auto px-4">
+        {missileAlerts.length > 0 && (
+          <AlertPopup alerts={missileAlerts} type="missile" onDismiss={dismissMissiles} />
+        )}
+        {droneAlerts.length > 0 && (
+          <AlertPopup alerts={droneAlerts} type="drone" onDismiss={dismissDrones} />
+        )}
+      </div>
+    </div>,
     document.body
   );
 }
