@@ -202,7 +202,7 @@ export default function MaceAI() {
       </div>
 
       {/* Hero Section */}
-      <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-black text-white overflow-hidden pt-8 pb-32">
+      <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-black text-white overflow-hidden pt-24 pb-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
             <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-[#0071e3] via-[#5856d6] to-[#ff2d55] flex items-center justify-center">
