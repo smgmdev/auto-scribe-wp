@@ -42,6 +42,14 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       { id: 'my-requests', label: 'My Engagements', icon: MessageSquare },
       { id: 'orders', label: 'My Orders', icon: Package }
     ]
+  }, {
+    id: 'mace-section',
+    label: 'Mace AI',
+    icon: Mic,
+    submenu: [
+      { id: 'admin-mace-ai', label: 'GO', icon: Play },
+      { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
+    ]
   }];
 
   // Add Agency Management for onboarded agencies
@@ -59,19 +67,6 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     });
   }
 
-  // Add Mace AI for non-admin users (without Settings)
-  if (!isAdmin) {
-    base.push({
-      id: 'mace-section',
-      label: 'Mace AI',
-      icon: Mic,
-      submenu: [
-        { id: 'admin-mace-ai', label: 'GO', icon: Play },
-        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
-      ]
-    });
-  }
-
   // Add Credit Management for non-admin users only (after Agency Management)
   if (!isAdmin) {
     base.push({
@@ -82,7 +77,16 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   }
 
   if (isAdmin) {
-    return [...base.filter(item => item.id !== 'b2b-media-buying'), {
+    return [...base.filter(item => item.id !== 'b2b-media-buying' && item.id !== 'mace-section'), {
+      id: 'admin-mace-section',
+      label: 'Mace AI',
+      icon: Mic,
+      submenu: [
+        { id: 'admin-mace-ai', label: 'GO', icon: Play },
+        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText },
+        { id: 'admin-mace-settings', label: 'Mace Settings (Dev)', icon: Cog }
+      ]
+    }, {
       id: 'b2b-media-buying',
       label: 'B2B Media Buying',
       icon: ShoppingBag,
@@ -143,15 +147,6 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       id: 'admin-feedback',
       label: 'Feedback',
       icon: MessageSquareText
-    }, {
-      id: 'admin-mace-section',
-      label: 'Mace AI',
-      icon: Mic,
-      submenu: [
-        { id: 'admin-mace-ai', label: 'GO', icon: Play },
-        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText },
-        { id: 'admin-mace-settings', label: 'Mace Settings (Dev)', icon: Cog }
-      ]
     }];
   }
   return base;
