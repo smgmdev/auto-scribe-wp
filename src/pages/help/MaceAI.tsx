@@ -107,7 +107,7 @@ const sections: HelpSection[] = [
         </p>
         <ol className="list-decimal list-inside space-y-2 ml-4">
           <li><strong>Content Generation:</strong> Mace researches the topic using real-time web data and generates a full-length, publication-ready article</li>
-          <li><strong>WordPress Publication:</strong> The article is published directly to your chosen WordPress site</li>
+          <li><strong>Real-Time Publishing:</strong> The article is published directly to your chosen site</li>
         </ol>
         <p>
           During the process, you'll see status indicators: "Researching topic...",
