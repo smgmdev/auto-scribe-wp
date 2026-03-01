@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -73,6 +73,7 @@ export function AdminSurveillanceView() {
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [missileTimeFilter, setMissileTimeFilter] = useState<number>(1); // hours, 0.0417 = 1h default
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
 
   const fetchLatestScan = useCallback(async () => {
@@ -127,18 +128,19 @@ export function AdminSurveillanceView() {
   }, [hasLoaded, fetchLatestScan, runScan]);
 
   // Fetch active missile alerts for trajectory arcs
+  const fetchMissiles = useCallback(async () => {
+    const cutoff = new Date(Date.now() - missileTimeFilter * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('missile_alerts')
+      .select('id, origin_country_code, destination_country_code')
+      .eq('active', true)
+      .gte('created_at', cutoff)
+      .not('origin_country_code', 'is', null)
+      .not('destination_country_code', 'is', null);
+    if (data) setMissileTrajectories(data);
+  }, [missileTimeFilter]);
+
   useEffect(() => {
-    const fetchMissiles = async () => {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from('missile_alerts')
-        .select('id, origin_country_code, destination_country_code')
-        .eq('active', true)
-        .gte('created_at', oneHourAgo)
-        .not('origin_country_code', 'is', null)
-        .not('destination_country_code', 'is', null);
-      if (data) setMissileTrajectories(data);
-    };
     fetchMissiles();
     const channel = supabase
       .channel('missile-alerts-globe')
@@ -150,7 +152,7 @@ export function AdminSurveillanceView() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchMissiles]);
 
   const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
   const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
@@ -160,7 +162,7 @@ export function AdminSurveillanceView() {
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-white/5 bg-[#0d1220]">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-1 border-b border-white/5 bg-[#0d1220]">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className={cn(
@@ -173,7 +175,7 @@ export function AdminSurveillanceView() {
             </div>
 
             {scanData && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2 px-3 py-0.5 bg-white/5 border border-white/10">
                 <div className={cn(
                   "w-2 h-2 rounded-full",
                   scanData.global_tension_level === 'critical' || scanData.global_tension_level === 'severe' ? 'bg-red-500' :
@@ -229,19 +231,46 @@ export function AdminSurveillanceView() {
               </div>
             )}
 
-            {/* Legend */}
-            <div className="absolute bottom-4 left-4 flex items-center gap-4 px-4 py-2 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                <span className="text-xs font-mono text-gray-400">Safe ({safeCount})</span>
+            {/* Legend + missile filter */}
+            <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
+                <Rocket className="w-3 h-3 text-blue-400" />
+                <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
+                {[
+                  { label: '1h', value: 1 },
+                  { label: '6h', value: 6 },
+                  { label: '12h', value: 12 },
+                  { label: '24h', value: 24 },
+                  { label: '7d', value: 168 },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setMissileTimeFilter(opt.value)}
+                    className={cn(
+                      "text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors",
+                      missileTimeFilter === opt.value
+                        ? "bg-blue-500/30 text-blue-300 border border-blue-500/40"
+                        : "text-gray-500 hover:text-gray-300"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                <span className="text-xs font-mono text-gray-400">Caution ({cautionCount})</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                <span className="text-xs font-mono text-gray-400">Danger ({dangerCount})</span>
+              <div className="flex items-center gap-4 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                  <span className="text-xs font-mono text-gray-400">Safe ({safeCount})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                  <span className="text-xs font-mono text-gray-400">Caution ({cautionCount})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                  <span className="text-xs font-mono text-gray-400">Danger ({dangerCount})</span>
+                </div>
               </div>
             </div>
 
