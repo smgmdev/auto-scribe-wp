@@ -122,22 +122,22 @@ function CountryLabels({ countries, zoomLevel }: { countries: CountryData[]; zoo
   );
 }
 
-/** Simple graticule grid acting as subtle country-border-like lines */
+/** Dense graticule grid simulating country borders */
 function GlobeGrid() {
   const gridLines = useMemo(() => {
     const lines: [number, number, number][][] = [];
-    // Latitude lines
-    for (let lat = -80; lat <= 80; lat += 10) {
+    // Dense latitude lines every 5°
+    for (let lat = -80; lat <= 80; lat += 5) {
       const points: [number, number, number][] = [];
-      for (let lng = -180; lng <= 180; lng += 3) {
+      for (let lng = -180; lng <= 180; lng += 2) {
         points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
       }
       lines.push(points);
     }
-    // Longitude lines
-    for (let lng = -180; lng < 180; lng += 15) {
+    // Dense longitude lines every 8°
+    for (let lng = -180; lng < 180; lng += 8) {
       const points: [number, number, number][] = [];
-      for (let lat = -90; lat <= 90; lat += 3) {
+      for (let lat = -90; lat <= 90; lat += 2) {
         points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
       }
       lines.push(points);
@@ -151,10 +151,10 @@ function GlobeGrid() {
         <Line
           key={i}
           points={points}
-          color="#ffffff"
-          opacity={0.06}
+          color="#aaaaaa"
+          opacity={0.09}
           transparent
-          lineWidth={0.4}
+          lineWidth={0.5}
         />
       ))}
     </>
@@ -226,38 +226,35 @@ function CountryMarker({
         <PulsingRing color={color} size={baseSize} />
       )}
 
-      {/* Compact hover tooltip */}
+      {/* Tiny hover tooltip */}
       {(hovered || isSelected) && (
         <Html
-          distanceFactor={6}
+          distanceFactor={7}
           style={{ pointerEvents: 'none' }}
           center
-          position={[0, 0.09, 0]}
+          position={[0, 0.07, 0]}
         >
           <div
             style={{
-              background: 'rgba(10, 14, 26, 0.88)',
-              border: `1px solid ${color}40`,
-              borderRadius: '4px',
-              padding: '3px 6px',
+              background: 'rgba(8, 12, 22, 0.85)',
+              border: `1px solid ${color}30`,
+              borderRadius: '3px',
+              padding: '1.5px 4px',
               textAlign: 'center',
               whiteSpace: 'nowrap',
-              backdropFilter: 'blur(6px)',
-              boxShadow: `0 0 8px ${color}30`,
+              backdropFilter: 'blur(4px)',
             }}
           >
-            <div style={{ fontSize: '8px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+            <div style={{ fontSize: '6px', fontWeight: 600, color: '#eee', lineHeight: 1.1 }}>
               {country.name}
             </div>
             <div
               style={{
-                fontSize: '7px',
+                fontSize: '5px',
                 fontFamily: 'monospace',
                 textTransform: 'uppercase',
-                letterSpacing: '0.3px',
                 color,
-                lineHeight: 1.3,
-                marginTop: '1px',
+                lineHeight: 1.2,
               }}
             >
               {country.threat_level} · {country.score}
