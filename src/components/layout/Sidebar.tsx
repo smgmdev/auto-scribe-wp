@@ -59,6 +59,19 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
     });
   }
 
+  // Add Mace AI for non-admin users (without Settings)
+  if (!isAdmin) {
+    base.push({
+      id: 'mace-section',
+      label: 'Mace AI',
+      icon: Mic,
+      submenu: [
+        { id: 'admin-mace-ai', label: 'GO', icon: Play },
+        { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
+      ]
+    });
+  }
+
   // Add Credit Management for non-admin users only (after Agency Management)
   if (!isAdmin) {
     base.push({
@@ -294,7 +307,7 @@ export function Sidebar({
     }
     const maceIds = ['admin-mace-ai', 'admin-mace-articles', 'admin-mace-settings'];
     if (maceIds.includes(currentView)) {
-      setExpandedMenus(prev => ({ ...prev, 'admin-mace-section': true }));
+      setExpandedMenus(prev => ({ ...prev, 'admin-mace-section': true, 'mace-section': true }));
     }
   }, [currentView, hasUserNavigated]);
 
