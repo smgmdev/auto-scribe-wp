@@ -239,8 +239,8 @@ export default function MaceAI() {
   return (
     <>
     <SEOHead
-      title="Mace AI – Intelligent Assistant | Arcana Mace"
-      description="Meet Mace AI, the intelligent assistant built into Arcana Mace. Generate articles, monitor security, automate publishing, and more with AI-powered tools."
+      title="Mace AI - Publish Articles by Voice Command"
+      description="Publish your article to media in under 30 seconds without touching the keyboard or writing a single word. Just use a voice command."
     />
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
       {/* Main Header - matches About page */}
