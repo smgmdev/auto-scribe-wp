@@ -59,20 +59,17 @@ function CountryDot({ lat, lng, color }: { lat: number; lng: number; color: stri
 function ArcTrajectory({ origin, destination }: { origin: [number, number, number]; destination: [number, number, number] }) {
   const missileRef = useRef<THREE.Mesh>(null);
 
-  const { curve, lineObj, glowLineObj } = useMemo(() => {
+  const { curve, tubeGeo, glowTubeGeo } = useMemo(() => {
     const start = new THREE.Vector3(...origin);
     const end = new THREE.Vector3(...destination);
     const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
     mid.normalize().multiplyScalar(1.6);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
-    const pts = c.getPoints(80);
-    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const tube = new THREE.TubeGeometry(c, 80, 0.015, 8, false);
+    const glowTube = new THREE.TubeGeometry(c, 80, 0.025, 8, false);
 
-    const mainLine = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#3b82f6', transparent: true, opacity: 0.6 }));
-    const glow = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#1d4ed8', transparent: true, opacity: 0.25 }));
-
-    return { curve: c, lineObj: mainLine, glowLineObj: glow };
+    return { curve: c, tubeGeo: tube, glowTubeGeo: glowTube };
   }, [origin, destination]);
 
   useFrame(({ clock }) => {
@@ -81,16 +78,22 @@ function ArcTrajectory({ origin, destination }: { origin: [number, number, numbe
       const pos = curve.getPoint(t);
       missileRef.current.position.copy(pos);
       const next = curve.getPoint(Math.min(t + 0.01, 1));
-      missileRef.current.lookAt(next);
+      const dir = new THREE.Vector3().subVectors(next, pos).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      missileRef.current.quaternion.copy(quat);
     }
   });
 
   return (
     <group>
-      <primitive object={lineObj} />
-      <primitive object={glowLineObj} />
+      <mesh geometry={glowTubeGeo}>
+        <meshBasicMaterial color="#1d4ed8" transparent opacity={0.25} />
+      </mesh>
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.6} />
+      </mesh>
       <mesh ref={missileRef}>
-        <sphereGeometry args={[0.02, 8, 8]} />
+        <coneGeometry args={[0.035, 0.08, 8]} />
         <meshBasicMaterial color="#60a5fa" />
       </mesh>
     </group>
