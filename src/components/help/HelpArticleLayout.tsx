@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Info, Search, User } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
+import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -223,6 +224,7 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
         </div>
       </main>
 
+      <PWAInstallButtons />
       <Footer narrow />
       <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </div>
