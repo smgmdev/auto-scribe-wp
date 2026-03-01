@@ -47,61 +47,53 @@ export default function ResetPassword() {
   useEffect(() => {
     let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return;
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+    // 1. Check if Supabase already established a session (from hash auto-detection)
+    //    This handles the case where the client parsed the hash BEFORE this component mounted.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && mounted) {
+        console.log('[ResetPassword] Session already available from getSession');
         setIsReady(true);
       }
     });
 
-    // Parse hash tokens and manually set session if present
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
+    // 2. Listen for future auth events (PASSWORD_RECOVERY or SIGNED_IN)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      console.log('[ResetPassword] Auth event:', event, !!session);
+      if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+        setIsReady(true);
+      }
+    });
 
-      if (accessToken && refreshToken) {
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        }).then(({ data, error }) => {
-          if (!mounted) return;
-          if (data?.session && !error) {
-            console.log('[ResetPassword] Session restored from hash tokens');
+    // 3. If hash tokens are present and nothing worked after 3s, try manual setSession
+    const hash = window.location.hash;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    if (hash && hash.includes('access_token')) {
+      fallbackTimer = setTimeout(async () => {
+        if (!mounted || isReady) return;
+        console.log('[ResetPassword] Fallback: manually parsing hash tokens');
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (data?.session && !error && mounted) {
+            console.log('[ResetPassword] Fallback setSession succeeded');
             setIsReady(true);
-            // Clean hash from URL
             window.history.replaceState(null, '', window.location.pathname);
           } else {
-            console.error('[ResetPassword] Failed to set session:', error?.message);
+            console.error('[ResetPassword] Fallback setSession failed:', error?.message);
           }
-        });
-      } else {
-        // Fallback: wait for Supabase to auto-detect
-        const fallbackTimer = setTimeout(async () => {
-          if (!mounted || isReady) return;
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session && mounted) {
-            setIsReady(true);
-          }
-        }, 3000);
-        return () => {
-          mounted = false;
-          clearTimeout(fallbackTimer);
-          subscription.unsubscribe();
-        };
-      }
-    } else {
-      // No hash — check if already authenticated (e.g. redirected with session cookie)
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session && mounted) {
-          setIsReady(true);
         }
-      });
+      }, 3000);
     }
 
     return () => {
       mounted = false;
+      if (fallbackTimer) clearTimeout(fallbackTimer);
       subscription.unsubscribe();
     };
   }, []);
