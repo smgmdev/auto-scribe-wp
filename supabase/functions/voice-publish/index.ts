@@ -125,12 +125,8 @@ WHAT YOU DO:
 4. Answer questions about publishing
 5. Search the internet for real-time information when users ask about current events, facts, news, or anything that needs up-to-date data
 
-FEATURED IMAGES — IMPORTANT:
-- You CANNOT generate images. You do NOT have image generation capabilities.
-- If a user asks you to add an image, generate an image, or mentions wanting a photo/picture, respond naturally: "I can't generate images myself, but if you have a specific image in mind, you can upload it and I'll attach it to the article for you."
-- If the user says yes or wants to upload, respond with EXACTLY this format: "Sure! Go ahead and use the upload button below to send me the image, and I'll include it in the article." — this triggers the upload UI.
-- When you detect the user wants to upload an image (says yes, ok, sure, etc. after you offer), include the special marker [SHOW_UPLOAD] at the very end of your response (after the period). This is invisible to the user but triggers the upload button in the UI.
-- Once an image is uploaded (you'll see a message like "I've uploaded an image for the article"), acknowledge it and continue with publishing.
+FEATURED IMAGES:
+- You do NOT support image uploads or image generation. If a user asks about images, say: "I don't handle images — I focus on writing and publishing the article content."
 
 IMPORTANT RULES:
 - For greetings like "hi", "how are you", "what's up" — just reply naturally. Do NOT call any tools.
@@ -440,7 +436,7 @@ IMPORTANT RULES:
           siteAgency: matchedSite.agency,
           creditsRequired,
           isAdmin,
-          featuredImageUrl: null,
+          
         },
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -541,39 +537,10 @@ FORMAT YOUR RESPONSE EXACTLY:
       }),
     });
 
-    // Upload user-provided featured image to WordPress IN PARALLEL with article+SEO
-    const imagePromise = (async () => {
-      if (!pa.featuredImageUrl) return 0;
-      try {
-        console.log('[voice-publish] Uploading user-provided featured image...');
-        const imgResp = await fetch(pa.featuredImageUrl);
-        if (!imgResp.ok) { console.error('[voice-publish] Failed to fetch user image:', imgResp.status); return 0; }
-        const imgBlob = await imgResp.blob();
-        const contentType = imgBlob.type || 'image/jpeg';
-        const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
-        const filename = `mace-featured-${Date.now()}.${ext}`;
-        const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
-        const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-          method: 'POST',
-          headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
-          body: imgBytes,
-        });
-        if (wpMediaResp.ok) {
-          const wpMediaData = await wpMediaResp.json();
-          console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
-          return wpMediaData.id;
-        }
-        const wpErr = await wpMediaResp.text();
-        console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
-        return 0;
-      } catch (imgError) {
-        console.error('[voice-publish] Featured image upload error (non-fatal):', imgError);
-        return 0;
-      }
-    })();
+    const featuredMediaId = 0;
 
-    // Wait for article + SEO + image ALL in parallel
-    const [articleResponse, seoResponse, featuredMediaId] = await Promise.all([articlePromise, seoPromise, imagePromise]);
+    // Wait for article + SEO in parallel
+    const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
