@@ -478,32 +478,52 @@ export function AdminMaceAIView() {
           setMessages(prev => [...prev, { role: 'assistant', content: goMsg }]);
           
           speak(goMsg, async () => {
-            // Now actually publish — cycle through phases for UI feedback
+            // Now actually publish — two-phase approach to avoid timeouts
             try {
               setStep('processing');
               setPublishPhase('Researching topic...');
-              const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 4000);
-              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 10000);
-              const phaseTimer3 = setTimeout(() => setPublishPhase('Creating tags...'), 15000);
-              const phaseTimer4 = setTimeout(() => setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`), 20000);
-              const phaseTimer5 = setTimeout(() => {}, 25000);
+              const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 3000);
+              const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 8000);
 
               const articleToPublish = { ...currentPending };
 
-              const result = await supabase.functions.invoke('voice-publish', {
+              // Phase 1: Generate article content (AI only, no WP calls)
+              const genResult = await supabase.functions.invoke('voice-publish', {
                 body: { action: 'confirm_publish', pendingArticle: articleToPublish },
               });
-              const data = result.data;
-              const error = result.error;
 
               clearTimeout(phaseTimer1);
               clearTimeout(phaseTimer2);
-              clearTimeout(phaseTimer3);
-              clearTimeout(phaseTimer4);
-              clearTimeout(phaseTimer5);
+
+              if (genResult.error) throw new Error(typeof genResult.error === 'string' ? genResult.error : genResult.error?.message || 'Article generation failed');
+              
+              const genData = genResult.data;
+              if (genData?.type === 'conversation') {
+                // AI returned an error message instead of content
+                throw new Error(genData.message || 'Article generation failed');
+              }
+              if (genData?.type !== 'content_ready' || !genData?.generatedContent) {
+                throw new Error('Unexpected response from article generation');
+              }
+
+              // Phase 2: Publish to WordPress (tags + WP + credits + DB)
+              setPublishPhase('Creating tags...');
+              const pubTimer = setTimeout(() => setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`), 3000);
+
+              const pubResult = await supabase.functions.invoke('voice-publish', {
+                body: { action: 'do_publish', generatedContent: genData.generatedContent },
+              });
+
+              clearTimeout(pubTimer);
               setPublishPhase('');
 
-              if (error) throw new Error(typeof error === 'string' ? error : error?.message || 'Publish failed');
+              if (pubResult.error) throw new Error(typeof pubResult.error === 'string' ? pubResult.error : pubResult.error?.message || 'Publishing failed');
+
+              const data = pubResult.data;
+              if (data?.type === 'conversation') {
+                // WP error returned as conversation
+                throw new Error(data.message || 'Publishing failed');
+              }
 
               const responseMessage = data?.message || "Something went wrong during publishing.";
               setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
