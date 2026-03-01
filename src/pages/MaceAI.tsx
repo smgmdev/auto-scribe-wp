@@ -426,7 +426,7 @@ export default function MaceAI() {
           </AnimatedSection>
 
           <AnimatedSection delay={200}>
-            <p className="text-base md:text-2xl text-white/70 max-w-2xl mx-auto leading-snug md:leading-relaxed mb-4 px-2 md:px-0">
+            <p className="text-base md:text-xl text-white/70 max-w-2xl mx-auto leading-snug mb-4 px-2 md:px-0">
               Publish your article to media in under 30 seconds—without touching the keyboard or writing a single word. Just use a voice command.
             </p>
           </AnimatedSection>
