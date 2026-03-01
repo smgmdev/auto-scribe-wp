@@ -278,24 +278,6 @@ function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
   );
 }
 
-/** Creates crosshair line geometry */
-function createCrosshairGeo(size: number): THREE.BufferGeometry {
-  const s = size, g = size * 0.3;
-  const vertices = new Float32Array([
-    -s, 0, 0,  -g, 0, 0,
-    g, 0, 0,   s, 0, 0,
-    0, s, 0,   0, g, 0,
-    0, -g, 0,  0, -s, 0,
-    s * 0.7, s, 0,   s, s, 0,   s, s, 0,   s, s * 0.7, 0,
-    -s * 0.7, s, 0,  -s, s, 0,  -s, s, 0,  -s, s * 0.7, 0,
-    s * 0.7, -s, 0,  s, -s, 0,  s, -s, 0,  s, -s * 0.7, 0,
-    -s * 0.7, -s, 0, -s, -s, 0, -s, -s, 0, -s, -s * 0.7, 0,
-  ]);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-  return geo;
-}
-
 function CountryMarker({
   country,
   onClick,
@@ -306,12 +288,12 @@ function CountryMarker({
   isSelected: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  const groupRef = useRef<THREE.Group>(null);
   const coords = COUNTRY_COORDINATES[country.code];
-  const baseSize =
-    country.threat_level === 'danger' ? 0.04
-    : country.threat_level === 'caution' ? 0.03
-    : 0.02;
-  const crosshairGeo = useMemo(() => createCrosshairGeo(baseSize), [baseSize]);
+  const sphereSize =
+    country.threat_level === 'danger' ? 0.035
+    : country.threat_level === 'caution' ? 0.025
+    : 0.018;
 
   if (!coords) return null;
 
@@ -320,77 +302,76 @@ function CountryMarker({
   const active = hovered || isSelected;
 
   return (
-    <group position={position}>
-      <lineSegments geometry={crosshairGeo}>
-        <lineBasicMaterial color={color} opacity={active ? 0.9 : 0.5} transparent />
-      </lineSegments>
-
+    <group position={position} ref={groupRef}>
+      {/* 3D glowing sphere core */}
       <mesh
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
       >
-        <circleGeometry args={[baseSize * 0.15, 16]} />
-        <meshBasicMaterial color={color} opacity={active ? 1 : 0.7} transparent side={THREE.DoubleSide} />
+        <sphereGeometry args={[sphereSize, 16, 16]} />
+        <meshPhongMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={active ? 1.2 : 0.6}
+          transparent
+          opacity={active ? 0.95 : 0.8}
+          shininess={80}
+        />
       </mesh>
 
-      {active && <LockOnRing color={color} size={baseSize} />}
-      {country.threat_level === 'danger' && <SonarPing color={color} size={baseSize} />}
+      {/* Outer glow shell */}
+      <mesh>
+        <sphereGeometry args={[sphereSize * 1.6, 16, 16]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.18 : 0.08} />
+      </mesh>
+
+      {/* Orbit ring */}
+      <OrbitRing color={color} size={sphereSize} speed={country.threat_level === 'danger' ? 2 : 1} active={active} />
+
+      {/* Danger pulse wave */}
+      {country.threat_level === 'danger' && <PulseWave color={color} size={sphereSize} />}
+
+      {/* Point light for surface glow */}
+      <pointLight color={color} intensity={active ? 0.5 : 0.15} distance={sphereSize * 12} />
     </group>
   );
 }
 
-function LockOnRing({ color, size }: { color: string; size: number }) {
+function OrbitRing({ color, size, speed, active }: { color: string; size: number; speed: number; active: boolean }) {
   const ref = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
-    if (ref.current) ref.current.rotation.z = clock.getElapsedTime() * 1.5;
-  });
-
-  const arcs = useMemo(() => {
-    const geos: THREE.BufferGeometry[] = [];
-    for (let q = 0; q < 4; q++) {
-      const verts: number[] = [];
-      const startA = (q / 4) * Math.PI * 2 + 0.15;
-      const endA = ((q + 1) / 4) * Math.PI * 2 - 0.15;
-      const steps = 12;
-      for (let i = 0; i < steps; i++) {
-        const a1 = startA + (i / steps) * (endA - startA);
-        const a2 = startA + ((i + 1) / steps) * (endA - startA);
-        const r = size * 0.7;
-        verts.push(Math.cos(a1) * r, Math.sin(a1) * r, 0, Math.cos(a2) * r, Math.sin(a2) * r, 0);
-      }
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-      geos.push(geo);
+    if (ref.current) {
+      const t = clock.getElapsedTime() * speed;
+      ref.current.rotation.x = Math.PI / 3;
+      ref.current.rotation.z = t;
     }
-    return geos;
-  }, [size]);
+  });
 
   return (
     <group ref={ref}>
-      {arcs.map((geo, i) => (
-        <lineSegments key={i} geometry={geo}>
-          <lineBasicMaterial color={color} opacity={0.8} transparent />
-        </lineSegments>
-      ))}
+      <mesh>
+        <torusGeometry args={[size * 2.2, size * 0.06, 8, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.6 : 0.25} />
+      </mesh>
     </group>
   );
 }
 
-function SonarPing({ color, size }: { color: string; size: number }) {
+function PulseWave({ color, size }: { color: string; size: number }) {
   const ref = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (ref.current) {
-      const t = (clock.getElapsedTime() * 1.5) % 2;
-      const scale = 1 + t * 1.5;
+      const t = (clock.getElapsedTime() * 1.2) % 2;
+      const scale = 1 + t * 2;
       ref.current.scale.setScalar(scale);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.25 - t * 0.12);
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.3 - t * 0.15);
     }
   });
   return (
     <mesh ref={ref}>
-      <ringGeometry args={[size * 0.8, size * 0.85, 32]} />
-      <meshBasicMaterial color={color} opacity={0.25} transparent side={THREE.DoubleSide} />
+      <sphereGeometry args={[size * 1.2, 16, 16]} />
+      <meshBasicMaterial color={color} transparent opacity={0.3} />
     </mesh>
   );
 }
