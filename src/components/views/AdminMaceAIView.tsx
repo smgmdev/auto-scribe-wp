@@ -811,7 +811,7 @@ export function AdminMaceAIView() {
             step === 'processing' ? 'text-muted-foreground'
             : 'text-muted-foreground'
           }`}>
-            {step === 'idle' && (messages.length === 0 ? 'Tap to speak' : 'Tap to continue')}
+            {step === 'idle' && (messages.length === 0 ? 'Tap to speak to Mace' : 'Tap to continue')}
             {step === 'processing' && (publishPhase || 'Processing...')}
           </p>
         </div>
