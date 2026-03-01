@@ -35,20 +35,20 @@ const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
       ] : [])
     ]
   }, {
-    id: 'b2b-media-buying',
-    label: 'B2B Media Buying',
-    icon: ShoppingBag,
-    submenu: [
-      { id: 'my-requests', label: 'My Engagements', icon: MessageSquare },
-      { id: 'orders', label: 'My Orders', icon: Package }
-    ]
-  }, {
     id: 'mace-section',
     label: 'Mace AI',
     icon: Mic,
     submenu: [
       { id: 'admin-mace-ai', label: 'GO', icon: Play },
       { id: 'admin-mace-articles', label: 'Mace Articles', icon: ScrollText }
+    ]
+  }, {
+    id: 'b2b-media-buying',
+    label: 'B2B Media Buying',
+    icon: ShoppingBag,
+    submenu: [
+      { id: 'my-requests', label: 'My Engagements', icon: MessageSquare },
+      { id: 'orders', label: 'My Orders', icon: Package }
     ]
   }];
 
