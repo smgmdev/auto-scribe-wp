@@ -721,19 +721,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (isStale) {
               // Session is stale — auto-clear it and proceed with login
               console.log('[Auth] Stale active session detected (last online:', lastOnline, '), auto-clearing');
-              await supabase
-                .from('profiles')
-                .update({ active_session_id: null, session_started_at: null } as any)
-                .eq('id', existingSession.user.id);
             } else {
-              // Another device/browser is actively using this account — kick ourselves
-              console.log('[Auth] Another active session detected on init, kicking this tab');
-              if (isMounted) {
-                initialLoadDoneRef.current = true;
-                setLoading(false);
-              }
-              handleSessionKicked();
-              return;
+              // On page reload / iframe rebuild (e.g. dev environment), sessionStorage
+              // resets and generates a new local session ID. Instead of kicking ourselves
+              // thinking it's "another device", just take over the session — the user
+              // clearly has a valid auth token in this tab.
+              console.log('[Auth] Different active_session_id on init, taking over (likely page reload or iframe rebuild)');
             }
           }
           
