@@ -562,7 +562,7 @@ export default function MaceAI() {
               onClick={() => navigate('/auth?mode=signup')}
               className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-none transition-colors duration-200"
             >
-              Get Started
+              Try Now
             </button>
             <button
               onClick={() => navigate('/ai-article-generation')}
