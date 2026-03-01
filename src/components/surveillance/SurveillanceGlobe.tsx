@@ -342,10 +342,10 @@ function CountryMarker({
   const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.015);
   const color = getThreatColor(country.threat_level);
   const baseSize =
-    country.threat_level === 'danger' ? 0.065
-    : country.threat_level === 'caution' ? 0.045
-    : 0.03;
-  const size = isSelected || hovered ? baseSize * 1.4 : baseSize;
+    country.threat_level === 'danger' ? 0.025
+    : country.threat_level === 'caution' ? 0.018
+    : 0.012;
+  const size = isSelected || hovered ? baseSize * 1.3 : baseSize;
 
   return (
     <group position={position}>
