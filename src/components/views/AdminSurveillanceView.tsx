@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -75,6 +75,7 @@ export function AdminSurveillanceView() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [missileTimeFilter, setMissileTimeFilter] = useState<number>(1); // hours, 0.0417 = 1h default
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [globeSpinning, setGlobeSpinning] = useState(false);
 
   const fetchLatestScan = useCallback(async () => {
     const { data } = await supabase
@@ -224,6 +225,13 @@ export function AdminSurveillanceView() {
                 {new Date(scanData.scanned_at).toLocaleTimeString()}
               </div>
             )}
+            <button
+              onClick={() => setGlobeSpinning(!globeSpinning)}
+              className="text-gray-400 hover:text-white transition-colors p-1"
+              title={globeSpinning ? 'Pause rotation' : 'Start rotation'}
+            >
+              {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            </button>
             <Button
               variant="ghost"
               size="sm"
@@ -247,6 +255,8 @@ export function AdminSurveillanceView() {
                 onCountryClick={(c) => setSelectedCountry(c)}
                 selectedCountry={selectedCountry?.code || null}
                 missileTrajectories={missileTrajectories}
+                isSpinning={globeSpinning}
+                onSpinChange={setGlobeSpinning}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
