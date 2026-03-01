@@ -108,12 +108,13 @@ export function AdminMaceAIView() {
         scribeCommittedTextRef.current = (scribeCommittedTextRef.current + ' ' + text).trim();
         setCurrentTranscript(scribeCommittedTextRef.current);
         setInterimTranscript('');
+        // Only start silence timer after real speech has been committed
+        if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
+        scribeSilenceTimerRef.current = setTimeout(() => {
+          finishScribeListening();
+        }, SCRIBE_SILENCE_MS);
       }
-      // Reset silence timer
-      if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
-      scribeSilenceTimerRef.current = setTimeout(() => {
-        finishScribeListening();
-      }, SCRIBE_SILENCE_MS);
+      // Ignore empty commits — don't start silence timer
     },
   });
 
