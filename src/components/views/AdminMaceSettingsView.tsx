@@ -197,10 +197,12 @@ export function AdminMaceSettingsView() {
                 <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors">
                   {site.favicon && <img src={site.favicon} alt="" className="h-5 w-5 rounded" />}
                   <h2 className="text-sm font-semibold text-foreground">{site.name}</h2>
-                  {selectedCount > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-xs">{selectedCount} categories</Badge>
-                  )}
-                  <ChevronRight className={`h-4 w-4 ml-auto text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                  <div className="flex items-center gap-1 ml-auto">
+                    {selectedCount > 0 && (
+                      <Badge variant="secondary" className="text-xs">{selectedCount} categories</Badge>
+                    )}
+                  <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+                  </div>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
