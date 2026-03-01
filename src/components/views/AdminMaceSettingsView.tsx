@@ -140,7 +140,7 @@ export function AdminMaceSettingsView() {
       <div className="max-w-[980px] mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+            <h1 className="text-4xl font-bold text-foreground">Settings</h1>
             <p className="mt-2 text-muted-foreground">
               Configure default categories for Mace AI published articles per site
             </p>
