@@ -284,7 +284,7 @@ const AdminMaceArticlesView = () => {
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Delete Article</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{articleToDelete?.title}"? This will also remove it from WordPress. This action cannot be undone.
+              Are you sure you want to delete "{articleToDelete?.title}"? This will also remove it from the media site. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-0 sm:space-x-0">
