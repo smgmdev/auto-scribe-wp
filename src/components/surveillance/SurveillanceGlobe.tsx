@@ -203,7 +203,7 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
         <lineBasicMaterial color="#ffffff" linewidth={5} opacity={0.7} transparent />
       </lineSegments>
       <Html position={centroid} distanceFactor={8} style={{ pointerEvents: 'none' }} center>
-        <span style={{ fontSize: '6px', fontWeight: 500, color: '#fff', fontFamily: 'monospace', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+        <span style={{ fontSize: '6px', fontWeight: 500, color: '#fff', fontFamily: 'monospace', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1, whiteSpace: 'nowrap' }}>
           {feature.properties.name}
         </span>
       </Html>
