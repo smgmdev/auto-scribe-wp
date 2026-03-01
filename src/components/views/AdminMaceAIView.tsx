@@ -636,14 +636,35 @@ export function AdminMaceAIView() {
               }`}
             >
               {step === 'listening' && (
-                <span className="absolute -inset-3 rounded-full border-2 border-red-400 opacity-30 animate-pulse pointer-events-none" />
+                <>
+                  <span className="absolute -inset-3 rounded-full border-2 border-red-400 opacity-30 animate-pulse pointer-events-none" />
+                  <span className="absolute -inset-6 rounded-full border border-red-300 opacity-15 animate-[ping_2s_ease-out_infinite] pointer-events-none" />
+                </>
               )}
               {step === 'speaking' && (
                 <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse pointer-events-none" />
               )}
 
               {step === 'idle' && <Mic className="w-7 h-7 text-white relative z-10" />}
-              {step === 'listening' && <MicOff className="w-7 h-7 text-white relative z-10" />}
+              {step === 'listening' && (
+                <div className="flex items-center gap-[3px] relative z-10">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <span
+                      key={i}
+                      className="w-[3px] rounded-full bg-white"
+                      style={{
+                        animation: `mace-bar-bounce 0.8s ease-in-out ${i * 0.1}s infinite alternate`,
+                      }}
+                    />
+                  ))}
+                  <style>{`
+                    @keyframes mace-bar-bounce {
+                      0% { height: 6px; }
+                      100% { height: 22px; }
+                    }
+                  `}</style>
+                </div>
+              )}
               {step === 'speaking' && <Volume2 className="w-7 h-7 text-white relative z-10 animate-pulse" />}
             </button>
           )}
