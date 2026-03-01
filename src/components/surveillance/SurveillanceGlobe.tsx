@@ -466,7 +466,9 @@ function RotatingGlobe({
         maxDistance={8}
         autoRotate={false}
         enableDamping
-        dampingFactor={0.05}
+        dampingFactor={0.08}
+        zoomSpeed={0.4}
+        rotateSpeed={0.5}
       />
     </>
   );
