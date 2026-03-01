@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast as sonnerToast } from 'sonner';
 import type { ArticleTone } from '@/types';
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'times-of-israel';
 
 const sourceLabels: Record<string, string> = {
   euronews: 'Euronews',
@@ -26,12 +26,13 @@ const sourceLabels: Record<string, string> = {
   'fortune-latest': 'Fortune Latest',
   'nikkei-asia': 'NIKKEI Asia',
   'cnn-middleeast': 'CNN Middle East',
+  'times-of-israel': 'Times of Israel',
 };
 
 const categorySourcesMap: Record<string, SourceType[]> = {
   political: ['euronews', 'euronews-economy'],
   business: ['bloomberg', 'bloomberg-latest', 'fortune'],
-  middleeast: ['bloomberg-middleeast', 'cnn-middleeast'],
+  middleeast: ['bloomberg-middleeast', 'cnn-middleeast', 'times-of-israel'],
   asia: ['bloomberg-asia', 'nikkei-asia'],
 };
 
