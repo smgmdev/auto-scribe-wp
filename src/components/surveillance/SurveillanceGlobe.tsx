@@ -303,10 +303,12 @@ function CountryMarker({
   country,
   onClick,
   isSelected,
+  onHover,
 }: {
   country: CountryData;
   onClick: () => void;
   isSelected: boolean;
+  onHover?: (name: string | null, point: THREE.Vector3 | null) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
@@ -322,14 +324,15 @@ function CountryMarker({
   const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.012);
   const color = getThreatColor(country.threat_level, country.score);
   const active = hovered || isSelected;
+  const posVec = new THREE.Vector3(...position);
 
   return (
     <group position={position} ref={groupRef}>
       {/* 3D glowing sphere core */}
       <mesh
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
-        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; onHover?.(country.name, posVec); }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; onHover?.(null, null); }}
       >
         <sphereGeometry args={[sphereSize, 16, 16]} />
         <meshPhongMaterial
@@ -597,6 +600,7 @@ function RotatingGlobe({
             country={country}
             onClick={() => handleMarkerClick(country)}
             isSelected={selectedCountry === country.code}
+            onHover={handleGlobeHover}
           />
         ))}
 
