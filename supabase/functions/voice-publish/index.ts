@@ -541,42 +541,39 @@ FORMAT YOUR RESPONSE EXACTLY:
       }),
     });
 
-    // Upload user-provided featured image to WordPress if provided
-    let featuredMediaId = 0;
-    if (pa.featuredImageUrl) {
+    // Upload user-provided featured image to WordPress IN PARALLEL with article+SEO
+    const imagePromise = (async () => {
+      if (!pa.featuredImageUrl) return 0;
       try {
         console.log('[voice-publish] Uploading user-provided featured image...');
-        // Fetch the image from the URL
         const imgResp = await fetch(pa.featuredImageUrl);
-        if (imgResp.ok) {
-          const imgBlob = await imgResp.blob();
-          const contentType = imgBlob.type || 'image/jpeg';
-          const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
-          const filename = `mace-featured-${Date.now()}.${ext}`;
-          const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
-          const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
-            method: 'POST',
-            headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
-            body: imgBytes,
-          });
-          if (wpMediaResp.ok) {
-            const wpMediaData = await wpMediaResp.json();
-            console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
-            featuredMediaId = wpMediaData.id;
-          } else {
-            const wpErr = await wpMediaResp.text();
-            console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
-          }
-        } else {
-          console.error('[voice-publish] Failed to fetch user image:', imgResp.status);
+        if (!imgResp.ok) { console.error('[voice-publish] Failed to fetch user image:', imgResp.status); return 0; }
+        const imgBlob = await imgResp.blob();
+        const contentType = imgBlob.type || 'image/jpeg';
+        const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+        const filename = `mace-featured-${Date.now()}.${ext}`;
+        const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
+        const wpMediaResp = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+          method: 'POST',
+          headers: { 'Authorization': wpAuthHeader, 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Type': contentType },
+          body: imgBytes,
+        });
+        if (wpMediaResp.ok) {
+          const wpMediaData = await wpMediaResp.json();
+          console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
+          return wpMediaData.id;
         }
+        const wpErr = await wpMediaResp.text();
+        console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
+        return 0;
       } catch (imgError) {
         console.error('[voice-publish] Featured image upload error (non-fatal):', imgError);
+        return 0;
       }
-    }
+    })();
 
-    // Wait for article + SEO
-    const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
+    // Wait for article + SEO + image ALL in parallel
+    const [articleResponse, seoResponse, featuredMediaId] = await Promise.all([articlePromise, seoPromise, imagePromise]);
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
