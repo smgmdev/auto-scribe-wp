@@ -193,7 +193,7 @@ export default function MaceAI() {
 
   // Scroll spy
   useEffect(() => {
-    const sections = ['overview', 'capabilities', 'privacy', 'faq'];
+    const sections = ['overview', 'features', 'privacy', 'faq'];
     
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -303,7 +303,7 @@ export default function MaceAI() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
             <span className="text-xl font-semibold text-foreground">Mace AI</span>
             <nav className="hidden md:flex items-center gap-6">
-              {['overview', 'capabilities', 'privacy', 'faq'].map((section) => (
+              {['overview', 'features', 'privacy', 'faq'].map((section) => (
                 <button 
                   key={section}
                   onClick={() => document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' })}
@@ -437,8 +437,8 @@ export default function MaceAI() {
         </div>
       </section>
 
-      {/* Voice Command Section */}
-      <section className="bg-white py-20 md:py-28">
+      {/* Voice Command / Features Section */}
+      <section id="features" className="bg-white py-20 md:py-28">
         <style>{`
           @keyframes voice-bar {
             0%, 100% { transform: scaleY(0.3); }
