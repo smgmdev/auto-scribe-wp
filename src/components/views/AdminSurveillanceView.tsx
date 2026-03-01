@@ -232,8 +232,8 @@ export function AdminSurveillanceView() {
             )}
 
             {/* Legend + missile filter */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
+            <div className="absolute top-2 left-2 flex flex-col z-10">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 border-b-0 rounded-t-md">
                 <Rocket className="w-3 h-3 text-blue-400" />
                 <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
                 {[
@@ -258,18 +258,18 @@ export function AdminSurveillanceView() {
                 ))}
                 <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
               </div>
-              <div className="flex items-center gap-4 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                  <span className="text-xs font-mono text-gray-400">Safe ({safeCount})</span>
+              <div className="flex items-center gap-3 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 rounded-b-md">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-[10px] font-mono text-gray-400">Safe ({safeCount})</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                  <span className="text-xs font-mono text-gray-400">Caution ({cautionCount})</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  <span className="text-[10px] font-mono text-gray-400">Caution ({cautionCount})</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                  <span className="text-xs font-mono text-gray-400">Danger ({dangerCount})</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <span className="text-[10px] font-mono text-gray-400">Danger ({dangerCount})</span>
                 </div>
               </div>
             </div>
