@@ -698,6 +698,7 @@ export function SurveillanceGlobe({
   selectedCountry,
   missileTrajectories = [],
   droneTrajectories = [],
+  nukeTrajectories = [],
   isSpinning = false,
   onSpinChange,
 }: SurveillanceGlobeProps) {
@@ -714,6 +715,7 @@ export function SurveillanceGlobe({
           selectedCountry={selectedCountry}
           missileTrajectories={missileTrajectories}
           droneTrajectories={droneTrajectories}
+          nukeTrajectories={nukeTrajectories}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
         />
