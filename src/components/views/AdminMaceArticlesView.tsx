@@ -227,16 +227,18 @@ const AdminMaceArticlesView = () => {
           {filtered.map((article) => (
             <div
               key={article.id}
-              className="flex items-start gap-4 px-4 py-2 bg-card hover:bg-muted/30 transition-colors"
+              className="flex items-start gap-4 pr-4 py-0 bg-card hover:bg-muted/30 transition-colors"
             >
               {article.published_to_favicon ? (
                 <img
                   src={article.published_to_favicon}
                   alt=""
-                  className="w-12 h-12 rounded-sm object-contain flex-shrink-0"
+                  className="w-16 h-full min-h-[72px] object-cover flex-shrink-0"
                 />
               ) : (
-                <Globe className="w-12 h-12 text-muted-foreground flex-shrink-0" />
+                <div className="w-16 min-h-[72px] flex items-center justify-center bg-muted flex-shrink-0">
+                  <Globe className="w-8 h-8 text-muted-foreground" />
+                </div>
               )}
 
               <div className="flex-1 min-w-0">
