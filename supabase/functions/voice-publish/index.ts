@@ -498,9 +498,12 @@ FORMAT YOUR RESPONSE EXACTLY:
     const baseUrl = pa.siteUrl.replace(/\/+$/, '');
 
     // Run article, SEO, and image generation ALL in parallel
+    const articleAbort = new AbortController();
+    const articleTimeout = setTimeout(() => articleAbort.abort(), 50000);
     const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      signal: articleAbort.signal,
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
@@ -510,7 +513,7 @@ FORMAT YOUR RESPONSE EXACTLY:
         temperature: 0.7,
         max_tokens: 1500,
       }),
-    });
+    }).finally(() => clearTimeout(articleTimeout));
 
     const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -532,17 +535,21 @@ FORMAT YOUR RESPONSE EXACTLY:
       try {
         console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
         // Use Gemini image generation model via chat completions
+        const imgAbort = new AbortController();
+        const imgTimeout = setTimeout(() => imgAbort.abort(), 45000);
         const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          signal: imgAbort.signal,
           body: JSON.stringify({
-            model: 'google/gemini-2.5-flash-image',
+            model: 'google/gemini-3-pro-image-preview',
             messages: [
               { role: 'user', content: `Generate a professional high-quality editorial photograph for a news article: ${pa.featuredImageQuery}. Photorealistic, well-lit, high resolution, no text or watermarks.` },
             ],
             modalities: ['image', 'text'],
           }),
         });
+        clearTimeout(imgTimeout);
         if (!imgGenResp.ok) {
           const errText = await imgGenResp.text();
           console.error('[voice-publish] Image gen failed:', imgGenResp.status, errText);
