@@ -416,7 +416,10 @@ export function AdminMaceAIView() {
   }, [scribe, finishScribeListening]);
 
   const processUserMessage = async (text: string) => {
-    if (isProcessingRef.current) return;
+    if (isProcessingRef.current) {
+      console.warn('[Mace] Blocked: isProcessing is still true, force-resetting');
+      isProcessingRef.current = false;
+    }
     isProcessingRef.current = true;
 
     // Full cleanup
@@ -440,7 +443,16 @@ export function AdminMaceAIView() {
     const updatedMessages = [...currentMessages, userMsg];
     setMessages(updatedMessages);
 
-    const done = () => { isProcessingRef.current = false; };
+    const done = () => { 
+      console.log('[Mace] Processing done, unlocking');
+      isProcessingRef.current = false; 
+    };
+
+    // Safety: if processing takes more than 60s, force-unlock
+    const safetyTimer = setTimeout(() => {
+      console.warn('[Mace] Safety timeout: force-unlocking isProcessing');
+      isProcessingRef.current = false;
+    }, 60000);
 
     try {
       if (currentPending) {
@@ -571,6 +583,8 @@ export function AdminMaceAIView() {
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
       speak(errorMsg, done);
       toast.error(errorMsg);
+    } finally {
+      clearTimeout(safetyTimer);
     }
   };
 
