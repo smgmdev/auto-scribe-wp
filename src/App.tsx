@@ -106,14 +106,14 @@ const useGlobalEscapeHandler = () => {
   }, []);
 };
 
-// Messaging widget wrapper that hides during loading screens and incomplete auth states
-function MessagingWidget() {
+// Wrapper that hides during loading screens and incomplete auth states
+function AuthGatedWidgets() {
   const { loading, user, emailVerified, pinRequired, pinVerified } = useAuth();
   
-  // Don't render messaging widget during:
+  // Don't render during:
   // 1. Loading screen
   // 2. No authenticated user
-  // 3. Email not verified (prevents flash during signup when Supabase auto-logs in)
+  // 3. Email not verified
   // 4. PIN required but not yet verified
   if (loading || !user || !emailVerified || (pinRequired && !pinVerified)) return null;
   
@@ -122,6 +122,7 @@ function MessagingWidget() {
       <ChatListPanel />
       <GlobalChatDialog />
       <GlobalSupportChat />
+      <MissileAlertListener />
     </>
   );
 }
@@ -194,9 +195,8 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
             
-            {/* Global Messaging Widget - hidden during loading screens */}
-            <MessagingWidget />
-            <MissileAlertListener />
+            {/* Global Widgets - hidden during loading/unauth/unverified */}
+            <AuthGatedWidgets />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
