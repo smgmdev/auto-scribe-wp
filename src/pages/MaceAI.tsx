@@ -439,26 +439,24 @@ export default function MaceAI() {
       {/* Voice Command Section */}
       <section className="bg-white py-20 md:py-28">
         <style>{`
-          @keyframes voice-ring-pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.7; }
-          }
-          @keyframes voice-ring-pulse-delay {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.25); opacity: 0.5; }
-          }
-          @keyframes voice-ring-pulse-slow {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.35); opacity: 0.3; }
+          @keyframes voice-bar {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
           }
         `}</style>
         <div className="max-w-[980px] mx-auto px-4 md:px-6 flex items-center gap-6 md:gap-10">
-          {/* Pulsing voice circle */}
-          <div className="relative flex-shrink-0 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border-2 border-[#FF9500]" style={{ animation: 'voice-ring-pulse 1.5s ease-in-out infinite' }} />
-            <div className="absolute inset-[-4px] rounded-full border-2 border-[#32ADE6]" style={{ animation: 'voice-ring-pulse-delay 1.8s ease-in-out infinite' }} />
-            <div className="absolute inset-[-8px] rounded-full border-2 border-[#1d1d1f]" style={{ animation: 'voice-ring-pulse-slow 2.1s ease-in-out infinite' }} />
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-transparent" />
+          {/* Waveform bars */}
+          <div className="flex-shrink-0 flex items-center gap-[3px] h-12 md:h-16">
+            {[0, 0.1, 0.2, 0.15, 0.25, 0.35, 0.3, 0.4, 0.2, 0.1].map((delay, i) => (
+              <div
+                key={i}
+                className="w-[3px] md:w-1 h-full rounded-full bg-[#e05252]"
+                style={{
+                  animation: `voice-bar ${0.6 + (i % 3) * 0.15}s ease-in-out ${delay}s infinite`,
+                  transformOrigin: 'center',
+                }}
+              />
+            ))}
           </div>
           <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
             Hey Mace, publish an article about Nvidia on Washington Morning!
