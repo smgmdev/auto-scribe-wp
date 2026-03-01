@@ -386,40 +386,82 @@ export function AdminSurveillanceView() {
                       </ul>
                     </div>
                   )}
-                  {countryMissiles.length > 0 && (
-                    <div>
-                      <span className="text-xs text-gray-500 font-mono block mb-1">Detected Missiles & Drones</span>
-                      <ScrollArea className="max-h-40">
-                        <ul className="space-y-1.5">
-                          {countryMissiles.map((m) => {
-                            const date = new Date(m.created_at);
-                            const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-                            const isMissile = m.severity !== 'drone';
-                            return (
-                              <li key={m.id} className="text-xs flex items-start gap-1.5 p-1.5 rounded bg-white/5 border border-white/5">
-                                {isMissile ? (
-                                  <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />
-                                ) : (
-                                  <Shield className="w-3 h-3 text-blue-400 mt-0.5 flex-shrink-0" />
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-gray-300 font-mono truncate">{m.title}</p>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
-                                    {m.origin_country_name && m.destination_country_name && (
-                                      <span className="text-[10px] text-blue-400/70 font-mono">
-                                        {m.origin_country_name} → {m.destination_country_name}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </ScrollArea>
-                    </div>
-                  )}
+                  {countryMissiles.length > 0 && (() => {
+                    const launched = countryMissiles.filter(m => m.origin_country_name?.toLowerCase() === selectedCountry.name.toLowerCase());
+                    const targeted = countryMissiles.filter(m => m.destination_country_name?.toLowerCase() === selectedCountry.name.toLowerCase() && m.origin_country_name?.toLowerCase() !== selectedCountry.name.toLowerCase());
+
+                    const getSeverityIcon = (severity: string) => {
+                      if (severity === 'nuke') return <Radiation className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />;
+                      if (severity === 'drone') return <Radar className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />;
+                      return <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />;
+                    };
+
+                    const getSeverityLabel = (severity: string) => {
+                      if (severity === 'nuke') return <span className="text-[9px] font-mono text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
+                      if (severity === 'drone') return <span className="text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
+                      return <span className="text-[9px] font-mono text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
+                    };
+
+                    const renderAlert = (m: typeof countryMissiles[0], direction: 'launched' | 'targeted') => {
+                      const date = new Date(m.created_at);
+                      const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                      return (
+                        <li key={m.id} className={cn(
+                          "text-xs flex items-start gap-1.5 p-1.5 rounded border",
+                          m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                          direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'
+                        )}>
+                          {getSeverityIcon(m.severity)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-gray-300 font-mono truncate flex-1">{m.title}</p>
+                              {getSeverityLabel(m.severity)}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
+                              {m.origin_country_name && m.destination_country_name && (
+                                <span className={cn(
+                                  "text-[10px] font-mono",
+                                  direction === 'launched' ? 'text-red-400/70' : 'text-blue-400/70'
+                                )}>
+                                  {m.origin_country_name} → {m.destination_country_name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    };
+
+                    return (
+                      <>
+                        {launched.length > 0 && (
+                          <div>
+                            <span className="text-xs text-red-400/80 font-mono block mb-1 flex items-center gap-1">
+                              <Rocket className="w-3 h-3" /> Attacks Launched ({launched.length})
+                            </span>
+                            <ScrollArea className="max-h-32">
+                              <ul className="space-y-1.5">
+                                {launched.map(m => renderAlert(m, 'launched'))}
+                              </ul>
+                            </ScrollArea>
+                          </div>
+                        )}
+                        {targeted.length > 0 && (
+                          <div>
+                            <span className="text-xs text-blue-400/80 font-mono block mb-1 flex items-center gap-1">
+                              <ShieldAlert className="w-3 h-3" /> Incoming Attacks ({targeted.length})
+                            </span>
+                            <ScrollArea className="max-h-32">
+                              <ul className="space-y-1.5">
+                                {targeted.map(m => renderAlert(m, 'targeted'))}
+                              </ul>
+                            </ScrollArea>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             )}
