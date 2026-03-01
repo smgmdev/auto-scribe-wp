@@ -153,15 +153,12 @@ IMPORTANT RULES:
       return true;
     });
 
-    const convAbort = new AbortController();
-    const convTimeout = setTimeout(() => convAbort.abort(), 25000);
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      signal: convAbort.signal,
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
@@ -213,7 +210,7 @@ IMPORTANT RULES:
           },
         ],
       }),
-    }).finally(() => clearTimeout(convTimeout));
+    });
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
@@ -516,12 +513,9 @@ FORMAT YOUR RESPONSE EXACTLY:
     const baseUrl = pa.siteUrl.replace(/\/+$/, '');
 
     // Run article, SEO, and image generation ALL in parallel
-    const articleAbort = new AbortController();
-    const articleTimeout = setTimeout(() => articleAbort.abort(), 60000);
     const articlePromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      signal: articleAbort.signal,
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
@@ -531,14 +525,11 @@ FORMAT YOUR RESPONSE EXACTLY:
         temperature: 0.7,
         max_tokens: 1500,
       }),
-    }).finally(() => clearTimeout(articleTimeout));
+    });
 
-    const seoAbort = new AbortController();
-    const seoTimeout = setTimeout(() => seoAbort.abort(), 45000);
     const seoPromise = fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      signal: seoAbort.signal,
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
         messages: [
@@ -548,7 +539,7 @@ FORMAT YOUR RESPONSE EXACTLY:
         tools: [{ type: 'function', function: { name: 'generate_seo', description: 'Generate SEO metadata and tags', parameters: { type: 'object', properties: { focus_keyword: { type: 'string' }, meta_description: { type: 'string' }, tags: { type: 'array', items: { type: 'string' }, description: '3-5 relevant tags for the article' } }, required: ['focus_keyword', 'meta_description', 'tags'], additionalProperties: false } } }],
         tool_choice: { type: 'function', function: { name: 'generate_seo' } },
       }),
-    }).finally(() => clearTimeout(seoTimeout));
+    });
 
     // Upload user-provided featured image to WordPress if provided
     let featuredMediaId = 0;
