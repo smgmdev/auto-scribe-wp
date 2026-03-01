@@ -74,7 +74,7 @@ const sections: HelpSection[] = [
           <li><strong>Enough credits</strong> to publish on your selected media site</li>
         </ul>
         <p>
-          Mace AI publishes to WordPress sites listed in your Local Media Library on Arcana Mace.
+          Mace AI can publish articles to sites listed in Local Media Library on Arcana Mace.
           Make sure your target site is connected and active before giving a voice command.
         </p>
       </div>
