@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, MicOff, Loader2, Volume2, ExternalLink, RotateCcw } from 'lucide-react';
+import { Mic, Loader2, Volume2, ExternalLink } from 'lucide-react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import amblack from '@/assets/amblack.png';
 
@@ -500,13 +501,12 @@ export function AdminMaceAIView() {
           </p>
         </div>
         {messages.length > 0 && (
-          <button
+          <Button
             onClick={resetConversation}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
           >
-            <RotateCcw className="w-4 h-4" />
             Reset
-          </button>
+          </Button>
         )}
       </div>
 
