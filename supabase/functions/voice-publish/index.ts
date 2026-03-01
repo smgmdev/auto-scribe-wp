@@ -529,14 +529,13 @@ FORMAT YOUR RESPONSE EXACTLY:
       }),
     });
 
-    // Generate + upload image as a single parallel promise
-    const imagePromise = (async (): Promise<number> => {
-      if (!pa.featuredImageQuery) return 0;
+    // Generate image in parallel but DON'T block on it — we'll attach after publish
+    const imagePromise = (async (): Promise<{ mediaId: number; imageBytes?: Uint8Array } | null> => {
+      if (!pa.featuredImageQuery) return null;
       try {
         console.log('[voice-publish] Generating featured image for:', pa.featuredImageQuery);
-        // Use Gemini image generation model via chat completions
         const imgAbort = new AbortController();
-        const imgTimeout = setTimeout(() => imgAbort.abort(), 45000);
+        const imgTimeout = setTimeout(() => imgAbort.abort(), 40000);
         const imgGenResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -553,20 +552,19 @@ FORMAT YOUR RESPONSE EXACTLY:
         if (!imgGenResp.ok) {
           const errText = await imgGenResp.text();
           console.error('[voice-publish] Image gen failed:', imgGenResp.status, errText);
-          return 0;
+          return null;
         }
         const imgGenText = await imgGenResp.text();
         let imgGenData: any;
-        try { imgGenData = JSON.parse(imgGenText); } catch { console.error('[voice-publish] Image gen returned non-JSON:', imgGenText.slice(0, 200)); return 0; }
+        try { imgGenData = JSON.parse(imgGenText); } catch { console.error('[voice-publish] Image gen returned non-JSON:', imgGenText.slice(0, 200)); return null; }
         const imageData = imgGenData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
         if (!imageData || !imageData.startsWith('data:image/')) {
           console.error('[voice-publish] No image data returned from Gemini');
-          return 0;
+          return null;
         }
         console.log('[voice-publish] Generated image, uploading to WP...');
-        // Parse base64 data URI
         const matches = imageData.match(/^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/);
-        if (!matches) { console.error('[voice-publish] Invalid image data URI'); return 0; }
+        if (!matches) { console.error('[voice-publish] Invalid image data URI'); return null; }
         const imgExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
         const imgBase64 = matches[2];
         const imgBytes = Uint8Array.from(atob(imgBase64), c => c.charCodeAt(0));
@@ -580,18 +578,25 @@ FORMAT YOUR RESPONSE EXACTLY:
         if (wpMediaResp.ok) {
           const wpMediaData = await wpMediaResp.json();
           console.log('[voice-publish] Uploaded featured image, media ID:', wpMediaData.id);
-          return wpMediaData.id;
+          return { mediaId: wpMediaData.id };
         }
         const wpErr = await wpMediaResp.text();
         console.error('[voice-publish] WP media upload failed:', wpMediaResp.status, wpErr);
-        return 0;
+        return null;
       } catch (imgError) {
         console.error('[voice-publish] Featured image error (non-fatal):', imgError);
-        return 0;
+        return null;
       }
     })();
 
-    const [articleResponse, seoResponse, featuredMediaId] = await Promise.all([articlePromise, seoPromise, imagePromise]);
+    // Wait for article + SEO first (fast), image resolves in background
+    const [articleResponse, seoResponse] = await Promise.all([articlePromise, seoPromise]);
+    // Check if image is already done; if not, we'll attach it after publishing
+    const imageResult = await Promise.race([
+      imagePromise,
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 1000)), // 1s grace period
+    ]);
+    const featuredMediaId = imageResult?.mediaId || 0;
 
     if (!articleResponse.ok) {
       throw new Error('Failed to generate article');
@@ -732,6 +737,25 @@ FORMAT YOUR RESPONSE EXACTLY:
     const wpData = await wpResponse.json();
     const wpPostId = wpData.id;
     const wpLink = wpData.link;
+
+    // If image wasn't ready before publish, wait for it and attach now (fire-and-forget)
+    if (!featuredMediaId && pa.featuredImageQuery) {
+      imagePromise.then(async (result) => {
+        if (result?.mediaId) {
+          try {
+            console.log('[voice-publish] Attaching late image to post:', result.mediaId);
+            await fetch(`${baseUrl}/wp-json/wp/v2/posts/${wpPostId}`, {
+              method: 'POST',
+              headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ featured_media: result.mediaId }),
+            });
+            console.log('[voice-publish] Late image attached successfully');
+          } catch (e) {
+            console.error('[voice-publish] Failed to attach late image:', e);
+          }
+        }
+      }).catch(() => {});
+    }
 
     // RankMath meta update
     if (pa.siteSeoPlugin === 'rankmath' && (focusKeyword || metaDescription)) {
