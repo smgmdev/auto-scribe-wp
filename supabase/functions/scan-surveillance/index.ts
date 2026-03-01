@@ -80,7 +80,11 @@ Deno.serve(async (req) => {
       "country_name": "<country name>",
       "severity": "<low|medium|high|critical>",
       "description": "<brief description>",
-      "source": "<source name or X/Twitter>"
+      "source": "<source name or X/Twitter>",
+      "origin_country_code": "<ISO code of launch origin if missile/rocket event, or null>",
+      "origin_country_name": "<origin country name if missile/rocket event, or null>",
+      "destination_country_code": "<ISO code of target if missile/rocket event, or null>",
+      "destination_country_name": "<target country name if missile/rocket event, or null>"
     }
   ]
 }
@@ -177,6 +181,10 @@ Return ONLY the JSON object, no other text.`
             source: event.source,
             severity: event.severity || 'critical',
             active: true,
+            origin_country_code: event.origin_country_code || null,
+            origin_country_name: event.origin_country_name || null,
+            destination_country_code: event.destination_country_code || null,
+            destination_country_name: event.destination_country_name || null,
           });
         }
       }
