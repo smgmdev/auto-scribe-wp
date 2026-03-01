@@ -494,7 +494,7 @@ export function AdminMaceAIView() {
       {/* Header */}
       <div className="p-4 lg:p-8 pb-0 flex items-center justify-between max-w-[980px] mx-auto w-full">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Mace AI</h1>
+          <h1 className="text-4xl font-bold text-foreground">Mace AI</h1>
           <p className="mt-2 text-muted-foreground">
             You speak and I'll handle the rest
           </p>
