@@ -18,6 +18,18 @@ import amblack from '@/assets/amblack.png';
 const updates = [
   {
     date: 'March 1, 2026',
+    title: 'Mace AI Landing Page & Publishing Experience',
+    changes: [
+      'Updated Mace AI landing page hero copy for clarity — "Publish your article to media in under 30 seconds—without touching the keyboard or writing a single word. Just use a voice command."',
+      'Updated Mace AI page SEO title to "Mace AI - Publish Articles by Voice Command" with a matching meta description for improved search visibility',
+      'Try Now button on the Mace AI landing page now correctly redirects to the Mace AI voice assistant after login or signup',
+      'Mace AI identity responses hardcoded for consistency — Mace now responds with verified answers when asked about its creator, platform operator, or underlying AI models',
+      'Mace Articles view redesigned with larger square logos, tighter card layout, and a cleaner centered loading spinner replacing the previous skeleton placeholders',
+      'Mace Settings category badges now align to the right side of each site row for a cleaner, more scannable layout',
+    ],
+  },
+  {
+    date: 'February 28, 2026',
     title: 'Mace AI — Voice-Powered Article Publishing',
     changes: [
       'Introducing Mace AI — a voice-first AI assistant built directly into Arcana Mace that lets you publish articles using natural speech commands in under 30 seconds',
@@ -36,7 +48,6 @@ const updates = [
       'Dedicated Mace AI landing page (/mace-ai) featuring an Apple-inspired design with scroll-animated sections, 3D orbital ring animation, and a cinematic rotating tagline with electric lightning effects',
       'Voice-command demo section on the landing page showcases the "Hey Mace, publish an article..." interaction with animated red and blue waveform visualizations',
       'Mace AI section now appears directly after Instant Publishing in the sidebar navigation for both regular users and administrators',
-      'Try Now button on the Mace AI landing page navigates logged-in users directly to the Mace AI interface in their dashboard',
       'Updated Mace AI FAQ to reference Local Media Library sites instead of WordPress sites, reflecting the platform\'s unified media terminology',
     ],
   },
