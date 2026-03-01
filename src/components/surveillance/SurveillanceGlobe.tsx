@@ -398,10 +398,10 @@ function PulseWave({ color, size }: { color: string; size: number }) {
 function MissileArc({ originCode, destCode }: { originCode: string; destCode: string }) {
   const missileRef = useRef<THREE.Mesh>(null);
 
-  const { curve, lineObj } = useMemo(() => {
+  const { curve, tubeGeo } = useMemo(() => {
     const oCoords = COUNTRY_COORDINATES[originCode];
     const dCoords = COUNTRY_COORDINATES[destCode];
-    if (!oCoords || !dCoords) return { curve: null, lineObj: null };
+    if (!oCoords || !dCoords) return { curve: null, tubeGeo: null };
 
     const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
     const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
@@ -409,10 +409,8 @@ function MissileArc({ originCode, destCode }: { originCode: string; destCode: st
     mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.8);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
-    const pts = c.getPoints(80);
-    const geo = new THREE.BufferGeometry().setFromPoints(pts);
-    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#3b82f6', transparent: true, opacity: 0.7, linewidth: 2 }));
-    return { curve: c, lineObj: line };
+    const tube = new THREE.TubeGeometry(c, 80, 0.025, 8, false);
+    return { curve: c, tubeGeo: tube };
   }, [originCode, destCode]);
 
   useFrame(({ clock }) => {
@@ -421,17 +419,21 @@ function MissileArc({ originCode, destCode }: { originCode: string; destCode: st
       const pos = curve.getPoint(t);
       missileRef.current.position.copy(pos);
       const next = curve.getPoint(Math.min(t + 0.02, 1));
-      missileRef.current.lookAt(next);
+      const dir = new THREE.Vector3().subVectors(next, pos).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      missileRef.current.quaternion.copy(quat);
     }
   });
 
-  if (!lineObj || !curve) return null;
+  if (!tubeGeo || !curve) return null;
 
   return (
     <group>
-      <primitive object={lineObj} />
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.7} />
+      </mesh>
       <mesh ref={missileRef}>
-        <sphereGeometry args={[0.03, 8, 8]} />
+        <coneGeometry args={[0.06, 0.15, 8]} />
         <meshBasicMaterial color="#60a5fa" />
       </mesh>
       <pointLight ref={(light) => {
