@@ -260,8 +260,100 @@ export default function MaceAI() {
       <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center bg-black text-white overflow-hidden pt-40 pb-32">
         <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center">
           <AnimatedSection>
-            <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-[#0071e3] via-[#5856d6] to-[#ff2d55] flex items-center justify-center">
-              <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-white" />
+            <div className="flex justify-center mb-8">
+              <style>{`
+                @keyframes mace-orbit-1 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-2 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-3 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-orbit-4 {
+                  0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); }
+                  100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); }
+                }
+                @keyframes mace-glow-spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+                @keyframes mace-glow-spin-rev {
+                  0% { transform: rotate(360deg); }
+                  100% { transform: rotate(0deg); }
+                }
+                @keyframes mace-sphere-pulse {
+                  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+                  50% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
+                }
+                @keyframes mace-rings-entrance {
+                  0% { opacity: 0; transform: scale(0.8); }
+                  100% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes mace-logo-entrance {
+                  0% { opacity: 0; transform: translateZ(0px) scale(0.9); }
+                  100% { opacity: 1; transform: translateZ(0px) scale(1); }
+                }
+                .mace-rings-container {
+                  animation: mace-rings-entrance 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                }
+                .mace-logo-entrance {
+                  animation: mace-logo-entrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+                  opacity: 0;
+                }
+              `}</style>
+              <div 
+                className="relative w-36 h-36 md:w-40 md:h-40 flex items-center justify-center mace-rings-container"
+                style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
+              >
+                {/* White AM logo centered */}
+                <img 
+                  src={amlogo} 
+                  alt="Arcana Mace" 
+                  className="absolute z-10 h-14 w-14 md:h-16 md:w-16 object-contain mace-logo-entrance"
+                  style={{ transform: 'translateZ(0px)', filter: 'brightness(10)' }}
+                />
+                
+                {/* Orbit Ring 1 - Blue */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-1 8s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #007AFF', boxShadow: '0 0 15px rgba(0, 122, 255, 0.5), 0 0 8px rgba(0, 122, 255, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 1s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #007AFF 30%, #0055cc 70%, #003399 100%)', boxShadow: '0 0 8px 2px rgba(0, 122, 255, 1), 0 0 16px 6px rgba(0, 122, 255, 0.7), 0 0 24px 10px rgba(0, 122, 255, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.5s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Orbit Ring 2 - Purple */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-2 10s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #5856D6', boxShadow: '0 0 15px rgba(88, 86, 214, 0.5), 0 0 8px rgba(88, 86, 214, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 1.2s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #5856D6 30%, #4240a8 70%, #2d2b7a 100%)', boxShadow: '0 0 8px 2px rgba(88, 86, 214, 1), 0 0 16px 6px rgba(88, 86, 214, 0.7), 0 0 24px 10px rgba(88, 86, 214, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.6s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Orbit Ring 3 - Cyan */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-3 12s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #32ADE6', boxShadow: '0 0 15px rgba(50, 173, 230, 0.5), 0 0 8px rgba(50, 173, 230, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin 0.8s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #32ADE6 30%, #1a8fc4 70%, #0d6a99 100%)', boxShadow: '0 0 8px 2px rgba(50, 173, 230, 1), 0 0 16px 6px rgba(50, 173, 230, 0.7), 0 0 24px 10px rgba(50, 173, 230, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.4s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Orbit Ring 4 - Orange */}
+                <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'mace-orbit-4 9s linear infinite' }}>
+                  <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #FF9500', boxShadow: '0 0 15px rgba(255, 149, 0, 0.5), 0 0 8px rgba(255, 149, 0, 0.3)' }}>
+                    <div className="absolute inset-0" style={{ animation: 'mace-glow-spin-rev 0.9s linear infinite' }}>
+                      <div className="absolute w-4 h-4 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #FF9500 30%, #cc7700 70%, #995900 100%)', boxShadow: '0 0 8px 2px rgba(255, 149, 0, 1), 0 0 16px 6px rgba(255, 149, 0, 0.7), 0 0 24px 10px rgba(255, 149, 0, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.3)', top: '-10px', left: '50%', transform: 'translateX(-50%)', animation: 'mace-sphere-pulse 0.45s ease-in-out infinite' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </AnimatedSection>
           
