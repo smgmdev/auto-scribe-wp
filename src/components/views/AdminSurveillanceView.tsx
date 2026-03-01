@@ -136,7 +136,7 @@ export function AdminSurveillanceView() {
     })();
   }, [hasLoaded, fetchLatestScan, runScan]);
 
-  // Fetch active missile alerts for trajectory arcs
+  // Fetch active missile alerts for trajectory arcs (exclude drones and nukes)
   const fetchMissiles = useCallback(async () => {
     const hours = parseFloat(missileTimeFilter);
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
@@ -144,6 +144,8 @@ export function AdminSurveillanceView() {
       .from('missile_alerts')
       .select('id, origin_country_code, destination_country_code')
       .eq('active', true)
+      .not('severity', 'eq', 'drone')
+      .not('severity', 'eq', 'nuke')
       .gte('created_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);

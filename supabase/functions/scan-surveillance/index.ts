@@ -157,16 +157,30 @@ Return ONLY the JSON object, no other text.`
       console.error('Failed to store scan:', insertError);
     }
 
-    // Detect missile-related events and create worldwide alerts
-    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'nuclear launch', 'warhead', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile'];
-    const missileEvents = (scanResult.latest_events || []).filter((e: any) => {
-      const text = `${e.title || ''} ${e.description || ''}`.toLowerCase();
-      return MISSILE_KEYWORDS.some((kw: string) => text.includes(kw));
+    // Detect threat events (missiles, drones, nukes) and create alerts
+    const DRONE_KEYWORDS = ['drone', 'uav', 'unmanned aerial', 'drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition'];
+    const NUKE_KEYWORDS = ['nuclear', 'nuke', 'atomic', 'nuclear warhead', 'nuclear launch', 'nuclear strike', 'thermonuclear', 'radiation', 'nuclear weapon'];
+    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'warhead', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage'];
+
+    const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | null => {
+      const text = `${title} ${description}`.toLowerCase();
+      // Check nuke first (highest priority)
+      if (NUKE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'nuke';
+      // Then drone
+      if (DRONE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'drone';
+      // Then missile
+      if (MISSILE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'missile';
+      return null;
+    };
+
+    const threatEvents = (scanResult.latest_events || []).filter((e: any) => {
+      return classifyThreatType(e.title || '', e.description || '') !== null;
     });
 
-    if (missileEvents.length > 0) {
-      console.log(`Detected ${missileEvents.length} missile-related events, creating alerts...`);
-      for (const event of missileEvents) {
+    if (threatEvents.length > 0) {
+      console.log(`Detected ${threatEvents.length} threat events, creating alerts...`);
+      for (const event of threatEvents) {
+        const threatType = classifyThreatType(event.title || '', event.description || '');
         // Check if a similar alert already exists (within last hour)
         const { data: existing } = await supabase
           .from('missile_alerts')
@@ -182,7 +196,7 @@ Return ONLY the JSON object, no other text.`
             country_code: event.country_code,
             country_name: event.country_name,
             source: event.source,
-            severity: event.severity || 'critical',
+            severity: threatType || 'missile',
             active: true,
             origin_country_code: event.origin_country_code || null,
             origin_country_name: event.origin_country_name || null,
