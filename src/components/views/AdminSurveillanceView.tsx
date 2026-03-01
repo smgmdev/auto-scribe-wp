@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -209,21 +209,6 @@ export function AdminSurveillanceView() {
               </span>
             </div>
 
-            {scanData && (
-              <div className="flex items-center gap-2 px-3 py-0.5 bg-white/5 border border-white/10">
-                <div className={cn(
-                  "w-2 h-2 rounded-full",
-                  scanData.global_tension_level === 'critical' || scanData.global_tension_level === 'severe' ? 'bg-red-500' :
-                  scanData.global_tension_level === 'high' ? 'bg-orange-500' :
-                  scanData.global_tension_level === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'
-                )} />
-                <span className="text-xs font-mono text-gray-300">GLOBAL TENSION</span>
-                <span className="text-sm font-bold font-mono text-white">{scanData.global_tension_score}</span>
-                <span className={cn("text-xs font-mono uppercase font-bold", getTensionColor(scanData.global_tension_level))}>
-                  {scanData.global_tension_level}
-                </span>
-              </div>
-            )}
 
             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
               <Rocket className="w-3 h-3 text-blue-400" />
@@ -244,7 +229,7 @@ export function AdminSurveillanceView() {
             </div>
 
             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
-              <Shield className="w-3 h-3 text-purple-400" />
+              <Radar className="w-3 h-3 text-purple-400" />
               <span className="text-[10px] font-mono text-gray-400">Drones</span>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
                 <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
