@@ -530,9 +530,7 @@ export default function MaceAI() {
       <section className="bg-white py-24 px-4">
         <AnimatedSection className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#0071e3] via-[#5856d6] to-[#ff2d55] flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
+            <img src={amblack} alt="Arcana Mace" className="w-20 h-20 object-contain" />
           </div>
           <h2 className="text-4xl md:text-6xl font-semibold text-[#1d1d1f] tracking-tight leading-tight mb-6">
             Experience Mace AI.
