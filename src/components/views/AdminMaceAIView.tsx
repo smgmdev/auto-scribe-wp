@@ -403,7 +403,7 @@ export function AdminMaceAIView() {
               const phaseTimer2 = setTimeout(() => setPublishPhase('Generating SEO keywords...'), 10000);
               const phaseTimer3 = setTimeout(() => setPublishPhase(uploadedImageUrl ? 'Uploading featured image...' : 'Creating tags...'), 15000);
               const phaseTimer4 = setTimeout(() => setPublishPhase('Creating tags...'), 20000);
-              const phaseTimer5 = setTimeout(() => setPublishPhase('Publishing to WordPress...'), 25000);
+              const phaseTimer5 = setTimeout(() => setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`), 25000);
 
               // Attach uploaded image URL to pending article if available
               const articleToPublish = { ...currentPending };
