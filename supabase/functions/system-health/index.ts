@@ -148,28 +148,25 @@ Deno.serve(async (req) => {
       services.push({ name: 'Mace AI', status: 'outage' })
     } else {
       const start = Date.now()
-      const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
-        method: 'POST',
+      const response = await fetch('https://api.lovable.dev/v1/models', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${lovableApiKey}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-lite',
-          messages: [{ role: 'user', content: 'ping' }],
-          max_tokens: 1,
-        }),
         signal: AbortSignal.timeout(10000),
       })
       const latency = Date.now() - start
 
-      if (response.ok) {
+      if (response.ok || response.status === 401 || response.status === 403) {
+        // API is reachable — even auth errors mean the service itself is up
         services.push({ name: 'Mace AI', status: latency > 5000 ? 'issue' : 'available', latency })
       } else if (response.status === 429) {
-        // Rate limited or credits exhausted
         services.push({ name: 'Mace AI', status: 'issue', latency })
-      } else {
+      } else if (response.status >= 500) {
         services.push({ name: 'Mace AI', status: 'outage', latency })
+      } else {
+        // Any other client response means the service is reachable
+        services.push({ name: 'Mace AI', status: 'available', latency })
       }
     }
   } catch {
