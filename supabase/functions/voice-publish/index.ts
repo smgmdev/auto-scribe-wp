@@ -145,8 +145,16 @@ IMPORTANT RULES:
 - When users ask questions about current events, news, facts, prices, weather, sports scores, or anything that needs real-time info, use the search_web tool.
 - After searching, summarize the results naturally in your own words. Don't just dump raw search results.`;
 
+    // Filter out error messages from conversation history
+    const cleanMessages = messages.filter((m: any) => {
+      if (m.role === 'assistant' && typeof m.content === 'string') {
+        return !m.content.includes('Failed to send a request') && !m.content.includes('Something went wrong');
+      }
+      return true;
+    });
+
     const convAbort = new AbortController();
-    const convTimeout = setTimeout(() => convAbort.abort(), 15000);
+    const convTimeout = setTimeout(() => convAbort.abort(), 25000);
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -158,7 +166,7 @@ IMPORTANT RULES:
         model: 'google/gemini-2.5-flash-lite',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages,
+          ...cleanMessages,
         ],
         temperature: 0.7,
         max_tokens: 300,
