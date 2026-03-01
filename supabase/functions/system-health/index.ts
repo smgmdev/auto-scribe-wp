@@ -117,28 +117,34 @@ Deno.serve(async (req) => {
     services.push({ name: 'API Server', status: 'outage' })
   }
 
-  // Check Stripe Payment Gateway
+  // Check Stripe Payment Gateway (reachability check against Stripe API)
   try {
-    const start = Date.now()
-    const response = await fetch('https://status.stripe.com/api/v2/status.json', {
-      method: 'GET',
-      signal: AbortSignal.timeout(8000),
-    })
-    const latency = Date.now() - start
-    if (response.ok) {
-      const data = await response.json().catch(() => null)
-      const indicator = data?.status?.indicator
-      // Use Stripe's own status indicator if available
-      if (indicator && indicator !== 'none') {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (!stripeKey) {
+      services.push({ name: 'Payment Gateway (Stripe)', status: 'outage' })
+    } else {
+      const start = Date.now()
+      const response = await fetch('https://api.stripe.com/v1/balance', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${stripeKey}` },
+        signal: AbortSignal.timeout(8000),
+      })
+      const latency = Date.now() - start
+      await response.text() // consume body
+
+      if (response.ok) {
+        services.push({ name: 'Payment Gateway (Stripe)', status: latency > 5000 ? 'issue' : 'available', latency })
+      } else if (response.status === 429) {
         services.push({ name: 'Payment Gateway (Stripe)', status: 'issue', latency })
+      } else if (response.status >= 500) {
+        services.push({ name: 'Payment Gateway (Stripe)', status: 'outage', latency })
       } else {
+        // 401/403 etc. means API is reachable
         services.push({ name: 'Payment Gateway (Stripe)', status: 'available', latency })
       }
-    } else {
-      services.push({ name: 'Payment Gateway (Stripe)', status: 'issue', latency })
     }
   } catch {
-    services.push({ name: 'Payment Gateway (Stripe)', status: 'issue' })
+    services.push({ name: 'Payment Gateway (Stripe)', status: 'outage' })
   }
 
   // Check Mace AI (Lovable AI Gateway)
