@@ -490,28 +490,11 @@ export function AdminMaceAIView() {
 
               const articleToPublish = { ...currentPending };
 
-              const controller = new AbortController();
-              const timeout = setTimeout(() => controller.abort('Voice publish timeout'), 120000); // 2 min timeout
-              const publishResp = await fetch(
-                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-publish`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                    Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-                  },
-                  body: JSON.stringify({ action: 'confirm_publish', pendingArticle: articleToPublish }),
-                  signal: controller.signal,
-                }
-              );
-              clearTimeout(timeout);
-              if (!publishResp.ok) {
-                const errBody = await publishResp.text();
-                throw new Error(errBody || `Publish failed: ${publishResp.status}`);
-              }
-              const data = await publishResp.json();
-              const error = null;
+              const result = await supabase.functions.invoke('voice-publish', {
+                body: { action: 'confirm_publish', pendingArticle: articleToPublish },
+              });
+              const data = result.data;
+              const error = result.error;
 
               clearTimeout(phaseTimer1);
               clearTimeout(phaseTimer2);
@@ -520,7 +503,7 @@ export function AdminMaceAIView() {
               clearTimeout(phaseTimer5);
               setPublishPhase('');
 
-              if (error) throw new Error(error.message || 'Publish failed');
+              if (error) throw new Error(typeof error === 'string' ? error : error?.message || 'Publish failed');
 
               const responseMessage = data?.message || "Something went wrong during publishing.";
               setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
@@ -537,17 +520,10 @@ export function AdminMaceAIView() {
               speak(responseMessage, done);
             } catch (err: any) {
               setPublishPhase('');
-              if (err.name === 'AbortError') {
-                const errorMsg = 'Publishing timed out. The article may still be processing — please check your site.';
-                setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-                speak(errorMsg, done);
-                toast.error(errorMsg);
-              } else {
-                const errorMsg = err.message || 'Publishing failed';
-                setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-                speak(errorMsg, done);
-                toast.error(errorMsg);
-              }
+              const errorMsg = err.message || 'Publishing failed';
+              setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
+              speak(errorMsg, done);
+              toast.error(errorMsg);
             }
           });
           return;
