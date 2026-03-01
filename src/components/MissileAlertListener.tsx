@@ -173,10 +173,16 @@ export function MissileAlertListener() {
     dismissedRef.current.add(id);
     setAlerts(prev => {
       const remaining = prev.filter(a => a.id !== id);
-      if (remaining.length === 0) stopSound();
+      if (remaining.length === 0) {
+        // Stop sound immediately
+        if (alertIntervalRef.current) {
+          clearInterval(alertIntervalRef.current);
+          alertIntervalRef.current = null;
+        }
+      }
       return remaining;
     });
-  }, [stopSound]);
+  }, []);
 
   useEffect(() => {
     const fetchActive = async () => {
