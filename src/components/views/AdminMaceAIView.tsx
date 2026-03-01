@@ -500,14 +500,13 @@ export function AdminMaceAIView() {
             You speak and I'll handle the rest
           </p>
         </div>
-        {messages.length > 0 && (
-          <Button
-            onClick={resetConversation}
-            className="bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
-          >
-            Reset
-          </Button>
-        )}
+        <Button
+          onClick={resetConversation}
+          disabled={messages.length === 0}
+          className="bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"
+        >
+          Reset
+        </Button>
       </div>
 
       {/* Hidden spacer for layout */}
