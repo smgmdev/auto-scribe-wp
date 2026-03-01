@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Rocket, Play, Pause, ChevronDown } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -178,7 +178,7 @@ export function AdminSurveillanceView() {
         {/* Top bar */}
         <div className="flex items-center justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#0d1220]">
           <div className="flex items-center gap-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pl-3">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
                 scanData ? "bg-green-500" : "bg-gray-500"
@@ -242,12 +242,6 @@ export function AdminSurveillanceView() {
           </div>
 
           <div className="flex items-center gap-3">
-            {scanData?.scanned_at && (
-              <div className="flex items-center gap-1 text-xs text-gray-500 font-mono">
-                <Clock className="w-3 h-3" />
-                {new Date(scanData.scanned_at).toLocaleTimeString()}
-              </div>
-            )}
             <button
               onClick={() => setGlobeSpinning(!globeSpinning)}
               className="text-gray-400 hover:text-white transition-colors p-1"
