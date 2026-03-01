@@ -135,10 +135,18 @@ export function MissileAlertListener() {
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const soundStoppedRef = useRef(false);
 
   const playAlertSound = useCallback(() => {
+    if (soundStoppedRef.current) return;
     try {
+      // Close previous context to avoid overlapping sounds
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioCtxRef.current = audioCtx;
       const playTone = (freq: number, startTime: number, duration: number) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -163,21 +171,23 @@ export function MissileAlertListener() {
   }, []);
 
   const stopSound = useCallback(() => {
+    soundStoppedRef.current = true;
     if (alertIntervalRef.current) {
       clearInterval(alertIntervalRef.current);
       alertIntervalRef.current = null;
+    }
+    // Kill any playing audio context immediately
+    if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+      audioCtxRef.current.close().catch(() => {});
+      audioCtxRef.current = null;
     }
   }, []);
 
   const dismissAlert = useCallback((id: string) => {
     dismissedRef.current.add(id);
-    // Stop sound immediately on any dismiss
-    if (alertIntervalRef.current) {
-      clearInterval(alertIntervalRef.current);
-      alertIntervalRef.current = null;
-    }
+    stopSound();
     setAlerts(prev => prev.filter(a => a.id !== id));
-  }, []);
+  }, [stopSound]);
 
   useEffect(() => {
     const fetchActive = async () => {
