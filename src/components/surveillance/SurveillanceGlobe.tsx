@@ -408,8 +408,10 @@ function MissileArc({ originCode, destCode }: { originCode: string; destCode: st
 
     const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
     const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const dist = start.distanceTo(end);
+    const arcHeight = Math.max(0.8, dist * 0.6);
     const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-    mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.8);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + arcHeight);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
     const tube = new THREE.TubeGeometry(c, 80, 0.005, 8, false);
@@ -456,8 +458,10 @@ function DroneArc({ originCode, destCode }: { originCode: string; destCode: stri
 
     const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
     const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const dist = start.distanceTo(end);
+    const arcHeight = Math.max(0.6, dist * 0.5);
     const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-    mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.6);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + arcHeight);
 
     const c = new THREE.QuadraticBezierCurve3(start, mid, end);
     const tube = new THREE.TubeGeometry(c, 80, 0.004, 8, false);
