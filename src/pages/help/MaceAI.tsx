@@ -14,8 +14,8 @@ const sections: HelpSection[] = [
         <p>
           Think of it as your personal AI publishing assistant. Tell Mace what to write about
           and which site to publish on, and it will research the topic, write a full
-          SEO-optimized article, and publish it directly to your WordPress site — all in
-          under 30 seconds.
+          SEO-optimized article, and publish it directly to your selected media site from the
+          Local Library — all in under 30 seconds.
         </p>
       </div>
     ),
