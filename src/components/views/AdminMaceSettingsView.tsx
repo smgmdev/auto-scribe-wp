@@ -162,7 +162,7 @@ export function AdminMaceSettingsView() {
               disabled={refreshing}
               className="md:rounded-l-none rounded-t-none md:rounded-tr-lg bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none w-full md:w-auto"
             >
-              {refreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              {refreshing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Refresh
             </Button>
           </div>
