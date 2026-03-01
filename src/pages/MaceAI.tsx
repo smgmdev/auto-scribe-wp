@@ -218,8 +218,8 @@ export default function MaceAI() {
 
           <AnimatedSection delay={200}>
             <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-4">
-              Your intelligent assistant for media buying,
-              article generation, and content management.
+              Your intelligent assistant for article generation
+              and media publishing.
             </p>
           </AnimatedSection>
 
