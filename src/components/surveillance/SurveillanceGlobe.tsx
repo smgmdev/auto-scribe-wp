@@ -485,11 +485,9 @@ function RotatingGlobe({
 
   const handleMarkerClick = useCallback(
     (country: CountryData) => {
-      onSpinChange?.(false);
       onCountryClick(country);
-      setTimeout(() => onSpinChange?.(true), 12000);
     },
-    [onCountryClick, onSpinChange]
+    [onCountryClick]
   );
 
   const handleGlobeHover = useCallback((name: string | null, point: THREE.Vector3 | null) => {
@@ -502,8 +500,6 @@ function RotatingGlobe({
 
   const handleGlobeClick = useCallback(
     (geoName: string) => {
-      onSpinChange?.(false);
-      setTimeout(() => onSpinChange?.(true), 12000);
       // Try to find matching country in scan data
       const match = countries.find(
         (c) => c.name.toLowerCase() === geoName.toLowerCase()
