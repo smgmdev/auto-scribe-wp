@@ -65,6 +65,61 @@ function AnimatedSection({
   );
 }
 
+const TAGLINES = [
+  'Built into every part of Arcana Mace.',
+  'Powered by advanced AI models.',
+  'Designed to keep your data private.',
+];
+
+function RotatingTagline() {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<'in' | 'out'>('in');
+
+  useEffect(() => {
+    const cycle = () => {
+      // Hold visible for 2.5s, then start exit
+      const holdTimer = setTimeout(() => {
+        setPhase('out');
+        // After exit animation, switch text and enter
+        const exitTimer = setTimeout(() => {
+          setIndex((prev) => (prev + 1) % TAGLINES.length);
+          setPhase('in');
+        }, 700);
+        return () => clearTimeout(exitTimer);
+      }, 2500);
+      return holdTimer;
+    };
+
+    const timer = cycle();
+    const interval = setInterval(() => {
+      cycle();
+    }, 3200); // 2500 hold + 700 exit
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <div className="mt-8 h-8 flex items-center justify-center overflow-hidden perspective-[800px]">
+      <p
+        key={index}
+        className="text-lg text-white/50 whitespace-nowrap transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          opacity: phase === 'in' ? 1 : 0,
+          transform: phase === 'in'
+            ? 'translateY(0) rotateX(0deg) scale(1)'
+            : 'translateY(-20px) rotateX(40deg) scale(0.92)',
+          filter: phase === 'in' ? 'blur(0px)' : 'blur(6px)',
+        }}
+      >
+        {TAGLINES[index]}
+      </p>
+    </div>
+  );
+}
+
 export default function MaceAI() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -224,11 +279,7 @@ export default function MaceAI() {
           </AnimatedSection>
 
           <AnimatedSection delay={300}>
-            <div className="flex flex-col items-center gap-3 mt-8">
-              <p className="text-lg text-white/50">Built into every part of Arcana Mace.</p>
-              <p className="text-lg text-white/50">Powered by advanced AI models.</p>
-              <p className="text-lg text-white/50">Designed to keep your data private.</p>
-            </div>
+            <RotatingTagline />
           </AnimatedSection>
         </div>
       </section>
