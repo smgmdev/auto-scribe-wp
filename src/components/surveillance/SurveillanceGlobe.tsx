@@ -29,6 +29,8 @@ interface SurveillanceGlobeProps {
   onCountryClick: (country: CountryData) => void;
   selectedCountry: string | null;
   missileTrajectories?: MissileTrajectory[];
+  isSpinning?: boolean;
+  onSpinChange?: (spinning: boolean) => void;
 }
 
 const GLOBE_RADIUS = 2;
@@ -454,9 +456,10 @@ function RotatingGlobe({
   onCountryClick,
   selectedCountry,
   missileTrajectories = [],
+  isSpinning = false,
+  onSpinChange,
 }: SurveillanceGlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const [autoRotate, setAutoRotate] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(4.5);
   const [geoFeatures, setGeoFeatures] = useState<GeoFeature[]>([]);
   const [hoveredGeo, setHoveredGeo] = useState<{ name: string; point: THREE.Vector3 } | null>(null);
@@ -475,18 +478,18 @@ function RotatingGlobe({
   }, []);
 
   useFrame(() => {
-    if (groupRef.current && autoRotate) {
+    if (groupRef.current && isSpinning) {
       groupRef.current.rotation.y += 0.0008;
     }
   });
 
   const handleMarkerClick = useCallback(
     (country: CountryData) => {
-      setAutoRotate(false);
+      onSpinChange?.(false);
       onCountryClick(country);
-      setTimeout(() => setAutoRotate(true), 12000);
+      setTimeout(() => onSpinChange?.(true), 12000);
     },
-    [onCountryClick]
+    [onCountryClick, onSpinChange]
   );
 
   const handleGlobeHover = useCallback((name: string | null, point: THREE.Vector3 | null) => {
@@ -499,8 +502,8 @@ function RotatingGlobe({
 
   const handleGlobeClick = useCallback(
     (geoName: string) => {
-      setAutoRotate(false);
-      setTimeout(() => setAutoRotate(true), 12000);
+      onSpinChange?.(false);
+      setTimeout(() => onSpinChange?.(true), 12000);
       // Try to find matching country in scan data
       const match = countries.find(
         (c) => c.name.toLowerCase() === geoName.toLowerCase()
@@ -576,11 +579,13 @@ export function SurveillanceGlobe({
   onCountryClick,
   selectedCountry,
   missileTrajectories = [],
+  isSpinning = false,
+  onSpinChange,
 }: SurveillanceGlobeProps) {
   return (
     <div className="w-full h-full">
       <Canvas
-        camera={{ position: [0, 0, 4.5], fov: 45 }}
+        camera={{ position: [1.5, 1.5, 3.8], fov: 45 }}
         style={{ background: 'transparent' }}
         gl={{ antialias: true, alpha: true }}
       >
@@ -589,6 +594,8 @@ export function SurveillanceGlobe({
           onCountryClick={onCountryClick}
           selectedCountry={selectedCountry}
           missileTrajectories={missileTrajectories}
+          isSpinning={isSpinning}
+          onSpinChange={onSpinChange}
         />
       </Canvas>
     </div>
