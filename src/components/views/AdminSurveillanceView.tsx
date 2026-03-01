@@ -1,21 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock, Siren } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
-const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'nuclear launch', 'warhead', 'rocket attack', 'missile launch', 'missile strike', 'missile test', 'cruise missile'];
-
-function detectMissileEvents(events: EventData[]): EventData[] {
-  return events.filter(e => {
-    const text = `${e.title} ${e.description}`.toLowerCase();
-    return MISSILE_KEYWORDS.some(kw => text.includes(kw));
-  });
-}
 
 interface CountryData {
   code: string;
@@ -76,65 +67,6 @@ export function AdminSurveillanceView() {
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [missileAlert, setMissileAlert] = useState<EventData[] | null>(null);
-  const missileAlertDismissedRef = useRef<Set<string>>(new Set());
-  const alertAudioRef = useRef<HTMLAudioElement | null>(null);
-  const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Create alert audio context
-  const playAlertSound = useCallback(() => {
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const playTone = (freq: number, startTime: number, duration: number) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(freq, startTime);
-        gain.gain.setValueAtTime(0.3, startTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-        osc.start(startTime);
-        osc.stop(startTime + duration);
-      };
-      const now = audioCtx.currentTime;
-      playTone(880, now, 0.15);
-      playTone(660, now + 0.15, 0.15);
-      playTone(880, now + 0.3, 0.15);
-      playTone(660, now + 0.45, 0.15);
-      playTone(1100, now + 0.6, 0.3);
-    } catch (e) {
-      console.warn('Could not play alert sound', e);
-    }
-  }, []);
-
-  const dismissMissileAlert = useCallback(() => {
-    if (alertIntervalRef.current) {
-      clearInterval(alertIntervalRef.current);
-      alertIntervalRef.current = null;
-    }
-    if (missileAlert) {
-      missileAlert.forEach(e => missileAlertDismissedRef.current.add(`${e.title}-${e.country_code}`));
-    }
-    setMissileAlert(null);
-  }, [missileAlert]);
-
-  // Check for missile events when scan data changes
-  useEffect(() => {
-    if (!scanData?.latest_events) return;
-    const missileEvents = detectMissileEvents(scanData.latest_events);
-    const newEvents = missileEvents.filter(
-      e => !missileAlertDismissedRef.current.has(`${e.title}-${e.country_code}`)
-    );
-    if (newEvents.length > 0) {
-      setMissileAlert(newEvents);
-      playAlertSound();
-      alertIntervalRef.current = setInterval(playAlertSound, 2000);
-    }
-    return () => {
-      if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
-    };
-  }, [scanData, playAlertSound]);
 
   const fetchLatestScan = useCallback(async () => {
     const { data } = await supabase
@@ -372,62 +304,6 @@ export function AdminSurveillanceView() {
           </div>
         </div>
       </div>
-
-      {/* Missile Alert Overlay */}
-      {missileAlert && missileAlert.length > 0 && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-          {/* Flashing red border */}
-          <div className="absolute inset-0 pointer-events-none animate-pulse border-[3px] border-red-600/60" />
-          
-          <div className="relative w-full max-w-md mx-4 rounded-xl border-2 border-red-500/80 bg-[#1a0505] shadow-[0_0_60px_rgba(239,68,68,0.4)] overflow-hidden">
-            {/* Top red bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 animate-pulse" />
-            
-            <div className="p-6 text-center space-y-4">
-              {/* Icon */}
-              <div className="flex justify-center">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-red-600/20 border-2 border-red-500 flex items-center justify-center animate-pulse">
-                    <Siren className="w-8 h-8 text-red-500" />
-                  </div>
-                  <div className="absolute inset-0 w-16 h-16 rounded-full border border-red-500/40 animate-ping" />
-                </div>
-              </div>
-
-              {/* Title */}
-              <div>
-                <h2 className="text-2xl font-bold font-mono text-red-500 tracking-wider animate-pulse">
-                  ⚠ MISSILE ALERT ⚠
-                </h2>
-                <p className="text-xs text-red-400/70 font-mono mt-1 uppercase tracking-widest">
-                  Threat Detection System
-                </p>
-              </div>
-
-              {/* Events */}
-              <div className="space-y-2 text-left max-h-48 overflow-y-auto">
-                {missileAlert.map((event, i) => (
-                  <div key={i} className="p-3 rounded-lg bg-red-950/50 border border-red-800/40">
-                    <p className="text-sm font-medium text-red-300">{event.title}</p>
-                    <p className="text-xs text-red-400/60 mt-1">{event.country_name} — {event.source}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* OK Button */}
-              <Button
-                onClick={dismissMissileAlert}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-mono font-bold tracking-wider text-base py-5 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
-              >
-                ACKNOWLEDGE
-              </Button>
-            </div>
-
-            {/* Bottom red bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 animate-pulse" />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

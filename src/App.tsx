@@ -13,6 +13,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
 import { SessionExpiryWarning } from "@/components/SessionExpiryWarning";
+import { MissileAlertListener } from "@/components/MissileAlertListener";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -195,6 +196,7 @@ const App = () => {
             
             {/* Global Messaging Widget - hidden during loading screens */}
             <MessagingWidget />
+            <MissileAlertListener />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

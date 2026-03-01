@@ -1144,6 +1144,42 @@ export type Database = {
         }
         Relationships: []
       }
+      missile_alerts: {
+        Row: {
+          active: boolean
+          country_code: string | null
+          country_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          severity: string
+          source: string | null
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+          source?: string | null
+          title: string
+        }
+        Update: {
+          active?: boolean
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+          source?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           accepted_at: string | null

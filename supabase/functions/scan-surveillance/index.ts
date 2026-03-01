@@ -150,6 +150,38 @@ Return ONLY the JSON object, no other text.`
       console.error('Failed to store scan:', insertError);
     }
 
+    // Detect missile-related events and create worldwide alerts
+    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'nuclear launch', 'warhead', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile'];
+    const missileEvents = (scanResult.latest_events || []).filter((e: any) => {
+      const text = `${e.title || ''} ${e.description || ''}`.toLowerCase();
+      return MISSILE_KEYWORDS.some((kw: string) => text.includes(kw));
+    });
+
+    if (missileEvents.length > 0) {
+      console.log(`Detected ${missileEvents.length} missile-related events, creating alerts...`);
+      for (const event of missileEvents) {
+        // Check if a similar alert already exists (within last hour)
+        const { data: existing } = await supabase
+          .from('missile_alerts')
+          .select('id')
+          .eq('title', event.title)
+          .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from('missile_alerts').insert({
+            title: event.title,
+            description: event.description,
+            country_code: event.country_code,
+            country_name: event.country_name,
+            source: event.source,
+            severity: event.severity || 'critical',
+            active: true,
+          });
+        }
+      }
+    }
+
     console.log('Surveillance scan complete. Tension:', scanResult.global_tension_score);
 
     return new Response(JSON.stringify({
