@@ -2138,8 +2138,8 @@ export function CreditHistoryView() {
                     
                     // Fetch article details for publish transactions
                     if (transaction.type === 'publish' && !publishDetails[transaction.id]) {
-                      // Extract site name from description like "Published article to Washington Morning"
-                      const siteNameMatch = transaction.description?.match(/Published article to (.+)/);
+                      // Extract site name from description like "Published article to X" or "Published via Mace AI to X"
+                      const siteNameMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
                       const siteName = siteNameMatch ? siteNameMatch[1].trim() : null;
                       
                       // Check if transaction has metadata with persisted links
@@ -2467,10 +2467,10 @@ export function CreditHistoryView() {
                                      <div className="flex items-center gap-2 mt-0.5">
                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                        <p className="font-medium">
-                                         {(() => {
-                                           const siteMatch = transaction.description?.match(/Published article to (.+)/);
-                                           return siteMatch ? siteMatch[1] : 'Unknown';
-                                         })()}
+                                          {(() => {
+                                            const siteMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
+                                            return siteMatch ? siteMatch[1] : 'Unknown';
+                                          })()}
                                        </p>
                                      </div>
                                    )}

@@ -444,7 +444,7 @@ export function AdminOrdersView() {
       setInstantOrders(data.map((d: any) => {
         const meta = d.metadata as InstantOrder['metadata'];
         const metaRaw = d.metadata as Record<string, unknown> | null;
-        const siteName = d.description?.replace('Published article to ', '') || '';
+        const siteName = d.description?.replace('Published via Mace AI to ', '').replace('Published article to ', '') || '';
         const wpInfo = wpSiteMap[siteName];
         const resolvedFavicon = meta?.site_favicon || wpInfo?.favicon || null;
         const agencyName = wpInfo?.agency || null;
@@ -1224,7 +1224,7 @@ export function AdminOrdersView() {
             ) : (
             <div className="space-y-0">
                 {instantOrders.map((item, index) => {
-                  const siteName = item.description?.replace('Published article to ', '') || 'Unknown Site';
+                  const siteName = item.description?.replace('Published via Mace AI to ', '').replace('Published article to ', '') || 'Unknown Site';
                   const credits = Math.abs(item.amount);
                   const amountUsd = credits; // 1 credit = $1
                   const commissionPct = item.commission_percentage ?? 10;
