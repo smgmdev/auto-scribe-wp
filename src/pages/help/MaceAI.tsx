@@ -124,7 +124,7 @@ const sections: HelpSection[] = [
       <div className="space-y-4">
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Be specific about the topic — "an article about Nvidia's latest GPU" works better than "an article about tech"</li>
-          <li>Mention the exact site name as it appears in your Local Media Library</li>
+          <li>Mention the exact site name as it appears in Local Media Library</li>
           <li>Speak clearly and at a natural pace — Mace uses advanced speech recognition</li>
           <li>Wait for Mace to finish speaking before giving your next command</li>
           <li>If Mace doesn't catch something, just repeat or rephrase naturally</li>
