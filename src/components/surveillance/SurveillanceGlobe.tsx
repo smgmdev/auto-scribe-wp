@@ -278,6 +278,41 @@ function CountryBorders({ geoFeatures }: { geoFeatures: GeoFeature[] }) {
   );
 }
 
+/** Creates a hexagon shape geometry */
+function createHexGeometry(radius: number): THREE.BufferGeometry {
+  const vertices: number[] = [0, 0, 0];
+  const indices: number[] = [];
+  for (let i = 0; i <= 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
+    vertices.push(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+  }
+  for (let i = 1; i <= 6; i++) indices.push(0, i, i + 1);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geo.setIndex(indices);
+  return geo;
+}
+
+/** Creates a hexagon ring geometry */
+function createHexRingGeometry(innerR: number, outerR: number): THREE.BufferGeometry {
+  const vertices: number[] = [];
+  const indices: number[] = [];
+  for (let i = 0; i <= 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    vertices.push(cos * innerR, sin * innerR, 0);
+    vertices.push(cos * outerR, sin * outerR, 0);
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
+    indices.push(a, b, c, b, d, c);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geo.setIndex(indices);
+  return geo;
+}
+
 function CountryMarker({
   country,
   onClick,
@@ -287,56 +322,69 @@ function CountryMarker({
   onClick: () => void;
   isSelected: boolean;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const coords = COUNTRY_COORDINATES[country.code];
+  const baseSize =
+    country.threat_level === 'danger' ? 0.03
+    : country.threat_level === 'caution' ? 0.022
+    : 0.015;
+  const hexGeo = useMemo(() => createHexGeometry(baseSize), [baseSize]);
+  const hexRingGeo = useMemo(() => createHexRingGeometry(baseSize * 1.1, baseSize * 1.35), [baseSize]);
+
   if (!coords) return null;
 
   const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.015);
   const color = getThreatColor(country.threat_level);
-  const baseSize =
-    country.threat_level === 'danger' ? 0.025
-    : country.threat_level === 'caution' ? 0.018
-    : 0.012;
-  const size = isSelected || hovered ? baseSize * 1.3 : baseSize;
 
   return (
     <group position={position}>
       {country.threat_level !== 'safe' && (
-        <mesh>
-          <ringGeometry args={[baseSize * 2, baseSize * 3, 32]} />
-          <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.3 : 0.12} transparent side={THREE.DoubleSide} />
-        </mesh>
+        <PulsingHexRing color={color} size={baseSize} speed={country.threat_level === 'danger' ? 3 : 1.8} delay={0} />
+      )}
+      {country.threat_level === 'danger' && (
+        <PulsingHexRing color={color} size={baseSize * 1.6} speed={2} delay={1} />
       )}
 
-      <mesh
-        ref={meshRef}
+      <mesh geometry={hexRingGeo}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
         onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
       >
-        <sphereGeometry args={[size, 16, 16]} />
-        <meshBasicMaterial color={color} />
+        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.6 : 0.3} transparent side={THREE.DoubleSide} />
       </mesh>
 
-      {country.threat_level === 'danger' && <PulsingRing color={color} size={baseSize} />}
+      <mesh geometry={hexGeo}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onClick(); }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+      >
+        <meshBasicMaterial color={color} opacity={hovered || isSelected ? 0.85 : 0.55} transparent side={THREE.DoubleSide} />
+      </mesh>
 
+      <mesh>
+        <sphereGeometry args={[baseSize * 0.3, 8, 8]} />
+        <meshBasicMaterial color="#ffffff" opacity={0.9} transparent />
+      </mesh>
     </group>
   );
 }
 
-function PulsingRing({ color, size }: { color: string; size: number }) {
+function PulsingHexRing({ color, size, speed, delay }: { color: string; size: number; speed: number; delay: number }) {
   const ref = useRef<THREE.Mesh>(null);
+  const geo = useMemo(() => createHexRingGeometry(size * 1.8, size * 2.2), [size]);
+
   useFrame(({ clock }) => {
     if (ref.current) {
-      const scale = 1 + Math.sin(clock.getElapsedTime() * 2.5) * 0.6;
+      const t = (clock.getElapsedTime() + delay) * speed;
+      const pulse = (Math.sin(t) + 1) / 2;
+      const scale = 1 + pulse * 0.8;
       ref.current.scale.setScalar(scale);
-      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.35 - scale * 0.1;
+      (ref.current.material as THREE.MeshBasicMaterial).opacity = 0.3 - pulse * 0.25;
     }
   });
+
   return (
-    <mesh ref={ref}>
-      <ringGeometry args={[size * 2.5, size * 4, 32]} />
+    <mesh ref={ref} geometry={geo}>
       <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
     </mesh>
   );
