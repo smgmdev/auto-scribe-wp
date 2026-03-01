@@ -30,6 +30,7 @@ interface SurveillanceGlobeProps {
   selectedCountry: string | null;
   missileTrajectories?: MissileTrajectory[];
   droneTrajectories?: MissileTrajectory[];
+  nukeTrajectories?: MissileTrajectory[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
 }
@@ -501,6 +502,56 @@ function DroneArc({ originCode, destCode }: { originCode: string; destCode: stri
   );
 }
 
+function NukeArc({ originCode, destCode }: { originCode: string; destCode: string }) {
+  const nukeRef = useRef<THREE.Mesh>(null);
+
+  const { curve, tubeGeo } = useMemo(() => {
+    const oCoords = COUNTRY_COORDINATES[originCode];
+    const dCoords = COUNTRY_COORDINATES[destCode];
+    if (!oCoords || !dCoords) return { curve: null, tubeGeo: null };
+
+    const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
+    const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const dist = start.distanceTo(end);
+    const arcHeight = Math.max(1.0, dist * 0.7);
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + arcHeight);
+
+    const c = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const tube = new THREE.TubeGeometry(c, 80, 0.007, 8, false);
+    return { curve: c, tubeGeo: tube };
+  }, [originCode, destCode]);
+
+  useFrame(({ clock }) => {
+    if (nukeRef.current && curve) {
+      const t = (clock.getElapsedTime() * 0.12) % 1;
+      const pos = curve.getPoint(t);
+      nukeRef.current.position.copy(pos);
+      const next = curve.getPoint(Math.min(t + 0.02, 1));
+      const dir = new THREE.Vector3().subVectors(next, pos).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      nukeRef.current.quaternion.copy(quat);
+    }
+  });
+
+  if (!tubeGeo || !curve) return null;
+
+  return (
+    <group>
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color="#eab308" transparent opacity={0.8} />
+      </mesh>
+      <mesh ref={nukeRef}>
+        <coneGeometry args={[0.03, 0.08, 6]} />
+        <meshBasicMaterial color="#facc15" />
+      </mesh>
+      <pointLight ref={(light) => {
+        if (light && nukeRef.current) light.position.copy(nukeRef.current.position);
+      }} color="#eab308" intensity={0.6} distance={0.6} />
+    </group>
+  );
+}
+
 function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   const { camera } = useThree();
   useFrame(() => onZoomChange(camera.position.length()));
@@ -513,6 +564,7 @@ function RotatingGlobe({
   selectedCountry,
   missileTrajectories = [],
   droneTrajectories = [],
+  nukeTrajectories = [],
   isSpinning = false,
   onSpinChange,
 }: SurveillanceGlobeProps) {
@@ -615,6 +667,12 @@ function RotatingGlobe({
         {droneTrajectories.map((t) =>
           t.origin_country_code && t.destination_country_code ? (
             <DroneArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
+          ) : null
+        )}
+
+        {nukeTrajectories.map((t) =>
+          t.origin_country_code && t.destination_country_code ? (
+            <NukeArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
           ) : null
         )}
       </group>
