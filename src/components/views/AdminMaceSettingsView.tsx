@@ -138,15 +138,15 @@ export function AdminMaceSettingsView() {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Settings</h1>
             <p className="mt-2 text-muted-foreground">
               Configure default categories for Mace AI published articles per site
             </p>
           </div>
-          <div className="flex items-center">
-            <Button onClick={handleSave} disabled={saving} className="rounded-r-none bg-black text-white border border-black border-r-0 shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none">
+          <div className="flex flex-col md:flex-row md:items-center">
+            <Button onClick={handleSave} disabled={saving} className="md:rounded-r-none rounded-b-none md:rounded-bl-lg bg-black text-white border border-black md:border-r-0 border-b-0 md:border-b shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none w-full md:w-auto">
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Save
             </Button>
@@ -160,7 +160,7 @@ export function AdminMaceSettingsView() {
                 toast.success('Refreshed');
               }}
               disabled={refreshing}
-              className="rounded-l-none bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none"
+              className="md:rounded-l-none rounded-t-none md:rounded-tr-lg bg-black text-white border border-black shadow-none transition-all duration-300 hover:bg-transparent hover:text-black hover:border-black hover:shadow-none w-full md:w-auto"
             >
               {refreshing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               Refresh
