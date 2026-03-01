@@ -199,19 +199,21 @@ const AdminMaceArticlesView = () => {
 
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-foreground truncate">{article.title}</h3>
-                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mt-1 text-xs text-muted-foreground">
                   <span>{article.published_to_name || 'Unknown site'}</span>
-                  {article.focus_keyword && (
-                    <>
-                      <span>·</span>
-                      <span className="text-primary/70">{article.focus_keyword}</span>
-                    </>
-                  )}
-                  <span>·</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {format(new Date(article.created_at), 'MMM d, yyyy')}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {article.focus_keyword && (
+                      <>
+                        <span className="hidden md:inline">·</span>
+                        <span className="text-primary/70">{article.focus_keyword}</span>
+                      </>
+                    )}
+                    <span className="hidden md:inline">·</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {format(new Date(article.created_at), 'MMM d, yyyy')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
