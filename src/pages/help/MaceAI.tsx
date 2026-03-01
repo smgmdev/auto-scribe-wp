@@ -52,7 +52,7 @@ const sections: HelpSection[] = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>"Publish an article about [topic] on [site name]"</strong> — generates and publishes immediately</li>
           <li><strong>"Write about [topic]"</strong> — Mace will ask which site to publish on</li>
-          <li><strong>"What sites do I have?"</strong> — Mace will list your connected WordPress sites</li>
+          <li><strong>"What sites can you publish on?"</strong> — Mace will then list available sites to publish</li>
         </ul>
         <p>
           Mace AI uses ElevenLabs for natural-sounding speech, so the conversation feels
