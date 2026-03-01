@@ -555,7 +555,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Skip if initial load hasn't finished yet — getSession handles that
-        if (!initialLoadDoneRef.current) return;
+        // EXCEPT for PASSWORD_RECOVERY which must be processed immediately
+        // so the reset-password page can use the recovery session
+        if (!initialLoadDoneRef.current && event !== 'PASSWORD_RECOVERY') return;
 
         // Skip ALL auth events during signup — user must verify email first
         if (isSigningUpRef.current) {

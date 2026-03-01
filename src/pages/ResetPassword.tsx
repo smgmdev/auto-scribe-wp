@@ -15,19 +15,38 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' && mounted) {
+        setIsReady(true);
+      }
+    });
+
     // Check if there's a hash fragment with access_token (from the reset email link)
     const hash = window.location.hash;
     if (hash && hash.includes('access_token')) {
       // Supabase will pick up the token from the hash and fire PASSWORD_RECOVERY
-      setIsReady(true);
+      // Set ready after a short delay as fallback in case the event doesn't fire
+      const fallbackTimer = setTimeout(async () => {
+        if (!mounted || isReady) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && mounted) {
+          console.log('[ResetPassword] Fallback: session found via getSession');
+          setIsReady(true);
+        }
+      }, 2000);
+      return () => {
+        mounted = false;
+        clearTimeout(fallbackTimer);
+        subscription.unsubscribe();
+      };
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setIsReady(true);
-      }
-    });
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleReset = async (e: React.FormEvent) => {
