@@ -71,50 +71,111 @@ const TAGLINES = [
   'Designed to keep your data private.',
 ];
 
+const TAGLINE_COLORS = [
+  // Blue-cyan lightning
+  ['#007AFF', '#32ADE6', '#5AC8FA', '#00D4FF', '#007AFF'],
+  // Purple-magenta lightning
+  ['#BF5AF2', '#5856D6', '#FF2D55', '#AF52DE', '#BF5AF2'],
+  // Orange-gold lightning
+  ['#FF9500', '#FFCC00', '#FF3B30', '#FF6B00', '#FF9500'],
+];
+
 function RotatingTagline() {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<'in' | 'out'>('in');
+  const [charReveal, setCharReveal] = useState(0);
 
   useEffect(() => {
-    const cycle = () => {
-      // Hold visible for 2.5s, then start exit
-      const holdTimer = setTimeout(() => {
-        setPhase('out');
-        // After exit animation, switch text and enter
-        const exitTimer = setTimeout(() => {
-          setIndex((prev) => (prev + 1) % TAGLINES.length);
-          setPhase('in');
-        }, 700);
-        return () => clearTimeout(exitTimer);
-      }, 2500);
-      return holdTimer;
+    const holdTime = 2800;
+    const exitTime = 600;
+    const totalCycle = holdTime + exitTime;
+
+    const tick = () => {
+      setPhase('out');
+      setCharReveal(0);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % TAGLINES.length);
+        setPhase('in');
+        setCharReveal(0);
+      }, exitTime);
     };
 
-    const timer = cycle();
-    const interval = setInterval(() => {
-      cycle();
-    }, 3200); // 2500 hold + 700 exit
-
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
+    const interval = setInterval(tick, totalCycle);
+    return () => clearInterval(interval);
   }, []);
 
+  // Character-by-character reveal
+  useEffect(() => {
+    if (phase !== 'in') return;
+    const text = TAGLINES[index];
+    if (charReveal >= text.length) return;
+    const timer = setTimeout(() => setCharReveal((c) => c + 1), 18);
+    return () => clearTimeout(timer);
+  }, [phase, index, charReveal]);
+
+  const colors = TAGLINE_COLORS[index % TAGLINE_COLORS.length];
+  const text = TAGLINES[index];
+
   return (
-    <div className="mt-8 h-8 flex items-center justify-center overflow-hidden perspective-[800px]">
+    <div className="mt-8 h-10 flex items-center justify-center overflow-hidden">
+      <style>{`
+        @keyframes lightning-flicker {
+          0%, 100% { opacity: 1; text-shadow: 0 0 4px var(--glow-color), 0 0 12px var(--glow-color), 0 0 24px var(--glow-color); }
+          10% { opacity: 0.8; text-shadow: 0 0 2px var(--glow-color); }
+          20% { opacity: 1; text-shadow: 0 0 8px var(--glow-color), 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); }
+          30% { opacity: 0.95; text-shadow: 0 0 4px var(--glow-color), 0 0 12px var(--glow-color); }
+          50% { opacity: 1; text-shadow: 0 0 6px var(--glow-color), 0 0 16px var(--glow-color), 0 0 32px var(--glow-color); }
+          70% { opacity: 0.9; text-shadow: 0 0 3px var(--glow-color); }
+          85% { opacity: 1; text-shadow: 0 0 10px var(--glow-color), 0 0 24px var(--glow-color), 0 0 48px var(--glow-color); }
+        }
+        @keyframes spark-trail {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .tagline-char {
+          display: inline-block;
+          animation: lightning-flicker 2s ease-in-out infinite;
+          background-size: 200% 200%;
+          animation: lightning-flicker 2s ease-in-out infinite, spark-trail 3s ease infinite;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+      `}</style>
       <p
-        key={index}
-        className="text-lg text-white/50 whitespace-nowrap transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="text-lg md:text-xl font-medium whitespace-nowrap transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           opacity: phase === 'in' ? 1 : 0,
           transform: phase === 'in'
-            ? 'translateY(0) rotateX(0deg) scale(1)'
-            : 'translateY(-20px) rotateX(40deg) scale(0.92)',
-          filter: phase === 'in' ? 'blur(0px)' : 'blur(6px)',
+            ? 'translateY(0) scale(1)'
+            : 'translateY(-16px) scale(0.94)',
+          filter: phase === 'in' ? 'blur(0px)' : 'blur(8px)',
         }}
       >
-        {TAGLINES[index]}
+        {text.split('').map((char, i) => {
+          const colorIdx = Math.floor((i / text.length) * (colors.length - 1));
+          const color1 = colors[colorIdx];
+          const color2 = colors[Math.min(colorIdx + 1, colors.length - 1)];
+          const glowColor = colors[Math.floor(colors.length / 2)];
+          const isRevealed = i < charReveal;
+          return (
+            <span
+              key={`${index}-${i}`}
+              className="tagline-char"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${color1}, ${color2}, ${colors[(colorIdx + 2) % colors.length]})`,
+                ['--glow-color' as string]: glowColor,
+                opacity: isRevealed ? 1 : 0,
+                transform: isRevealed ? 'translateY(0)' : 'translateY(8px)',
+                transition: `opacity 0.15s ease ${i * 0.01}s, transform 0.2s ease ${i * 0.01}s`,
+                animationDelay: `${i * 0.05}s, ${i * 0.08}s`,
+              }}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          );
+        })}
       </p>
     </div>
   );
