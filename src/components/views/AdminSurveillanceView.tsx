@@ -177,7 +177,7 @@ export function AdminSurveillanceView() {
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
         <div className="flex items-center justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#0d1220]">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-0">
             <div className="flex items-center gap-2">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
@@ -208,7 +208,7 @@ export function AdminSurveillanceView() {
               <Rocket className="w-3 h-3 text-blue-400" />
               <span className="text-[10px] font-mono text-gray-400">Missiles</span>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
-                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-white/10 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
@@ -226,7 +226,7 @@ export function AdminSurveillanceView() {
               <Shield className="w-3 h-3 text-purple-400" />
               <span className="text-[10px] font-mono text-gray-400">Drones</span>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
-                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-white/10 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
