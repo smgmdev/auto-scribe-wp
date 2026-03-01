@@ -149,6 +149,29 @@ const sections: HelpSection[] = [
       </div>
     ),
   },
+  {
+    id: 'data-privacy',
+    title: 'Data Privacy',
+    content: (
+      <div className="space-y-4">
+        <p>
+          Mace AI is designed with your privacy in mind. Your voice commands, article content,
+          and publishing activity are processed securely and are never shared with third parties
+          for advertising, analytics, or any other purpose outside of delivering the service.
+        </p>
+        <p>
+          Voice input is used solely to understand your publishing instructions and is not
+          stored or retained after your session. Mace AI does not collect, sell, or distribute
+          your personal data to external entities.
+        </p>
+        <p>
+          All data transmission between your browser and Arcana Mace is encrypted. Your
+          account credentials, site connections, and publishing history remain private and
+          accessible only to you.
+        </p>
+      </div>
+    ),
+  },
 ];
 
 export default function MaceAIHelp() {
