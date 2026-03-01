@@ -606,12 +606,23 @@ export function AdminMaceAIView() {
   const resetConversation = () => {
     stopAll();
     isProcessingRef.current = false;
+    scribeCommittedTextRef.current = '';
+    scribeActiveRef.current = false;
+    speculativeResultRef.current = null;
+    if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
+    if (speculativeTimerRef.current) { clearTimeout(speculativeTimerRef.current); speculativeTimerRef.current = null; }
+    if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
+    if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
     setStep('idle');
     setMessages([]);
     setCurrentTranscript('');
     setInterimTranscript('');
     setPublishResult(null);
     setPendingArticle(null);
+    setPublishPhase('');
+    setSpeakingWords([]);
+    // Re-warm the Scribe connection for instant next tap
+    prefetchScribeToken().then(() => warmUpScribe());
   };
 
 
