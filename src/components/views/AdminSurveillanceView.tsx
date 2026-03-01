@@ -510,7 +510,7 @@ export function AdminSurveillanceView() {
                         )}
                         {event.published_at && (
                           <span className="text-[10px] text-gray-600 font-mono">
-                            {new Date(event.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(event.published_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
                       </div>
