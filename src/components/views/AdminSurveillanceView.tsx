@@ -364,7 +364,14 @@ export function AdminSurveillanceView() {
                     <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-gray-600 font-mono">{event.country_name}</span>
-                      <span className="text-[10px] text-gray-600 font-mono">{event.source}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-gray-600 font-mono">{event.source}</span>
+                        {scanData.scanned_at && (
+                          <span className="text-[10px] text-gray-600 font-mono">
+                            {new Date(scanData.scanned_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} {new Date(scanData.scanned_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )) || (
