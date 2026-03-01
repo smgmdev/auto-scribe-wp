@@ -436,30 +436,6 @@ export default function MaceAI() {
         </div>
       </section>
 
-      {/* "All-new powers" section inspired by Siri's Apple Intelligence */}
-      <section className="bg-[#1d1d1f] py-20 md:py-32">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
-          <AnimatedSection>
-            <p className="text-[#86868b] text-lg md:text-xl mb-4">Arcana Mace + AI</p>
-            <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.08] mb-6">
-              All-new capabilities.
-            </h2>
-          </AnimatedSection>
-          <AnimatedSection delay={100}>
-            <p className="text-lg md:text-xl text-[#86868b] max-w-3xl mx-auto leading-relaxed mb-10">
-              With Mace AI built into every workflow, Arcana Mace delivers intelligent tools that help you generate content, monitor your account security, automate publishing, and manage campaigns — effortlessly.
-            </p>
-          </AnimatedSection>
-          <AnimatedSection delay={200}>
-            <button
-              onClick={() => navigate('/ai-article-generation')}
-              className="text-[#2997ff] hover:underline text-lg"
-            >
-              Learn more about AI Article Generation ›
-            </button>
-          </AnimatedSection>
-        </div>
-      </section>
 
       {/* Capabilities Grid - Siri-style scenarios */}
       <section id="capabilities" className="bg-black py-20 md:py-32">
