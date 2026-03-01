@@ -538,9 +538,15 @@ export function AdminMaceAIView() {
           {/* Listening transcript hidden — clean UI during recording */}
 
           {publishResult && step === 'idle' && (
-            <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
-              ✓ Published to {publishResult.site}
-            </p>
+            publishResult.link ? (
+              <a href={publishResult.link} target="_blank" rel="noopener noreferrer" className="text-sm text-center truncate max-w-full font-medium underline underline-offset-2 hover:opacity-80 transition-opacity" style={{ color: 'hsl(var(--chart-2))' }}>
+                Published to {publishResult.site}
+              </a>
+            ) : (
+              <p className="text-sm text-center truncate max-w-full font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
+                Published to {publishResult.site}
+              </p>
+            )
           )}
           {isProcessing ? (
             <>
