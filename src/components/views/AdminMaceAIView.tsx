@@ -22,7 +22,7 @@ interface PublishResult {
 }
 
 const SILENCE_TIMEOUT_MS = 1500;
-const SCRIBE_SILENCE_MS = 1000; // Time after last speech to auto-stop and process
+const SCRIBE_SILENCE_MS = 2000; // Time after last speech to auto-stop and process
 
 function isConfirmation(text: string): boolean {
   const lower = text.toLowerCase().trim();
@@ -352,22 +352,38 @@ export function AdminMaceAIView() {
     } catch (err) {
       console.error('ElevenLabs TTS error, falling back to browser:', err);
       if (isMountedRef.current) setStep('speaking');
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.3;
-      // Estimate ~180ms per word for browser TTS
-      startWordReveal(text, text.split(/\s+/).length * 180);
-      utterance.onend = () => {
+      try {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.3;
+        startWordReveal(text, text.split(/\s+/).length * 180);
+        
+        // Safety: if browser TTS doesn't fire callbacks within 30s, force done
+        const browserTtsSafety = setTimeout(() => {
+          if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+          setSpeakingWords([]);
+          if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+        }, 30000);
+        
+        utterance.onend = () => {
+          clearTimeout(browserTtsSafety);
+          if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+          setSpeakingWords([]);
+          if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+        };
+        utterance.onerror = () => {
+          clearTimeout(browserTtsSafety);
+          if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+          setSpeakingWords([]);
+          if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+        };
+        window.speechSynthesis.speak(utterance);
+      } catch (browserErr) {
+        console.error('Browser TTS also failed:', browserErr);
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
         setSpeakingWords([]);
         if (isMountedRef.current) { setStep('idle'); onDone?.(); }
-      };
-      utterance.onerror = () => {
-        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords([]);
-        if (isMountedRef.current) { setStep('idle'); onDone?.(); }
-      };
-      window.speechSynthesis.speak(utterance);
+      }
     }
   }, [startWordReveal]);
 
@@ -575,13 +591,13 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      speak(displayMessage, done);
+      await speak(displayMessage, done);
 
     } catch (err: any) {
       console.error('Voice publish error:', err);
       const errorMsg = err.message || 'Something went wrong';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-      speak(errorMsg, done);
+      await speak(errorMsg, done);
       toast.error(errorMsg);
     } finally {
       clearTimeout(safetyTimer);
