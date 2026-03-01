@@ -54,7 +54,13 @@ function getSeverityColor(severity: string) {
   }
 }
 
-function getThreatBadge(level: string) {
+function getThreatBadge(level: string, score?: number) {
+  // Use score as primary indicator when available, fall back to label
+  if (score !== undefined) {
+    if (score >= 60) return { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'DANGER' };
+    if (score >= 30) return { color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'CAUTION' };
+    return { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'SAFE' };
+  }
   switch (level) {
     case 'danger': return { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'DANGER' };
     case 'caution': return { color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'CAUTION' };
@@ -119,9 +125,9 @@ export function AdminSurveillanceView() {
     })();
   }, [hasLoaded, fetchLatestScan, runScan]);
 
-  const dangerCount = scanData?.countries.filter(c => c.threat_level === 'danger').length || 0;
-  const cautionCount = scanData?.countries.filter(c => c.threat_level === 'caution').length || 0;
-  const safeCount = scanData?.countries.filter(c => c.threat_level === 'safe').length || 0;
+  const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
+  const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
+  const safeCount = scanData?.countries.filter(c => c.score < 30).length || 0;
 
   return (
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
@@ -227,8 +233,8 @@ export function AdminSurveillanceView() {
                 <div className="p-3 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 font-mono">Threat Level</span>
-                    <Badge variant="outline" className={cn("text-xs font-mono", getThreatBadge(selectedCountry.threat_level).color)}>
-                      {getThreatBadge(selectedCountry.threat_level).label}
+                    <Badge variant="outline" className={cn("text-xs font-mono", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
+                      {getThreatBadge(selectedCountry.threat_level, selectedCountry.score).label}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
