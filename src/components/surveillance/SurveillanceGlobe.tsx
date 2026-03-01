@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState, useCallback } from 'react';
-import { Canvas, useFrame, useLoader, ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { Canvas, useFrame, useLoader, ThreeEvent, useThree } from '@react-three/fiber';
+import { OrbitControls, Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { COUNTRY_COORDINATES, latLngToVector3 } from '@/constants/countryCoordinates';
 
@@ -30,15 +30,6 @@ function getThreatColor(level: string): string {
   }
 }
 
-function getThreatGlow(level: string): string {
-  switch (level) {
-    case 'danger': return '#ff000080';
-    case 'caution': return '#ff990060';
-    case 'safe':
-    default: return '#00ff0040';
-  }
-}
-
 function EarthSphere() {
   const texture = useLoader(THREE.TextureLoader, '/textures/earth-blue-marble.jpg');
   const bumpMap = useLoader(THREE.TextureLoader, '/textures/earth-topology.png');
@@ -58,8 +49,6 @@ function EarthSphere() {
 }
 
 function AtmosphereGlow() {
-  const shaderRef = useRef<THREE.ShaderMaterial>(null);
-
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: `
@@ -89,6 +78,89 @@ function AtmosphereGlow() {
   );
 }
 
+/** Renders country name labels when camera is zoomed in */
+function CountryLabels({ countries, zoomLevel }: { countries: CountryData[]; zoomLevel: number }) {
+  // Only show labels when zoomed in (distance < 4)
+  if (zoomLevel > 4) return null;
+
+  // Show more labels as user zooms closer
+  const maxLabels = zoomLevel < 3.2 ? countries.length : Math.min(20, countries.length);
+  const visibleCountries = countries.slice(0, maxLabels);
+
+  return (
+    <>
+      {visibleCountries.map((country) => {
+        const coords = COUNTRY_COORDINATES[country.code];
+        if (!coords) return null;
+        const pos = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.04);
+        return (
+          <Html
+            key={`label-${country.code}`}
+            position={pos}
+            distanceFactor={5}
+            style={{ pointerEvents: 'none' }}
+            center
+            occlude={false}
+          >
+            <span
+              style={{
+                fontSize: '7px',
+                color: 'rgba(255,255,255,0.55)',
+                fontFamily: 'monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                textShadow: '0 0 4px rgba(0,0,0,0.9)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {country.name}
+            </span>
+          </Html>
+        );
+      })}
+    </>
+  );
+}
+
+/** Simple graticule grid acting as subtle country-border-like lines */
+function GlobeGrid() {
+  const gridLines = useMemo(() => {
+    const lines: [number, number, number][][] = [];
+    // Latitude lines
+    for (let lat = -80; lat <= 80; lat += 10) {
+      const points: [number, number, number][] = [];
+      for (let lng = -180; lng <= 180; lng += 3) {
+        points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
+      }
+      lines.push(points);
+    }
+    // Longitude lines
+    for (let lng = -180; lng < 180; lng += 15) {
+      const points: [number, number, number][] = [];
+      for (let lat = -90; lat <= 90; lat += 3) {
+        points.push(latLngToVector3(lat, lng, GLOBE_RADIUS + 0.003));
+      }
+      lines.push(points);
+    }
+    return lines;
+  }, []);
+
+  return (
+    <>
+      {gridLines.map((points, i) => (
+        <Line
+          key={i}
+          points={points}
+          color="#ffffff"
+          opacity={0.06}
+          transparent
+          lineWidth={0.4}
+        />
+      ))}
+    </>
+  );
+}
+
 function CountryMarker({
   country,
   onClick,
@@ -107,21 +179,21 @@ function CountryMarker({
   const color = getThreatColor(country.threat_level);
   const baseSize =
     country.threat_level === 'danger'
-      ? 0.07
+      ? 0.065
       : country.threat_level === 'caution'
-      ? 0.05
-      : 0.035;
-  const size = isSelected || hovered ? baseSize * 1.6 : baseSize;
+      ? 0.045
+      : 0.03;
+  const size = isSelected || hovered ? baseSize * 1.4 : baseSize;
 
   return (
     <group position={position}>
       {/* Outer glow ring for non-safe */}
       {country.threat_level !== 'safe' && (
         <mesh>
-          <ringGeometry args={[baseSize * 2, baseSize * 3.5, 32]} />
+          <ringGeometry args={[baseSize * 2, baseSize * 3, 32]} />
           <meshBasicMaterial
             color={color}
-            opacity={hovered || isSelected ? 0.35 : 0.15}
+            opacity={hovered || isSelected ? 0.3 : 0.12}
             transparent
             side={THREE.DoubleSide}
           />
@@ -154,31 +226,41 @@ function CountryMarker({
         <PulsingRing color={color} size={baseSize} />
       )}
 
-      {/* Hover/selected label */}
+      {/* Compact hover tooltip */}
       {(hovered || isSelected) && (
         <Html
           distanceFactor={6}
           style={{ pointerEvents: 'none' }}
           center
-          position={[0, 0.12, 0]}
+          position={[0, 0.09, 0]}
         >
           <div
-            className="px-2.5 py-1.5 rounded-md text-center whitespace-nowrap"
             style={{
-              background: 'rgba(10, 14, 26, 0.92)',
-              border: `1px solid ${color}50`,
-              boxShadow: `0 0 12px ${getThreatGlow(country.threat_level)}`,
-              backdropFilter: 'blur(8px)',
+              background: 'rgba(10, 14, 26, 0.88)',
+              border: `1px solid ${color}40`,
+              borderRadius: '4px',
+              padding: '3px 6px',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              backdropFilter: 'blur(6px)',
+              boxShadow: `0 0 8px ${color}30`,
             }}
           >
-            <div className="text-[11px] font-bold text-white leading-tight">
+            <div style={{ fontSize: '8px', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
               {country.name}
             </div>
             <div
-              className="text-[9px] font-mono uppercase tracking-wider mt-0.5"
-              style={{ color }}
+              style={{
+                fontSize: '7px',
+                fontFamily: 'monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '0.3px',
+                color,
+                lineHeight: 1.3,
+                marginTop: '1px',
+              }}
             >
-              {country.threat_level} · {country.score}/100
+              {country.threat_level} · {country.score}
             </div>
           </div>
         </Html>
@@ -210,6 +292,16 @@ function PulsingRing({ color, size }: { color: string; size: number }) {
   );
 }
 
+/** Tracks camera distance for zoom-dependent features */
+function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
+  const { camera } = useThree();
+  useFrame(() => {
+    const d = camera.position.length();
+    onZoomChange(d);
+  });
+  return null;
+}
+
 function RotatingGlobe({
   countries,
   onCountryClick,
@@ -217,6 +309,7 @@ function RotatingGlobe({
 }: SurveillanceGlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(4.5);
 
   useFrame(() => {
     if (groupRef.current && autoRotate) {
@@ -235,6 +328,7 @@ function RotatingGlobe({
 
   return (
     <>
+      <ZoomTracker onZoomChange={setZoomLevel} />
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 3, 5]} intensity={1.2} />
       <directionalLight position={[-5, -3, -5]} intensity={0.3} color="#4488cc" />
@@ -242,6 +336,8 @@ function RotatingGlobe({
       <group ref={groupRef}>
         <EarthSphere />
         <AtmosphereGlow />
+        <GlobeGrid />
+        <CountryLabels countries={countries} zoomLevel={zoomLevel} />
 
         {countries.map((country) => (
           <CountryMarker
@@ -256,7 +352,7 @@ function RotatingGlobe({
       <OrbitControls
         enableZoom={true}
         enablePan={false}
-        minDistance={3}
+        minDistance={2.8}
         maxDistance={8}
         autoRotate={false}
         enableDamping
