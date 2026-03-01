@@ -178,7 +178,7 @@ export function AdminSurveillanceView() {
         {/* Top bar */}
         <div className="flex items-center justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#0d1220]">
           <div className="flex items-center gap-0">
-            <div className="flex items-center gap-2 pl-3">
+            <div className="flex items-center gap-2 pl-3 pr-3">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
                 scanData ? "bg-green-500" : "bg-gray-500"
