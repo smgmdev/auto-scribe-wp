@@ -2065,6 +2065,7 @@ export function CreditHistoryView() {
                 const matchedLocked = isUnlocked ? unlockToLockedMap.get(transaction.id) : null;
                 const orderInfo = orderDetails[transaction.id];
                 const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
+                const isMacePublish = transaction.type === 'publish' && !!transaction.description?.includes('via Mace AI');
                 
                 const displayDescription = (() => {
                   // Format locked/unlocked credit transactions with better labels
@@ -2098,6 +2099,10 @@ export function CreditHistoryView() {
                       : transaction.description?.includes('USDT')
                         ? 'Withdrawal via USDT'
                         : 'Withdrawal Pending';
+                  }
+                  if (isMacePublish) {
+                    const siteMatch = transaction.description?.match(/Published via Mace AI to (.+)/);
+                    return siteMatch ? `Published via Mace AI to ${siteMatch[1]}` : 'Published via Mace AI';
                   }
                   return transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
                 })();
@@ -2266,7 +2271,9 @@ export function CreditHistoryView() {
                           <div className="flex justify-end mb-2">
                             {isInstantPublishingPayout 
                               ? <Badge className="bg-green-100 text-green-700">Instant Publishing</Badge>
-                              : getTransactionBadge(transaction.type)}
+                              : isMacePublish
+                                ? <Badge className="bg-purple-100 text-purple-700">Mace AI</Badge>
+                                : getTransactionBadge(transaction.type)}
                           </div>
                           
                           {/* Instant Publishing Payout - Show site, order value, platform fee, net earnings */}
