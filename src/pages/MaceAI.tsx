@@ -574,35 +574,6 @@ export default function MaceAI() {
         </div>
       </section>
 
-      {/* Use Cases - Siri-style scenario tiles */}
-      <section className="bg-[#1d1d1f] py-20 md:py-32">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <AnimatedSection>
-            <h2 className="text-4xl md:text-6xl lg:text-[64px] font-semibold text-white tracking-tight leading-[1.08] mb-16 md:mb-24">
-              Built for every<br />workflow.
-            </h2>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { icon: FileText, title: 'Content Creation', desc: 'Generate publication-ready articles from headlines, topics, or voice recordings.', color: 'from-[#0071e3] to-[#5856d6]' },
-              { icon: Globe, title: 'Global Publishing', desc: 'Publish AI-rewritten content to WordPress sites across the world, automatically.', color: 'from-[#30d158] to-[#0071e3]' },
-              { icon: BarChart3, title: 'Campaign Management', desc: 'Monitor order progress, track deliveries, and manage media buying campaigns.', color: 'from-[#ff9500] to-[#ff2d55]' },
-              { icon: MessageSquare, title: 'Communication', desc: 'Chat securely with agencies while Mace AI monitors for suspicious activity.', color: 'from-[#5856d6] to-[#af52de]' },
-            ].map((item, i) => (
-              <AnimatedSection key={item.title} delay={i * 100}>
-                <div className="bg-black rounded-2xl p-8 h-full">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-6`}>
-                    <item.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-                  <p className="text-[#86868b] leading-relaxed">{item.desc}</p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Privacy Section - matches Siri's privacy section */}
       <section id="privacy" className="bg-black py-20 md:py-32">
