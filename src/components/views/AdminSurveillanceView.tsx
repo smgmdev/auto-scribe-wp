@@ -208,15 +208,15 @@ export function AdminSurveillanceView() {
               <Rocket className="w-3 h-3 text-blue-400" />
               <span className="text-[10px] font-mono text-gray-400">Missiles</span>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
-                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
-                  <SelectItem value="1" className="text-[11px] font-mono">1h</SelectItem>
-                  <SelectItem value="6" className="text-[11px] font-mono">6h</SelectItem>
-                  <SelectItem value="12" className="text-[11px] font-mono">12h</SelectItem>
-                  <SelectItem value="24" className="text-[11px] font-mono">24h</SelectItem>
-                  <SelectItem value="168" className="text-[11px] font-mono">7d</SelectItem>
+                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
                 </SelectContent>
               </Select>
               <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
@@ -226,15 +226,15 @@ export function AdminSurveillanceView() {
               <Shield className="w-3 h-3 text-purple-400" />
               <span className="text-[10px] font-mono text-gray-400">Drones</span>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
-                <SelectTrigger className="h-5 w-[52px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
-                  <SelectItem value="1" className="text-[11px] font-mono">1h</SelectItem>
-                  <SelectItem value="6" className="text-[11px] font-mono">6h</SelectItem>
-                  <SelectItem value="12" className="text-[11px] font-mono">12h</SelectItem>
-                  <SelectItem value="24" className="text-[11px] font-mono">24h</SelectItem>
-                  <SelectItem value="168" className="text-[11px] font-mono">7d</SelectItem>
+                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
                 </SelectContent>
               </Select>
               <span className="text-[10px] font-mono text-gray-600">({droneTrajectories.length})</span>
