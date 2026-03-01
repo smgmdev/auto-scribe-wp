@@ -202,19 +202,10 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
       <lineSegments geometry={borderGeo}>
         <lineBasicMaterial color="#ffffff" linewidth={5} opacity={0.7} transparent />
       </lineSegments>
-      <Html position={centroid} distanceFactor={10} style={{ pointerEvents: 'none' }} center>
-        <div style={{
-          background: 'rgba(8,12,22,0.88)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          borderRadius: '4px',
-          padding: '3px 8px',
-          whiteSpace: 'nowrap',
-          backdropFilter: 'blur(4px)',
-        }}>
-          <span style={{ fontSize: '11px', fontWeight: 400, color: '#eee', fontFamily: 'monospace' }}>
-            {feature.properties.name}
-          </span>
-        </div>
+      <Html position={centroid} distanceFactor={8} style={{ pointerEvents: 'none' }} center>
+        <span style={{ fontSize: '9px', fontWeight: 500, color: '#fff', fontFamily: 'monospace', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+          {feature.properties.name}
+        </span>
       </Html>
     </group>
   );
