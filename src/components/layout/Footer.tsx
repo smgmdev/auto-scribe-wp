@@ -178,7 +178,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
           <p className={`text-xs shrink-0 ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             © {new Date().getFullYear()} Arcana Mace. All rights reserved.
           </p>
-          <div className={`flex flex-col md:flex-wrap md:flex-row items-start gap-x-4 gap-y-1.5 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
+          <div className={`flex flex-col md:flex-wrap md:flex-row items-start gap-x-4 gap-y-0 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
             <button onClick={() => navigate('/terms')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Terms of Service</button>
             <button onClick={() => navigate('/privacy')} className={`transition-colors text-left whitespace-nowrap ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Privacy Policy</button>
             <button onClick={() => navigate('/do-not-sell')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>We Do Not Sell or Share Your Personal Information</button>
