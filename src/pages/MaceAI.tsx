@@ -439,9 +439,13 @@ export default function MaceAI() {
       {/* Voice Command Section */}
       <section className="bg-white py-20 md:py-28">
         <div className="max-w-[980px] mx-auto px-4 md:px-6">
-          <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
-            Hey Mace, publish an article about Nvidia on Washington Morning!
-          </p>
+          <div className="flex justify-end">
+            <div className="bg-black text-white rounded-2xl rounded-br-sm px-5 py-3 max-w-[85%] md:max-w-[60%] shadow-lg">
+              <p className="text-base md:text-lg leading-relaxed">
+                Hey Mace, publish an article about Nvidia on Washington Morning!
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
