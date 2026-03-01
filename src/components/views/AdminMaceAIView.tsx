@@ -66,6 +66,10 @@ export function AdminMaceAIView() {
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedTokenRef = useRef<string | null>(null);
   const tokenFetchingRef = useRef(false);
+  // Speculative AI prefetch refs
+  const speculativeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const speculativeAbortRef = useRef<AbortController | null>(null);
+  const speculativeResultRef = useRef<{ text: string; result: any } | null>(null);
 
   // ElevenLabs Scribe for speech-to-text
   const scribe = useScribe({
@@ -112,6 +116,14 @@ export function AdminMaceAIView() {
         scribeSilenceTimerRef.current = setTimeout(() => {
           finishScribeListening();
         }, SCRIBE_SILENCE_MS);
+
+        // Speculative AI prefetch: after 500ms of silence, start AI call in background
+        if (speculativeTimerRef.current) clearTimeout(speculativeTimerRef.current);
+        if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
+        speculativeResultRef.current = null;
+        speculativeTimerRef.current = setTimeout(() => {
+          startSpeculativeAICall(scribeCommittedTextRef.current);
+        }, 500);
       }
       // Ignore empty commits — don't start silence timer
     },
@@ -119,6 +131,43 @@ export function AdminMaceAIView() {
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
+
+  // Speculative AI call: fire during recording pauses so response is ready when user stops
+  const startSpeculativeAICall = useCallback(async (text: string) => {
+    if (!text || text.length < 3) return;
+    const currentPending = pendingArticleRef.current;
+    // Don't speculate for confirmations/denials or publish flows
+    if (currentPending) return;
+
+    const controller = new AbortController();
+    speculativeAbortRef.current = controller;
+    console.log('[Speculative] Starting AI prefetch for:', text);
+
+    try {
+      const currentMessages = messagesRef.current;
+      const userMsg: Message = { role: 'user', content: text };
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-publish`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ messages: [...currentMessages, userMsg] }),
+          signal: controller.signal,
+        }
+      );
+      if (!resp.ok) return;
+      const data = await resp.json();
+      // Store result keyed by the text it was generated for
+      speculativeResultRef.current = { text, result: data };
+      console.log('[Speculative] AI response cached for:', text);
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error('[Speculative] Error:', err);
+    }
+  }, []);
 
   const prefetchScribeToken = useCallback(async () => {
     if (tokenFetchingRef.current || prefetchedTokenRef.current) return;
@@ -166,6 +215,8 @@ export function AdminMaceAIView() {
     if (!scribeActiveRef.current) return;
     scribeActiveRef.current = false;
     if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
+    // Stop speculative timer (but keep result if ready — processUserMessage will use it)
+    if (speculativeTimerRef.current) { clearTimeout(speculativeTimerRef.current); speculativeTimerRef.current = null; }
     
     const text = scribeCommittedTextRef.current.trim();
     scribeCommittedTextRef.current = '';
@@ -184,6 +235,10 @@ export function AdminMaceAIView() {
   }, [scribe]);
 
   const stopAll = useCallback(() => {
+    // Clean up speculative AI calls
+    if (speculativeTimerRef.current) { clearTimeout(speculativeTimerRef.current); speculativeTimerRef.current = null; }
+    if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
+    speculativeResultRef.current = null;
     scribeActiveRef.current = false;
     if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
     if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
@@ -472,9 +527,24 @@ export function AdminMaceAIView() {
         setPendingArticle(null);
       }
 
-      const { data, error } = await supabase.functions.invoke('voice-publish', {
-        body: { messages: updatedMessages },
-      });
+      // Check if speculative AI call already has the result for this exact text
+      let data: any = null;
+      let error: any = null;
+      const specResult = speculativeResultRef.current;
+      if (specResult && specResult.text === text) {
+        console.log('[Speculative] Using cached AI response — instant!');
+        data = specResult.result;
+        speculativeResultRef.current = null;
+      } else {
+        // Cancel any in-flight speculative call
+        if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
+        speculativeResultRef.current = null;
+        const result = await supabase.functions.invoke('voice-publish', {
+          body: { messages: updatedMessages },
+        });
+        data = result.data;
+        error = result.error;
+      }
       if (error) throw new Error(error.message || 'Request failed');
 
       const displayMessage = data?.message || "I'm not sure what happened. Can you try again?";
@@ -701,7 +771,7 @@ export function AdminMaceAIView() {
             : 'text-muted-foreground'
           }`}>
             {step === 'idle' && (messages.length === 0 ? 'Tap to start' : 'Tap to continue')}
-            {step === 'processing' && (publishPhase || (pendingArticle ? 'Publishing...' : 'Thinking...'))}
+            {step === 'processing' && (publishPhase || 'Processing...')}
           </p>
         </div>
       </div>
