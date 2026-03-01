@@ -68,7 +68,7 @@ interface AppState {
   setPreselectedSiteId: (siteId: string | null) => void;
   
   // UI State
-  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media' | 'admin-media-management' | 'my-agency' | 'credit-history' | 'admin-new-press-release' | 'admin-all-news' | 'admin-system' | 'support' | 'admin-support';
+  currentView: 'dashboard' | 'sites' | 'headlines' | 'compose' | 'articles' | 'settings' | 'account' | 'admin-credits' | 'admin-users' | 'admin-agencies' | 'admin-orders' | 'orders' | 'my-requests' | 'admin-engagements' | 'admin-applications' | 'agency-application' | 'agency-requests' | 'agency-payouts' | 'agency-media' | 'admin-media-management' | 'my-agency' | 'credit-history' | 'admin-new-press-release' | 'admin-all-news' | 'admin-system' | 'support' | 'admin-support' | 'admin-mace-ai' | 'admin-mace-articles' | 'admin-mace-settings';
   setCurrentView: (view: AppState['currentView']) => void;
   
   // Target tab and subcategory for Sites view navigation

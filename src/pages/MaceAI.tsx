@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { Search, User, Sparkles, Brain, Shield, Zap, MessageSquare, FileText, Globe, BarChart3, Plus } from 'lucide-react';
+import { useAppStore } from '@/stores/appStore';
 import {
   Accordion,
   AccordionContent,
@@ -559,7 +560,14 @@ export default function MaceAI() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => navigate('/auth?mode=signup')}
+              onClick={() => {
+                if (user) {
+                  useAppStore.getState().setCurrentView('admin-mace-ai');
+                  navigate('/account');
+                } else {
+                  navigate('/auth?mode=signup');
+                }
+              }}
               className="inline-flex items-center px-8 py-4 bg-[#0071e3] hover:bg-[#0077ed] text-white text-lg font-medium rounded-none transition-colors duration-200"
             >
               Try Now
@@ -607,7 +615,7 @@ export default function MaceAI() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Simply use voice input to tell Mace the topic of your interest for article publishing. Mace AI then generates a full article with proper formatting and publishes it instantly to the connected WordPress site of your choice.
+                  Simply use voice input to tell Mace the topic of your interest for article publishing. Mace AI then generates a full article with proper formatting and publishes it instantly to Local Media Library site of your choice.
                 </AccordionContent>
               </AccordionItem>
 
