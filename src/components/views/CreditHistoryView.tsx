@@ -2464,22 +2464,20 @@ export function CreditHistoryView() {
                                  <div>
                                    <span className="text-muted-foreground">Media Site:</span>
                                    {publishDetails[transaction.id] ? (
-                                     <div className="flex items-center gap-2 mt-0.5">
+                                     <p className="font-medium flex items-center gap-2">
                                        {(publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon) && (
                                          <img src={publishDetails[transaction.id].site_favicon || publishDetails[transaction.id].published_to_favicon} alt="" className="h-4 w-4 rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                        )}
-                                       <p className="font-medium">{publishDetails[transaction.id].published_to_name || 'Unknown'}</p>
-                                     </div>
+                                       {publishDetails[transaction.id].published_to_name || 'Unknown'}
+                                     </p>
                                    ) : (
-                                     <div className="flex items-center gap-2 mt-0.5">
+                                     <p className="font-medium flex items-center gap-2">
                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                       <p className="font-medium">
-                                          {(() => {
-                                            const siteMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
-                                            return siteMatch ? siteMatch[1] : 'Unknown';
-                                          })()}
-                                       </p>
-                                     </div>
+                                       {(() => {
+                                         const siteMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
+                                         return siteMatch ? siteMatch[1] : 'Unknown';
+                                       })()}
+                                     </p>
                                    )}
                                   </div>
                                   <div>
