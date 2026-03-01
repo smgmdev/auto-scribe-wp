@@ -13,6 +13,12 @@ interface CountryData {
   events: string[];
 }
 
+interface MissileTrajectory {
+  id: string;
+  origin_country_code: string | null;
+  destination_country_code: string | null;
+}
+
 interface GeoFeature {
   properties: { name: string; id?: string };
   geometry: { type: string; coordinates: any };
@@ -22,17 +28,29 @@ interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
   selectedCountry: string | null;
+  missileTrajectories?: MissileTrajectory[];
 }
 
 const GLOBE_RADIUS = 2;
 
-function getThreatColor(level: string): string {
+function getThreatColor(level: string, score?: number): string {
+  if (score !== undefined) {
+    if (score >= 60) return '#ef4444';
+    if (score >= 30) return '#f59e0b';
+    return '#22c55e';
+  }
   switch (level) {
     case 'danger': return '#ef4444';
     case 'caution': return '#f59e0b';
     case 'safe':
     default: return '#22c55e';
   }
+}
+
+function getScoreLevel(score: number): 'danger' | 'caution' | 'safe' {
+  if (score >= 60) return 'danger';
+  if (score >= 30) return 'caution';
+  return 'safe';
 }
 
 /** Point-in-polygon ray casting algorithm */
@@ -290,15 +308,16 @@ function CountryMarker({
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const coords = COUNTRY_COORDINATES[country.code];
+  const effectiveLevel = getScoreLevel(country.score);
   const sphereSize =
-    country.threat_level === 'danger' ? 0.035
-    : country.threat_level === 'caution' ? 0.025
+    effectiveLevel === 'danger' ? 0.035
+    : effectiveLevel === 'caution' ? 0.025
     : 0.018;
 
   if (!coords) return null;
 
   const position = latLngToVector3(coords.lat, coords.lng, GLOBE_RADIUS + 0.012);
-  const color = getThreatColor(country.threat_level);
+  const color = getThreatColor(country.threat_level, country.score);
   const active = hovered || isSelected;
 
   return (
@@ -327,10 +346,10 @@ function CountryMarker({
       </mesh>
 
       {/* Orbit ring */}
-      <OrbitRing color={color} size={sphereSize} speed={country.threat_level === 'danger' ? 2 : 1} active={active} />
+      <OrbitRing color={color} size={sphereSize} speed={effectiveLevel === 'danger' ? 2 : 1} active={active} />
 
       {/* Danger pulse wave */}
-      {country.threat_level === 'danger' && <PulseWave color={color} size={sphereSize} />}
+      {effectiveLevel === 'danger' && <PulseWave color={color} size={sphereSize} />}
 
       {/* Point light for surface glow */}
       <pointLight color={color} intensity={active ? 0.5 : 0.15} distance={sphereSize * 12} />
@@ -376,6 +395,52 @@ function PulseWave({ color, size }: { color: string; size: number }) {
   );
 }
 
+function MissileArc({ originCode, destCode }: { originCode: string; destCode: string }) {
+  const missileRef = useRef<THREE.Mesh>(null);
+
+  const { curve, lineObj } = useMemo(() => {
+    const oCoords = COUNTRY_COORDINATES[originCode];
+    const dCoords = COUNTRY_COORDINATES[destCode];
+    if (!oCoords || !dCoords) return { curve: null, lineObj: null };
+
+    const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
+    const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + 0.8);
+
+    const c = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const pts = c.getPoints(80);
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#3b82f6', transparent: true, opacity: 0.7, linewidth: 2 }));
+    return { curve: c, lineObj: line };
+  }, [originCode, destCode]);
+
+  useFrame(({ clock }) => {
+    if (missileRef.current && curve) {
+      const t = (clock.getElapsedTime() * 0.25) % 1;
+      const pos = curve.getPoint(t);
+      missileRef.current.position.copy(pos);
+      const next = curve.getPoint(Math.min(t + 0.02, 1));
+      missileRef.current.lookAt(next);
+    }
+  });
+
+  if (!lineObj || !curve) return null;
+
+  return (
+    <group>
+      <primitive object={lineObj} />
+      <mesh ref={missileRef}>
+        <sphereGeometry args={[0.03, 8, 8]} />
+        <meshBasicMaterial color="#60a5fa" />
+      </mesh>
+      <pointLight ref={(light) => {
+        if (light && missileRef.current) light.position.copy(missileRef.current.position);
+      }} color="#3b82f6" intensity={0.4} distance={0.5} />
+    </group>
+  );
+}
+
 function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   const { camera } = useThree();
   useFrame(() => onZoomChange(camera.position.length()));
@@ -386,6 +451,7 @@ function RotatingGlobe({
   countries,
   onCountryClick,
   selectedCountry,
+  missileTrajectories = [],
 }: SurveillanceGlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [autoRotate, setAutoRotate] = useState(true);
@@ -480,6 +546,12 @@ function RotatingGlobe({
         ))}
 
         {hoveredFeature && <CountryHighlight feature={hoveredFeature} />}
+
+        {missileTrajectories.map((t) =>
+          t.origin_country_code && t.destination_country_code ? (
+            <MissileArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
+          ) : null
+        )}
       </group>
 
       <OrbitControls
@@ -501,6 +573,7 @@ export function SurveillanceGlobe({
   countries,
   onCountryClick,
   selectedCountry,
+  missileTrajectories = [],
 }: SurveillanceGlobeProps) {
   return (
     <div className="w-full h-full">
@@ -513,6 +586,7 @@ export function SurveillanceGlobe({
           countries={countries}
           onCountryClick={onCountryClick}
           selectedCountry={selectedCountry}
+          missileTrajectories={missileTrajectories}
         />
       </Canvas>
     </div>

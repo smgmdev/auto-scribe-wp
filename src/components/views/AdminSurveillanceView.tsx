@@ -73,6 +73,7 @@ export function AdminSurveillanceView() {
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
 
   const fetchLatestScan = useCallback(async () => {
     const { data } = await supabase
@@ -124,6 +125,32 @@ export function AdminSurveillanceView() {
       }
     })();
   }, [hasLoaded, fetchLatestScan, runScan]);
+
+  // Fetch active missile alerts for trajectory arcs
+  useEffect(() => {
+    const fetchMissiles = async () => {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from('missile_alerts')
+        .select('id, origin_country_code, destination_country_code')
+        .eq('active', true)
+        .gte('created_at', oneHourAgo)
+        .not('origin_country_code', 'is', null)
+        .not('destination_country_code', 'is', null);
+      if (data) setMissileTrajectories(data);
+    };
+    fetchMissiles();
+    const channel = supabase
+      .channel('missile-alerts-globe')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'missile_alerts' }, (payload) => {
+        const a = payload.new as any;
+        if (a.origin_country_code && a.destination_country_code) {
+          setMissileTrajectories(prev => [...prev, { id: a.id, origin_country_code: a.origin_country_code, destination_country_code: a.destination_country_code }]);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
   const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
@@ -191,6 +218,7 @@ export function AdminSurveillanceView() {
                 countries={scanData.countries}
                 onCountryClick={(c) => setSelectedCountry(c)}
                 selectedCountry={selectedCountry?.code || null}
+                missileTrajectories={missileTrajectories}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
