@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 2000;
+const MAX_RETRIES = 2;
+const BASE_DELAY_MS = 1500;
 
 async function publishWithRetry(
   url: string,
@@ -15,9 +15,6 @@ async function publishWithRetry(
   postBody: Record<string, unknown>,
   attempt: number = 1
 ): Promise<Response> {
-  const jitter = Math.random() * 1500;
-  await new Promise(r => setTimeout(r, jitter));
-  
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -511,7 +508,7 @@ FORMAT YOUR RESPONSE EXACTLY:
           { role: 'user', content: `Write the article about: ${pa.topic}` },
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 1500,
       }),
     });
 
@@ -725,19 +722,22 @@ FORMAT YOUR RESPONSE EXACTLY:
       }
     }
 
-    // ── Save to DB ──
-    await supabase.from('articles').insert({
-      user_id: userId, title: articleTitle, content: htmlContent, tone: selectedTone,
-      status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
-      published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
-      focus_keyword: focusKeyword, meta_description: metaDescription,
-      source_headline: { source: 'mace' },
-    });
-
-    sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, articleTitle, wpLink || '')).catch(() => {});
+    // ── Save to DB + Telegram (fire-and-forget for speed) ──
+    const dbAndAlertPromise = Promise.all([
+      supabase.from('articles').insert({
+        user_id: userId, title: articleTitle, content: htmlContent, tone: selectedTone,
+        status: 'published', published_to: pa.siteId, published_to_name: pa.siteName,
+        published_to_favicon: pa.siteFavicon || null, wp_post_id: wpPostId, wp_link: wpLink,
+        focus_keyword: focusKeyword, meta_description: metaDescription,
+        source_headline: { source: 'mace' },
+      }),
+      sendTelegramAlert(TelegramAlerts.wpArticlePublished(pa.siteName, articleTitle, wpLink || '')).catch(() => {}),
+    ]).catch(err => console.error('[voice-publish] DB/alert error (non-fatal):', err));
 
     const creditsMsg = creditsRequired > 0 ? ` ${creditsRequired} credits were used.` : '';
-    return new Response(JSON.stringify({
+    
+    // Return response immediately — don't await DB save
+    const responsePayload = {
       type: 'publish_success',
       message: `It's done! "${articleTitle}" is now live on ${pa.siteName}.${creditsMsg}`,
       title: articleTitle,
@@ -747,7 +747,12 @@ FORMAT YOUR RESPONSE EXACTLY:
       creditsUsed: creditsRequired,
       focusKeyword: focusKeyword,
       metaDescription: metaDescription,
-    }), {
+    };
+
+    // Wait for DB save to complete before returning (edge function would terminate otherwise)
+    await dbAndAlertPromise;
+
+    return new Response(JSON.stringify(responsePayload), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
