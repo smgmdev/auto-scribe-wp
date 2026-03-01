@@ -258,7 +258,7 @@ export function AdminSurveillanceView() {
             )}
 
             {/* Legend */}
-            <div className="absolute top-2 left-2 z-10">
+            <div className="absolute bottom-0 left-0 z-10">
               <div className="flex items-center gap-3 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 rounded-md">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
