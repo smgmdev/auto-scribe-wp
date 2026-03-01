@@ -594,45 +594,54 @@ export function AdminMaceAIView() {
           ) : (
             <button
               onClick={handleMicClick}
-              className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible ${
-                step === 'listening'
-                  ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.4)] scale-110'
-                  : step === 'speaking'
-                  ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
-                  : 'bg-transparent hover:scale-105 cursor-pointer'
-              }`}
+              className="relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 overflow-visible bg-transparent hover:scale-105 cursor-pointer"
             >
-              {step === 'listening' && (
-                <>
-                  <span className="absolute -inset-3 rounded-full border-2 border-red-400 opacity-30 animate-pulse pointer-events-none" />
-                  <span className="absolute -inset-6 rounded-full border border-red-300 opacity-15 animate-[ping_2s_ease-out_infinite] pointer-events-none" />
-                </>
-              )}
-              {step === 'speaking' && (
-                <span className="absolute -inset-3 rounded-full border-2 border-blue-400 opacity-40 animate-pulse pointer-events-none" />
-              )}
-
               {step === 'idle' && <Play className="w-10 h-10 text-foreground relative z-10 fill-foreground" />}
+
               {step === 'listening' && (
-                <div className="flex items-center gap-[3px] relative z-10">
-                  {[0, 1, 2, 3, 4].map(i => (
+                <div className="flex items-center justify-center gap-[4px] relative z-10">
+                  {[0, 1, 2, 3, 4, 5, 6].map(i => (
                     <span
                       key={i}
-                      className="w-[3px] rounded-full bg-white"
+                      className="w-[3px] rounded-full bg-red-500"
                       style={{
-                        animation: `mace-bar-bounce 0.8s ease-in-out ${i * 0.1}s infinite alternate`,
+                        animation: `mace-wave-listen 0.6s ease-in-out ${i * 0.08}s infinite alternate`,
                       }}
                     />
                   ))}
                   <style>{`
-                    @keyframes mace-bar-bounce {
-                      0% { height: 6px; }
-                      100% { height: 22px; }
+                    @keyframes mace-wave-listen {
+                      0% { height: 4px; }
+                      100% { height: 28px; }
                     }
                   `}</style>
                 </div>
               )}
-              {step === 'speaking' && <Volume2 className="w-7 h-7 text-white relative z-10 animate-pulse" />}
+
+              {step === 'speaking' && (
+                <div className="flex items-center justify-center gap-[4px] relative z-10">
+                  {[0, 1, 2, 3, 4, 5, 6].map(i => {
+                    const colors = ['#007AFF', '#5856D6', '#32ADE6', '#007AFF', '#5856D6', '#32ADE6', '#007AFF'];
+                    return (
+                      <span
+                        key={i}
+                        className="w-[3px] rounded-full"
+                        style={{
+                          backgroundColor: colors[i],
+                          animation: `mace-wave-speak 0.7s ease-in-out ${i * 0.1}s infinite alternate`,
+                        }}
+                      />
+                    );
+                  })}
+                  <style>{`
+                    @keyframes mace-wave-speak {
+                      0% { height: 4px; opacity: 0.6; }
+                      50% { height: 24px; opacity: 1; }
+                      100% { height: 8px; opacity: 0.7; }
+                    }
+                  `}</style>
+                </div>
+              )}
             </button>
           )}
 
