@@ -436,24 +436,12 @@ export default function MaceAI() {
         </div>
       </section>
 
-      {/* Voice Command Marquee */}
-      <section className="bg-white py-20 md:py-28 overflow-hidden">
-        <style>{`
-          @keyframes mace-slide-left {
-            0% { transform: translateX(100%); opacity: 0; }
-            10% { opacity: 1; }
-            100% { transform: translateX(-100%); opacity: 1; }
-          }
-        `}</style>
-        <div 
-          className="whitespace-nowrap"
-          style={{
-            animation: 'mace-slide-left 12s linear infinite',
-          }}
-        >
-          <span className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-none">
+      {/* Voice Command Section */}
+      <section className="bg-white py-20 md:py-28">
+        <div className="max-w-[980px] mx-auto px-4 md:px-6">
+          <p className="text-4xl md:text-6xl lg:text-[80px] font-bold text-black tracking-tight leading-[1.05]">
             Hey Mace, publish an article about Nvidia on Washington Morning!
-          </span>
+          </p>
         </div>
       </section>
 
