@@ -652,7 +652,7 @@ async function handleDoPublish(
 
       await supabase.from('credit_transactions').update({
         type: 'publish',
-        description: `Published article to ${gc.siteName} (voice)`,
+        description: `Published via Mace AI to ${gc.siteName}`,
         ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
       }).eq('id', lockId);
 
