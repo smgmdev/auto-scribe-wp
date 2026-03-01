@@ -189,6 +189,32 @@ export function AdminSurveillanceView() {
                 </span>
               </div>
             )}
+
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 border border-white/10">
+              <Rocket className="w-3 h-3 text-blue-400" />
+              <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
+              {[
+                { label: '1h', value: 1 },
+                { label: '6h', value: 6 },
+                { label: '12h', value: 12 },
+                { label: '24h', value: 24 },
+                { label: '7d', value: 168 },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setMissileTimeFilter(opt.value)}
+                  className={cn(
+                    "text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors",
+                    missileTimeFilter === opt.value
+                      ? "bg-blue-500/30 text-blue-300 border border-blue-500/40"
+                      : "text-gray-500 hover:text-gray-300"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -231,34 +257,9 @@ export function AdminSurveillanceView() {
               </div>
             )}
 
-            {/* Legend + missile filter */}
-            <div className="absolute top-2 left-2 flex flex-col z-10">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 border-b-0 rounded-t-md">
-                <Rocket className="w-3 h-3 text-blue-400" />
-                <span className="text-[10px] font-mono text-gray-400">Missiles:</span>
-                {[
-                  { label: '1h', value: 1 },
-                  { label: '6h', value: 6 },
-                  { label: '12h', value: 12 },
-                  { label: '24h', value: 24 },
-                  { label: '7d', value: 168 },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setMissileTimeFilter(opt.value)}
-                    className={cn(
-                      "text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors",
-                      missileTimeFilter === opt.value
-                        ? "bg-blue-500/30 text-blue-300 border border-blue-500/40"
-                        : "text-gray-500 hover:text-gray-300"
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-                <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
-              </div>
-              <div className="flex items-center gap-3 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 rounded-b-md">
+            {/* Legend */}
+            <div className="absolute top-2 left-2 z-10">
+              <div className="flex items-center gap-3 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 rounded-md">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span className="text-[10px] font-mono text-gray-400">Safe ({safeCount})</span>
