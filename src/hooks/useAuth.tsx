@@ -230,7 +230,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Skip during signup flow — signUp() handles its own sign-out after
       // sending the welcome email; forcing sign-out here would race with it
       // and could prevent the toast or break the email call.
-      if (!isVerified && !shadowModeRef.current && !isSigningUpRef.current) {
+      // Also skip on the /reset-password page — the recovery session is
+      // needed so the user can call updateUser({ password }).
+      const isOnResetPage = window.location.pathname === '/reset-password';
+      if (!isVerified && !shadowModeRef.current && !isSigningUpRef.current && !isOnResetPage) {
         console.log('[Auth] Unverified session detected, forcing immediate sign-out');
         userInitiatedSignOutRef.current = true;
         await supabase.auth.signOut({ scope: 'local' });
