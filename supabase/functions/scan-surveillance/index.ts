@@ -210,6 +210,7 @@ ${config.sources}
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
 IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
+CRITICAL — NUCLEAR EVENTS: Do NOT classify any event as nuclear unless there is an OFFICIAL CONFIRMED announcement that a nuclear weapon has been launched or detonated. Political rhetoric, threats, warnings, nuclear program news, or nuclear policy discussions are NOT nuclear events. Only a verified, officially confirmed nuclear weapon launch/detonation qualifies.
 Return ONLY the JSON object, no other text.`
         },
         {
@@ -470,13 +471,17 @@ Deno.serve(async (req) => {
     }
 
     // Detect threat events (missiles, drones, nukes) and create alerts
-    const DRONE_KEYWORDS = ['drone', 'uav', 'unmanned aerial', 'drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition'];
-    const NUKE_KEYWORDS = ['nuclear', 'nuke', 'atomic', 'nuclear warhead', 'nuclear launch', 'nuclear strike', 'thermonuclear', 'radiation', 'nuclear weapon'];
-    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'warhead', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage'];
+    const DRONE_KEYWORDS = ['drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition', 'uav attack', 'unmanned aerial attack'];
+    // Nuke: ONLY confirmed launches/detonations — exclude diplomatic/political mentions
+    const NUKE_LAUNCH_PHRASES = ['nuclear weapon launched', 'nuclear strike confirmed', 'nuclear warhead detonated', 'nuclear bomb dropped', 'nuclear detonation', 'thermonuclear strike', 'nuclear attack confirmed', 'nuclear missile launched'];
+    // Exclude false positives: these phrases contain "nuclear" but are NOT actual launches
+    const NUKE_FALSE_POSITIVES = ['nuclear deal', 'nuclear talks', 'nuclear program', 'nuclear threat', 'nuclear deterrent', 'nuclear capable', 'nuclear arsenal', 'nuclear policy', 'nuclear energy', 'nuclear power', 'nuclear facility', 'nuclear plant', 'nuclear reactor', 'nuclear proliferation', 'nuclear sanctions', 'nuclear agreement', 'nuclear diplomacy', 'nuclear posture', 'nuclear doctrine', 'nuclear option', 'nuclear warning', 'nuclear rhetoric', 'nuclear fears', 'nuclear risk', 'nuclear standoff'];
+    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage'];
 
     const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | null => {
       const text = `${title} ${description}`.toLowerCase();
-      if (NUKE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'nuke';
+      // Nuke requires explicit launch/detonation phrases AND must NOT match false positives only
+      if (NUKE_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'nuke';
       if (DRONE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'drone';
       if (MISSILE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'missile';
       return null;
