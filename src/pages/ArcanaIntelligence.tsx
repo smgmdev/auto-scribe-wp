@@ -66,8 +66,8 @@ function AnimatedStat({ value, suffix = '', prefix = '' }: { value: number; suff
 }
 
 // ── Highlight card ──
-function HighlightCard({ icon: Icon, title, description, image, video, delay = 0 }: {
-  icon: React.ElementType; title: string; description: string; image: string; video?: string; delay?: number;
+function HighlightCard({ icon: Icon, title, description, image, video, customContent, delay = 0 }: {
+  icon: React.ElementType; title: string; description: string; image: string; video?: string; customContent?: React.ReactNode; delay?: number;
 }) {
   const { ref, isInView } = useInView();
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -75,7 +75,11 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
     <div ref={ref} className="group relative overflow-hidden rounded-none bg-[#1d1d1f] transition-all duration-700"
       style={{ opacity: isInView ? 1 : 0, transform: isInView ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)', transitionDelay: `${delay}ms` }}>
       <div className="relative aspect-[3/3] overflow-hidden">
-        {video ? (
+        {customContent ? (
+          <div className="w-full h-full flex items-center justify-center bg-black">
+            {customContent}
+          </div>
+        ) : video ? (
           <>
             {!videoLoaded && (
               <div className="absolute top-3 left-3 z-20">
@@ -356,7 +360,40 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={globalVideo} delay={0} />
-              <HighlightCard icon={Brain} title="Precision AI" description="AI that learns the global situation autonomously, visualizes information, and provides guidance for defense." image={engineImg} video={engineVideo} delay={150} />
+              <HighlightCard icon={Brain} title="Precision AI" description="AI that learns the global situation autonomously, visualizes information, and provides guidance for defense." image={engineImg} customContent={
+                <div className="relative w-40 h-40 flex items-center justify-center" style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}>
+                  <style>{`
+                    @keyframes arc-orbit-1 { 0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); } 100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); } }
+                    @keyframes arc-orbit-2 { 0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); } 100% { transform: rotateZ(-360deg) rotateX(60deg) rotateY(50deg); } }
+                    @keyframes arc-orbit-3 { 0% { transform: rotateZ(0deg) rotateX(60deg) rotateY(50deg); } 100% { transform: rotateZ(360deg) rotateX(60deg) rotateY(50deg); } }
+                    @keyframes arc-glow-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                    @keyframes arc-glow-spin-rev { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+                    @keyframes arc-sphere-pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.2); } }
+                  `}</style>
+                  <img src={amblack} alt="Arcana" className="absolute z-10 h-12 w-12 object-contain" />
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'arc-orbit-1 8s linear infinite' }}>
+                    <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #007AFF', boxShadow: '0 0 15px rgba(0,122,255,0.5)' }}>
+                      <div className="absolute inset-0" style={{ animation: 'arc-glow-spin 1s linear infinite' }}>
+                        <div className="absolute w-3.5 h-3.5 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #fff 0%, #007AFF 30%, #0055cc 70%)', boxShadow: '0 0 8px 2px rgba(0,122,255,1), 0 0 16px 6px rgba(0,122,255,0.6)', top: '-7px', left: '50%', transform: 'translateX(-50%)', animation: 'arc-sphere-pulse 0.5s ease-in-out infinite' }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'arc-orbit-2 10s linear infinite' }}>
+                    <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #5856D6', boxShadow: '0 0 15px rgba(88,86,214,0.5)' }}>
+                      <div className="absolute inset-0" style={{ animation: 'arc-glow-spin-rev 1.2s linear infinite' }}>
+                        <div className="absolute w-3.5 h-3.5 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #fff 0%, #5856D6 30%, #4240a8 70%)', boxShadow: '0 0 8px 2px rgba(88,86,214,1), 0 0 16px 6px rgba(88,86,214,0.6)', top: '-7px', left: '50%', transform: 'translateX(-50%)', animation: 'arc-sphere-pulse 0.6s ease-in-out infinite' }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'arc-orbit-3 12s linear infinite' }}>
+                    <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #32ADE6', boxShadow: '0 0 15px rgba(50,173,230,0.5)' }}>
+                      <div className="absolute inset-0" style={{ animation: 'arc-glow-spin 0.8s linear infinite' }}>
+                        <div className="absolute w-3.5 h-3.5 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #fff 0%, #32ADE6 30%, #1a8fc4 70%)', boxShadow: '0 0 8px 2px rgba(50,173,230,1), 0 0 16px 6px rgba(50,173,230,0.6)', top: '-7px', left: '50%', transform: 'translateX(-50%)', animation: 'arc-sphere-pulse 0.4s ease-in-out infinite' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              } delay={150} />
               <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} video={analyticsVideo} delay={300} />
             </div>
           </div>
@@ -387,7 +424,7 @@ export default function ArcanaIntelligence() {
         <section id="engine" className="py-1">
           <FeatureSection
             title="AI Engine"
-            headline="Built to think faster."
+            headline="Built to detect."
             description="The Arcana Precision engine processes millions of data points per minute — classifying, correlating, and surfacing what matters before the news cycle catches up."
             image={engineImg}
             video={engineVideo}
