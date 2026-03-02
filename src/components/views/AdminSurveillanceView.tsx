@@ -385,6 +385,11 @@ export function AdminSurveillanceView() {
                   <span className="text-xs text-gray-500">{selectedCountry.code}</span>
                 </div>
               )}
+              footer={
+                <div className="flex items-center justify-center w-full py-1.5 text-xs text-gray-500">
+                  Close: <kbd className="ml-1 px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-gray-400">ESC</kbd>
+                </div>
+              }
             >
               {selectedCountry && (
                 <div className="flex flex-col md:flex-row">
