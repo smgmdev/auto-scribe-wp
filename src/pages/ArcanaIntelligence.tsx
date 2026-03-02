@@ -508,9 +508,12 @@ export default function ArcanaIntelligence() {
         <section id="integration" className="bg-black pt-20 md:pt-28 pb-20 md:pb-28">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <AnimatedSection>
-              <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-12">
+              <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
                 Precision in your system.
               </h2>
+              <p className="text-white/50 text-base md:text-lg leading-relaxed max-w-2xl mb-12">
+                Seamlessly integrate Arcana Precision into your existing infrastructure. Built with flexible APIs and enterprise‑grade architecture to fit any operational environment.
+              </p>
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
