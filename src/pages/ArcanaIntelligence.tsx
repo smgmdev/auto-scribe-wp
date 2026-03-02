@@ -501,6 +501,35 @@ export default function ArcanaIntelligence() {
         </section>
 
 
+        {/* ══════════════ VALUES ══════════════ */}
+        <section className="bg-black py-20 md:py-28">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6">
+            <AnimatedSection>
+              <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-12">
+                Our values lead the way.
+              </h2>
+            </AnimatedSection>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { icon: Globe, title: 'Global-first intelligence.', desc: 'We monitor every corner of the world — delivering real-time insights across 195 countries with unmatched breadth and depth.', link: '#global', linkText: 'Learn more about coverage' },
+                { icon: Shield, title: 'Security. Non‑negotiable.', desc: 'Every signal is encrypted, every access is logged. Built for organizations where data integrity is mission‑critical.', link: '#security', linkText: 'Learn more about security' },
+                { icon: Zap, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Our AI engine processes millions of data points per minute to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
+              ].map((item) => (
+                <AnimatedSection key={item.title} delay={100}>
+                  <div className="bg-[#1d1d1f] rounded-2xl p-8 h-full flex flex-col">
+                    <item.icon className="w-8 h-8 text-white mb-6" />
+                    <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                    <p className="text-white/50 text-sm leading-relaxed mb-6 flex-1">{item.desc}</p>
+                    <a href={item.link} className="text-[#007AFF] text-sm font-normal hover:underline">
+                      {item.linkText} ›
+                    </a>
+                  </div>
+                </AnimatedSection>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ══════════════ CTA BANNER ══════════════ */}
         <section className="bg-black py-24 md:py-32 border-t border-white/5">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
