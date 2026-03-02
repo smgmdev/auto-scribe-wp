@@ -22,11 +22,33 @@ const SCAN_REGIONS: { value: ScanRegion; label: string }[] = [
 ];
 
 type CameraRegion = 'middle_east' | 'asia' | 'europe' | 'us';
-const CAMERA_FEEDS: { region: CameraRegion; label: string; embedId: string; description: string }[] = [
-  { region: 'middle_east', label: 'Middle East', embedId: 'lY2yjz-HRcg', description: 'Live Webcams — Tel Aviv, Jerusalem & Middle East' },
-  { region: 'asia', label: 'Asia', embedId: 'f0lYkdA-Gtw', description: 'NHK WORLD-JAPAN — 24/7 Live' },
-  { region: 'europe', label: 'Europe', embedId: 'h3MuIUNCCzI', description: 'FRANCE 24 — 24/7 Live News' },
-  { region: 'us', label: 'United States', embedId: 'w_Ma8oQLmSM', description: 'NBC News — 24/7 Live Stream' },
+interface CameraFeed { label: string; embedId: string }
+interface CameraRegionConfig { region: CameraRegion; label: string; feeds: CameraFeed[] }
+const CAMERA_REGIONS: CameraRegionConfig[] = [
+  { region: 'middle_east', label: 'Middle East', feeds: [
+    { label: 'Tehran', embedId: '-zGuR1qVKrU' },
+    { label: 'Tel Aviv', embedId: '-VLcYT5QBrY' },
+    { label: 'Jerusalem', embedId: 'JHwwZRH2wz8' },
+    { label: 'Middle East', embedId: '4E-iFtUM2kk' },
+  ]},
+  { region: 'asia', label: 'Asia', feeds: [
+    { label: 'NHK World', embedId: 'f0lYkdA-Gtw' },
+    { label: 'WION Live', embedId: 'UBKcjkGqFhA' },
+    { label: 'CNA Asia', embedId: 'XWq5kBlakcQ' },
+    { label: 'Arirang TV', embedId: 'kUhRAbmSwig' },
+  ]},
+  { region: 'europe', label: 'Europe', feeds: [
+    { label: 'France 24', embedId: 'h3MuIUNCCzI' },
+    { label: 'DW News', embedId: 'V4Qgff4_wP0' },
+    { label: 'Euronews', embedId: 'pykpO5kQJ98' },
+    { label: 'Sky News', embedId: '9Auq9mYxFEE' },
+  ]},
+  { region: 'us', label: 'United States', feeds: [
+    { label: 'NBC News', embedId: 'w_Ma8oQLmSM' },
+    { label: 'Bloomberg', embedId: 'iEpJwprxDdk' },
+    { label: 'ABC News', embedId: 'YMhRY_E0nSk' },
+    { label: 'CBS News', embedId: 'pftHHOTHwHs' },
+  ]},
 ];
 
 interface CountryData {
@@ -106,7 +128,7 @@ export function AdminSurveillanceView() {
   const [showDrones, setShowDrones] = useState(true);
   const [showNukes, setShowNukes] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [activeCameraFeed, setActiveCameraFeed] = useState<typeof CAMERA_FEEDS[number] | null>(null);
+  const [activeCameraRegion, setActiveCameraRegion] = useState<CameraRegionConfig | null>(null);
 
   // Trigger zoom-out-and-reposition on mount (same as crosshair button)
   useEffect(() => {
@@ -293,14 +315,14 @@ export function AdminSurveillanceView() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[160px]">
-                  {CAMERA_FEEDS.map(feed => (
+                  {CAMERA_REGIONS.map(region => (
                     <DropdownMenuItem
-                      key={feed.region}
-                      onClick={() => setActiveCameraFeed(feed)}
+                      key={region.region}
+                      onClick={() => setActiveCameraRegion(region)}
                       className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2"
                     >
                       <Video className="w-3 h-3 text-red-400" />
-                      {feed.label}
+                      {region.label}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -526,13 +548,13 @@ export function AdminSurveillanceView() {
         </div>
       </div>
 
-      {/* Live Camera Feed Popup */}
-      {activeCameraFeed && (
+      {/* Live Camera Feed Popup — 2x2 Grid */}
+      {activeCameraRegion && (
         <DraggablePopup
-          open={!!activeCameraFeed}
-          onOpenChange={(open) => { if (!open) setActiveCameraFeed(null); }}
-          width={420}
-          maxHeight="60vh"
+          open={!!activeCameraRegion}
+          onOpenChange={(open) => { if (!open) setActiveCameraRegion(null); }}
+          width={520}
+          maxHeight="75vh"
           zIndex={350}
           headerContent={
             <div className="flex items-center gap-2 ml-2">
@@ -540,19 +562,32 @@ export function AdminSurveillanceView() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
               </span>
-              <span className="text-[10px] font-medium text-gray-300 truncate">{activeCameraFeed.label}</span>
+              <span className="text-[10px] font-medium text-gray-300 truncate">{activeCameraRegion.label} — Live Webcams</span>
             </div>
           }
           bodyClassName="p-0 !p-0"
         >
-          <div className="w-full bg-black" style={{ aspectRatio: '16/9' }}>
-            <iframe
-              src={`https://www.youtube.com/embed/${activeCameraFeed.embedId}?autoplay=1&mute=1&rel=0`}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title={activeCameraFeed.description}
-            />
+          <div className="grid grid-cols-2 gap-px bg-white/5">
+            {activeCameraRegion.feeds.map(feed => (
+              <div key={feed.embedId} className="relative bg-black">
+                <div className="absolute top-1 left-1.5 z-10 flex items-center gap-1 bg-black/70 px-1.5 py-0.5 rounded-sm">
+                  <span className="relative flex h-1 w-1">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1 w-1 bg-red-500" />
+                  </span>
+                  <span className="text-[8px] font-medium text-gray-300 uppercase tracking-wider">{feed.label}</span>
+                </div>
+                <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${feed.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0`}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={feed.label}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </DraggablePopup>
       )}
