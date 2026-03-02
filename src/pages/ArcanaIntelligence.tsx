@@ -16,6 +16,7 @@ import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
 import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import Missile3D from '@/components/Missile3D';
+import { PrecisionContactForm } from '@/components/precision/PrecisionContactForm';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import globalVideo from '@/assets/arcana-intel-surveillance.mp4';
 import securityImg from '@/assets/arcana-intel-security.png';
@@ -246,6 +247,7 @@ export default function ArcanaIntelligence() {
   const { user } = useAuth();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -549,7 +551,7 @@ export default function ArcanaIntelligence() {
               <p className="text-lg text-white/50 max-w-lg mx-auto mb-10 leading-tight">
                 A platform designed for governments, agencies, and enterprises for mission‑critical intelligence.
               </p>
-              <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
+              <Button onClick={() => setContactOpen(true)}
                 className="rounded-none bg-[#007AFF] text-white hover:bg-[#0066D6] h-14 px-10 text-lg font-medium">
                 Contact
               </Button>
@@ -563,6 +565,7 @@ export default function ArcanaIntelligence() {
         </div>
         <Footer narrow dark />
       </div>
+      <PrecisionContactForm open={contactOpen} onOpenChange={setContactOpen} />
     </>
   );
 }

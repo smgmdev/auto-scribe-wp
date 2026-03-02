@@ -1376,6 +1376,42 @@ export type Database = {
         }
         Relationships: []
       }
+      precision_contact_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          mobile_number: string
+          organization_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          mobile_number: string
+          organization_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          mobile_number?: string
+          organization_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       press_release_categories: {
         Row: {
           created_at: string
