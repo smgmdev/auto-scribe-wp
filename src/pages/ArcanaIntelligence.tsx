@@ -506,7 +506,7 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <AnimatedSection>
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-12">
-                Our values lead the way.
+                Integrate Precision into your system.
               </h2>
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
