@@ -460,7 +460,7 @@ export default function ArcanaIntelligence() {
         </section>
 
         {/* ══════════════ AI ENGINE ══════════════ */}
-        <section id="engine" className="pt-10 md:pt-14 pb-10 md:pb-14">
+        <section id="engine" className="pt-6 md:pt-8 pb-6 md:pb-8">
           <FeatureSection
             title="AI Engine"
             headline="Built to detect."
@@ -491,7 +491,7 @@ export default function ArcanaIntelligence() {
         </section>
 
         {/* ══════════════ GLOBAL COVERAGE ══════════════ */}
-        <section id="global" className="pt-10 md:pt-14 pb-10 md:pb-14">
+        <section id="global" className="pt-6 md:pt-8 pb-6 md:pb-8">
           <FeatureSection
             title="Global Reach"
             headline="Every corner. Every signal."
