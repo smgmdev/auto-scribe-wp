@@ -113,10 +113,6 @@ const sections: HelpSection[] = [
           <li>Alert escalation workflows tailored to organizational structure</li>
           <li>API access for programmatic integration with third-party systems</li>
         </ul>
-        <p>
-          To discuss integration and setup for your organization, contact us through
-          the platform.
-        </p>
       </div>
     ),
   },
