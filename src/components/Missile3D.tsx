@@ -9,7 +9,7 @@ function ShieldIcon() {
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.position.y = 2.4 + Math.sin(state.clock.elapsedTime * 1.5) * 0.06;
+      groupRef.current.position.y = 1.6 + Math.sin(state.clock.elapsedTime * 1.5) * 0.04;
     }
   });
 
@@ -58,7 +58,7 @@ function ShieldIcon() {
   }, []);
 
   return (
-    <group ref={groupRef} position={[0, 2.4, 0]}>
+    <group ref={groupRef} position={[0, 1.6, 0]} scale={0.6}>
       {/* Shield fill */}
       <mesh geometry={shieldGeo}>
         <meshStandardMaterial
