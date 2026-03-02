@@ -393,7 +393,7 @@ export function AdminSurveillanceView() {
             {/* Burger menu for mobile feed */}
             <button
               onClick={() => setShowMobileFeed(true)}
-              className="lg:hidden flex items-center px-3 ml-auto text-gray-400 hover:text-white transition-colors"
+              className="flex items-center px-3 ml-auto text-gray-400 hover:text-white transition-colors"
               title="Open news feed"
             >
               <Menu className="w-4 h-4" />
@@ -504,63 +504,10 @@ export function AdminSurveillanceView() {
             {/* Country popup is now rendered globally via SurveillanceCountryPopup */}
           </div>
 
-          {/* Right panel - Events feed (desktop only) */}
-          <div className="hidden lg:flex w-96 border-l border-white/5 bg-[#0d1220] flex-col">
-            <div className="px-4 py-3 border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-300 uppercase tracking-wider">Feed</span>
-                <span className="text-xs text-gray-500">
-                  ({scanData?.latest_events.length || 0})
-                </span>
-              </div>
-            </div>
-
-            <ScrollArea className="flex-1">
-              <div className="p-3 space-y-2">
-                {scanData?.latest_events.map((event, i) => (
-                  <div
-                    key={i}
-                    className="p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors cursor-pointer"
-                    onClick={() => {
-                      const country = scanData.countries.find(c => c.code === event.country_code);
-                      if (country) {
-                        openSurveillancePopup(country);
-                      }
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h4 className="text-xs font-medium text-gray-200 leading-tight line-clamp-2">
-                        {event.title}
-                      </h4>
-                      <Badge variant="outline" className={cn("text-[10px] flex-shrink-0 px-1.5", getSeverityColor(event.severity))}>
-                        {event.severity.toUpperCase()}
-                      </Badge>
-                    </div>
-                    {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
-                      <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-gray-600">{event.country_name}</span>
-                      {event.published_at && (
-                        <span className="text-[10px] text-gray-600">
-                          {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )) || (
-                  <div className="text-center py-8">
-                    <Shield className="w-6 h-6 text-gray-700 mx-auto mb-2" />
-                    <p className="text-xs text-gray-600">No events loaded</p>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
         </div>
       </div>
 
-      {/* Mobile feed slide-over */}
+      {/* Feed slide-over */}
       <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed}>
         <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-[#0d1220] border-white/10 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
           <div className="flex flex-col h-full">
