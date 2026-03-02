@@ -484,19 +484,11 @@ export default function ArcanaIntelligence() {
                 <div key={f.title} className="pl-0">
                   <div className="inline-block">
                     <p className="text-white font-semibold text-lg mb-0">{f.title}</p>
-                    <div className="relative h-[2px] w-full mt-1 overflow-hidden bg-white/10">
-                      <div className="absolute inset-0 h-full w-1/3 bg-[#007AFF] animate-[flashLine_2s_ease-in-out_infinite]" />
-                    </div>
+                    <div className="h-[2px] w-full mt-1 bg-white/15" />
                   </div>
                   <p className="text-white/60 text-base leading-relaxed mt-2">{f.desc}</p>
                 </div>
               ))}
-              <style>{`
-                @keyframes flashLine {
-                  0% { left: -33%; }
-                  100% { left: 100%; }
-                }
-              `}</style>
             </div>
           </FeatureSection>
         </section>
