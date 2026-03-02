@@ -15,6 +15,8 @@ import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
 import { SessionExpiryWarning } from "@/components/SessionExpiryWarning";
 import { MissileAlertListener } from "@/components/MissileAlertListener";
 import { SurveillanceCountryPopup } from "@/components/surveillance/SurveillanceCountryPopup";
+import { PrecisionContactForm } from "@/components/precision/PrecisionContactForm";
+import { useAppStore } from "@/stores/appStore";
 import { SurveillanceCameraPopup } from "@/components/surveillance/SurveillanceCameraPopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -136,6 +138,8 @@ function AuthGatedWidgets() {
 const App = () => {
   usePreventBodyStyleChanges();
   useGlobalEscapeHandler();
+  const precisionContactOpen = useAppStore((s) => s.precisionContactOpen);
+  const setPrecisionContactOpen = useAppStore((s) => s.setPrecisionContactOpen);
   // HMR refresh v2
   return (
     <QueryClientProvider client={queryClient}>
@@ -205,6 +209,7 @@ const App = () => {
             
             {/* Global Widgets - hidden during loading/unauth/unverified */}
             <AuthGatedWidgets />
+            <PrecisionContactForm open={precisionContactOpen} onOpenChange={setPrecisionContactOpen} />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
