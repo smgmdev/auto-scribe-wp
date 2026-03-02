@@ -111,7 +111,7 @@ export function SurveillanceCountryPopup() {
       width={countryMissiles.length > 0 ? 740 : 360}
       maxHeight="75vh"
       zIndex={200}
-      className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-1.5 [&>div:last-child]:!px-3"
+      className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
       headerClassName="!bg-[#0d1220] !border-white/5"
       bodyClassName="!p-0"
       headerContent={
@@ -121,7 +121,7 @@ export function SurveillanceCountryPopup() {
         </div>
       }
       footer={
-        <div className="flex items-center justify-end w-full text-[10px] text-gray-500 -my-2.5">
+        <div className="flex items-center justify-end w-full text-[10px] text-gray-500 -my-1">
           Close: <kbd className="ml-1 px-1 py-0 bg-white/5 border border-white/10 rounded text-[10px] text-gray-400">ESC</kbd>
         </div>
       }
