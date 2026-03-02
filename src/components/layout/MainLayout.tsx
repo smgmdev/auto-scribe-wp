@@ -60,10 +60,7 @@ export function MainLayout({
       <div className="hidden lg:block">
         <div style={{ left: sidebarCollapsed ? 60 : 256 }} className="fixed top-0 right-0 z-50 h-16 flex flex-col transition-all duration-300">
           <QuickNavBanner inDashboard />
-          <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6 gap-3">
-            <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-8 w-8">
-              <Menu className="h-5 w-5" />
-            </Button>
+          <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
             <p className="text-white/80 text-xs flex items-center">
               <span>Get free credits by finding bugs on Arcana Mace</span>
               <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
