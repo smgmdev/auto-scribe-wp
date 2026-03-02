@@ -16,6 +16,7 @@ import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import securityImg from '@/assets/arcana-intel-security.jpg';
+import securityVideo from '@/assets/arcana-intel-security.mp4';
 
 // ── Intersection Observer hook ──
 function useInView(options?: IntersectionObserverInit) {
@@ -86,7 +87,7 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
         ) : (
           <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1d1d1f] via-[#1d1d1f]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1d1d1f] via-transparent to-transparent" />
       </div>
       <div className="relative px-6 pb-8 -mt-20 z-10">
         <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
@@ -302,7 +303,7 @@ export default function ArcanaIntelligence() {
           {/* Horizontal scrollable highlight cards */}
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={heroVideo} delay={0} />
+              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={securityVideo} delay={0} />
               <HighlightCard icon={Brain} title="AI‑Powered Analysis" description="Advanced language models scan, classify, and summarize thousands of news sources in seconds." image={engineImg} delay={150} />
               <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} video={analyticsVideo} delay={300} />
             </div>
