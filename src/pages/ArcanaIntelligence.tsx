@@ -430,7 +430,20 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
-                <img src={securityImg} alt="Security" className="w-full max-w-sm mx-auto rounded-2xl" />
+                <div className="relative w-full max-w-sm mx-auto">
+                  {/* Pulsing glow ring */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-[85%] h-[85%] rounded-full bg-[#007AFF]/5 animate-[shieldPulse_3s_ease-in-out_infinite]" />
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-[70%] h-[70%] rounded-full bg-[#007AFF]/3 animate-[shieldPulse_3s_ease-in-out_infinite_0.5s]" />
+                  </div>
+                  <img 
+                    src={securityImg} 
+                    alt="Security" 
+                    className="relative z-10 w-full rounded-2xl animate-[shieldFloat_4s_ease-in-out_infinite] drop-shadow-[0_0_30px_rgba(0,122,255,0.3)]" 
+                  />
+                </div>
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
                 <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-4">Security & Privacy</p>
