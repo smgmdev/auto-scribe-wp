@@ -154,7 +154,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
           </div>
         </AnimatedSection>
         <AnimatedSection delay={200}>
-          <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10">{description}</p>
+          <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-4">{description}</p>
         </AnimatedSection>
       </div>
       <AnimatedSection delay={300}>
