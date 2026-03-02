@@ -109,10 +109,10 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
   const colors = getAlertColors(type);
 
   return (
-    <div className={`relative w-full max-w-sm sm:max-w-sm max-sm:max-w-[calc(100vw-2rem)] mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
-      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
+    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:max-h-[70vh]`}>
+      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse shrink-0`} />
       
-      <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2">
+      <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2 flex-1 overflow-auto">
         <div className="flex justify-center">
           <div className="relative">
             <div className={`w-12 h-12 max-sm:w-10 max-sm:h-10 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
@@ -156,7 +156,9 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
             )}
           </div>
         </div>
+      </div>
 
+      <div className="shrink-0 px-4 max-sm:px-3 pb-4 max-sm:pb-3">
         <Button
           onClick={onDismiss}
           className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
@@ -165,7 +167,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
         </Button>
       </div>
 
-      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
+      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse shrink-0`} />
     </div>
   );
 }
