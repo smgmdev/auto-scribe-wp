@@ -54,18 +54,22 @@ function OrbitalRings() {
 
 function StarField({ missilePos }: { missilePos: React.MutableRefObject<THREE.Vector3> }) {
   const starsRef = useRef<THREE.Points>(null);
-  const count = 400;
+  const count = 500;
   
-  const { positions, lifetimes } = useMemo(() => {
+  const { positions, velocities, lifetimes } = useMemo(() => {
     const pos = new Float32Array(count * 3);
+    const vel = new Float32Array(count * 3);
     const life = new Float32Array(count);
     for (let i = 0; i < count; i++) {
       pos[i * 3] = 0;
       pos[i * 3 + 1] = 0;
-      pos[i * 3 + 2] = 100; // off-screen initially
-      life[i] = Math.random(); // stagger initial lifetimes
+      pos[i * 3 + 2] = -999;
+      vel[i * 3] = (Math.random() - 0.5) * 3;
+      vel[i * 3 + 1] = (Math.random() - 0.5) * 3;
+      vel[i * 3 + 2] = 2 + Math.random() * 4;
+      life[i] = 0;
     }
-    return { positions: pos, lifetimes: life };
+    return { positions: pos, velocities: vel, lifetimes: life };
   }, []);
 
   useFrame((_, delta) => {
@@ -75,21 +79,32 @@ function StarField({ missilePos }: { missilePos: React.MutableRefObject<THREE.Ve
     const mx = missilePos.current.x;
     const my = missilePos.current.y;
     const mz = missilePos.current.z;
+
+    // Only emit when missile is in visible range
+    const missileVisible = mz < 10 && mz > -15;
     
     for (let i = 0; i < count; i++) {
-      lifetimes[i] -= delta * (1.5 + Math.random() * 0.5);
+      lifetimes[i] -= delta;
       
       if (lifetimes[i] <= 0) {
-        // Respawn at missile position with slight spread
-        arr[i * 3] = mx + (Math.random() - 0.5) * 0.6;
-        arr[i * 3 + 1] = my + (Math.random() - 0.5) * 0.6;
-        arr[i * 3 + 2] = mz + (Math.random() - 0.5) * 0.3;
-        lifetimes[i] = 0.8 + Math.random() * 1.2;
+        if (missileVisible) {
+          // Spawn at missile position
+          arr[i * 3] = mx + (Math.random() - 0.5) * 0.8;
+          arr[i * 3 + 1] = my + (Math.random() - 0.5) * 0.8;
+          arr[i * 3 + 2] = mz + (Math.random() - 0.5) * 0.4;
+          // Randomize velocity direction for this particle
+          velocities[i * 3] = (Math.random() - 0.5) * 4;
+          velocities[i * 3 + 1] = (Math.random() - 0.5) * 4;
+          velocities[i * 3 + 2] = 3 + Math.random() * 5;
+          lifetimes[i] = 0.3 + Math.random() * 0.8;
+        } else {
+          arr[i * 3 + 2] = -999; // hide
+        }
       } else {
-        // Drift backward (trail behind missile)
-        arr[i * 3] += (Math.random() - 0.5) * delta * 2;
-        arr[i * 3 + 1] += (Math.random() - 0.5) * delta * 2;
-        arr[i * 3 + 2] += delta * 3; // trail backward in Z
+        // Move along velocity (trail behind)
+        arr[i * 3] += velocities[i * 3] * delta;
+        arr[i * 3 + 1] += velocities[i * 3 + 1] * delta;
+        arr[i * 3 + 2] += velocities[i * 3 + 2] * delta;
       }
     }
     posAttr.needsUpdate = true;
@@ -100,7 +115,7 @@ function StarField({ missilePos }: { missilePos: React.MutableRefObject<THREE.Ve
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.04} color="#66aaff" transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.08} color="#ff8844" transparent opacity={0.8} sizeAttenuation />
     </points>
   );
 }
