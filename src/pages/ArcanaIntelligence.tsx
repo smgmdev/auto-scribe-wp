@@ -541,7 +541,7 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
-                Ready to see the full picture?
+                Ready to improve your defence?
               </h2>
               <p className="text-lg text-white/50 max-w-lg mx-auto mb-10 leading-tight">
                 A platform designed for governments, agencies, and enterprises for mission‑critical intelligence.
