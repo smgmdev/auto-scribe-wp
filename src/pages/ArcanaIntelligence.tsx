@@ -157,8 +157,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <AnimatedSection delay={300}>
         {(stats || children) ? (
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
-            <div className="flex flex-col md:flex-row items-start gap-8">
-              <div className="w-full md:w-1/2 relative">
+            <div className="relative w-full">
+              <div className="w-full">
                 {customContent ? customContent : video ? (
                   <>
                     {!featureVideoLoaded && (
@@ -176,7 +176,11 @@ function FeatureSection({ title, headline, description, image, video, customCont
                 )}
                 {stats && <CyclingStats stats={stats} />}
               </div>
-              {children && <div className="w-full md:w-1/2">{children}</div>}
+              {children && (
+                <div className="absolute bottom-8 right-8 z-10 max-w-sm">
+                  {children}
+                </div>
+              )}
             </div>
           </div>
         ) : (
