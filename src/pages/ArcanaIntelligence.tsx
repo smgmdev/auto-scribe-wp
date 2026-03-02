@@ -248,7 +248,7 @@ export default function ArcanaIntelligence() {
         </div>
 
         {/* ══════════════ HERO ══════════════ */}
-        <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden" style={{ backgroundImage: `url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-black">
           {/* Video loading spinner */}
           {!heroVideoLoaded && (
             <div className="absolute bottom-4 right-4 z-20">
@@ -263,7 +263,7 @@ export default function ArcanaIntelligence() {
             playsInline
             preload="auto"
             className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
-            onCanPlayThrough={(e) => { e.currentTarget.style.opacity = '0.6'; setHeroVideoLoaded(true); }}
+            onCanPlayThrough={(e) => { e.currentTarget.style.opacity = '1'; setHeroVideoLoaded(true); }}
           >
             <source src={heroVideo} type="video/mp4" />
           </video>
