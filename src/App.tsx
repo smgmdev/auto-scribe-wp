@@ -57,6 +57,7 @@ import UpdateLog from "./pages/UpdateLog";
 import ResetPassword from "./pages/ResetPassword";
 import Industries from "./pages/Industries";
 import MaceAI from "./pages/MaceAI";
+import ArcanaIntelligence from "./pages/ArcanaIntelligence";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -195,6 +196,7 @@ const App = () => {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/industries" element={<Industries />} />
               <Route path="/mace-ai" element={<MaceAI />} />
+              <Route path="/arcana-intelligence" element={<ArcanaIntelligence />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
