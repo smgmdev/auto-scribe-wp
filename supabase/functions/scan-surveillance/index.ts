@@ -13,7 +13,10 @@ async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> 
     const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=30&format=json&timespan=24h&sort=DateDesc`;
 
     console.log('Fetching GDELT events...');
-    const resp = await fetch(url);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!resp.ok) {
       console.error('GDELT API error:', resp.status);
       return { events: [], countries: [] };
@@ -38,7 +41,7 @@ async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> 
       } catch { /* use default */ }
       return {
         title: a.title || '',
-        description: a.seendate ? `Published ${a.seendate}` : '',
+        description: '',
         source: a.domain || 'GDELT',
         source_url: a.url || '',
         country_code: a.sourcecountry?.toUpperCase()?.substring(0, 2) || null,
@@ -62,7 +65,10 @@ async function fetchReliefWebAlerts(): Promise<any[]> {
   try {
     console.log('Fetching ReliefWeb disaster/crisis alerts...');
     const url = 'https://api.reliefweb.int/v1/disasters?appname=amdev-surveillance&limit=15&sort[]=date:desc&fields[include][]=name&fields[include][]=glide&fields[include][]=date&fields[include][]=country&fields[include][]=type&fields[include][]=status&fields[include][]=description';
-    const resp = await fetch(url);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!resp.ok) {
       console.error('ReliefWeb API error:', resp.status);
       return [];
