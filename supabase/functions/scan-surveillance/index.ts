@@ -149,6 +149,8 @@ Include ALL countries with notable activity (at least 15-25 countries).
 Mark countries with no issues as "safe".
 Include at least 15-20 latest events from the past 48 hours.
 
+CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
+
 MANDATORY SOURCES — you MUST check ALL of these for the latest developments:
 — Global wires: Reuters, AP News, AFP
 — Western: BBC, Sky News, NBC News, CNN, Fox News, ABC News
@@ -164,7 +166,7 @@ Return ONLY the JSON object, no other text.`
         },
         {
           role: 'user',
-          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, X/Twitter. Cover the past 48 hours across ALL regions.'
+          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. IMPORTANT: Always include the latest Russian missile and drone strikes on Ukraine — check Ukrainian Air Force reports, Ukrinform, and Kyiv Independent. You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, X/Twitter. Cover the past 48 hours across ALL regions.'
         }
       ],
       search_recency_filter: 'day',
