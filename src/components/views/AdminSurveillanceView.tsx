@@ -76,9 +76,9 @@ export function AdminSurveillanceView() {
   const [scanData, setScanData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [missileTimeFilter, setMissileTimeFilter] = useState<string>('1');
-  const [droneTimeFilter, setDroneTimeFilter] = useState<string>('1');
-  const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('1');
+  const [missileTimeFilter, setMissileTimeFilter] = useState<string>('24');
+  const [droneTimeFilter, setDroneTimeFilter] = useState<string>('24');
+  const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('24');
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
