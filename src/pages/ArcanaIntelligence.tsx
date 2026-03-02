@@ -355,7 +355,7 @@ export default function ArcanaIntelligence() {
           {/* Horizontal scrollable highlight cards */}
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={securityVideo} delay={0} />
+              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={globalVideo} delay={0} />
               <HighlightCard icon={Brain} title="Precision AI" description="AI that learns the global situation autonomously, visualizes information, and provides guidance for defense." image={engineImg} video={engineVideo} delay={150} />
               <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} video={analyticsVideo} delay={300} />
             </div>
@@ -420,7 +420,7 @@ export default function ArcanaIntelligence() {
             headline="Every corner. Every signal."
             description="Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time."
             image={globalImg}
-            video={globalVideo}
+            video={securityVideo}
             reverse
           />
         </section>
