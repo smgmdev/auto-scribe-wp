@@ -4,60 +4,113 @@ import { useRef, useMemo, Suspense, useState } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function ShieldDome() {
-  const shieldRef = useRef<THREE.Mesh>(null);
-  const hexRef = useRef<THREE.LineSegments>(null);
+function EnergyShield() {
+  const outerRef = useRef<THREE.Group>(null);
+  const innerRef = useRef<THREE.Group>(null);
+  const pulseRef = useRef<THREE.Mesh>(null);
+  const ringRefs = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    if (shieldRef.current) {
-      const mat = shieldRef.current.material as THREE.MeshStandardMaterial;
-      mat.opacity = 0.06 + Math.sin(t * 1.5) * 0.03;
+
+    // Outer hex grid rotates slowly
+    if (outerRef.current) {
+      outerRef.current.rotation.y = t * 0.1;
+      outerRef.current.rotation.x = Math.sin(t * 0.3) * 0.05;
     }
-    if (hexRef.current) {
-      hexRef.current.rotation.y = t * 0.15;
-      const mat = hexRef.current.material as THREE.LineBasicMaterial;
-      mat.opacity = 0.15 + Math.sin(t * 2) * 0.08;
+
+    // Inner shell counter-rotates
+    if (innerRef.current) {
+      innerRef.current.rotation.y = -t * 0.15;
     }
+
+    // Pulse ring expanding outward
+    if (pulseRef.current) {
+      const cycle = (t * 0.5) % 1; // 0→1 repeating
+      const scale = 1.8 + cycle * 0.8;
+      pulseRef.current.scale.setScalar(scale);
+      const mat = pulseRef.current.material as THREE.MeshStandardMaterial;
+      mat.opacity = 0.25 * (1 - cycle);
+    }
+
+    // Orbital rings
+    ringRefs.forEach((ref, i) => {
+      if (ref.current) {
+        const offset = (Math.PI * 2 / 3) * i;
+        ref.current.rotation.x = t * 0.4 + offset;
+        ref.current.rotation.z = t * 0.2 + offset;
+        const mat = ref.current.material as THREE.MeshStandardMaterial;
+        mat.opacity = 0.12 + Math.sin(t * 2 + i) * 0.06;
+      }
+    });
   });
 
-  // Create hex grid wireframe on a sphere
-  const hexGeo = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.2, 2);
-    const edges = new THREE.EdgesGeometry(geo);
-    return edges;
+  // Hex wireframe
+  const hexEdges = useMemo(() => {
+    const geo = new THREE.IcosahedronGeometry(2.0, 1);
+    return new THREE.EdgesGeometry(geo);
+  }, []);
+
+  const innerEdges = useMemo(() => {
+    const geo = new THREE.IcosahedronGeometry(1.7, 2);
+    return new THREE.EdgesGeometry(geo);
   }, []);
 
   return (
     <>
-      {/* Translucent shield sphere */}
-      <mesh ref={shieldRef}>
-        <sphereGeometry args={[2.2, 32, 32]} />
-        <meshStandardMaterial
-          color="#007AFF"
-          emissive="#007AFF"
-          emissiveIntensity={0.3}
-          transparent
-          opacity={0.06}
-          side={THREE.DoubleSide}
-          depthWrite={false}
-        />
-      </mesh>
+      {/* Outer hex wireframe shell */}
+      <group ref={outerRef}>
+        <lineSegments geometry={hexEdges}>
+          <lineBasicMaterial color="#007AFF" transparent opacity={0.18} />
+        </lineSegments>
+      </group>
 
-      {/* Hex wireframe overlay */}
-      <lineSegments ref={hexRef} geometry={hexGeo}>
-        <lineBasicMaterial color="#007AFF" transparent opacity={0.15} />
-      </lineSegments>
+      {/* Inner denser wireframe */}
+      <group ref={innerRef}>
+        <lineSegments geometry={innerEdges}>
+          <lineBasicMaterial color="#007AFF" transparent opacity={0.08} />
+        </lineSegments>
+      </group>
 
-      {/* Shield rim glow ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.2, 0.01, 8, 64]} />
+      {/* Expanding pulse ring */}
+      <mesh ref={pulseRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1, 0.015, 4, 64]} />
         <meshStandardMaterial
           color="#007AFF"
           emissive="#007AFF"
           emissiveIntensity={2}
           transparent
-          opacity={0.3}
+          opacity={0.25}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Three orbital defense rings */}
+      {ringRefs.map((ref, i) => (
+        <mesh key={i} ref={ref}>
+          <torusGeometry args={[2.3 + i * 0.15, 0.004, 4, 80]} />
+          <meshStandardMaterial
+            color="#007AFF"
+            emissive="#007AFF"
+            emissiveIntensity={1.5}
+            transparent
+            opacity={0.15}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+
+      {/* Subtle glow sphere */}
+      <mesh>
+        <sphereGeometry args={[2.0, 24, 24]} />
+        <meshStandardMaterial
+          color="#007AFF"
+          emissive="#007AFF"
+          emissiveIntensity={0.15}
+          transparent
+          opacity={0.03}
+          side={THREE.BackSide}
+          depthWrite={false}
         />
       </mesh>
     </>
@@ -71,8 +124,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
 
   useFrame((state) => {
     if (!groupRef.current) return;
-    const t = state.clock.elapsedTime;
-    groupRef.current.rotation.y = -t * 0.3;
+    groupRef.current.rotation.y = -state.clock.elapsedTime * 0.3;
   });
 
   return (
@@ -80,7 +132,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      <ShieldDome />
+      <EnergyShield />
     </>
   );
 }
