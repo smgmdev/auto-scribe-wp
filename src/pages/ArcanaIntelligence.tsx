@@ -253,7 +253,7 @@ export default function ArcanaIntelligence() {
 
   // Scroll‑spy
   useEffect(() => {
-    const ids = ['overview', 'capabilities', 'engine', 'global', 'integration'];
+    const ids = ['overview', 'capabilities', 'engine', 'global', 'integration', 'learn-more'];
     const obs = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) setActiveSection(e.target.id); });
     }, { root: scrollContainerRef.current, rootMargin: '-20% 0px -60% 0px', threshold: 0 });
@@ -280,7 +280,8 @@ export default function ArcanaIntelligence() {
     { id: 'capabilities', label: 'Capabilities' },
     { id: 'engine', label: 'Engine' },
     { id: 'global', label: 'Global' },
-    { id: 'integration', label: 'Integration' },
+    { id: 'integration', label: 'Integrate' },
+    { id: 'learn-more', label: 'Learn More' },
   ];
 
   return (
@@ -531,7 +532,7 @@ export default function ArcanaIntelligence() {
         </section>
 
         {/* ══════════════ CTA BANNER ══════════════ */}
-        <section className="bg-black py-24 md:py-32 border-t border-white/5">
+        <section id="learn-more" className="bg-black py-24 md:py-32 border-t border-white/5">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
