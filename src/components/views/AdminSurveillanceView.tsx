@@ -235,7 +235,7 @@ export function AdminSurveillanceView() {
             </div>
 
 
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-y border-l border-white/10">
+            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
               <Rocket className="w-3 h-3 text-blue-400" />
               <span className="text-[10px] font-mono text-gray-400">Missiles</span>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
@@ -253,7 +253,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-y border-white/10">
+            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
               <Radar className="w-3 h-3 text-purple-400" />
               <span className="text-[10px] font-mono text-gray-400">Drones</span>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
@@ -271,7 +271,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] font-mono text-gray-600">({droneTrajectories.length})</span>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-y border-r border-white/10">
+            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
               <Radiation className="w-3 h-3 text-yellow-400" />
               <span className="text-[10px] font-mono text-gray-400">Nukes</span>
               <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
