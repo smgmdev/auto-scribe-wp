@@ -132,6 +132,7 @@ export default function SystemStatus() {
     'Headlines Scanner': { internalLink: '/account?view=headlines' },
     'Payment Gateway (Stripe)': { internalLink: '/account?view=credit-history' },
     'Mace AI': { internalLink: '/mace-ai' },
+    'Arcana Precision': { internalLink: '/arcana-precision' },
   };
 
   // Name mapping for services (API name -> Display name)
@@ -186,6 +187,7 @@ export default function SystemStatus() {
         { name: 'Media Site Network', status: 'issue', internalLink: '/account?view=sites' },
         { name: 'Agency System & Features', status: 'issue' },
         { name: 'Headlines Scanner', status: 'issue', internalLink: '/account?view=headlines' },
+        { name: 'Arcana Precision', status: 'issue', internalLink: '/arcana-precision' },
       ]);
     } finally {
       setIsLoading(false);

@@ -181,6 +181,24 @@ Deno.serve(async (req) => {
 
   // These services depend on external providers - we mark them available by default
   // as we can't directly check them without making actual transactions
+  // Check Arcana Precision (surveillance scanning)
+  try {
+    const start = Date.now()
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { error } = await supabase.from('surveillance_scans').select('id').limit(1)
+    const latency = Date.now() - start
+
+    if (error) {
+      services.push({ name: 'Arcana Precision', status: 'outage', latency })
+    } else if (latency > 2000) {
+      services.push({ name: 'Arcana Precision', status: 'issue', latency })
+    } else {
+      services.push({ name: 'Arcana Precision', status: 'available', latency })
+    }
+  } catch {
+    services.push({ name: 'Arcana Precision', status: 'outage' })
+  }
+
   const externalServices = [
     'AI Article Generation',
     'WordPress Publishing',
