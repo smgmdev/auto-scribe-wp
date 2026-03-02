@@ -9,6 +9,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
+const SCAN_REGIONS: { value: ScanRegion; label: string }[] = [
+  { value: 'global', label: 'Global' },
+  { value: 'asia', label: 'Asia' },
+  { value: 'middle_east', label: 'Middle East' },
+  { value: 'europe', label: 'Europe' },
+  { value: 'us', label: 'United States' },
+];
 
 interface CountryData {
   code: string;
@@ -114,16 +124,17 @@ export function AdminSurveillanceView() {
     return !!data;
   }, []);
 
-  const runScan = useCallback(async () => {
+  const runScan = useCallback(async (region: ScanRegion = 'global') => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('scan-surveillance');
+      const { data, error } = await supabase.functions.invoke('scan-surveillance', {
+        body: { region },
+      });
       if (error) throw error;
       if (data?.scan) {
         setScanData(data.scan);
-        // Trigger trajectory re-fetch after scan creates new alerts
         setTrajectoryRefresh(prev => prev + 1);
-        toast.success('Surveillance scan complete');
+        toast.success(`Scan complete — ${SCAN_REGIONS.find(r => r.value === region)?.label}`);
       } else if (data?.error) {
         throw new Error(data.error);
       }
@@ -236,14 +247,29 @@ export function AdminSurveillanceView() {
               >
                 {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
               </button>
-              <button
-                onClick={runScan}
-                disabled={loading}
-                className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50"
-                title="Rescan"
-              >
-                <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    disabled={loading}
+                    className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50 flex items-center gap-0.5"
+                    title="Scan region"
+                  >
+                    <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+                    <ChevronDown className="w-2.5 h-2.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[140px]">
+                  {SCAN_REGIONS.map(r => (
+                    <DropdownMenuItem
+                      key={r.value}
+                      onClick={() => runScan(r.value)}
+                      className="text-[11px] text-gray-300 hover:text-white cursor-pointer"
+                    >
+                      {r.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
