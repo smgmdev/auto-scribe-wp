@@ -79,13 +79,13 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
                 <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
               </div>
             )}
-            <video autoPlay loop muted playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover"
               onCanPlayThrough={() => setVideoLoaded(true)}>
               <source src={video} type="video/mp4" />
             </video>
           </>
         ) : (
-          <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          <img src={image} alt={title} className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#1d1d1f] to-transparent" />
       </div>
