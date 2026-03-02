@@ -114,6 +114,16 @@ function getThreatBadge(level: string, score?: number) {
   }
 }
 
+function dedupeTrajectories(trajectories: Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>) {
+  const seen = new Set<string>();
+  return trajectories.filter(t => {
+    const key = `${t.origin_country_code}->${t.destination_country_code}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function AdminSurveillanceView() {
   const [scanData, setScanData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -475,9 +485,9 @@ export function AdminSurveillanceView() {
                     openSurveillancePopup(c);
                   }}
                   selectedCountry={surveillanceCountry?.code || null}
-                  missileTrajectories={showMissiles ? missileTrajectories : []}
-                  droneTrajectories={showDrones ? droneTrajectories : []}
-                  nukeTrajectories={showNukes ? nukeTrajectories : []}
+                  missileTrajectories={showMissiles ? dedupeTrajectories(missileTrajectories) : []}
+                  droneTrajectories={showDrones ? dedupeTrajectories(droneTrajectories) : []}
+                  nukeTrajectories={showNukes ? dedupeTrajectories(nukeTrajectories) : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
