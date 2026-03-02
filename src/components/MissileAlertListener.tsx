@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Siren, Shield, Radiation } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MissileTrajectoryGlobe = lazy(() => import('@/components/MissileTrajectoryGlobe').then(m => ({ default: m.MissileTrajectoryGlobe })));
 
@@ -181,6 +182,7 @@ export function MissileAlertListener() {
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const soundStoppedRef = useRef(false);
+  const isMobile = useIsMobile();
 
   const playAlertSound = useCallback(() => {
     if (soundStoppedRef.current) return;
@@ -223,7 +225,6 @@ export function MissileAlertListener() {
       audioCtxRef.current = audioCtx;
       const now = audioCtx.currentTime;
 
-      // Layer 1: Deep bass drone
       const bassOsc = audioCtx.createOscillator();
       const bassGain = audioCtx.createGain();
       bassOsc.connect(bassGain);
@@ -236,7 +237,6 @@ export function MissileAlertListener() {
       bassOsc.start(now);
       bassOsc.stop(now + 2.5);
 
-      // Layer 2: Ascending siren sweep
       const sirenOsc = audioCtx.createOscillator();
       const sirenGain = audioCtx.createGain();
       sirenOsc.connect(sirenGain);
@@ -252,7 +252,6 @@ export function MissileAlertListener() {
       sirenOsc.start(now);
       sirenOsc.stop(now + 2.5);
 
-      // Layer 3: High-frequency alarm beeps
       for (let i = 0; i < 8; i++) {
         const beepOsc = audioCtx.createOscillator();
         const beepGain = audioCtx.createGain();
@@ -284,8 +283,14 @@ export function MissileAlertListener() {
 
   const dismissAlert = useCallback((id: string) => {
     dismissedRef.current.add(id);
-    stopSound();
-    setAlerts(prev => prev.filter(a => a.id !== id));
+    setAlerts(prev => {
+      const remaining = prev.filter(a => a.id !== id);
+      // If no more alerts, stop sound
+      if (remaining.length === 0) {
+        stopSound();
+      }
+      return remaining;
+    });
   }, [stopSound]);
 
   useEffect(() => {
@@ -317,17 +322,29 @@ export function MissileAlertListener() {
 
   if (alerts.length === 0) return null;
 
+  // Show max 2 on desktop, 1 on mobile — remaining are queued behind
+  const maxVisible = isMobile ? 1 : 2;
+  const visibleAlerts = alerts.slice(0, maxVisible);
+  const queuedCount = alerts.length - visibleAlerts.length;
+
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none animate-fade-in">
-      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[90vh] overflow-auto px-4 pointer-events-auto">
-        {alerts.map(alert => (
-          <AlertPopup
-            key={alert.id}
-            alert={alert}
-            type={getAlertType(alert.severity)}
-            onDismiss={() => dismissAlert(alert.id)}
-          />
-        ))}
+      <div className="flex flex-col items-center gap-2 pointer-events-auto">
+        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4">
+          {visibleAlerts.map(alert => (
+            <AlertPopup
+              key={alert.id}
+              alert={alert}
+              type={getAlertType(alert.severity)}
+              onDismiss={() => dismissAlert(alert.id)}
+            />
+          ))}
+        </div>
+        {queuedCount > 0 && (
+          <div className="text-xs font-mono text-red-400/80 bg-black/60 px-3 py-1 rounded-full border border-red-500/30">
+            +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
+          </div>
+        )}
       </div>
     </div>,
     document.body
