@@ -16,51 +16,60 @@ function TargetOverlay() {
   });
 
   const orange = '#f2a547';
-  const r = 1.5; // outer radius
+  const s = 1.5; // half-size of outer square
+
+  // Square outline from line segments
+  const outerSquare = useMemo(() => {
+    const pts = [
+      new THREE.Vector3(-s, -s, 0), new THREE.Vector3(s, -s, 0),
+      new THREE.Vector3(s, -s, 0), new THREE.Vector3(s, s, 0),
+      new THREE.Vector3(s, s, 0), new THREE.Vector3(-s, s, 0),
+      new THREE.Vector3(-s, s, 0), new THREE.Vector3(-s, -s, 0),
+    ];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    return geo;
+  }, []);
+
+  const si = 0.7; // half-size of inner square
+  const innerSquare = useMemo(() => {
+    const pts = [
+      new THREE.Vector3(-si, -si, 0), new THREE.Vector3(si, -si, 0),
+      new THREE.Vector3(si, -si, 0), new THREE.Vector3(si, si, 0),
+      new THREE.Vector3(si, si, 0), new THREE.Vector3(-si, si, 0),
+      new THREE.Vector3(-si, si, 0), new THREE.Vector3(-si, -si, 0),
+    ];
+    return new THREE.BufferGeometry().setFromPoints(pts);
+  }, []);
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Outer ring */}
-      <mesh>
-        <ringGeometry args={[r - 0.04, r, 64]} />
-        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.7}
-          transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
-      {/* Inner ring */}
-      <mesh>
-        <ringGeometry args={[0.7, 0.74, 64]} />
-        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.6}
-          transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
+      {/* Outer square */}
+      <lineSegments geometry={outerSquare}>
+        <lineBasicMaterial color={orange} transparent opacity={0.8} />
+      </lineSegments>
+      {/* Inner square */}
+      <lineSegments geometry={innerSquare}>
+        <lineBasicMaterial color={orange} transparent opacity={0.5} />
+      </lineSegments>
       {/* Center dot */}
       <mesh position={[0, 0, 0.01]}>
         <circleGeometry args={[0.08, 24]} />
         <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.9}
           transparent opacity={0.9} depthWrite={false} />
       </mesh>
-      {/* Crosshair lines */}
-      {[0, Math.PI / 2, Math.PI, -Math.PI / 2].map((rot, i) => (
-        <mesh key={i} position={[Math.cos(rot) * ((r + 0.74) / 2), Math.sin(rot) * ((r + 0.74) / 2), 0]}
-          rotation={[0, 0, rot]}>
-          <planeGeometry args={[r - 0.74 - 0.08, 0.04]} />
+      {/* Crosshair lines (top, right, bottom, left) */}
+      {[
+        { pos: [0, (s + si) / 2, 0] as [number, number, number], size: [0.04, s - si - 0.08] as [number, number] },
+        { pos: [(s + si) / 2, 0, 0] as [number, number, number], size: [s - si - 0.08, 0.04] as [number, number] },
+        { pos: [0, -(s + si) / 2, 0] as [number, number, number], size: [0.04, s - si - 0.08] as [number, number] },
+        { pos: [-(s + si) / 2, 0, 0] as [number, number, number], size: [s - si - 0.08, 0.04] as [number, number] },
+      ].map((line, i) => (
+        <mesh key={i} position={line.pos}>
+          <planeGeometry args={line.size} />
           <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.7}
             transparent opacity={0.7} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
       ))}
-      {/* Tick marks on outer ring */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2;
-        if (i % 3 === 0) return null; // skip where crosshairs are
-        return (
-          <mesh key={`tick-${i}`}
-            position={[Math.cos(angle) * (r + 0.08), Math.sin(angle) * (r + 0.08), 0]}
-            rotation={[0, 0, angle]}>
-            <planeGeometry args={[0.15, 0.03]} />
-            <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.5}
-              transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} />
-          </mesh>
-        );
-      })}
     </group>
   );
 }
