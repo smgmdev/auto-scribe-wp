@@ -109,34 +109,36 @@ function StarField() {
   );
 }
 
-function Particles() {
-  const particlesRef = useRef<THREE.Points>(null);
+function ScanGrid() {
+  const gridRef = useRef<THREE.Points>(null);
   
   const positions = useMemo(() => {
-    const pos = new Float32Array(200 * 3);
-    for (let i = 0; i < 200; i++) {
-      const radius = 1.5 + Math.random() * 2;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      pos[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = radius * Math.cos(phi);
+    const count = 300;
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      // Flat grid plane with slight random depth
+      pos[i * 3] = (Math.random() - 0.5) * 8;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 0.1;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 8;
     }
     return pos;
   }, []);
 
   useFrame((state) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+    if (gridRef.current) {
+      // Slow radar-sweep rotation
+      gridRef.current.rotation.y = state.clock.elapsedTime * 0.15;
+      // Subtle vertical pulse
+      gridRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2 - 1;
     }
   });
 
   return (
-    <points ref={particlesRef}>
+    <points ref={gridRef}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={200} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-position" count={300} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.02} color="#f2a547" transparent opacity={0.5} sizeAttenuation />
+      <pointsMaterial size={0.015} color="#007AFF" transparent opacity={0.35} sizeAttenuation />
     </points>
   );
 }
@@ -183,7 +185,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
         <primitive object={scene} scale={2.5} />
       </group>
       <StarField />
-      <Particles />
+      <ScanGrid />
     </>
   );
 }
