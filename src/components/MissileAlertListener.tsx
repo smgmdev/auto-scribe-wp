@@ -109,30 +109,30 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
   const colors = getAlertColors(type);
 
   return (
-    <div className={`relative w-full max-w-md mx-2 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
-      <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
+    <div className={`relative w-full max-w-sm mx-2 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
+      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
       
-      <div className="p-6 text-center space-y-4">
+      <div className="p-4 text-center space-y-3">
         <div className="flex justify-center">
           <div className="relative">
-            <div className={`w-16 h-16 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
-              {getAlertIcon(type, `w-8 h-8 ${colors.iconColor}`)}
+            <div className={`w-12 h-12 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
+              {getAlertIcon(type, `w-6 h-6 ${colors.iconColor}`)}
             </div>
-            <div className={`absolute inset-0 w-16 h-16 rounded-full border ${colors.pingBorder} animate-ping`} />
+            <div className={`absolute inset-0 w-12 h-12 rounded-full border ${colors.pingBorder} animate-ping`} />
           </div>
         </div>
 
         <div>
-          <h2 className={`text-2xl font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
+          <h2 className={`text-lg font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
             ⚠ {getAlertLabel(type)} ALERT ⚠
           </h2>
-          <p className={`text-xs ${colors.subtitleColor} font-mono mt-1 uppercase tracking-widest`}>
+          <p className={`text-[10px] ${colors.subtitleColor} font-mono mt-0.5 uppercase tracking-widest`}>
             Worldwide Threat Detection
           </p>
         </div>
 
         {alert.origin_country_code && alert.destination_country_code && (
-          <Suspense fallback={<div className="w-full h-48 bg-black/40 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="w-full h-36 bg-black/40 rounded-lg animate-pulse" />}>
             <MissileTrajectoryGlobe
               originCode={alert.origin_country_code}
               destinationCode={alert.destination_country_code}
@@ -140,17 +140,17 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           </Suspense>
         )}
 
-        <div className={`p-3 rounded-lg ${colors.cardBg} border ${colors.cardBorder} text-left`}>
-          <p className={`text-sm font-medium ${colors.textPrimary}`}>{alert.title}</p>
+        <div className={`p-2.5 rounded-lg ${colors.cardBg} border ${colors.cardBorder} text-left`}>
+          <p className={`text-xs font-medium ${colors.textPrimary}`}>{alert.title}</p>
           {alert.description && (
-            <p className={`text-xs ${colors.textSecondary} mt-1`}>{alert.description}</p>
+            <p className={`text-[11px] ${colors.textSecondary} mt-0.5`}>{alert.description}</p>
           )}
-          <div className="flex items-center gap-2 mt-1">
-            <p className={`text-xs ${colors.textTertiary}`}>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className={`text-[10px] ${colors.textTertiary}`}>
               {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
             </p>
             {alert.origin_country_name && alert.destination_country_name && (
-              <span className="text-xs text-blue-400 font-mono">
+              <span className="text-[10px] text-blue-400 font-mono">
                 {alert.origin_country_name} → {alert.destination_country_name}
               </span>
             )}
@@ -159,13 +159,13 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
 
         <Button
           onClick={onDismiss}
-          className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-base py-5 border ${colors.btnBorder} ${colors.btnShadow}`}
+          className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
         >
           OK
         </Button>
       </div>
 
-      <div className={`h-1 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
+      <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
     </div>
   );
 }
