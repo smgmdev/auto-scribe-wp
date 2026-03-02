@@ -27,7 +27,11 @@ export default function Missile3D() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <div className="relative w-full aspect-square bg-[#1d1d1f] rounded-2xl overflow-hidden">
+    <div className="relative w-full aspect-square">
+      {/* Radial vignette that fades into the black page background */}
+      <div className="absolute inset-0 z-20 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse 70% 70% at center, transparent 30%, black 75%)',
+      }} />
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-[#007AFF] animate-spin" />
