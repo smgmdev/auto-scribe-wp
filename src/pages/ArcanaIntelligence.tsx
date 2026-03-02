@@ -157,27 +157,25 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <AnimatedSection delay={300}>
         {(stats || children) ? (
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="flex-1 w-full relative">
-                {customContent ? customContent : video ? (
-                  <>
-                    {!featureVideoLoaded && (
-                      <div className="absolute top-3 left-3 z-20">
-                        <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
-                      </div>
-                    )}
-                    <video autoPlay loop muted playsInline className="w-full rounded-2xl"
-                      onCanPlayThrough={() => setFeatureVideoLoaded(true)}>
-                      <source src={video} type="video/mp4" />
-                    </video>
-                  </>
-                ) : (
-                  <img src={image} alt={headline} className="w-full rounded-2xl" />
-                )}
-                {stats && <CyclingStats stats={stats} />}
-              </div>
-              {children && <div className="flex-1">{children}</div>}
+            <div className="w-full relative">
+              {customContent ? customContent : video ? (
+                <>
+                  {!featureVideoLoaded && (
+                    <div className="absolute top-3 left-3 z-20">
+                      <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
+                    </div>
+                  )}
+                  <video autoPlay loop muted playsInline className="w-full rounded-2xl"
+                    onCanPlayThrough={() => setFeatureVideoLoaded(true)}>
+                    <source src={video} type="video/mp4" />
+                  </video>
+                </>
+              ) : (
+                <img src={image} alt={headline} className="w-full rounded-2xl" />
+              )}
+              {stats && <CyclingStats stats={stats} />}
             </div>
+            {children && <div className="mt-8">{children}</div>}
           </div>
         ) : (
           <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-0 relative">
