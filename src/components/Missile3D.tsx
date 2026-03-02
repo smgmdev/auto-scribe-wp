@@ -12,8 +12,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
-    groupRef.current.rotation.y = t * 0.3;
-    groupRef.current.position.y = Math.sin(t * 0.6) * 0.15;
+    groupRef.current.rotation.y = -t * 0.3;
   });
 
   return (
