@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight } from 'lucide-react';
+import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2 } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import heroImg from '@/assets/arcana-intel-hero.jpg';
+import heroVideo from '@/assets/arcana-intel-hero.mp4';
 import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import globalImg from '@/assets/arcana-intel-global.jpg';
@@ -131,6 +132,7 @@ export default function ArcanaIntelligence() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
+  const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -246,12 +248,26 @@ export default function ArcanaIntelligence() {
         </div>
 
         {/* ══════════════ HERO ══════════════ */}
-        <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden">
-          {/* Background image */}
-          <div className="absolute inset-0">
-            <img src={heroImg} alt="" className="w-full h-full object-cover opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
-          </div>
+        <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden" style={{ backgroundImage: `url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          {/* Video loading spinner */}
+          {!heroVideoLoaded && (
+            <div className="absolute bottom-4 right-4 z-20">
+              <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+            </div>
+          )}
+          {/* Video background */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
+            onCanPlayThrough={(e) => { e.currentTarget.style.opacity = '0.6'; setHeroVideoLoaded(true); }}
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
 
           <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-52 md:pt-64 pb-40">
             <AnimatedSection>
