@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -390,13 +390,13 @@ export function AdminSurveillanceView() {
               </div>
             </div>
 
-            {/* Burger menu for mobile feed */}
+            {/* Shield menu for feed panel */}
             <button
               onClick={() => setShowMobileFeed(true)}
               className="flex items-center px-3 ml-auto text-gray-400 hover:text-white transition-colors"
               title="Open news feed"
             >
-              <Menu className="w-4 h-4" />
+              <ShieldAlert className="w-4 h-4" />
             </button>
           </div>
 
@@ -509,23 +509,24 @@ export function AdminSurveillanceView() {
 
       {/* Feed slide-over */}
       <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed} modal={false}>
-        <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-[#0d1220] border-white/10 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
+        <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-[#0a0e1a]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
           <div className="flex flex-col h-full">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-300 uppercase tracking-wider">Feed</span>
-                <span className="text-xs text-gray-500">
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-400/80" />
+                <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">Feed</span>
+                <span className="text-[10px] text-gray-600 tabular-nums">
                   ({scanData?.latest_events.length || 0})
                 </span>
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
-              <div className="p-3 space-y-2">
+            <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/[0.08] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.14]">
+              <div className="p-2.5 space-y-1.5">
                 {scanData?.latest_events.map((event, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
                     onClick={() => {
                       const country = scanData.countries.find(c => c.code === event.country_code);
                       if (country) {
@@ -535,20 +536,20 @@ export function AdminSurveillanceView() {
                     }}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h4 className="text-xs font-medium text-gray-200 leading-tight line-clamp-2">
+                      <h4 className="text-[11px] font-medium text-gray-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">
                         {event.title}
                       </h4>
-                      <Badge variant="outline" className={cn("text-[10px] flex-shrink-0 px-1.5", getSeverityColor(event.severity))}>
+                      <Badge variant="outline" className={cn("text-[9px] flex-shrink-0 px-1.5 py-0 h-5 rounded-sm uppercase tracking-wider font-semibold", getSeverityColor(event.severity))}>
                         {event.severity.toUpperCase()}
                       </Badge>
                     </div>
                     {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
-                      <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
+                      <p className="text-[10px] text-gray-500 line-clamp-2 mb-1.5 leading-relaxed">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
                     )}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-gray-600">{event.country_name}</span>
                       {event.published_at && (
-                        <span className="text-[10px] text-gray-600">
+                        <span className="text-[10px] text-gray-600 tabular-nums">
                           {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
@@ -561,7 +562,7 @@ export function AdminSurveillanceView() {
                   </div>
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
