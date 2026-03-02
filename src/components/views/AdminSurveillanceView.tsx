@@ -108,23 +108,46 @@ export function AdminSurveillanceView() {
   const surveillanceCountry = useAppStore((s) => s.surveillanceCountry);
 
   const fetchLatestScan = useCallback(async () => {
-    const { data } = await supabase
+    // Fetch recent scans (last 24h) to aggregate events and prevent data loss between scans
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: scans } = await supabase
       .from('surveillance_scans')
       .select('*')
+      .gte('scanned_at', cutoff)
       .order('scanned_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(20);
 
-    if (data) {
+    if (scans && scans.length > 0) {
+      const latest = scans[0];
+      // Aggregate and deduplicate events from all recent scans
+      const seenTitles = new Set<string>();
+      const allEvents: EventData[] = [];
+      for (const scan of scans) {
+        const events = (scan.events as any as EventData[]) || [];
+        for (const ev of events) {
+          const key = ev.title?.toLowerCase().trim();
+          if (key && !seenTitles.has(key)) {
+            seenTitles.add(key);
+            allEvents.push(ev);
+          }
+        }
+      }
+      // Sort by published_at descending, then by title
+      allEvents.sort((a, b) => {
+        const da = a.published_at ? new Date(a.published_at).getTime() : 0;
+        const db = b.published_at ? new Date(b.published_at).getTime() : 0;
+        return db - da;
+      });
+
       setScanData({
-        global_tension_score: data.global_tension_score,
-        global_tension_level: data.global_tension_level,
-        countries: (data.country_data as any) || [],
-        latest_events: (data.events as any) || [],
-        scanned_at: data.scanned_at,
+        global_tension_score: latest.global_tension_score,
+        global_tension_level: latest.global_tension_level,
+        countries: (latest.country_data as any) || [],
+        latest_events: allEvents,
+        scanned_at: latest.scanned_at,
       });
     }
-    return !!data;
+    return !!(scans && scans.length > 0);
   }, []);
 
   const runScan = useCallback(async (region: ScanRegion = 'global') => {
