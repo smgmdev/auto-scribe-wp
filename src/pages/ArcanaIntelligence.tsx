@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair, Rocket } from 'lucide-react';
+import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair, Rocket, SlidersHorizontal } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -511,8 +511,8 @@ export default function ArcanaIntelligence() {
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { icon: Globe, title: 'Data security & privacy.', desc: 'Every signal is encrypted, every access is logged. Built for organizations and government entities where data integrity and privacy are mission‑critical.', link: '#global', linkText: 'Learn more' },
-                { icon: Shield, title: 'Unlimited customizations.', desc: 'Precision can be configured and set up in any way required — with unlimited capability for customization and features tailored to your needs.', link: '#security', linkText: 'Learn more' },
+                { icon: Shield, title: 'Data security and privacy.', desc: 'Every signal is encrypted, every access is logged. Built for organizations and government entities where data integrity and privacy are mission‑critical.', link: '#global', linkText: 'Learn more' },
+                { icon: SlidersHorizontal, title: 'Unlimited customizations.', desc: 'Precision can be configured and set up in any way required — with unlimited capability for customization and features tailored to your needs.', link: '#security', linkText: 'Learn more' },
                 { icon: Zap, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Precision AI engine processes extensive amounts of data to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
               ].map((item) => (
                 <AnimatedSection key={item.title} delay={100}>
