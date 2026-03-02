@@ -42,7 +42,9 @@ export function MainLayout({
   useEffect(() => {
     const measure = () => {
       if (mobileTopRef.current) {
-        setMobileTopHeight(mobileTopRef.current.offsetHeight);
+        const h = mobileTopRef.current.offsetHeight;
+        setMobileTopHeight(h);
+        document.documentElement.style.setProperty('--mobile-header-height', `${h}px`);
       }
     };
     measure();

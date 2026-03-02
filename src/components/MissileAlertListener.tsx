@@ -330,7 +330,7 @@ export function MissileAlertListener() {
   const queuedCount = alerts.length - visibleAlerts.length;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-stretch justify-center pointer-events-none animate-fade-in max-sm:top-[60px]">
+    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-stretch justify-center pointer-events-none animate-fade-in max-sm:top-[var(--mobile-header-height,128px)]">
       <div className="flex flex-col items-center pointer-events-auto max-sm:w-full max-sm:h-full">
         <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:h-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0">
           {visibleAlerts.map(alert => (
