@@ -123,7 +123,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
       </div>
       <AnimatedSection delay={300}>
         {(stats || children) ? (
-          <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 mb-16`}>
+          <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-4 mb-16`}>
             <div className="flex-1 w-full relative">
               {customContent ? customContent : video ? (
                 <>
