@@ -490,15 +490,15 @@ function DroneArc({ originCode, destCode }: { originCode: string; destCode: stri
   return (
     <group>
       <mesh geometry={tubeGeo}>
-        <meshBasicMaterial color="#1e3a5f" transparent opacity={0.7} />
+        <meshBasicMaterial color="#7c3aed" transparent opacity={0.7} />
       </mesh>
       <mesh ref={droneRef}>
         <coneGeometry args={[0.02, 0.06, 6]} />
-        <meshBasicMaterial color="#2563eb" />
+        <meshBasicMaterial color="#a855f7" />
       </mesh>
       <pointLight ref={(light) => {
         if (light && droneRef.current) light.position.copy(droneRef.current.position);
-      }} color="#1e3a5f" intensity={0.3} distance={0.4} />
+      }} color="#7c3aed" intensity={0.3} distance={0.4} />
     </group>
   );
 }
