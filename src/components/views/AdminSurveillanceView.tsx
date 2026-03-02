@@ -374,7 +374,7 @@ export function AdminSurveillanceView() {
               headerClassName="!bg-[#0d1220] !border-white/5"
               bodyClassName="!p-0"
               title={selectedCountry && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-4 pt-3">
                   <ShieldAlert className="w-4 h-4 text-gray-400" />
                   <span className="text-sm font-bold font-mono text-white">{selectedCountry.name}</span>
                   <span className="text-xs text-gray-500 font-mono">{selectedCountry.code}</span>
