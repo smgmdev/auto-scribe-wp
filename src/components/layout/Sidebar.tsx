@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { playMessageSound } from '@/lib/chat-presence';
 import { isNotificationGuarded } from '@/lib/notification-guard';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
@@ -1880,7 +1881,7 @@ export function Sidebar({
     return () => window.removeEventListener('resize', handler);
   }, []);
   const sidebarCollapsed = isDesktop && sidebarCollapsedStore;
-  return <>
+  return <TooltipProvider delayDuration={0}>
       <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
     // Desktop: always visible, width depends on collapsed state
     sidebarCollapsed ? "lg:w-16" : "lg:w-64",
@@ -1946,20 +1947,26 @@ export function Sidebar({
                   // In collapsed mode: show only icon, click navigates to first submenu item
                   return (
                     <div key={item.id} className="relative group">
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                          isActive && "text-[#3872e0] font-medium bg-sidebar-accent"
-                        )}
-                        onClick={() => {
-                          const firstSub = item.submenu?.[0];
-                          if (firstSub) handleNavClick(firstSub.id);
-                        }}
-                        title={item.label}
-                      >
-                        <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                              isActive && "text-[#3872e0] font-medium bg-sidebar-accent"
+                            )}
+                            onClick={() => {
+                              const firstSub = item.submenu?.[0];
+                              if (firstSub) handleNavClick(firstSub.id);
+                            }}
+                          >
+                            <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-black text-white border-white/10">
+                          {item.label}
+                        </TooltipContent>
+                      </Tooltip>
                       {totalDropdownCount > 0 && (
                         <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
                           {totalDropdownCount}
@@ -2117,17 +2124,23 @@ export function Sidebar({
                 const badgeCount = supportBadgeCount || feedbackBadgeCount;
                 return (
                   <div key={item.id} className="relative">
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                        isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
-                      )}
-                      onClick={() => handleNavClick(item.id)}
-                      title={item.label}
-                    >
-                      <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                            isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                          )}
+                          onClick={() => handleNavClick(item.id)}
+                        >
+                          <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="bg-black text-white border-white/10">
+                        {item.label}
+                      </TooltipContent>
+                    </Tooltip>
                     {badgeCount > 0 && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
                         {badgeCount}
@@ -2185,23 +2198,33 @@ export function Sidebar({
             )}
             
             <div className="space-y-1">
-              <Button variant="ghost" className={cn(
-                "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium"
-              )} onClick={() => handleNavClick('account')} title={sidebarCollapsed ? "Account Settings" : undefined}>
-                <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
-                {!sidebarCollapsed && "Account Settings"}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className={cn(
+                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                    currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium"
+                  )} onClick={() => handleNavClick('account')}>
+                    <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
+                    {!sidebarCollapsed && "Account Settings"}
+                  </Button>
+                </TooltipTrigger>
+                {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Account Settings</TooltipContent>}
+              </Tooltip>
               <div className="relative">
-                <Button variant="ghost" className={cn(
-                  "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                  sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                  (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium"
-                )} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')} title={sidebarCollapsed ? "Support" : undefined}>
-                  <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
-                  {!sidebarCollapsed && "Support"}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" className={cn(
+                      "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                      sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                      (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium"
+                    )} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
+                      <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
+                      {!sidebarCollapsed && "Support"}
+                    </Button>
+                  </TooltipTrigger>
+                  {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Support</TooltipContent>}
+                </Tooltip>
                 {(isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount) > 0 && (
                   <span className={cn("absolute -top-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center", sidebarCollapsed ? "-right-1" : "right-2")}>
                     {isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount}
@@ -2210,38 +2233,53 @@ export function Sidebar({
               </div>
               {isAdmin && (
                 <>
-                  <Button variant="ghost" className={cn(
-                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                    currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium"
-                  )} onClick={() => handleNavClick('admin-surveillance')} title={sidebarCollapsed ? "Surveillance" : undefined}>
-                    <ScanEye className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
-                    {!sidebarCollapsed && "Surveillance"}
-                  </Button>
-                  <Button variant="ghost" className={cn(
-                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                    currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium"
-                  )} onClick={() => handleNavClick('admin-system')} title={sidebarCollapsed ? "Terminal" : undefined}>
-                    <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
-                    {!sidebarCollapsed && "Terminal"}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" className={cn(
+                        "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                        currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium"
+                      )} onClick={() => handleNavClick('admin-surveillance')}>
+                        <ScanEye className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
+                        {!sidebarCollapsed && "Surveillance"}
+                      </Button>
+                    </TooltipTrigger>
+                    {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Surveillance</TooltipContent>}
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" className={cn(
+                        "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                        currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium"
+                      )} onClick={() => handleNavClick('admin-system')}>
+                        <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
+                        {!sidebarCollapsed && "Terminal"}
+                      </Button>
+                    </TooltipTrigger>
+                    {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Terminal</TooltipContent>}
+                  </Tooltip>
                 </>
               )}
-              <Button variant="ghost" className={cn(
-                "w-full text-sidebar-foreground/70 hover:text-destructive",
-                sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3"
-              )} onClick={() => {
-                navigate('/');
-                signOut();
-              }} title={sidebarCollapsed ? "Log Out" : undefined}>
-                <LogOut className="h-5 w-5" />
-                {!sidebarCollapsed && "Log Out"}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className={cn(
+                    "w-full text-sidebar-foreground/70 hover:text-destructive",
+                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3"
+                  )} onClick={() => {
+                    navigate('/');
+                    signOut();
+                  }}>
+                    <LogOut className="h-5 w-5" />
+                    {!sidebarCollapsed && "Log Out"}
+                  </Button>
+                </TooltipTrigger>
+                {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Log Out</TooltipContent>}
+              </Tooltip>
             </div>
           </div>
         </div>
       </aside>
 
-    </>;
+    </TooltipProvider>;
 }
