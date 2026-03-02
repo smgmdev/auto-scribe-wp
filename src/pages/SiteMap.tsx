@@ -26,6 +26,7 @@ const SITEMAP_SECTIONS = [
       { label: 'Media Buying', href: '/media-buying' },
       { label: 'AI Article Generation', href: '/ai-article-generation' },
       { label: 'Mace AI', href: '/mace-ai' },
+      { label: 'Arcana Precision', href: '/arcana-precision' },
     ],
   },
   {
@@ -71,6 +72,7 @@ const SITEMAP_SECTIONS = [
       { label: 'AI Security Supervision', href: '/help/ai-security-supervision' },
       { label: 'Mace AI', href: '/help/mace-ai' },
       { label: 'AI Marketing Strategy', href: '/help/ai-marketing-strategy' },
+      { label: 'Arcana Precision', href: '/help/arcana-precision' },
       { label: 'Troubleshooting', href: '/help/troubleshooting' },
     ],
   },
