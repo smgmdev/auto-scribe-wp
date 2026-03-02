@@ -319,12 +319,45 @@ export function AdminSurveillanceView() {
     if (!scanData?.countries) return [];
     // Build set of country codes that have events in the time window
     const activeCountryCodes = new Set(filteredEvents.map(ev => ev.country_code));
+
+    // Also include countries involved in active weapon trajectories
+    const trajectoryCountryCodes = new Set<string>();
+    const allTrajectories = [
+      ...(showMissiles ? missileTrajectories : []),
+      ...(showDrones ? droneTrajectories : []),
+      ...(showNukes ? nukeTrajectories : []),
+      ...(showHbombs ? hbombTrajectories : []),
+    ];
+    for (const t of allTrajectories) {
+      if (t.origin_country_code) trajectoryCountryCodes.add(t.origin_country_code);
+      if (t.destination_country_code) trajectoryCountryCodes.add(t.destination_country_code);
+    }
+
+    // Score boost based on weapon type involvement
+    const countryAttackScore = new Map<string, number>();
+    const addScore = (code: string | null, boost: number) => {
+      if (!code) return;
+      countryAttackScore.set(code, (countryAttackScore.get(code) || 0) + boost);
+    };
+    if (showNukes) nukeTrajectories.forEach(t => { addScore(t.origin_country_code, 80); addScore(t.destination_country_code, 90); });
+    if (showHbombs) hbombTrajectories.forEach(t => { addScore(t.origin_country_code, 85); addScore(t.destination_country_code, 95); });
+    if (showMissiles) missileTrajectories.forEach(t => { addScore(t.origin_country_code, 40); addScore(t.destination_country_code, 60); });
+    if (showDrones) droneTrajectories.forEach(t => { addScore(t.origin_country_code, 25); addScore(t.destination_country_code, 40); });
+
     return scanData.countries.map(c => {
-      if (activeCountryCodes.has(c.code)) return c;
-      // Countries without active events get score zeroed out
+      const hasEvents = activeCountryCodes.has(c.code);
+      const hasTrajectory = trajectoryCountryCodes.has(c.code);
+      const attackBoost = countryAttackScore.get(c.code) || 0;
+
+      if (hasEvents || hasTrajectory) {
+        const newScore = Math.min(100, Math.max(c.score, attackBoost));
+        const newLevel = newScore >= 60 ? 'danger' as const : newScore >= 30 ? 'caution' as const : 'safe' as const;
+        return { ...c, score: hasEvents ? Math.max(c.score, newScore) : newScore, threat_level: hasEvents ? (c.score >= newScore ? c.threat_level : newLevel) : newLevel, events: hasEvents ? c.events : [] };
+      }
+      // Countries without active events or trajectories get score zeroed out
       return { ...c, score: 0, threat_level: 'safe' as const, events: [] };
     });
-  }, [scanData?.countries, filteredEvents]);
+  }, [scanData?.countries, filteredEvents, missileTrajectories, droneTrajectories, nukeTrajectories, hbombTrajectories, showMissiles, showDrones, showNukes, showHbombs]);
 
   const dangerCount = filteredCountries.filter(c => c.score >= 60).length || 0;
   const cautionCount = filteredCountries.filter(c => c.score >= 30 && c.score < 60).length || 0;
