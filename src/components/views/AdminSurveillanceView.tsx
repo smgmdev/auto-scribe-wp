@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -334,7 +334,7 @@ export function AdminSurveillanceView() {
                 )}
                 title={showDrones ? 'Hide drones on map' : 'Show drones on map'}
               >
-                <Radar className="w-3 h-3 text-purple-400" />
+                <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                 <span className="text-[10px] text-gray-400">Drones</span>
               </button>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
