@@ -4,84 +4,75 @@ import { useRef, Suspense, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function PumpingLock() {
+function TargetingReticle() {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
-    const scale = 1 + Math.sin(t * 2.5) * 0.15;
+    const scale = 1 + Math.sin(t * 2.5) * 0.12;
     groupRef.current.scale.set(scale, scale, scale);
-    groupRef.current.position.y = 2.2 + Math.sin(t * 1.5) * 0.05;
+    groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.05;
   });
 
-  // Lock body (rounded rectangle)
-  const bodyGeo = useMemo(() => {
+  const cornerSize = 0.6;
+  const cornerThickness = 0.08;
+  const offset = 1.4; // distance from center
+
+  // Build an L-shaped corner
+  const cornerGeo = useMemo(() => {
     const shape = new THREE.Shape();
-    const w = 0.35, h = 0.3, r = 0.06;
-    shape.moveTo(-w + r, -h);
-    shape.lineTo(w - r, -h);
-    shape.quadraticCurveTo(w, -h, w, -h + r);
-    shape.lineTo(w, h - r);
-    shape.quadraticCurveTo(w, h, w - r, h);
-    shape.lineTo(-w + r, h);
-    shape.quadraticCurveTo(-w, h, -w, h - r);
-    shape.lineTo(-w, -h + r);
-    shape.quadraticCurveTo(-w, -h, -w + r, -h);
+    // vertical bar
+    shape.moveTo(0, 0);
+    shape.lineTo(cornerThickness, 0);
+    shape.lineTo(cornerThickness, cornerSize);
+    shape.lineTo(0, cornerSize);
+    shape.lineTo(0, 0);
+    // horizontal bar
+    shape.moveTo(0, 0);
+    shape.lineTo(cornerSize, 0);
+    shape.lineTo(cornerSize, cornerThickness);
+    shape.lineTo(0, cornerThickness);
+    shape.lineTo(0, 0);
     return new THREE.ShapeGeometry(shape);
   }, []);
 
-  // Lock shackle (U-shape arc)
-  const shackleGeo = useMemo(() => {
-    const curve = new THREE.EllipseCurve(0, 0, 0.2, 0.25, 0, Math.PI, false, 0);
-    const points = curve.getPoints(32);
-    const geo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
-    return geo;
-  }, []);
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#f2a547',
+    emissive: '#f2a547',
+    emissiveIntensity: 0.7,
+    transparent: true,
+    opacity: 0.9,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  }), []);
+
+  // 4 corners with rotations: TL, TR, BR, BL
+  const corners = [
+    { pos: [-offset, offset, 0] as [number, number, number], rot: 0 },           // top-left
+    { pos: [offset, offset, 0] as [number, number, number], rot: Math.PI / 2 },   // top-right
+    { pos: [offset, -offset, 0] as [number, number, number], rot: Math.PI },       // bottom-right
+    { pos: [-offset, -offset, 0] as [number, number, number], rot: -Math.PI / 2 }, // bottom-left
+  ];
 
   return (
-    <group ref={groupRef} position={[0, 2.2, 0]}>
-      {/* Lock body */}
-      <mesh geometry={bodyGeo} position={[0, -0.15, 0]}>
-        <meshStandardMaterial
-          color="#f2a547"
-          emissive="#f2a547"
-          emissiveIntensity={0.6}
-          transparent
-          opacity={0.85}
-          side={THREE.DoubleSide}
-          depthWrite={false}
+    <group ref={groupRef} position={[0, 0.8, 0]}>
+      {corners.map((c, i) => (
+        <mesh key={i} geometry={cornerGeo} material={mat} position={c.pos} rotation={[0, 0, c.rot]} />
+      ))}
+      {/* Center dot */}
+      <mesh position={[0, 0, 0]}>
+        <circleGeometry args={[0.1, 24]} />
+        <meshStandardMaterial color="#f2a547" emissive="#f2a547" emissiveIntensity={0.8} transparent opacity={0.9} depthWrite={false} />
+      </mesh>
+      {/* Inner corners (smaller) */}
+      {corners.map((c, i) => (
+        <mesh key={`inner-${i}`} geometry={cornerGeo} material={mat}
+          position={[c.pos[0] * 0.45, c.pos[1] * 0.45, 0.01]}
+          rotation={[0, 0, c.rot]}
+          scale={0.5}
         />
-      </mesh>
-      {/* Lock shackle - rendered as thin tube */}
-      <group position={[0, 0.15, 0]}>
-        <mesh>
-          <torusGeometry args={[0.2, 0.02, 8, 32, Math.PI]} />
-          <meshStandardMaterial color="#f2a547" emissive="#f2a547" emissiveIntensity={0.6} />
-        </mesh>
-      </group>
-      {/* Keyhole */}
-      <mesh position={[0, -0.1, 0.01]}>
-        <circleGeometry args={[0.06, 16]} />
-        <meshStandardMaterial color="#000000" transparent opacity={0.7} depthWrite={false} />
-      </mesh>
-      <mesh position={[0, -0.2, 0.01]}>
-        <planeGeometry args={[0.04, 0.1]} />
-        <meshStandardMaterial color="#000000" transparent opacity={0.7} depthWrite={false} />
-      </mesh>
-      {/* Glow ring */}
-      <mesh position={[0, -0.05, -0.01]}>
-        <ringGeometry args={[0.5, 0.55, 32]} />
-        <meshStandardMaterial
-          color="#f2a547"
-          emissive="#f2a547"
-          emissiveIntensity={0.8}
-          transparent
-          opacity={0.15}
-          side={THREE.DoubleSide}
-          depthWrite={false}
-        />
-      </mesh>
+      ))}
     </group>
   );
 }
@@ -101,7 +92,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      <PumpingLock />
+      <TargetingReticle />
     </>
   );
 }
