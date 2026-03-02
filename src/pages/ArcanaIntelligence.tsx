@@ -267,8 +267,9 @@ export default function ArcanaIntelligence() {
             <AnimatedSection>
               
               <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6">
-                Arcana<br />Intelligence
+                Precision.<br />War Intelligence.
               </h1>
+              <p className="text-2xl md:text-3xl text-white/80 font-semibold tracking-tight">Arcana Mace.</p>
             </AnimatedSection>
             <AnimatedSection delay={200}>
               <p className="text-xl md:text-2xl text-white/60 max-w-xl mx-auto mb-10 leading-tight">
