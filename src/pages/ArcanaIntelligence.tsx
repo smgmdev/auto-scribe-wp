@@ -156,7 +156,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
             </div>
           </div>
         ) : (
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-16 relative">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-0 relative">
             {video ? (
               <>
                 {!featureVideoLoaded && (
