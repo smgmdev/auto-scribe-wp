@@ -110,7 +110,7 @@ function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) 
   const [phase, setPhase] = useState<'entering' | 'visible' | 'exiting' | 'hidden'>('entering');
 
   useEffect(() => {
-    const timings = { entering: 500, visible: 1200, exiting: 200, hidden: 50 };
+    const timings = { entering: 300, visible: 600, exiting: 150, hidden: 50 };
     const timeout = setTimeout(() => {
       setPhase(prev => {
         if (prev === 'entering') return 'visible';
