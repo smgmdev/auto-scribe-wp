@@ -170,11 +170,9 @@ export function SurveillanceCountryPopup() {
                 <span className="text-xs text-red-400/80 block mb-1 flex items-center gap-1">
                   <Rocket className="w-3 h-3" /> Launched ({launched.length})
                 </span>
-                <ScrollArea className="max-h-60">
-                  <ul className="space-y-1.5">
-                    {launched.map(m => renderAlert(m, 'launched'))}
-                  </ul>
-                </ScrollArea>
+                <ul className="space-y-1.5">
+                  {launched.map(m => renderAlert(m, 'launched'))}
+                </ul>
               </div>
             )}
             {targeted.length > 0 && (
@@ -182,11 +180,9 @@ export function SurveillanceCountryPopup() {
                 <span className="text-xs text-blue-400/80 block mb-1 flex items-center gap-1">
                   <ShieldAlert className="w-3 h-3" /> Incoming ({targeted.length})
                 </span>
-                <ScrollArea className="max-h-60">
-                  <ul className="space-y-1.5">
-                    {targeted.map(m => renderAlert(m, 'targeted'))}
-                  </ul>
-                </ScrollArea>
+                <ul className="space-y-1.5">
+                  {targeted.map(m => renderAlert(m, 'targeted'))}
+                </ul>
               </div>
             )}
           </div>
