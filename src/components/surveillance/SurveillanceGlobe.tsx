@@ -616,9 +616,13 @@ function RotatingGlobe({
       if (match) {
         onCountryClick(match);
       } else {
-        // Create a basic entry for countries not in scan data
+        // Look up country code from coordinates mapping
+        const codeEntry = Object.entries(COUNTRY_COORDINATES).find(
+          ([, v]) => v.name?.toLowerCase() === geoName.toLowerCase()
+        );
+        const code = codeEntry ? codeEntry[0] : '';
         onCountryClick({
-          code: '',
+          code,
           name: geoName,
           threat_level: 'safe',
           score: 0,
