@@ -1877,10 +1877,12 @@ export function Sidebar({
 
   return <TooltipProvider delayDuration={0}>
       <aside 
-        style={{ width: isOpen && window.innerWidth < 1024 ? 256 : (sidebarCollapsed ? 60 : 256) }}
-        className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
-    "lg:translate-x-0",
-    isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0")}>
+        className={cn(
+          "fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
+          "lg:translate-x-0",
+          isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0",
+          sidebarCollapsed ? "lg:!w-[60px]" : "lg:!w-64",
+        )}>
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className={cn("flex h-16 items-center border-b border-sidebar-border", sidebarCollapsed ? "justify-center px-1" : "justify-between px-3")}>
