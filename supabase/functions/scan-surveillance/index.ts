@@ -5,6 +5,206 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// ── GDELT GKG API (free, no key) ──────────────────────────────────────
+async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> {
+  try {
+    // GDELT DOC 2.0 API – conflict & protest events from last 24h
+    const query = encodeURIComponent('(conflict OR war OR attack OR missile OR drone OR protest OR coup OR terrorism) sourcelang:eng');
+    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=30&format=json&timespan=24h&sort=DateDesc`;
+
+    console.log('Fetching GDELT events...');
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      console.error('GDELT API error:', resp.status);
+      return { events: [], countries: [] };
+    }
+    const data = await resp.json();
+    const articles = data.articles || [];
+
+    const events = articles.map((a: any) => ({
+      title: a.title || '',
+      description: a.seendate ? `Published ${a.seendate}` : '',
+      source: a.domain || 'GDELT',
+      source_url: a.url || '',
+      country_code: a.sourcecountry?.toUpperCase()?.substring(0, 2) || null,
+      country_name: null, // GDELT doesn't always provide this
+      severity: 'medium',
+      published_at: a.seendate ? new Date(
+        a.seendate.substring(0, 4) + '-' +
+        a.seendate.substring(4, 6) + '-' +
+        a.seendate.substring(6, 8) + 'T' +
+        a.seendate.substring(8, 10) + ':' +
+        a.seendate.substring(10, 12) + ':' +
+        a.seendate.substring(12, 14) + 'Z'
+      ).toISOString() : new Date().toISOString(),
+      origin: 'gdelt',
+    }));
+
+    console.log(`GDELT returned ${events.length} events`);
+    return { events, countries: [] };
+  } catch (err) {
+    console.error('GDELT fetch error:', err);
+    return { events: [], countries: [] };
+  }
+}
+
+// ── UN ReliefWeb API (free, no key) ───────────────────────────────────
+async function fetchReliefWebAlerts(): Promise<any[]> {
+  try {
+    console.log('Fetching ReliefWeb disaster/crisis alerts...');
+    const url = 'https://api.reliefweb.int/v1/disasters?appname=amdev-surveillance&limit=15&sort[]=date:desc&fields[include][]=name&fields[include][]=glide&fields[include][]=date&fields[include][]=country&fields[include][]=type&fields[include][]=status&fields[include][]=description';
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      console.error('ReliefWeb API error:', resp.status);
+      return [];
+    }
+    const data = await resp.json();
+    const items = data.data || [];
+
+    const events = items.map((item: any) => {
+      const fields = item.fields || {};
+      const countries = (fields.country || []).map((c: any) => c.name).join(', ');
+      const countryIso = fields.country?.[0]?.iso3 || null;
+      const types = (fields.type || []).map((t: any) => t.name).join(', ');
+      return {
+        title: fields.name || 'Unknown disaster',
+        description: `${types} – ${countries}`,
+        source: 'UN ReliefWeb',
+        source_url: `https://reliefweb.int/disaster/${item.id}`,
+        country_code: countryIso?.substring(0, 2)?.toUpperCase() || null,
+        country_name: countries || null,
+        severity: fields.status === 'alert' ? 'high' : 'medium',
+        published_at: fields.date?.created || new Date().toISOString(),
+        origin: 'reliefweb',
+      };
+    });
+
+    console.log(`ReliefWeb returned ${events.length} alerts`);
+    return events;
+  } catch (err) {
+    console.error('ReliefWeb fetch error:', err);
+    return [];
+  }
+}
+
+// ── ACLED (via RSS proxy – GDELT covers similar ground) ───────────────
+// ACLED requires registration; we use GDELT conflict data instead.
+
+// ── Perplexity scan (primary) ─────────────────────────────────────────
+async function fetchPerplexityScan(apiKey: string): Promise<{ scanResult: any; citations: string[] }> {
+  const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'sonar',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a global security analyst. Analyze current global conflicts, wars, terrorism, violence, and security threats worldwide. Return a JSON object with this exact structure:
+{
+  "global_tension_score": <number 0-100>,
+  "global_tension_level": "<low|moderate|high|severe|critical>",
+  "countries": [
+    {
+      "code": "<ISO 3166-1 alpha-2 country code>",
+      "name": "<country name>",
+      "threat_level": "<safe|caution|danger>",
+      "score": <number 0-100>,
+      "summary": "<brief 1-2 sentence summary of current situation>",
+      "events": ["<event 1>", "<event 2>"]
+    }
+  ],
+  "latest_events": [
+    {
+      "title": "<event title>",
+      "country_code": "<ISO code>",
+      "country_name": "<country name>",
+      "severity": "<low|medium|high|critical>",
+      "description": "<brief description>",
+      "source": "<source name e.g. Reuters, BBC, Al Jazeera, X/Twitter>",
+      "source_url": "<direct URL to the source article or post>",
+      "published_at": "<ISO 8601 datetime of when the news was originally published, e.g. 2025-03-01T14:30:00Z>",
+      "origin_country_code": "<ISO code of launch origin if missile/rocket event, or null>",
+      "origin_country_name": "<origin country name if missile/rocket event, or null>",
+      "destination_country_code": "<ISO code of target if missile/rocket event, or null>",
+      "destination_country_name": "<target country name if missile/rocket event, or null>"
+    }
+  ]
+}
+
+Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass violence, coups, border tensions.
+Include ALL countries with notable activity (at least 15-25 countries).
+Mark countries with no issues as "safe".
+Include at least 10-15 latest events from the past 48 hours.
+IMPORTANT: Prioritize sourcing from Reuters, BBC, Al Jazeera, AP News, and X/Twitter. Always check Reuters (reuters.com) for breaking security and conflict news.
+IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
+Search X/Twitter, Reuters, and major news outlets for the most recent developments.
+Return ONLY the JSON object, no other text.`
+        },
+        {
+          role: 'user',
+          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. Check Reuters, X/Twitter, AP News, BBC, and other major news sources for the latest developments in the past 48 hours.'
+        }
+      ],
+      search_recency_filter: 'day',
+    }),
+  });
+
+  if (!perplexityResponse.ok) {
+    const errText = await perplexityResponse.text();
+    console.error('Perplexity API error:', perplexityResponse.status, errText);
+    throw new Error('Failed to scan with Perplexity');
+  }
+
+  const perplexityData = await perplexityResponse.json();
+  const content = perplexityData.choices?.[0]?.message?.content || '';
+  const citations = perplexityData.citations || [];
+
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in Perplexity response');
+  const scanResult = JSON.parse(jsonMatch[0]);
+
+  return { scanResult, citations };
+}
+
+// ── Merge supplementary events into Perplexity results ────────────────
+function mergeEvents(perplexityEvents: any[], gdeltEvents: any[], reliefWebEvents: any[]): any[] {
+  const merged = [...perplexityEvents];
+  const existingTitles = new Set(perplexityEvents.map((e: any) => e.title?.toLowerCase().trim()));
+
+  // De-duplicate by checking title similarity
+  const addIfUnique = (event: any) => {
+    const titleLower = (event.title || '').toLowerCase().trim();
+    // Check if any existing title contains this or vice versa
+    let isDuplicate = false;
+    for (const existing of existingTitles) {
+      if (existing.includes(titleLower.substring(0, 30)) || titleLower.includes(existing.substring(0, 30))) {
+        isDuplicate = true;
+        break;
+      }
+    }
+    if (!isDuplicate && titleLower.length > 5) {
+      merged.push(event);
+      existingTitles.add(titleLower);
+    }
+  };
+
+  // Add GDELT events (prioritize high-severity)
+  for (const e of gdeltEvents) {
+    addIfUnique(e);
+  }
+
+  // Add ReliefWeb alerts
+  for (const e of reliefWebEvents) {
+    addIfUnique(e);
+  }
+
+  return merged;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -45,101 +245,30 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Starting surveillance scan with Perplexity...');
+    console.log('Starting multi-source surveillance scan...');
 
-    // Scan for global conflicts using Perplexity
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'sonar',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a global security analyst. Analyze current global conflicts, wars, terrorism, violence, and security threats worldwide. Return a JSON object with this exact structure:
-{
-  "global_tension_score": <number 0-100>,
-  "global_tension_level": "<low|moderate|high|severe|critical>",
-  "countries": [
-    {
-      "code": "<ISO 3166-1 alpha-2 country code>",
-      "name": "<country name>",
-      "threat_level": "<safe|caution|danger>",
-      "score": <number 0-100>,
-      "summary": "<brief 1-2 sentence summary of current situation>",
-      "events": ["<event 1>", "<event 2>"]
-    }
-  ],
-  "latest_events": [
-    {
-      "title": "<event title>",
-      "country_code": "<ISO code>",
-      "country_name": "<country name>",
-      "severity": "<low|medium|high|critical>",
-      "description": "<brief description>",
-      "source": "<source name e.g. Reuters, BBC, Al Jazeera, X/Twitter>",
-      "source_url": "<direct URL to the source article or post>",
-      "published_at": "<ISO 8601 datetime of when the news was originally published, e.g. 2025-03-01T14:30:00Z>",
-      "origin_country_code": "<ISO code of launch origin if missile/rocket event, or null>",
-      "origin_country_name": "<origin country name if missile/rocket event, or null>",
-      "destination_country_code": "<ISO code of target if missile/rocket event, or null>",
-      "destination_country_name": "<target country name if missile/rocket event, or null>"
-    }
-  ]
-}
+    // Fetch all sources in parallel
+    const [perplexityResult, gdeltResult, reliefWebEvents] = await Promise.all([
+      fetchPerplexityScan(PERPLEXITY_API_KEY),
+      fetchGdeltEvents(),
+      fetchReliefWebAlerts(),
+    ]);
 
-Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass violence, coups, border tensions.
-Include ALL countries with notable activity (at least 15-25 countries).
-Mark countries with no issues as "safe".
-Include at least 10-15 latest events from the past 48 hours.
-IMPORTANT: Prioritize sourcing from Reuters, BBC, Al Jazeera, AP News, and X/Twitter. Always check Reuters (reuters.com) for breaking security and conflict news.
-IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
-Search X/Twitter, Reuters, and major news outlets for the most recent developments.
-Return ONLY the JSON object, no other text.`
-          },
-          {
-            role: 'user',
-            content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. Check Reuters, X/Twitter, AP News, BBC, and other major news sources for the latest developments in the past 48 hours.'
-          }
-        ],
-        search_recency_filter: 'day',
-      }),
-    });
+    const { scanResult, citations } = perplexityResult;
 
-    if (!perplexityResponse.ok) {
-      const errText = await perplexityResponse.text();
-      console.error('Perplexity API error:', perplexityResponse.status, errText);
-      return new Response(JSON.stringify({ error: 'Failed to scan with Perplexity' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    // Merge supplementary events into main results
+    const mergedEvents = mergeEvents(
+      scanResult.latest_events || [],
+      gdeltResult.events,
+      reliefWebEvents,
+    );
 
-    const perplexityData = await perplexityResponse.json();
-    const content = perplexityData.choices?.[0]?.message?.content || '';
-    const citations = perplexityData.citations || [];
+    // Build enriched source list
+    const sources = ['perplexity'];
+    if (gdeltResult.events.length > 0) sources.push('gdelt');
+    if (reliefWebEvents.length > 0) sources.push('reliefweb');
 
-    console.log('Raw Perplexity response length:', content.length);
-
-    // Parse the JSON from the response
-    let scanResult;
-    try {
-      // Try to extract JSON from the response (may be wrapped in markdown code blocks)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        scanResult = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in response');
-      }
-    } catch (parseError) {
-      console.error('Failed to parse Perplexity response:', parseError);
-      console.error('Raw content:', content.substring(0, 500));
-      return new Response(JSON.stringify({ error: 'Failed to parse scan results', raw: content.substring(0, 200) }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    console.log(`Sources used: ${sources.join(', ')}. Total events: ${mergedEvents.length}`);
 
     // Store in database
     const { data: insertedScan, error: insertError } = await supabase
@@ -148,8 +277,8 @@ Return ONLY the JSON object, no other text.`
         global_tension_score: scanResult.global_tension_score || 0,
         global_tension_level: scanResult.global_tension_level || 'low',
         country_data: scanResult.countries || [],
-        events: scanResult.latest_events || [],
-        source: 'perplexity',
+        events: mergedEvents,
+        source: sources.join('+'),
       })
       .select()
       .single();
@@ -165,16 +294,13 @@ Return ONLY the JSON object, no other text.`
 
     const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | null => {
       const text = `${title} ${description}`.toLowerCase();
-      // Check nuke first (highest priority)
       if (NUKE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'nuke';
-      // Then drone
       if (DRONE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'drone';
-      // Then missile
       if (MISSILE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'missile';
       return null;
     };
 
-    const threatEvents = (scanResult.latest_events || []).filter((e: any) => {
+    const threatEvents = mergedEvents.filter((e: any) => {
       return classifyThreatType(e.title || '', e.description || '') !== null;
     });
 
@@ -182,7 +308,6 @@ Return ONLY the JSON object, no other text.`
       console.log(`Detected ${threatEvents.length} threat events, creating alerts...`);
       for (const event of threatEvents) {
         const threatType = classifyThreatType(event.title || '', event.description || '');
-        // Check if a similar alert already exists (within last hour)
         const { data: existing } = await supabase
           .from('missile_alerts')
           .select('id')
@@ -196,7 +321,7 @@ Return ONLY the JSON object, no other text.`
             description: event.description,
             country_code: event.country_code,
             country_name: event.country_name,
-            source: event.source,
+            source: event.source || event.origin || 'unknown',
             severity: threatType || 'missile',
             active: true,
             origin_country_code: event.origin_country_code || null,
@@ -217,8 +342,9 @@ Return ONLY the JSON object, no other text.`
         global_tension_score: scanResult.global_tension_score,
         global_tension_level: scanResult.global_tension_level,
         countries: scanResult.countries || [],
-        latest_events: scanResult.latest_events || [],
+        latest_events: mergedEvents,
         citations,
+        sources,
         scanned_at: new Date().toISOString(),
       }
     }), {
