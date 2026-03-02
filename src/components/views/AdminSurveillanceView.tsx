@@ -281,8 +281,9 @@ export function AdminSurveillanceView() {
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
-        <div className="flex items-stretch justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#1d1d1f]">
-          <div className="flex items-stretch gap-0">
+        <div className="flex flex-col border-b border-white/5 bg-[#1d1d1f]">
+          {/* Row 1: LIVE + controls */}
+          <div className="flex items-stretch px-0 py-0">
             <div className="flex items-center gap-2 pl-3 pr-3">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
@@ -294,36 +295,21 @@ export function AdminSurveillanceView() {
             </div>
 
             <div className="flex items-center gap-1 px-2 border-l border-white/10 self-stretch">
-              <button
-                onClick={() => setResetTrigger(t => t + 1)}
-                className="text-gray-400 hover:text-white transition-colors p-1"
-                title="Reset globe view"
-              >
+              <button onClick={() => setResetTrigger(t => t + 1)} className="text-gray-400 hover:text-white transition-colors p-1" title="Reset globe view">
                 <Crosshair className="w-3.5 h-3.5" />
               </button>
-              <button
-                onClick={() => setGlobeSpinning(!globeSpinning)}
-                className="text-gray-400 hover:text-white transition-colors p-1"
-                title={globeSpinning ? 'Pause rotation' : 'Start rotation'}
-              >
+              <button onClick={() => setGlobeSpinning(!globeSpinning)} className="text-gray-400 hover:text-white transition-colors p-1" title={globeSpinning ? 'Pause rotation' : 'Start rotation'}>
                 {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button
-                    className="text-gray-400 hover:text-white transition-colors p-1"
-                    title="Live camera feeds"
-                  >
+                  <button className="text-gray-400 hover:text-white transition-colors p-1" title="Live camera feeds">
                     <Video className="w-3.5 h-3.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[160px]">
                   {CAMERA_REGIONS.map(region => (
-                    <DropdownMenuItem
-                      key={region.region}
-                      onClick={() => openCameraFeed(region)}
-                      className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2"
-                    >
+                    <DropdownMenuItem key={region.region} onClick={() => openCameraFeed(region)} className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2">
                       <Video className="w-3 h-3 text-red-400" />
                       {region.label}
                     </DropdownMenuItem>
@@ -332,22 +318,14 @@ export function AdminSurveillanceView() {
               </DropdownMenu>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button
-                    disabled={loading}
-                    className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50 flex items-center gap-0.5"
-                    title="Scan region"
-                  >
+                  <button disabled={loading} className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50 flex items-center gap-0.5" title="Scan region">
                     <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
                     <ChevronDown className="w-2.5 h-2.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[140px]">
                   {SCAN_REGIONS.map(r => (
-                    <DropdownMenuItem
-                      key={r.value}
-                      onClick={() => runScan(r.value)}
-                      className="text-[11px] text-gray-300 hover:text-white cursor-pointer"
-                    >
+                    <DropdownMenuItem key={r.value} onClick={() => runScan(r.value)} className="text-[11px] text-gray-300 hover:text-white cursor-pointer">
                       {r.label}
                     </DropdownMenuItem>
                   ))}
@@ -355,22 +333,71 @@ export function AdminSurveillanceView() {
               </DropdownMenu>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
-              <button
-                onClick={() => setShowMissiles(v => !v)}
-                className={cn(
-                  "flex items-center gap-1.5 transition-opacity",
-                  !showMissiles && "opacity-30"
-                )}
-                title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}
-              >
+            {/* Trajectory filters - desktop inline */}
+            <div className="hidden lg:flex items-stretch">
+              <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
+                <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")} title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}>
+                  <Rocket className="w-3 h-3 text-blue-400" />
+                  <span className="text-[10px] text-gray-400">Missiles</span>
+                </button>
+                <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")} title={showDrones ? 'Hide drones on map' : 'Show drones on map'}>
+                  <PlaneTakeoff className="w-3 h-3 text-purple-400" />
+                  <span className="text-[10px] text-gray-400">Drones</span>
+                </button>
+                <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")} title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}>
+                  <Radiation className="w-3 h-3 text-yellow-400" />
+                  <span className="text-[10px] text-gray-400">Nukes</span>
+                </button>
+                <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Trajectory filters - mobile only */}
+          <div className="flex lg:hidden items-stretch border-t border-white/5">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-1">
+              <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")}>
                 <Rocket className="w-3 h-3 text-blue-400" />
                 <span className="text-[10px] text-gray-400">Missiles</span>
               </button>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
                   <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
                   <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
@@ -381,23 +408,13 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
             </div>
-
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
-              <button
-                onClick={() => setShowDrones(v => !v)}
-                className={cn(
-                  "flex items-center gap-1.5 transition-opacity",
-                  !showDrones && "opacity-30"
-                )}
-                title={showDrones ? 'Hide drones on map' : 'Show drones on map'}
-              >
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-1">
+              <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")}>
                 <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                 <span className="text-[10px] text-gray-400">Drones</span>
               </button>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
                   <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
                   <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
@@ -408,23 +425,13 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
             </div>
-
-            <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
-              <button
-                onClick={() => setShowNukes(v => !v)}
-                className={cn(
-                  "flex items-center gap-1.5 transition-opacity",
-                  !showNukes && "opacity-30"
-                )}
-                title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}
-              >
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-1">
+              <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")}>
                 <Radiation className="w-3 h-3 text-yellow-400" />
                 <span className="text-[10px] text-gray-400">Nukes</span>
               </button>
               <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
                   <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
                   <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
