@@ -84,6 +84,12 @@ export function AdminSurveillanceView() {
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
+
+  // Trigger zoom-out-and-reposition on mount (same as crosshair button)
+  useEffect(() => {
+    const timer = setTimeout(() => setResetTrigger(1), 500);
+    return () => clearTimeout(timer);
+  }, []);
   const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
   const openSurveillancePopup = useAppStore((s) => s.openSurveillancePopup);
   const surveillanceCountry = useAppStore((s) => s.surveillanceCountry);
