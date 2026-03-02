@@ -578,6 +578,7 @@ Deno.serve(async (req) => {
             origin_country_name: event.origin_country_name || null,
             destination_country_code: event.destination_country_code || null,
             destination_country_name: event.destination_country_name || null,
+            published_at: event.published_at || new Date().toISOString(),
           };
         });
 

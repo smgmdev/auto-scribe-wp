@@ -131,6 +131,7 @@ export function AdminSurveillanceView() {
   const [missileTimeFilter, setMissileTimeFilter] = useState<string>('24');
   const [droneTimeFilter, setDroneTimeFilter] = useState<string>('24');
   const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('24');
+  const [globalTimeFilter, setGlobalTimeFilter] = useState<string>('24');
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
@@ -241,7 +242,7 @@ export function AdminSurveillanceView() {
       .eq('active', true)
       .not('severity', 'eq', 'drone')
       .not('severity', 'eq', 'nuke')
-      .gte('created_at', cutoff)
+      .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setMissileTrajectories(data);
@@ -257,7 +258,7 @@ export function AdminSurveillanceView() {
       .select('id, origin_country_code, destination_country_code')
       .eq('active', true)
       .eq('severity', 'drone')
-      .gte('created_at', cutoff)
+      .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setDroneTrajectories(data);
@@ -271,7 +272,7 @@ export function AdminSurveillanceView() {
       .select('id, origin_country_code, destination_country_code')
       .eq('active', true)
       .eq('severity', 'nuke')
-      .gte('created_at', cutoff)
+      .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setNukeTrajectories(data);
@@ -283,11 +284,31 @@ export function AdminSurveillanceView() {
     fetchNukes();
   }, [fetchMissiles, fetchDrones, fetchNukes, trajectoryRefresh]);
 
-  // Country missile data is now handled by the global SurveillanceCountryPopup
+  // Filter events and countries by global time filter
+  const filteredEvents = useMemo(() => {
+    if (!scanData?.latest_events) return [];
+    const hours = parseFloat(globalTimeFilter);
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return scanData.latest_events.filter(ev => {
+      if (!ev.published_at) return true; // keep events without timestamp
+      return new Date(ev.published_at).getTime() >= cutoff;
+    });
+  }, [scanData?.latest_events, globalTimeFilter]);
 
-  const dangerCount = scanData?.countries.filter(c => c.score >= 60).length || 0;
-  const cautionCount = scanData?.countries.filter(c => c.score >= 30 && c.score < 60).length || 0;
-  const safeCount = scanData?.countries.filter(c => c.score < 30).length || 0;
+  const filteredCountries = useMemo(() => {
+    if (!scanData?.countries) return [];
+    // Build set of country codes that have events in the time window
+    const activeCountryCodes = new Set(filteredEvents.map(ev => ev.country_code));
+    return scanData.countries.map(c => {
+      if (activeCountryCodes.has(c.code)) return c;
+      // Countries without active events get score zeroed out
+      return { ...c, score: 0, threat_level: 'safe' as const, events: [] };
+    });
+  }, [scanData?.countries, filteredEvents]);
+
+  const dangerCount = filteredCountries.filter(c => c.score >= 60).length || 0;
+  const cautionCount = filteredCountries.filter(c => c.score >= 30 && c.score < 60).length || 0;
+  const safeCount = filteredCountries.filter(c => c.score < 30).length || 0;
 
   return (
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
@@ -345,9 +366,24 @@ export function AdminSurveillanceView() {
               </DropdownMenu>
             </div>
 
-            {/* Trajectory filters - desktop inline */}
+            {/* Global events filter + Trajectory filters - desktop inline */}
             <div className="hidden lg:flex items-stretch flex-1">
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-l border-r border-white/10 self-stretch">
+                <Shield className="w-3 h-3 text-emerald-400" />
+                <span className="text-[10px] text-gray-400">Events</span>
+                <Select value={globalTimeFilter} onValueChange={setGlobalTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({filteredEvents.length})</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
                 <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")} title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}>
                   <Rocket className="w-3 h-3 text-blue-400" />
                   <span className="text-[10px] text-gray-400">Missiles</span>
@@ -412,6 +448,21 @@ export function AdminSurveillanceView() {
 
           {/* Row 2: Trajectory filters - mobile only */}
           <div className="flex lg:hidden items-stretch border-t border-white/5 overflow-x-auto">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
+              <Shield className="w-3 h-3 text-emerald-400" />
+              <span className="text-[10px] text-gray-400">Events</span>
+              <Select value={globalTimeFilter} onValueChange={setGlobalTimeFilter}>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[10px] text-gray-600">({filteredEvents.length})</span>
+            </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
               <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")}>
                 <Rocket className="w-3 h-3 text-blue-400" />
@@ -480,7 +531,7 @@ export function AdminSurveillanceView() {
                 </div>
               }>
                 <SurveillanceGlobe
-                  countries={scanData.countries}
+                  countries={filteredCountries}
                   onCountryClick={(c) => {
                     openSurveillancePopup(c);
                   }}
@@ -535,20 +586,20 @@ export function AdminSurveillanceView() {
                 <ShieldAlert className="w-3.5 h-3.5 text-amber-400/80" />
                 <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">Feed</span>
                 <span className="text-[10px] text-gray-600 tabular-nums">
-                  ({scanData?.latest_events.length || 0})
+                  ({filteredEvents.length})
                 </span>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/[0.08] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.14]">
               <div className="p-2.5 space-y-1.5">
-                {scanData?.latest_events.map((event, i) => (
+                {filteredEvents.map((event, i) => (
                   <div
                     key={i}
                     className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const country = scanData.countries.find(c => c.code === event.country_code);
+                      const country = filteredCountries.find(c => c.code === event.country_code) || scanData?.countries.find(c => c.code === event.country_code);
                       if (country) {
                         openSurveillancePopup(country);
                         setShowMobileFeed(false);

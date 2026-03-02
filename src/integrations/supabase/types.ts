@@ -1185,6 +1185,7 @@ export type Database = {
           id: string
           origin_country_code: string | null
           origin_country_name: string | null
+          published_at: string | null
           severity: string
           source: string | null
           title: string
@@ -1200,6 +1201,7 @@ export type Database = {
           id?: string
           origin_country_code?: string | null
           origin_country_name?: string | null
+          published_at?: string | null
           severity?: string
           source?: string | null
           title: string
@@ -1215,6 +1217,7 @@ export type Database = {
           id?: string
           origin_country_code?: string | null
           origin_country_name?: string | null
+          published_at?: string | null
           severity?: string
           source?: string | null
           title?: string
