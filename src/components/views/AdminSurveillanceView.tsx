@@ -280,7 +280,7 @@ export function AdminSurveillanceView() {
                 onClick={() => setShowMissiles(v => !v)}
                 className={cn(
                   "flex items-center gap-1.5 transition-opacity",
-                  !showMissiles && "opacity-40 line-through"
+                  !showMissiles && "opacity-30"
                 )}
                 title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}
               >
@@ -307,7 +307,7 @@ export function AdminSurveillanceView() {
                 onClick={() => setShowDrones(v => !v)}
                 className={cn(
                   "flex items-center gap-1.5 transition-opacity",
-                  !showDrones && "opacity-40 line-through"
+                  !showDrones && "opacity-30"
                 )}
                 title={showDrones ? 'Hide drones on map' : 'Show drones on map'}
               >
@@ -334,7 +334,7 @@ export function AdminSurveillanceView() {
                 onClick={() => setShowNukes(v => !v)}
                 className={cn(
                   "flex items-center gap-1.5 transition-opacity",
-                  !showNukes && "opacity-40 line-through"
+                  !showNukes && "opacity-30"
                 )}
                 title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}
               >
