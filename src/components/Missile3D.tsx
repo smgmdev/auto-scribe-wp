@@ -89,7 +89,7 @@ function ShieldIcon() {
 }
 
 function SceneContent({ onLoaded }: { onLoaded: () => void }) {
-  const { scene } = useGLTF('/models/missile.glb');
+  const { scene } = useGLTF('/models/missile_UI.glb');
   useState(() => { onLoaded(); });
   const groupRef = useRef<THREE.Group>(null);
 
@@ -135,4 +135,4 @@ export default function Missile3D() {
   );
 }
 
-useGLTF.preload('/models/missile.glb');
+useGLTF.preload('/models/missile_UI.glb');
