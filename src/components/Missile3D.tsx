@@ -100,7 +100,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   return (
     <>
       <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
-        <primitive object={scene} scale={1.5} />
+        <primitive object={scene} scale={2.5} />
       </group>
       <Particles />
     </>
