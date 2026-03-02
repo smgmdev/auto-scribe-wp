@@ -125,6 +125,19 @@ export default {
 				'45%': { transform: 'scale(1.04)', filter: 'drop-shadow(0 0 30px rgba(0,122,255,0.5)) brightness(1.1)' },
 				'60%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 20px rgba(0,122,255,0.3)) brightness(1)' },
 			},
+			'shieldPulseRing': {
+				'0%, 100%': { transform: 'scale(1)', opacity: '0.3' },
+				'50%': { transform: 'scale(1.1)', opacity: '0.05' },
+			},
+			'shieldOrbit': {
+				'0%': { transform: 'rotate(0deg)' },
+				'100%': { transform: 'rotate(360deg)' },
+			},
+			'shieldScan': {
+				'0%': { transform: 'translateY(0%)' },
+				'50%': { transform: 'translateY(4800%)' },
+				'100%': { transform: 'translateY(0%)' },
+			},
 			'accordion-down': {
 				from: {
 					height: '0'

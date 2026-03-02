@@ -431,10 +431,35 @@ export default function ArcanaIntelligence() {
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
                 <div className="relative w-full max-w-xs mx-auto flex items-center justify-center">
-                  <Shield 
-                    className="w-48 h-48 md:w-64 md:h-64 text-[#007AFF] animate-[shieldHeartbeat_2s_ease-in-out_infinite]" 
-                    strokeWidth={1} 
-                  />
+                  {/* Outer glow pulse */}
+                  <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full bg-[#007AFF]/5 animate-[shieldPulseRing_3s_ease-in-out_infinite]" />
+                  <div className="absolute w-44 h-44 md:w-56 md:h-56 rounded-full bg-[#007AFF]/8 animate-[shieldPulseRing_3s_ease-in-out_infinite_0.4s]" />
+                  
+                  {/* Rotating orbit ring */}
+                  <div className="absolute w-52 h-52 md:w-68 md:h-68 animate-[shieldOrbit_8s_linear_infinite]">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#007AFF] shadow-[0_0_8px_#007AFF]" />
+                  </div>
+                  <div className="absolute w-48 h-48 md:w-64 md:h-64 animate-[shieldOrbit_6s_linear_infinite_reverse]">
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#007AFF]/60 shadow-[0_0_6px_#007AFF]" />
+                  </div>
+
+                  {/* Inner shield with scan line */}
+                  <div className="relative animate-[shieldHeartbeat_2s_ease-in-out_infinite]">
+                    <Shield 
+                      className="w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_20px_rgba(0,122,255,0.4)]" 
+                      strokeWidth={1} 
+                    />
+                    {/* Scan line sweeping down */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-[#007AFF]/60 to-transparent animate-[shieldScan_3s_ease-in-out_infinite]" />
+                    </div>
+                    {/* Inner shield check */}
+                    <Shield 
+                      className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/20" 
+                      strokeWidth={0.5}
+                      fill="rgba(0,122,255,0.05)"
+                    />
+                  </div>
                 </div>
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
