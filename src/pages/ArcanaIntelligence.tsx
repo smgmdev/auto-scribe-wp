@@ -175,28 +175,48 @@ export default function ArcanaIntelligence() {
 
       <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-black flex flex-col">
         {/* ── Header ── */}
-        <header className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-[#1d1d1f]/80 backdrop-blur-xl transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <div className="max-w-[980px] mx-auto flex h-12 items-center justify-between px-4 md:px-6">
-            <button onClick={() => navigate('/')} className="flex items-center gap-2">
-              <img src={amblack} alt="Arcana Mace" className="h-8 w-8 invert" />
-              <span className="text-sm font-medium text-white/80">Arcana Mace</span>
+        <header 
+          className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        >
+          <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+              <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+              <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
             </button>
-            <div className="hidden md:flex flex-1 max-w-md mx-6">
-              <button onClick={() => setSearchOpen(true)} className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-white/40 text-sm hover:bg-white/15 transition-colors text-left">
-                <Search className="h-3.5 w-3.5" />
-                <span>Search...</span>
+            
+            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              >
+                <Search className="h-4 w-4" />
+                <span>Search media outlets...</span>
               </button>
             </div>
+            
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="md:hidden text-white/70 hover:text-white hover:bg-white/10" onClick={() => setSearchOpen(true)}>
-                <Search className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden hover:bg-black hover:text-white"
+                onClick={() => setSearchOpen(true)}
+              >
+                <Search className="h-5 w-5" />
               </Button>
+              
               {user ? (
-                <Button onClick={() => navigate('/account')} size="sm" className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066D6] text-xs h-8 px-4">
-                  <User className="h-3.5 w-3.5 mr-1" />Account
+                <Button 
+                  onClick={() => navigate('/account')}
+                  className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                >
+                  <User className="h-4 w-4" />
+                  Account
                 </Button>
               ) : (
-                <Button onClick={() => navigate('/auth')} size="sm" className="rounded-full bg-white text-black hover:bg-white/90 text-xs h-8 px-4">
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                >
                   Sign In
                 </Button>
               )}
@@ -209,14 +229,14 @@ export default function ArcanaIntelligence() {
         <div className="h-[92px]" />
 
         {/* ── Sub‑header nav ── */}
-        <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[68px]'}`}>
-          <div className="bg-[#1d1d1f]/90 backdrop-blur-xl border-b border-white/10">
+        <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+          <div className="bg-white border-b border-border">
             <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-              <span className="text-lg font-semibold text-white">Arcana Intelligence</span>
-              <nav className="hidden md:flex items-center gap-5">
+              <span className="text-xl font-semibold text-foreground">Arcana Intelligence</span>
+              <nav className="hidden md:flex items-center gap-6">
                 {NAV_ITEMS.map((s) => (
                   <button key={s.id} onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}
-                    className={`text-xs transition-colors ${activeSection === s.id ? 'text-white font-medium' : 'text-white/40 hover:text-white/70'}`}>
+                    className={`text-sm transition-colors ${activeSection === s.id ? 'text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
                     {s.label}
                   </button>
                 ))}
