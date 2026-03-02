@@ -481,11 +481,20 @@ export default function ArcanaIntelligence() {
                 { title: 'Entity Recognition', desc: 'Automatically identifies people, organizations, locations, events and objects based on the context.' },
                 { title: 'Predictive Signals', desc: 'Detects emerging patterns before they become headlines.' },
               ].map((f) => (
-                <div key={f.title} className="border-l-2 border-[#007AFF] pl-5">
-                  <p className="text-white font-semibold text-lg mb-1">{f.title}</p>
+                <div key={f.title} className="pl-0">
+                  <p className="text-white font-semibold text-lg mb-0">{f.title}</p>
+                  <div className="relative h-[2px] w-full mt-1 mb-2 overflow-hidden bg-white/10">
+                    <div className="absolute inset-0 h-full w-1/3 bg-[#007AFF] animate-[flashLine_2s_ease-in-out_infinite]" />
+                  </div>
                   <p className="text-white/60 text-base leading-relaxed">{f.desc}</p>
                 </div>
               ))}
+              <style>{`
+                @keyframes flashLine {
+                  0% { left: -33%; }
+                  100% { left: 100%; }
+                }
+              `}</style>
             </div>
           </FeatureSection>
         </section>
