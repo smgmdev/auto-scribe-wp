@@ -511,7 +511,7 @@ export default function ArcanaIntelligence() {
 
 
         {/* ══════════════ VALUES ══════════════ */}
-        <section id="integration" className="bg-black pt-20 md:pt-28 pb-20 md:pb-28">
+        <section id="integration" className="bg-black pt-10 md:pt-28 pb-14 md:pb-28">
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <AnimatedSection>
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
