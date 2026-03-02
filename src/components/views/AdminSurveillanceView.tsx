@@ -44,10 +44,10 @@ const CAMERA_REGIONS: CameraRegionConfig[] = [
     { label: 'Sky News', embedId: '9Auq9mYxFEE' },
   ]},
   { region: 'us', label: 'United States', feeds: [
-    { label: 'NBC News', embedId: 'w_Ma8oQLmSM' },
-    { label: 'Bloomberg', embedId: 'iEpJwprxDdk' },
-    { label: 'ABC News', embedId: 'YMhRY_E0nSk' },
-    { label: 'CBS News', embedId: 'pftHHOTHwHs' },
+    { label: 'Washington DC', embedId: 'lHkebfwmC4U' },
+    { label: 'New York', embedId: 'rnXIjl_Rzy4' },
+    { label: 'Los Angeles', embedId: 'qmE7U1YZPQA' },
+    { label: 'Miami', embedId: 'mqJLCYASw2E' },
   ]},
 ];
 
