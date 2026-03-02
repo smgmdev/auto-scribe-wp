@@ -160,6 +160,7 @@ const helpCategories = [
       'Government & Defense Integration',
       'AI Models & 24/7 Scanning',
       'Customization & Setup',
+      'Data Security & Privacy',
     ],
     slug: 'arcana-precision',
   },
