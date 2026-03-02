@@ -143,20 +143,43 @@ function Particles() {
 
 function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   const { scene } = useGLTF('/models/missile.glb');
-  // Signal loaded once the model is available
   useState(() => { onLoaded(); });
   const groupRef = useRef<THREE.Group>(null);
+  const phaseRef = useRef(0);
 
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    phaseRef.current += delta;
+    const cycle = phaseRef.current % 6;
+
+    if (cycle < 3) {
+      // Approach — missile flies toward camera
+      const p = cycle / 3;
+      const e = p * p * (3 - 2 * p);
+      groupRef.current.position.set(
+        Math.sin(p * Math.PI * 0.5) * 1.5,
+        Math.cos(p * Math.PI) * 0.5 + 0.5,
+        THREE.MathUtils.lerp(15, -3, e)
+      );
+      groupRef.current.rotation.set(0.2, Math.PI + p * 0.3, Math.sin(p * Math.PI) * 0.15);
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(0.3, 2.8, e));
+    } else if (cycle < 4.5) {
+      // Flyby — streaks past camera
+      const p = (cycle - 3) / 1.5;
+      const e = p * p;
+      groupRef.current.position.set(THREE.MathUtils.lerp(1.5, -2, p), 0.3, THREE.MathUtils.lerp(-3, -20, e));
+      groupRef.current.rotation.set(-0.1, Math.PI + 0.3, -0.1);
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(2.8, 0.5, e));
+    } else {
+      // Reset — hidden, waiting to loop
+      groupRef.current.position.set(0, 2, 15);
+      groupRef.current.scale.setScalar(0.01);
     }
   });
 
   return (
     <>
-      <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
+      <group ref={groupRef}>
         <primitive object={scene} scale={2.5} />
       </group>
       <StarField />
