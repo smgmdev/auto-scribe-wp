@@ -511,7 +511,7 @@ export default function ArcanaIntelligence() {
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
                 Precision in your system.
               </h2>
-              <p className="text-white/50 text-base md:text-lg leading-relaxed max-w-2xl mb-12">
+              <p className="text-lg md:text-xl text-white/70 leading-tight max-w-2xl mb-12">
                 Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time.
               </p>
             </AnimatedSection>
