@@ -1,5 +1,5 @@
 import { useRef, useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { COUNTRY_COORDINATES, latLngToVector3 } from '@/constants/countryCoordinates';
 
@@ -9,19 +9,19 @@ interface MissileTrajectoryGlobeProps {
 }
 
 function Earth() {
+  const texture = useLoader(THREE.TextureLoader, '/textures/earth-blue-marble.jpg');
+  const bumpMap = useLoader(THREE.TextureLoader, '/textures/earth-topology.png');
+
   return (
     <mesh>
-      <sphereGeometry args={[1, 48, 48]} />
-      <meshStandardMaterial
-        color="#1a1a2e"
-        emissive="#0a0a1a"
-        roughness={0.8}
-        metalness={0.2}
+      <sphereGeometry args={[1, 64, 64]} />
+      <meshPhongMaterial
+        map={texture}
+        bumpMap={bumpMap}
+        bumpScale={0.02}
+        specular={new THREE.Color('#1a3a5c')}
+        shininess={8}
       />
-      <mesh>
-        <sphereGeometry args={[1.002, 24, 24]} />
-        <meshBasicMaterial color="#2a2a4a" wireframe transparent opacity={0.3} />
-      </mesh>
     </mesh>
   );
 }
