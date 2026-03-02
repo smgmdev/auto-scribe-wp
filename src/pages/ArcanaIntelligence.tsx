@@ -278,7 +278,7 @@ export default function ArcanaIntelligence() {
             </AnimatedSection>
             <AnimatedSection delay={200}>
               <p className="text-xl md:text-2xl text-white/60 max-w-xl mx-auto mb-10 leading-relaxed">
-                See what others miss. Real‑time media intelligence, powered by advanced AI.
+                See what others miss. Real‑time security intelligence, powered by advanced AI models.
               </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>
