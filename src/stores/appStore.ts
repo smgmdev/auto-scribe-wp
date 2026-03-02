@@ -305,6 +305,10 @@ interface AppState {
   openCameraFeed: (region: { region: string; label: string; feeds: { label: string; embedId: string }[] }) => void;
   closeCameraFeed: () => void;
 
+  // Precision contact popup
+  precisionContactOpen: boolean;
+  setPrecisionContactOpen: (open: boolean) => void;
+
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
@@ -835,4 +839,8 @@ export const useAppStore = create<AppState>()((set) => ({
     unreadMessageCounts: {},
     minimizedChats: [],
   }),
+
+  // Precision contact popup
+  precisionContactOpen: false,
+  setPrecisionContactOpen: (open) => set({ precisionContactOpen: open }),
 }));
