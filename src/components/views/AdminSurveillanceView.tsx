@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -75,6 +76,8 @@ export function AdminSurveillanceView() {
   const [scanData, setScanData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
+  const [showCountryPopup, setShowCountryPopup] = useState(false);
+  const [showAttacksPopup, setShowAttacksPopup] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [missileTimeFilter, setMissileTimeFilter] = useState<string>('1');
   const [droneTimeFilter, setDroneTimeFilter] = useState<string>('1');
@@ -315,7 +318,11 @@ export function AdminSurveillanceView() {
             {scanData ? (
               <SurveillanceGlobe
                 countries={scanData.countries}
-                onCountryClick={(c) => setSelectedCountry(c)}
+                onCountryClick={(c) => {
+                  setSelectedCountry(c);
+                  setShowCountryPopup(true);
+                  setShowAttacksPopup(true);
+                }}
                 selectedCountry={selectedCountry?.code || null}
                 missileTrajectories={missileTrajectories}
                 droneTrajectories={droneTrajectories}
@@ -350,142 +357,153 @@ export function AdminSurveillanceView() {
               </div>
             </div>
 
-            {/* Country detail overlay */}
-            {selectedCountry && (
-              <div className="absolute top-4 left-4 flex items-start gap-3 z-10">
-                {/* Country info popup */}
-                <div className="w-80 bg-[#0d1220]/95 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
-                  <div className="flex items-center justify-between p-3 border-b border-white/5">
-                    <div className="flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-bold font-mono">{selectedCountry.name}</span>
-                      <span className="text-xs text-gray-500 font-mono">{selectedCountry.code}</span>
-                    </div>
-                    <button onClick={() => setSelectedCountry(null)} className="text-gray-500 hover:text-white">
-                      <X className="w-4 h-4" />
-                    </button>
+            {/* Country detail DraggablePopup */}
+            <DraggablePopup
+              open={showCountryPopup && !!selectedCountry}
+              onOpenChange={(open) => {
+                setShowCountryPopup(open);
+                if (!open) setSelectedCountry(null);
+              }}
+              width={360}
+              maxHeight="70vh"
+              zIndex={200}
+              className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg"
+              headerClassName="!bg-[#0d1220] !border-white/5"
+              title={selectedCountry && (
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-bold font-mono text-white">{selectedCountry.name}</span>
+                  <span className="text-xs text-gray-500 font-mono">{selectedCountry.code}</span>
+                </div>
+              )}
+            >
+              {selectedCountry && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-mono">Threat Level</span>
+                    <Badge variant="outline" className={cn("text-xs font-mono", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
+                      {getThreatBadge(selectedCountry.threat_level, selectedCountry.score).label}
+                    </Badge>
                   </div>
-                  <div className="p-3 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 font-mono">Threat Level</span>
-                      <Badge variant="outline" className={cn("text-xs font-mono", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
-                        {getThreatBadge(selectedCountry.threat_level, selectedCountry.score).label}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 font-mono">Risk Score</span>
-                      <span className="text-sm font-bold font-mono">{selectedCountry.score}/100</span>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-mono">Risk Score</span>
+                    <span className="text-sm font-bold font-mono text-white">{selectedCountry.score}/100</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 font-mono block mb-1">Summary</span>
+                    <p className="text-xs text-gray-300 leading-relaxed">{selectedCountry.summary}</p>
+                  </div>
+                  {selectedCountry.events.length > 0 && (
                     <div>
-                      <span className="text-xs text-gray-500 font-mono block mb-1">Summary</span>
-                      <p className="text-xs text-gray-300 leading-relaxed">{selectedCountry.summary}</p>
+                      <span className="text-xs text-gray-500 font-mono block mb-1">Active Events</span>
+                      <ul className="space-y-1">
+                        {selectedCountry.events.map((event, i) => (
+                          <li key={i} className="text-xs text-gray-400 flex items-start gap-1.5">
+                            <AlertTriangle className="w-3 h-3 text-orange-400 mt-0.5 flex-shrink-0" />
+                            {event}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    {selectedCountry.events.length > 0 && (
+                  )}
+                </div>
+              )}
+            </DraggablePopup>
+
+            {/* Attacks DraggablePopup */}
+            <DraggablePopup
+              open={showAttacksPopup && !!selectedCountry && countryMissiles.length > 0}
+              onOpenChange={(open) => setShowAttacksPopup(open)}
+              width={380}
+              maxHeight="70vh"
+              zIndex={210}
+              className="!bg-[#0d1220]/95 !border-red-500/20 !text-white !rounded-lg"
+              headerClassName="!bg-[#0d1220] !border-red-500/10"
+              title={selectedCountry && (
+                <div className="flex items-center gap-2">
+                  <Rocket className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-bold font-mono text-red-400">Attacks</span>
+                  <span className="text-xs text-gray-500 font-mono">{selectedCountry.name}</span>
+                </div>
+              )}
+            >
+              {selectedCountry && (() => {
+                const launched = countryMissiles.filter(m => m.origin_country_name?.toLowerCase() === selectedCountry.name.toLowerCase());
+                const targeted = countryMissiles.filter(m => m.destination_country_name?.toLowerCase() === selectedCountry.name.toLowerCase() && m.origin_country_name?.toLowerCase() !== selectedCountry.name.toLowerCase());
+
+                const getSeverityIcon = (severity: string) => {
+                  if (severity === 'nuke') return <Radiation className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />;
+                  if (severity === 'drone') return <Radar className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />;
+                  return <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />;
+                };
+
+                const getSeverityLabel = (severity: string) => {
+                  if (severity === 'nuke') return <span className="text-[9px] font-mono text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
+                  if (severity === 'drone') return <span className="text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
+                  return <span className="text-[9px] font-mono text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
+                };
+
+                const renderAlert = (m: typeof countryMissiles[0], direction: 'launched' | 'targeted') => {
+                  const date = new Date(m.created_at);
+                  const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                  return (
+                    <li key={m.id} className={cn(
+                      "text-xs flex items-start gap-1.5 p-1.5 rounded border",
+                      m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                      direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'
+                    )}>
+                      {getSeverityIcon(m.severity)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-gray-300 font-mono truncate flex-1">{m.title}</p>
+                          {getSeverityLabel(m.severity)}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
+                          {m.origin_country_name && m.destination_country_name && (
+                            <span className={cn(
+                              "text-[10px] font-mono",
+                              direction === 'launched' ? 'text-red-400/70' : 'text-blue-400/70'
+                            )}>
+                              {m.origin_country_name} → {m.destination_country_name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                };
+
+                return (
+                  <div className="space-y-3">
+                    {launched.length > 0 && (
                       <div>
-                        <span className="text-xs text-gray-500 font-mono block mb-1">Active Events</span>
-                        <ul className="space-y-1">
-                          {selectedCountry.events.map((event, i) => (
-                            <li key={i} className="text-xs text-gray-400 flex items-start gap-1.5">
-                              <AlertTriangle className="w-3 h-3 text-orange-400 mt-0.5 flex-shrink-0" />
-                              {event}
-                            </li>
-                          ))}
-                        </ul>
+                        <span className="text-xs text-red-400/80 font-mono block mb-1 flex items-center gap-1">
+                          <Rocket className="w-3 h-3" /> Attacks Launched ({launched.length})
+                        </span>
+                        <ScrollArea className="max-h-40">
+                          <ul className="space-y-1.5">
+                            {launched.map(m => renderAlert(m, 'launched'))}
+                          </ul>
+                        </ScrollArea>
+                      </div>
+                    )}
+                    {targeted.length > 0 && (
+                      <div>
+                        <span className="text-xs text-blue-400/80 font-mono block mb-1 flex items-center gap-1">
+                          <ShieldAlert className="w-3 h-3" /> Incoming Attacks ({targeted.length})
+                        </span>
+                        <ScrollArea className="max-h-40">
+                          <ul className="space-y-1.5">
+                            {targeted.map(m => renderAlert(m, 'targeted'))}
+                          </ul>
+                        </ScrollArea>
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Attacks popup - separate panel */}
-                {countryMissiles.length > 0 && (() => {
-                  const launched = countryMissiles.filter(m => m.origin_country_name?.toLowerCase() === selectedCountry.name.toLowerCase());
-                  const targeted = countryMissiles.filter(m => m.destination_country_name?.toLowerCase() === selectedCountry.name.toLowerCase() && m.origin_country_name?.toLowerCase() !== selectedCountry.name.toLowerCase());
-
-                  if (launched.length === 0 && targeted.length === 0) return null;
-
-                  const getSeverityIcon = (severity: string) => {
-                    if (severity === 'nuke') return <Radiation className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />;
-                    if (severity === 'drone') return <Radar className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />;
-                    return <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />;
-                  };
-
-                  const getSeverityLabel = (severity: string) => {
-                    if (severity === 'nuke') return <span className="text-[9px] font-mono text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
-                    if (severity === 'drone') return <span className="text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
-                    return <span className="text-[9px] font-mono text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
-                  };
-
-                  const renderAlert = (m: typeof countryMissiles[0], direction: 'launched' | 'targeted') => {
-                    const date = new Date(m.created_at);
-                    const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-                    return (
-                      <li key={m.id} className={cn(
-                        "text-xs flex items-start gap-1.5 p-1.5 rounded border",
-                        m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
-                        direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'
-                      )}>
-                        {getSeverityIcon(m.severity)}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-gray-300 font-mono truncate flex-1">{m.title}</p>
-                            {getSeverityLabel(m.severity)}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
-                            {m.origin_country_name && m.destination_country_name && (
-                              <span className={cn(
-                                "text-[10px] font-mono",
-                                direction === 'launched' ? 'text-red-400/70' : 'text-blue-400/70'
-                              )}>
-                                {m.origin_country_name} → {m.destination_country_name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  };
-
-                  return (
-                    <div className="w-80 bg-[#0d1220]/95 backdrop-blur-md border border-red-500/20 rounded-lg overflow-hidden">
-                      <div className="flex items-center justify-between p-3 border-b border-red-500/10">
-                        <div className="flex items-center gap-2">
-                          <Rocket className="w-4 h-4 text-red-400" />
-                          <span className="text-sm font-bold font-mono text-red-400">Attacks</span>
-                          <span className="text-xs text-gray-500 font-mono">{selectedCountry.name}</span>
-                        </div>
-                      </div>
-                      <div className="p-3 space-y-3">
-                        {launched.length > 0 && (
-                          <div>
-                            <span className="text-xs text-red-400/80 font-mono block mb-1 flex items-center gap-1">
-                              <Rocket className="w-3 h-3" /> Attacks Launched ({launched.length})
-                            </span>
-                            <ScrollArea className="max-h-40">
-                              <ul className="space-y-1.5">
-                                {launched.map(m => renderAlert(m, 'launched'))}
-                              </ul>
-                            </ScrollArea>
-                          </div>
-                        )}
-                        {targeted.length > 0 && (
-                          <div>
-                            <span className="text-xs text-blue-400/80 font-mono block mb-1 flex items-center gap-1">
-                              <ShieldAlert className="w-3 h-3" /> Incoming Attacks ({targeted.length})
-                            </span>
-                            <ScrollArea className="max-h-40">
-                              <ul className="space-y-1.5">
-                                {targeted.map(m => renderAlert(m, 'targeted'))}
-                              </ul>
-                            </ScrollArea>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
+                );
+              })()}
+            </DraggablePopup>
           </div>
 
           {/* Right panel - Events feed */}
