@@ -33,6 +33,7 @@ interface SurveillanceGlobeProps {
   nukeTrajectories?: MissileTrajectory[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
+  resetTrigger?: number;
 }
 
 const GLOBE_RADIUS = 2;
@@ -558,6 +559,37 @@ function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   return null;
 }
 
+const DEFAULT_CAMERA_POS = new THREE.Vector3(1.2, 1.4, 3.5);
+
+function CameraResetter({ trigger }: { trigger: number }) {
+  const { camera } = useThree();
+  const animating = useRef(false);
+  const startPos = useRef(new THREE.Vector3());
+  const progress = useRef(0);
+  const lastTrigger = useRef(trigger);
+
+  useEffect(() => {
+    if (trigger > 0 && trigger !== lastTrigger.current) {
+      lastTrigger.current = trigger;
+      startPos.current.copy(camera.position);
+      progress.current = 0;
+      animating.current = true;
+    }
+  }, [trigger, camera]);
+
+  useFrame(() => {
+    if (animating.current) {
+      progress.current = Math.min(progress.current + 0.02, 1);
+      const t = 1 - Math.pow(1 - progress.current, 3); // ease-out cubic
+      camera.position.lerpVectors(startPos.current, DEFAULT_CAMERA_POS, t);
+      camera.lookAt(0, 0, 0);
+      if (progress.current >= 1) animating.current = false;
+    }
+  });
+
+  return null;
+}
+
 function RotatingGlobe({
   countries,
   onCountryClick,
@@ -567,11 +599,19 @@ function RotatingGlobe({
   nukeTrajectories = [],
   isSpinning = false,
   onSpinChange,
+  resetTrigger = 0,
 }: SurveillanceGlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [zoomLevel, setZoomLevel] = useState(4.5);
   const [geoFeatures, setGeoFeatures] = useState<GeoFeature[]>([]);
   const [hoveredGeo, setHoveredGeo] = useState<{ name: string; point: THREE.Vector3 } | null>(null);
+
+  // Reset group rotation when reset is triggered
+  useEffect(() => {
+    if (resetTrigger > 0 && groupRef.current) {
+      groupRef.current.rotation.set(0, 0, 0);
+    }
+  }, [resetTrigger]);
 
   const hoveredFeature = useMemo(() => {
     if (!hoveredGeo) return null;
@@ -637,6 +677,7 @@ function RotatingGlobe({
   return (
     <>
       <ZoomTracker onZoomChange={setZoomLevel} />
+      <CameraResetter trigger={resetTrigger} />
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 3, 5]} intensity={1.2} />
       <directionalLight position={[-5, -3, -5]} intensity={0.3} color="#4488cc" />
@@ -705,6 +746,7 @@ export function SurveillanceGlobe({
   nukeTrajectories = [],
   isSpinning = false,
   onSpinChange,
+  resetTrigger = 0,
 }: SurveillanceGlobeProps) {
   return (
     <div className="w-full h-full">
@@ -722,6 +764,7 @@ export function SurveillanceGlobe({
           nukeTrajectories={nukeTrajectories}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
+          resetTrigger={resetTrigger}
         />
       </Canvas>
     </div>
