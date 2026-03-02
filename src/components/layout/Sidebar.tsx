@@ -1884,24 +1884,28 @@ export function Sidebar({
   return <TooltipProvider delayDuration={0}>
       <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
     // Desktop: always visible, width depends on collapsed state
-    sidebarCollapsed ? "lg:w-16" : "lg:w-64",
+    sidebarCollapsed ? "lg:w-[60px]" : "lg:w-64",
     "lg:translate-x-0",
     // Mobile: always full width slide in/out
     "w-64",
     isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-3">
-            <div className="flex items-center gap-2">
-              {/* Desktop: burger toggles collapse */}
+          <div className={cn("flex h-16 items-center border-b border-sidebar-border", sidebarCollapsed ? "justify-center px-1" : "justify-between px-3")}>
+            {sidebarCollapsed ? (
               <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="hidden lg:flex text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
                 <Menu className="h-5 w-5" />
               </Button>
-              {/* Mobile: X closes sidebar */}
-              <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                <X className="h-5 w-5" />
-              </Button>
-              {!sidebarCollapsed && (
+            ) : (
+              <div className="flex items-center gap-2">
+                {/* Desktop: burger toggles collapse */}
+                <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="hidden lg:flex text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                </Button>
+                {/* Mobile: X closes sidebar */}
+                <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                  <X className="h-5 w-5" />
+                </Button>
                 <button 
                   onClick={() => navigate('/')} 
                   className="flex items-center gap-2"
@@ -1911,13 +1915,13 @@ export function Sidebar({
                     Arcana Mace
                   </h1>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
-            <div className={cn("space-y-1", sidebarCollapsed ? "px-2" : "px-4")}>
+            <div className={cn("space-y-1", sidebarCollapsed ? "px-1" : "px-4")}>
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
@@ -2175,7 +2179,7 @@ export function Sidebar({
           </nav>
 
           {/* Agency Status & Account */}
-          <div className={cn("border-t border-sidebar-border py-4 space-y-3 flex-shrink-0", sidebarCollapsed ? "px-2" : "px-4")}>
+          <div className={cn("border-t border-sidebar-border py-4 space-y-3 flex-shrink-0", sidebarCollapsed ? "px-1" : "px-4")}>
             {/* Agency Status Card - Only for non-admin users, hidden when collapsed */}
             {!sidebarCollapsed && !isAdmin && !agencyDataLoaded && (
               <div className="flex items-center justify-center py-4">
