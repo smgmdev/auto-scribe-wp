@@ -78,7 +78,7 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
         {video ? (
           <>
             {!videoLoaded && (
-              <div className="absolute bottom-3 right-3 z-20">
+              <div className="absolute top-3 left-3 z-20">
                 <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
               </div>
             )}
@@ -124,7 +124,7 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
               {video ? (
                 <>
                   {!featureVideoLoaded && (
-                    <div className="absolute bottom-3 right-3 z-20">
+                    <div className="absolute top-3 left-3 z-20">
                       <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
                     </div>
                   )}
@@ -156,7 +156,7 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
             {video ? (
               <>
                 {!featureVideoLoaded && (
-                  <div className="absolute bottom-3 right-3 z-20">
+                  <div className="absolute top-3 left-3 z-20">
                     <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
                   </div>
                 )}
@@ -303,7 +303,7 @@ export default function ArcanaIntelligence() {
         {/* ══════════════ HERO ══════════════ */}
         <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-black">
           {!heroVideoLoaded && (
-            <div className="absolute bottom-4 right-4 z-20">
+            <div className="absolute top-4 left-4 z-20">
               <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
             </div>
           )}
