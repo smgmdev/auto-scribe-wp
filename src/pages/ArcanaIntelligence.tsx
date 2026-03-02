@@ -233,7 +233,7 @@ export default function ArcanaIntelligence() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
           </div>
 
-          <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-32 pb-40">
+          <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-52 md:pt-64 pb-40">
             <AnimatedSection>
               <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-6">Introducing</p>
               <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6">
