@@ -145,7 +145,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
   const [featureVideoLoaded, setFeatureVideoLoaded] = useState(false);
   return (
     <section className="bg-black text-white overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+      <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <AnimatedSection>
           <p className="text-[#007AFF] text-sm font-semibold tracking-wide uppercase mb-2">{title}</p>
           <div className="flex flex-wrap items-baseline gap-x-2 md:gap-x-3 mb-4">
@@ -159,7 +159,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
       </div>
       <AnimatedSection delay={300}>
         {(stats || children) ? (
-          <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-4">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="w-full md:w-1/2 relative">
                 {customContent ? customContent : video ? (
@@ -383,7 +383,7 @@ export default function ArcanaIntelligence() {
           </div>
 
           {/* Horizontal scrollable highlight cards */}
-          <div className="max-w-[1200px] mx-auto px-4 md:px-6">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={globalVideo} delay={0} />
               <HighlightCard icon={Brain} title="Precision AI" description="AI that learns the global situation autonomously, visualizes information, and provides guidance for defense." image={engineImg} customContent={
