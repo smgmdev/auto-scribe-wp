@@ -1872,50 +1872,64 @@ export function Sidebar({
 
   const sidebarCollapsedStore = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebarCollapsed = useAppStore((s) => s.toggleSidebarCollapsed);
+  
+  // On mobile, never show collapsed (icons-only) — always show full labels
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  const sidebarCollapsed = sidebarCollapsedStore;
+  const sidebarCollapsed = isDesktop ? sidebarCollapsedStore : false;
+  const desktopExpanded = isDesktop && !sidebarCollapsedStore;
 
   return <TooltipProvider delayDuration={0}>
+      {/* Desktop overlay backdrop when expanded */}
+      {desktopExpanded && (
+        <div 
+          className="hidden lg:block fixed inset-0 z-[49] bg-black/30 transition-opacity" 
+          onClick={toggleSidebarCollapsed} 
+        />
+      )}
       <aside 
         className={cn(
-          "fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
-          "lg:translate-x-0",
-          isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0",
-          sidebarCollapsed ? "lg:!w-[60px]" : "lg:!w-64",
+          "fixed left-0 top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
+          // Mobile: slide in/out
+          isOpen ? "translate-x-0 w-64" : "-translate-x-full",
+          // Desktop: always visible, width depends on expanded state
+          desktopExpanded ? "lg:translate-x-0 lg:w-64" : "lg:translate-x-0 lg:w-[60px]",
         )}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className={cn("flex h-16 items-center border-b border-sidebar-border", sidebarCollapsed ? "justify-center px-1" : "justify-between px-3")}>
-            {sidebarCollapsed ? (
-              <Button variant="ghost" size="icon" onClick={() => { toggleSidebarCollapsed(); onClose(); }} className="hidden lg:flex text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+          <div className={cn("flex h-16 items-center border-b border-sidebar-border", !desktopExpanded && sidebarCollapsed ? "lg:justify-center lg:px-1" : "justify-between px-3")}>
+            {/* Desktop collapsed: just burger icon */}
+            <div className={cn("hidden lg:flex items-center gap-2", desktopExpanded ? "" : "justify-center w-full")}>
+              <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
                 <Menu className="h-5 w-5" />
               </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                {/* Desktop: burger toggles collapse */}
-                <Button variant="ghost" size="icon" onClick={() => { toggleSidebarCollapsed(); onClose(); }} className="hidden lg:flex text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                  <Menu className="h-5 w-5" />
-                </Button>
-                {/* Mobile: X closes sidebar */}
-                <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                  <X className="h-5 w-5" />
-                </Button>
-                <button 
-                  onClick={() => navigate('/')} 
-                  className="flex items-center gap-2"
-                >
+              {desktopExpanded && (
+                <button onClick={() => navigate('/')} className="flex items-center gap-2">
                   <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
-                  <h1 className="text-lg font-semibold text-white whitespace-nowrap">
-                    Arcana Mace
-                  </h1>
+                  <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
+            {/* Mobile: X + logo */}
+            <div className="lg:hidden flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                <X className="h-5 w-5" />
+              </Button>
+              <button onClick={() => navigate('/')} className="flex items-center gap-2">
+                <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
+                <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
+              </button>
+            </div>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
-            <div className={cn("space-y-1", sidebarCollapsed ? "px-1" : "px-4")}>
+            <div className={cn("space-y-1", sidebarCollapsed && !desktopExpanded ? "lg:px-1 px-4" : "px-4")}>
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
