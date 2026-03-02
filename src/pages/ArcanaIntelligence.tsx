@@ -409,7 +409,7 @@ export default function ArcanaIntelligence() {
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
                 Intelligence at every level.
               </h2>
-              <p className="text-lg text-white/50 max-w-xl mx-auto">
+              <p className="text-lg text-white/50 max-w-xl mx-auto leading-tight">
                 From real‑time surveillance to deep media analytics — every tool designed to give you the edge.
               </p>
             </AnimatedSection>
@@ -465,6 +465,7 @@ export default function ArcanaIntelligence() {
             title="AI Engine"
             headline="Built to detect."
             description="The Arcana Precision AI engine processes millions of data points — classifying, correlating, and surfacing what matters to visualize the information for security and defense purposes."
+            descriptionClassName="leading-tight"
             image={engineImg}
             customContent={<Missile3D />}
             stats={[
@@ -539,7 +540,7 @@ export default function ArcanaIntelligence() {
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
                 Ready to see the full picture?
               </h2>
-              <p className="text-lg text-white/50 max-w-lg mx-auto mb-10">
+              <p className="text-lg text-white/50 max-w-lg mx-auto mb-10 leading-tight">
                 A platform designed for governments, agencies, and enterprises for mission‑critical intelligence.
               </p>
               <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
