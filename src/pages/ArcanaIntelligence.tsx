@@ -185,6 +185,7 @@ export default function ArcanaIntelligence() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
+  const [securityVideoLoaded, setSecurityVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -389,6 +390,7 @@ export default function ArcanaIntelligence() {
             headline="Built to think faster."
             description="The Arcana Precision engine processes millions of data points per minute — classifying, correlating, and surfacing what matters before the news cycle catches up."
             image={engineImg}
+            video={engineVideo}
             stats={[
               { value: '1M+', label: 'Data points per minute' },
               { value: '<100ms', label: 'Classification latency' },
@@ -428,7 +430,17 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
-                <img src={securityImg} alt="Security" className="w-full max-w-sm mx-auto rounded-2xl" />
+                <div className="relative w-full max-w-sm mx-auto">
+                  {!securityVideoLoaded && (
+                    <div className="absolute bottom-3 right-3 z-20">
+                      <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
+                    </div>
+                  )}
+                  <video autoPlay loop muted playsInline className="w-full rounded-2xl"
+                    onCanPlayThrough={() => setSecurityVideoLoaded(true)}>
+                    <source src={securityVideo} type="video/mp4" />
+                  </video>
+                </div>
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
                 <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-4">Security & Privacy</p>
