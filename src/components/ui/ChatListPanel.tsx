@@ -129,7 +129,7 @@ export function ChatListPanel() {
   const fetchMyEngagements = async () => {
     if (!user) return;
 
-    console.log('[ChatListPanel] fetchMyEngagements called for user:', user.id);
+    // Reduced logging to avoid console spam
     const { data, error } = await supabase
       .from('service_requests')
       .select(`
@@ -161,7 +161,8 @@ export function ChatListPanel() {
       return;
     }
 
-    console.log('[ChatListPanel] fetchMyEngagements got', data.length, 'results');
+    // Only log when there are actual results to reduce noise
+    if (data.length > 0) console.log('[ChatListPanel] fetchMyEngagements got', data.length, 'results');
     if (data) {
       // Fetch last messages for each request
       const requestIds = data.map(r => r.id);
@@ -823,7 +824,7 @@ export function ChatListPanel() {
 
   useEffect(() => {
     minimizedChatsRef.current = minimizedChats;
-    console.log('[ChatListPanel] minimizedChatsRef updated:', minimizedChats.map(c => ({ id: c.id, unreadCount: c.unreadCount })));
+    // minimizedChatsRef updated silently
   }, [minimizedChats]);
 
   useEffect(() => {
@@ -832,7 +833,7 @@ export function ChatListPanel() {
 
   useEffect(() => {
     agencyPayoutIdRef.current = agencyPayoutId;
-    console.log('[ChatListPanel] Agency ref updated:', { agencyPayoutId });
+    // Agency ref updated silently
   }, [agencyPayoutId]);
 
   // Listen for engagement-cancelled event to remove cancelled chats from lists
@@ -1773,8 +1774,16 @@ export function ChatListPanel() {
       }, fallbackPollDelayRef.current);
     };
 
+    let lastForegroundRecovery = 0;
     const handleForegroundRecovery = () => {
       if (document.visibilityState === 'hidden') return;
+      // Debounce: skip if we already ran within the last 5 seconds
+      const now = Date.now();
+      if (now - lastForegroundRecovery < 5000) return;
+      // Skip if realtime is healthy (heartbeat within 15s)
+      const staleForMs = now - lastRealtimeHeartbeatRef.current;
+      if (staleForMs < 15000) return;
+      lastForegroundRecovery = now;
       runFallbackSync();
     };
 
