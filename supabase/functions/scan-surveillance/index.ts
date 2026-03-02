@@ -396,6 +396,21 @@ Deno.serve(async (req) => {
       console.error('Failed to store scan:', insertError);
     }
 
+    // ── Country code normalizer (UK→GB only, as approved) ──
+    const COUNTRY_CODE_FIXES: Record<string, string> = { UK: 'GB' };
+    const fixCode = (code: string | null): string | null => {
+      if (!code) return null;
+      const upper = code.toUpperCase().trim();
+      return COUNTRY_CODE_FIXES[upper] || upper;
+    };
+
+    // Apply fixes to all merged events
+    for (const ev of mergedEvents) {
+      ev.country_code = fixCode(ev.country_code);
+      ev.origin_country_code = fixCode(ev.origin_country_code);
+      ev.destination_country_code = fixCode(ev.destination_country_code);
+    }
+
     // Detect threat events (missiles, drones, nukes) and create alerts
     const DRONE_KEYWORDS = ['drone', 'uav', 'unmanned aerial', 'drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition'];
     const NUKE_KEYWORDS = ['nuclear', 'nuke', 'atomic', 'nuclear warhead', 'nuclear launch', 'nuclear strike', 'thermonuclear', 'radiation', 'nuclear weapon'];
