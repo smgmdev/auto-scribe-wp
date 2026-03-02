@@ -95,13 +95,14 @@ Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass
 Include ALL countries with notable activity (at least 15-25 countries).
 Mark countries with no issues as "safe".
 Include at least 10-15 latest events from the past 48 hours.
+IMPORTANT: Prioritize sourcing from Reuters, BBC, Al Jazeera, AP News, and X/Twitter. Always check Reuters (reuters.com) for breaking security and conflict news.
 IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
-Search X/Twitter and news for the most recent developments.
+Search X/Twitter, Reuters, and major news outlets for the most recent developments.
 Return ONLY the JSON object, no other text.`
           },
           {
             role: 'user',
-            content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. Check X/Twitter and major news sources for the latest developments in the past 48 hours.'
+            content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. Check Reuters, X/Twitter, AP News, BBC, and other major news sources for the latest developments in the past 48 hours.'
           }
         ],
         search_recency_filter: 'day',
