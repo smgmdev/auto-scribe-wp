@@ -222,8 +222,8 @@ export function AdminSurveillanceView() {
     <div className="animate-fade-in bg-[#0a0e1a] min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#1d1d1f]">
-          <div className="flex items-center gap-0">
+        <div className="flex items-stretch justify-between px-0 lg:px-0 py-0 border-b border-white/5 bg-[#1d1d1f]">
+          <div className="flex items-stretch gap-0">
             <div className="flex items-center gap-2 pl-3 pr-3">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
