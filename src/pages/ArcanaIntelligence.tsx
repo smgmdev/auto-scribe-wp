@@ -370,7 +370,7 @@ export default function ArcanaIntelligence() {
                     @keyframes arc-glow-spin-rev { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
                     @keyframes arc-sphere-pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.2); } }
                   `}</style>
-                  <img src={amblack} alt="Arcana" className="absolute z-10 h-12 w-12 object-contain" />
+                  <img src={amlogo} alt="Arcana" className="absolute z-10 h-12 w-12 object-contain" />
                   <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d', animation: 'arc-orbit-1 8s linear infinite' }}>
                     <div className="absolute rounded-full" style={{ width: '100px', height: '100px', border: '1.5px solid #007AFF', boxShadow: '0 0 15px rgba(0,122,255,0.5)' }}>
                       <div className="absolute inset-0" style={{ animation: 'arc-glow-spin 1s linear infinite' }}>
