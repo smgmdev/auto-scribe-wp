@@ -247,6 +247,14 @@ Deno.serve(async (req) => {
 
     console.log('Starting multi-source surveillance scan...');
 
+    // Fetch previous scan for carry-forward logic
+    const { data: prevScan } = await supabase
+      .from('surveillance_scans')
+      .select('country_data, events, scanned_at')
+      .order('scanned_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     // Fetch all sources in parallel
     const [perplexityResult, gdeltResult, reliefWebEvents] = await Promise.all([
       fetchPerplexityScan(PERPLEXITY_API_KEY),
@@ -255,6 +263,69 @@ Deno.serve(async (req) => {
     ]);
 
     const { scanResult, citations } = perplexityResult;
+
+    // ── Carry-forward: preserve high-threat countries that new scan downgraded ──
+    // If a country was caution/danger in the last scan (within 6 hours) but the
+    // new scan marks it safe, keep the previous assessment to prevent flicker.
+    const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+    const prevCountries: any[] = (prevScan?.country_data as any[]) || [];
+    const prevScannedAt = prevScan?.scanned_at ? new Date(prevScan.scanned_at).getTime() : 0;
+    const isRecent = (Date.now() - prevScannedAt) < SIX_HOURS_MS;
+
+    if (isRecent && prevCountries.length > 0) {
+      const newCountryMap = new Map<string, any>();
+      for (const c of (scanResult.countries || [])) {
+        newCountryMap.set(c.code, c);
+      }
+
+      for (const prev of prevCountries) {
+        if (!prev.code) continue;
+        const prevThreat = prev.threat_level || 'safe';
+        const newEntry = newCountryMap.get(prev.code);
+        const newThreat = newEntry?.threat_level || 'safe';
+        const prevScore = prev.score || 0;
+
+        // If previous was elevated (caution/danger with score >= 40) and new scan dropped it
+        if ((prevThreat === 'caution' || prevThreat === 'danger') && prevScore >= 40 && newThreat === 'safe') {
+          // Decay the score by 20% but keep it elevated
+          const decayedScore = Math.max(Math.round(prevScore * 0.8), 20);
+          const decayedThreat = decayedScore >= 60 ? 'danger' : 'caution';
+          const carried = {
+            ...prev,
+            score: decayedScore,
+            threat_level: decayedThreat,
+            summary: `${prev.summary} [Carried from previous scan — situation may still be developing]`,
+          };
+          if (newEntry) {
+            // Replace the safe entry with carried data
+            const idx = scanResult.countries.indexOf(newEntry);
+            if (idx >= 0) scanResult.countries[idx] = carried;
+          } else {
+            scanResult.countries.push(carried);
+          }
+          console.log(`Carried forward ${prev.code} (${prev.name}): ${prevThreat}/${prevScore} → ${decayedThreat}/${decayedScore}`);
+        }
+      }
+
+      // Also carry forward events from previous scan that relate to carried countries
+      const carriedCodes = new Set(
+        prevCountries
+          .filter((c: any) => (c.threat_level === 'caution' || c.threat_level === 'danger') && (c.score || 0) >= 40)
+          .map((c: any) => c.code)
+      );
+      const prevEvents: any[] = (prevScan?.events as any[]) || [];
+      for (const pe of prevEvents) {
+        const code = pe.country_code || pe.origin_country_code || '';
+        if (carriedCodes.has(code)) {
+          // Check if this event is already in new results
+          const newTitles = (scanResult.latest_events || []).map((e: any) => (e.title || '').toLowerCase());
+          if (!newTitles.some((t: string) => t.includes((pe.title || '').toLowerCase().substring(0, 25)))) {
+            scanResult.latest_events = scanResult.latest_events || [];
+            scanResult.latest_events.push({ ...pe, carried_forward: true });
+          }
+        }
+      }
+    }
 
     // Merge supplementary events into main results
     const mergedEvents = mergeEvents(
