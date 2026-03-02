@@ -187,8 +187,8 @@ export default function ArcanaIntelligence() {
   return (
     <>
       <SEOHead
-        title="Arcana Intelligence — Advanced Media Intelligence Platform"
-        description="Real-time media intelligence, geopolitical surveillance, and AI-powered analytics. See what others miss."
+        title="Arcana Precision — Advanced War Intelligence Platform"
+        description="Real-time war intelligence, geopolitical surveillance, and AI-powered analytics. Precision war intelligence."
       />
 
       <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-black flex flex-col">
@@ -250,7 +250,7 @@ export default function ArcanaIntelligence() {
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
           <div className="bg-[#3d3d3d]/90 backdrop-blur-sm border-b border-[#4d4d4d]">
             <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-              <span className="text-xl font-semibold text-white">Arcana Intelligence</span>
+              <span className="text-xl font-semibold text-white">Arcana Precision</span>
               <nav className="hidden md:flex items-center gap-6">
                 {NAV_ITEMS.map((s) => (
                   <button key={s.id} onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}
@@ -351,7 +351,7 @@ export default function ArcanaIntelligence() {
           <FeatureSection
             title="AI Engine"
             headline="Built to think faster."
-            description="The Arcana Intelligence engine processes millions of data points per minute — classifying, correlating, and surfacing what matters before the news cycle catches up."
+            description="The Arcana Precision engine processes millions of data points per minute — classifying, correlating, and surfacing what matters before the news cycle catches up."
             image={engineImg}
             stats={[
               { value: '1M+', label: 'Data points per minute' },
@@ -380,7 +380,7 @@ export default function ArcanaIntelligence() {
           <FeatureSection
             title="Global Reach"
             headline="Every corner. Every signal."
-            description="Arcana Intelligence spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time."
+            description="Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time."
             image={globalImg}
             reverse
             stats={[
