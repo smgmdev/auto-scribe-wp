@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu } from 'lucide-react';
+const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -461,19 +461,28 @@ export function AdminSurveillanceView() {
           {/* Globe area */}
           <div className="relative w-full h-full max-w-[100vw] md:max-w-none mx-auto aspect-square md:aspect-auto">
             {scanData ? (
-              <SurveillanceGlobe
-                countries={scanData.countries}
-                onCountryClick={(c) => {
-                  openSurveillancePopup(c);
-                }}
-                selectedCountry={surveillanceCountry?.code || null}
-                missileTrajectories={showMissiles ? missileTrajectories : []}
-                droneTrajectories={showDrones ? droneTrajectories : []}
-                nukeTrajectories={showNukes ? nukeTrajectories : []}
-                isSpinning={globeSpinning}
-                onSpinChange={setGlobeSpinning}
-                resetTrigger={resetTrigger}
-              />
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-3">
+                    <Satellite className="w-8 h-8 text-gray-600 animate-pulse mx-auto" />
+                    <p className="text-sm text-gray-500">Loading globe...</p>
+                  </div>
+                </div>
+              }>
+                <SurveillanceGlobe
+                  countries={scanData.countries}
+                  onCountryClick={(c) => {
+                    openSurveillancePopup(c);
+                  }}
+                  selectedCountry={surveillanceCountry?.code || null}
+                  missileTrajectories={showMissiles ? missileTrajectories : []}
+                  droneTrajectories={showDrones ? droneTrajectories : []}
+                  nukeTrajectories={showNukes ? nukeTrajectories : []}
+                  isSpinning={globeSpinning}
+                  onSpinChange={setGlobeSpinning}
+                  resetTrigger={resetTrigger}
+                />
+              </Suspense>
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-3">
