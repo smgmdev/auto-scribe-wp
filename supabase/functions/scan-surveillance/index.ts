@@ -110,9 +110,11 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
 — China: Xinhua, Global Times, CGTN, Caixin
 — Europe: Euronews, France 24, Deutsche Welle (DW)
 — Ukraine: Ukrinform, Kyiv Independent, Ukrainian Air Force
+— Latin America & Caribbean: Reuters Latin America, BBC Mundo, Infobae, El Nacional (Venezuela), El Tiempo (Colombia), Folha de S.Paulo (Brazil), La Nación (Argentina)
+— Africa: BBC Africa, Al Jazeera Africa, Reuters Africa
 — X/Twitter: Check for breaking reports from verified journalists and OSINT accounts`,
-    focus: 'Cover ALL regions worldwide with geographic diversity.',
-    userPromptExtra: 'You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, X/Twitter. Cover the past 48 hours across ALL regions.',
+    focus: 'Cover ALL regions worldwide with geographic diversity. Include conflicts in Latin America (Venezuela, Colombia, etc.), Africa (Sudan, DRC, Somalia, etc.), Middle East, Europe, and Asia.',
+    userPromptExtra: 'You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, BBC Mundo, Infobae, El Nacional, X/Twitter. Cover the past 48 hours across ALL regions including Latin America, Africa, and everywhere else.',
   },
   asia: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
@@ -147,10 +149,10 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
   us: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
 — US media: CNN, Fox News, NBC News, ABC News, CBS News, AP News, Reuters, New York Times, Washington Post, Politico
-— Latin America: BBC Mundo, Reuters Latin America
-— X/Twitter: Check for breaking US security reports`,
-    focus: 'Focus ONLY on United States domestic threats, US military operations, US-related security events, and Americas.',
-    userPromptExtra: 'Focus on United States and Americas ONLY. Check: CNN, Fox News, NBC News, ABC News, CBS News, AP News, Reuters, NY Times, Washington Post, X/Twitter. Cover past 48 hours.',
+— Latin America & Caribbean: BBC Mundo, Reuters Latin America, Infobae, El Nacional (Venezuela), El Tiempo (Colombia), Folha de S.Paulo (Brazil), La Nación (Argentina), Telesur
+— X/Twitter: Check for breaking US and Latin America security reports`,
+    focus: 'Focus on United States, Latin America, and the Americas. Include Venezuela, Colombia, Brazil, Mexico, and all other countries in the region.',
+    userPromptExtra: 'Focus on United States, Latin America, and Americas. Include Venezuela military/security events, Colombia conflicts, Mexican cartel violence, Brazilian security events, and any other regional conflicts. Check: CNN, Fox News, NBC News, AP News, Reuters, BBC Mundo, Infobae, El Nacional, X/Twitter. Cover past 48 hours.',
   },
 };
 
@@ -211,6 +213,8 @@ CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian miss
 
 IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
 CRITICAL — NUCLEAR EVENTS: Do NOT classify any event as nuclear unless there is an OFFICIAL CONFIRMED announcement that a nuclear weapon has been launched or detonated. Political rhetoric, threats, warnings, nuclear program news, or nuclear policy discussions are NOT nuclear events. Only a verified, officially confirmed nuclear weapon launch/detonation qualifies.
+CRITICAL — NO HALLUCINATIONS: Only report events that ACTUALLY HAPPENED and are confirmed by real news sources. Do NOT fabricate, speculate, or predict events. If you cannot find a real source URL for an event, do NOT include it. Never invent attacks, strikes, or military operations that have not been reported by credible news outlets. Each event MUST have a real, verifiable source_url pointing to an actual published article.
+CRITICAL — GLOBAL COVERAGE: Include attacks and military operations from ALL regions — Russia-Ukraine, Middle East (Israel/Palestine, Yemen/Houthis, Iran), Latin America (Venezuela, Colombia, etc.), Africa (Sudan, DRC, Somalia, Ethiopia), Asia (Myanmar, North Korea), and anywhere else with active conflicts.
 Return ONLY the JSON object, no other text.`
         },
         {
