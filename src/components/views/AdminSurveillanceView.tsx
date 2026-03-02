@@ -285,8 +285,8 @@ export function AdminSurveillanceView() {
         {/* Top bar */}
         <div className="flex flex-col border-b border-white/5 bg-[#1d1d1f]">
           {/* Row 1: LIVE + controls */}
-          <div className="flex items-stretch px-0 py-1">
-            <div className="flex items-center gap-2 pl-3 pr-3">
+          <div className="flex items-stretch px-0">
+            <div className="flex items-center gap-2 pl-3 pr-3 py-1">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
                 scanData ? "bg-green-500" : "bg-gray-500"
@@ -296,7 +296,7 @@ export function AdminSurveillanceView() {
               </span>
             </div>
 
-            <div className="flex items-center gap-1 px-2 border-l border-white/10 self-stretch">
+            <div className="flex items-center gap-1 px-2 py-1 border-l border-white/10 self-stretch">
               <button onClick={() => setResetTrigger(t => t + 1)} className="text-gray-400 hover:text-white transition-colors p-1" title="Reset globe view">
                 <Crosshair className="w-3.5 h-3.5" />
               </button>
