@@ -229,7 +229,7 @@ export function AdminSurveillanceView() {
                 "w-2 h-2 rounded-full animate-pulse",
                 scanData ? "bg-green-500" : "bg-gray-500"
               )} />
-              <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">
+              <span className="text-xs text-gray-400 uppercase tracking-wider">
                 {loading ? 'Scanning...' : 'Live'}
               </span>
             </div>
@@ -237,56 +237,56 @@ export function AdminSurveillanceView() {
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
               <Rocket className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-mono text-gray-400">Missiles</span>
+              <span className="text-[10px] text-gray-400">Missiles</span>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
-                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
-                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
-                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
-                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
-                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-[10px] font-mono text-gray-600">({missileTrajectories.length})</span>
+              <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
               <Radar className="w-3 h-3 text-purple-400" />
-              <span className="text-[10px] font-mono text-gray-400">Drones</span>
+              <span className="text-[10px] text-gray-400">Drones</span>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
-                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
-                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
-                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
-                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
-                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-[10px] font-mono text-gray-600">({droneTrajectories.length})</span>
+              <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
               <Radiation className="w-3 h-3 text-yellow-400" />
-              <span className="text-[10px] font-mono text-gray-400">Nukes</span>
+              <span className="text-[10px] text-gray-400">Nukes</span>
               <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
-                <SelectTrigger className="h-5 w-[72px] text-[10px] font-mono bg-transparent border-0 text-gray-300 px-1.5 py-0">
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
-                  <SelectItem value="1" className="text-[11px] font-mono">last 1h</SelectItem>
-                  <SelectItem value="6" className="text-[11px] font-mono">last 6h</SelectItem>
-                  <SelectItem value="12" className="text-[11px] font-mono">last 12h</SelectItem>
-                  <SelectItem value="24" className="text-[11px] font-mono">last 24h</SelectItem>
-                  <SelectItem value="168" className="text-[11px] font-mono">last 7d</SelectItem>
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-[10px] font-mono text-gray-600">({nukeTrajectories.length})</span>
+              <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
             </div>
           </div>
 
@@ -310,7 +310,7 @@ export function AdminSurveillanceView() {
               size="sm"
               onClick={runScan}
               disabled={loading}
-              className="text-gray-400 hover:text-white hover:bg-white/5 font-mono text-xs"
+              className="text-gray-400 hover:text-white hover:bg-white/5 text-xs"
             >
               <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", loading && "animate-spin")} />
               Rescan
@@ -341,7 +341,7 @@ export function AdminSurveillanceView() {
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-3">
                   <RefreshCw className="w-8 h-8 text-gray-600 animate-spin mx-auto" />
-                  <p className="text-sm text-gray-500 font-mono">Initializing scan...</p>
+                  <p className="text-sm text-gray-500">Initializing scan...</p>
                 </div>
               </div>
             )}
@@ -351,15 +351,15 @@ export function AdminSurveillanceView() {
               <div className="flex items-center gap-3 px-2 py-1 bg-black/60 backdrop-blur-sm border border-white/5 rounded-md">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="text-[10px] font-mono text-gray-400">Safe ({safeCount})</span>
+                  <span className="text-[10px] text-gray-400">Safe ({safeCount})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  <span className="text-[10px] font-mono text-gray-400">Caution ({cautionCount})</span>
+                  <span className="text-[10px] text-gray-400">Caution ({cautionCount})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <span className="text-[10px] font-mono text-gray-400">Danger ({dangerCount})</span>
+                  <span className="text-[10px] text-gray-400">Danger ({dangerCount})</span>
                 </div>
               </div>
             </div>
@@ -382,8 +382,8 @@ export function AdminSurveillanceView() {
               title={selectedCountry && (
                 <div className="flex items-center gap-2 px-4 pt-3">
                   <ShieldAlert className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-bold font-mono text-white">{selectedCountry.name}</span>
-                  <span className="text-xs text-gray-500 font-mono">{selectedCountry.code}</span>
+                  <span className="text-sm font-bold text-white">{selectedCountry.name}</span>
+                  <span className="text-xs text-gray-500">{selectedCountry.code}</span>
                 </div>
               )}
             >
@@ -392,22 +392,22 @@ export function AdminSurveillanceView() {
                   {/* Country info panel */}
                   <div className={cn("p-4 space-y-3", countryMissiles.length > 0 ? "md:w-1/2 md:border-r md:border-white/5" : "w-full")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 font-mono">Threat Level</span>
-                      <Badge variant="outline" className={cn("text-xs font-mono", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
+                      <span className="text-xs text-gray-500">Threat Level</span>
+                      <Badge variant="outline" className={cn("text-xs", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
                         {getThreatBadge(selectedCountry.threat_level, selectedCountry.score).label}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 font-mono">Risk Score</span>
-                      <span className="text-sm font-bold font-mono text-white">{selectedCountry.score}/100</span>
+                      <span className="text-xs text-gray-500">Risk Score</span>
+                      <span className="text-sm font-bold text-white">{selectedCountry.score}/100</span>
                     </div>
                     <div>
-                      <span className="text-xs text-gray-500 font-mono block mb-1">Summary</span>
+                      <span className="text-xs text-gray-500 block mb-1">Summary</span>
                       <p className="text-xs text-gray-300 leading-relaxed">{selectedCountry.summary}</p>
                     </div>
                     {selectedCountry.events.length > 0 && (
                       <div>
-                        <span className="text-xs text-gray-500 font-mono block mb-1">Active Events</span>
+                        <span className="text-xs text-gray-500 block mb-1">Active Events</span>
                         <ul className="space-y-1">
                           {selectedCountry.events.map((event, i) => (
                             <li key={i} className="text-xs text-gray-400 flex items-start gap-1.5">
@@ -434,9 +434,9 @@ export function AdminSurveillanceView() {
                     };
 
                     const getSeverityLabel = (severity: string) => {
-                      if (severity === 'nuke') return <span className="text-[9px] font-mono text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
-                      if (severity === 'drone') return <span className="text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
-                      return <span className="text-[9px] font-mono text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
+                      if (severity === 'nuke') return <span className="text-[9px] text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
+                      if (severity === 'drone') return <span className="text-[9px] text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
+                      return <span className="text-[9px] text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
                     };
 
                     const renderAlert = (m: typeof countryMissiles[0], direction: 'launched' | 'targeted') => {
@@ -451,14 +451,14 @@ export function AdminSurveillanceView() {
                           {getSeverityIcon(m.severity)}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <p className="text-gray-300 font-mono truncate flex-1">{m.title}</p>
+                              <p className="text-gray-300 truncate flex-1">{m.title}</p>
                               {getSeverityLabel(m.severity)}
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[10px] text-gray-500 font-mono">{timeStr}</span>
+                              <span className="text-[10px] text-gray-500">{timeStr}</span>
                               {m.origin_country_name && m.destination_country_name && (
                                 <span className={cn(
-                                  "text-[10px] font-mono",
+                                  "text-[10px]",
                                   direction === 'launched' ? 'text-red-400/70' : 'text-blue-400/70'
                                 )}>
                                   {m.origin_country_name} → {m.destination_country_name}
@@ -474,11 +474,11 @@ export function AdminSurveillanceView() {
                       <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
                         <div className="flex items-center gap-2 mb-2">
                           <Rocket className="w-4 h-4 text-red-400" />
-                          <span className="text-sm font-bold font-mono text-red-400">Attacks</span>
+                          <span className="text-sm font-bold text-red-400">Attacks</span>
                         </div>
                         {launched.length > 0 && (
                           <div>
-                            <span className="text-xs text-red-400/80 font-mono block mb-1 flex items-center gap-1">
+                            <span className="text-xs text-red-400/80 block mb-1 flex items-center gap-1">
                               <Rocket className="w-3 h-3" /> Launched ({launched.length})
                             </span>
                             <ScrollArea className="max-h-40">
@@ -490,7 +490,7 @@ export function AdminSurveillanceView() {
                         )}
                         {targeted.length > 0 && (
                           <div>
-                            <span className="text-xs text-blue-400/80 font-mono block mb-1 flex items-center gap-1">
+                            <span className="text-xs text-blue-400/80 block mb-1 flex items-center gap-1">
                               <ShieldAlert className="w-3 h-3" /> Incoming ({targeted.length})
                             </span>
                             <ScrollArea className="max-h-40">
@@ -512,8 +512,8 @@ export function AdminSurveillanceView() {
           <div className="w-80 lg:w-96 border-l border-white/5 bg-[#0d1220] flex flex-col">
             <div className="px-4 py-3 border-b border-white/5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-gray-300 uppercase tracking-wider">Feed</span>
-                <span className="text-xs font-mono text-gray-500">
+                <span className="text-xs text-gray-300 uppercase tracking-wider">Feed</span>
+                <span className="text-xs text-gray-500">
                   ({scanData?.latest_events.length || 0})
                 </span>
               </div>
@@ -537,23 +537,23 @@ export function AdminSurveillanceView() {
                       <h4 className="text-xs font-medium text-gray-200 leading-tight line-clamp-2">
                         {event.title}
                       </h4>
-                      <Badge variant="outline" className={cn("text-[10px] font-mono flex-shrink-0 px-1.5", getSeverityColor(event.severity))}>
+                      <Badge variant="outline" className={cn("text-[10px] flex-shrink-0 px-1.5", getSeverityColor(event.severity))}>
                         {event.severity.toUpperCase()}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-gray-600 font-mono">{event.country_name}</span>
+                      <span className="text-[10px] text-gray-600">{event.country_name}</span>
                       <div className="flex items-center gap-2">
                         {event.source_url ? (
-                          <a href={event.source_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/70 hover:text-blue-300 font-mono underline underline-offset-2">
+                          <a href={event.source_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/70 hover:text-blue-300 underline underline-offset-2">
                             {event.source}
                           </a>
                         ) : (
-                          <span className="text-[10px] text-gray-600 font-mono">{event.source}</span>
+                          <span className="text-[10px] text-gray-600">{event.source}</span>
                         )}
                         {event.published_at && (
-                          <span className="text-[10px] text-gray-600 font-mono">
+                          <span className="text-[10px] text-gray-600">
                             {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
@@ -563,7 +563,7 @@ export function AdminSurveillanceView() {
                 )) || (
                   <div className="text-center py-8">
                     <Shield className="w-6 h-6 text-gray-700 mx-auto mb-2" />
-                    <p className="text-xs text-gray-600 font-mono">No events loaded</p>
+                    <p className="text-xs text-gray-600">No events loaded</p>
                   </div>
                 )}
               </div>
