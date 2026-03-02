@@ -41,13 +41,23 @@ export function PrecisionContactForm({ open, onOpenChange }: PrecisionContactFor
     setShowCaptcha(false);
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('precision_contact_requests').insert({
+      const payload = {
         full_name: fullName.trim(),
         email: email.trim(),
         mobile_number: mobileNumber.trim(),
         organization_type: organizationType,
-      });
+      };
+
+      // Save to database
+      const { error } = await supabase.from('precision_contact_requests').insert(payload);
       if (error) throw error;
+
+      // Send notification email
+      const { error: emailError } = await supabase.functions.invoke('send-precision-contact', {
+        body: payload,
+      });
+      if (emailError) console.error('Email notification failed:', emailError);
+
       toast.success('Request sent successfully. We will be in touch.');
       setFullName('');
       setEmail('');

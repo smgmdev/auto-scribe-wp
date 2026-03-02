@@ -195,3 +195,6 @@ verify_jwt = false
 
 [functions.voice-publish]
 verify_jwt = false
+
+[functions.send-precision-contact]
+verify_jwt = false
