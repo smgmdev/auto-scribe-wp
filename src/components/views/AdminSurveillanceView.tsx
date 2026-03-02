@@ -77,7 +77,6 @@ export function AdminSurveillanceView() {
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [showCountryPopup, setShowCountryPopup] = useState(false);
-  const [showAttacksPopup, setShowAttacksPopup] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [missileTimeFilter, setMissileTimeFilter] = useState<string>('1');
   const [droneTimeFilter, setDroneTimeFilter] = useState<string>('1');
@@ -329,7 +328,6 @@ export function AdminSurveillanceView() {
                 onCountryClick={(c) => {
                   setSelectedCountry(c);
                   setShowCountryPopup(true);
-                  setShowAttacksPopup(true);
                 }}
                 selectedCountry={selectedCountry?.code || null}
                 missileTrajectories={missileTrajectories}
@@ -373,7 +371,6 @@ export function AdminSurveillanceView() {
                 setShowCountryPopup(open);
                 if (!open) {
                   setSelectedCountry(null);
-                  setShowAttacksPopup(false);
                 }
               }}
               width={countryMissiles.length > 0 ? 740 : 360}
@@ -530,7 +527,10 @@ export function AdminSurveillanceView() {
                     className="p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors cursor-pointer"
                     onClick={() => {
                       const country = scanData.countries.find(c => c.code === event.country_code);
-                      if (country) setSelectedCountry(country);
+                      if (country) {
+                        setSelectedCountry(country);
+                        setShowCountryPopup(true);
+                      }
                     }}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
