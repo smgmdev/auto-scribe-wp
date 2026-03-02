@@ -178,25 +178,10 @@ function getAlertType(severity: string): AlertType {
   return 'missile';
 }
 
-const DISMISSED_STORAGE_KEY = 'missile_alerts_dismissed';
-
-function loadDismissed(): Set<string> {
-  try {
-    const raw = localStorage.getItem(DISMISSED_STORAGE_KEY);
-    if (raw) return new Set(JSON.parse(raw));
-  } catch {}
-  return new Set();
-}
-
-function saveDismissed(ids: Set<string>) {
-  try {
-    localStorage.setItem(DISMISSED_STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {}
-}
-
 export function MissileAlertListener() {
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
-  const dismissedRef = useRef<Set<string>>(loadDismissed());
+  const dismissedRef = useRef<Set<string>>(new Set());
+  const dismissedLoadedRef = useRef(false);
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const soundStoppedRef = useRef(false);
@@ -299,12 +284,19 @@ export function MissileAlertListener() {
     }
   }, []);
 
-  const dismissAlert = useCallback((id: string) => {
+  const dismissAlert = useCallback(async (id: string) => {
     dismissedRef.current.add(id);
-    saveDismissed(dismissedRef.current);
+    // Persist to DB (fire-and-forget)
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        supabase.from('dismissed_missile_alerts').insert({
+          user_id: data.user.id,
+          alert_id: id,
+        }).then(() => {});
+      }
+    });
     setAlerts(prev => {
       const remaining = prev.filter(a => a.id !== id);
-      // If no more alerts, stop sound
       if (remaining.length === 0) {
         stopSound();
       }
@@ -314,6 +306,21 @@ export function MissileAlertListener() {
 
   useEffect(() => {
     const fetchActive = async () => {
+      // Load dismissed alerts from DB for authenticated users
+      if (!dismissedLoadedRef.current) {
+        dismissedLoadedRef.current = true;
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          const { data: dismissed } = await supabase
+            .from('dismissed_missile_alerts')
+            .select('alert_id')
+            .eq('user_id', userData.user.id);
+          if (dismissed) {
+            dismissed.forEach(d => dismissedRef.current.add(d.alert_id));
+          }
+        }
+      }
+
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from('missile_alerts')
