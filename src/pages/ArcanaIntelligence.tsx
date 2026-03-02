@@ -106,34 +106,65 @@ function HighlightCard({ icon: Icon, title, description, image, video, customCon
 
 // ── Cycling stats under 3D model ──
 function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [displayIndex, setDisplayIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<'entering' | 'visible' | 'exiting' | 'hidden'>('entering');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimating(true);
-      setTimeout(() => {
-        setDisplayIndex((prev) => (prev + 1) % stats.length);
-        setAnimating(false);
-      }, 300);
-    }, 1800);
-    return () => clearInterval(interval);
-  }, [stats.length]);
+    const timings = { entering: 500, visible: 1200, exiting: 200, hidden: 50 };
+    const timeout = setTimeout(() => {
+      setPhase(prev => {
+        if (prev === 'entering') return 'visible';
+        if (prev === 'visible') return 'exiting';
+        if (prev === 'exiting') {
+          setIndex(i => (i + 1) % stats.length);
+          return 'hidden';
+        }
+        return 'entering';
+      });
+    }, timings[phase]);
+    return () => clearTimeout(timeout);
+  }, [phase, stats.length]);
+
+  const isVisible = phase === 'entering' || phase === 'visible';
+  const isEntering = phase === 'entering';
 
   return (
-    <div className="h-12 md:h-14 flex items-center overflow-visible relative z-10">
-      <div
-        className={`transition-all duration-300 ease-out ${
-          animating
-            ? 'opacity-0 scale-90 -translate-y-3 blur-[2px]'
-            : 'opacity-100 scale-100 translate-y-0 blur-0'
-        }`}
+    <div className="relative flex items-center overflow-visible z-10">
+      <p
+        className="text-3xl md:text-5xl font-bold tracking-wide whitespace-nowrap relative inline-block"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.92)',
+          transition: isEntering
+            ? 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+            : 'opacity 0.4s ease-out, transform 0.4s ease-out',
+          color: '#f2a547',
+          textShadow: isEntering
+            ? '0 0 60px rgba(242,165,71,0.9), 0 0 120px rgba(242,165,71,0.5), 0 0 200px rgba(242,165,71,0.3)'
+            : isVisible
+              ? '0 0 40px rgba(242,165,71,0.5), 0 0 80px rgba(242,165,71,0.2)'
+              : 'none',
+        }}
       >
-        <p className="text-3xl md:text-5xl font-bold text-[#f2a547] tracking-wide whitespace-nowrap">
-          {stats[displayIndex].value}
-        </p>
-      </div>
+        {stats[index].value}
+      </p>
+      {isEntering && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'screen' }}>
+          <div
+            className="absolute top-0 bottom-0 w-[60%]"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(242,165,71,0.3), rgba(255,255,255,0.15), rgba(242,165,71,0.3), transparent)',
+              animation: 'cyclingSweep 0.8s ease-out forwards',
+            }}
+          />
+        </div>
+      )}
+      <style>{`
+        @keyframes cyclingSweep {
+          0% { left: -60%; }
+          100% { left: 120%; }
+        }
+      `}</style>
     </div>
   );
 }
