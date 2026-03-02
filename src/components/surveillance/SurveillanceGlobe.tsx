@@ -560,10 +560,11 @@ function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
 }
 
 const DEFAULT_CAMERA_POS = new THREE.Vector3(3.5, 2.0, 4.5);
+const ZOOM_OUT_POS = new THREE.Vector3(0, 0, 12); // max zoom out
 
 function CameraResetter({ trigger }: { trigger: number }) {
   const { camera } = useThree();
-  const animating = useRef(false);
+  const phase = useRef<'idle' | 'zoom-out' | 'reposition'>('idle');
   const startPos = useRef(new THREE.Vector3());
   const progress = useRef(0);
   const lastTrigger = useRef(trigger);
@@ -573,17 +574,27 @@ function CameraResetter({ trigger }: { trigger: number }) {
       lastTrigger.current = trigger;
       startPos.current.copy(camera.position);
       progress.current = 0;
-      animating.current = true;
+      phase.current = 'zoom-out';
     }
   }, [trigger, camera]);
 
   useFrame(() => {
-    if (animating.current) {
+    if (phase.current === 'zoom-out') {
+      progress.current = Math.min(progress.current + 0.025, 1);
+      const t = 1 - Math.pow(1 - progress.current, 3);
+      camera.position.lerpVectors(startPos.current, ZOOM_OUT_POS, t);
+      camera.lookAt(0, 0, 0);
+      if (progress.current >= 1) {
+        startPos.current.copy(camera.position);
+        progress.current = 0;
+        phase.current = 'reposition';
+      }
+    } else if (phase.current === 'reposition') {
       progress.current = Math.min(progress.current + 0.02, 1);
-      const t = 1 - Math.pow(1 - progress.current, 3); // ease-out cubic
+      const t = 1 - Math.pow(1 - progress.current, 3);
       camera.position.lerpVectors(startPos.current, DEFAULT_CAMERA_POS, t);
       camera.lookAt(0, 0, 0);
-      if (progress.current >= 1) animating.current = false;
+      if (progress.current >= 1) phase.current = 'idle';
     }
   });
 
