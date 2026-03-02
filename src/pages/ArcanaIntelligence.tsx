@@ -512,7 +512,7 @@ export default function ArcanaIntelligence() {
                 Precision in your system.
               </h2>
               <p className="text-lg md:text-xl text-white/70 leading-tight max-w-2xl mb-12">
-                Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time.
+                Seamlessly integrate your data into Arcana Precision. Built to accept any data point to fit any operational environment.
               </p>
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
