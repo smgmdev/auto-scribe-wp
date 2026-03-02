@@ -267,7 +267,7 @@ export default function ArcanaIntelligence() {
           >
             <source src={heroVideo} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
+          
 
           <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-52 md:pt-64 pb-40">
             <AnimatedSection>
