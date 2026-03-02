@@ -153,6 +153,17 @@ const helpCategories = [
     slug: 'ai-marketing-strategy',
   },
   {
+    title: 'Arcana Precision',
+    topics: [
+      'What Is Arcana Precision?',
+      'Threat Detection Capabilities',
+      'Government & Defense Integration',
+      'AI Models & 24/7 Scanning',
+      'Customization & Setup',
+    ],
+    slug: 'arcana-precision',
+  },
+  {
     title: 'Troubleshooting',
     topics: [
       'Common Issues',

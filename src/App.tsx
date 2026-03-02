@@ -46,6 +46,7 @@ import AISecuritySupervision from "./pages/help/AISecuritySupervision";
 import Troubleshooting from "./pages/help/Troubleshooting";
 import MaceAIHelp from "./pages/help/MaceAI";
 import AIMarketingStrategy from "./pages/help/AIMarketingStrategy";
+import ArcanaPrecisionHelp from "./pages/help/ArcanaPrecision";
 import SelfPublishing from "./pages/SelfPublishing";
 import MediaBuying from "./pages/MediaBuying";
 import HowItWorks from "./pages/HowItWorks";
@@ -184,6 +185,7 @@ const App = () => {
               <Route path="/help/ai-security-supervision" element={<AISecuritySupervision />} />
               <Route path="/help/mace-ai" element={<MaceAIHelp />} />
               <Route path="/help/ai-marketing-strategy" element={<AIMarketingStrategy />} />
+              <Route path="/help/arcana-precision" element={<ArcanaPrecisionHelp />} />
               <Route path="/help/troubleshooting" element={<Troubleshooting />} />
               <Route path="/self-publishing" element={<SelfPublishing />} />
               <Route path="/media-buying" element={<MediaBuying />} />
