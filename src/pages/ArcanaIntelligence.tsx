@@ -430,11 +430,10 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
-                <div className="relative w-full max-w-sm mx-auto flex items-center justify-center">
-                  <img 
-                    src={securityImg} 
-                    alt="Security" 
-                    className="w-full animate-[shieldHeartbeat_2s_ease-in-out_infinite]" 
+                <div className="relative w-full max-w-xs mx-auto flex items-center justify-center">
+                  <Shield 
+                    className="w-48 h-48 md:w-64 md:h-64 text-[#007AFF] animate-[shieldHeartbeat_2s_ease-in-out_infinite]" 
+                    strokeWidth={1} 
                   />
                 </div>
               </AnimatedSection>
