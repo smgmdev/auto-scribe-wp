@@ -121,7 +121,7 @@ function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) 
   }, [stats.length]);
 
   return (
-    <div className="flex justify-center mt-6 h-14 items-center overflow-hidden">
+    <div className="h-10 flex items-center overflow-hidden">
       <div
         className={`transition-all duration-400 ease-in-out ${
           isAnimating
@@ -129,7 +129,7 @@ function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) 
             : 'opacity-100 blur-0 scale-100 translate-y-0'
         }`}
       >
-        <p className="text-3xl md:text-4xl font-bold text-[#f2a547] text-center tracking-wide">
+        <p className="text-3xl md:text-5xl font-bold text-[#f2a547] tracking-wide">
           {stats[activeIndex].value}
         </p>
       </div>
@@ -148,7 +148,10 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <AnimatedSection>
           <p className="text-[#007AFF] text-sm font-semibold tracking-wide uppercase mb-2">{title}</p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">{headline}</h2>
+          <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">{headline}</h2>
+            {stats && <CyclingStats stats={stats} />}
+          </div>
         </AnimatedSection>
         <AnimatedSection delay={200}>
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-4">{description}</p>
@@ -157,8 +160,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <AnimatedSection delay={300}>
         {(stats || children) ? (
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
-            <div className="relative w-full">
-              <div className="w-full">
+            <div className="flex flex-col md:flex-row items-start gap-8">
+              <div className="w-full md:w-1/2 relative">
                 {customContent ? customContent : video ? (
                   <>
                     {!featureVideoLoaded && (
@@ -174,13 +177,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
                 ) : (
                   <img src={image} alt={headline} className="w-full rounded-2xl" />
                 )}
-                {stats && <CyclingStats stats={stats} />}
               </div>
-              {children && (
-                <div className="absolute bottom-8 right-8 z-10 max-w-sm">
-                  {children}
-                </div>
-              )}
+              {children && <div className="w-full md:w-1/2 md:pt-8">{children}</div>}
             </div>
           </div>
         ) : (
