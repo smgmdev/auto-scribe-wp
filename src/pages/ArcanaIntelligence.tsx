@@ -430,36 +430,74 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
-                <div className="relative w-full max-w-xs mx-auto flex items-center justify-center">
-                  {/* Outer glow pulse */}
-                  <div className="absolute w-56 h-56 md:w-72 md:h-72 rounded-full bg-[#007AFF]/5 animate-[shieldPulseRing_3s_ease-in-out_infinite]" />
-                  <div className="absolute w-44 h-44 md:w-56 md:h-56 rounded-full bg-[#007AFF]/8 animate-[shieldPulseRing_3s_ease-in-out_infinite_0.4s]" />
-                  
-                  {/* Rotating orbit ring */}
-                  <div className="absolute w-52 h-52 md:w-68 md:h-68 animate-[shieldOrbit_8s_linear_infinite]">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#007AFF] shadow-[0_0_8px_#007AFF]" />
-                  </div>
-                  <div className="absolute w-48 h-48 md:w-64 md:h-64 animate-[shieldOrbit_6s_linear_infinite_reverse]">
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#007AFF]/60 shadow-[0_0_6px_#007AFF]" />
+                <div className="relative w-full max-w-sm mx-auto flex items-center justify-center py-8">
+                  {/* Outermost ring - slow rotation */}
+                  <div className="absolute w-72 h-72 md:w-80 md:h-80 rounded-full border border-[#007AFF]/10 animate-[shieldOrbit_20s_linear_infinite]">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#007AFF]/40 shadow-[0_0_6px_#007AFF]" />
+                    <div className="absolute bottom-0 right-0 w-1 h-1 rounded-full bg-[#007AFF]/30 shadow-[0_0_4px_#007AFF]" />
                   </div>
 
-                  {/* Inner shield with scan line */}
-                  <div className="relative animate-[shieldHeartbeat_2s_ease-in-out_infinite]">
-                    <Shield 
-                      className="w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_20px_rgba(0,122,255,0.4)]" 
-                      strokeWidth={1} 
-                    />
-                    {/* Scan line sweeping down */}
-                    <div className="absolute inset-0 overflow-hidden">
-                      <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-[#007AFF]/60 to-transparent animate-[shieldScan_3s_ease-in-out_infinite]" />
-                    </div>
-                    {/* Inner shield check */}
-                    <Shield 
-                      className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/20" 
-                      strokeWidth={0.5}
-                      fill="rgba(0,122,255,0.05)"
-                    />
+                  {/* Mid ring - opposite rotation with dashed style */}
+                  <div className="absolute w-64 h-64 md:w-72 md:h-72 rounded-full border border-dashed border-[#007AFF]/8 animate-[shieldOrbit_15s_linear_infinite_reverse]">
+                    <div className="absolute top-1/4 right-0 w-2 h-2 rounded-full bg-[#007AFF] shadow-[0_0_10px_#007AFF,0_0_20px_#007AFF]" />
+                    <div className="absolute bottom-1/4 left-0 w-1.5 h-1.5 rounded-full bg-cyan-400/60 shadow-[0_0_8px_#22d3ee]" />
                   </div>
+
+                  {/* Inner orbit ring */}
+                  <div className="absolute w-56 h-56 md:w-64 md:h-64 rounded-full border border-[#007AFF]/6 animate-[shieldOrbit_10s_linear_infinite]">
+                    <div className="absolute top-0 left-1/3 w-1 h-1 rounded-full bg-cyan-300/50 shadow-[0_0_6px_#67e8f9]" />
+                    <div className="absolute bottom-0 right-1/3 w-2 h-2 rounded-full bg-[#007AFF]/80 shadow-[0_0_12px_#007AFF]" />
+                  </div>
+
+                  {/* Pulsing glow backdrop */}
+                  <div className="absolute w-40 h-40 md:w-52 md:h-52 rounded-full bg-[#007AFF]/5 animate-[shieldPulseRing_3s_ease-in-out_infinite] blur-xl" />
+                  <div className="absolute w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#007AFF]/8 animate-[shieldPulseRing_3s_ease-in-out_infinite_0.5s] blur-lg" />
+
+                  {/* Hexagon grid overlay behind shield */}
+                  <svg className="absolute w-44 h-44 md:w-56 md:h-56 text-[#007AFF]/[0.07] animate-[shieldOrbit_30s_linear_infinite]" viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth="0.5">
+                    {[0, 1, 2, 3, 4].map(row =>
+                      [0, 1, 2, 3].map(col => {
+                        const x = 30 + col * 40 + (row % 2 ? 20 : 0);
+                        const y = 20 + row * 35;
+                        return (
+                          <polygon key={`${row}-${col}`} points={`${x},${y-15} ${x+13},${y-7.5} ${x+13},${y+7.5} ${x},${y+15} ${x-13},${y+7.5} ${x-13},${y-7.5}`} />
+                        );
+                      })
+                    )}
+                  </svg>
+
+                  {/* Main shield with heartbeat */}
+                  <div className="relative animate-[shieldHeartbeat_2s_ease-in-out_infinite]">
+                    {/* Glow layer */}
+                    <Shield 
+                      className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/30 blur-md" 
+                      strokeWidth={2}
+                    />
+                    {/* Filled inner */}
+                    <Shield 
+                      className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/10" 
+                      strokeWidth={0.5}
+                      fill="rgba(0,122,255,0.04)"
+                    />
+                    {/* Primary shield */}
+                    <Shield 
+                      className="relative w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_25px_rgba(0,122,255,0.5)]" 
+                      strokeWidth={1.2} 
+                    />
+                    {/* Scan line */}
+                    <div className="absolute inset-0 overflow-hidden rounded-full">
+                      <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-[shieldScan_3s_ease-in-out_infinite]" />
+                    </div>
+                    {/* Center checkmark dot */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#007AFF]/20 shadow-[0_0_15px_#007AFF] animate-[shieldPulseRing_2s_ease-in-out_infinite]" />
+                    </div>
+                  </div>
+
+                  {/* Corner accent particles */}
+                  <div className="absolute top-4 right-8 w-1 h-1 rounded-full bg-[#007AFF]/40 animate-[shieldPulseRing_4s_ease-in-out_infinite_1s]" />
+                  <div className="absolute bottom-8 left-6 w-1.5 h-1.5 rounded-full bg-cyan-400/30 animate-[shieldPulseRing_5s_ease-in-out_infinite_2s]" />
+                  <div className="absolute top-12 left-4 w-1 h-1 rounded-full bg-[#007AFF]/20 animate-[shieldPulseRing_3s_ease-in-out_infinite_0.5s]" />
                 </div>
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
