@@ -10,6 +10,7 @@ export const COUNTRY_COORDINATES: Record<string, { lat: number; lng: number; nam
   AT: { lat: 47.52, lng: 14.55, name: 'Austria' },
   AZ: { lat: 40.14, lng: 47.58, name: 'Azerbaijan' },
   BD: { lat: 23.68, lng: 90.36, name: 'Bangladesh' },
+  BH: { lat: 26.07, lng: 50.55, name: 'Bahrain' },
   BY: { lat: 53.71, lng: 27.95, name: 'Belarus' },
   BE: { lat: 50.50, lng: 4.47, name: 'Belgium' },
   BJ: { lat: 9.31, lng: 2.32, name: 'Benin' },
