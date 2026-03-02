@@ -26,7 +26,6 @@ const SITEMAP_SECTIONS = [
       { label: 'Media Buying', href: '/media-buying' },
       { label: 'AI Article Generation', href: '/ai-article-generation' },
       { label: 'Mace AI', href: '/mace-ai' },
-      { label: 'Arcana Precision', href: '/arcana-precision' },
     ],
   },
   {
@@ -34,6 +33,7 @@ const SITEMAP_SECTIONS = [
     links: [
       { label: 'Agency Account', href: '/account', state: { targetView: 'agency-application' } },
       { label: 'Industries', href: '/industries' },
+      { label: 'Arcana Precision', href: '/arcana-precision' },
     ],
   },
   {
