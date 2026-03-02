@@ -390,8 +390,8 @@ export function AdminSurveillanceView() {
           </div>
 
           {/* Row 2: Trajectory filters - mobile only */}
-          <div className="flex lg:hidden items-stretch border-t border-white/5">
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-1">
+          <div className="flex lg:hidden items-stretch border-t border-white/5 overflow-x-auto">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
               <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")}>
                 <Rocket className="w-3 h-3 text-blue-400" />
                 <span className="text-[10px] text-gray-400">Missiles</span>
@@ -408,7 +408,7 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-1">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
               <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")}>
                 <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                 <span className="text-[10px] text-gray-400">Drones</span>
@@ -425,7 +425,7 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-1">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
               <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")}>
                 <Radiation className="w-3 h-3 text-yellow-400" />
                 <span className="text-[10px] text-gray-400">Nukes</span>
