@@ -429,10 +429,10 @@ export default function ArcanaIntelligence() {
             image={engineImg}
             customContent={<Missile3D />}
             stats={[
-              { value: '1M+', label: 'Data points per minute' },
-              { value: '<100ms', label: 'Classification latency' },
-              { value: '40+', label: 'Languages supported' },
-              { value: '24/7', label: 'Continuous monitoring' },
+              { value: 'Missiles', label: 'Data points per minute' },
+              { value: 'Drones', label: 'Classification latency' },
+              { value: 'Nuclear', label: 'Languages supported' },
+              { value: 'Hydrogen Bomb', label: 'Continuous monitoring' },
             ]}
           >
             <div className="space-y-4">
