@@ -17,7 +17,7 @@ import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import Missile3D from '@/components/Missile3D';
 import globalImg from '@/assets/arcana-intel-global.jpg';
-import globalVideo from '@/assets/arcana-intel-global.mp4';
+import globalVideo from '@/assets/arcana-intel-surveillance.mp4';
 import securityImg from '@/assets/arcana-intel-security.png';
 import securityVideo from '@/assets/arcana-intel-security.mp4';
 
