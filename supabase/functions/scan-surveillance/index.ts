@@ -138,15 +138,24 @@ async function fetchPerplexityScan(apiKey: string): Promise<{ scanResult: any; c
 Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass violence, coups, border tensions.
 Include ALL countries with notable activity (at least 15-25 countries).
 Mark countries with no issues as "safe".
-Include at least 10-15 latest events from the past 48 hours.
-IMPORTANT: Prioritize sourcing from Reuters, BBC, Al Jazeera, AP News, and X/Twitter. Always check Reuters (reuters.com) for breaking security and conflict news.
+Include at least 15-20 latest events from the past 48 hours.
+
+MANDATORY SOURCES — you MUST check ALL of these for the latest developments:
+— Global wires: Reuters, AP News, AFP
+— Western: BBC, Sky News, NBC News, CNN, Fox News, ABC News
+— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International
+— Asia: South China Morning Post (SCMP), Hindustan Times, The Japan Times, Nikkei Asia, Yonhap (South Korea), Straits Times (Singapore), Channel News Asia
+— China: Xinhua, Global Times, CGTN, Caixin
+— Europe: Euronews, France 24, Deutsche Welle (DW)
+— X/Twitter: Check for breaking reports from verified journalists and OSINT accounts
+
 IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
-Search X/Twitter, Reuters, and major news outlets for the most recent developments.
+IMPORTANT: Ensure geographic diversity — do not over-index on one region. Cover Middle East, Asia-Pacific, Europe, Africa, and Americas.
 Return ONLY the JSON object, no other text.`
         },
         {
           role: 'user',
-          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. Check Reuters, X/Twitter, AP News, BBC, and other major news sources for the latest developments in the past 48 hours.'
+          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, X/Twitter. Cover the past 48 hours across ALL regions.'
         }
       ],
       search_recency_filter: 'day',
