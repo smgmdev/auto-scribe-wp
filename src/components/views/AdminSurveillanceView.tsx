@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { DraggablePopup } from '@/components/ui/DraggablePopup';
+
 
 type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
 const SCAN_REGIONS: { value: ScanRegion; label: string }[] = [
@@ -128,7 +128,7 @@ export function AdminSurveillanceView() {
   const [showDrones, setShowDrones] = useState(true);
   const [showNukes, setShowNukes] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [activeCameraRegion, setActiveCameraRegion] = useState<CameraRegionConfig | null>(null);
+  const openCameraFeed = useAppStore((s) => s.openCameraFeed);
 
   // Trigger zoom-out-and-reposition on mount (same as crosshair button)
   useEffect(() => {
@@ -318,7 +318,7 @@ export function AdminSurveillanceView() {
                   {CAMERA_REGIONS.map(region => (
                     <DropdownMenuItem
                       key={region.region}
-                      onClick={() => setActiveCameraRegion(region)}
+                      onClick={() => openCameraFeed(region)}
                       className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2"
                     >
                       <Video className="w-3 h-3 text-red-400" />
@@ -548,57 +548,7 @@ export function AdminSurveillanceView() {
         </div>
       </div>
 
-      {/* Live Camera Feed Popup — 2x2 Grid */}
-      {activeCameraRegion && (
-        <DraggablePopup
-          open={!!activeCameraRegion}
-          onOpenChange={(open) => { if (!open) setActiveCameraRegion(null); }}
-          width={520}
-          maxHeight="75vh"
-          zIndex={200}
-          className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
-          headerClassName="!bg-[#0d1220] !border-white/5"
-          bodyClassName="!p-0"
-          headerContent={
-            <div className="flex items-center gap-2 pl-2">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
-              </span>
-              <span className="text-sm font-bold text-white">{activeCameraRegion.label}</span>
-              <span className="text-xs text-gray-500">Live Webcams</span>
-            </div>
-          }
-          footer={
-            <div className="flex items-center justify-start w-full text-[10px] text-gray-500 -my-1">
-              Close: <kbd className="ml-1 px-1 py-0 bg-white/5 border border-white/10 rounded text-[10px] text-gray-400">ESC</kbd>
-            </div>
-          }
-        >
-          <div className="grid grid-cols-2 gap-px bg-white/5">
-            {activeCameraRegion.feeds.map(feed => (
-              <div key={feed.embedId} className="relative bg-black">
-                <div className="absolute top-1 left-1.5 z-10 flex items-center gap-1 bg-black/70 px-1.5 py-0.5 rounded-sm">
-                  <span className="relative flex h-1 w-1">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1 w-1 bg-red-500" />
-                  </span>
-                  <span className="text-[8px] font-medium text-gray-300 uppercase tracking-wider">{feed.label}</span>
-                </div>
-                <div className="w-full" style={{ aspectRatio: '16/9' }}>
-                  <iframe
-                    src={`https://www.youtube.com/embed/${feed.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0`}
-                    className="w-full h-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={feed.label}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </DraggablePopup>
-      )}
+
     </div>
   );
 }

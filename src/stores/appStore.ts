@@ -298,6 +298,11 @@ interface AppState {
   openSurveillancePopup: (country: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] }) => void;
   closeSurveillancePopup: () => void;
 
+  // Surveillance camera feed popup (persists across navigation)
+  activeCameraRegion: { region: string; label: string; feeds: { label: string; embedId: string }[] } | null;
+  openCameraFeed: (region: { region: string; label: string; feeds: { label: string; embedId: string }[] }) => void;
+  closeCameraFeed: () => void;
+
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
@@ -789,6 +794,11 @@ export const useAppStore = create<AppState>()((set) => ({
   showSurveillancePopup: false,
   openSurveillancePopup: (country) => set({ surveillanceCountry: country, showSurveillancePopup: true }),
   closeSurveillancePopup: () => set({ showSurveillancePopup: false, surveillanceCountry: null }),
+
+  // Surveillance camera feed popup
+  activeCameraRegion: null,
+  openCameraFeed: (region) => set({ activeCameraRegion: region }),
+  closeCameraFeed: () => set({ activeCameraRegion: null }),
 
   // Reset all notification counts
   resetAllNotifications: () => set({
