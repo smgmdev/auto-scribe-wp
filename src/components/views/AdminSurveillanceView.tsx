@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +86,7 @@ export function AdminSurveillanceView() {
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
   const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
   const [countryMissiles, setCountryMissiles] = useState<Array<{ id: string; title: string; created_at: string; origin_country_name: string | null; destination_country_name: string | null; severity: string }>>([]);
 
@@ -298,6 +299,13 @@ export function AdminSurveillanceView() {
             >
               {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             </button>
+            <button
+              onClick={() => setResetTrigger(t => t + 1)}
+              className="text-gray-400 hover:text-white transition-colors p-1"
+              title="Reset globe view"
+            >
+              <Crosshair className="w-3.5 h-3.5" />
+            </button>
             <Button
               variant="ghost"
               size="sm"
@@ -329,6 +337,7 @@ export function AdminSurveillanceView() {
                 nukeTrajectories={nukeTrajectories}
                 isSpinning={globeSpinning}
                 onSpinChange={setGlobeSpinning}
+                resetTrigger={resetTrigger}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
