@@ -170,20 +170,19 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       // Fly from left to right across the scene
       const p = cycle / 3; // 0 → 1
       const e = p * p * (3 - 2 * p); // smoothstep
-      const x = THREE.MathUtils.lerp(-6, 6, e);
-      const y = Math.sin(p * Math.PI) * 0.8 + 0.3; // gentle arc
-      const z = 2 + Math.sin(p * Math.PI) * -1; // slight depth variation
+      const x = THREE.MathUtils.lerp(6, -6, e);
+      const y = Math.sin(p * Math.PI) * 0.8 + 0.3;
+      const z = 2 + Math.sin(p * Math.PI) * -1;
       groupRef.current.position.set(x, y, z);
-      // Rotate to face right (flying direction)
       groupRef.current.rotation.set(
-        Math.sin(p * Math.PI) * -0.2, // slight nose pitch
-        -Math.PI / 2, // face right
-        Math.sin(p * Math.PI) * 0.15 // slight roll
+        Math.sin(p * Math.PI) * -0.2,
+        Math.PI / 2, // face left
+        Math.sin(p * Math.PI) * -0.15
       );
       groupRef.current.scale.setScalar(2);
     } else {
       // Brief reset
-      groupRef.current.position.set(-6, 0.3, 2);
+      groupRef.current.position.set(6, 0.3, 2);
       groupRef.current.scale.setScalar(0.01);
     }
     missilePosRef.current.copy(groupRef.current.position);
