@@ -99,8 +99,65 @@ async function fetchReliefWebAlerts(): Promise<any[]> {
 // ── ACLED (via RSS proxy – GDELT covers similar ground) ───────────────
 // ACLED requires registration; we use GDELT conflict data instead.
 
+// ── Region-specific source configs ────────────────────────────────────
+const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromptExtra: string }> = {
+  global: {
+    sources: `MANDATORY SOURCES — you MUST check ALL of these for the latest developments:
+— Global wires: Reuters, AP News, AFP
+— Western: BBC, Sky News, NBC News, CNN, Fox News, ABC News
+— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International
+— Asia: South China Morning Post (SCMP), Hindustan Times, The Japan Times, Nikkei Asia, Yonhap (South Korea), Straits Times (Singapore), Channel News Asia
+— China: Xinhua, Global Times, CGTN, Caixin
+— Europe: Euronews, France 24, Deutsche Welle (DW)
+— Ukraine: Ukrinform, Kyiv Independent, Ukrainian Air Force
+— X/Twitter: Check for breaking reports from verified journalists and OSINT accounts`,
+    focus: 'Cover ALL regions worldwide with geographic diversity.',
+    userPromptExtra: 'You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, X/Twitter. Cover the past 48 hours across ALL regions.',
+  },
+  asia: {
+    sources: `MANDATORY SOURCES — you MUST check ALL of these:
+— Global wires: Reuters, AP News
+— Asia-Pacific: South China Morning Post (SCMP), Hindustan Times, The Japan Times, Nikkei Asia, Yonhap (South Korea), Straits Times (Singapore), Channel News Asia, The Diplomat
+— China: Xinhua, Global Times, CGTN, Caixin
+— South Asia: Dawn (Pakistan), NDTV (India), The Hindu
+— Southeast Asia: Bangkok Post, VnExpress
+— X/Twitter: Check for breaking reports from verified Asia journalists`,
+    focus: 'Focus ONLY on Asia-Pacific, East Asia, South Asia, Southeast Asia, Central Asia.',
+    userPromptExtra: 'Focus on Asia-Pacific region ONLY. Check: Reuters, SCMP, Hindustan Times, Japan Times, Xinhua, Global Times, Nikkei Asia, Yonhap, Straits Times, Channel News Asia, Dawn, NDTV, X/Twitter. Cover past 48 hours.',
+  },
+  middle_east: {
+    sources: `MANDATORY SOURCES — you MUST check ALL of these:
+— Global wires: Reuters, AP News
+— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International, Al-Monitor, Haaretz
+— North Africa: Libya Observer, Egypt Independent
+— X/Twitter: Check for breaking reports from verified Middle East journalists and OSINT accounts`,
+    focus: 'Focus ONLY on Middle East, North Africa, Gulf states, Iran, Israel/Palestine, Turkey.',
+    userPromptExtra: 'Focus on Middle East region ONLY. Check: Reuters, Al Jazeera, Times of Israel, Al Arabiya, Gulf News, Arab News, Middle East Eye, Iran International, Al-Monitor, Haaretz, X/Twitter. Cover past 48 hours.',
+  },
+  europe: {
+    sources: `MANDATORY SOURCES — you MUST check ALL of these:
+— Global wires: Reuters, AP News
+— Europe: Euronews, France 24, Deutsche Welle (DW), BBC, Sky News, The Guardian
+— Ukraine/Russia: Ukrinform, Kyiv Independent, Ukrainian Air Force, TASS, Moscow Times
+— Balkans/Eastern: Balkan Insight
+— X/Twitter: Check for breaking reports from European journalists and OSINT accounts`,
+    focus: 'Focus ONLY on Europe including UK, EU, Balkans, Ukraine-Russia war, Scandinavia.',
+    userPromptExtra: 'Focus on Europe ONLY. IMPORTANT: Always include latest Russian missile and drone strikes on Ukraine. Check: Reuters, BBC, Euronews, France 24, DW, Ukrinform, Kyiv Independent, Sky News, The Guardian, X/Twitter. Cover past 48 hours.',
+  },
+  us: {
+    sources: `MANDATORY SOURCES — you MUST check ALL of these:
+— US media: CNN, Fox News, NBC News, ABC News, CBS News, AP News, Reuters, New York Times, Washington Post, Politico
+— Latin America: BBC Mundo, Reuters Latin America
+— X/Twitter: Check for breaking US security reports`,
+    focus: 'Focus ONLY on United States domestic threats, US military operations, US-related security events, and Americas.',
+    userPromptExtra: 'Focus on United States and Americas ONLY. Check: CNN, Fox News, NBC News, ABC News, CBS News, AP News, Reuters, NY Times, Washington Post, X/Twitter. Cover past 48 hours.',
+  },
+};
+
 // ── Perplexity scan (primary) ─────────────────────────────────────────
-async function fetchPerplexityScan(apiKey: string): Promise<{ scanResult: any; citations: string[] }> {
+async function fetchPerplexityScan(apiKey: string, region: string = 'global'): Promise<{ scanResult: any; citations: string[] }> {
+  const config = REGION_CONFIGS[region] || REGION_CONFIGS.global;
+
   const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: {
@@ -144,29 +201,20 @@ async function fetchPerplexityScan(apiKey: string): Promise<{ scanResult: any; c
   ]
 }
 
-Focus on: active wars, military conflicts, terrorist attacks, civil unrest, mass violence, coups, border tensions.
-Include ALL countries with notable activity (at least 15-25 countries).
+${config.focus}
+Include at least 10-20 latest events from the past 48 hours.
 Mark countries with no issues as "safe".
-Include at least 15-20 latest events from the past 48 hours.
+
+${config.sources}
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
-MANDATORY SOURCES — you MUST check ALL of these for the latest developments:
-— Global wires: Reuters, AP News, AFP
-— Western: BBC, Sky News, NBC News, CNN, Fox News, ABC News
-— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International
-— Asia: South China Morning Post (SCMP), Hindustan Times, The Japan Times, Nikkei Asia, Yonhap (South Korea), Straits Times (Singapore), Channel News Asia
-— China: Xinhua, Global Times, CGTN, Caixin
-— Europe: Euronews, France 24, Deutsche Welle (DW)
-— X/Twitter: Check for breaking reports from verified journalists and OSINT accounts
-
 IMPORTANT: For each event, include the ACTUAL publication date/time (published_at) of the original news article, NOT the current time. Also include a direct source_url link to the article.
-IMPORTANT: Ensure geographic diversity — do not over-index on one region. Cover Middle East, Asia-Pacific, Europe, Africa, and Americas.
 Return ONLY the JSON object, no other text.`
         },
         {
           role: 'user',
-          content: 'Provide a comprehensive global security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest worldwide. IMPORTANT: Always include the latest Russian missile and drone strikes on Ukraine — check Ukrainian Air Force reports, Ukrinform, and Kyiv Independent. You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, X/Twitter. Cover the past 48 hours across ALL regions.'
+          content: `Provide a comprehensive security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest. ${config.userPromptExtra}`
         }
       ],
       search_recency_filter: 'day',
@@ -183,9 +231,7 @@ Return ONLY the JSON object, no other text.`
   const content = perplexityData.choices?.[0]?.message?.content || '';
   const citations = perplexityData.citations || [];
 
-  // Try to extract JSON — handle markdown code blocks and raw JSON
   let jsonStr = content;
-  // Remove markdown code fences if present
   const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
     jsonStr = codeBlockMatch[1].trim();
@@ -275,7 +321,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Starting multi-source surveillance scan...');
+    // Parse region from request body
+    let region = 'global';
+    try {
+      const body = await req.json();
+      if (body?.region && REGION_CONFIGS[body.region]) {
+        region = body.region;
+      }
+    } catch { /* no body or invalid JSON — default to global */ }
+
+    console.log(`Starting surveillance scan for region: ${region}...`);
 
     // Fetch previous scan for carry-forward logic
     const { data: prevScan } = await supabase
@@ -285,11 +340,12 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort
+    // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort (skip for regional to speed up)
+    const isGlobal = region === 'global';
     const [perplexityResult, gdeltResult, reliefWebResult] = await Promise.allSettled([
-      fetchPerplexityScan(PERPLEXITY_API_KEY),
-      fetchGdeltEvents(),
-      fetchReliefWebAlerts(),
+      fetchPerplexityScan(PERPLEXITY_API_KEY, region),
+      isGlobal ? fetchGdeltEvents() : Promise.resolve({ events: [], countries: [] }),
+      isGlobal ? fetchReliefWebAlerts() : Promise.resolve([]),
     ]);
 
     // Perplexity is required
