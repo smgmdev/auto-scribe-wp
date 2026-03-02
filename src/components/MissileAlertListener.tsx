@@ -321,12 +321,12 @@ export function MissileAlertListener() {
         }
       }
 
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from('missile_alerts')
         .select('*')
         .eq('active', true)
-        .gte('created_at', oneHourAgo)
+        .gte('created_at', threeHoursAgo)
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
         const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
