@@ -649,16 +649,29 @@ function RotatingGlobe({
 
   const handleGlobeClick = useCallback(
     (geoName: string) => {
-      // Try to find matching country in scan data
-      const match = countries.find(
-        (c) => c.name.toLowerCase() === geoName.toLowerCase()
-      );
+      const geoLower = geoName.toLowerCase();
+      // 1. Direct name match
+      let match = countries.find((c) => c.name.toLowerCase() === geoLower);
+      if (!match) {
+        // 2. Find country code from COUNTRY_COORDINATES by geo name, then match by code
+        const codeEntry = Object.entries(COUNTRY_COORDINATES).find(
+          ([, v]) => v.name?.toLowerCase() === geoLower
+        );
+        if (codeEntry) {
+          match = countries.find((c) => c.code === codeEntry[0]);
+        }
+      }
+      if (!match) {
+        // 3. Partial / contains match (e.g. "United States of America" contains "United States")
+        match = countries.find(
+          (c) => geoLower.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(geoLower)
+        );
+      }
       if (match) {
         onCountryClick(match);
       } else {
-        // Look up country code from coordinates mapping
         const codeEntry = Object.entries(COUNTRY_COORDINATES).find(
-          ([, v]) => v.name?.toLowerCase() === geoName.toLowerCase()
+          ([, v]) => v.name?.toLowerCase() === geoLower
         );
         const code = codeEntry ? codeEntry[0] : '';
         onCountryClick({
