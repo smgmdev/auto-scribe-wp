@@ -18,7 +18,7 @@ import engineImg from '@/assets/arcana-intel-engine.jpg';
 import engineVideo from '@/assets/arcana-intel-engine.mp4';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import globalVideo from '@/assets/arcana-intel-global.mp4';
-import securityImg from '@/assets/arcana-intel-security.jpg';
+import securityImg from '@/assets/arcana-intel-security.png';
 import securityVideo from '@/assets/arcana-intel-security.mp4';
 
 // ── Intersection Observer hook ──
