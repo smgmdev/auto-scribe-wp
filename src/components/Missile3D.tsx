@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import { useRef, Suspense, useState } from 'react';
+import { useRef, Suspense, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
@@ -9,53 +9,81 @@ function ShieldIcon() {
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.position.y = 2.2 + Math.sin(state.clock.elapsedTime * 1.5) * 0.08;
+      groupRef.current.position.y = 2.4 + Math.sin(state.clock.elapsedTime * 1.5) * 0.06;
     }
   });
 
-  // Shield shape using a custom path
-  const shieldShape = new THREE.Shape();
-  const w = 0.5;
-  const h = 0.7;
-  shieldShape.moveTo(0, h);
-  shieldShape.quadraticCurveTo(w, h * 0.7, w, 0);
-  shieldShape.quadraticCurveTo(w * 0.8, -h * 0.5, 0, -h);
-  shieldShape.quadraticCurveTo(-w * 0.8, -h * 0.5, -w, 0);
-  shieldShape.quadraticCurveTo(-w, h * 0.7, 0, h);
+  const shieldGeo = useMemo(() => {
+    const shape = new THREE.Shape();
+    // Shield path
+    shape.moveTo(0, 0.55);
+    shape.bezierCurveTo(0.35, 0.55, 0.5, 0.35, 0.5, 0.1);
+    shape.bezierCurveTo(0.5, -0.15, 0.3, -0.4, 0, -0.6);
+    shape.bezierCurveTo(-0.3, -0.4, -0.5, -0.15, -0.5, 0.1);
+    shape.bezierCurveTo(-0.5, 0.35, -0.35, 0.55, 0, 0.55);
+    return new THREE.ShapeGeometry(shape);
+  }, []);
+
+  const outlinePoints = useMemo(() => {
+    const pts: number[] = [];
+    const steps = 48;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const angle = t * Math.PI * 2;
+      // Parametric shield shape
+      let x, y;
+      if (t <= 0.25) {
+        // top-right curve
+        x = Math.sin(angle) * 0.5;
+        y = 0.55 - (0.55 - 0.1) * (t / 0.25);
+      } else if (t <= 0.5) {
+        // bottom-right to bottom
+        const lt = (t - 0.25) / 0.25;
+        x = 0.5 * (1 - lt);
+        y = 0.1 - 0.7 * lt;
+      } else if (t <= 0.75) {
+        // bottom to left
+        const lt = (t - 0.5) / 0.25;
+        x = -0.5 * lt;
+        y = -0.6 + 0.7 * lt;
+      } else {
+        // left to top
+        const lt = (t - 0.75) / 0.25;
+        x = -0.5 * (1 - lt);
+        y = 0.1 + (0.55 - 0.1) * lt;
+      }
+      pts.push(x, y, 0);
+    }
+    return new Float32Array(pts);
+  }, []);
 
   return (
-    <group ref={groupRef} position={[0, 2.2, 0]}>
-      <mesh>
-        <shapeGeometry args={[shieldShape]} />
+    <group ref={groupRef} position={[0, 2.4, 0]}>
+      {/* Shield fill */}
+      <mesh geometry={shieldGeo}>
         <meshStandardMaterial
           color="#007AFF"
           emissive="#007AFF"
-          emissiveIntensity={0.6}
+          emissiveIntensity={0.5}
           transparent
-          opacity={0.25}
+          opacity={0.2}
           side={THREE.DoubleSide}
           depthWrite={false}
         />
       </mesh>
       {/* Shield outline */}
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={32}
-            array={(() => {
-              const points: number[] = [];
-              for (let i = 0; i <= 31; i++) {
-                const p = shieldShape.getPoint(i / 31);
-                points.push(p.x, p.y, 0);
-              }
-              return new Float32Array(points);
-            })()}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#007AFF" transparent opacity={0.6} />
-      </line>
+      <mesh geometry={shieldGeo}>
+        <meshStandardMaterial
+          color="#007AFF"
+          emissive="#007AFF"
+          emissiveIntensity={1}
+          transparent
+          opacity={0.5}
+          side={THREE.DoubleSide}
+          wireframe
+          depthWrite={false}
+        />
+      </mesh>
     </group>
   );
 }
