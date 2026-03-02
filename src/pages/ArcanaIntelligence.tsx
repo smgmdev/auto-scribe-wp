@@ -511,9 +511,9 @@ export default function ArcanaIntelligence() {
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { icon: Globe, title: 'Global-first intelligence.', desc: 'We monitor every corner of the world — delivering real-time insights across 195 countries with unmatched breadth and depth.', link: '#global', linkText: 'Learn more about coverage' },
+                { icon: Globe, title: 'Global-first intelligence.', desc: 'We monitor every corner of the world — analyzing real-time insights across 195 countries with unmatched breadth and depth.', link: '#global', linkText: 'Learn more about coverage' },
                 { icon: Shield, title: 'Security. Non‑negotiable.', desc: 'Every signal is encrypted, every access is logged. Built for organizations where data integrity is mission‑critical.', link: '#security', linkText: 'Learn more about security' },
-                { icon: Zap, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Our AI engine processes millions of data points per minute to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
+                { icon: Zap, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Precision AI engine processes extensive amounts of data to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
               ].map((item) => (
                 <AnimatedSection key={item.title} delay={100}>
                   <div className="bg-[#1d1d1f] rounded-2xl p-8 h-full flex flex-col">
