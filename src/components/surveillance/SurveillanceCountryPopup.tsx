@@ -150,7 +150,7 @@ export function SurveillanceCountryPopup() {
                 {selectedCountry.events.map((event, i) => (
                   <li key={i} className="text-xs text-gray-400 flex items-start gap-1.5">
                     <AlertTriangle className="w-3 h-3 text-orange-400 mt-0.5 flex-shrink-0" />
-                    {event}
+                    {typeof event === 'string' ? event : (event as any)?.title || (event as any)?.description || JSON.stringify(event)}
                   </li>
                 ))}
               </ul>
