@@ -129,12 +129,15 @@ export function AdminSurveillanceView() {
   const [showNukes, setShowNukes] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
+  const currentView = useAppStore((s) => s.currentView);
 
-  // Trigger zoom-out-and-reposition on mount (same as crosshair button)
+  // Trigger globe reset whenever the surveillance view becomes active
   useEffect(() => {
-    const timer = setTimeout(() => setResetTrigger(1), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    if (currentView === 'admin-surveillance') {
+      const timer = setTimeout(() => setResetTrigger(t => t + 1), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentView]);
   const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
   const openSurveillancePopup = useAppStore((s) => s.openSurveillancePopup);
   const surveillanceCountry = useAppStore((s) => s.surveillanceCountry);
