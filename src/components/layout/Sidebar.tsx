@@ -1884,8 +1884,8 @@ export function Sidebar({
 
   return <TooltipProvider delayDuration={0}>
       <aside 
+        style={{ width: sidebarCollapsed ? 60 : 256 }}
         className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
-    sidebarCollapsed ? "w-[60px]" : "w-64",
     "lg:translate-x-0",
     isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0")}>
         <div className="flex h-full flex-col">
