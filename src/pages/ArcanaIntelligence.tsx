@@ -15,7 +15,7 @@ import heroBgVideo from '@/assets/arcana-intel-hero-bg.mp4';
 import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
 import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
-import engineVideo from '@/assets/arcana-intel-engine.mp4';
+import Missile3D from '@/components/Missile3D';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import globalVideo from '@/assets/arcana-intel-global.mp4';
 import securityImg from '@/assets/arcana-intel-security.png';
@@ -105,8 +105,8 @@ function HighlightCard({ icon: Icon, title, description, image, video, customCon
 }
 
 // ── Feature row (alternating) ──
-function FeatureSection({ title, headline, description, image, video, stats, reverse = false, children }: {
-  title: string; headline: string; description: string; image: string; video?: string;
+function FeatureSection({ title, headline, description, image, video, customContent, stats, reverse = false, children }: {
+  title: string; headline: string; description: string; image: string; video?: string; customContent?: React.ReactNode;
   stats?: { label: string; value: string }[]; reverse?: boolean; children?: React.ReactNode;
 }) {
   const [featureVideoLoaded, setFeatureVideoLoaded] = useState(false);
@@ -125,7 +125,7 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
         {(stats || children) ? (
           <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 mb-16`}>
             <div className="flex-1 w-full relative">
-              {video ? (
+              {customContent ? customContent : video ? (
                 <>
                   {!featureVideoLoaded && (
                     <div className="absolute top-3 left-3 z-20">
@@ -427,7 +427,7 @@ export default function ArcanaIntelligence() {
             headline="Built to detect."
             description="The Arcana Precision AI engine processes millions of data points — classifying, correlating, and surfacing what matters to visualize the information for security and defense purposes."
             image={engineImg}
-            video={engineVideo}
+            customContent={<Missile3D />}
             stats={[
               { value: '1M+', label: 'Data points per minute' },
               { value: '<100ms', label: 'Classification latency' },
