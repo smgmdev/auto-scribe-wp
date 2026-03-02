@@ -282,15 +282,10 @@ export default function ArcanaIntelligence() {
               </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex items-center justify-center">
                 <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
                   className="rounded-none bg-[#007AFF] text-white hover:bg-[#0066D6] h-12 px-8 text-base font-medium">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button variant="outline" onClick={() => document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="rounded-none border-white/30 text-white hover:bg-white/10 hover:text-white h-12 px-8 text-base font-medium bg-transparent">
-                  Learn More
+                  Contact Sales
                 </Button>
               </div>
             </AnimatedSection>
