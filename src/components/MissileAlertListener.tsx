@@ -331,8 +331,8 @@ export function MissileAlertListener() {
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-end justify-center pointer-events-none animate-fade-in">
-      <div className="flex flex-col items-center gap-2 pointer-events-auto max-sm:w-full">
-        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] max-sm:max-h-[70vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-2 max-sm:pb-2">
+      <div className="flex flex-col items-center pointer-events-auto max-sm:w-full">
+        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] max-sm:max-h-[70vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0">
           {visibleAlerts.map(alert => (
             <AlertPopup
               key={alert.id}
@@ -343,7 +343,7 @@ export function MissileAlertListener() {
           ))}
         </div>
         {queuedCount > 0 && (
-          <div className="text-xs font-mono text-red-400/80 bg-black/60 px-3 py-1 rounded-full border border-red-500/30">
+          <div className="w-full max-w-sm max-sm:max-w-full bg-black text-red-500 text-xs font-mono font-bold text-center py-2 px-4 tracking-wider">
             +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
           </div>
         )}
