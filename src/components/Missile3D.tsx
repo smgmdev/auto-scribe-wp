@@ -52,59 +52,55 @@ function OrbitalRings() {
   );
 }
 
-function StarField() {
+function StarField({ missilePos }: { missilePos: React.MutableRefObject<THREE.Vector3> }) {
   const starsRef = useRef<THREE.Points>(null);
+  const count = 400;
   
-  const { positions, velocities } = useMemo(() => {
-    const count = 400;
+  const { positions, lifetimes } = useMemo(() => {
     const pos = new Float32Array(count * 3);
-    const vel = new Float32Array(count * 3);
+    const life = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      // Start from random positions in a cylinder around the missile
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.5 + Math.random() * 3;
-      pos[i * 3] = Math.cos(angle) * radius;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 6;
-      pos[i * 3 + 2] = Math.sin(angle) * radius;
-      // Velocity pointing outward and slightly downward (like hyperspace streaks)
-      vel[i * 3] = Math.cos(angle) * (0.5 + Math.random() * 1.5);
-      vel[i * 3 + 1] = -0.2 + Math.random() * 0.4;
-      vel[i * 3 + 2] = Math.sin(angle) * (0.5 + Math.random() * 1.5);
+      pos[i * 3] = 0;
+      pos[i * 3 + 1] = 0;
+      pos[i * 3 + 2] = 100; // off-screen initially
+      life[i] = Math.random(); // stagger initial lifetimes
     }
-    return { positions: pos, velocities: vel };
+    return { positions: pos, lifetimes: life };
   }, []);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!starsRef.current) return;
-    const geo = starsRef.current.geometry;
-    const posAttr = geo.attributes.position as THREE.BufferAttribute;
+    const posAttr = starsRef.current.geometry.attributes.position as THREE.BufferAttribute;
     const arr = posAttr.array as Float32Array;
+    const mx = missilePos.current.x;
+    const my = missilePos.current.y;
+    const mz = missilePos.current.z;
     
-    for (let i = 0; i < arr.length / 3; i++) {
-      arr[i * 3] += velocities[i * 3] * delta * 0.8;
-      arr[i * 3 + 1] += velocities[i * 3 + 1] * delta * 0.8;
-      arr[i * 3 + 2] += velocities[i * 3 + 2] * delta * 0.8;
+    for (let i = 0; i < count; i++) {
+      lifetimes[i] -= delta * (1.5 + Math.random() * 0.5);
       
-      // Reset stars that go too far
-      const dist = Math.sqrt(arr[i * 3] ** 2 + arr[i * 3 + 1] ** 2 + arr[i * 3 + 2] ** 2);
-      if (dist > 5) {
-        const angle = Math.random() * Math.PI * 2;
-        const r = 0.3 + Math.random() * 0.5;
-        arr[i * 3] = Math.cos(angle) * r;
-        arr[i * 3 + 1] = (Math.random() - 0.5) * 1;
-        arr[i * 3 + 2] = Math.sin(angle) * r;
+      if (lifetimes[i] <= 0) {
+        // Respawn at missile position with slight spread
+        arr[i * 3] = mx + (Math.random() - 0.5) * 0.6;
+        arr[i * 3 + 1] = my + (Math.random() - 0.5) * 0.6;
+        arr[i * 3 + 2] = mz + (Math.random() - 0.5) * 0.3;
+        lifetimes[i] = 0.8 + Math.random() * 1.2;
+      } else {
+        // Drift backward (trail behind missile)
+        arr[i * 3] += (Math.random() - 0.5) * delta * 2;
+        arr[i * 3 + 1] += (Math.random() - 0.5) * delta * 2;
+        arr[i * 3 + 2] += delta * 3; // trail backward in Z
       }
     }
     posAttr.needsUpdate = true;
-    starsRef.current.rotation.y = state.clock.elapsedTime * 0.1;
   });
 
   return (
     <points ref={starsRef}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={400} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.03} color="#ffffff" transparent opacity={0.7} sizeAttenuation />
+      <pointsMaterial size={0.04} color="#66aaff" transparent opacity={0.6} sizeAttenuation />
     </points>
   );
 }
@@ -148,6 +144,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   useState(() => { onLoaded(); });
   const groupRef = useRef<THREE.Group>(null);
   const phaseRef = useRef(0);
+  const missilePosRef = useRef(new THREE.Vector3(0, 2, 15));
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -155,7 +152,6 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
     const cycle = phaseRef.current % 6;
 
     if (cycle < 3) {
-      // Approach — missile flies toward camera
       const p = cycle / 3;
       const e = p * p * (3 - 2 * p);
       groupRef.current.position.set(
@@ -166,17 +162,16 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       groupRef.current.rotation.set(0.2, Math.PI + p * 0.3, Math.sin(p * Math.PI) * 0.15);
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(0.3, 2.8, e));
     } else if (cycle < 4.5) {
-      // Flyby — streaks past camera
       const p = (cycle - 3) / 1.5;
       const e = p * p;
       groupRef.current.position.set(THREE.MathUtils.lerp(1.5, -2, p), 0.3, THREE.MathUtils.lerp(-3, -20, e));
       groupRef.current.rotation.set(-0.1, Math.PI + 0.3, -0.1);
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(2.8, 0.5, e));
     } else {
-      // Reset — hidden, waiting to loop
       groupRef.current.position.set(0, 2, 15);
       groupRef.current.scale.setScalar(0.01);
     }
+    missilePosRef.current.copy(groupRef.current.position);
   });
 
   return (
@@ -184,7 +179,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef}>
         <primitive object={scene} scale={2.5} />
       </group>
-      <StarField />
+      <StarField missilePos={missilePosRef} />
       <ScanGrid />
     </>
   );
