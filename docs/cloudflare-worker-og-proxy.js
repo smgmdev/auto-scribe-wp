@@ -37,6 +37,14 @@ const CRAWLER_PATTERNS = [
   'outbrain',
   'W3C_Validator',
   'redditbot',
+  'OpenGraphIO',     // opengraph.xyz testing tool
+  'OpenGraph',
+  'curl',            // CLI testing
+  'wget',
+  'axios',
+  'node-fetch',
+  'Go-http-client',
+  'python-requests',
 ];
 
 function isCrawler(userAgent) {
