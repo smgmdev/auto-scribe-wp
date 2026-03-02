@@ -255,7 +255,7 @@ export default function ArcanaIntelligence() {
 
           <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-52 md:pt-64 pb-40">
             <AnimatedSection>
-              <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-6">Introducing</p>
+              <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-6">Arcana Intelligence</p>
               <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6">
                 Arcana<br />Intelligence
               </h1>
@@ -268,12 +268,12 @@ export default function ArcanaIntelligence() {
             <AnimatedSection delay={400}>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
-                  className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066D6] h-12 px-8 text-base font-medium">
+                  className="rounded-none bg-[#007AFF] text-white hover:bg-[#0066D6] h-12 px-8 text-base font-medium">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button variant="outline" onClick={() => document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="rounded-full border-white/30 text-white hover:bg-white/10 hover:text-white h-12 px-8 text-base font-medium bg-transparent">
+                  className="rounded-none border-white/30 text-white hover:bg-white/10 hover:text-white h-12 px-8 text-base font-medium bg-transparent">
                   Learn More
                 </Button>
               </div>
@@ -448,7 +448,7 @@ export default function ArcanaIntelligence() {
                 Join the platform that governments, agencies, and enterprises trust for mission‑critical intelligence.
               </p>
               <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
-                className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066D6] h-14 px-10 text-lg font-medium">
+                className="rounded-none bg-[#007AFF] text-white hover:bg-[#0066D6] h-14 px-10 text-lg font-medium">
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
