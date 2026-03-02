@@ -269,7 +269,7 @@ export default function ArcanaIntelligence() {
           </video>
           
 
-          <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-52 md:pt-64 pb-40">
+          <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-72 md:pt-64 pb-40">
             <AnimatedSection>
               
               <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6">
@@ -277,7 +277,7 @@ export default function ArcanaIntelligence() {
               </h1>
             </AnimatedSection>
             <AnimatedSection delay={200}>
-              <p className="text-xl md:text-2xl text-white/60 max-w-xl mx-auto mb-10 leading-relaxed">
+              <p className="text-xl md:text-2xl text-white/60 max-w-xl mx-auto mb-10 leading-tight">
                 See what others miss. Real‑time security intelligence, powered by advanced AI models.
               </p>
             </AnimatedSection>
