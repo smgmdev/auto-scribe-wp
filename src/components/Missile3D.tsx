@@ -15,7 +15,7 @@ function TargetOverlay() {
     groupRef.current.rotation.z = Math.sin(t * 0.6) * 0.03;
   });
 
-  const orange = '#f2a547';
+  const orange = '#da8e5a';
   const s = 1.5; // half-size of outer square
 
   // Square outline from line segments
