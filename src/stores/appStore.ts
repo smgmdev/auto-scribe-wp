@@ -295,6 +295,8 @@ interface AppState {
   // Surveillance country popup (persists across navigation)
   surveillanceCountry: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] } | null;
   showSurveillancePopup: boolean;
+  surveillanceTimeFilter: string;
+  setSurveillanceTimeFilter: (filter: string) => void;
   openSurveillancePopup: (country: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] }) => void;
   closeSurveillancePopup: () => void;
 
@@ -792,6 +794,8 @@ export const useAppStore = create<AppState>()((set) => ({
   // Surveillance country popup
   surveillanceCountry: null,
   showSurveillancePopup: false,
+  surveillanceTimeFilter: '24',
+  setSurveillanceTimeFilter: (filter) => set({ surveillanceTimeFilter: filter }),
   openSurveillancePopup: (country) => set({ surveillanceCountry: country, showSurveillancePopup: true }),
   closeSurveillancePopup: () => set({ showSurveillancePopup: false, surveillanceCountry: null }),
 
