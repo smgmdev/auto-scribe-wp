@@ -128,10 +128,14 @@ export function AdminSurveillanceView() {
   const [scanData, setScanData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [missileTimeFilter, setMissileTimeFilter] = useState<string>('24');
-  const [droneTimeFilter, setDroneTimeFilter] = useState<string>('24');
-  const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('24');
-  const [hbombTimeFilter, setHbombTimeFilter] = useState<string>('24');
+  const missileTimeFilter = useAppStore((s) => s.missileTimeFilter);
+  const setMissileTimeFilter = useAppStore((s) => s.setMissileTimeFilter);
+  const droneTimeFilter = useAppStore((s) => s.droneTimeFilter);
+  const setDroneTimeFilter = useAppStore((s) => s.setDroneTimeFilter);
+  const nukeTimeFilter = useAppStore((s) => s.nukeTimeFilter);
+  const setNukeTimeFilter = useAppStore((s) => s.setNukeTimeFilter);
+  const hbombTimeFilter = useAppStore((s) => s.hbombTimeFilter);
+  const setHbombTimeFilter = useAppStore((s) => s.setHbombTimeFilter);
   const globalTimeFilter = useAppStore((s) => s.surveillanceTimeFilter);
   const setGlobalTimeFilter = useAppStore((s) => s.setSurveillanceTimeFilter);
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
@@ -139,10 +143,14 @@ export function AdminSurveillanceView() {
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [hbombTrajectories, setHbombTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
-  const [showMissiles, setShowMissiles] = useState(true);
-  const [showDrones, setShowDrones] = useState(true);
-  const [showNukes, setShowNukes] = useState(true);
-  const [showHbombs, setShowHbombs] = useState(true);
+  const showMissiles = useAppStore((s) => s.showMissiles);
+  const setShowMissiles = useAppStore((s) => s.setShowMissiles);
+  const showDrones = useAppStore((s) => s.showDrones);
+  const setShowDrones = useAppStore((s) => s.setShowDrones);
+  const showNukes = useAppStore((s) => s.showNukes);
+  const setShowNukes = useAppStore((s) => s.setShowNukes);
+  const showHbombs = useAppStore((s) => s.showHbombs);
+  const setShowHbombs = useAppStore((s) => s.setShowHbombs);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
@@ -437,7 +445,7 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-600">({filteredEvents.length})</span>
               </div>
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
-                <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")} title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}>
+                <button onClick={() => setShowMissiles(!showMissiles)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")} title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}>
                   <Rocket className="w-3 h-3 text-blue-400" />
                   <span className="text-[10px] text-gray-400">Missiles</span>
                 </button>
@@ -454,7 +462,7 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
               </div>
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
-                <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")} title={showDrones ? 'Hide drones on map' : 'Show drones on map'}>
+                <button onClick={() => setShowDrones(!showDrones)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")} title={showDrones ? 'Hide drones on map' : 'Show drones on map'}>
                   <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                   <span className="text-[10px] text-gray-400">Drones</span>
                 </button>
@@ -471,7 +479,7 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
               </div>
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
-                <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")} title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}>
+                <button onClick={() => setShowNukes(!showNukes)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")} title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}>
                   <Radiation className="w-3 h-3 text-yellow-400" />
                   <span className="text-[10px] text-gray-400">Nukes</span>
                 </button>
@@ -488,7 +496,7 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
               </div>
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
-                <button onClick={() => setShowHbombs(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")} title={showHbombs ? 'Hide H-bombs on map' : 'Show H-bombs on map'}>
+                <button onClick={() => setShowHbombs(!showHbombs)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")} title={showHbombs ? 'Hide H-bombs on map' : 'Show H-bombs on map'}>
                   <Bomb className="w-3 h-3 text-orange-400" />
                   <span className="text-[10px] text-gray-400">H-Bomb</span>
                 </button>
@@ -534,7 +542,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] text-gray-600">({filteredEvents.length})</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
-              <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")}>
+              <button onClick={() => setShowMissiles(!showMissiles)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")}>
                 <Rocket className="w-3 h-3 text-blue-400" />
                 <span className="text-[10px] text-gray-400">Missiles</span>
               </button>
@@ -551,7 +559,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border-r border-white/10 flex-shrink-0">
-              <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")}>
+              <button onClick={() => setShowDrones(!showDrones)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")}>
                 <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                 <span className="text-[10px] text-gray-400">Drones</span>
               </button>
@@ -568,7 +576,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
-              <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")}>
+              <button onClick={() => setShowNukes(!showNukes)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")}>
                 <Radiation className="w-3 h-3 text-yellow-400" />
                 <span className="text-[10px] text-gray-400">Nukes</span>
               </button>
@@ -585,7 +593,7 @@ export function AdminSurveillanceView() {
               <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
-              <button onClick={() => setShowHbombs(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")}>
+              <button onClick={() => setShowHbombs(!showHbombs)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")}>
                 <Bomb className="w-3 h-3 text-orange-400" />
                 <span className="text-[10px] text-gray-400">H-Bomb</span>
               </button>

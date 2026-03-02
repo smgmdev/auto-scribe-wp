@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/appStore';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation } from 'lucide-react';
+import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation, Bomb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function getThreatBadge(level: string, score?: number) {
@@ -34,40 +34,85 @@ export function SurveillanceCountryPopup() {
   const selectedCountry = useAppStore((s) => s.surveillanceCountry);
   const showPopup = useAppStore((s) => s.showSurveillancePopup);
   const closeSurveillancePopup = useAppStore((s) => s.closeSurveillancePopup);
-  const timeFilter = useAppStore((s) => s.surveillanceTimeFilter);
+  const showMissiles = useAppStore((s) => s.showMissiles);
+  const showDrones = useAppStore((s) => s.showDrones);
+  const showNukes = useAppStore((s) => s.showNukes);
+  const showHbombs = useAppStore((s) => s.showHbombs);
+  const missileTimeFilter = useAppStore((s) => s.missileTimeFilter);
+  const droneTimeFilter = useAppStore((s) => s.droneTimeFilter);
+  const nukeTimeFilter = useAppStore((s) => s.nukeTimeFilter);
+  const hbombTimeFilter = useAppStore((s) => s.hbombTimeFilter);
   const [countryMissiles, setCountryMissiles] = useState<MissileAlert[]>([]);
 
+  // Build list of active severity types and their cutoff times
+  const activeFilters = useMemo(() => {
+    const filters: { severity: string; cutoff: string }[] = [];
+    if (showMissiles) filters.push({ severity: 'missile', cutoff: new Date(Date.now() - parseFloat(missileTimeFilter) * 3600000).toISOString() });
+    if (showDrones) filters.push({ severity: 'drone', cutoff: new Date(Date.now() - parseFloat(droneTimeFilter) * 3600000).toISOString() });
+    if (showNukes) filters.push({ severity: 'nuke', cutoff: new Date(Date.now() - parseFloat(nukeTimeFilter) * 3600000).toISOString() });
+    if (showHbombs) filters.push({ severity: 'hbomb', cutoff: new Date(Date.now() - parseFloat(hbombTimeFilter) * 3600000).toISOString() });
+    return filters;
+  }, [showMissiles, showDrones, showNukes, showHbombs, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter]);
+
+  // Compute widest time window label for display
+  const displayTimeLabel = useMemo(() => {
+    const times = [
+      ...(showMissiles ? [parseFloat(missileTimeFilter)] : []),
+      ...(showDrones ? [parseFloat(droneTimeFilter)] : []),
+      ...(showNukes ? [parseFloat(nukeTimeFilter)] : []),
+      ...(showHbombs ? [parseFloat(hbombTimeFilter)] : []),
+    ];
+    const max = Math.max(...(times.length ? times : [24]));
+    return max >= 168 ? '7d' : `${max}h`;
+  }, [showMissiles, showDrones, showNukes, showHbombs, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter]);
+
   useEffect(() => {
-    if (!selectedCountry) {
+    if (!selectedCountry || activeFilters.length === 0) {
       setCountryMissiles([]);
       return;
     }
     const fetchCountryMissiles = async () => {
       const code = selectedCountry.code;
-      const hours = parseFloat(timeFilter);
-      const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+      // Use the earliest cutoff (widest window) to fetch, then filter client-side per severity
+      const earliestCutoff = activeFilters.reduce((min, f) => f.cutoff < min ? f.cutoff : min, activeFilters[0].cutoff);
+      const activeSeverities = activeFilters.map(f => f.severity);
+      
       const { data } = await supabase
         .from('missile_alerts')
         .select('id, title, published_at, created_at, origin_country_name, destination_country_name, severity')
         .eq('active', true)
+        .in('severity', activeSeverities)
         .or(`origin_country_code.eq.${code},destination_country_code.eq.${code}`)
-        .gte('published_at', cutoff)
+        .gte('published_at', earliestCutoff)
         .order('published_at', { ascending: false })
-        .limit(20);
-      if (data) setCountryMissiles(data);
+        .limit(30);
+      
+      if (data) {
+        // Client-side filter: each alert must be within its severity's time window
+        const cutoffMap = new Map(activeFilters.map(f => [f.severity, f.cutoff]));
+        const filtered = data.filter(m => {
+          const cutoff = cutoffMap.get(m.severity);
+          if (!cutoff) return false;
+          const pubDate = m.published_at || m.created_at;
+          return pubDate >= cutoff;
+        });
+        setCountryMissiles(filtered);
+      }
     };
     fetchCountryMissiles();
-  }, [selectedCountry, timeFilter]);
+  }, [selectedCountry, activeFilters]);
 
   if (!selectedCountry) return null;
 
   const getSeverityIcon = (severity: string) => {
+    if (severity === 'hbomb') return <Bomb className="w-3 h-3 text-orange-400 mt-0.5 flex-shrink-0" />;
     if (severity === 'nuke') return <Radiation className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />;
     if (severity === 'drone') return <Radar className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />;
     return <Rocket className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" />;
   };
 
   const getSeverityLabel = (severity: string) => {
+    if (severity === 'hbomb') return <span className="text-[9px] text-orange-400 bg-orange-500/10 px-1 rounded">H-BOMB</span>;
     if (severity === 'nuke') return <span className="text-[9px] text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
     if (severity === 'drone') return <span className="text-[9px] text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
     return <span className="text-[9px] text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
@@ -79,6 +124,7 @@ export function SurveillanceCountryPopup() {
     return (
       <li key={m.id} className={cn(
         "text-xs flex items-start gap-1.5 p-1.5 rounded border",
+        m.severity === 'hbomb' ? 'bg-orange-500/5 border-orange-500/20' :
         m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
         direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'
       )}>
@@ -169,7 +215,7 @@ export function SurveillanceCountryPopup() {
             <Rocket className="w-4 h-4 text-red-400" />
             <span className="text-sm font-bold text-red-400">Attacks</span>
             <span className="text-[10px] text-gray-600 ml-auto">
-              last {timeFilter === '168' ? '7d' : `${timeFilter}h`}
+              last {displayTimeLabel}
             </span>
           </div>
           {countryMissiles.length === 0 ? (
