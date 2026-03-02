@@ -273,6 +273,13 @@ export function AdminSurveillanceView() {
 
           <div className="flex items-center gap-3">
             <button
+              onClick={() => setResetTrigger(t => t + 1)}
+              className="text-gray-400 hover:text-white transition-colors p-1"
+              title="Reset globe view"
+            >
+              <Crosshair className="w-3.5 h-3.5" />
+            </button>
+            <button
               onClick={() => setGlobeSpinning(!globeSpinning)}
               className="text-gray-400 hover:text-white transition-colors p-1"
               title={globeSpinning ? 'Pause rotation' : 'Start rotation'}
@@ -280,22 +287,13 @@ export function AdminSurveillanceView() {
               {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             </button>
             <button
-              onClick={() => setResetTrigger(t => t + 1)}
-              className="text-gray-400 hover:text-white transition-colors p-1"
-              title="Reset globe view"
-            >
-              <Crosshair className="w-3.5 h-3.5" />
-            </button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={runScan}
               disabled={loading}
-              className="text-gray-400 hover:text-white hover:bg-white/5 text-xs"
+              className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50"
+              title="Rescan"
             >
-              <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", loading && "animate-spin")} />
-              Rescan
-            </Button>
+              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+            </button>
           </div>
         </div>
 
