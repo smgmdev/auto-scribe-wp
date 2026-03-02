@@ -93,6 +93,9 @@ export function AdminSurveillanceView() {
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
+  const [showMissiles, setShowMissiles] = useState(true);
+  const [showDrones, setShowDrones] = useState(true);
+  const [showNukes, setShowNukes] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
 
   // Trigger zoom-out-and-reposition on mount (same as crosshair button)
@@ -273,8 +276,17 @@ export function AdminSurveillanceView() {
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
-              <Rocket className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] text-gray-400">Missiles</span>
+              <button
+                onClick={() => setShowMissiles(v => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 transition-opacity",
+                  !showMissiles && "opacity-40 line-through"
+                )}
+                title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}
+              >
+                <Rocket className="w-3 h-3 text-blue-400" />
+                <span className="text-[10px] text-gray-400">Missiles</span>
+              </button>
               <Select value={missileTimeFilter} onValueChange={setMissileTimeFilter}>
                 <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
@@ -291,8 +303,17 @@ export function AdminSurveillanceView() {
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
-              <Radar className="w-3 h-3 text-purple-400" />
-              <span className="text-[10px] text-gray-400">Drones</span>
+              <button
+                onClick={() => setShowDrones(v => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 transition-opacity",
+                  !showDrones && "opacity-40 line-through"
+                )}
+                title={showDrones ? 'Hide drones on map' : 'Show drones on map'}
+              >
+                <Radar className="w-3 h-3 text-purple-400" />
+                <span className="text-[10px] text-gray-400">Drones</span>
+              </button>
               <Select value={droneTimeFilter} onValueChange={setDroneTimeFilter}>
                 <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
@@ -309,8 +330,17 @@ export function AdminSurveillanceView() {
             </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-r border-white/10 self-stretch">
-              <Radiation className="w-3 h-3 text-yellow-400" />
-              <span className="text-[10px] text-gray-400">Nukes</span>
+              <button
+                onClick={() => setShowNukes(v => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 transition-opacity",
+                  !showNukes && "opacity-40 line-through"
+                )}
+                title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}
+              >
+                <Radiation className="w-3 h-3 text-yellow-400" />
+                <span className="text-[10px] text-gray-400">Nukes</span>
+              </button>
               <Select value={nukeTimeFilter} onValueChange={setNukeTimeFilter}>
                 <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0">
                   <SelectValue />
@@ -339,9 +369,9 @@ export function AdminSurveillanceView() {
                   openSurveillancePopup(c);
                 }}
                 selectedCountry={surveillanceCountry?.code || null}
-                missileTrajectories={missileTrajectories}
-                droneTrajectories={droneTrajectories}
-                nukeTrajectories={nukeTrajectories}
+                missileTrajectories={showMissiles ? missileTrajectories : []}
+                droneTrajectories={showDrones ? droneTrajectories : []}
+                nukeTrajectories={showNukes ? nukeTrajectories : []}
                 isSpinning={globeSpinning}
                 onSpinChange={setGlobeSpinning}
                 resetTrigger={resetTrigger}
