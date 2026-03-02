@@ -286,13 +286,13 @@ export function MissileAlertListener() {
 
   const dismissAlert = useCallback(async (id: string) => {
     dismissedRef.current.add(id);
-    // Persist to DB (fire-and-forget)
+    // Persist to DB (fire-and-forget, upsert to avoid duplicate key errors)
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
-        supabase.from('dismissed_missile_alerts').insert({
+        supabase.from('dismissed_missile_alerts').upsert({
           user_id: data.user.id,
           alert_id: id,
-        }).then(() => {});
+        }, { onConflict: 'user_id,alert_id' }).then(() => {});
       }
     });
     setAlerts(prev => {
@@ -331,7 +331,12 @@ export function MissileAlertListener() {
         .not('destination_country_code', 'is', null)
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
-        const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
+        const threeHoursMs = 3 * 60 * 60 * 1000;
+        const nowMs = Date.now();
+        const filtered = (data as MissileAlert[]).filter(a => 
+          !dismissedRef.current.has(a.id) && 
+          (nowMs - new Date(a.created_at).getTime()) < threeHoursMs
+        );
         if (filtered.length > 0) {
           setAlerts(filtered);
           const hasNuke = filtered.some(a => a.severity === 'nuke');
