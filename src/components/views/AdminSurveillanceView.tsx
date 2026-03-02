@@ -523,20 +523,11 @@ export function AdminSurveillanceView() {
                     )}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-gray-600">{event.country_name}</span>
-                      <div className="flex items-center gap-2">
-                        {event.source_url ? (
-                          <a href={event.source_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/70 hover:text-blue-300 underline underline-offset-2">
-                            {event.source}
-                          </a>
-                        ) : (
-                          <span className="text-[10px] text-gray-600">{event.source}</span>
-                        )}
-                        {event.published_at && (
-                          <span className="text-[10px] text-gray-600">
-                            {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                      </div>
+                      {event.published_at && (
+                        <span className="text-[10px] text-gray-600">
+                          {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )) || (
