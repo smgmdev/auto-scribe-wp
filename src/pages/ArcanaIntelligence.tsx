@@ -61,15 +61,21 @@ function AnimatedStat({ value, suffix = '', prefix = '' }: { value: number; suff
 }
 
 // ── Highlight card ──
-function HighlightCard({ icon: Icon, title, description, image, delay = 0 }: {
-  icon: React.ElementType; title: string; description: string; image: string; delay?: number;
+function HighlightCard({ icon: Icon, title, description, image, video, delay = 0 }: {
+  icon: React.ElementType; title: string; description: string; image: string; video?: string; delay?: number;
 }) {
   const { ref, isInView } = useInView();
   return (
     <div ref={ref} className="group relative overflow-hidden rounded-3xl bg-[#1d1d1f] transition-all duration-700"
       style={{ opacity: isInView ? 1 : 0, transform: isInView ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)', transitionDelay: `${delay}ms` }}>
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        {video ? (
+          <video autoPlay loop muted playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+            <source src={video} type="video/mp4" />
+          </video>
+        ) : (
+          <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#1d1d1f] via-[#1d1d1f]/40 to-transparent" />
       </div>
       <div className="relative px-6 pb-8 -mt-20 z-10">
@@ -310,7 +316,7 @@ export default function ArcanaIntelligence() {
           {/* Horizontal scrollable highlight cards */}
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} delay={0} />
+              <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={heroVideo} delay={0} />
               <HighlightCard icon={Brain} title="AI‑Powered Analysis" description="Advanced language models scan, classify, and summarize thousands of news sources in seconds." image={engineImg} delay={150} />
               <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} delay={300} />
             </div>
