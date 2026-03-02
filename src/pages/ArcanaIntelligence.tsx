@@ -145,7 +145,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
   const [featureVideoLoaded, setFeatureVideoLoaded] = useState(false);
   return (
     <section className="bg-black text-white overflow-hidden">
-      <div className="max-w-[980px] mx-auto px-4 md:px-6">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6">
         <AnimatedSection>
           <p className="text-[#007AFF] text-sm font-semibold tracking-wide uppercase mb-2">{title}</p>
           <div className="flex flex-wrap items-baseline gap-x-2 md:gap-x-3 mb-4">
