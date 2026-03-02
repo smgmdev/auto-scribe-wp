@@ -118,6 +118,14 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
 		keyframes: {
+			'shieldFloat': {
+				'0%, 100%': { transform: 'translateY(0)' },
+				'50%': { transform: 'translateY(-12px)' }
+			},
+			'shieldPulse': {
+				'0%, 100%': { transform: 'scale(1)', opacity: '0.15' },
+				'50%': { transform: 'scale(1.15)', opacity: '0.05' }
+			},
 			'accordion-down': {
 				from: {
 					height: '0'
