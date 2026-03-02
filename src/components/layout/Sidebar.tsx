@@ -1893,43 +1893,45 @@ export function Sidebar({
         />
       )}
       <aside 
+        style={{ width: isDesktop ? (desktopExpanded ? 256 : 60) : (isOpen ? 256 : 0) }}
         className={cn(
           "fixed left-0 top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
           // Mobile: slide in/out
-          isOpen ? "translate-x-0 w-64" : "-translate-x-full",
-          // Desktop: always visible, width depends on expanded state
-          desktopExpanded ? "lg:translate-x-0 lg:w-64" : "lg:translate-x-0 lg:w-[60px]",
+          !isDesktop && (isOpen ? "translate-x-0" : "-translate-x-full"),
+          // Desktop: always visible
+          isDesktop && "translate-x-0",
         )}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className={cn("flex h-16 items-center border-b border-sidebar-border", !desktopExpanded && sidebarCollapsed ? "lg:justify-center lg:px-1" : "justify-between px-3")}>
-            {/* Desktop collapsed: just burger icon */}
-            <div className={cn("hidden lg:flex items-center gap-2", desktopExpanded ? "" : "justify-center w-full")}>
-              <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                <Menu className="h-5 w-5" />
-              </Button>
-              {desktopExpanded && (
+          <div className={cn("flex h-16 items-center border-b border-sidebar-border", isDesktop && sidebarCollapsed ? "justify-center px-1" : "justify-between px-3")}>
+            {isDesktop ? (
+              <div className={cn("flex items-center gap-2", sidebarCollapsed ? "justify-center w-full" : "")}>
+                <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                </Button>
+                {desktopExpanded && (
+                  <button onClick={() => navigate('/')} className="flex items-center gap-2">
+                    <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
+                    <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                  <X className="h-5 w-5" />
+                </Button>
                 <button onClick={() => navigate('/')} className="flex items-center gap-2">
                   <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
                   <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
                 </button>
-              )}
-            </div>
-            {/* Mobile: X + logo */}
-            <div className="lg:hidden flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                <X className="h-5 w-5" />
-              </Button>
-              <button onClick={() => navigate('/')} className="flex items-center gap-2">
-                <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
-                <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
-              </button>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
-            <div className={cn("space-y-1", sidebarCollapsed && !desktopExpanded ? "lg:px-1 px-4" : "px-4")}>
+            <div className={cn("space-y-1", sidebarCollapsed ? "px-1" : "px-4")}>
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
