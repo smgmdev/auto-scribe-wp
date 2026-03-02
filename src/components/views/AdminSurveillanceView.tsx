@@ -23,10 +23,10 @@ const SCAN_REGIONS: { value: ScanRegion; label: string }[] = [
 
 type CameraRegion = 'middle_east' | 'asia' | 'europe' | 'us';
 const CAMERA_FEEDS: { region: CameraRegion; label: string; embedId: string; description: string }[] = [
-  { region: 'middle_east', label: 'Middle East', embedId: 'SMfsnS38RzM', description: 'Live HD Cameras — Iran, Israel & Middle East' },
-  { region: 'asia', label: 'Asia', embedId: 'f0lYkdA-Gtw', description: 'NHK WORLD-JAPAN — Live News' },
-  { region: 'europe', label: 'Europe', embedId: 'h3MuIUNCCzI', description: 'FRANCE 24 English — Live News' },
-  { region: 'us', label: 'United States', embedId: 'w_Ma8oQLmSM', description: 'NBC News — Live Stream' },
+  { region: 'middle_east', label: 'Middle East', embedId: 'lY2yjz-HRcg', description: 'Live Webcams — Tel Aviv, Jerusalem & Middle East' },
+  { region: 'asia', label: 'Asia', embedId: 'f0lYkdA-Gtw', description: 'NHK WORLD-JAPAN — 24/7 Live' },
+  { region: 'europe', label: 'Europe', embedId: 'h3MuIUNCCzI', description: 'FRANCE 24 — 24/7 Live News' },
+  { region: 'us', label: 'United States', embedId: 'w_Ma8oQLmSM', description: 'NBC News — 24/7 Live Stream' },
 ];
 
 interface CountryData {
@@ -531,19 +531,16 @@ export function AdminSurveillanceView() {
         <DraggablePopup
           open={!!activeCameraFeed}
           onOpenChange={(open) => { if (!open) setActiveCameraFeed(null); }}
-          width={720}
-          maxHeight="80vh"
+          width={420}
+          maxHeight="60vh"
           zIndex={350}
-          title={
-            <div className="flex items-center gap-2 px-3 pt-2">
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                </span>
-                <span className="text-[10px] font-bold text-red-400 tracking-wider">LIVE</span>
-              </div>
-              <span className="text-sm font-medium text-white">{activeCameraFeed.label} — Camera Feed</span>
+          headerContent={
+            <div className="flex items-center gap-2 ml-2">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+              </span>
+              <span className="text-[10px] font-medium text-gray-300 truncate">{activeCameraFeed.label}</span>
             </div>
           }
           bodyClassName="p-0 !p-0"
@@ -556,9 +553,6 @@ export function AdminSurveillanceView() {
               allowFullScreen
               title={activeCameraFeed.description}
             />
-          </div>
-          <div className="px-3 py-2 bg-[#0a0f1a] border-t border-white/5">
-            <p className="text-[10px] text-gray-500">{activeCameraFeed.description}</p>
           </div>
         </DraggablePopup>
       )}
