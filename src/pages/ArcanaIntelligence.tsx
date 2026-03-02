@@ -303,7 +303,7 @@ export default function ArcanaIntelligence() {
         {/* ══════════════ HERO ══════════════ */}
         <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-black">
           {!heroVideoLoaded && (
-            <div className="absolute top-4 left-4 z-20">
+            <div className="absolute bottom-4 left-4 z-20">
               <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
             </div>
           )}
