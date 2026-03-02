@@ -104,6 +104,39 @@ function HighlightCard({ icon: Icon, title, description, image, video, customCon
   );
 }
 
+// ── Cycling stats under 3D model ──
+function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setActiveIndex((prev) => (prev + 1) % stats.length);
+        setIsAnimating(false);
+      }, 400);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [stats.length]);
+
+  return (
+    <div className="flex justify-center mt-6 h-14 items-center overflow-hidden">
+      <div
+        className={`transition-all duration-400 ease-in-out ${
+          isAnimating
+            ? 'opacity-0 blur-sm scale-75 translate-y-4'
+            : 'opacity-100 blur-0 scale-100 translate-y-0'
+        }`}
+      >
+        <p className="text-3xl md:text-4xl font-bold text-[#f2a547] text-center tracking-wide">
+          {stats[activeIndex].value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Feature row (alternating) ──
 function FeatureSection({ title, headline, description, image, video, customContent, stats, reverse = false, children }: {
   title: string; headline: string; description: string; image: string; video?: string; customContent?: React.ReactNode;
@@ -123,8 +156,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
       </div>
       <AnimatedSection delay={300}>
         {(stats || children) ? (
-          <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-4 mb-4`}>
-            <div className="flex-1 w-full relative">
+          <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
+            <div className="w-full relative">
               {customContent ? customContent : video ? (
                 <>
                   {!featureVideoLoaded && (
@@ -141,18 +174,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
                 <img src={image} alt={headline} className="w-full rounded-2xl" />
               )}
             </div>
-            <div className="flex-1 space-y-8">
-              {stats && (
-                <div className="grid grid-cols-2 gap-6">
-                  {stats.map((s) => (
-                    <div key={s.label}>
-                      <p className="text-3xl md:text-4xl font-bold text-[#f2a547]">{s.value}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {children}
-            </div>
+            {stats && <CyclingStats stats={stats} />}
+            {children && <div className="mt-8">{children}</div>}
           </div>
         ) : (
           <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-0 relative">
