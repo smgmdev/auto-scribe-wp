@@ -68,7 +68,7 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
   return (
     <div ref={ref} className="group relative overflow-hidden rounded-none bg-[#1d1d1f] transition-all duration-700"
       style={{ opacity: isInView ? 1 : 0, transform: isInView ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)', transitionDelay: `${delay}ms` }}>
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[3/3] overflow-hidden">
         {video ? (
           <video autoPlay loop muted playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
             <source src={video} type="video/mp4" />
