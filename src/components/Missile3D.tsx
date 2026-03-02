@@ -4,83 +4,81 @@ import { useRef, Suspense, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function ShieldIcon() {
+function PumpingLock() {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.position.y = 1.6 + Math.sin(state.clock.elapsedTime * 1.5) * 0.04;
-    }
+    if (!groupRef.current) return;
+    const t = state.clock.elapsedTime;
+    const scale = 1 + Math.sin(t * 2.5) * 0.15;
+    groupRef.current.scale.set(scale, scale, scale);
+    groupRef.current.position.y = 2.2 + Math.sin(t * 1.5) * 0.05;
   });
 
-  const shieldGeo = useMemo(() => {
+  // Lock body (rounded rectangle)
+  const bodyGeo = useMemo(() => {
     const shape = new THREE.Shape();
-    // Shield path
-    shape.moveTo(0, 0.55);
-    shape.bezierCurveTo(0.35, 0.55, 0.5, 0.35, 0.5, 0.1);
-    shape.bezierCurveTo(0.5, -0.15, 0.3, -0.4, 0, -0.6);
-    shape.bezierCurveTo(-0.3, -0.4, -0.5, -0.15, -0.5, 0.1);
-    shape.bezierCurveTo(-0.5, 0.35, -0.35, 0.55, 0, 0.55);
+    const w = 0.35, h = 0.3, r = 0.06;
+    shape.moveTo(-w + r, -h);
+    shape.lineTo(w - r, -h);
+    shape.quadraticCurveTo(w, -h, w, -h + r);
+    shape.lineTo(w, h - r);
+    shape.quadraticCurveTo(w, h, w - r, h);
+    shape.lineTo(-w + r, h);
+    shape.quadraticCurveTo(-w, h, -w, h - r);
+    shape.lineTo(-w, -h + r);
+    shape.quadraticCurveTo(-w, -h, -w + r, -h);
     return new THREE.ShapeGeometry(shape);
   }, []);
 
-  const outlinePoints = useMemo(() => {
-    const pts: number[] = [];
-    const steps = 48;
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const angle = t * Math.PI * 2;
-      // Parametric shield shape
-      let x, y;
-      if (t <= 0.25) {
-        // top-right curve
-        x = Math.sin(angle) * 0.5;
-        y = 0.55 - (0.55 - 0.1) * (t / 0.25);
-      } else if (t <= 0.5) {
-        // bottom-right to bottom
-        const lt = (t - 0.25) / 0.25;
-        x = 0.5 * (1 - lt);
-        y = 0.1 - 0.7 * lt;
-      } else if (t <= 0.75) {
-        // bottom to left
-        const lt = (t - 0.5) / 0.25;
-        x = -0.5 * lt;
-        y = -0.6 + 0.7 * lt;
-      } else {
-        // left to top
-        const lt = (t - 0.75) / 0.25;
-        x = -0.5 * (1 - lt);
-        y = 0.1 + (0.55 - 0.1) * lt;
-      }
-      pts.push(x, y, 0);
-    }
-    return new Float32Array(pts);
+  // Lock shackle (U-shape arc)
+  const shackleGeo = useMemo(() => {
+    const curve = new THREE.EllipseCurve(0, 0, 0.2, 0.25, 0, Math.PI, false, 0);
+    const points = curve.getPoints(32);
+    const geo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
+    return geo;
   }, []);
 
   return (
-    <group ref={groupRef} position={[0, 1.6, 0]} scale={0.6}>
-      {/* Shield fill */}
-      <mesh geometry={shieldGeo}>
+    <group ref={groupRef} position={[0, 2.2, 0]}>
+      {/* Lock body */}
+      <mesh geometry={bodyGeo} position={[0, -0.15, 0]}>
         <meshStandardMaterial
-          color="#007AFF"
-          emissive="#007AFF"
-          emissiveIntensity={0.5}
+          color="#f2a547"
+          emissive="#f2a547"
+          emissiveIntensity={0.6}
           transparent
-          opacity={0.2}
+          opacity={0.85}
           side={THREE.DoubleSide}
           depthWrite={false}
         />
       </mesh>
-      {/* Shield outline */}
-      <mesh geometry={shieldGeo}>
+      {/* Lock shackle - rendered as thin tube */}
+      <group position={[0, 0.15, 0]}>
+        <mesh>
+          <torusGeometry args={[0.2, 0.02, 8, 32, Math.PI]} />
+          <meshStandardMaterial color="#f2a547" emissive="#f2a547" emissiveIntensity={0.6} />
+        </mesh>
+      </group>
+      {/* Keyhole */}
+      <mesh position={[0, -0.1, 0.01]}>
+        <circleGeometry args={[0.06, 16]} />
+        <meshStandardMaterial color="#000000" transparent opacity={0.7} depthWrite={false} />
+      </mesh>
+      <mesh position={[0, -0.2, 0.01]}>
+        <planeGeometry args={[0.04, 0.1]} />
+        <meshStandardMaterial color="#000000" transparent opacity={0.7} depthWrite={false} />
+      </mesh>
+      {/* Glow ring */}
+      <mesh position={[0, -0.05, -0.01]}>
+        <ringGeometry args={[0.5, 0.55, 32]} />
         <meshStandardMaterial
-          color="#007AFF"
-          emissive="#007AFF"
-          emissiveIntensity={1}
+          color="#f2a547"
+          emissive="#f2a547"
+          emissiveIntensity={0.8}
           transparent
-          opacity={0.5}
+          opacity={0.15}
           side={THREE.DoubleSide}
-          wireframe
           depthWrite={false}
         />
       </mesh>
@@ -103,7 +101,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      
+      <PumpingLock />
     </>
   );
 }
