@@ -400,26 +400,7 @@ export default function ArcanaIntelligence() {
             image={globalImg}
             video={globalVideo}
             reverse
-            stats={[
-              { value: '195', label: 'Countries' },
-              { value: '10K+', label: 'Media sources' },
-              { value: '7', label: 'Continents' },
-              { value: '∞', label: 'Scalability' },
-            ]}
-          >
-            <div className="space-y-4">
-              {[
-                { title: 'Geopolitical Mapping', desc: 'Live threat level visualization on an interactive 3D globe.' },
-                { title: 'Regional Breakdowns', desc: 'Drill into any country for localized intelligence and media landscape data.' },
-                { title: 'Cross‑Border Tracking', desc: 'Follow events as they ripple across borders and influence global narratives.' },
-              ].map((f) => (
-                <div key={f.title} className="border-l-2 border-[#007AFF] pl-4">
-                  <p className="text-white font-medium text-sm">{f.title}</p>
-                  <p className="text-white/50 text-sm">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </FeatureSection>
+          />
         </section>
 
         {/* ══════════════ SECURITY ══════════════ */}
