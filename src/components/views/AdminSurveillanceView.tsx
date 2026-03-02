@@ -380,7 +380,7 @@ export function AdminSurveillanceView() {
               headerClassName="!bg-[#0d1220] !border-white/5"
               bodyClassName="!p-0"
               headerContent={selectedCountry && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pl-2">
                   <span className="text-sm font-bold text-white">{selectedCountry.name}</span>
                   <span className="text-xs text-gray-500">{selectedCountry.code}</span>
                 </div>
@@ -480,7 +480,7 @@ export function AdminSurveillanceView() {
                             <span className="text-xs text-red-400/80 block mb-1 flex items-center gap-1">
                               <Rocket className="w-3 h-3" /> Launched ({launched.length})
                             </span>
-                            <ScrollArea className="max-h-40">
+                            <ScrollArea className="max-h-60">
                               <ul className="space-y-1.5">
                                 {launched.map(m => renderAlert(m, 'launched'))}
                               </ul>
@@ -492,7 +492,7 @@ export function AdminSurveillanceView() {
                             <span className="text-xs text-blue-400/80 block mb-1 flex items-center gap-1">
                               <ShieldAlert className="w-3 h-3" /> Incoming ({targeted.length})
                             </span>
-                            <ScrollArea className="max-h-40">
+                            <ScrollArea className="max-h-60">
                               <ul className="space-y-1.5">
                                 {targeted.map(m => renderAlert(m, 'targeted'))}
                               </ul>
