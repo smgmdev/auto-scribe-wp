@@ -178,6 +178,7 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
 // ══════════════════════════════════════════
 // Main page
 // ══════════════════════════════════════════
+// Force clean render after hook count change
 export default function ArcanaIntelligence() {
   const navigate = useNavigate();
   const { user } = useAuth();
