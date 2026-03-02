@@ -19,7 +19,7 @@ function TargetOverlay() {
   const r = 1.5; // outer radius
 
   return (
-    <group ref={groupRef} position={[0, 0.8, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]}>
       {/* Outer ring */}
       <mesh>
         <ringGeometry args={[r - 0.04, r, 64]} />
