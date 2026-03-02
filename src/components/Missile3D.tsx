@@ -164,22 +164,26 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   useFrame((_, delta) => {
     if (!groupRef.current) return;
     phaseRef.current += delta;
-    const cycle = phaseRef.current % 5;
+    const cycle = phaseRef.current % 4;
 
-    if (cycle < 3.5) {
-      // Approach — missile flies from far background toward camera
-      const p = cycle / 3.5;
-      const e = p * p * (3 - 2 * p);
-      groupRef.current.position.set(
-        Math.sin(p * Math.PI * 0.3) * 0.8,
-        Math.cos(p * Math.PI * 0.5) * 0.3 + 0.3,
-        THREE.MathUtils.lerp(20, 1, e)
+    if (cycle < 3) {
+      // Fly from left to right across the scene
+      const p = cycle / 3; // 0 → 1
+      const e = p * p * (3 - 2 * p); // smoothstep
+      const x = THREE.MathUtils.lerp(-6, 6, e);
+      const y = Math.sin(p * Math.PI) * 0.8 + 0.3; // gentle arc
+      const z = 2 + Math.sin(p * Math.PI) * -1; // slight depth variation
+      groupRef.current.position.set(x, y, z);
+      // Rotate to face right (flying direction)
+      groupRef.current.rotation.set(
+        Math.sin(p * Math.PI) * -0.2, // slight nose pitch
+        -Math.PI / 2, // face right
+        Math.sin(p * Math.PI) * 0.15 // slight roll
       );
-      groupRef.current.rotation.set(0.15, Math.PI, Math.sin(p * Math.PI) * 0.1);
-      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(0.1, 3, e));
+      groupRef.current.scale.setScalar(2);
     } else {
-      // Reset — hidden, waiting to loop
-      groupRef.current.position.set(0, 0.5, 20);
+      // Brief reset
+      groupRef.current.position.set(-6, 0.3, 2);
       groupRef.current.scale.setScalar(0.01);
     }
     missilePosRef.current.copy(groupRef.current.position);
