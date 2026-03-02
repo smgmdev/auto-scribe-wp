@@ -23,6 +23,7 @@ function getThreatBadge(level: string, score?: number) {
 interface MissileAlert {
   id: string;
   title: string;
+  published_at: string | null;
   created_at: string;
   origin_country_name: string | null;
   destination_country_name: string | null;
@@ -33,6 +34,7 @@ export function SurveillanceCountryPopup() {
   const selectedCountry = useAppStore((s) => s.surveillanceCountry);
   const showPopup = useAppStore((s) => s.showSurveillancePopup);
   const closeSurveillancePopup = useAppStore((s) => s.closeSurveillancePopup);
+  const timeFilter = useAppStore((s) => s.surveillanceTimeFilter);
   const [countryMissiles, setCountryMissiles] = useState<MissileAlert[]>([]);
 
   useEffect(() => {
@@ -42,17 +44,20 @@ export function SurveillanceCountryPopup() {
     }
     const fetchCountryMissiles = async () => {
       const code = selectedCountry.code;
+      const hours = parseFloat(timeFilter);
+      const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from('missile_alerts')
-        .select('id, title, created_at, origin_country_name, destination_country_name, severity')
+        .select('id, title, published_at, created_at, origin_country_name, destination_country_name, severity')
         .eq('active', true)
         .or(`origin_country_code.eq.${code},destination_country_code.eq.${code}`)
-        .order('created_at', { ascending: false })
+        .gte('published_at', cutoff)
+        .order('published_at', { ascending: false })
         .limit(20);
       if (data) setCountryMissiles(data);
     };
     fetchCountryMissiles();
-  }, [selectedCountry]);
+  }, [selectedCountry, timeFilter]);
 
   if (!selectedCountry) return null;
 
@@ -69,7 +74,7 @@ export function SurveillanceCountryPopup() {
   };
 
   const renderAlert = (m: MissileAlert, direction: 'launched' | 'targeted') => {
-    const date = new Date(m.created_at);
+    const date = new Date(m.published_at || m.created_at);
     const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
     return (
       <li key={m.id} className={cn(
@@ -108,7 +113,7 @@ export function SurveillanceCountryPopup() {
       onOpenChange={(open) => {
         if (!open) closeSurveillancePopup();
       }}
-      width={countryMissiles.length > 0 ? 740 : 360}
+      width={740}
       maxHeight="75vh"
       zIndex={200}
       className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
@@ -128,7 +133,7 @@ export function SurveillanceCountryPopup() {
     >
       <div className="flex flex-col md:flex-row">
         {/* Country info panel */}
-        <div className={cn("p-4 space-y-3", countryMissiles.length > 0 ? "md:w-1/2 md:border-r md:border-white/5" : "w-full")}>
+        <div className={cn("p-4 space-y-3 md:w-1/2 md:border-r md:border-white/5")}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Threat Level</span>
             <Badge variant="outline" className={cn("text-xs", getThreatBadge(selectedCountry.threat_level, selectedCountry.score).color)}>
@@ -159,34 +164,44 @@ export function SurveillanceCountryPopup() {
         </div>
 
         {/* Attacks panel */}
-        {countryMissiles.length > 0 && (launched.length > 0 || targeted.length > 0) && (
-          <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Rocket className="w-4 h-4 text-red-400" />
-              <span className="text-sm font-bold text-red-400">Attacks</span>
-            </div>
-            {launched.length > 0 && (
-              <div>
-                <span className="text-xs text-red-400/80 block mb-1 flex items-center gap-1">
-                  <Rocket className="w-3 h-3" /> Launched ({launched.length})
-                </span>
-                <ul className="space-y-1.5">
-                  {launched.map(m => renderAlert(m, 'launched'))}
-                </ul>
-              </div>
-            )}
-            {targeted.length > 0 && (
-              <div>
-                <span className="text-xs text-blue-400/80 block mb-1 flex items-center gap-1">
-                  <ShieldAlert className="w-3 h-3" /> Incoming ({targeted.length})
-                </span>
-                <ul className="space-y-1.5">
-                  {targeted.map(m => renderAlert(m, 'targeted'))}
-                </ul>
-              </div>
-            )}
+        <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
+          <div className="flex items-center gap-2 mb-2">
+            <Rocket className="w-4 h-4 text-red-400" />
+            <span className="text-sm font-bold text-red-400">Attacks</span>
+            <span className="text-[10px] text-gray-600 ml-auto">
+              last {timeFilter === '168' ? '7d' : `${timeFilter}h`}
+            </span>
           </div>
-        )}
+          {countryMissiles.length === 0 ? (
+            <div className="text-center py-6">
+              <ShieldAlert className="w-5 h-5 text-green-500/50 mx-auto mb-2" />
+              <p className="text-xs text-gray-500">No attacks in this time window</p>
+            </div>
+          ) : (
+            <>
+              {launched.length > 0 && (
+                <div>
+                  <span className="text-xs text-red-400/80 block mb-1 flex items-center gap-1">
+                    <Rocket className="w-3 h-3" /> Launched ({launched.length})
+                  </span>
+                  <ul className="space-y-1.5">
+                    {launched.map(m => renderAlert(m, 'launched'))}
+                  </ul>
+                </div>
+              )}
+              {targeted.length > 0 && (
+                <div>
+                  <span className="text-xs text-blue-400/80 block mb-1 flex items-center gap-1">
+                    <ShieldAlert className="w-3 h-3" /> Incoming ({targeted.length})
+                  </span>
+                  <ul className="space-y-1.5">
+                    {targeted.map(m => renderAlert(m, 'targeted'))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </DraggablePopup>
   );
