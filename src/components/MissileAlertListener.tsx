@@ -109,21 +109,21 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
   const colors = getAlertColors(type);
 
   return (
-    <div className={`relative w-full max-w-sm mx-2 rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
+    <div className={`relative w-full max-w-sm sm:max-w-sm max-sm:max-w-[calc(100vw-2rem)] mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse`} />
       
-      <div className="p-4 text-center space-y-3">
+      <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2">
         <div className="flex justify-center">
           <div className="relative">
-            <div className={`w-12 h-12 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
-              {getAlertIcon(type, `w-6 h-6 ${colors.iconColor}`)}
+            <div className={`w-12 h-12 max-sm:w-10 max-sm:h-10 rounded-full ${colors.iconBg} border-2 ${colors.iconBorder} flex items-center justify-center animate-pulse`}>
+              {getAlertIcon(type, `w-6 h-6 max-sm:w-5 max-sm:h-5 ${colors.iconColor}`)}
             </div>
-            <div className={`absolute inset-0 w-12 h-12 rounded-full border ${colors.pingBorder} animate-ping`} />
+            <div className={`absolute inset-0 w-12 h-12 max-sm:w-10 max-sm:h-10 rounded-full border ${colors.pingBorder} animate-ping`} />
           </div>
         </div>
 
         <div>
-          <h2 className={`text-lg font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
+          <h2 className={`text-lg max-sm:text-base font-bold font-mono ${colors.titleColor} tracking-wider animate-pulse`}>
             ⚠ {getAlertLabel(type)} ALERT ⚠
           </h2>
           <p className={`text-[10px] ${colors.subtitleColor} font-mono mt-0.5 uppercase tracking-widest`}>
@@ -328,9 +328,9 @@ export function MissileAlertListener() {
   const queuedCount = alerts.length - visibleAlerts.length;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none animate-fade-in">
-      <div className="flex flex-col items-center gap-2 pointer-events-auto">
-        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4">
+    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-end justify-center pointer-events-none animate-fade-in">
+      <div className="flex flex-col items-center gap-2 pointer-events-auto max-sm:w-full">
+        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] max-sm:max-h-[70vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-2 max-sm:pb-2">
           {visibleAlerts.map(alert => (
             <AlertPopup
               key={alert.id}
