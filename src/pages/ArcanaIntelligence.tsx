@@ -497,19 +497,19 @@ export default function ArcanaIntelligence() {
                 </div>
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
-                <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-4">Security & Privacy</p>
+                <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-4">Real Time Missile Alert</p>
                 <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-6">
-                  Your intelligence, fully protected.
+                  Instant threat detection, worldwide.
                 </h2>
                 <p className="text-lg text-white/60 mb-8 leading-relaxed">
-                  Enterprise‑grade encryption, role‑based access controls, and zero data sharing with third parties. Your insights remain exclusively yours.
+                  Live alerts for missiles, drones, and nuclear weapons broadcast globally the moment an attack is confirmed. Real‑time trajectories visualized on a 3D globe.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { icon: Shield, label: 'End‑to‑end encryption' },
-                    { icon: Eye, label: 'Audit logging' },
-                    { icon: Layers, label: 'SOC 2 compliant' },
-                    { icon: Zap, label: 'Zero data sharing' },
+                    { icon: Radar, label: 'Live radar tracking' },
+                    { icon: Globe, label: '195 countries covered' },
+                    { icon: Zap, label: 'Instant siren alerts' },
+                    { icon: Shield, label: 'Verified threats only' },
                   ].map(({ icon: I, label }) => (
                     <div key={label} className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-lg bg-[#007AFF]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
