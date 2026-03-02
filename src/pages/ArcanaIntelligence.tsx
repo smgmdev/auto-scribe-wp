@@ -148,8 +148,8 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
         <AnimatedSection>
           <p className="text-[#007AFF] text-sm font-semibold tracking-wide uppercase mb-2">{title}</p>
-          <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-4">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">{headline}</h2>
+          <div className="flex flex-wrap items-baseline gap-x-2 md:gap-x-3 mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight whitespace-nowrap">{headline}</h2>
             {stats && <CyclingStats stats={stats} />}
           </div>
         </AnimatedSection>
