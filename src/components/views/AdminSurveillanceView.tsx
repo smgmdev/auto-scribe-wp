@@ -393,7 +393,7 @@ export function AdminSurveillanceView() {
             {/* Burger menu for mobile feed */}
             <button
               onClick={() => setShowMobileFeed(true)}
-              className="lg:hidden flex items-center px-3 ml-auto border-l border-white/10 text-gray-400 hover:text-white transition-colors"
+              className="lg:hidden flex items-center px-3 ml-auto text-gray-400 hover:text-white transition-colors"
               title="Open news feed"
             >
               <Menu className="w-4 h-4" />
