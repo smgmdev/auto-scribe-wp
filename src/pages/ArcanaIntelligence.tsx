@@ -11,6 +11,7 @@ import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import heroImg from '@/assets/arcana-intel-hero.jpg';
 import heroVideo from '@/assets/arcana-intel-hero.mp4';
+import heroBgVideo from '@/assets/arcana-intel-hero-bg.mp4';
 import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
 import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
@@ -264,6 +265,19 @@ export default function ArcanaIntelligence() {
 
         {/* ══════════════ HERO ══════════════ */}
         <section id="overview" className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-black">
+          {!heroVideoLoaded && (
+            <div className="absolute bottom-4 right-4 z-20">
+              <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+            </div>
+          )}
+          <video
+            autoPlay loop muted playsInline preload="auto"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
+            onCanPlayThrough={(e) => { e.currentTarget.style.opacity = '1'; setHeroVideoLoaded(true); }}
+          >
+            <source src={heroBgVideo} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/40 z-[1]" />
           <div className="relative z-10 max-w-[980px] mx-auto px-4 md:px-6 text-center pt-72 md:pt-64 pb-40">
             <AnimatedSection>
               
