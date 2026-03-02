@@ -343,7 +343,7 @@ export function MissileAlertListener() {
           ))}
         </div>
         {queuedCount > 0 && (
-          <div className="w-full max-w-sm max-sm:max-w-full bg-black text-red-500 text-xs font-mono font-bold text-center py-2 px-4 tracking-wider">
+          <div className="w-full max-w-sm max-sm:max-w-full bg-black text-red-500 text-xs font-mono text-center py-2 px-4 tracking-wider">
             +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
           </div>
         )}
