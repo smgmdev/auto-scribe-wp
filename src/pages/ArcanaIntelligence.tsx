@@ -96,7 +96,7 @@ function HighlightCard({ icon: Icon, title, description, image, video, customCon
         )}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#1d1d1f] to-transparent" />
       </div>
-      <div className="relative px-6 pb-8 -mt-20 z-10">
+      <div className="relative px-6 pb-0 -mt-20 z-10">
         <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
         <p className="text-[15px] leading-relaxed text-white/60">{description}</p>
       </div>
