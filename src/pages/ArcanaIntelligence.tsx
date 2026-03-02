@@ -12,6 +12,7 @@ import amlogo from '@/assets/amlogo.png';
 import heroImg from '@/assets/arcana-intel-hero.jpg';
 import heroVideo from '@/assets/arcana-intel-hero.mp4';
 import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
+import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import securityImg from '@/assets/arcana-intel-security.jpg';
@@ -65,14 +66,23 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
   icon: React.ElementType; title: string; description: string; image: string; video?: string; delay?: number;
 }) {
   const { ref, isInView } = useInView();
+  const [videoLoaded, setVideoLoaded] = useState(false);
   return (
     <div ref={ref} className="group relative overflow-hidden rounded-none bg-[#1d1d1f] transition-all duration-700"
       style={{ opacity: isInView ? 1 : 0, transform: isInView ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)', transitionDelay: `${delay}ms` }}>
       <div className="relative aspect-[3/3] overflow-hidden">
         {video ? (
-          <video autoPlay loop muted playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-            <source src={video} type="video/mp4" />
-          </video>
+          <>
+            {!videoLoaded && (
+              <div className="absolute bottom-3 right-3 z-20">
+                <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
+              </div>
+            )}
+            <video autoPlay loop muted playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              onCanPlayThrough={() => setVideoLoaded(true)}>
+              <source src={video} type="video/mp4" />
+            </video>
+          </>
         ) : (
           <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
         )}
@@ -315,7 +325,7 @@ export default function ArcanaIntelligence() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={heroVideo} delay={0} />
               <HighlightCard icon={Brain} title="AI‑Powered Analysis" description="Advanced language models scan, classify, and summarize thousands of news sources in seconds." image={engineImg} delay={150} />
-              <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} delay={300} />
+              <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} video={analyticsVideo} delay={300} />
             </div>
           </div>
 
