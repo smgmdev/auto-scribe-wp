@@ -196,7 +196,7 @@ const App = () => {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/industries" element={<Industries />} />
               <Route path="/mace-ai" element={<MaceAI />} />
-              <Route path="/arcana-intelligence" element={<ArcanaIntelligence />} />
+              <Route path="/arcana-precision" element={<ArcanaIntelligence />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

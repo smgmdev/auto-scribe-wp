@@ -136,7 +136,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
               <li><button onClick={() => navigate('/media-buying')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Media Buying</button></li>
               <li><button onClick={() => navigate('/ai-article-generation')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>AI Article Generation</button></li>
               <li><button onClick={() => navigate('/mace-ai')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Mace AI</button></li>
-              <li><button onClick={() => navigate('/arcana-intelligence')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Arcana Intelligence</button></li>
+              <li><button onClick={() => navigate('/arcana-precision')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Arcana Precision</button></li>
             </ul>
           </div>
           
