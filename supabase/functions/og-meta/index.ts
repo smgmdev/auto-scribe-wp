@@ -121,6 +121,34 @@ const ROUTE_META: Record<string, { title: string; description: string }> = {
     title: 'Sitemap',
     description: 'Browse all pages on Arcana Mace — media buying, publishing, help center, and more.',
   },
+  '/arcana-precision': {
+    title: 'Arcana Precision — Advanced War Intelligence Platform',
+    description: 'Real-time war intelligence, geopolitical surveillance, and AI-powered analytics. Precision war intelligence by Arcana Mace.',
+  },
+  '/industries': {
+    title: 'Industries — Arcana Mace',
+    description: 'Learn how Arcana Mace media publishing impacts industries through strategic public relations and global media distribution.',
+  },
+  '/mace-ai': {
+    title: 'Mace AI — Arcana Mace',
+    description: 'Explore Mace AI, the intelligent assistant powering content creation, media strategy, and publishing automation on Arcana Mace.',
+  },
+  '/landing': {
+    title: 'Arcana Mace: Media Buying Marketplace',
+    description: 'Arcana Mace is a media buying marketplace connecting global brands and PR agencies for seamless media transactions.',
+  },
+  '/auth': {
+    title: 'Sign In — Arcana Mace',
+    description: 'Sign in or create an account on Arcana Mace to start buying media placements and publishing articles globally.',
+  },
+  '/payment-success': {
+    title: 'Payment Successful — Arcana Mace',
+    description: 'Your payment was successful. Thank you for your purchase on Arcana Mace.',
+  },
+  '/reset-password': {
+    title: 'Reset Password — Arcana Mace',
+    description: 'Reset your Arcana Mace account password securely.',
+  },
 };
 
 // Default fallback
