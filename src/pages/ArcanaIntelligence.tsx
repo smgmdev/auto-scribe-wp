@@ -451,13 +451,11 @@ export default function ArcanaIntelligence() {
           </div>
         </section>
 
-        {/* ══════════════ PWA + FOOTER ══════════════ */}
-        <div className="w-full bg-[#1d1d1f]">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-12">
-            <PWAInstallButtons />
-          </div>
+        <div className="border-t border-[#424245]" />
+        <div className="bg-black">
+          <PWAInstallButtons />
         </div>
-        <Footer narrow showTopBorder dark />
+        <Footer narrow dark />
       </div>
     </>
   );
