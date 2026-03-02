@@ -5,7 +5,7 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { Menu, Search, Volume2, VolumeOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-import { QuickNavBanner } from './QuickNavBanner';
+
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
@@ -55,18 +55,6 @@ export function MainLayout({
   }, []);
 
   return <div className="min-h-screen bg-background">
-      {/* Desktop: separate fixed banners */}
-      <div className="hidden lg:block">
-        <div className="fixed top-0 left-[60px] right-0 z-50 h-16 flex flex-col transition-all duration-300">
-          <QuickNavBanner inDashboard />
-          <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
-            <p className="text-white/80 text-xs flex items-center">
-              <span>Get free credits by finding bugs on Arcana Mace</span>
-              <Link to="/report-bug" className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Mobile: stacked fixed container that flows naturally */}
       <div ref={mobileTopRef} className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
@@ -123,7 +111,7 @@ export function MainLayout({
         className={cn(
           "h-screen overflow-y-auto flex flex-col transition-all duration-300",
           isDarkFooter || isDashboardFooter ? 'bg-black' : '',
-          "lg:pt-16",
+          
           "lg:pl-[60px]",
         )}
         style={{ 
