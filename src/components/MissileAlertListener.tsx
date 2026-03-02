@@ -178,9 +178,25 @@ function getAlertType(severity: string): AlertType {
   return 'missile';
 }
 
+const DISMISSED_STORAGE_KEY = 'missile_alerts_dismissed';
+
+function loadDismissed(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DISMISSED_STORAGE_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch {}
+  return new Set();
+}
+
+function saveDismissed(ids: Set<string>) {
+  try {
+    localStorage.setItem(DISMISSED_STORAGE_KEY, JSON.stringify([...ids]));
+  } catch {}
+}
+
 export function MissileAlertListener() {
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
-  const dismissedRef = useRef<Set<string>>(new Set());
+  const dismissedRef = useRef<Set<string>>(loadDismissed());
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const soundStoppedRef = useRef(false);
@@ -285,6 +301,7 @@ export function MissileAlertListener() {
 
   const dismissAlert = useCallback((id: string) => {
     dismissedRef.current.add(id);
+    saveDismissed(dismissedRef.current);
     setAlerts(prev => {
       const remaining = prev.filter(a => a.id !== id);
       // If no more alerts, stop sound
