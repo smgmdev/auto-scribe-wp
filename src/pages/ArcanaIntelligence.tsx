@@ -164,7 +164,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
                     <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
                   </div>
                 )}
-                <video autoPlay loop muted playsInline className="w-full rounded-2xl"
+                <video autoPlay loop muted playsInline className="w-full"
                   onCanPlayThrough={() => setFeatureVideoLoaded(true)}>
                   <source src={video} type="video/mp4" />
                 </video>
