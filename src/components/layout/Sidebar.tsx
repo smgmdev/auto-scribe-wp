@@ -1873,18 +1873,20 @@ export function Sidebar({
   const sidebarCollapsedStore = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebarCollapsed = useAppStore((s) => s.toggleSidebarCollapsed);
   
-  // Only apply collapsed state on desktop (lg+). On mobile the sidebar is always full-width overlay.
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+  // On mobile, sidebar is always full-width overlay (w-64), collapsed state is ignored for rendering
+  const [isLg, setIsLg] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
   useEffect(() => {
-    const handler = () => setIsDesktop(window.innerWidth >= 1024);
+    const handler = () => setIsLg(window.innerWidth >= 1024);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
-  const sidebarCollapsed = isDesktop && sidebarCollapsedStore;
+  // sidebarCollapsed: only true on desktop when store says collapsed
+  const sidebarCollapsed = isLg && sidebarCollapsedStore;
+
   return <TooltipProvider delayDuration={0}>
       <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
     // Desktop: always visible, width depends on collapsed state
-    sidebarCollapsed ? "lg:w-[60px]" : "lg:w-64",
+    sidebarCollapsedStore ? "lg:w-[60px]" : "lg:w-64",
     "lg:translate-x-0",
     // Mobile: always full width slide in/out
     "w-64",
