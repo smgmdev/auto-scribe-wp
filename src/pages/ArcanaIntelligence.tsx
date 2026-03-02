@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair, Radar } from 'lucide-react';
+import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair, Rocket } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -521,9 +521,9 @@ export default function ArcanaIntelligence() {
                     <Shield className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/30 blur-md" strokeWidth={2} />
                     <Shield className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/10" strokeWidth={0.5} fill="rgba(0,122,255,0.04)" />
                     <Shield className="relative w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_25px_rgba(0,122,255,0.5)]" strokeWidth={1.2} />
-                    {/* Inner radar icon - steady rotation */}
+                    {/* Inner missile icon - steady rotation */}
                     <div className="absolute inset-0 flex items-center justify-center pt-2">
-                      <Radar className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40 animate-[shieldOrbit_4s_linear_infinite]" strokeWidth={1.5} />
+                      <Rocket className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40 animate-[shieldOrbit_4s_linear_infinite]" strokeWidth={1.5} />
                     </div>
                     {/* Scan line */}
                     <div className="absolute inset-0 overflow-hidden rounded-full">
@@ -543,7 +543,7 @@ export default function ArcanaIntelligence() {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { icon: Radar, label: 'Live radar tracking' },
+                    { icon: Rocket, label: 'Live missile tracking' },
                     { icon: Globe, label: '195 countries covered' },
                     { icon: Zap, label: 'Instant siren alerts' },
                     { icon: Shield, label: 'Verified threats only' },
