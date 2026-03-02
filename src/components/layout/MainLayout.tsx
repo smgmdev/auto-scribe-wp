@@ -1,4 +1,5 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { Menu, Search, Volume2, VolumeOff } from 'lucide-react';
@@ -23,6 +24,7 @@ export function MainLayout({
   const mobileTopRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const currentView = useAppStore((state) => state.currentView);
+  const sidebarCollapsed = useAppStore((state) => state.sidebarCollapsed);
   const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   const soundEnabled = useAppStore((state) => state.soundEnabled);
   const toggleSound = useAppStore((state) => state.toggleSound);
@@ -55,7 +57,7 @@ export function MainLayout({
   return <div className="min-h-screen bg-background">
       {/* Desktop: separate fixed banners */}
       <div className="hidden lg:block">
-        <div className="fixed top-0 left-64 right-0 z-50 h-16 flex flex-col">
+        <div className={cn("fixed top-0 right-0 z-50 h-16 flex flex-col transition-all duration-300", sidebarCollapsed ? "left-16" : "left-64")}>
           <QuickNavBanner inDashboard />
           <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
             <p className="text-white/80 text-xs flex items-center">
@@ -118,7 +120,7 @@ export function MainLayout({
       {/* Main Content */}
       <main 
         ref={mainRef}
-        className={`lg:pl-64 lg:pt-16 h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
+        className={cn("lg:pt-16 h-screen overflow-y-auto flex flex-col transition-all duration-300", sidebarCollapsed ? "lg:pl-16" : "lg:pl-64", isDarkFooter || isDashboardFooter ? 'bg-black' : '')}
         style={{ 
           paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
           WebkitOverflowScrolling: 'touch',

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion, Mic, Play, Radar, ScanEye } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion, Mic, Play, Radar, ScanEye, Menu } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -1869,35 +1869,54 @@ export function Sidebar({
     onClose();
   };
 
+  const sidebarCollapsedStore = useAppStore((s) => s.sidebarCollapsed);
+  const toggleSidebarCollapsed = useAppStore((s) => s.toggleSidebarCollapsed);
+  
+  // Only apply collapsed state on desktop (lg+). On mobile the sidebar is always full-width overlay.
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  const sidebarCollapsed = isDesktop && sidebarCollapsedStore;
   return <>
-      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
-    // Desktop: always visible
+      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
+    // Desktop: always visible, width depends on collapsed state
+    sidebarCollapsed ? "lg:w-16" : "lg:w-64",
     "lg:translate-x-0",
-    // Mobile: slide in/out
+    // Mobile: always full width slide in/out
+    "w-64",
     isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-6">
-            <button 
-              onClick={() => navigate('/')} 
-              className="flex items-center gap-3"
-            >
-              <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
-              <div>
-                <h1 className="text-lg font-semibold text-white">
-                  Arcana Mace 
-                </h1>
-              </div>
-            </button>
-            {/* Close button for mobile */}
-            <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full">
-              <X className="h-5 w-5" />
-            </Button>
+          <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-3">
+            <div className="flex items-center gap-2">
+              {/* Desktop: burger toggles collapse */}
+              <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="hidden lg:flex text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                <Menu className="h-5 w-5" />
+              </Button>
+              {/* Mobile: X closes sidebar */}
+              <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
+                <X className="h-5 w-5" />
+              </Button>
+              {!sidebarCollapsed && (
+                <button 
+                  onClick={() => navigate('/')} 
+                  className="flex items-center gap-2"
+                >
+                  <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
+                  <h1 className="text-lg font-semibold text-white whitespace-nowrap">
+                    Arcana Mace
+                  </h1>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
-            <div className="space-y-1 px-4">
+            <div className={cn("space-y-1", sidebarCollapsed ? "px-2" : "px-4")}>
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
@@ -1923,6 +1942,33 @@ export function Sidebar({
                   ? unreadFlaggedMessagesCount
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount + usersGroupCount;
+                if (sidebarCollapsed) {
+                  // In collapsed mode: show only icon, click navigates to first submenu item
+                  return (
+                    <div key={item.id} className="relative group">
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                          isActive && "text-[#3872e0] font-medium bg-sidebar-accent"
+                        )}
+                        onClick={() => {
+                          const firstSub = item.submenu?.[0];
+                          if (firstSub) handleNavClick(firstSub.id);
+                        }}
+                        title={item.label}
+                      >
+                        <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
+                      </Button>
+                      {totalDropdownCount > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
+                          {totalDropdownCount}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={item.id} className="relative">
                     <Button
@@ -2067,6 +2113,30 @@ export function Sidebar({
               const supportBadgeCount = item.id === 'admin-support' ? unreadSupportTicketsCount : 0;
               const feedbackBadgeCount = item.id === 'admin-feedback' ? unreadBugReportsCount : 0;
               
+              if (sidebarCollapsed) {
+                const badgeCount = supportBadgeCount || feedbackBadgeCount;
+                return (
+                  <div key={item.id} className="relative">
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                        isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
+                      )}
+                      onClick={() => handleNavClick(item.id)}
+                      title={item.label}
+                    >
+                      <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
+                    </Button>
+                    {badgeCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                        {badgeCount}
+                      </span>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <div key={item.id} className="relative">
                   <Button
@@ -2092,14 +2162,14 @@ export function Sidebar({
           </nav>
 
           {/* Agency Status & Account */}
-          <div className="border-t border-sidebar-border px-4 py-4 space-y-3 flex-shrink-0">
-            {/* Agency Status Card - Only for non-admin users */}
-            {!isAdmin && !agencyDataLoaded && (
+          <div className={cn("border-t border-sidebar-border py-4 space-y-3 flex-shrink-0", sidebarCollapsed ? "px-2" : "px-4")}>
+            {/* Agency Status Card - Only for non-admin users, hidden when collapsed */}
+            {!sidebarCollapsed && !isAdmin && !agencyDataLoaded && (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-5 w-5 animate-spin text-sidebar-foreground/50" />
               </div>
             )}
-            {!isAdmin && agencyDataLoaded && (
+            {!sidebarCollapsed && !isAdmin && agencyDataLoaded && (
               <AgencyStatusCard
                 applicationStatus={userApplicationStatus}
                 applicationId={applicationId}
@@ -2115,39 +2185,58 @@ export function Sidebar({
             )}
             
             <div className="space-y-1">
-              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
+              <Button variant="ghost" className={cn(
+                "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium"
+              )} onClick={() => handleNavClick('account')} title={sidebarCollapsed ? "Account Settings" : undefined}>
                 <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
-                Account Settings
+                {!sidebarCollapsed && "Account Settings"}
               </Button>
               <div className="relative">
-                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
+                <Button variant="ghost" className={cn(
+                  "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                  sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                  (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium"
+                )} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')} title={sidebarCollapsed ? "Support" : undefined}>
                   <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
-                  Support
+                  {!sidebarCollapsed && "Support"}
                 </Button>
                 {(isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount) > 0 && (
-                  <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                  <span className={cn("absolute -top-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center", sidebarCollapsed ? "-right-1" : "right-2")}>
                     {isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount}
                   </span>
                 )}
               </div>
               {isAdmin && (
                 <>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-surveillance')}>
+                  <Button variant="ghost" className={cn(
+                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                    currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium"
+                  )} onClick={() => handleNavClick('admin-surveillance')} title={sidebarCollapsed ? "Surveillance" : undefined}>
                     <ScanEye className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
-                    Surveillance
+                    {!sidebarCollapsed && "Surveillance"}
                   </Button>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
+                  <Button variant="ghost" className={cn(
+                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
+                    currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium"
+                  )} onClick={() => handleNavClick('admin-system')} title={sidebarCollapsed ? "Terminal" : undefined}>
                     <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
-                    Terminal
+                    {!sidebarCollapsed && "Terminal"}
                   </Button>
                 </>
               )}
-              <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={() => {
+              <Button variant="ghost" className={cn(
+                "w-full text-sidebar-foreground/70 hover:text-destructive",
+                sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3"
+              )} onClick={() => {
                 navigate('/');
                 signOut();
-              }}>
+              }} title={sidebarCollapsed ? "Log Out" : undefined}>
                 <LogOut className="h-5 w-5" />
-                Log Out
+                {!sidebarCollapsed && "Log Out"}
               </Button>
             </div>
           </div>
