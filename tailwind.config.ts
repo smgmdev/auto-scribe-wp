@@ -118,13 +118,12 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
 		keyframes: {
-			'shieldFloat': {
-				'0%, 100%': { transform: 'translateY(0)' },
-				'50%': { transform: 'translateY(-12px)' }
-			},
-			'shieldPulse': {
-				'0%, 100%': { transform: 'scale(1)', opacity: '0.15' },
-				'50%': { transform: 'scale(1.15)', opacity: '0.05' }
+			'shieldHeartbeat': {
+				'0%, 100%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 20px rgba(0,122,255,0.3)) brightness(1)' },
+				'15%': { transform: 'scale(1.06)', filter: 'drop-shadow(0 0 35px rgba(0,122,255,0.6)) brightness(1.15)' },
+				'30%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 20px rgba(0,122,255,0.3)) brightness(1)' },
+				'45%': { transform: 'scale(1.04)', filter: 'drop-shadow(0 0 30px rgba(0,122,255,0.5)) brightness(1.1)' },
+				'60%': { transform: 'scale(1)', filter: 'drop-shadow(0 0 20px rgba(0,122,255,0.3)) brightness(1)' },
 			},
 			'accordion-down': {
 				from: {
