@@ -215,6 +215,30 @@ export function AdminSurveillanceView() {
               </span>
             </div>
 
+            <div className="flex items-center gap-1 px-2 border-l border-white/10 self-stretch">
+              <button
+                onClick={() => setResetTrigger(t => t + 1)}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title="Reset globe view"
+              >
+                <Crosshair className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setGlobeSpinning(!globeSpinning)}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title={globeSpinning ? 'Pause rotation' : 'Start rotation'}
+              >
+                {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={runScan}
+                disabled={loading}
+                className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50"
+                title="Rescan"
+              >
+                <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+              </button>
+            </div>
 
             <div className="flex items-center gap-1.5 px-2 bg-white/5 border-l border-r border-white/10 self-stretch">
               <Rocket className="w-3 h-3 text-blue-400" />
@@ -269,31 +293,6 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setResetTrigger(t => t + 1)}
-              className="text-gray-400 hover:text-white transition-colors p-1"
-              title="Reset globe view"
-            >
-              <Crosshair className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setGlobeSpinning(!globeSpinning)}
-              className="text-gray-400 hover:text-white transition-colors p-1"
-              title={globeSpinning ? 'Pause rotation' : 'Start rotation'}
-            >
-              {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            </button>
-            <button
-              onClick={runScan}
-              disabled={loading}
-              className="text-gray-400 hover:text-white transition-colors p-1 disabled:opacity-50"
-              title="Rescan"
-            >
-              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-            </button>
           </div>
         </div>
 
