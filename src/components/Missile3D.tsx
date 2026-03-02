@@ -100,7 +100,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   return (
     <>
       <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
-        <primitive object={scene} scale={1} />
+        <primitive object={scene} scale={1.8} />
       </group>
       <Particles />
     </>
@@ -111,7 +111,7 @@ export default function Missile3D() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <div className="relative w-full max-w-md mx-auto aspect-square bg-black rounded-2xl overflow-hidden">
+    <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden">
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-[#007AFF] animate-spin" />
