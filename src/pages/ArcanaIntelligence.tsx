@@ -118,8 +118,41 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
         </AnimatedSection>
       </div>
       <AnimatedSection delay={300}>
-        <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 mb-16`}>
-          <div className="flex-1 w-full relative">
+        {(stats || children) ? (
+          <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 mb-16`}>
+            <div className="flex-1 w-full relative">
+              {video ? (
+                <>
+                  {!featureVideoLoaded && (
+                    <div className="absolute bottom-3 right-3 z-20">
+                      <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
+                    </div>
+                  )}
+                  <video autoPlay loop muted playsInline className="w-full rounded-2xl"
+                    onCanPlayThrough={() => setFeatureVideoLoaded(true)}>
+                    <source src={video} type="video/mp4" />
+                  </video>
+                </>
+              ) : (
+                <img src={image} alt={headline} className="w-full rounded-2xl" />
+              )}
+            </div>
+            <div className="flex-1 space-y-8">
+              {stats && (
+                <div className="grid grid-cols-2 gap-6">
+                  {stats.map((s) => (
+                    <div key={s.label}>
+                      <p className="text-3xl md:text-4xl font-bold text-white">{s.value}</p>
+                      <p className="text-sm text-white/50 mt-1">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {children}
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 mb-16 relative">
             {video ? (
               <>
                 {!featureVideoLoaded && (
@@ -136,20 +169,7 @@ function FeatureSection({ title, headline, description, image, video, stats, rev
               <img src={image} alt={headline} className="w-full rounded-2xl" />
             )}
           </div>
-          <div className="flex-1 space-y-8">
-            {stats && (
-              <div className="grid grid-cols-2 gap-6">
-                {stats.map((s) => (
-                  <div key={s.label}>
-                    <p className="text-3xl md:text-4xl font-bold text-white">{s.value}</p>
-                    <p className="text-sm text-white/50 mt-1">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            {children}
-          </div>
-        </div>
+        )}
       </AnimatedSection>
     </section>
   );
