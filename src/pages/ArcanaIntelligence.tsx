@@ -459,15 +459,15 @@ export default function ArcanaIntelligence() {
               { value: 'Hydrogen Bomb', label: 'Continuous monitoring' },
             ]}
           >
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[
                 { title: 'Natural Language Processing', desc: 'Understands context, tone, and intent across dozens of languages through worldwide scan.' },
                 { title: 'Entity Recognition', desc: 'Automatically identifies people, organizations, locations, events and objects based on the context.' },
                 { title: 'Predictive Signals', desc: 'Detects emerging patterns before they become headlines.' },
               ].map((f) => (
-                <div key={f.title} className="border-l-2 border-[#007AFF] pl-4">
-                  <p className="text-white font-medium text-sm">{f.title}</p>
-                  <p className="text-white/50 text-sm">{f.desc}</p>
+                <div key={f.title} className="border-l-2 border-[#007AFF] pl-5">
+                  <p className="text-white font-semibold text-lg mb-1">{f.title}</p>
+                  <p className="text-white/60 text-base leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
