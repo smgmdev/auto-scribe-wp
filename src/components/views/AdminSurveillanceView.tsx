@@ -83,6 +83,7 @@ export function AdminSurveillanceView() {
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
+  const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
   const [countryMissiles, setCountryMissiles] = useState<Array<{ id: string; title: string; created_at: string; origin_country_name: string | null; destination_country_name: string | null; severity: string }>>([]);
 
   const fetchLatestScan = useCallback(async () => {
@@ -112,6 +113,8 @@ export function AdminSurveillanceView() {
       if (error) throw error;
       if (data?.scan) {
         setScanData(data.scan);
+        // Trigger trajectory re-fetch after scan creates new alerts
+        setTrajectoryRefresh(prev => prev + 1);
         toast.success('Surveillance scan complete');
       } else if (data?.error) {
         throw new Error(data.error);
@@ -186,7 +189,7 @@ export function AdminSurveillanceView() {
     fetchMissiles();
     fetchDrones();
     fetchNukes();
-  }, [fetchMissiles, fetchDrones, fetchNukes]);
+  }, [fetchMissiles, fetchDrones, fetchNukes, trajectoryRefresh]);
 
   // Fetch missile alerts related to selected country
   useEffect(() => {
