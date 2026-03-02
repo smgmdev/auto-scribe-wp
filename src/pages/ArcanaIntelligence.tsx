@@ -459,8 +459,8 @@ export default function ArcanaIntelligence() {
           >
             <div className="space-y-4">
               {[
-                { title: 'Natural Language Processing', desc: 'Understands context, tone, and intent across dozens of languages.' },
-                { title: 'Entity Recognition', desc: 'Automatically identifies people, organizations, locations, and events.' },
+                { title: 'Natural Language Processing', desc: 'Understands context, tone, and intent across dozens of languages through worldwide scan.' },
+                { title: 'Entity Recognition', desc: 'Automatically identifies people, organizations, locations, events and objects based on the context.' },
                 { title: 'Predictive Signals', desc: 'Detects emerging patterns before they become headlines.' },
               ].map((f) => (
                 <div key={f.title} className="border-l-2 border-[#007AFF] pl-4">
