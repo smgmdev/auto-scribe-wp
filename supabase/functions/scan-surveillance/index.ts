@@ -21,24 +21,33 @@ async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> 
     const data = await resp.json();
     const articles = data.articles || [];
 
-    const events = articles.map((a: any) => ({
-      title: a.title || '',
-      description: a.seendate ? `Published ${a.seendate}` : '',
-      source: a.domain || 'GDELT',
-      source_url: a.url || '',
-      country_code: a.sourcecountry?.toUpperCase()?.substring(0, 2) || null,
-      country_name: null, // GDELT doesn't always provide this
-      severity: 'medium',
-      published_at: a.seendate ? new Date(
-        a.seendate.substring(0, 4) + '-' +
-        a.seendate.substring(4, 6) + '-' +
-        a.seendate.substring(6, 8) + 'T' +
-        a.seendate.substring(8, 10) + ':' +
-        a.seendate.substring(10, 12) + ':' +
-        a.seendate.substring(12, 14) + 'Z'
-      ).toISOString() : new Date().toISOString(),
-      origin: 'gdelt',
-    }));
+    const events = articles.map((a: any) => {
+      let publishedAt = new Date().toISOString();
+      try {
+        if (a.seendate && a.seendate.length >= 14) {
+          const d = new Date(
+            a.seendate.substring(0, 4) + '-' +
+            a.seendate.substring(4, 6) + '-' +
+            a.seendate.substring(6, 8) + 'T' +
+            a.seendate.substring(8, 10) + ':' +
+            a.seendate.substring(10, 12) + ':' +
+            a.seendate.substring(12, 14) + 'Z'
+          );
+          if (!isNaN(d.getTime())) publishedAt = d.toISOString();
+        }
+      } catch { /* use default */ }
+      return {
+        title: a.title || '',
+        description: a.seendate ? `Published ${a.seendate}` : '',
+        source: a.domain || 'GDELT',
+        source_url: a.url || '',
+        country_code: a.sourcecountry?.toUpperCase()?.substring(0, 2) || null,
+        country_name: null,
+        severity: 'medium',
+        published_at: publishedAt,
+        origin: 'gdelt',
+      };
+    });
 
     console.log(`GDELT returned ${events.length} events`);
     return { events, countries: [] };
@@ -172,8 +181,18 @@ Return ONLY the JSON object, no other text.`
   const content = perplexityData.choices?.[0]?.message?.content || '';
   const citations = perplexityData.citations || [];
 
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON found in Perplexity response');
+  // Try to extract JSON — handle markdown code blocks and raw JSON
+  let jsonStr = content;
+  // Remove markdown code fences if present
+  const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    jsonStr = codeBlockMatch[1].trim();
+  }
+  const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error('Perplexity response (no JSON):', content.substring(0, 500));
+    throw new Error('No JSON found in Perplexity response');
+  }
   const scanResult = JSON.parse(jsonMatch[0]);
 
   return { scanResult, citations };
@@ -264,14 +283,24 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    // Fetch all sources in parallel
-    const [perplexityResult, gdeltResult, reliefWebEvents] = await Promise.all([
+    // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort
+    const [perplexityResult, gdeltResult, reliefWebResult] = await Promise.allSettled([
       fetchPerplexityScan(PERPLEXITY_API_KEY),
       fetchGdeltEvents(),
       fetchReliefWebAlerts(),
     ]);
 
-    const { scanResult, citations } = perplexityResult;
+    // Perplexity is required
+    if (perplexityResult.status === 'rejected') {
+      console.error('Perplexity failed:', perplexityResult.reason);
+      return new Response(JSON.stringify({ error: 'Perplexity scan failed: ' + perplexityResult.reason?.message }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { scanResult, citations } = perplexityResult.value;
+    const gdeltData = gdeltResult.status === 'fulfilled' ? gdeltResult.value : { events: [], countries: [] };
+    const reliefData = reliefWebResult.status === 'fulfilled' ? reliefWebResult.value : [];
 
     // ── Carry-forward: preserve high-threat countries that new scan downgraded ──
     // If a country was caution/danger in the last scan (within 6 hours) but the
@@ -339,14 +368,14 @@ Deno.serve(async (req) => {
     // Merge supplementary events into main results
     const mergedEvents = mergeEvents(
       scanResult.latest_events || [],
-      gdeltResult.events,
-      reliefWebEvents,
+      gdeltData.events,
+      reliefData,
     );
 
     // Build enriched source list
     const sources = ['perplexity'];
-    if (gdeltResult.events.length > 0) sources.push('gdelt');
-    if (reliefWebEvents.length > 0) sources.push('reliefweb');
+    if (gdeltData.events.length > 0) sources.push('gdelt');
+    if (reliefData.length > 0) sources.push('reliefweb');
 
     console.log(`Sources used: ${sources.join(', ')}. Total events: ${mergedEvents.length}`);
 
