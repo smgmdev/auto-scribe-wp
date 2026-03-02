@@ -206,7 +206,7 @@ export default function ArcanaIntelligence() {
 
         <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
-        <div className="h-[68px]" />
+        <div className="h-[92px]" />
 
         {/* ── Sub‑header nav ── */}
         <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[68px]'}`}>
