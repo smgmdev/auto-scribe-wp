@@ -186,7 +186,6 @@ export default function ArcanaIntelligence() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
-  const [securityVideoLoaded, setSecurityVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -431,17 +430,7 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center gap-16">
               <AnimatedSection className="flex-1">
-                <div className="relative w-full max-w-sm mx-auto">
-                  {!securityVideoLoaded && (
-                    <div className="absolute bottom-3 right-3 z-20">
-                      <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
-                    </div>
-                  )}
-                  <video autoPlay loop muted playsInline className="w-full rounded-2xl"
-                    onCanPlayThrough={() => setSecurityVideoLoaded(true)}>
-                    <source src={securityVideo} type="video/mp4" />
-                  </video>
-                </div>
+                <img src={securityImg} alt="Security" className="w-full max-w-sm mx-auto rounded-2xl" />
               </AnimatedSection>
               <AnimatedSection delay={200} className="flex-1">
                 <p className="text-[#007AFF] text-sm font-semibold tracking-widest uppercase mb-4">Security & Privacy</p>
