@@ -160,7 +160,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
       <AnimatedSection delay={300}>
         {(stats || children) ? (
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-4">
-            <div className="flex flex-col md:flex-row items-start gap-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="w-full md:w-1/2 relative">
                 {customContent ? customContent : video ? (
                   <>
