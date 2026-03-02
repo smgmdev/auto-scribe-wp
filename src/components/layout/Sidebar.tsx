@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion, Mic, Play, Radar, ScanEye, Menu } from 'lucide-react';
+import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion, Mic, Play, Radar, ScanEye } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { playMessageSound } from '@/lib/chat-presence';
 import { isNotificationGuarded } from '@/lib/notification-guard';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const getNavigation = (isAdmin: boolean, isAgencyOnboarded: boolean) => {
   const base = [{
@@ -1870,68 +1869,35 @@ export function Sidebar({
     onClose();
   };
 
-  const sidebarCollapsedStore = useAppStore((s) => s.sidebarCollapsed);
-  const toggleSidebarCollapsed = useAppStore((s) => s.toggleSidebarCollapsed);
-  
-  // On mobile, never show collapsed (icons-only) — always show full labels
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const sidebarCollapsed = isDesktop ? sidebarCollapsedStore : false;
-  const desktopExpanded = isDesktop && !sidebarCollapsedStore;
-
-  return <TooltipProvider delayDuration={0}>
-      {/* Desktop overlay backdrop when expanded */}
-      {desktopExpanded && (
-        <div 
-          className="hidden lg:block fixed inset-0 z-[49] bg-black/30 transition-opacity" 
-          onClick={toggleSidebarCollapsed} 
-        />
-      )}
-      <aside 
-        style={{ width: isDesktop ? (desktopExpanded ? 256 : 60) : (isOpen ? 256 : 0) }}
-        className={cn(
-          "fixed left-0 top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen bg-black border-r border-sidebar-border transition-all duration-300 ease-out overflow-hidden",
-          // Mobile: slide in/out
-          !isDesktop && (isOpen ? "translate-x-0" : "-translate-x-full"),
-          // Desktop: always visible
-          isDesktop && "translate-x-0",
-        )}>
+  return <>
+      <aside className={cn("fixed left-0 top-0 lg:top-0 z-[60] lg:z-50 h-[100dvh] lg:h-screen w-64 bg-black border-r border-sidebar-border transition-transform duration-300 ease-out",
+    // Desktop: always visible
+    "lg:translate-x-0",
+    // Mobile: slide in/out
+    isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className={cn("flex h-16 items-center border-b border-sidebar-border", isDesktop && sidebarCollapsed ? "justify-center px-1" : "justify-between px-3")}>
-            {isDesktop ? (
-              <div className={cn("flex items-center gap-2", sidebarCollapsed ? "justify-center w-full" : "")}>
-                <Button variant="ghost" size="icon" onClick={toggleSidebarCollapsed} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                  <Menu className="h-5 w-5" />
-                </Button>
-                {desktopExpanded && (
-                  <button onClick={() => navigate('/')} className="flex items-center gap-2">
-                    <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
-                    <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
-                  </button>
-                )}
+          <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-6">
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center gap-3"
+            >
+              <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
+              <div>
+                <h1 className="text-lg font-semibold text-white">
+                  Arcana Mace 
+                </h1>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:text-white hover:bg-[#999]/30 rounded-full flex-shrink-0 h-9 w-9">
-                  <X className="h-5 w-5" />
-                </Button>
-                <button onClick={() => navigate('/')} className="flex items-center gap-2">
-                  <img src={amlogo} alt="Logo" className="h-8 w-8 object-contain" />
-                  <h1 className="text-lg font-semibold text-white whitespace-nowrap">Arcana Mace</h1>
-                </button>
-              </div>
-            )}
+            </button>
+            {/* Close button for mobile */}
+            <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden text-white hover:text-white hover:bg-[#999]/30 rounded-full">
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 pt-2 pb-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
-            <div className={cn("space-y-1", sidebarCollapsed ? "px-1" : "px-4")}>
+            <div className="space-y-1 px-4">
             {navigation.map(item => {
               const Icon = item.icon;
               const hasSubmenu = 'submenu' in item && item.submenu;
@@ -1957,39 +1923,6 @@ export function Sidebar({
                   ? unreadFlaggedMessagesCount
                   : 0;
                 const totalDropdownCount = agencyDropdownCount + agencyManagementCount + b2bMediaBuyingCount + usersGroupCount;
-                if (sidebarCollapsed) {
-                  // In collapsed mode: show only icon, click navigates to first submenu item
-                  return (
-                    <div key={item.id} className="relative group">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className={cn(
-                              "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                              isActive && "text-[#3872e0] font-medium bg-sidebar-accent"
-                            )}
-                            onClick={() => {
-                              const firstSub = item.submenu?.[0];
-                              if (firstSub) handleNavClick(firstSub.id);
-                            }}
-                          >
-                            <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-black text-white border-white/10">
-                          {item.label}
-                        </TooltipContent>
-                      </Tooltip>
-                      {totalDropdownCount > 0 && (
-                        <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-red-500 text-white rounded-full flex items-center justify-center z-10">
-                          {totalDropdownCount}
-                        </span>
-                      )}
-                    </div>
-                  );
-                }
-
                 return (
                   <div key={item.id} className="relative">
                     <Button
@@ -2134,36 +2067,6 @@ export function Sidebar({
               const supportBadgeCount = item.id === 'admin-support' ? unreadSupportTicketsCount : 0;
               const feedbackBadgeCount = item.id === 'admin-feedback' ? unreadBugReportsCount : 0;
               
-              if (sidebarCollapsed) {
-                const badgeCount = supportBadgeCount || feedbackBadgeCount;
-                return (
-                  <div key={item.id} className="relative">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className={cn(
-                            "w-full justify-center p-2 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                            isActive && "bg-sidebar-accent text-[#3872e0] font-medium"
-                          )}
-                          onClick={() => handleNavClick(item.id)}
-                        >
-                          <Icon className={cn("h-5 w-5", isActive && "text-[#3872e0]")} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="bg-black text-white border-white/10">
-                        {item.label}
-                      </TooltipContent>
-                    </Tooltip>
-                    {badgeCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 text-[8px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
-                        {badgeCount}
-                      </span>
-                    )}
-                  </div>
-                );
-              }
-
               return (
                 <div key={item.id} className="relative">
                   <Button
@@ -2189,14 +2092,14 @@ export function Sidebar({
           </nav>
 
           {/* Agency Status & Account */}
-          <div className={cn("border-t border-sidebar-border py-4 space-y-3 flex-shrink-0", sidebarCollapsed ? "px-1" : "px-4")}>
-            {/* Agency Status Card - Only for non-admin users, hidden when collapsed */}
-            {!sidebarCollapsed && !isAdmin && !agencyDataLoaded && (
+          <div className="border-t border-sidebar-border px-4 py-4 space-y-3 flex-shrink-0">
+            {/* Agency Status Card - Only for non-admin users */}
+            {!isAdmin && !agencyDataLoaded && (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-5 w-5 animate-spin text-sidebar-foreground/50" />
               </div>
             )}
-            {!sidebarCollapsed && !isAdmin && agencyDataLoaded && (
+            {!isAdmin && agencyDataLoaded && (
               <AgencyStatusCard
                 applicationStatus={userApplicationStatus}
                 applicationId={applicationId}
@@ -2212,88 +2115,44 @@ export function Sidebar({
             )}
             
             <div className="space-y-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className={cn(
-                    "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                    currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium"
-                  )} onClick={() => handleNavClick('account')}>
-                    <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
-                    {!sidebarCollapsed && "Account Settings"}
-                  </Button>
-                </TooltipTrigger>
-                {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Account Settings</TooltipContent>}
-              </Tooltip>
+              <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'account' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('account')}>
+                <UserCircle className={cn("h-5 w-5", currentView === 'account' && "text-[#3872e0]")} />
+                Account Settings
+              </Button>
               <div className="relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" className={cn(
-                      "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                      sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                      (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium"
-                    )} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
-                      <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
-                      {!sidebarCollapsed && "Support"}
-                    </Button>
-                  </TooltipTrigger>
-                  {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Support</TooltipContent>}
-                </Tooltip>
+                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", (currentView === 'support' || currentView === 'admin-support') && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick(isAdmin ? 'admin-support' : 'support')}>
+                  <MessageCircleQuestion className={cn("h-5 w-5", (currentView === 'support' || currentView === 'admin-support') && "text-[#3872e0]")} />
+                  Support
+                </Button>
                 {(isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount) > 0 && (
-                  <span className={cn("absolute -top-1 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center", sidebarCollapsed ? "-right-1" : "right-2")}>
+                  <span className="absolute -top-1 right-2 min-w-[16px] h-[16px] px-1 text-[9px] font-medium bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
                     {isAdmin ? unreadSupportTicketsCount : userUnreadSupportTicketsCount}
                   </span>
                 )}
               </div>
               {isAdmin && (
                 <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" className={cn(
-                        "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                        sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                        currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium"
-                      )} onClick={() => handleNavClick('admin-surveillance')}>
-                        <ScanEye className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
-                        {!sidebarCollapsed && "Surveillance"}
-                      </Button>
-                    </TooltipTrigger>
-                    {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Surveillance</TooltipContent>}
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" className={cn(
-                        "w-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-                        sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3",
-                        currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium"
-                      )} onClick={() => handleNavClick('admin-system')}>
-                        <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
-                        {!sidebarCollapsed && "Terminal"}
-                      </Button>
-                    </TooltipTrigger>
-                    {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Terminal</TooltipContent>}
-                  </Tooltip>
+                  <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-surveillance')}>
+                    <ScanEye className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
+                    Surveillance
+                  </Button>
+                  <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
+                    <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
+                    Terminal
+                  </Button>
                 </>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className={cn(
-                    "w-full text-sidebar-foreground/70 hover:text-destructive",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-start gap-3"
-                  )} onClick={() => {
-                    navigate('/');
-                    signOut();
-                  }}>
-                    <LogOut className="h-5 w-5" />
-                    {!sidebarCollapsed && "Log Out"}
-                  </Button>
-                </TooltipTrigger>
-                {sidebarCollapsed && <TooltipContent side="right" className="bg-black text-white border-white/10">Log Out</TooltipContent>}
-              </Tooltip>
+              <Button variant="ghost" className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-destructive" onClick={() => {
+                navigate('/');
+                signOut();
+              }}>
+                <LogOut className="h-5 w-5" />
+                Log Out
+              </Button>
             </div>
           </div>
         </div>
       </aside>
 
-    </TooltipProvider>;
+    </>;
 }

@@ -1,12 +1,10 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { Menu, Search, Volume2, VolumeOff } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { QuickNavBanner } from './QuickNavBanner';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
-
+import { QuickNavBanner } from './QuickNavBanner';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
@@ -22,20 +20,12 @@ export function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [mobileTopHeight, setMobileTopHeight] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
   const mobileTopRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const currentView = useAppStore((state) => state.currentView);
   const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   const soundEnabled = useAppStore((state) => state.soundEnabled);
   const toggleSound = useAppStore((state) => state.toggleSound);
-
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
   
   const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
@@ -64,8 +54,8 @@ export function MainLayout({
 
   return <div className="min-h-screen bg-background">
       {/* Desktop: separate fixed banners */}
-      {isDesktop && (
-        <div className="fixed top-0 right-0 z-50 h-16 flex flex-col transition-all duration-300" style={{ left: 60 }}>
+      <div className="hidden lg:block">
+        <div className="fixed top-0 left-64 right-0 z-50 h-16 flex flex-col">
           <QuickNavBanner inDashboard />
           <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
             <p className="text-white/80 text-xs flex items-center">
@@ -74,47 +64,50 @@ export function MainLayout({
             </p>
           </div>
         </div>
-      )}
+      </div>
+
       {/* Mobile: stacked fixed container that flows naturally */}
-      {!isDesktop && (
-        <div ref={mobileTopRef} className="fixed top-0 left-0 right-0 z-50 flex flex-col">
-          <div className="bg-black text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight">
-            <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap overflow-hidden">
-              <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
-              <span><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
-              <span><span className="font-bold">Close</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
-              <button
-                onClick={toggleSound}
-                className="ml-auto flex items-center gap-1 hover:text-[#f2a547] transition-colors"
-                title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
-              >
-                {soundEnabled ? <Volume2 size={14} /> : <VolumeOff size={14} />}
-              </button>
-            </div>
-          </div>
-          <div className="bg-[#1d1d1f] border-b border-white/10 flex items-center py-3 px-4">
-            <p className="text-white/80 text-xs flex flex-wrap items-center gap-2">
-              <span>Get free credits by finding bugs on Arcana Mace</span>
-              <Link to="/report-bug" className="inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
-            </p>
-          </div>
-          <header className="h-14 bg-black border-b border-white/10 flex items-center justify-center px-4 relative">
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="absolute left-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
-              <Menu className="h-6 w-6" />
-            </Button>
-            <button onClick={() => navigate('/')} className="flex items-center">
-              <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
-              <span className="ml-2 text-lg font-semibold text-white">Arcana Mace</span>
+      <div ref={mobileTopRef} className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
+        {/* Inline QuickNav for mobile */}
+        <div className="bg-black text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight">
+          <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap overflow-hidden">
+            <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
+            <span><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
+            <span><span className="font-bold">Close</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
+            <button
+              onClick={toggleSound}
+              className="ml-auto flex items-center gap-1 hover:text-[#f2a547] transition-colors"
+              title={soundEnabled ? 'Mute notifications' : 'Unmute notifications'}
+            >
+              {soundEnabled ? <Volume2 size={14} /> : <VolumeOff size={14} />}
             </button>
-            <Button variant="ghost" size="icon" onClick={() => setShowSearchModal(true)} className="absolute right-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
-              <Search className="h-5 w-5" />
-            </Button>
-          </header>
+          </div>
         </div>
-      )}
+        <div className="bg-[#1d1d1f] border-b border-white/10 flex items-center py-3 px-4">
+          <p className="text-white/80 text-xs flex flex-wrap items-center gap-2">
+            <span>Get free credits by finding bugs on Arcana Mace</span>
+            <Link to="/report-bug" className="inline-flex items-center px-2.5 py-0.5 rounded-none text-[10px] font-semibold bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">Get Credits</Link>
+          </p>
+        </div>
+        <header className="h-14 bg-black border-b border-white/10 flex items-center justify-center px-4 relative">
+          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="absolute left-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
+            <Menu className="h-6 w-6" />
+          </Button>
+          <button 
+            onClick={() => navigate('/')} 
+            className="flex items-center"
+          >
+            <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
+            <span className="ml-2 text-lg font-semibold text-white">Arcana Mace</span>
+          </button>
+          <Button variant="ghost" size="icon" onClick={() => setShowSearchModal(true)} className="absolute right-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">
+            <Search className="h-5 w-5" />
+          </Button>
+        </header>
+      </div>
 
       {/* Mobile Overlay */}
-      {sidebarOpen && !isDesktop && <div className="fixed inset-0 z-40 bg-black/50 transition-opacity" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <div className="lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -125,13 +118,9 @@ export function MainLayout({
       {/* Main Content */}
       <main 
         ref={mainRef}
-        className={cn(
-          "h-screen overflow-y-auto flex flex-col transition-all duration-300",
-          isDarkFooter || isDashboardFooter ? 'bg-black' : '',
-        )}
+        className={`lg:pl-64 lg:pt-16 h-screen overflow-y-auto flex flex-col ${isDarkFooter || isDashboardFooter ? 'bg-black' : ''}`}
         style={{ 
-          paddingLeft: isDesktop ? 60 : undefined,
-          paddingTop: isDesktop ? 64 : (mobileTopHeight > 0 ? mobileTopHeight : undefined),
+          paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
           WebkitOverflowScrolling: 'touch',
         }}
       >

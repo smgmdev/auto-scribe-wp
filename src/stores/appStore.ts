@@ -50,10 +50,6 @@ export interface OpenChat {
 }
 
 interface AppState {
-  // Sidebar collapsed state (desktop only)
-  sidebarCollapsed: boolean;
-  toggleSidebarCollapsed: () => void;
-  
   // 404 page flag
   is404Page: boolean;
   setIs404Page: (val: boolean) => void;
@@ -312,10 +308,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>()((set) => ({
-  // Sidebar collapsed state
-  sidebarCollapsed: false,
-  toggleSidebarCollapsed: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-  
   // 404 page flag
   is404Page: false,
   setIs404Page: (val) => set({ is404Page: val }),
