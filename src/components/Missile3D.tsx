@@ -4,103 +4,63 @@ import { useRef, Suspense, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function PumpingLock() {
+function TargetOverlay() {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
-    const scale = 1 + Math.sin(t * 2.5) * 0.15;
+    const scale = 1 + Math.sin(t * 2.5) * 0.1;
     groupRef.current.scale.set(scale, scale, scale);
-    groupRef.current.position.y = 0.8 + Math.sin(t * 1.5) * 0.06;
+    groupRef.current.rotation.z = Math.sin(t * 0.6) * 0.03;
   });
 
   const orange = '#f2a547';
-
-  // Lock body shape
-  const bodyGeo = useMemo(() => {
-    const shape = new THREE.Shape();
-    const w = 1.0, h = 0.85, r = 0.12;
-    shape.moveTo(-w + r, -h);
-    shape.lineTo(w - r, -h);
-    shape.quadraticCurveTo(w, -h, w, -h + r);
-    shape.lineTo(w, h - r);
-    shape.quadraticCurveTo(w, h, w - r, h);
-    shape.lineTo(-w + r, h);
-    shape.quadraticCurveTo(-w, h, -w, h - r);
-    shape.lineTo(-w, -h + r);
-    shape.quadraticCurveTo(-w, -h, -w + r, -h);
-    return new THREE.ShapeGeometry(shape);
-  }, []);
-
-  // Body outline only (wireframe edges)
-  const bodyEdges = useMemo(() => {
-    const shape = new THREE.Shape();
-    const w = 1.0, h = 0.85, r = 0.12;
-    shape.moveTo(-w + r, -h);
-    shape.lineTo(w - r, -h);
-    shape.quadraticCurveTo(w, -h, w, -h + r);
-    shape.lineTo(w, h - r);
-    shape.quadraticCurveTo(w, h, w - r, h);
-    shape.lineTo(-w + r, h);
-    shape.quadraticCurveTo(-w, h, -w, h - r);
-    shape.lineTo(-w, -h + r);
-    shape.quadraticCurveTo(-w, -h, -w + r, -h);
-    const pts = shape.getPoints(64);
-    return new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, p.y, 0)));
-  }, []);
+  const r = 1.5; // outer radius
 
   return (
     <group ref={groupRef} position={[0, 0.8, 0]}>
-      {/* Lock body fill — subtle */}
-      <mesh geometry={bodyGeo} position={[0, -0.4, 0]}>
-        <meshStandardMaterial
-          color={orange} emissive={orange} emissiveIntensity={0.3}
-          transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false}
-        />
+      {/* Outer ring */}
+      <mesh>
+        <ringGeometry args={[r - 0.04, r, 64]} />
+        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.7}
+          transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>
-      {/* Lock body outline */}
-      <lineSegments geometry={bodyEdges} position={[0, -0.4, 0]}>
-        <lineBasicMaterial color={orange} transparent opacity={0.7} />
-      </lineSegments>
-
-      {/* Shackle (U-shaped arc on top) */}
-      <group position={[0, 0.45, 0]} rotation={[0, 0, 0]}>
-        <mesh>
-          <torusGeometry args={[0.55, 0.045, 16, 48, Math.PI]} />
-          <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.6} />
-        </mesh>
-        {/* Left shackle leg */}
-        <mesh position={[-0.55, -0.25, 0]}>
-          <boxGeometry args={[0.09, 0.5, 0.09]} />
-          <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.6} />
-        </mesh>
-        {/* Right shackle leg */}
-        <mesh position={[0.55, -0.25, 0]}>
-          <boxGeometry args={[0.09, 0.5, 0.09]} />
-          <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.6} />
-        </mesh>
-      </group>
-
-      {/* Keyhole circle */}
-      <mesh position={[0, -0.25, 0.02]}>
-        <ringGeometry args={[0.08, 0.15, 24]} />
-        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.8}
-          transparent opacity={0.9} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
-      {/* Keyhole slot */}
-      <mesh position={[0, -0.45, 0.02]}>
-        <planeGeometry args={[0.08, 0.25]} />
-        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.8}
-          transparent opacity={0.9} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
-
-      {/* Outer glow */}
-      <mesh position={[0, 0, -0.02]}>
-        <ringGeometry args={[1.6, 1.75, 48]} />
+      {/* Inner ring */}
+      <mesh>
+        <ringGeometry args={[0.7, 0.74, 64]} />
         <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.6}
-          transparent opacity={0.1} side={THREE.DoubleSide} depthWrite={false} />
+          transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>
+      {/* Center dot */}
+      <mesh position={[0, 0, 0.01]}>
+        <circleGeometry args={[0.08, 24]} />
+        <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.9}
+          transparent opacity={0.9} depthWrite={false} />
+      </mesh>
+      {/* Crosshair lines */}
+      {[0, Math.PI / 2, Math.PI, -Math.PI / 2].map((rot, i) => (
+        <mesh key={i} position={[Math.cos(rot) * ((r + 0.74) / 2), Math.sin(rot) * ((r + 0.74) / 2), 0]}
+          rotation={[0, 0, rot]}>
+          <planeGeometry args={[r - 0.74 - 0.08, 0.04]} />
+          <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.7}
+            transparent opacity={0.7} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+      ))}
+      {/* Tick marks on outer ring */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i / 12) * Math.PI * 2;
+        if (i % 3 === 0) return null; // skip where crosshairs are
+        return (
+          <mesh key={`tick-${i}`}
+            position={[Math.cos(angle) * (r + 0.08), Math.sin(angle) * (r + 0.08), 0]}
+            rotation={[0, 0, angle]}>
+            <planeGeometry args={[0.15, 0.03]} />
+            <meshStandardMaterial color={orange} emissive={orange} emissiveIntensity={0.5}
+              transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
@@ -120,7 +80,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      <PumpingLock />
+      <TargetOverlay />
     </>
   );
 }
