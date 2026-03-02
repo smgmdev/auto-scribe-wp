@@ -366,7 +366,7 @@ export default function SystemStatus() {
               <RefreshCw className="w-6 h-6 animate-spin text-[#86868b]" />
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-x-8 gap-y-8">
               {groupedServices.map((group) => (
                 <div key={group.title}>
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868b] mb-2">{group.title}</h3>
