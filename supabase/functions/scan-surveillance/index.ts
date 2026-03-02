@@ -10,7 +10,7 @@ async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> 
   try {
     // GDELT DOC 2.0 API – conflict & protest events from last 24h
     const query = encodeURIComponent('(conflict OR war OR attack OR missile OR drone OR protest OR coup OR terrorism) sourcelang:eng');
-    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=30&format=json&timespan=24h&sort=DateDesc`;
+    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=75&format=json&timespan=24h&sort=DateDesc`;
 
     console.log('Fetching GDELT events...');
     const controller = new AbortController();
@@ -210,7 +210,7 @@ async function fetchPerplexityScan(apiKey: string, region: string = 'global'): P
 }
 
 ${config.focus}
-Include at least 10-20 latest events from the past 48 hours.
+Include at least 40-60 latest events from the past 48 hours. The more events you include the better — aim for maximum coverage.
 Mark countries with no issues as "safe".
 
 ${config.sources}
@@ -388,11 +388,11 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort (skip for regional to speed up)
-    const isGlobal = region === 'global';
+    // Always fetch GDELT and ReliefWeb to supplement Perplexity (which often returns too few events)
     const [perplexityResult, gdeltResult, reliefWebResult] = await Promise.allSettled([
       fetchPerplexityScan(PERPLEXITY_API_KEY, region),
-      isGlobal ? fetchGdeltEvents() : Promise.resolve({ events: [], countries: [] }),
-      isGlobal ? fetchReliefWebAlerts() : Promise.resolve([]),
+      fetchGdeltEvents(),
+      fetchReliefWebAlerts(),
     ]);
 
     // Perplexity is required
