@@ -23,9 +23,31 @@ interface MissileAlert {
   created_at: string;
 }
 
-type AlertType = 'missile' | 'drone' | 'nuke';
+type AlertType = 'missile' | 'drone' | 'nuke' | 'hbomb';
 
 function getAlertColors(type: AlertType) {
+  if (type === 'hbomb') {
+    return {
+      border: 'border-orange-500/80',
+      bg: 'bg-[#1a0d05]',
+      shadow: 'shadow-[0_0_100px_rgba(249,115,22,0.6)]',
+      bar: 'from-orange-700 via-orange-400 to-orange-700',
+      iconBg: 'bg-orange-600/20',
+      iconBorder: 'border-orange-500',
+      iconColor: 'text-orange-400',
+      pingBorder: 'border-orange-500/40',
+      titleColor: 'text-orange-400',
+      subtitleColor: 'text-orange-400/70',
+      cardBg: 'bg-orange-950/50',
+      cardBorder: 'border-orange-800/40',
+      textPrimary: 'text-orange-300',
+      textSecondary: 'text-orange-400/80',
+      textTertiary: 'text-orange-400/60',
+      btnBg: 'bg-orange-600 hover:bg-orange-700',
+      btnBorder: 'border-orange-500/50',
+      btnShadow: 'shadow-[0_0_30px_rgba(249,115,22,0.5)]',
+    };
+  }
   if (type === 'nuke') {
     return {
       border: 'border-yellow-500/80',
@@ -94,12 +116,14 @@ function getAlertColors(type: AlertType) {
 }
 
 function getAlertIcon(type: AlertType, className: string) {
+  if (type === 'hbomb') return <Radiation className={className} />;
   if (type === 'nuke') return <Radiation className={className} />;
   if (type === 'missile') return <Siren className={className} />;
   return <Shield className={className} />;
 }
 
 function getAlertLabel(type: AlertType) {
+  if (type === 'hbomb') return 'H-BOMB';
   if (type === 'nuke') return 'NUCLEAR';
   if (type === 'missile') return 'MISSILE';
   return 'DRONE';
@@ -173,6 +197,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
 }
 
 function getAlertType(severity: string): AlertType {
+  if (severity === 'hbomb') return 'hbomb';
   if (severity === 'nuke') return 'nuke';
   if (severity === 'drone') return 'drone';
   return 'missile';
@@ -334,10 +359,11 @@ export function MissileAlertListener() {
         const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
         if (filtered.length > 0) {
           setAlerts(filtered);
+          const hasHbomb = filtered.some(a => a.severity === 'hbomb');
           const hasNuke = filtered.some(a => a.severity === 'nuke');
-          const soundFn = hasNuke ? playNukeAlarm : playAlertSound;
+          const soundFn = (hasHbomb || hasNuke) ? playNukeAlarm : playAlertSound;
           soundFn();
-          alertIntervalRef.current = setInterval(soundFn, hasNuke ? 3000 : 2500);
+          alertIntervalRef.current = setInterval(soundFn, (hasHbomb || hasNuke) ? 3000 : 2500);
         }
       }
     };
