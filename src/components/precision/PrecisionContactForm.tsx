@@ -72,7 +72,7 @@ export function PrecisionContactForm({ open, onOpenChange }: PrecisionContactFor
     <DraggablePopup
       open={open}
       onOpenChange={handleClose}
-      title={<h2 className="text-lg font-bold">Contact Arcana Precision</h2>}
+      title={<h2 className="text-lg font-bold">Interest in Arcana Precision</h2>}
       width={440}
       zIndex={250}
       footer={
