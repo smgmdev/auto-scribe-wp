@@ -1,10 +1,13 @@
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef, useMemo } from 'react';
+import { useGLTF } from '@react-three/drei';
+import { useRef, useMemo, Suspense, useState } from 'react';
 import * as THREE from 'three';
+import { Loader2 } from 'lucide-react';
 
-function MissileBody() {
+function MissileModel() {
+  const { scene } = useGLTF('/models/missile.glb');
   const groupRef = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
@@ -14,45 +17,7 @@ function MissileBody() {
 
   return (
     <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
-      {/* Main body - elongated cone/cylinder */}
-      <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.08, 0.15, 2.5, 16]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.9} roughness={0.2} />
-      </mesh>
-      
-      {/* Nose cone */}
-      <mesh position={[0, 1.55, 0]}>
-        <coneGeometry args={[0.08, 0.6, 16]} />
-        <meshStandardMaterial color="#0f0f1a" metalness={0.95} roughness={0.1} />
-      </mesh>
-      
-      {/* Nose tip glow */}
-      <mesh position={[0, 1.85, 0]}>
-        <sphereGeometry args={[0.02, 8, 8]} />
-        <meshStandardMaterial color="#007AFF" emissive="#007AFF" emissiveIntensity={3} />
-      </mesh>
-      
-      {/* Body rings */}
-      {[-0.3, 0.2, 0.7].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]}>
-          <torusGeometry args={[0.16, 0.008, 8, 32]} />
-          <meshStandardMaterial color="#007AFF" emissive="#007AFF" emissiveIntensity={1.5} transparent opacity={0.6} />
-        </mesh>
-      ))}
-      
-      {/* Fins */}
-      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle, i) => (
-        <mesh key={`fin-${i}`} position={[Math.sin(angle) * 0.2, -1.1, Math.cos(angle) * 0.2]} rotation={[0, -angle, 0]}>
-          <boxGeometry args={[0.02, 0.5, 0.25]} />
-          <meshStandardMaterial color="#111128" metalness={0.8} roughness={0.3} />
-        </mesh>
-      ))}
-      
-      {/* Engine exhaust glow */}
-      <mesh position={[0, -1.35, 0]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color="#007AFF" emissive="#007AFF" emissiveIntensity={2} transparent opacity={0.4} />
-      </mesh>
+      <primitive object={scene} scale={1.5} />
     </group>
   );
 }
@@ -119,18 +84,51 @@ function Particles() {
   );
 }
 
-export default function Missile3D() {
+function SceneContent({ onLoaded }: { onLoaded: () => void }) {
+  const { scene } = useGLTF('/models/missile.glb');
+  // Signal loaded once the model is available
+  useState(() => { onLoaded(); });
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
+    }
+  });
+
   return (
-    <div className="w-full aspect-square bg-black rounded-2xl overflow-hidden">
+    <>
+      <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
+        <primitive object={scene} scale={1.5} />
+      </group>
+      <OrbitalRings />
+      <Particles />
+    </>
+  );
+}
+
+export default function Missile3D() {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden">
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-[#007AFF] animate-spin" />
+        </div>
+      )}
       <Canvas camera={{ position: [0, 0, 5.5], fov: 45 }}>
         <ambientLight intensity={0.15} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} color="#ffffff" />
         <directionalLight position={[-3, -2, 4]} intensity={0.3} color="#007AFF" />
         <pointLight position={[0, 2, 2]} intensity={0.5} color="#007AFF" />
-        <MissileBody />
-        <OrbitalRings />
-        <Particles />
+        <Suspense fallback={null}>
+          <SceneContent onLoaded={() => setLoading(false)} />
+        </Suspense>
       </Canvas>
     </div>
   );
 }
+
+useGLTF.preload('/models/missile.glb');
