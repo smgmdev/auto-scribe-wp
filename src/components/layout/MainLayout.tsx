@@ -121,10 +121,14 @@ export function MainLayout({
       {/* Main Content */}
       <main 
         ref={mainRef}
-        className={cn("lg:pt-16 h-screen overflow-y-auto flex flex-col transition-all duration-300", isDarkFooter || isDashboardFooter ? 'bg-black' : '')}
+        className={cn(
+          "h-screen overflow-y-auto flex flex-col transition-all duration-300",
+          isDarkFooter || isDashboardFooter ? 'bg-black' : '',
+          "lg:pt-16"
+        )}
         style={{ 
-          paddingLeft: window.innerWidth >= 1024 ? (sidebarCollapsed ? 60 : 256) : undefined,
-          paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
+          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? (sidebarCollapsed ? 60 : 256) : undefined,
+          paddingTop: mobileTopHeight > 0 && typeof window !== 'undefined' && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
           WebkitOverflowScrolling: 'touch',
         }}
       >
