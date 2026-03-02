@@ -241,10 +241,46 @@ Return ONLY the JSON object, no other text.`
   if (codeBlockMatch) {
     jsonStr = codeBlockMatch[1].trim();
   }
-  const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+  let jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    console.error('Perplexity response (no JSON):', content.substring(0, 500));
-    throw new Error('No JSON found in Perplexity response');
+    console.warn('Perplexity response had no JSON, retrying with simpler prompt...');
+    // Retry once with a simpler prompt
+    const retryResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a security analyst. Return ONLY a valid JSON object (no markdown, no explanation) with global security data. Structure: {"global_tension_score": <0-100>, "global_tension_level": "<low|moderate|high|severe|critical>", "countries": [{"code": "<ISO>", "name": "<name>", "threat_level": "<safe|caution|danger>", "score": <0-100>, "summary": "<brief>", "events": []}], "latest_events": [{"title": "<title>", "country_code": "<ISO>", "country_name": "<name>", "severity": "<low|medium|high|critical>", "description": "<desc>", "source": "<source>", "source_url": "<url>", "published_at": "<ISO datetime>", "origin_country_code": null, "destination_country_code": null, "origin_country_name": null, "destination_country_name": null}]}`
+          },
+          {
+            role: 'user',
+            content: `Current global security threats and conflicts. ${config.userPromptExtra} Return ONLY JSON.`
+          }
+        ],
+        search_recency_filter: 'day',
+      }),
+    });
+    if (retryResponse.ok) {
+      const retryData = await retryResponse.json();
+      const retryContent = retryData.choices?.[0]?.message?.content || '';
+      const retryCodeBlock = retryContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const retryStr = retryCodeBlock ? retryCodeBlock[1].trim() : retryContent;
+      jsonMatch = retryStr.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        console.log('Retry succeeded, got JSON');
+        citations.push(...(retryData.citations || []));
+      }
+    }
+    if (!jsonMatch) {
+      console.error('Perplexity response (no JSON after retry):', content.substring(0, 500));
+      throw new Error('No JSON found in Perplexity response');
+    }
   }
   const scanResult = JSON.parse(jsonMatch[0]);
 
@@ -356,6 +392,19 @@ Deno.serve(async (req) => {
     // Perplexity is required
     if (perplexityResult.status === 'rejected') {
       console.error('Perplexity failed:', perplexityResult.reason);
+      // Fall back to previous scan data if available
+      if (prevScan) {
+        console.log('Falling back to previous scan data');
+        return new Response(JSON.stringify({
+          global_tension_score: prevScan.global_tension_score,
+          global_tension_level: prevScan.global_tension_level,
+          countries: prevScan.country_data,
+          latest_events: prevScan.events,
+          scanned_at: prevScan.scanned_at,
+          fallback: true,
+          fallback_reason: perplexityResult.reason?.message || 'Perplexity scan failed',
+        }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
       return new Response(JSON.stringify({ error: 'Perplexity scan failed: ' + perplexityResult.reason?.message }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
