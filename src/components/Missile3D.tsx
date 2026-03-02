@@ -4,130 +4,155 @@ import { useRef, useMemo, Suspense, useState } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function MissileModel() {
-  const { scene } = useGLTF('/models/missile.glb');
-  const groupRef = useRef<THREE.Group>(null);
+function TargetLockRing({ radius, speed, color, opacity, reverse = false }: {
+  radius: number; speed: number; color: string; opacity: number; reverse?: boolean;
+}) {
+  const ref = useRef<THREE.Group>(null);
+  const dashRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
-    }
+    if (!ref.current) return;
+    const t = state.clock.elapsedTime;
+    ref.current.rotation.z = (reverse ? -1 : 1) * t * speed;
+    // Pulse scale
+    const pulse = 1 + Math.sin(t * 2) * 0.03;
+    ref.current.scale.setScalar(pulse);
   });
 
+  // Create dashed ring with gap segments
+  const segments = 8;
+  const gapRatio = 0.3;
+  const arcAngle = (Math.PI * 2 / segments) * (1 - gapRatio);
+
   return (
-    <group ref={groupRef} rotation={[0.3, 0, 0.1]}>
-      <primitive object={scene} scale={1.5} />
+    <group ref={ref}>
+      {Array.from({ length: segments }).map((_, i) => {
+        const startAngle = (Math.PI * 2 / segments) * i;
+        return (
+          <mesh key={i} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[radius, 0.008, 4, 32, arcAngle]} />
+            <meshStandardMaterial
+              color={color}
+              emissive={color}
+              emissiveIntensity={1.5}
+              transparent
+              opacity={opacity}
+            />
+            <group rotation={[0, 0, startAngle]}>
+              <mesh>
+                <torusGeometry args={[radius, 0.008, 4, 32, arcAngle]} />
+                <meshStandardMaterial
+                  color={color}
+                  emissive={color}
+                  emissiveIntensity={1.5}
+                  transparent
+                  opacity={opacity}
+                />
+              </mesh>
+            </group>
+          </mesh>
+        );
+      })}
     </group>
   );
 }
 
-function OrbitalRings() {
-  const ringRef1 = useRef<THREE.Mesh>(null);
-  const ringRef2 = useRef<THREE.Mesh>(null);
+function TargetReticle() {
+  const groupRef = useRef<THREE.Group>(null);
+  const innerRef = useRef<THREE.Group>(null);
+  const outerRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    if (ringRef1.current) {
-      ringRef1.current.rotation.x = t * 0.4;
-      ringRef1.current.rotation.z = t * 0.2;
+    if (innerRef.current) {
+      innerRef.current.rotation.z = t * 0.8;
+      const s = 1 + Math.sin(t * 3) * 0.04;
+      innerRef.current.scale.setScalar(s);
     }
-    if (ringRef2.current) {
-      ringRef2.current.rotation.y = t * 0.3;
-      ringRef2.current.rotation.x = Math.PI / 3 + t * 0.15;
+    if (outerRef.current) {
+      outerRef.current.rotation.z = -t * 0.4;
+      const s = 1 + Math.sin(t * 2 + 1) * 0.03;
+      outerRef.current.scale.setScalar(s);
     }
   });
 
-  return (
-    <>
-      <mesh ref={ringRef1}>
-        <torusGeometry args={[2.2, 0.005, 8, 128]} />
-        <meshStandardMaterial color="#007AFF" emissive="#007AFF" emissiveIntensity={1} transparent opacity={0.3} />
-      </mesh>
-      <mesh ref={ringRef2}>
-        <torusGeometry args={[2.5, 0.004, 8, 128]} />
-        <meshStandardMaterial color="#007AFF" emissive="#007AFF" emissiveIntensity={0.8} transparent opacity={0.2} />
-      </mesh>
-    </>
-  );
-}
-
-function StarField({ missilePos }: { missilePos: React.MutableRefObject<THREE.Vector3> }) {
-  const starsRef = useRef<THREE.Points>(null);
-  const count = 500;
-  
-  const { positions, velocities, lifetimes } = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const vel = new Float32Array(count * 3);
-    const life = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = 0;
-      pos[i * 3 + 1] = 0;
-      pos[i * 3 + 2] = -999;
-      vel[i * 3] = (Math.random() - 0.5) * 3;
-      vel[i * 3 + 1] = (Math.random() - 0.5) * 3;
-      vel[i * 3 + 2] = 2 + Math.random() * 4;
-      life[i] = 0;
-    }
-    return { positions: pos, velocities: vel, lifetimes: life };
-  }, []);
-
-  useFrame((_, delta) => {
-    if (!starsRef.current) return;
-    const posAttr = starsRef.current.geometry.attributes.position as THREE.BufferAttribute;
-    const arr = posAttr.array as Float32Array;
-    const mx = missilePos.current.x;
-    const my = missilePos.current.y;
-    const mz = missilePos.current.z;
-
-    // Only emit when missile is in visible range
-    const missileVisible = mz < 10 && mz > -15;
-    
-    for (let i = 0; i < count; i++) {
-      lifetimes[i] -= delta;
-      
-      if (lifetimes[i] <= 0) {
-        if (missileVisible) {
-          // Spawn at missile position
-          arr[i * 3] = mx + (Math.random() - 0.5) * 0.8;
-          arr[i * 3 + 1] = my + (Math.random() - 0.5) * 0.8;
-          arr[i * 3 + 2] = mz + (Math.random() - 0.5) * 0.4;
-          // Randomize velocity direction for this particle
-          velocities[i * 3] = (Math.random() - 0.5) * 4;
-          velocities[i * 3 + 1] = (Math.random() - 0.5) * 4;
-          velocities[i * 3 + 2] = 3 + Math.random() * 5;
-          lifetimes[i] = 0.3 + Math.random() * 0.8;
-        } else {
-          arr[i * 3 + 2] = -999; // hide
-        }
-      } else {
-        // Move along velocity (trail behind)
-        arr[i * 3] += velocities[i * 3] * delta;
-        arr[i * 3 + 1] += velocities[i * 3 + 1] * delta;
-        arr[i * 3 + 2] += velocities[i * 3 + 2] * delta;
-      }
-    }
-    posAttr.needsUpdate = true;
-  });
+  // Crosshair lines
+  const crosshairMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#007AFF',
+    emissive: '#007AFF',
+    emissiveIntensity: 2,
+    transparent: true,
+    opacity: 0.5,
+  }), []);
 
   return (
-    <points ref={starsRef}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={0.08} color="#ff8844" transparent opacity={0.8} sizeAttenuation />
-    </points>
+    <group ref={groupRef}>
+      {/* Outer dashed ring */}
+      <group ref={outerRef}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <mesh key={`outer-${i}`} rotation={[Math.PI / 2, 0, (Math.PI * 2 / 6) * i]}>
+            <torusGeometry args={[2.4, 0.006, 4, 16, Math.PI / 5]} />
+            <meshStandardMaterial
+              color="#007AFF"
+              emissive="#007AFF"
+              emissiveIntensity={1.2}
+              transparent
+              opacity={0.25}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Inner dashed ring */}
+      <group ref={innerRef}>
+        {[0, 1, 2, 3].map((i) => (
+          <mesh key={`inner-${i}`} rotation={[Math.PI / 2, 0, (Math.PI / 2) * i]}>
+            <torusGeometry args={[1.6, 0.008, 4, 20, Math.PI / 3.5]} />
+            <meshStandardMaterial
+              color="#007AFF"
+              emissive="#007AFF"
+              emissiveIntensity={1.8}
+              transparent
+              opacity={0.4}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Crosshair lines */}
+      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle, i) => (
+        <mesh
+          key={`cross-${i}`}
+          position={[Math.cos(angle) * 1.1, Math.sin(angle) * 1.1, 0]}
+          rotation={[0, 0, angle]}
+        >
+          <boxGeometry args={[0.5, 0.003, 0.003]} />
+          <primitive object={crosshairMat} attach="material" />
+        </mesh>
+      ))}
+
+      {/* Center dot */}
+      <mesh>
+        <sphereGeometry args={[0.04, 8, 8]} />
+        <meshStandardMaterial
+          color="#ff3b30"
+          emissive="#ff3b30"
+          emissiveIntensity={3}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+    </group>
   );
 }
 
 function ScanGrid() {
   const gridRef = useRef<THREE.Points>(null);
-  
+
   const positions = useMemo(() => {
-    const count = 300;
+    const count = 200;
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      // Flat grid plane with slight random depth
       pos[i * 3] = (Math.random() - 0.5) * 8;
       pos[i * 3 + 1] = (Math.random() - 0.5) * 0.1;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 8;
@@ -137,19 +162,17 @@ function ScanGrid() {
 
   useFrame((state) => {
     if (gridRef.current) {
-      // Slow radar-sweep rotation
-      gridRef.current.rotation.y = state.clock.elapsedTime * 0.15;
-      // Subtle vertical pulse
-      gridRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2 - 1;
+      gridRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      gridRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2 - 1.2;
     }
   });
 
   return (
     <points ref={gridRef}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={300} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-position" count={200} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.015} color="#007AFF" transparent opacity={0.35} sizeAttenuation />
+      <pointsMaterial size={0.012} color="#007AFF" transparent opacity={0.25} sizeAttenuation />
     </points>
   );
 }
@@ -158,42 +181,22 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
   const { scene } = useGLTF('/models/missile.glb');
   useState(() => { onLoaded(); });
   const groupRef = useRef<THREE.Group>(null);
-  const phaseRef = useRef(0);
-  const missilePosRef = useRef(new THREE.Vector3(0, 2, 15));
 
-  useFrame((_, delta) => {
+  useFrame((state) => {
     if (!groupRef.current) return;
-    phaseRef.current += delta;
-    const cycle = phaseRef.current % 4;
-
-    if (cycle < 3) {
-      // Fly from left to right across the scene
-      const p = cycle / 3; // 0 → 1
-      const e = p * p * (3 - 2 * p); // smoothstep
-      const x = THREE.MathUtils.lerp(6, -6, e);
-      const y = Math.sin(p * Math.PI) * 0.8 + 0.3;
-      const z = 2 + Math.sin(p * Math.PI) * -1;
-      groupRef.current.position.set(x, y, z);
-      groupRef.current.rotation.set(
-        Math.sin(p * Math.PI) * -0.2,
-        Math.PI / 2, // face left
-        Math.sin(p * Math.PI) * -0.15
-      );
-      groupRef.current.scale.setScalar(2);
-    } else {
-      // Brief reset
-      groupRef.current.position.set(6, 0.3, 2);
-      groupRef.current.scale.setScalar(0.01);
-    }
-    missilePosRef.current.copy(groupRef.current.position);
+    const t = state.clock.elapsedTime;
+    // Slow rotation
+    groupRef.current.rotation.y = t * 0.3;
+    // Gentle hover
+    groupRef.current.position.y = Math.sin(t * 0.6) * 0.15;
   });
 
   return (
     <>
-      <group ref={groupRef}>
-        <primitive object={scene} scale={2.5} />
+      <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
+        <primitive object={scene} scale={2} />
       </group>
-      <StarField missilePos={missilePosRef} />
+      <TargetReticle />
       <ScanGrid />
     </>
   );
@@ -209,7 +212,7 @@ export default function Missile3D() {
           <Loader2 className="w-8 h-8 text-[#007AFF] animate-spin" />
         </div>
       )}
-      <Canvas camera={{ position: [0, 1, 5.5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0.5, 5], fov: 45 }}>
         <ambientLight intensity={0.15} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} color="#ffffff" />
         <directionalLight position={[-3, -2, 4]} intensity={0.3} color="#007AFF" />
