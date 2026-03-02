@@ -461,7 +461,9 @@ export function AdminSurveillanceView() {
                         {event.severity.toUpperCase()}
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description}</p>
+                    {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
+                      <p className="text-[11px] text-gray-500 line-clamp-2 mb-1.5">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-gray-600">{event.country_name}</span>
                       <div className="flex items-center gap-2">
