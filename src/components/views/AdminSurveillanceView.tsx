@@ -555,17 +555,25 @@ export function AdminSurveillanceView() {
           onOpenChange={(open) => { if (!open) setActiveCameraRegion(null); }}
           width={520}
           maxHeight="75vh"
-          zIndex={350}
+          zIndex={200}
+          className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
+          headerClassName="!bg-[#0d1220] !border-white/5"
+          bodyClassName="!p-0"
           headerContent={
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center gap-2 pl-2">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
               </span>
-              <span className="text-[10px] font-medium text-gray-300 truncate">{activeCameraRegion.label} — Live Webcams</span>
+              <span className="text-sm font-bold text-white">{activeCameraRegion.label}</span>
+              <span className="text-xs text-gray-500">Live Webcams</span>
             </div>
           }
-          bodyClassName="p-0 !p-0"
+          footer={
+            <div className="flex items-center justify-start w-full text-[10px] text-gray-500 -my-1">
+              Close: <kbd className="ml-1 px-1 py-0 bg-white/5 border border-white/10 rounded text-[10px] text-gray-400">ESC</kbd>
+            </div>
+          }
         >
           <div className="grid grid-cols-2 gap-px bg-white/5">
             {activeCameraRegion.feeds.map(feed => (
