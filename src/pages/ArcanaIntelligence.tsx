@@ -107,29 +107,31 @@ function HighlightCard({ icon: Icon, title, description, image, video, customCon
 // ── Cycling stats under 3D model ──
 function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [phase, setPhase] = useState<'visible' | 'exit' | 'enter'>('visible');
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
+      setPhase('exit');
       setTimeout(() => {
         setActiveIndex((prev) => (prev + 1) % stats.length);
-        setIsAnimating(false);
-      }, 400);
-    }, 2000);
+        setPhase('enter');
+        setTimeout(() => setPhase('visible'), 50);
+      }, 600);
+    }, 2500);
     return () => clearInterval(interval);
   }, [stats.length]);
 
+  const animClass =
+    phase === 'exit'
+      ? 'opacity-0 blur-md scale-50 translate-y-6'
+      : phase === 'enter'
+      ? 'opacity-0 blur-md scale-50 -translate-y-6'
+      : 'opacity-100 blur-0 scale-100 translate-y-0';
+
   return (
-    <div className="h-10 flex items-center overflow-visible relative z-10">
-      <div
-        className={`transition-all duration-400 ease-in-out ${
-          isAnimating
-            ? 'opacity-0 blur-sm scale-75 translate-y-4'
-            : 'opacity-100 blur-0 scale-100 translate-y-0'
-        }`}
-      >
-        <p className="text-3xl md:text-5xl font-bold text-[#f2a547] tracking-wide">
+    <div className="h-12 md:h-14 flex items-center overflow-visible relative z-10">
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${animClass}`}>
+        <p className="text-3xl md:text-5xl font-bold text-[#f2a547] tracking-wide whitespace-nowrap">
           {stats[activeIndex].value}
         </p>
       </div>
