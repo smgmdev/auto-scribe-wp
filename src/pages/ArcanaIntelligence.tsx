@@ -121,7 +121,7 @@ function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) 
   }, [stats.length]);
 
   return (
-    <div className="h-10 flex items-center overflow-hidden">
+    <div className="h-10 flex items-center overflow-visible relative z-10">
       <div
         className={`transition-all duration-400 ease-in-out ${
           isAnimating
