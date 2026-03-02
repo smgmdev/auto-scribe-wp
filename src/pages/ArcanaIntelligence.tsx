@@ -512,7 +512,7 @@ export default function ArcanaIntelligence() {
                 Precision in your system.
               </h2>
               <p className="text-white/50 text-base md:text-lg leading-relaxed max-w-2xl mb-12">
-                Seamlessly integrate Arcana Precision into your existing infrastructure. Built with flexible APIs and enterprise‑grade architecture to fit any operational environment.
+                Seamlessly integrate your data into Arcana Precision. Built to accept any data point to fit any operational environment.
               </p>
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
