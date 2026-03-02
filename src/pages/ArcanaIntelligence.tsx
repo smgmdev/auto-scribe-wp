@@ -267,7 +267,7 @@ export default function ArcanaIntelligence() {
             <AnimatedSection>
               
               <h1 className="text-5xl md:text-7xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6">
-                Arcana<br />Precision
+                Arcana Precision.
               </h1>
             </AnimatedSection>
             <AnimatedSection delay={200}>
