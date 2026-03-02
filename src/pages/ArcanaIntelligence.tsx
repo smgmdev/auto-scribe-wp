@@ -14,6 +14,7 @@ import heroVideo from '@/assets/arcana-intel-hero.mp4';
 import analyticsImg from '@/assets/arcana-intel-analytics.jpg';
 import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
+import engineVideo from '@/assets/arcana-intel-engine.mp4';
 import globalImg from '@/assets/arcana-intel-global.jpg';
 import securityImg from '@/assets/arcana-intel-security.jpg';
 import securityVideo from '@/assets/arcana-intel-security.mp4';
@@ -304,7 +305,7 @@ export default function ArcanaIntelligence() {
           <div className="max-w-[1200px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <HighlightCard icon={Eye} title="Real‑Time Surveillance" description="Monitor geopolitical events, military movements, and threat levels across 195 countries with live updates." image={globalImg} video={securityVideo} delay={0} />
-              <HighlightCard icon={Brain} title="AI‑Powered Analysis" description="Advanced language models scan, classify, and summarize thousands of news sources in seconds." image={engineImg} delay={150} />
+              <HighlightCard icon={Brain} title="AI‑Powered Analysis" description="Advanced language models scan, classify, and summarize thousands of news sources in seconds." image={engineImg} video={engineVideo} delay={150} />
               <HighlightCard icon={BarChart3} title="Media Analytics" description="Track coverage, sentiment, and reach across global media outlets with precision dashboards." image={analyticsImg} video={analyticsVideo} delay={300} />
             </div>
           </div>
