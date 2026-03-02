@@ -815,6 +815,35 @@ export type Database = {
           },
         ]
       }
+      dismissed_missile_alerts: {
+        Row: {
+          alert_id: string
+          dismissed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          alert_id: string
+          dismissed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          alert_id?: string
+          dismissed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dismissed_missile_alerts_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "missile_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes: {
         Row: {
           admin_notes: string | null
