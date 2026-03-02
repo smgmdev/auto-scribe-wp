@@ -121,7 +121,7 @@ export function SurveillanceCountryPopup() {
         </div>
       }
       footer={
-        <div className="flex items-center justify-end w-full text-[10px] text-gray-500 -my-1">
+        <div className="flex items-center justify-start w-full text-[10px] text-gray-500 -my-1">
           Close: <kbd className="ml-1 px-1 py-0 bg-white/5 border border-white/10 rounded text-[10px] text-gray-400">ESC</kbd>
         </div>
       }
