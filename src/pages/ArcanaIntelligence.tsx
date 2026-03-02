@@ -425,7 +425,7 @@ export default function ArcanaIntelligence() {
           <FeatureSection
             title="AI Engine"
             headline="Built to detect."
-            description="The Arcana Precision engine processes millions of data points per minute — classifying, correlating, and surfacing what matters before the news cycle catches up."
+            description="The Arcana Precision AI engine processes millions of data points — classifying, correlating, and surfacing what matters to visualize the information for security and defense purposes."
             image={engineImg}
             video={engineVideo}
             stats={[
