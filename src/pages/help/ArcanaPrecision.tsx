@@ -116,6 +116,30 @@ const sections: HelpSection[] = [
       </div>
     ),
   },
+  {
+    id: 'data-security',
+    title: 'Data Security & Privacy',
+    content: (
+      <div className="space-y-4">
+        <p>
+          Every signal processed by Arcana Precision is encrypted end-to-end, and every
+          access is logged with full audit trails. The system is built from the ground up
+          for organizations and government entities where data integrity and privacy are
+          mission‑critical.
+        </p>
+        <p>
+          Security measures include:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li><strong>End-to-End Encryption</strong> — All data in transit and at rest is encrypted using military-grade protocols.</li>
+          <li><strong>Access Logging</strong> — Every interaction with the system is recorded with timestamps, user identity, and action details.</li>
+          <li><strong>Role-Based Access Control</strong> — Granular permissions ensure only authorized personnel can access sensitive intelligence.</li>
+          <li><strong>Data Sovereignty</strong> — Deployment options that ensure data remains within jurisdictional boundaries as required.</li>
+          <li><strong>Compliance</strong> — Built to meet the security and privacy standards required by government and defense organizations.</li>
+        </ul>
+      </div>
+    ),
+  },
 ];
 
 export default function ArcanaPrecisionHelp() {
