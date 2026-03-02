@@ -208,9 +208,36 @@ export default function SystemStatus() {
     return () => clearInterval(interval);
   }, [fetchStatus]);
 
-  // Split into two columns
-  const leftColumn = services.slice(0, Math.ceil(services.length / 2));
-  const rightColumn = services.slice(Math.ceil(services.length / 2));
+  // Group services into categories
+  const serviceCategories: { title: string; names: string[] }[] = [
+    {
+      title: 'System & Security',
+      names: ['API Server', 'Database', 'Authentication', 'Edge Functions', 'File Storage', 'Real-time Messaging', 'Email Notifications'],
+    },
+    {
+      title: 'Media',
+      names: ['WordPress Publishing', 'Media Site Network', 'Headlines Scanner', 'Agency System & Features'],
+    },
+    {
+      title: 'Transactions',
+      names: ['Credit Processing', 'Payment Gateway (Stripe)'],
+    },
+    {
+      title: 'AI Publishing',
+      names: ['AI Article Generation', 'Mace AI'],
+    },
+    {
+      title: 'Defense',
+      names: ['Arcana Precision'],
+    },
+  ];
+
+  const groupedServices = serviceCategories.map((cat) => ({
+    title: cat.title,
+    services: cat.names
+      .map((name) => services.find((s) => s.name === name))
+      .filter(Boolean) as ServiceStatus[],
+  }));
 
   const { user } = useAuth();
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -339,20 +366,17 @@ export default function SystemStatus() {
               <RefreshCw className="w-6 h-6 animate-spin text-[#86868b]" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-x-8 border-t border-[#d2d2d7]">
-              {/* Left Column */}
-              <div>
-                {leftColumn.map((service) => (
-                  <ServiceRow key={service.name} service={service} onNavigate={navigate} />
-                ))}
-              </div>
-              
-              {/* Right Column */}
-              <div className="border-t border-[#d2d2d7] md:border-t-0">
-                {rightColumn.map((service) => (
-                  <ServiceRow key={service.name} service={service} onNavigate={navigate} />
-                ))}
-              </div>
+            <div className="space-y-8">
+              {groupedServices.map((group) => (
+                <div key={group.title}>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868b] mb-2">{group.title}</h3>
+                  <div className="border-t border-[#d2d2d7]">
+                    {group.services.map((service) => (
+                      <ServiceRow key={service.name} service={service} onNavigate={navigate} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
