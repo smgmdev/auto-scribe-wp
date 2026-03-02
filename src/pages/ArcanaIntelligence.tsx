@@ -66,7 +66,7 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
 }) {
   const { ref, isInView } = useInView();
   return (
-    <div ref={ref} className="group relative overflow-hidden rounded-3xl bg-[#1d1d1f] transition-all duration-700"
+    <div ref={ref} className="group relative overflow-hidden rounded-none bg-[#1d1d1f] transition-all duration-700"
       style={{ opacity: isInView ? 1 : 0, transform: isInView ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.96)', transitionDelay: `${delay}ms` }}>
       <div className="relative aspect-[4/3] overflow-hidden">
         {video ? (
@@ -79,9 +79,6 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
         <div className="absolute inset-0 bg-gradient-to-t from-[#1d1d1f] via-[#1d1d1f]/40 to-transparent" />
       </div>
       <div className="relative px-6 pb-8 -mt-20 z-10">
-        <div className="w-10 h-10 rounded-2xl bg-[#007AFF]/20 flex items-center justify-center mb-4">
-          <Icon className="w-5 h-5 text-[#007AFF]" />
-        </div>
         <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
         <p className="text-[15px] leading-relaxed text-white/60">{description}</p>
       </div>
