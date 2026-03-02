@@ -559,7 +559,7 @@ function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   return null;
 }
 
-const DEFAULT_CAMERA_POS = new THREE.Vector3(2.5, 3.5, 4.0);
+const DEFAULT_CAMERA_POS = new THREE.Vector3(-4.5, 2.5, 3.5);
 const ZOOM_OUT_POS = new THREE.Vector3(0, 0, 12); // max zoom out
 
 function CameraResetter({ trigger }: { trigger: number }) {
