@@ -1,119 +1,62 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import { useRef, useMemo, Suspense, useState } from 'react';
+import { useRef, Suspense, useState } from 'react';
 import * as THREE from 'three';
 import { Loader2 } from 'lucide-react';
 
-function EnergyShield() {
-  const outerRef = useRef<THREE.Group>(null);
-  const innerRef = useRef<THREE.Group>(null);
-  const pulseRef = useRef<THREE.Mesh>(null);
-  const ringRefs = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
+function ShieldIcon() {
+  const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime;
-
-    // Outer hex grid rotates slowly
-    if (outerRef.current) {
-      outerRef.current.rotation.y = t * 0.1;
-      outerRef.current.rotation.x = Math.sin(t * 0.3) * 0.05;
+    if (groupRef.current) {
+      groupRef.current.position.y = 2.2 + Math.sin(state.clock.elapsedTime * 1.5) * 0.08;
     }
-
-    // Inner shell counter-rotates
-    if (innerRef.current) {
-      innerRef.current.rotation.y = -t * 0.15;
-    }
-
-    // Pulse ring expanding outward
-    if (pulseRef.current) {
-      const cycle = (t * 0.5) % 1; // 0→1 repeating
-      const scale = 1.8 + cycle * 0.8;
-      pulseRef.current.scale.setScalar(scale);
-      const mat = pulseRef.current.material as THREE.MeshStandardMaterial;
-      mat.opacity = 0.25 * (1 - cycle);
-    }
-
-    // Orbital rings
-    ringRefs.forEach((ref, i) => {
-      if (ref.current) {
-        const offset = (Math.PI * 2 / 3) * i;
-        ref.current.rotation.x = t * 0.4 + offset;
-        ref.current.rotation.z = t * 0.2 + offset;
-        const mat = ref.current.material as THREE.MeshStandardMaterial;
-        mat.opacity = 0.12 + Math.sin(t * 2 + i) * 0.06;
-      }
-    });
   });
 
-  // Hex wireframe
-  const hexEdges = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(2.0, 1);
-    return new THREE.EdgesGeometry(geo);
-  }, []);
-
-  const innerEdges = useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(1.7, 2);
-    return new THREE.EdgesGeometry(geo);
-  }, []);
+  // Shield shape using a custom path
+  const shieldShape = new THREE.Shape();
+  const w = 0.5;
+  const h = 0.7;
+  shieldShape.moveTo(0, h);
+  shieldShape.quadraticCurveTo(w, h * 0.7, w, 0);
+  shieldShape.quadraticCurveTo(w * 0.8, -h * 0.5, 0, -h);
+  shieldShape.quadraticCurveTo(-w * 0.8, -h * 0.5, -w, 0);
+  shieldShape.quadraticCurveTo(-w, h * 0.7, 0, h);
 
   return (
-    <>
-      {/* Outer hex wireframe shell */}
-      <group ref={outerRef}>
-        <lineSegments geometry={hexEdges}>
-          <lineBasicMaterial color="#007AFF" transparent opacity={0.18} />
-        </lineSegments>
-      </group>
-
-      {/* Inner denser wireframe */}
-      <group ref={innerRef}>
-        <lineSegments geometry={innerEdges}>
-          <lineBasicMaterial color="#007AFF" transparent opacity={0.08} />
-        </lineSegments>
-      </group>
-
-      {/* Expanding pulse ring */}
-      <mesh ref={pulseRef} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1, 0.015, 4, 64]} />
+    <group ref={groupRef} position={[0, 2.2, 0]}>
+      <mesh>
+        <shapeGeometry args={[shieldShape]} />
         <meshStandardMaterial
           color="#007AFF"
           emissive="#007AFF"
-          emissiveIntensity={2}
+          emissiveIntensity={0.6}
           transparent
           opacity={0.25}
+          side={THREE.DoubleSide}
           depthWrite={false}
         />
       </mesh>
-
-      {/* Three orbital defense rings */}
-      {ringRefs.map((ref, i) => (
-        <mesh key={i} ref={ref}>
-          <torusGeometry args={[2.3 + i * 0.15, 0.004, 4, 80]} />
-          <meshStandardMaterial
-            color="#007AFF"
-            emissive="#007AFF"
-            emissiveIntensity={1.5}
-            transparent
-            opacity={0.15}
-            depthWrite={false}
+      {/* Shield outline */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={32}
+            array={(() => {
+              const points: number[] = [];
+              for (let i = 0; i <= 31; i++) {
+                const p = shieldShape.getPoint(i / 31);
+                points.push(p.x, p.y, 0);
+              }
+              return new Float32Array(points);
+            })()}
+            itemSize={3}
           />
-        </mesh>
-      ))}
-
-      {/* Subtle glow sphere */}
-      <mesh>
-        <sphereGeometry args={[2.0, 24, 24]} />
-        <meshStandardMaterial
-          color="#007AFF"
-          emissive="#007AFF"
-          emissiveIntensity={0.15}
-          transparent
-          opacity={0.03}
-          side={THREE.BackSide}
-          depthWrite={false}
-        />
-      </mesh>
-    </>
+        </bufferGeometry>
+        <lineBasicMaterial color="#007AFF" transparent opacity={0.6} />
+      </line>
+    </group>
   );
 }
 
@@ -132,7 +75,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      <EnergyShield />
+      <ShieldIcon />
     </>
   );
 }
