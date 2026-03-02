@@ -337,7 +337,7 @@ export function AdminSurveillanceView() {
 
             {/* Trajectory filters - desktop inline */}
             <div className="hidden lg:flex items-stretch flex-1">
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border-l border-r border-white/10 self-stretch">
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-l border-r border-white/10 self-stretch">
                 <button onClick={() => setShowMissiles(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showMissiles && "opacity-30")} title={showMissiles ? 'Hide missiles on map' : 'Show missiles on map'}>
                   <Rocket className="w-3 h-3 text-blue-400" />
                   <span className="text-[10px] text-gray-400">Missiles</span>
@@ -354,7 +354,7 @@ export function AdminSurveillanceView() {
                 </Select>
                 <span className="text-[10px] text-gray-600">({missileTrajectories.length})</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border-r border-white/10 self-stretch">
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
                 <button onClick={() => setShowDrones(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showDrones && "opacity-30")} title={showDrones ? 'Hide drones on map' : 'Show drones on map'}>
                   <PlaneTakeoff className="w-3 h-3 text-purple-400" />
                   <span className="text-[10px] text-gray-400">Drones</span>
@@ -371,7 +371,7 @@ export function AdminSurveillanceView() {
                 </Select>
                 <span className="text-[10px] text-gray-600">({droneTrajectories.length})</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border-r border-white/10 self-stretch">
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
                 <button onClick={() => setShowNukes(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showNukes && "opacity-30")} title={showNukes ? 'Hide nukes on map' : 'Show nukes on map'}>
                   <Radiation className="w-3 h-3 text-yellow-400" />
                   <span className="text-[10px] text-gray-400">Nukes</span>
