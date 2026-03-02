@@ -569,12 +569,11 @@ export default function ArcanaIntelligence() {
                 Ready to see the full picture?
               </h2>
               <p className="text-lg text-white/50 max-w-lg mx-auto mb-10">
-                Join the platform that governments, agencies, and enterprises trust for mission‑critical intelligence.
+                A platform designed for governments, agencies, and enterprises for mission‑critical intelligence.
               </p>
               <Button onClick={() => user ? navigate('/account') : navigate('/auth')}
                 className="rounded-none bg-[#007AFF] text-white hover:bg-[#0066D6] h-14 px-10 text-lg font-medium">
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Contact
               </Button>
             </AnimatedSection>
           </div>
