@@ -17,6 +17,7 @@ import analyticsVideo from '@/assets/arcana-intel-analytics.mp4';
 import engineImg from '@/assets/arcana-intel-engine.jpg';
 import engineVideo from '@/assets/arcana-intel-engine.mp4';
 import globalImg from '@/assets/arcana-intel-global.jpg';
+import globalVideo from '@/assets/arcana-intel-global.mp4';
 import securityImg from '@/assets/arcana-intel-security.jpg';
 import securityVideo from '@/assets/arcana-intel-security.mp4';
 
@@ -100,10 +101,11 @@ function HighlightCard({ icon: Icon, title, description, image, video, delay = 0
 }
 
 // ── Feature row (alternating) ──
-function FeatureSection({ title, headline, description, image, stats, reverse = false, children }: {
-  title: string; headline: string; description: string; image: string;
+function FeatureSection({ title, headline, description, image, video, stats, reverse = false, children }: {
+  title: string; headline: string; description: string; image: string; video?: string;
   stats?: { label: string; value: string }[]; reverse?: boolean; children?: React.ReactNode;
 }) {
+  const [featureVideoLoaded, setFeatureVideoLoaded] = useState(false);
   return (
     <section className="bg-black text-white overflow-hidden">
       <div className="max-w-[980px] mx-auto px-4 md:px-6">
@@ -117,8 +119,22 @@ function FeatureSection({ title, headline, description, image, stats, reverse = 
       </div>
       <AnimatedSection delay={300}>
         <div className={`max-w-[1200px] mx-auto px-4 md:px-6 flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 mb-16`}>
-          <div className="flex-1 w-full">
-            <img src={image} alt={headline} className="w-full rounded-2xl" />
+          <div className="flex-1 w-full relative">
+            {video ? (
+              <>
+                {!featureVideoLoaded && (
+                  <div className="absolute bottom-3 right-3 z-20">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#0071e3]" />
+                  </div>
+                )}
+                <video autoPlay loop muted playsInline className="w-full rounded-2xl"
+                  onCanPlayThrough={() => setFeatureVideoLoaded(true)}>
+                  <source src={video} type="video/mp4" />
+                </video>
+              </>
+            ) : (
+              <img src={image} alt={headline} className="w-full rounded-2xl" />
+            )}
           </div>
           <div className="flex-1 space-y-8">
             {stats && (
@@ -382,6 +398,7 @@ export default function ArcanaIntelligence() {
             headline="Every corner. Every signal."
             description="Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time."
             image={globalImg}
+            video={globalVideo}
             reverse
             stats={[
               { value: '195', label: 'Countries' },
