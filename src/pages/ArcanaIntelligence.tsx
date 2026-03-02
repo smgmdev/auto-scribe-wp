@@ -291,22 +291,6 @@ export default function ArcanaIntelligence() {
             </AnimatedSection>
           </div>
 
-          {/* Scrolling stats bar */}
-          <div className="relative z-10 w-full border-t border-white/10 bg-black/60 backdrop-blur-xl">
-            <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { val: 10000, suffix: '+', label: 'Sources monitored' },
-                { val: 195, suffix: '', label: 'Countries covered' },
-                { val: 50, suffix: 'ms', label: 'Avg. response time' },
-                { val: 99, suffix: '.9%', label: 'Uptime reliability' },
-              ].map((s) => (
-                <div key={s.label}>
-                  <p className="text-2xl md:text-3xl font-bold text-white"><AnimatedStat value={s.val} suffix={s.suffix} /></p>
-                  <p className="text-xs text-white/40 mt-1">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </section>
 
         {/* ══════════════ HIGHLIGHT CARDS ══════════════ */}
