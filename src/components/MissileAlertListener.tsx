@@ -109,7 +109,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
   const colors = getAlertColors(type);
 
   return (
-    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:max-h-[70vh]`}>
+    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:h-full`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse shrink-0`} />
       
       <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2 flex-1 overflow-auto">
@@ -330,9 +330,9 @@ export function MissileAlertListener() {
   const queuedCount = alerts.length - visibleAlerts.length;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-end justify-center pointer-events-none animate-fade-in">
-      <div className="flex flex-col items-center pointer-events-auto max-sm:w-full">
-        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] max-sm:max-h-[70vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0">
+    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-stretch justify-center pointer-events-none animate-fade-in max-sm:top-[60px]">
+      <div className="flex flex-col items-center pointer-events-auto max-sm:w-full max-sm:h-full">
+        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:h-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0">
           {visibleAlerts.map(alert => (
             <AlertPopup
               key={alert.id}
