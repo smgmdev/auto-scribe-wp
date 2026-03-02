@@ -86,6 +86,7 @@ const sections: HelpSection[] = [
           <li><strong>Natural Language Processing</strong> — Understands context, tone, and intent across dozens of languages through worldwide scan.</li>
           <li><strong>Entity Recognition</strong> — Automatically identifies people, organizations, locations, events, and objects based on context.</li>
           <li><strong>Predictive Signals</strong> — Detects emerging patterns before they become headlines.</li>
+          <li><strong>Real-Time Alerts</strong> — Instant notifications on confirmed missile launches, drone incursions, and nuclear activity — delivered the moment threats are detected.</li>
           <li><strong>Multi-Source Fusion</strong> — Combines data from media outlets, social channels, and open-source intelligence feeds.</li>
         </ul>
       </div>

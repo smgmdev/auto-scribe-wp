@@ -482,6 +482,7 @@ export default function ArcanaIntelligence() {
                 { title: 'Natural Language Processing', desc: 'Understands context, tone, and intent across dozens of languages through worldwide scan.' },
                 { title: 'Entity Recognition', desc: 'Automatically identifies people, organizations, locations, events and objects based on the context.' },
                 { title: 'Predictive Signals', desc: 'Detects emerging patterns before they become headlines.' },
+                { title: 'Real-Time Alerts', desc: 'Instant notifications on confirmed missile launches, drone incursions, and nuclear activity — delivered the moment threats are detected.' },
               ].map((f) => (
                 <div key={f.title} className="pl-0">
                   <div className="inline-block">
