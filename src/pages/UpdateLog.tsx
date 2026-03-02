@@ -17,6 +17,20 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'March 2, 2026',
+    title: 'Arcana Precision — Intelligence Platform',
+    changes: [
+      'Launched Arcana Precision (/arcana-precision) — a dedicated intelligence platform designed for governments, semi-government agencies, and enterprises requiring mission-critical surveillance and analytics capabilities',
+      'Arcana Precision landing page features scroll-animated sections showcasing real-time missile surveillance, deep data analytics, global coverage, and security infrastructure',
+      'Added Interest in Arcana Precision contact form with full name, email, mobile number, and organization type fields — accessible globally from any page via the app store',
+      'Contact form includes slider puzzle CAPTCHA verification to prevent automated bot submissions',
+      'Form submissions are stored in the database and trigger an email notification to the business team via Resend',
+      'Added Arcana Precision help article to the Help Center covering platform capabilities and contact information',
+      'Updated site map page and sitemap.xml with Arcana Precision entries',
+      'Arcana Precision now listed under "For Business" in the footer navigation alongside Agency Account and Industries',
+    ],
+  },
+  {
     date: 'March 1, 2026',
     title: 'Password Reset Flow & Page Consistency',
     changes: [
