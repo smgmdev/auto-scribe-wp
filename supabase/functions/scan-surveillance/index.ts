@@ -430,17 +430,21 @@ Deno.serve(async (req) => {
 
     if (threatEvents.length > 0) {
       console.log(`Detected ${threatEvents.length} threat events, creating alerts...`);
-      for (const event of threatEvents) {
-        const threatType = classifyThreatType(event.title || '', event.description || '');
-        const { data: existing } = await supabase
-          .from('missile_alerts')
-          .select('id')
-          .eq('title', event.title)
-          .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
-          .maybeSingle();
+      
+      // Batch dedup check: fetch all recent alert titles in one query
+      const recentCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: recentAlerts } = await supabase
+        .from('missile_alerts')
+        .select('title')
+        .gte('created_at', recentCutoff);
+      const existingTitles = new Set((recentAlerts || []).map((a: any) => a.title));
 
-        if (!existing) {
-          await supabase.from('missile_alerts').insert({
+      // Build batch of new alerts
+      const newAlerts = threatEvents
+        .filter((event: any) => !existingTitles.has(event.title))
+        .map((event: any) => {
+          const threatType = classifyThreatType(event.title || '', event.description || '');
+          return {
             title: event.title,
             description: event.description,
             country_code: event.country_code,
@@ -452,8 +456,12 @@ Deno.serve(async (req) => {
             origin_country_name: event.origin_country_name || null,
             destination_country_code: event.destination_country_code || null,
             destination_country_name: event.destination_country_name || null,
-          });
-        }
+          };
+        });
+
+      if (newAlerts.length > 0) {
+        await supabase.from('missile_alerts').insert(newAlerts);
+        console.log(`Inserted ${newAlerts.length} new threat alerts in batch`);
       }
     }
 
