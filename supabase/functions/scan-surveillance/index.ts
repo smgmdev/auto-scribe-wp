@@ -533,12 +533,16 @@ Deno.serve(async (req) => {
     const DRONE_KEYWORDS = ['drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition', 'uav attack', 'unmanned aerial attack'];
     // Nuke: ONLY confirmed launches/detonations — exclude diplomatic/political mentions
     const NUKE_LAUNCH_PHRASES = ['nuclear weapon launched', 'nuclear strike confirmed', 'nuclear warhead detonated', 'nuclear bomb dropped', 'nuclear detonation', 'thermonuclear strike', 'nuclear attack confirmed', 'nuclear missile launched'];
+    // Hydrogen bomb: ONLY confirmed launches/detonations
+    const HBOMB_LAUNCH_PHRASES = ['hydrogen bomb launched', 'hydrogen bomb detonated', 'hydrogen bomb dropped', 'thermonuclear bomb launched', 'thermonuclear bomb detonated', 'h-bomb launched', 'h-bomb detonated', 'h-bomb dropped', 'hydrogen bomb strike', 'thermonuclear bomb strike', 'fusion bomb launched', 'fusion bomb detonated', 'hydrogen bomb attack confirmed', 'thermonuclear device detonated'];
     // Exclude false positives: these phrases contain "nuclear" but are NOT actual launches
     const NUKE_FALSE_POSITIVES = ['nuclear deal', 'nuclear talks', 'nuclear program', 'nuclear threat', 'nuclear deterrent', 'nuclear capable', 'nuclear arsenal', 'nuclear policy', 'nuclear energy', 'nuclear power', 'nuclear facility', 'nuclear plant', 'nuclear reactor', 'nuclear proliferation', 'nuclear sanctions', 'nuclear agreement', 'nuclear diplomacy', 'nuclear posture', 'nuclear doctrine', 'nuclear option', 'nuclear warning', 'nuclear rhetoric', 'nuclear fears', 'nuclear risk', 'nuclear standoff'];
     const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage'];
 
-    const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | null => {
+    const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | 'hbomb' | null => {
       const text = `${title} ${description}`.toLowerCase();
+      // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
+      if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases AND must NOT match false positives only
       if (NUKE_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'nuke';
       if (DRONE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'drone';

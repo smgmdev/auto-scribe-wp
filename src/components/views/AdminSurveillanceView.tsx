@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -131,15 +131,18 @@ export function AdminSurveillanceView() {
   const [missileTimeFilter, setMissileTimeFilter] = useState<string>('24');
   const [droneTimeFilter, setDroneTimeFilter] = useState<string>('24');
   const [nukeTimeFilter, setNukeTimeFilter] = useState<string>('24');
+  const [hbombTimeFilter, setHbombTimeFilter] = useState<string>('24');
   const globalTimeFilter = useAppStore((s) => s.surveillanceTimeFilter);
   const setGlobalTimeFilter = useAppStore((s) => s.setSurveillanceTimeFilter);
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [hbombTrajectories, setHbombTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const [showMissiles, setShowMissiles] = useState(true);
   const [showDrones, setShowDrones] = useState(true);
   const [showNukes, setShowNukes] = useState(true);
+  const [showHbombs, setShowHbombs] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
@@ -243,6 +246,7 @@ export function AdminSurveillanceView() {
       .eq('active', true)
       .not('severity', 'eq', 'drone')
       .not('severity', 'eq', 'nuke')
+      .not('severity', 'eq', 'hbomb')
       .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
@@ -279,11 +283,26 @@ export function AdminSurveillanceView() {
     if (data) setNukeTrajectories(data);
   }, [nukeTimeFilter]);
 
+  const fetchHbombs = useCallback(async () => {
+    const hours = parseFloat(hbombTimeFilter);
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('missile_alerts')
+      .select('id, origin_country_code, destination_country_code')
+      .eq('active', true)
+      .eq('severity', 'hbomb')
+      .gte('published_at', cutoff)
+      .not('origin_country_code', 'is', null)
+      .not('destination_country_code', 'is', null);
+    if (data) setHbombTrajectories(data);
+  }, [hbombTimeFilter]);
+
   useEffect(() => {
     fetchMissiles();
     fetchDrones();
     fetchNukes();
-  }, [fetchMissiles, fetchDrones, fetchNukes, trajectoryRefresh]);
+    fetchHbombs();
+  }, [fetchMissiles, fetchDrones, fetchNukes, fetchHbombs, trajectoryRefresh]);
 
   // Filter events and countries by global time filter
   const filteredEvents = useMemo(() => {
@@ -435,6 +454,23 @@ export function AdminSurveillanceView() {
                 </Select>
                 <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
               </div>
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowHbombs(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")} title={showHbombs ? 'Hide H-bombs on map' : 'Show H-bombs on map'}>
+                  <Bomb className="w-3 h-3 text-orange-400" />
+                  <span className="text-[10px] text-gray-400">H-Bomb</span>
+                </button>
+                <Select value={hbombTimeFilter} onValueChange={setHbombTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({hbombTrajectories.length})</span>
+              </div>
             </div>
 
             {/* Shield menu for feed panel */}
@@ -515,6 +551,23 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({nukeTrajectories.length})</span>
             </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
+              <button onClick={() => setShowHbombs(v => !v)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")}>
+                <Bomb className="w-3 h-3 text-orange-400" />
+                <span className="text-[10px] text-gray-400">H-Bomb</span>
+              </button>
+              <Select value={hbombTimeFilter} onValueChange={setHbombTimeFilter}>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[10px] text-gray-600">({hbombTrajectories.length})</span>
+            </div>
           </div>
         </div>
 
@@ -540,6 +593,7 @@ export function AdminSurveillanceView() {
                   missileTrajectories={showMissiles ? dedupeTrajectories(missileTrajectories) : []}
                   droneTrajectories={showDrones ? dedupeTrajectories(droneTrajectories) : []}
                   nukeTrajectories={showNukes ? dedupeTrajectories(nukeTrajectories) : []}
+                  hbombTrajectories={showHbombs ? dedupeTrajectories(hbombTrajectories) : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
