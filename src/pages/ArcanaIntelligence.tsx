@@ -146,8 +146,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
                 <div className="grid grid-cols-2 gap-6">
                   {stats.map((s) => (
                     <div key={s.label}>
-                      <p className="text-3xl md:text-4xl font-bold text-white">{s.value}</p>
-                      <p className="text-sm text-white/50 mt-1">{s.label}</p>
+                      <p className="text-3xl md:text-4xl font-bold text-[#f2a547]">{s.value}</p>
                     </div>
                   ))}
                 </div>
