@@ -520,7 +520,7 @@ export default function ArcanaIntelligence() {
               ].map((item) => (
                 <AnimatedSection key={item.title} delay={100}>
                   <div className="bg-[#1d1d1f] rounded-none p-8 h-full flex flex-col">
-                    <item.icon className="w-8 h-8 text-white mb-6" />
+                    
                     <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
                     <p className="text-white/50 text-sm leading-relaxed mb-6 flex-1">{item.desc}</p>
                     <a href={item.link} className="text-[#007AFF] text-sm font-normal hover:underline">
