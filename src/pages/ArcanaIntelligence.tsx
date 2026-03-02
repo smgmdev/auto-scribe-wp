@@ -434,8 +434,7 @@ export default function ArcanaIntelligence() {
                   <img 
                     src={securityImg} 
                     alt="Security" 
-                    className="w-full rounded-2xl animate-[shieldHeartbeat_2s_ease-in-out_infinite] drop-shadow-[0_0_40px_rgba(0,122,255,0.4)]" 
-                    style={{ filter: 'drop-shadow(0 0 20px rgba(0,122,255,0.3))' }}
+                    className="w-full animate-[shieldHeartbeat_2s_ease-in-out_infinite]" 
                   />
                 </div>
               </AnimatedSection>
