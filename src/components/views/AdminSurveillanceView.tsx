@@ -32,22 +32,22 @@ const CAMERA_REGIONS: CameraRegionConfig[] = [
     { label: 'Middle East', embedId: '4E-iFtUM2kk' },
   ]},
   { region: 'asia', label: 'Asia', feeds: [
-    { label: 'NHK World', embedId: 'f0lYkdA-Gtw' },
-    { label: 'WION Live', embedId: 'UBKcjkGqFhA' },
-    { label: 'CNA Asia', embedId: 'XWq5kBlakcQ' },
-    { label: 'Arirang TV', embedId: 'kUhRAbmSwig' },
+    { label: 'Taipei', embedId: 'z_fY1pj1VBw' },
+    { label: 'Tokyo', embedId: '4pu9sF5Qssw' },
+    { label: 'Shanghai', embedId: '76EwqI5XZIc' },
+    { label: 'Seoul', embedId: '-JhoMGoAfFc' },
   ]},
   { region: 'europe', label: 'Europe', feeds: [
-    { label: 'France 24', embedId: 'h3MuIUNCCzI' },
-    { label: 'DW News', embedId: 'V4Qgff4_wP0' },
-    { label: 'Euronews', embedId: 'pykpO5kQJ98' },
-    { label: 'Sky News', embedId: '9Auq9mYxFEE' },
+    { label: 'Kyiv', embedId: '-Q7FuPINDjA' },
+    { label: 'Odessa', embedId: 'e2gC37ILQmk' },
+    { label: 'Paris', embedId: 'OzYp4NRZlwQ' },
+    { label: 'St. Petersburg', embedId: 'CjtIYbmVfck' },
   ]},
   { region: 'us', label: 'United States', feeds: [
-    { label: 'Washington DC', embedId: 'lHkebfwmC4U' },
+    { label: 'Washington DC', embedId: '1wV9lLe14aU' },
     { label: 'New York', embedId: 'rnXIjl_Rzy4' },
     { label: 'Los Angeles', embedId: 'qmE7U1YZPQA' },
-    { label: 'Miami', embedId: 'mqJLCYASw2E' },
+    { label: 'Miami', embedId: '5YCajRjvWCg' },
   ]},
 ];
 
