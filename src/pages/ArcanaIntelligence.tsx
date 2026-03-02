@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
-import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair } from 'lucide-react';
+import { Search, User, Brain, Globe, Shield, Zap, BarChart3, Eye, Radio, Layers, ArrowRight, Loader2, Lock, Fingerprint, ScanLine, Crosshair, Radar } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 import { SearchModal } from '@/components/search/SearchModal';
@@ -484,9 +484,9 @@ export default function ArcanaIntelligence() {
                     <Shield className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/30 blur-md" strokeWidth={2} />
                     <Shield className="absolute inset-0 w-36 h-36 md:w-48 md:h-48 text-[#007AFF]/10" strokeWidth={0.5} fill="rgba(0,122,255,0.04)" />
                     <Shield className="relative w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_25px_rgba(0,122,255,0.5)]" strokeWidth={1.2} />
-                    {/* Inner lock icon */}
+                    {/* Inner radar icon */}
                     <div className="absolute inset-0 flex items-center justify-center pt-2">
-                      <Lock className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40" strokeWidth={1.5} />
+                      <Radar className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40" strokeWidth={1.5} />
                     </div>
                     {/* Scan line */}
                     <div className="absolute inset-0 overflow-hidden rounded-full">
@@ -497,7 +497,7 @@ export default function ArcanaIntelligence() {
                   {/* Status label */}
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
-                    <span className="text-[10px] font-mono text-white/30 tracking-widest uppercase">Encrypted</span>
+                    <span className="text-[10px] font-mono text-white/30 tracking-widest uppercase">Real time</span>
                   </div>
                 </div>
               </AnimatedSection>
