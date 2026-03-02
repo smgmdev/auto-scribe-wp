@@ -19,6 +19,8 @@ interface DraggablePopupProps {
   bodyClassName?: string;
   /** Extra class for the drag bar / header */
   headerClassName?: string;
+  /** Content rendered inline inside the drag bar (between grip icon and close button) */
+  headerContent?: ReactNode;
 }
 
 export function DraggablePopup({
@@ -33,6 +35,7 @@ export function DraggablePopup({
   className = '',
   bodyClassName = '',
   headerClassName = '',
+  headerContent,
 }: DraggablePopupProps) {
   const isMobile = useIsMobile();
   const popupId = useId();
@@ -148,7 +151,8 @@ export function DraggablePopup({
       }`}
       onMouseDown={!isMobile ? handleDragStart : undefined}
     >
-      <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+      <GripHorizontal className="h-4 w-4 text-muted-foreground shrink-0" />
+      {headerContent && <div className="flex-1 min-w-0">{headerContent}</div>}
       <Button
         variant="ghost"
         size="icon"
