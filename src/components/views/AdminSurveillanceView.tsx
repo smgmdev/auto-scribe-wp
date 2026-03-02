@@ -459,7 +459,7 @@ export function AdminSurveillanceView() {
         {/* Main content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Globe area */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative flex items-center justify-center">
             {scanData ? (
               <SurveillanceGlobe
                 countries={scanData.countries}
