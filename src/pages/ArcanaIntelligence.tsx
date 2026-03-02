@@ -410,7 +410,7 @@ export default function ArcanaIntelligence() {
                 Intelligence at every level.
               </h2>
               <p className="text-lg text-white/50 max-w-xl mx-auto leading-tight">
-                From real‑time surveillance to deep media analytics — every tool designed to give you the edge.
+                From real‑time missile surveillance to deep data analytics — designed to give you the edge.
               </p>
             </AnimatedSection>
           </div>
