@@ -272,7 +272,7 @@ export default function ArcanaIntelligence() {
             </AnimatedSection>
             <AnimatedSection delay={200}>
               <p className="text-xl md:text-2xl text-white/60 max-w-xl mx-auto mb-10 leading-tight">
-                See what others miss. Real‑time security intelligence, powered by advanced AI models.
+                Designed to spot real‑time missile, drone and nuclear weapon attacks. Precision war intelligence.
               </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>
