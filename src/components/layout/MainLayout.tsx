@@ -57,7 +57,7 @@ export function MainLayout({
   return <div className="min-h-screen bg-background">
       {/* Desktop: separate fixed banners */}
       <div className="hidden lg:block">
-        <div className={cn("fixed top-0 right-0 z-50 h-16 flex flex-col transition-all duration-300", sidebarCollapsed ? "left-16" : "left-64")}>
+        <div className={cn("fixed top-0 right-0 z-50 h-16 flex flex-col transition-all duration-300", sidebarCollapsed ? "left-[60px]" : "left-64")}>
           <QuickNavBanner inDashboard />
           <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
             <p className="text-white/80 text-xs flex items-center">
@@ -120,7 +120,7 @@ export function MainLayout({
       {/* Main Content */}
       <main 
         ref={mainRef}
-        className={cn("lg:pt-16 h-screen overflow-y-auto flex flex-col transition-all duration-300", sidebarCollapsed ? "lg:pl-16" : "lg:pl-64", isDarkFooter || isDashboardFooter ? 'bg-black' : '')}
+        className={cn("lg:pt-16 h-screen overflow-y-auto flex flex-col transition-all duration-300", sidebarCollapsed ? "lg:pl-[60px]" : "lg:pl-64", isDarkFooter || isDashboardFooter ? 'bg-black' : '')}
         style={{ 
           paddingTop: mobileTopHeight > 0 && window.innerWidth < 1024 ? `${mobileTopHeight}px` : undefined,
           WebkitOverflowScrolling: 'touch',
