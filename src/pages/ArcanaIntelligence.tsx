@@ -170,9 +170,9 @@ function CyclingStats({ stats }: { stats: { label: string; value: string }[] }) 
 }
 
 // ── Feature row (alternating) ──
-function FeatureSection({ title, headline, description, image, video, customContent, stats, reverse = false, children }: {
+function FeatureSection({ title, headline, description, image, video, customContent, stats, reverse = false, children, descriptionClassName }: {
   title: string; headline: string; description: string; image: string; video?: string; customContent?: React.ReactNode;
-  stats?: { label: string; value: string }[]; reverse?: boolean; children?: React.ReactNode;
+  stats?: { label: string; value: string }[]; reverse?: boolean; children?: React.ReactNode; descriptionClassName?: string;
 }) {
   const [featureVideoLoaded, setFeatureVideoLoaded] = useState(false);
   return (
@@ -186,7 +186,7 @@ function FeatureSection({ title, headline, description, image, video, customCont
           </div>
         </AnimatedSection>
         <AnimatedSection delay={200}>
-          <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-tight">{description}</p>
+          <p className={`text-lg md:text-xl text-white/70 max-w-2xl mb-10 ${descriptionClassName || ''}`}>{description}</p>
         </AnimatedSection>
       </div>
       <AnimatedSection delay={300}>
@@ -495,6 +495,7 @@ export default function ArcanaIntelligence() {
             title="Global Reach"
             headline="Every corner. Every signal."
             description="Arcana Precision spans 195 countries, monitoring thousands of media outlets, social channels, and open‑source intelligence feeds in real time."
+            descriptionClassName="leading-tight"
             image={globalImg}
             video={securityVideo}
             reverse
