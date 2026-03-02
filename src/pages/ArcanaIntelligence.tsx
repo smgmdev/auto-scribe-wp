@@ -514,7 +514,7 @@ export default function ArcanaIntelligence() {
               {[
                 { icon: Shield, title: 'Data security and privacy.', desc: 'Every signal is encrypted, every access is logged. Built for organizations and government entities where data integrity and privacy are mission‑critical.', link: '#global', linkText: 'Learn more' },
                 { icon: SlidersHorizontal, title: 'Unlimited customizations.', desc: 'Precision can be configured and set up in any way required — with unlimited capability for customization and features tailored to your needs.', link: '#security', linkText: 'Learn more' },
-                { icon: Zap, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Precision AI engine processes extensive amounts of data to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
+                { icon: Rocket, title: 'Speed that saves lives.', desc: 'Threats don\'t wait. Precision AI engine processes extensive amounts of data to surface what matters before it escalates.', link: '#engine', linkText: 'Learn more about the engine' },
               ].map((item) => (
                 <AnimatedSection key={item.title} delay={100}>
                   <div className="bg-[#1d1d1f] rounded-2xl p-8 h-full flex flex-col">
