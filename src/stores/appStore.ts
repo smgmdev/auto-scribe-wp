@@ -292,6 +292,12 @@ interface AppState {
   openSupportChat: (ticket: { id: string; subject: string; status: string; created_at: string; updated_at: string; user_read: boolean; admin_read?: boolean; user_email?: string }) => void;
   closeSupportChat: () => void;
   
+  // Surveillance country popup (persists across navigation)
+  surveillanceCountry: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] } | null;
+  showSurveillancePopup: boolean;
+  openSurveillancePopup: (country: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] }) => void;
+  closeSurveillancePopup: () => void;
+
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
@@ -778,6 +784,12 @@ export const useAppStore = create<AppState>()((set) => ({
     return { soundEnabled: newVal };
   }),
   
+  // Surveillance country popup
+  surveillanceCountry: null,
+  showSurveillancePopup: false,
+  openSurveillancePopup: (country) => set({ surveillanceCountry: country, showSurveillancePopup: true }),
+  closeSurveillancePopup: () => set({ showSurveillancePopup: false, surveillanceCountry: null }),
+
   // Reset all notification counts
   resetAllNotifications: () => set({
     unreadAgencyApplicationsCount: 0,

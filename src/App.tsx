@@ -14,6 +14,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { QuickNavBanner } from "@/components/layout/QuickNavBanner";
 import { SessionExpiryWarning } from "@/components/SessionExpiryWarning";
 import { MissileAlertListener } from "@/components/MissileAlertListener";
+import { SurveillanceCountryPopup } from "@/components/surveillance/SurveillanceCountryPopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -123,6 +124,7 @@ function AuthGatedWidgets() {
       <GlobalChatDialog />
       <GlobalSupportChat />
       <MissileAlertListener />
+      <SurveillanceCountryPopup />
     </>
   );
 }
