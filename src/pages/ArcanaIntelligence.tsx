@@ -522,7 +522,7 @@ export default function ArcanaIntelligence() {
               <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
                 Precision in your system.
               </h2>
-              <p className="text-lg md:text-xl text-white/70 leading-tight max-w-2xl mb-12">
+              <p className="text-lg md:text-xl text-white/70 leading-tight max-w-2xl mb-6">
                 Seamlessly integrate your data into Arcana Precision. Built to accept any data point to fit any operational environment.
               </p>
             </AnimatedSection>
