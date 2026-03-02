@@ -508,7 +508,7 @@ export function AdminSurveillanceView() {
       </div>
 
       {/* Feed slide-over */}
-      <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed}>
+      <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed} modal={false}>
         <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-[#0d1220] border-white/10 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
           <div className="flex flex-col h-full">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
