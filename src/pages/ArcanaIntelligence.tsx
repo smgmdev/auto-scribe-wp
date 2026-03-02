@@ -523,7 +523,7 @@ export default function ArcanaIntelligence() {
                     <Shield className="relative w-36 h-36 md:w-48 md:h-48 text-[#007AFF] drop-shadow-[0_0_25px_rgba(0,122,255,0.5)]" strokeWidth={1.2} />
                     {/* Inner missile icon - steady rotation */}
                     <div className="absolute inset-0 flex items-center justify-center pt-2">
-                      <Rocket className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40 animate-[shieldOrbit_4s_linear_infinite]" strokeWidth={1.5} />
+                      <Rocket className="w-8 h-8 md:w-10 md:h-10 text-[#007AFF]/40" strokeWidth={1.5} />
                     </div>
                     {/* Scan line */}
                     <div className="absolute inset-0 overflow-hidden rounded-full">
