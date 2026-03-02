@@ -424,26 +424,6 @@ export default function ArcanaIntelligence() {
             </div>
           </div>
 
-          {/* Feature pills */}
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 mt-16">
-            <AnimatedSection delay={200}>
-              <div className="flex flex-wrap justify-center gap-3">
-                {[
-                  { icon: Radio, label: 'Live Threat Detection' },
-                  { icon: Globe, label: 'Global Coverage' },
-                  { icon: Layers, label: 'Multi‑Source Fusion' },
-                  { icon: Shield, label: 'Secure Infrastructure' },
-                  { icon: Zap, label: 'Instant Alerts' },
-                  { icon: BarChart3, label: 'Trend Forecasting' },
-                ].map(({ icon: I, label }) => (
-                  <div key={label} className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-sm">
-                    <I className="w-4 h-4 text-[#007AFF]" />
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </AnimatedSection>
-          </div>
         </section>
 
         {/* ══════════════ AI ENGINE ══════════════ */}
