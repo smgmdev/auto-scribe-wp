@@ -327,6 +327,8 @@ export function MissileAlertListener() {
         .select('*')
         .eq('active', true)
         .gte('created_at', threeHoursAgo)
+        .not('origin_country_code', 'is', null)
+        .not('destination_country_code', 'is', null)
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
         const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
