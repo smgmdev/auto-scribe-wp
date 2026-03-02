@@ -117,7 +117,7 @@ export default function Missile3D() {
           <Loader2 className="w-8 h-8 text-[#007AFF] animate-spin" />
         </div>
       )}
-      <Canvas camera={{ position: [0, 0, 5.5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 1, 5.5], fov: 45 }}>
         <ambientLight intensity={0.15} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} color="#ffffff" />
         <directionalLight position={[-3, -2, 4]} intensity={0.3} color="#007AFF" />
