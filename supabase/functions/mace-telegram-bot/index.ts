@@ -186,65 +186,82 @@ Deno.serve(async (req) => {
       if (profile) {
         supabaseUserId = profile.id;
       } else {
-        // Not linked — verification flow
-        if (text?.toLowerCase() === '/start' || (!session && !text?.includes('@'))) {
+        // Not linked — verification flow using persistent DB sessions
+        
+        // Check if there's a pending verification session in DB
+        const { data: verifySession } = await supabase
+          .from('telegram_verification_sessions')
+          .select('*')
+          .eq('telegram_chat_id', String(chatId))
+          .maybeSingle();
+
+        // /start command or no session and not an email
+        if (text?.toLowerCase() === '/start' || (!verifySession && !text?.includes('@'))) {
           await sendTelegramMessage(botToken, chatId, 
             `👋 Hey! I'm <b>Mace</b>, your AI publishing assistant.\n\n` +
             `To get started, I need to verify your Arcana Mace account.\n\n` +
             `Please send me your Arcana Mace account email address. I'll send you a 6-digit code to verify it's really you.`
           );
-          userSessions.set(chatId, { step: 'awaiting_email', lastActivity: Date.now() });
           return new Response('OK', { status: 200 });
         }
 
-        // Handle awaiting_code step for unlinked users
-        if (session?.step === 'awaiting_code' && session.verifyCode && session.pendingEmail) {
+        // Handle code verification (6-digit input when session exists)
+        if (verifySession) {
           const inputCode = (text || '').replace(/\s/g, '');
-          if (!inputCode || inputCode.length !== 6) {
-            await sendTelegramMessage(botToken, chatId, `Please enter the 6-digit code I sent to your email.`);
+          
+          // Check if they're sending a new email instead
+          if (text && text.includes('@') && text.includes('.')) {
+            // Fall through to email handling below
+          } else {
+            if (!inputCode || inputCode.length !== 6) {
+              await sendTelegramMessage(botToken, chatId, `Please enter the 6-digit code I sent to your email.`);
+              return new Response('OK', { status: 200 });
+            }
+            
+            if (new Date(verifySession.expires_at) < new Date()) {
+              await supabase.from('telegram_verification_sessions').delete().eq('telegram_chat_id', String(chatId));
+              await sendTelegramMessage(botToken, chatId, `⏳ That code has expired. Please send your email again to get a new one.`);
+              return new Response('OK', { status: 200 });
+            }
+            
+            if (inputCode !== verifySession.verify_code) {
+              await sendTelegramMessage(botToken, chatId, `❌ Wrong code. Please try again or send your email to request a new one.`);
+              return new Response('OK', { status: 200 });
+            }
+
+            // Code matches — link account
+            const { data: profileByEmail } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('email', verifySession.email)
+              .maybeSingle();
+
+            if (!profileByEmail) {
+              await sendTelegramMessage(botToken, chatId, `❌ Account not found. Please try again.`);
+              await supabase.from('telegram_verification_sessions').delete().eq('telegram_chat_id', String(chatId));
+              return new Response('OK', { status: 200 });
+            }
+
+            await supabase
+              .from('profiles')
+              .update({ telegram_chat_id: String(chatId) })
+              .eq('id', profileByEmail.id);
+
+            // Clean up verification session
+            await supabase.from('telegram_verification_sessions').delete().eq('telegram_chat_id', String(chatId));
+
+            supabaseUserId = profileByEmail.id;
+            await sendTelegramMessage(botToken, chatId,
+              `✅ Account verified and linked!\n\n` +
+              `Now you can:\n` +
+              `📝 Send me text and I'll publish it as an article\n` +
+              `📸 Send me a photo and I'll write an article about it\n` +
+              `📄 Send me a PDF or Word document to publish\n\n` +
+              `Just send me something and I'll ask which site you want to publish on!`
+            );
+            userSessions.set(chatId, { step: 'idle', userId: supabaseUserId, lastActivity: Date.now() });
             return new Response('OK', { status: 200 });
           }
-          if (Date.now() > (session.codeExpiresAt || 0)) {
-            await sendTelegramMessage(botToken, chatId, `⏳ That code has expired. Please send your email again to get a new one.`);
-            session.step = 'awaiting_email';
-            session.verifyCode = undefined;
-            session.pendingEmail = undefined;
-            return new Response('OK', { status: 200 });
-          }
-          if (inputCode !== session.verifyCode) {
-            await sendTelegramMessage(botToken, chatId, `❌ Wrong code. Please try again or send your email to request a new one.`);
-            return new Response('OK', { status: 200 });
-          }
-
-          // Code matches — link account
-          const { data: profileByEmail } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', session.pendingEmail)
-            .maybeSingle();
-
-          if (!profileByEmail) {
-            await sendTelegramMessage(botToken, chatId, `❌ Account not found. Please try again.`);
-            session.step = 'awaiting_email';
-            return new Response('OK', { status: 200 });
-          }
-
-          await supabase
-            .from('profiles')
-            .update({ telegram_chat_id: String(chatId) })
-            .eq('id', profileByEmail.id);
-
-          supabaseUserId = profileByEmail.id;
-          await sendTelegramMessage(botToken, chatId,
-            `✅ Account verified and linked!\n\n` +
-            `Now you can:\n` +
-            `📝 Send me text and I'll publish it as an article\n` +
-            `📸 Send me a photo and I'll write an article about it\n` +
-            `📄 Send me a PDF or Word document to publish\n\n` +
-            `Just send me something and I'll ask which site you want to publish on!`
-          );
-          userSessions.set(chatId, { step: 'idle', userId: supabaseUserId, lastActivity: Date.now() });
-          return new Response('OK', { status: 200 });
         }
 
         // User is sending their email
@@ -278,14 +295,13 @@ Deno.serve(async (req) => {
             return new Response('OK', { status: 200 });
           }
 
-          if (!session) {
-            userSessions.set(chatId, { step: 'awaiting_code', pendingEmail: email, verifyCode: code, codeExpiresAt: Date.now() + 10 * 60 * 1000, lastActivity: Date.now() });
-          } else {
-            session.step = 'awaiting_code';
-            session.pendingEmail = email;
-            session.verifyCode = code;
-            session.codeExpiresAt = Date.now() + 10 * 60 * 1000;
-          }
+          // Persist verification session in DB (upsert)
+          await supabase.from('telegram_verification_sessions').upsert({
+            telegram_chat_id: String(chatId),
+            email,
+            verify_code: code,
+            expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+          }, { onConflict: 'telegram_chat_id' });
 
           await sendTelegramMessage(botToken, chatId,
             `📧 I've sent a 6-digit verification code to <b>${email}</b>.\n\nPlease check your inbox and send me the code here.`
