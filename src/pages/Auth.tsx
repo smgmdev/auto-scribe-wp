@@ -286,16 +286,15 @@ export default function Auth() {
       return;
     }
 
-    // Capture successful login with location
-    try {
-      await supabase.functions.invoke('capture-login-attempt', {
-        body: { email: signInEmail, type: 'login' }
-      });
-    } catch (ipError) {
-      console.error('Failed to capture login IP:', ipError);
-    }
+    // Capture successful login with location (fire-and-forget)
+    supabase.functions.invoke('capture-login-attempt', {
+      body: { email: signInEmail, type: 'login' }
+    }).catch(ipError => console.error('Failed to capture login IP:', ipError));
 
-    setIsLoading(false);
+    // Don't setIsLoading(false) on success — the auth state change will
+    // trigger fetchUserData + session registration, then the redirect
+    // useEffect will navigate to /account. Keeping the spinner avoids
+    // a visible gap between "button stops loading" and "redirect happens".
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
