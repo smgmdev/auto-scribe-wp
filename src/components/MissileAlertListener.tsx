@@ -412,24 +412,22 @@ export function MissileAlertListener() {
   const queuedCount = alerts.length - visibleAlerts.length;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center max-sm:items-stretch justify-center animate-fade-in max-sm:top-[var(--mobile-header-height,128px)] bg-black/40 backdrop-blur-[2px]">
-      <div className="flex flex-col items-center max-sm:w-full max-sm:h-full">
-        <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:h-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0">
-          {visibleAlerts.map(alert => (
-            <AlertPopup
-              key={alert.id}
-              alert={alert}
-              type={getAlertType(alert.severity)}
-              onDismiss={() => dismissAlert(alert.id)}
-            />
-          ))}
-        </div>
-        {queuedCount > 0 && (
-          <div className="w-full max-w-sm max-sm:max-w-full max-sm:mt-auto bg-black text-red-500 text-xs font-mono text-center py-2 px-4 tracking-wider">
-            +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
-          </div>
-        )}
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center animate-fade-in max-sm:top-[var(--mobile-header-height,128px)] max-sm:justify-between bg-black/40 backdrop-blur-[2px]">
+      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0 max-sm:flex-1">
+        {visibleAlerts.map(alert => (
+          <AlertPopup
+            key={alert.id}
+            alert={alert}
+            type={getAlertType(alert.severity)}
+            onDismiss={() => dismissAlert(alert.id)}
+          />
+        ))}
       </div>
+      {queuedCount > 0 && (
+        <div className="max-w-sm w-full mt-4 max-sm:max-w-full max-sm:mt-0 bg-black text-red-500 text-xs font-mono text-center py-2 px-4 tracking-wider">
+          +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
+        </div>
+      )}
     </div>,
     document.body
   );
