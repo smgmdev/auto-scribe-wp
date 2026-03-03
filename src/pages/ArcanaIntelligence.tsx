@@ -564,6 +564,19 @@ export default function ArcanaIntelligence() {
         <div className="bg-black">
           <PWAInstallButtons />
         </div>
+
+        {/* Disclaimer */}
+        <section className="bg-black">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
+            <div className="text-[11px] text-[#86868b] leading-relaxed">
+              <p>
+                Arcana Precision is a global media and communications collective-data, advanced AI-powered security intelligence tool that supports governmental entities and enterprises with advanced threat visualization mapping worldwide.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="bg-black"><div className="max-w-[980px] mx-auto px-4 md:px-6"><div className="border-t border-[#424245]" /></div></div>
         <Footer narrow dark />
       </div>
       
