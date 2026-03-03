@@ -133,6 +133,50 @@ const sections: HelpSection[] = [
     ),
   },
   {
+    id: 'telegram-bot',
+    title: 'Mace AI Telegram Bot',
+    content: (
+      <div className="space-y-4">
+        <p>
+          Mace AI is also available as a <strong>Telegram bot</strong>, giving you full publishing
+          capabilities directly from the Telegram app — no browser needed.
+        </p>
+        <p>
+          With the Telegram bot you can:
+        </p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>Submit articles via text or voice message</strong> — paste content, share a news link, or send a voice note and Mace will process it</li>
+          <li><strong>Share Google Docs links</strong> — Mace extracts the content automatically for review and publishing</li>
+          <li><strong>Share news URLs</strong> — Mace fetches the article, rewrites it for originality, and prepares it for publishing</li>
+          <li><strong>Upload featured images</strong> — attach a JPG or PNG image to use as the article's featured media</li>
+          <li><strong>AI quality review</strong> — every submission is analyzed for structure, tone, and professional standards before publishing</li>
+          <li><strong>Manage your articles</strong> — use <code>/myarticles</code> to browse, review, and delete published posts</li>
+          <li><strong>Have conversations</strong> — chat naturally with Mace about any topic, powered by AI with full session memory</li>
+        </ul>
+        <h4 className="font-semibold text-foreground pt-2">How to Get Started</h4>
+        <ol className="list-decimal list-inside space-y-2 ml-4">
+          <li>Go to <strong>Account Settings</strong> in your Arcana Mace dashboard</li>
+          <li>Find the <strong>"Link with Mace AI"</strong> section</li>
+          <li>Follow the instructions to connect your Telegram account with a verification code</li>
+          <li>Once linked, open the Mace AI bot in Telegram and start publishing</li>
+        </ol>
+        <h4 className="font-semibold text-foreground pt-2">Content Standards</h4>
+        <p>
+          All articles submitted through Telegram go through Mace's AI quality review. If the content
+          doesn't meet publishing standards, Mace will provide a mandatory AI-edited version with
+          improved structure, a professional title, and a human-like narrative hook. You can approve or
+          reject the edit before publishing.
+        </p>
+        <h4 className="font-semibold text-foreground pt-2">Voice Messages</h4>
+        <p>
+          You can send voice messages to Mace in Telegram. Voice notes are transcribed using advanced
+          speech recognition and can be used for both casual conversation and article generation — making
+          it a truly hands-free publishing experience.
+        </p>
+      </div>
+    ),
+  },
+  {
     id: 'associated-costs',
     title: 'Associated Costs',
     content: (
